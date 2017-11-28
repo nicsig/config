@@ -1,0 +1,133 @@
+# Shebang.
+#
+# Executing bash via:
+#
+#         #!/usr/bin/env bash
+#
+# … would make scripts more portable, but the Shell Style Guide from Google
+# recommends to use `#!/bin/bash`, because it's more secure.
+# We know exactly which binary is going to be executed.
+# `#!/usr/bin/env bash` could execute another `bash` binary from a directory
+# in the `PATH`, one which would be before `/bin/`.
+
+snippet #! "bash shebang" bm
+#!/bin/bash
+endsnippet
+
+# https://stackoverflow.com/a/18216122/8243465
+snippet guard_root "check we've enough rights to run script" bm
+if [ "$EUID" -ne 0 ]
+	then echo "Please run as root"
+	exit
+fi
+endsnippet
+
+snippet case "case condition" bm
+case ${1:my_var} in
+	${2:val1})
+		${3:action 1}
+		;;
+	${3:val2})
+		${4:action 2}
+		;;
+	${5:val3})
+		${6:action3}
+		exit 1
+		;;
+	*)
+		${0:final action}
+esac
+endsnippet
+
+snippet elvi "Template to create a custom elvi for surfraw" bm
+#!/bin/sh
+#
+# elvis: ${1:name of the site}		-- Search ${2:what} using $1 (${3:url of the main page})
+. surfraw || exit 1
+
+w3_usage_hook () {
+	cat <<EOF
+Usage: $w3_argv0 [options] [search words]...
+Description:
+	Search $2 using $1 ($3)
+EOF
+	w3_global_usage
+}
+
+w3_config
+w3_parse_args "$@"
+if test -z "$w3_args"; then
+	w3_browse_url "$3"
+else
+	escaped_args=\`w3_url_of_arg $w3_args\`
+	w3_browse_url "${4:url to search a keyword}${escaped_args}"
+fi
+endsnippet
+
+snippet for "for ... in ... done"
+for ${1:i} in ${2:words}; do
+	${0:#statements}
+done
+endsnippet
+
+snippet if "if … fi" bm
+if [[ $1 ]]; then
+	${0:${VISUAL}}
+fi
+endsnippet
+
+snippet ife "if … else … fi" bm
+if [[ $1 ]]; then
+	${0:${VISUAL}}
+else
+fi
+endsnippet
+
+snippet log "log output of script" bm
+exec 3>&1 4>&2
+[ -d ~/log ] || mkdir ~/log
+exec 1>~/log/"\$(basename "\$0" .sh)".log 2>&1
+
+
+endsnippet
+
+snippet select "select instruction" bm
+echo -e "\n${1:Which action do you want to perform?}\n"
+
+select ${2:action} in ${3:list of values}; do
+	$0
+done
+endsnippet
+
+snippet $ "value of var in assigment" i
+"${$0}"
+endsnippet
+
+# http://mywiki.wooledge.org/BashPitfalls#function_foo.28.29
+#
+#     foo() { … ; }             ✔ more portable
+#     function foo { … ; }      ✔ resists to alias collision (alias foo=…)
+#     function foo() { … ; }    ✘
+snippet fu "function" bm
+${1:my_func}() {
+	${0:${VISUAL}}
+}
+endsnippet
+
+# This syntax doesn't seem to handle complex regexes, but is POSIX, contrary to:
+#     [[ "string" == "pattern" ]]
+#
+# For other valid syntaxes:
+# https://stackoverflow.com/questions/21115121/how-to-check-pattern-match-by-using-bin-sh-not-by-bin-bash
+snippet rgx_comp "test if pattern match string" bm
+case "${1:string}" in
+	${2:pat1|pat2}) $3 ;;
+	*) $4 ;;
+esac
+endsnippet
+
+snippet tmp "create temporary file" bm
+TMP="$(mktemp /tmp/.${1:pgm}.XXXXXXXXXX)"
+$0
+rm "${TMP}"
+endsnippet

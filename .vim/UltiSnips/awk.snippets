@@ -1,0 +1,182 @@
+# cannot use /usr/bin/env because it does not support parameters (as -f)
+snippet #! "awk shebang" bm
+#!/usr/bin/awk -f
+endsnippet
+
+snippet beg "BEGIN {…}" bm
+BEGIN {
+	$0
+}
+endsnippet
+
+snippet end "END {…}" bm
+END {
+	$0
+}
+endsnippet
+
+snippet if "if {…}" bm
+if ($1) {
+	$0${VISUAL}
+}
+endsnippet
+
+snippet ife "if … else …" bm
+if ($1) {
+	${2:${VISUAL}}
+} else {
+	$0
+}
+endsnippet
+
+snippet elif "else if …" bm
+else if ($1) {
+	$0
+}
+endsnippet
+
+snippet el "else {…}" bm
+else {
+	$0
+}
+endsnippet
+
+snippet wh "while" bm
+while ($1) {
+	$2
+}
+endsnippet
+
+snippet do "do … while" bm
+do {
+	$0
+} while ($1)
+endsnippet
+
+snippet for "for" bm
+for (${2:i} = ${3:1}; $2 <= ${1:n}; ${4:++$2}) {
+	$0
+}
+endsnippet
+
+snippet fori "for in" bm
+for (${1:i} in ${2:array}) {
+	$0
+}
+endsnippet
+
+snippet fu "function" bm
+function ${1:myfunc}($2) {
+	${0:${VISUAL}}
+	return
+}
+endsnippet
+
+# the switch statement is a gawk extension
+snippet sw "switch" bm
+switch ($1) {
+case $2:
+	$3
+	break
+
+default:
+	$0
+	break
+}
+endsnippet
+
+# the `case` statement is part of the `switch` one
+snippet case "case" bm
+	case $1:
+		$0
+		break
+endsnippet
+
+# Also works when we reverse the order of the tabstops:
+#
+#     print ${2:"$1"}$0
+#
+# In this case, we end up directly inside the quotes, then after hitting tab,
+# we select the whole string.
+snippet pri "print" bm
+	print ${1:"$2"}$0
+endsnippet
+
+snippet sort_array "sort array" bm
+for (${1:i} in ${2:array})
+	print $2[$1] | "sort${5:${3: -nr}${4: >/tmp/file}}"
+close("sort$5")
+$0
+endsnippet
+
+snippet isnum "test if n is a number" bm
+function isnum(n) {
+	${1:return n ~ /^[+-]?[0-9]+$/}
+	${2:sign     = "[-+]?"
+	decimal  = "[0-9]+[.]?[0-9]*"
+	fraction = "[.][0-9]+"
+	exponent = "[eE]" sign "[0-9]+"
+	number   = "^" sign "(" decimal "|" fraction ")(" exponent ")?$"
+
+	return n ~ number}
+}
+$0
+endsnippet
+
+snippet \d "digits regex" i
+[0-9]
+endsnippet
+
+snippet test_func "test custom function" bm
+{ printf("%${2:-10}s %${3:20}s\n", \$0, ${1:myfunc}(\$0)) }
+function $1(${4:x}) {
+	${0:${VISUAL}}
+	return
+}
+endsnippet
+
+snippet test_pattern "test pattern" bm
+match(\$0, ${1:/pattern/}, match_array) { print match_array[0]; next }
+{ print "no match" }
+$0
+endsnippet
+
+# shout: SHell OUTput
+snippet shout "capture output of shell command" bm
+"${1:cmd}" | getline ${2:var}
+close("$1")
+endsnippet
+
+# do not initialize `guard` to 1, and,
+# do not make `guard` a local variable:
+#
+#	  it would prevent the guard from working with a recursive function
+#	  (i.e. a function which calls itself)
+#
+# if you want to check whether you're trapped inside an infinite loop,
+# add a `print guard` statement, somewhere in your code
+#
+# The statement to go out of a function is `return`, but to go out of a loop
+# it's `break`.
+snippet guard "prevent excessive recursion" bm
+if (guard${1:1} >= 99)
+	${2:return}
+guard$1 += 1
+endsnippet
+
+# FIXME:
+# What's the difference between:
+#
+#	  $0
+#	  ${VISUAL}
+#	  $0${VISUAL}
+#	  ${0:${VISUAL}}
+# ?
+# The difference is that `${VISUAL}` is only a token standing for the contents
+# of the last visual selection. It is NOT a tabstop: by default, UltiSnips does
+# not select it, and therefore does not position the cursor somewhere near it.
+# By contrast, $0 IS a tabstop. And as all tabstops, it can have a placeholder.
+# We can use this property to select the contents of `${VISUAL}` by writing it
+# as the placeholder of $0. Or any other tabstop.
+#
+# Write all of this in our notes.

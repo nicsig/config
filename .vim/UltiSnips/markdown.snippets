@@ -1,0 +1,38 @@
+# bug_report {{{1
+
+snippet bug_report "info when filing bug report for (Neo)Vim" bm
+ - \``!v has('nvim') ? 'n' : ''`vim --version\`:      `!v substitute(join(split(execute('version'), '\n')[0:1]), '(.\{-})', '', '')`
+ `!v !has('nvim') ? '' :     '- Vim (version: ) behaves differently?
+'`- Operating system:     `!v matchstr(system('lsb_release -d'), 'Description:\s*\zs.*')[:-2]`
+ - Terminal emulator:    rxvt-unicode v9.22`!v !empty($TMUX) ? '
+ - Terminal multiplexer: '.systemlist('tmux -V')[0] : ''`
+ - \`$TERM\`:              `echo $TERM`
+ - Shell:                `!v matchstr(systemlist('zsh --version')[0], '.\{-\}\ze\s*(')`
+$0
+endsnippet
+
+# note {{{1
+
+# FIXME:
+# trim the whitespace after the tab_trigger
+# center the text
+
+snippet note "NOTE header" m
+
+
+                                     NOTE:
+
+$0
+endsnippet
+# wpm {{{1
+
+# snippet wrds "Log a 750words.com session" b
+# 750words.com: ${1:750} words in ${2:20} minutes - `!p` wpm
+# endsnippet
+
+snippet wpm "average speed" b
+I typed ${1:750} words in ${2:30} minutes; my speed is `!p
+snip.rv = float(t[1]) / float(t[2])
+` words per minute
+endsnippet
+
