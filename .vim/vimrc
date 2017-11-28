@@ -6419,25 +6419,6 @@ tno <s-tab> <left>
 " Maybe we should use `qf#hide_noise()`to hide noise in help buffers
 " instead of syntax/ (move qf#hide_noise() in library in this case)
 
-" 1. add in `~/.shrc`:
-"         alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-"
-" 2. echo ".cfg" >> .gitignore
-" 3. git clone --bare <git-repo-url> $HOME/.cfg
-"
-" 4. define alias for current shell session:
-"         alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-
-" 1. git init --bare $HOME/.cfg
-" 2. alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-" 3. config config --local status.showUntrackedFiles no
-" 4. config status
-" 5. config add ~/.vim/vimrc
-" 6. config commit -m 'add vimrc'
-" 7. config remote add origin https://github.com/lacygoill/config.git
-" 8. config push -u origin master
-
-
 " :h
 
 " :vert sb#
