@@ -107,7 +107,7 @@ Plug 'lacygoill/vim-matchit'
 " Plug 'beloglazov/vim-online-thesaurus'
 " settings {{{
 
-let g:online_thesaurus_map_keys = 0
+" let g:online_thesaurus_map_keys = 0
 
 "}}}
 Plug 'lacygoill/potion'
@@ -440,12 +440,6 @@ xmap s <nop>
 " I also disable `s Esc`, to prevent Vim from deleting a character when I cancel `s`.
 nno s<esc> <nop>
 xno s<esc> <esc>
-
-" FIXME:
-" Sometimes, `srb"` make Vim enter an infinite loop.
-" Same thing for `sr` in visual mode.
-" nno srb <nop>
-" xno sr  <nop>
 
 "}}}
 Plug 'junegunn/seoul256.vim'
@@ -3652,22 +3646,22 @@ xno Ss <nop>
 " Also, the whole code seems to be a mess.
 " Tidy all that in a plugin (vim-repeat-motion).
 
-nmap <expr> ;    <sid>motion_wrapper(';')
-nmap <expr> ,    <sid>motion_wrapper(',')
+nno  <expr> ;    <sid>motion_wrapper(';')
+nno  <expr> ,    <sid>motion_wrapper(',')
 xmap <expr> ;    <sid>visual_repeat_sneak(1)
 xmap <expr> ,    <sid>visual_repeat_sneak(0)
 omap        ;    <plug>Sneak_;
 omap        ,    <plug>Sneak_,
 
-nmap <expr> f    <sid>reset_motion_to_repeat('f')
-nmap <expr> F    <sid>reset_motion_to_repeat('F')
+nno  <expr> f    <sid>reset_motion_to_repeat('f')
+nno  <expr> F    <sid>reset_motion_to_repeat('F')
 xmap        f    <plug>Sneak_f
 xmap        F    <plug>Sneak_F
 omap        f    <plug>Sneak_f
 omap        F    <plug>Sneak_F
 
-nmap <expr> t    <sid>reset_motion_to_repeat('t')
-nmap <expr> T    <sid>reset_motion_to_repeat('T')
+nno  <expr> t    <sid>reset_motion_to_repeat('t')
+nno  <expr> T    <sid>reset_motion_to_repeat('T')
 xmap        t    <plug>Sneak_t
 xmap        T    <plug>Sneak_T
 omap        t    <plug>Sneak_t
@@ -6419,15 +6413,109 @@ tno <s-tab> <left>
 " Maybe we should use `qf#hide_noise()`to hide noise in help buffers
 " instead of syntax/ (move qf#hide_noise() in library in this case)
 
+
+
 " :h
 
 " :vert sb#
 
-
-
 "  pair_complete.vim
 "  undotreeshow       4929 (before big refactoring)
 "  undotreeshow       5247 (after  ")
+
+
+
+" We need to remove this item from `g:sandwich#default_recipes`:
+"
+"         { 'noremap':     0,
+"         \ 'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
+"         \ 'kind':        ['replace', 'textobj'],
+"         \ 'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
+"         \ 'input':       ['t'],
+"         \ 'synchro':     1 }
+"
+" Otherwise, we have the bug `srb`, `v_sr`.
+"
+"         <plug>(textobj-sandwich-tagname-a)
+"
+"         sandwich#magicchar#t#a()
+"         /home/jean/.vim/plugged/vim-sandwich/autoload/sandwich/magicchar/t.vim
+"
+"         call s:prototype('a')
+"                 execute printf('normal! v%dat', v:count1)
+"
+"                 ⇔ v1at → E65: Illegal back reference
+"                          E65: Illegal back reference
+"
+" Sometimes,  when the  plugin must  find  what are  the surrounding  characters
+" itself, it WRONGLY finds a tag.
+"
+" Removing this item may make us lose the tag object.
+" We could:
+"
+"         • submit a bug report:
+"
+"                 the plugin detection of surrounding characters should be improved
+"                 if it can't, when `E65` occurs, the plugin should stop and show it to us
+"                 why doesn't that happen?
+"
+"         • try and tweak the definition of this recipe
+"
+"         • let the recipe in, and disable the problematic operators:
+"
+"                 nno srb <nop>
+"                 xno sr  <nop>
+
+if has('vim_starting')
+    let g:sandwich#default_recipes = [
+          \   {'buns': ['\s\+', '\s\+'], 'regex': 1, 'kind': ['delete', 'replace', 'query'], 'input': [' ']},
+          \   {'buns': ['', ''], 'action': ['add'], 'motionwise': ['line'], 'linewise': 1, 'input': ["\<CR>"]},
+          \   {'buns': ['^$', '^$'], 'regex': 1, 'linewise': 1, 'input': ["\<CR>"]},
+          \   {'buns': ['<', '>'], 'expand_range': 0, 'match_syntax': 1},
+          \   {'buns': ['"', '"'], 'quoteescape': 1, 'expand_range': 0, 'nesting': 0, 'linewise': 0, 'match_syntax': 1},
+          \   {'buns': ["'", "'"], 'quoteescape': 1, 'expand_range': 0, 'nesting': 0, 'linewise': 0, 'match_syntax': 1},
+          \   {'buns': ['{', '}'], 'nesting': 1, 'match_syntax': 1, 'skip_break': 1},
+          \   {'buns': ['[', ']'], 'nesting': 1, 'match_syntax': 1},
+          \   {'buns': ['(', ')'], 'nesting': 1, 'match_syntax': 1},
+          \   {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['add'], 'action': ['add'], 'input': ['t']},
+          \   {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['T']},
+          \   {'buns': 'sandwich#magicchar#t#tagname()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['t']},
+          \   {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['delete', 'textobj'], 'expr_filter': ['operator#sandwich#kind() !=# "replace"'], 'synchro': 1, 'linewise': 1, 'input': ['t', 'T']},
+          \   {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['replace', 'query'], 'expr_filter': ['operator#sandwich#kind() ==# "replace"'], 'synchro': 1, 'input': ['T']},
+          \   {'buns': ['sandwich#magicchar#f#fname()', '")"'], 'kind': ['add', 'replace'], 'action': ['add'], 'expr': 1, 'input': ['f']},
+          \   {'external': ["\<Plug>(textobj-sandwich-function-ip)", "\<Plug>(textobj-sandwich-function-i)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['f']},
+          \   {'external': ["\<Plug>(textobj-sandwich-function-ap)", "\<Plug>(textobj-sandwich-function-a)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['F']},
+          \   {'buns': 'sandwich#magicchar#i#input("operator")', 'kind': ['add', 'replace'], 'action': ['add'], 'listexpr': 1, 'input': ['i']},
+          \   {'buns': 'sandwich#magicchar#i#input("textobj", 1)', 'kind': ['delete', 'replace', 'query'], 'listexpr': 1, 'regex': 1, 'synchro': 1, 'input': ['i']},
+          \   {'buns': 'sandwich#magicchar#i#lastinput("operator", 1)', 'kind': ['add', 'replace'], 'action': ['add'], 'listexpr': 1, 'input': ['I']},
+          \   {'buns': 'sandwich#magicchar#i#lastinput("textobj")', 'kind': ['delete', 'replace', 'query'], 'listexpr': 1, 'regex': 1, 'synchro': 1, 'input': ['I']},
+          \ ]
+endif
+
+com! -bar -nargs=+ ProfilePlugin exe s:profile_plugin(<f-args>)
+
+fu! s:profile_plugin(...) abort
+    " TODO:
+    " remove
+    if a:0 != 2
+        return 'echoerr "Provide the names of the plugin, and of its guard"'
+    endif
+
+    try
+        profile start /tmp/plugin_profiling_result
+        let [ plugin_name, guard_name ] = a:000
+        exe 'prof! file ~/.vim/plugged/'.plugin_name.'/**/*.vim'
+        exe 'unlet! '.guard_name
+        call writefile(map(filter(glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1, 1),
+        \                           'v:val !~# ''/t\%[est]/'''),
+        \                    '''so ''.v:val'), '/tmp/plugin_profiling_result')
+        sil! so /tmp/plugin_profiling_result
+
+    catch
+        return 'echoerr '.string(v:exception)
+    endtry
+    return 'echo "Recreate the issue, restart Vim, and have a look at /tmp/plugin_profiling_result"'
+endfu
 
 
 
@@ -6474,7 +6562,11 @@ fu! s:goyo_enter() abort
     " The new window created by `:tab sp` inherits the window-local options of
     " the original window. But `:tab sp` doesn't fire `BufWinEnter` so we lose
     " our position in the changelist.
-    call s:restore_change_position()
+    "
+    " FIXME: We should  use the function `s:restore_change_position()`  but it's
+    " local to `vim-window`.
+    sil! exe 'norm! '.(exists('b:my_change_position') ? '99g;' : '99g,')
+    \                .(b:my_change_position - 1) .'g,'
     call setpos('.', pos)
 
     if get(g:, 'my_goyo_without_syntax_hl', 1)

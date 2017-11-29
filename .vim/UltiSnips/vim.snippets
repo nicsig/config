@@ -166,37 +166,37 @@ endsnippet
 # fu_comp {{{1
 
 snippet fu_comp "Completion Function for a custom command" bm
-fu! ${1:completion_function}(lead, _line, _pos) abort
-	let suggestions = [ ${2:''} ]
-	return empty(a:lead)
-			\ ? suggestions
-			\ : filter(suggestions, 'v:val[:strlen(a:lead)-1] ==# a:lead')
+fu! ${1:completion_function}(arglead, _cmdline, _pos) abort
+	let candidates = [ ${2:''} ]
+	return empty(a:arglead)
+			\ ? candidates
+			\ : filter(candidates, 'v:val[:strlen(a:arglead)-1] ==# a:arglead')
 endfu
 $0
 endsnippet
 
-# To filter the suggestions, we don't use this condition:
-#          v:val =~ '^'.a:lead
+# To filter the candidates, we don't use this condition:
+#          v:val =~ '^'.a:arglead
 #
 # Instead, we use:
-#          v:val[:strlen(a:lead)-1] ==# v:val
+#          v:val[:strlen(a:arglead)-1] ==# v:val
 #
 # Why?
-# Because `a:lead` could contain special characters.
+# Because `a:arglead` could contain special characters.
 # If there are, we don't want them to be interpreted by the regex engine.
 #
-# Also, if the completion function didn't receive anything (`a:lead` is empty):
+# Also, if the completion function didn't receive anything (`a:arglead` is empty):
 #
 #                        ┌─ ''
 #                        │
-#          v:val[:strlen(a:lead)-1]
+#          v:val[:strlen(a:arglead)-1]
 #        → v:val[:-1]
 #        → v:val
-#          != a:lead ('')
+#          != a:arglead ('')
 #
 # … it won't return anything. We don't want that. We want the completion function
-# to return ALL the suggestions. So, we handle this special case by testing if
-# `a:lead` is empty, before invoking `filter()`.
+# to return ALL the candidates. So, we handle this special case by testing if
+# `a:arglead` is empty, before invoking `filter()`.
 
 # guard {{{1
 
