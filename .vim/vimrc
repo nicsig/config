@@ -4995,15 +4995,15 @@ fu! s:didyoumean() abort
         return
     endif
 
-    let suggestions = ['Did you mean:']
+    let candidates = ['Did you mean:']
     for i in range(1, len(matching_entries))
-        call add(suggestions, i . '. ' . matching_entries[i-1])
+        call add(candidates, i . '. ' . matching_entries[i-1])
     endfor
 
     " ┌─ necessary because of `set shm+=F`
     " │  without it, the input query is bypassed
     " │
-    unsilent let choice = inputlist(suggestions)
+    unsilent let choice = inputlist(candidates)
 
     if choice >= 1 && choice <= len(matching_entries)
         let empty_buffer_nr = bufnr('%')

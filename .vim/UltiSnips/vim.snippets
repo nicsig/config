@@ -166,7 +166,7 @@ endsnippet
 # fu_comp {{{1
 
 snippet fu_comp "Completion Function for a custom command" bm
-fu! ${1:completion_function}(arglead, _cmdline, _pos) abort
+fu! ${1:completion_function}(arglead, _c, _p) abort
 	let candidates = [ ${2:''} ]
 	return empty(a:arglead)
 			\ ? candidates
