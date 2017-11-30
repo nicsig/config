@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +69 ~/Desktop/preview.md
+badd +44 ~/Desktop/preview.md
 argglobal
 silent! argdel *
 edit ~/Desktop/preview.md
@@ -16,7 +16,7 @@ wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
 setlocal fdm=expr
-setlocal fde=<SNR>83_stacked()
+setlocal fde=markdown#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

@@ -8,8 +8,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +224 ~/.vim/plugged/vim-submode/autoload/submode.vim
-badd +18 ~/.vim/plugged/vim-schlepp/plugin/schlepp.vim
-badd +10 ~/.vim/plugged/vim-schlepp/autoload/schlepp.vim
+badd +1 ~/.vim/plugged/vim-schlepp/plugin/schlepp.vim
+badd +15 ~/.vim/plugged/vim-schlepp/autoload/schlepp.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -30,7 +30,7 @@ setlocal fen
 normal! zo
 115
 normal! zo
-let s:l = 224 - ((121 * winheight(0) + 6) / 13)
+let s:l = 224 - ((208 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -44,8 +44,8 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 8) / 16)
-exe '2resize ' . ((&lines * 11 + 8) / 16)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -57,7 +57,7 @@ setlocal fdn=20
 setlocal fen
 31
 normal! zo
-let s:l = 6 - ((3 * winheight(0) + 0) / 1)
+let s:l = 6 - ((5 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -74,7 +74,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 15 - ((7 * winheight(0) + 5) / 11)
+let s:l = 15 - ((14 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -82,8 +82,8 @@ normal! zt
 normal! 0
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 1 + 8) / 16)
-exe '2resize ' . ((&lines * 11 + 8) / 16)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 2
 set stal=1
 if exists('s:wipebuf')

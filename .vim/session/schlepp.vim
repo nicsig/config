@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +103 ~/.vim/plugged/vim-schlepp/plugin/schlepp.vim
-badd +1 ~/.vim/plugged/vim-schlepp/autoload/schlepp.vim
+badd +6 ~/.vim/plugged/vim-schlepp/plugin/schlepp.vim
+badd +291 ~/.vim/plugged/vim-schlepp/autoload/schlepp.vim
 argglobal
 silent! argdel *
 edit ~/.vim/plugged/vim-schlepp/plugin/schlepp.vim
@@ -30,7 +30,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 103 - ((82 * winheight(0) + 0) / 1)
+let s:l = 103 - ((80 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -47,7 +47,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 291 - ((290 * winheight(0) + 14) / 29)
+let s:l = 291 - ((273 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt

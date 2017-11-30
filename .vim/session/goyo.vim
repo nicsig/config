@@ -9,7 +9,7 @@ endif
 set shortmess=aoO
 badd +1 ~/.vim/plugged/goyo.vim/plugin/goyo.vim
 badd +166 ~/.vim/plugged/goyo.vim/autoload/goyo.vim
-badd +4 ~/.vim/plugged/limelight.vim/plugin/limelight.vim
+badd +1 ~/.vim/plugged/limelight.vim/plugin/limelight.vim
 badd +20 ~/.vim/plugged/limelight.vim/autoload/limelight.vim
 argglobal
 silent! argdel *

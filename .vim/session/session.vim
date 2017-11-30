@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +146 ~/.vim/plugged/vim-session/plugin/session.vim
+badd +38 ~/.vim/plugged/vim-session/plugin/session.vim
 argglobal
 silent! argdel *
 edit ~/.vim/plugged/vim-session/plugin/session.vim
@@ -23,12 +23,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 38 - ((35 * winheight(0) + 15) / 31)
+let s:l = 626 - ((623 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-38
-normal! 0
+626
+normal! 01|
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

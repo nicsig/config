@@ -3,14 +3,13 @@ if &cp | set nocp | endif
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
-cd ~/.vim
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +24 ~/Dropbox/conf/cheat/ffmpeg
+badd +1 ~/Dropbox/conf/cheat/ffmpeg
 badd +2 ~/Desktop/gif-ffmpeg.md
-badd +24 ~/Dropbox/conf/bin/gifrec.sh
+badd +1 ~/Dropbox/conf/bin/gifrec.sh
 badd +1 ~/Dropbox/conf/bin/gifenc.sh
 argglobal
 silent! argdel *
@@ -27,26 +26,24 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=<SNR>76_stacked()
+setlocal fde=markdown#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-1
-normal! zo
-let s:l = 21 - ((3 * winheight(0) + 0) / 1)
+let s:l = 21 - ((20 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 21
-normal! 013|
+normal! 01|
 wincmd w
 argglobal
 if bufexists('~/Desktop/gif-ffmpeg.md') | buffer ~/Desktop/gif-ffmpeg.md | else | edit ~/Desktop/gif-ffmpeg.md | endif
 setlocal fdm=expr
-setlocal fde=<SNR>76_stacked()
+setlocal fde=markdown#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

@@ -8,9 +8,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +3113 ~/Dropbox/conf/cheat/awk
-badd +9 ~/Dropbox/conf/vim/after/syntax/awk.vim
+badd +1 ~/Dropbox/conf/vim/after/syntax/awk.vim
 badd +153 /usr/share/vim/vim80/syntax/awk.vim
-badd +0 ~/Dropbox/conf/bin/awk/study/histogram.awk
+badd +1 ~/Dropbox/conf/bin/awk/study/histogram.awk
 argglobal
 silent! argdel *
 set stal=2
@@ -20,7 +20,7 @@ wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
 setlocal fdm=expr
-setlocal fde=<SNR>112_stacked()
+setlocal fde=markdown#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -60,8 +60,8 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -71,13 +71,11 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-1
-normal! zo
-let s:l = 9 - ((8 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-9
+1
 normal! 0
 wincmd w
 argglobal
@@ -90,15 +88,15 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 153 - ((13 * winheight(0) + 0) / 1)
+let s:l = 153 - ((13 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 153
 normal! 051|
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 2
 set stal=1
 if exists('s:wipebuf')

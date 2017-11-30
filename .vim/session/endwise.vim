@@ -1,4 +1,5 @@
 let SessionLoad = 1
+if &cp | set nocp | endif
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
@@ -17,9 +18,9 @@ split
 1wincmd k
 wincmd w
 wincmd t
-set winminheight=1 winminwidth=1 winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 8) / 16)
-exe '2resize ' . ((&lines * 12 + 8) / 16)
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -39,7 +40,7 @@ normal! zo
 normal! zo
 163
 normal! zo
-let s:l = 165 - ((14 * winheight(0) + 0) / 1)
+let s:l = 165 - ((31 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -47,7 +48,7 @@ normal! zt
 normal! 0
 wincmd w
 argglobal
-edit /tmp/lua.lua
+if bufexists('/tmp/lua.lua') | buffer /tmp/lua.lua | else | edit /tmp/lua.lua | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -57,7 +58,7 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 6) / 12)
+let s:l = 1 - ((0 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -65,14 +66,15 @@ normal! zt
 normal! 0
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 1 + 8) / 16)
-exe '2resize ' . ((&lines * 12 + 8) / 16)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
-if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
+if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 winminheight=1 winminwidth=1 shortmess=filnxtToOcFIsW
+set winheight=1 winwidth=20 shortmess=filnxtToOcFIsW
+set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)

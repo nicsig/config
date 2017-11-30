@@ -7,10 +7,10 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
+badd +6833 ~/.vim/vimrc
 badd +1 ~/Desktop/qflist.vim
 badd +1 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
 badd +6 ~/Desktop/qfedit.vim
-badd +0 ~/.vim/vimrc
 argglobal
 silent! argdel *
 set stal=2
@@ -103,7 +103,7 @@ set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
-setlocal fdm=manual
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -111,13 +111,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 6878 - ((14 * winheight(0) + 15) / 30)
+let s:l = 6535 - ((2400 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-6878
-normal! 049|
+6535
+normal! 0
 tabnext 4
 set stal=1
 if exists('s:wipebuf')

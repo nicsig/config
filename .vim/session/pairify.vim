@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +228 ~/Dropbox/vim_plugins/pair_complete.vim
+badd +294 ~/Dropbox/vim_plugins/pair_complete.vim
 argglobal
 silent! argdel *
 edit ~/Dropbox/vim_plugins/pair_complete.vim
