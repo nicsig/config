@@ -2491,11 +2491,11 @@ endfu
 ino <silent> <bslash> <c-r>=<sid>indent_before_backslash()<cr>
 
 fu! s:indent_before_backslash() abort
-    let text_before_cursor = matchstr(getline('.'), '.*\%'.col('.').'c') =~# '\S'
-    let prev_indent        = matchstr(getline(line('.')-1), '^\s*\\')
-    let next_indent        = matchstr(getline(line('.')+1), '^\s*\\')
+    let has_text_before_cursor = matchstr(getline('.'), '.*\%'.col('.').'c') =~# '\S'
+    let prev_indent            = matchstr(getline(line('.')-1), '^\s*\\')
+    let next_indent            = matchstr(getline(line('.')+1), '^\s*\\')
 
-    if  text_before_cursor
+    if  has_text_before_cursor
     \|| empty(prev_indent) && empty(next_indent)
         return '\'
     endif
@@ -6292,6 +6292,11 @@ tno <s-tab> <left>
 " 86 -
 "
 " create mapping to send current line to terminal, and execute it
+" use `g>` for the lhs?
+"
+"     g> + text object
+"     g> on visual selection
+"     g>> for line
 "
 " 87 -
 " finish reviewing vim-math
@@ -6401,19 +6406,39 @@ tno <s-tab> <left>
 "         \        { k,v -> 'so '.v })
 "
 " 95 -
-" hide more noise in help files:
+" Aren't `cob` and `coc` redundant?
+" Are there really 2 kind of noises?
+" It seems that `coc` cycles between 2 arbitrary values of 'cole' (2 and 0 ?).
+" And `cob` is specific to `help` and `qf` buffers.
 "
-"         • Environment variables are expanded |:set_env|.
-"         • See |option-backslash| about including spaces and backslashes.
-"         • This option cannot be set from a |modeline| or in the |sandbox|, for
-"           security reasons.
+" Maybe we should have a mapping to cycle between all possible values of 'cole'.
+" Maybe we could use `[oc` and `]oc` to in/decrease the level of conceal.
+" And `coc` to cycle between the 2 max values (0 and 3).
+" And remove `cob`.
 "
-" Tricky:
-" each space could be a newline
-"
-" Maybe we should use `qf#hide_noise()`to hide noise in help buffers
-" instead of syntax/ (move qf#hide_noise() in library in this case)
+" 96 -
+" https://github.com/zeis/kokoi
 
+
+nno [oc :call Func(0)<cr>
+nno ]oc :call Func(1)<cr>
+fu! Func(fwd) abort
+    let &l:cole = a:fwd
+    \?                (&l:cole + 1)%4
+    \:               -(&l:cole + 1)%4
+
+    let g:motion_to_repeat = (a:fwd ? ']' : '[').'oc'
+    echo '[conceallevel] '.&l:cole
+endfu
+
+
+
+" f(x2) - f(x1) = (&l:cole + 1)%4
+"
+" g(x2) - g(x1)             = (&l:cole + 1)%4
+" (4 - f(x2)) - (4 - f(x1)) = (&l:cole + 1)%4
+" f(x1) - f(x2)             = (&l:cole + 1)%4
+" f(x2)                     = f(x1) - (&l:cole + 1)%4
 
 
 " :h
@@ -6772,7 +6797,7 @@ augroup END
 " fu! s:diagram_complete() abort
 "     let previous_line = getline(line('.')-1)
 "     let new_line      = substitute(previous_line, '\v%(└|┌).*', '', '')
-"     if match(previous_line, '┌') != -1
+"     if stridx(previous_line, '┌') != -1
 "         let new_line .= '│'
 "     endif
 "     let new_line = substitute(new_line, '[^└┌│'.split(&l:cms, '%s')[0].']', ' ', 'g')

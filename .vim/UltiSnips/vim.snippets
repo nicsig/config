@@ -467,11 +467,20 @@ endsnippet
 
 # undo {{{1
 
+snippet undo_inde "undo indent settings" bm
+" teardown {{ {1
+
+let b:undo_indent =         get(b:, 'undo_indent', '')
+\                   .(empty(get(b:, 'undo_indent', '')) ? '' : '|')
+\                   .'setl ${1:indk}<'
+$0
+endsnippet
+
 # If there are  autocmds, do NOT delete their augroup. Even  if the autocmds for
 # the current buffer are no longer relevant, and should be removed, that doesn't
 # mean that  the augroup is empty. There  could still be other  buffers with the
 # same filetype, using autocmds in this augroup.
-snippet undo "undo ftplugin settings" bm
+snippet undo_ft "undo ftplugin settings" bm
 " teardown {{ {1
 
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')

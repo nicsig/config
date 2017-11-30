@@ -440,7 +440,7 @@ endfu
 fu! s:search_superfluous_myfuncs() abort
     let line      = getline('.')
     let func_name = matchstr(line, 'myfuncs#\k\+')
-    if match(s:my_vimrc, func_name) == -1
+    if stridx(s:my_vimrc, func_name) == -1
         call writefile([func_name], s:tempfile, 'a')
     endif
 endfu
@@ -954,7 +954,7 @@ endfu
 
 fu! myfuncs#long_listing_split() abort "{{{1
     let line = getline('.')
-    if match(line, ',') == -1
+    if stridx(line, ',') == -1
         return
     endif
 
@@ -1709,6 +1709,7 @@ fu! myfuncs#plugin_install(url) abort "{{{1
     call win_gotoid(win_orig)
     call win_gotoid(win_plug)
 endfu
+
 fu! myfuncs#plugin_global_variables(keyword) abort "{{{1
     let condition = 'v:key =~ ''\V''.escape('''.a:keyword.''', ''\'') && v:key !~ ''\(loaded\|did_plugin_\)'''
     let options   = items(filter(deepcopy(g:), condition))
@@ -2108,6 +2109,7 @@ fu! myfuncs#set_indent(indent) abort range "{{{1
 
     call cursor(a:firstline, 1)
 endfu
+
 fu! myfuncs#show_me_snippets() abort "{{{1
     call UltiSnips#SnippetsInCurrentScope(1)
     if empty(g:current_ulti_dict)
@@ -2213,6 +2215,7 @@ endfu
 "         echohl None
 "     endtry
 " endfu
+
 fu! myfuncs#tab_toc() abort "{{{1
     if index(['help', 'man', 'markdown'], &ft) == -1
         return
@@ -2585,7 +2588,7 @@ endfu
 fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     let flags  = {
     \              'min_length' : matchstr(a:1, '-min_length\s\+\zs\d\+'),
-    \              'weighted'   : match(a:1, '-weighted') != -1,
+    \              'weighted'   : stridx(a:1, '-weighted') != -1,
     \            }
 
     let view       = winsaveview()
