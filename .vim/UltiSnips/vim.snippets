@@ -13,9 +13,9 @@ endsnippet
 #                      │                   └ remaining characters
 #                      └ first character
 snippet abbrev "uppercase abbreviation on command line" bm
-cnorea <expr> <buffer> ${1:lhs} getcmdtype() ==# ':' && getcmdline() ==# '$1'
-\                               ?    '`!p snip.rv = (t[1][0]).upper() + t[1][1:]`'
-\                               :    '$1'
+cnorea <expr> <buffer> ${1:lhs}  getcmdtype() ==# ':' && getcmdline() ==# '$1'
+\                                ?    '`!p snip.rv = (t[1][0]).upper() + t[1][1:]`'
+\                                :    '$1'
 endsnippet
 
 # au {{{1
@@ -482,7 +482,7 @@ let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
 \                        | exe 'au! ${6:group_name} * <buffer>'}${7:
 \                        | exe '${8:n}unmap <buffer> ${9:lhs}'}${10:
 \                        | exe '${11:c}una   <buffer> ${12:lhs}'}${13:
-\                        | delcommand ${14:Cmd}}
+\                        | delc ${14:Cmd}}
 \                      "
 $0
 endsnippet

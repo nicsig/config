@@ -9,9 +9,7 @@ endif
 set shortmess=aoO
 badd +150 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +6 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
-badd +1 ~/.vim/plugged/vim-vim/autoload/vim.vim
-badd +1 ~/Desktop/refvval.vim
-badd +43 ~/.vim/plugged/vim-completion/autoload/mycompletion/ultisnips.vim
+badd +6418 ~/.vim/vimrc
 argglobal
 silent! argdel *
 set stal=2
@@ -62,7 +60,7 @@ normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/.vim/plugged/vim-vim/autoload/vim.vim
+tabedit ~/.vim/vimrc
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
@@ -75,53 +73,21 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-107
+1881
 normal! zo
-let s:l = 131 - ((24 * winheight(0) + 15) / 30)
+2513
+normal! zo
+3334
+normal! zo
+5316
+normal! zo
+let s:l = 6417 - ((12 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-131
-normal! 07|
-tabedit ~/Desktop/refvval.vim
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-tabedit ~/.vim/plugged/vim-completion/autoload/mycompletion/ultisnips.vim
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-tabnext 4
+6417
+normal! 03|
+tabnext 2
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

@@ -2182,7 +2182,7 @@ nno <silent> <space>fc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
 " because it's not present in:
 "
 "     :h i_^g C-d
-"     :echo map(taglist('^i_CTRL-G'), 'v:val.name')
+"     :echo map(taglist('^i_CTRL-G'), { k,v -> v.name })
 "
 " There is no default equivalent for visual mode, but we often use `m` for
 " visual mode mappings. So, here again, we'll use `m` as a prefix.
@@ -3011,8 +3011,8 @@ fu! s:op_source(type, ...) abort
     " (trigger completion).
     "
     " So, instead, we dump it in a temporary file and source the latter.
-    let lines     = filter(raw_lines, 'v:val !~# "[⇔→│└┌]"')
-    let lines     = map(raw_lines, 'substitute(v:val, "[✘✔].*", "", "")')
+    let lines     = filter(raw_lines, { k,v -> v !~# '[⇔→│└┌]' })
+    let lines     = map(raw_lines, { k,v -> substitute(v, '[✘✔].*', '', '') })
     let tempfile  = tempname()
     call writefile(lines, tempfile, 'b')
 
@@ -3372,7 +3372,7 @@ endfu
 
 fu! s:global_mark_go(char) abort
     if !exists('g:MY_GLOBAL_MARK_'.a:char)
-        let info = get(filter(split(execute('marks'), '\n'), 'v:val =~# "^\\s*'.a:char.'"'), 0 , '')
+        let info = get(filter(split(execute('marks'), '\n'), { k,v -> v =~# '^\s*'.a:char }), 0 , '')
         if !empty(info)
             let fpath = matchstr(info, '^\s*'.a:char.'\s\+\d\+\s\+\d\+\s\+\zs.*')
             let pos   = split(matchstr(info, '^\s*'.a:char.'\s\+\zs\d\+\s\+\d\+'))
@@ -3415,7 +3415,7 @@ fu! s:global_mark_go(char) abort
 endfu
 
 fu! s:global_mark_mappings() abort
-    for upper in map(range(char2nr('A'),char2nr('Z')), 'nr2char(v:val,1)')
+    for upper in map(range(char2nr('A'),char2nr('Z')), { k,v -> nr2char(v,1) })
         sil! exe "nno <silent> '".upper.' :<c-u>exe <sid>global_mark_go("'.upper.'")<cr>'
         sil! exe 'nno <silent> m'.upper.' :<c-u>exe <sid>global_mark_set("'.upper.'")<cr>'
     endfor
@@ -4722,9 +4722,9 @@ augroup END
 
 fu! s:update_history() abort
     " update history of current session
-    "                                 remove any command 5 characters long or shorter ┐
-    "                                                             ┌───────────────────┤
-    let new_hist = filter(getline(1, '$'), 'v:val !~# "^\\s*$" && v:val !~# "^.\\{,5}$"')
+    "                               remove any command 5 characters long or shorter ┐
+    "                                                                ┌──────────────┤
+    let new_hist = filter(getline(1, '$'), { k,v -> v !~# '^\s*$' && v !~# '^.\{,5}$' })
     call histdel(':')
     for line in new_hist
         call histadd(':', line)
@@ -4743,16 +4743,16 @@ fu! s:update_history() abort
     "
     "                                               ┌ take the old history
     "                            ┌──────────────────┤
-    let deleted_entries = filter(copy(s:old_cmd_hist), 'index(new_hist, v:val) == -1')
-    "                                                   └──────────────────────────┤
-    "          … and keep only the entries which aren't in the new history anymore ┘
+    let deleted_entries = filter(copy(s:old_cmd_hist), { k,v -> index(new_hist, v) == -1 })
+    "                                                           └──────────────────────┤
+    "              … and keep only the entries which aren't in the new history anymore ┘
     "
     " convert the text entries to delete, into their numeric indexes inside
     " the list `info`
-    call map(deleted_entries, 'index(info, ":".v:val)')
+    call map(deleted_entries, { k,v -> index(info, ':'.v) })
 
     " sort them, and check they were all found (no -1)
-    call sort(filter(deleted_entries, 'v:val >= 0'))
+    call sort(filter(deleted_entries, { k,v -> v >= 0 }))
     if empty(deleted_entries)
         return
     endif
@@ -4891,11 +4891,11 @@ fu! s:dnb_clean() abort
     endif
 
     " Source: http://stackoverflow.com/a/6561076
-    let to_wipe = filter(range(1, bufnr('$')), 'buflisted(v:val)
-                                               \ && empty(bufname(v:val))
-                                               \ && empty(win_findbuf(v:val))')
-                                               "    │
-                                               "    └─ make sure the buffer is NOT displayed in any window
+    let to_wipe = filter(range(1, bufnr('$')), { k,v ->    buflisted(v)
+    \                                                   && empty(bufname(v))
+    \                                                   && empty(win_findbuf(v)) })
+    "                                                      │
+    "                                                      └─ make sure the buffer is NOT displayed in any window
 
     if !empty(to_wipe)
         sil! exe 'bw! '.join(to_wipe, ' ')
@@ -4974,7 +4974,7 @@ fu! s:didyoumean() abort
     " Filter out the swapfile, if there's one.
     let swapfile = fnamemodify(execute('swapname')[1:], ':p')
     if swapfile !=? 'no swap file'
-        call filter(matching_entries, 'fnamemodify(v:val, ":p") != swapfile')
+        call filter(matching_entries, { k,v -> fnamemodify(v, ':p') != swapfile })
     endif
 
     " We don't need to be suggested to load the current buffer.
@@ -4989,7 +4989,7 @@ fu! s:didyoumean() abort
     " its name before using it for filtering the matching entries.
 
     let current_entry = substitute(expand('%'), '/$', '', '')
-    call filter(matching_entries, 'v:val !=# current_entry')
+    call filter(matching_entries, { k,v -> v !=# current_entry })
 
     if empty(matching_entries)
         return
@@ -6382,6 +6382,7 @@ tno <s-tab> <left>
 "
 " 93 -
 " debug vim-sandwich (:profile, source everything)
+" also, try to configure the plugin so that `sdb` can delete a pair of backticks
 "
 " 94 -
 " Create a command in vim-debug, to automatically profile a plugin.
@@ -6395,9 +6396,9 @@ tno <s-tab> <left>
 "         …
 "
 " We would put `file1`, `file2`, … with:
-"         put =map(filter(glob($HOME.'/.vim/plugged/{plugin-name}/**/*.vim', 0, 1, 1),
-"         \               'v:val !~# ''/t\%[est]/'''),
-"         \        '''so ''.v:val')
+"         put =map(filter(glob($HOME.'/.vim/plugged/{plugin-name}/**/*.vim', 0, 1),
+"         \               { k,v -> v !~# '/t\%[est]/' }),
+"         \        { k,v -> 'so '.v })
 "
 " 95 -
 " hide more noise in help files:
@@ -6506,9 +6507,9 @@ fu! s:profile_plugin(...) abort
         let [ plugin_name, guard_name ] = a:000
         exe 'prof! file ~/.vim/plugged/'.plugin_name.'/**/*.vim'
         exe 'unlet! '.guard_name
-        call writefile(map(filter(glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1, 1),
-        \                           'v:val !~# ''/t\%[est]/'''),
-        \                    '''so ''.v:val'), '/tmp/plugin_profiling_result')
+        call writefile(map(filter(glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1),
+        \                         { k,v -> v !~# '/t\%[est]/' }),
+        \                  { k,v -> 'so '.v }), '/tmp/plugin_profiling_result')
         sil! so /tmp/plugin_profiling_result
 
     catch
@@ -6762,7 +6763,7 @@ augroup END
 "     endif
 " endfu
 
-" call fzf#run({'source': map(range(1, bufnr('$')), 'bufname(v:val)'),
+" call fzf#run({'source': map(range(1, bufnr('$')), { k,v -> bufname(v) }),
 "             \ 'sink': 'e', 'down': '30%'})
 
 

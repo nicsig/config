@@ -447,7 +447,7 @@ endfu
 
 fu! myfuncs#clean_reg() abort "{{{1
     let registers = ['"', '+', '-', '*', '/', '=']
-    call extend(registers, map(range(48,57)+range(97,122), 'nr2char(v:val,1)'))
+    call extend(registers, map(range(48,57)+range(97,122), { k,v -> nr2char(v,1) }))
     for register in registers
         call setreg(register, '')
     endfor
@@ -526,8 +526,9 @@ fu! myfuncs#cloc(lnum1,lnum2,path) abort "{{{1
     " With `\s\{2,}`, it shouldn't occur, unless some weird languages use
     " more than 2 consecutive spaces in their name…
 
-    let output_cloc = map(filter(split(output_cloc, "\n"), 'v:val =~# ''\d\+'''),
-                         \ 'split(v:val, ''\s\{2,}\ze\d'')')
+    let output_cloc = map(filter(split(output_cloc, '\n'),
+    \                            { k,v -> v =~# '\d\+' }),
+    \                     { k,v -> split(v, '\s\{2,}\ze\d') })
 
     let g:cloc_results = {}
     let keys           = ['files', 'blank', 'comment', 'code']
@@ -633,8 +634,8 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
     let tempdir = substitute(tempname(), '\v.*/\zs.{-}', '', '')
     call system('git clone '.shellescape(url).' '.tempdir)
     let files = glob(tempdir.'/*', 0, 1)
-    call map(files, 'substitute(v:val, "^\\V".tempdir."/", "", "")')
-    call filter(files, 'v:val !~# "\\v\\c_?footer$"')
+    call map(files, { k,v -> substitute(v, '^\V'.tempdir.'/', '', '') })
+    call filter(files, { k,v -> v !~# '\v\c_?footer$' })
 
     mark x
     for file in files
@@ -1086,10 +1087,11 @@ fu! myfuncs#mru(file, how_to_open) abort "{{{1
     exe a:how_to_open ==# 'tabedit' ? 'lcd %:p:h' : ''
 endfu
 
-fu! myfuncs#mru_complete(lead, _line, _pos) abort
-    return empty(a:lead)
+fu! myfuncs#mru_complete(arglead, _c, _p) abort
+    return empty(a:arglead)
     \?         v:oldfiles
-    \:         map(filter(copy(v:oldfiles), 'v:val =~? a:lead'), 'fnamemodify(v:val, ":~:.")')
+    \:         map(filter(copy(v:oldfiles), { k,v -> v =~? a:arglead }),
+    \                     { k,v -> fnamemodify(v, ':~:.') })
 endfu
 
 fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
@@ -1621,14 +1623,14 @@ fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1
     " (and the pipe), otherwise they terminate the command prematurely.
 
     " put the patterns
-    sil! 0put =map(patterns, 'v:val.\"\<c-a>\"')
-    "                                   │
-    "                                   └─ add a literal C-a to be used as a delimiter by `column`;
-    "                                      we don't want to align around spaces, because `column` would
-    "                                      consider all of them, while we want it to only consider the 1st
-    "                                      one on a line
-    "                                      with a single C-a on each line, we can be sure `column` will only
-    "                                      consider the first occurrence of the delimiter
+    sil! 0put =map(patterns, { k,v -> v."\<c-a>" })
+    "                                       │
+    "                                       └─ add a literal C-a to be used as a delimiter by `column`;
+    "                                          we don't want to align around spaces, because `column` would
+    "                                          consider all of them, while we want it to only consider the 1st
+    "                                          one on a line
+    "                                          with a single C-a on each line, we can be sure `column` will only
+    "                                          consider the first occurrence of the delimiter
     " put the counts right below
     sil! exe a:0.'put =counts'
 
@@ -1654,12 +1656,12 @@ fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1
     wincmd p | call winrestview(view) | wincmd p
 endfu
 
-fu! myfuncs#patterns_favorite(lead, _line, _pos) abort
+fu! myfuncs#patterns_favorite(arglead, _c, _p) abort
     " We could put inside the following list some patterns that we often use
     let patterns = ['']
-    return empty(a:lead)
+    return empty(a:arglead)
     \?         patterns
-    \:         filter(patterns, 'v:val[:strlen(a:lead)-1] ==# a:lead')
+    \:         filter(patterns, { k,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
 endfu
 
 fu! myfuncs#plugin_install(url) abort "{{{1
@@ -1830,7 +1832,7 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
 
         "          ┌─ get rid of entries which are not files, or not readable
         "          │
-        tab args `=filter(systemlist(a:cmd), 'filereadable(v:val)')`
+        tab args `=filter(systemlist(a:cmd), { k,v -> filereadable(v) })`
         " enable item indicator in the statusline
         let g:my_stl_list_position = 1
     endif
@@ -1992,8 +1994,8 @@ fu! myfuncs#search_internal_variables() abort "{{{1
     let view = winsaveview()
 
     let help_file      = readfile($VIMRUNTIME.'/doc/eval.txt')
-    let lines_with_var = filter(help_file, 'v:val =~ "^\\s*v:\\S\\+"')
-    let extract_var    = map(lines_with_var, 'matchstr(v:val, "v:\\zs\\S\\+")')
+    let lines_with_var = filter(help_file, { k,v -> v =~ '^\s*v:\S\+' })
+    let extract_var    = map(lines_with_var, { k,v -> matchstr(v, 'v:\zs\S\+') })
     let list_var       = uniq(sort(extract_var))
 
     call cursor(1,1)
@@ -2020,11 +2022,11 @@ fu! myfuncs#search_todo() abort "{{{1
         return
     endtry
 
-    call setloclist(0, map(getloclist(0), 's:search_todo_text(v:val)'), 'r')
-    "                                      │
-    "                                      └── Tweak the text of each entry when there's a line
-    "                                          with just `todo` or `fixme`;
-    "                                          replace it with the text of the next non empty line instead
+    call setloclist(0, map(getloclist(0), { k,v -> s:search_todo_text(v) }), 'r')
+    "                                              │
+    "                                              └── Tweak the text of each entry when there's a line
+    "                                                  with just `todo` or `fixme`;
+    "                                                  replace it with the text of the next non empty line instead
     call setloclist(0, [], 'a', { 'title': 'FIXME LIST' })
 
     " the ll window is correctly opened by our automcd in vimrc (with :lwindow),
@@ -2061,7 +2063,7 @@ fu! s:search_todo_text(dict) abort
         let pattern = '^\s*\V'.escape(split(&l:commentstring, '%s')[0], '\').'\v\s*$|^\s*$'
         let dict.text = filter(
                       \        getline(dict.lnum + 1, dict.lnum + 2),
-                      \        'v:val !~ pattern'
+                      \        { k,v -> v !~ pattern }
                       \ )[0]
     endif
     return dict
@@ -2116,7 +2118,7 @@ fu! myfuncs#show_me_snippets() abort "{{{1
 
     if !bufexists('snip cheat') | sil file snip\ cheat | endif
 
-    sil 0put =map(sort(deepcopy(keys(g:current_ulti_dict))), 'v:val.\" : \".g:current_ulti_dict[v:val]')
+    sil 0put =map(sort(deepcopy(keys(g:current_ulti_dict))), { k,v -> v.' : '.g:current_ulti_dict[v] })
     sil $d_
     sil %EasyAlign 1 : { 'left_margin': '',  'right_margin': ' ' }
     sil %s/:/
@@ -2167,7 +2169,7 @@ fu! myfuncs#tmux_last_command() abort
     \            'send-keys C-l Up Enter',
     \            'last-pane',
     \          ]
-    call system(join(map(cmds, '"tmux ".v:val.";"')))
+    call system(join(map(cmds, { k,v -> 'tmux '.v.';' })))
 endfu
 
 " tmux-navigator {{{1
@@ -2601,10 +2603,10 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     "
     "     • not containing any letter
 
-    call filter(words, 'strchars(v:val) >= '.min_length.' && strchars(v:val) <= 30 && v:val =~ "\\a"')
+    call filter(words, { k,v -> strchars(v) >= min_length && strchars(v) <= 30 && v =~ '\a' })
 
     " put all of them in lowercase
-    call map(words, 'tolower(v:val)')
+    call map(words, { k,v -> tolower(v) })
 
     let freq = {}
     for word in words
@@ -2634,7 +2636,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         \                    )'
 
         let weighted_freq = deepcopy(freq)
-        call map(weighted_freq, 'v:val * (strchars(v:key) - '.abbrev_length.')')
+        call map(weighted_freq, { k,v -> v * (strchars(k) - abbrev_length) })
         let weighted_freq = sort(items(weighted_freq), {a, b -> b[1] - a[1]})
     endif
 
@@ -2654,7 +2656,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     sil! %!column -t
     sil! %!sort -rn -k2
 
-    exe 'vert res '.(max(map(getline(1, '$'), 'strchars(v:val)'))+4)
+    exe 'vert res '.(max(map(getline(1, '$'), { k,v -> strchars(v) }))+4)
 
     nno <buffer> <nowait> <silent>  q  :<c-u>close<cr>
     setl noma ro
@@ -2662,18 +2664,18 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     wincmd p
 endfu
 
-fu! myfuncs#wf_complete(lead, _line, _pos) abort
+fu! myfuncs#wf_complete(arglead, _c, _p) abort
     " filter the list `flags` so that only the item matching the current
-    " text being completed (`a:lead`) remains
+    " text being completed (`a:arglead`) remains
 
     let flags = [
     \             '-min_length',
     \             '-weighted',
     \           ]
 
-    return empty(a:lead)
+    return empty(a:arglead)
     \?         flags
-    \:         filter(flags, 'v:val[:strlen(a:lead)-1] ==# a:lead')
+    \:         filter(flags, { k,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
 endfu
 
 fu! myfuncs#word_single(action) abort "{{{1
@@ -2696,11 +2698,11 @@ fu! myfuncs#word_single(action) abort "{{{1
     return [word_single, pattern]
 endfu
 
-fu! myfuncs#word_single_complete(lead, _line, _pos) abort
+fu! myfuncs#word_single_complete(arglead, _c, _p) abort
     let candidates = ['highlight', 'del_words', 'del_lines']
-    return empty(a:lead)
+    return empty(a:arglead)
     \?         candidates
-    \:         filter(candidates, 'v:val[:strlen(a:lead)-1] ==# a:lead')
+    \:         filter(candidates, { k,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
 endfu
 
 fu! myfuncs#xor_lines(bang) abort range "{{{1
