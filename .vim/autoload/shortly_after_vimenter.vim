@@ -6,4 +6,4 @@ call operator#sandwich#set('delete', 'all', 'highlight', 0)
 " It causes several autoload/ files to be sourced. Too slow.
 
 let g:sandwich#recipes =   deepcopy(g:sandwich#default_recipes)
-\                        + [ {'buns': ['“', '”'], 'input': ['u\"'] } ]
+\                        + [ {'buns': ['“', '”'], 'input': ['u"'] } ]
