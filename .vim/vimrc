@@ -6432,7 +6432,6 @@ tno <s-tab> <left>
 
 nno [oc :call Func(0)<cr>
 nno ]oc :call Func(1)<cr>
-
 fu! Func(fwd) abort
     let &l:cole = a:fwd
     \?                (&l:cole + 1)%(3+1)
