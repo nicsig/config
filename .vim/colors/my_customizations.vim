@@ -171,6 +171,8 @@ try
 catch
 endtry
 
+" QuickFixLine {{{2
+
 " hide the current line in a qf window (the cursor should be enough)
 hi! link QuickFixLine Normal
 " │
@@ -178,4 +180,7 @@ hi! link QuickFixLine Normal
 
 " Terminal {{{2
 
-hi link Terminal Normal
+" I don't remember why I wrote this originally, but don't uncomment it.
+" It seems to disable the color in the shell prompt of a terminal buffer.
+"
+"     hi link Terminal Normal

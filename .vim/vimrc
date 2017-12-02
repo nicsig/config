@@ -1,3 +1,29 @@
+" OPTIONS_1 {{{1
+" Why this setting?{{{
+"
+" When we use gVim, we don't want `$VIMRUNTIME/menu.vim` to be sourced.
+" We won't use the menu. It makes Vim start around 50ms slower.
+" https://www.reddit.com/r/vim/comments/5l939k/recommendation_deinvim_as_a_plugin_manager/dbu74zd/
+"
+" The default value is 'aegimrLtT'.
+" We could also let 'go' unchanged, and write this instead:
+"
+"         let did_install_default_menus = 1
+"         let did_install_syntax_menu = 1
+"
+" In this case, we would keep the menu bar but avoid loading the default menus.
+" For more info, see :h menu.vim
+"}}}
+" Why here, before the plugins, and not after, with the other options?{{{
+"
+" From `:h 'go-M`:
+"
+" Note that  this flag  must be added  in the .vimrc  file, before  switching on
+" syntax  or filetype  recognition (…;  the  `:syntax on`  and `:filetype  on`
+" commands load the menu too). `:filetype on` and `:syntax on` source menu.vim.
+"}}}
+set go=M
+
 " PLUGINS {{{1
 " Disable plugins {{{2
 
@@ -483,7 +509,7 @@ Plug 'chrisbra/unicode.vim'
 
 call plug#end()
 
-" OPTIONS {{{1
+" OPTIONS_2 {{{1
 " ENCODING {{{2
 " Why should you leave this section at the top of our options configurations.{{{
 "
@@ -605,23 +631,6 @@ set termencoding=utf-8
 
 if has('gui_running')
     set guifont=DejaVu\ Sans\ Mono\ 20
-
-    " When we use gVim, we don't want `$VIMRUNTIME/menu.vim` to be sourced.
-    " We won't use the menu. It makes Vim start around 50ms slower.
-    " https://www.reddit.com/r/vim/comments/5l939k/recommendation_deinvim_as_a_plugin_manager/dbu74zd/
-    "
-    " The default value is 'aegimrLtT'.
-    " We could also let `go` unchanged, and write this instead:
-    "
-    "         let did_install_default_menus = 1
-    "         let did_install_syntax_menu = 1
-    "
-    " In this case, we would keep the menu but avoid loading the default menus.
-    " For more info, see :h menu.vim
-
-    set guioptions=M
-    " `:filetype on` and `:syntax on` source menu.vim (:h go-M).
-    " So, we must add the `M` flag to 'guioptions' before these commands.
 endif
 
 " backspace {{{2
@@ -4076,6 +4085,11 @@ xno <expr> <silent> d 'd'.execute('let @v=@"')
 " same thing when we yank
 xno <expr> <silent> y 'y'.execute('let @v=@"')
 
+" gj          join lines {{{3
+
+" We use J to move the selection down. Join needs to be restored.
+xno gj J
+
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
 xno <expr> h    mode() ==# '<c-v>' && virtcol('.') == 1            ? '' : 'h'
@@ -4088,11 +4102,6 @@ xno <expr> l    mode() ==# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
 " (you can cycle through the last 2 visual selections with `gv`)
 
 nno <silent> <expr> vip getline('.') =~# '^\s*$' ? '' : 'vip'
-
-" SPC J       join lines {{{3
-
-" We use J to move the selection down. Join needs to be restored.
-xno <space>j J
 
 " mbc mbd     clear/delete blocks {{{3
 
@@ -4177,17 +4186,13 @@ com! -bar -nargs=0 CleanRegisters call myfuncs#clean_reg()
 " CountPatterns {{{2
 
 com! -range=% -nargs=+ -complete=customlist,myfuncs#patterns_favorite CountPatterns
-                     \| call myfuncs#patterns_count(<line1>, <line2>, <f-args>)
+\|                      call myfuncs#patterns_count(<line1>, <line2>, <f-args>)
 
 " CV    Capture Variable {{{2
 
-" This command is useful to create a copy of a variable local to a function or
-" a script into the global namespace, for debugging purpose.
+" This command is useful to create a copy of a variable local to a function or a
+" script into the global namespace, for debugging purpose.
 com! -bar CV t. | sil keepj keepp s/\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*/g:\1\2= deepcopy(\1)/e
-
-" RemoveDuplicateLines {{{2
-
-com! -bang -bar -range=% RemoveDuplicateLines exe myfuncs#remove_duplicate_lines(<line1>,<line2>, <bang>0)
 
 " Doc    {{{2
 
@@ -4243,7 +4248,7 @@ fu! s:diff_orig() abort
     augroup diff_orig_restore_settings
         au! * <buffer>
         au BufWipeOut <buffer> exe 'sil norm ]oa'
-                            \| call timer_start(0, {-> execute(get(w:, 'diff_orig_cmd', ''))})
+        \|                     call timer_start(0, {-> execute(get(w:, 'diff_orig_cmd', ''))})
     augroup END
 
     wincmd p
@@ -4326,7 +4331,6 @@ com! -bar -nargs=1 IsPrime echo my_lib#is_prime(<args>)
 "     • provide the nr of lines of a block as an argument to the command
 "
 " After an initial join, you can repeat it with @:
-
 
 " How it works?{{{
 "
@@ -4481,6 +4485,10 @@ fu! s:plugins_update() abort
     PlugUpgrade
 endfu
 
+" RemoveDuplicateLines {{{2
+
+com! -bang -bar -range=% RemoveDuplicateLines exe myfuncs#remove_duplicate_lines(<line1>,<line2>, <bang>0)
+
 " RemoveTabs {{{2
 
 " The purpose of this command is to replace all tab characters in the buffer
@@ -4587,14 +4595,6 @@ endfu
 " SumColumn {{{2
 
 com! -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | exe '.!bc' | -j
-
-" Tabedit {{{2
-
-" La commande :tabedit n'accepte qu'un seul nom de fichier, et donc ne peut
-" pas ouvrir plusieurs onglets.
-" Pour remédier à cela on peut définir la commande :Tabedit qui suit:
-
-com! -bar -nargs=+ -complete=file_in_path Tabedit call myfuncs#open_multiple_tab_pages(<f-args>)
 
 " TW    TrimWhitespace {{{2
 
@@ -6057,7 +6057,8 @@ endfu
 " Replace all occurrences of `norm ga` with appropriate code.
 " Do the same for other `norm` (ex: `norm gs`).
 "
-"         vim /\C\v^%(\s*\V"\v)@!.*\zsnorm%[al]!@!\s/gj ~/.vim/**/*.vim
+"         vim /\%(^\s*".*\|\<ono\>.*\)\@<!norm!\@!\>/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"         :Cfilter! -not_my_plugins
 "
 " 59 -
 " better understand how the new `getqflist()` works
@@ -6418,28 +6419,83 @@ tno <s-tab> <left>
 "
 " 96 -
 " Check whether some commands would be better suited as mappings.
+" And check whether some mappings would be better suited as commands.
 "
 " 97 -
-" refactor :BoxPrettify so that it better replaces `+`
-" (have a look at a table in ~/Dropbox/conf/cheat/enigmes)
+"         BCILNSWacdfhilmnopqstvwz
+"         echo map(range(65,90)+range(97,122), {k,v -> nr2char(v)})
+"         echo filter(map(range(65,90)+range(97,122), {k,v -> nr2char(v)}), {k,v -> })
+"              ^^^^^^^                                                    ^^^^^^^^^^^^
+"              create a transformation to automatically add this
+"              make it cycle between `filter()` and `map()`
 "
 " 98 -
-" Open 2 horizontal viewports. In the upper one, press `g:o`.
-" The  original  window to  which  the  location  window is  associated  becomes
-" small. It shouldn't.
+" implement C-x C-x on command line (should be easy)
+"
+" 99 -
+" When `:lh` opens a vertical viewport, long lines are not wrapped.
+" They should.
 
 
+" Purpose:
+" Automate the process of finding a bug in our vimrc through a binary search.
+com! -bar DebugVimrc exe s:debug_vimrc()
 
-nno [oc :call Func(0)<cr>
-nno ]oc :call Func(1)<cr>
-fu! Func(fwd) abort
-    let &l:cole = a:fwd
-    \?                (&l:cole + 1)%(3+1)
-    \:                3 - (3 - &l:cole + 1)%(3+1)
+fu! s:debug_vimrc() abort
+    if !exists('$TMUX')
+        return 'echoerr "Only works inside Tmux"'
+    endif
 
-    let g:motion_to_repeat = (a:fwd ? ']' : '[').'oc'
-    echo '[conceallevel] '.&l:cole
+    " open a new file to use as a temporary vimrc
+    new /tmp/debug_vimrc
+    " wipe the buffer when it becomes hidden
+    " useful to not have to remove the next buffer-local autocmd
+    setl bh=wipe nobl
+    " disable automatic saving
+    norm [oa
+    " make sure the file is empty
+    %d_
+    " import our current vimrc
+    sil 0r $MYVIMRC
+    " write the file
+    sil update
+    " Every time  we'll change  and write  our temporary vimrc,  we want  Vim to
+    " start a new Vim  instance, in a new tmux pane, so that  we can begin a new
+    " test. We build the necessary tmux command.
+    let s:debug_vimrc = {}
+    let s:debug_vimrc.cmd  = 'tmux split-window -c /tmp'
+    let s:debug_vimrc.cmd .= ' -v -p 50'
+    let s:debug_vimrc.cmd .= ' -PF "#D"'
+    let s:debug_vimrc.cmd .= ' vim -Nu /tmp/debug_vimrc'
+
+    augroup my_debug_vimrc
+        au! * <buffer>
+        " start a Vim session sourcing the new temporary vimrc in a tmux pane
+        au BufWritePost <buffer> call s:debug_vimrc_act_on_pane(1)
+        " Warning:
+        " don't call `s:debug_vimrc_act_on_pane()` AFTER destroying `s:debug_vimrc`
+        " the function needs this variable
+        au BufWipeOut   <buffer> exe 'norm ]oa'
+        \|                       call s:debug_vimrc_act_on_pane(0)
+        \|                       unlet s:debug_vimrc
+    augroup END
+    return ''
 endfu
+
+fu! s:debug_vimrc_act_on_pane(open) abort
+    " if there's already a tmux pane opened to debug Vim, kill it
+    if    get(get(s:, 'debug_vimrc', ''), 'pane_id', -1) != -1
+    \&&   stridx(system('tmux list-pane -t %'.s:debug_vimrc.pane_id),
+    \            "can't find pane %".s:debug_vimrc.pane_id) == -1
+        call system('tmux kill-pane -t %'.s:debug_vimrc.pane_id)
+    endif
+    if a:open
+        " open  a tmux  pane, and  start a  Vim instance  with the  new modified
+        " minimal vimrc
+        let s:debug_vimrc.pane_id = systemlist(s:debug_vimrc.cmd)[0][1:]
+    endif
+endfu
+
 
 
 

@@ -713,15 +713,37 @@ fu! myfuncs#fix_spell() abort "{{{1
     "         norm! `^
     "         call winrestview(winview)
 
+    let spell_save = &l:spell
     setl spell
     try
-        let badword    = spellbadword(getline('.'))[0]
-        let suggestion = spellsuggest(badword)[0]
-        let new_line   = substitute(getline('.'), badword, suggestion, 'g')
-        call timer_start(0, {-> setline(line('.'), new_line)})
+        let orig_line = getline('.')
+        "                                                  ┌ don't eliminate a keyword nor a single quote
+        "                                                  │ when you split the line
+        "                                         ┌────────┤
+        let words = reverse(split(orig_line, '\v%(%(\k|'')@!.)+'))
+
+        let found_a_badword = 0
+        for word in words
+            let badword = get(spellbadword(word), 0, '')
+            if empty(badword)
+                continue
+            endif
+            let suggestion = get(spellsuggest(badword), 0, '')
+            if empty(suggestion)
+                continue
+            else
+                let found_a_badword = 1
+                break
+            endif
+        endfor
+
+        if found_a_badword
+            let new_line = substitute(orig_line, '\<'.badword.'\>', suggestion, 'g')
+            call timer_start(0, {-> setline(line('.'), new_line)})
+        endif
     catch
     finally
-        setl nospell
+        let &l:spell = spell_save
     endtry
 
     return ''
@@ -1566,28 +1588,6 @@ fu! s:open_gx_get_url() abort
 
     endif
     return url
-endfu
-
-fu! myfuncs#open_multiple_tab_pages(...) abort "{{{1
-
-    " La variable `pattern` itère sur les arguments passés à la fonction via
-    " la commande :Tabedit.
-    " Ils correspondent à une liste de noms de fichiers, pouvant inclure des globs.
-    " Ex: *.c
-    "
-    " On sait que l'argument sera bien une liste car c'est la commande :Tabedit
-    " qui appellera cette fonction.
-    " Or les arguments que la commande passe à la fonction sont codés via la
-    " séquence d'échappement <f-args>.
-
-    " On boucle sur les patterns avec la variable `pattern`.
-    for pattern in a:000
-        " Puis on boucle sur le développement des patterns avec la variable
-        " `file`.
-        for file in glob(pattern, 0, 1)
-            exe 'tabedit ' . file
-        endfor
-    endfor
 endfu
 
 fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1

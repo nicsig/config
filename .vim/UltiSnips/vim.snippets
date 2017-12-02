@@ -51,15 +51,6 @@ endsnippet
 #         string,  "". This  feature  is  very powerful. It  allows  you to  add
 #         optional text into snippets.
 
-# callback {{{1
-
-snippet callback "Create a hook to be able to register for callback" bm
-if exists('#User#${1:PluginFuncPost}')
-	doautocmd <nomodeline> User $1
-endif
-$0
-endsnippet
-
 # cfu {{{1
 
 snippet cfu "Custom Completion Function" bm
@@ -112,6 +103,15 @@ endsnippet
 
 snippet com "command" bm
 com! ${1:MyCmd} ${2:call s:my_function()}
+$0
+endsnippet
+
+# doautocmd {{{1
+
+snippet doautocmd "Create a hook to be able to register for callback" bm
+if exists('#User#${1:PluginFuncPost}')
+	doautocmd <nomodeline> User $1
+endif
 $0
 endsnippet
 
