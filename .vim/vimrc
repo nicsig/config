@@ -1901,18 +1901,6 @@ fu! s:cancel_prefix(prefixes) abort
 endfu
 call s:cancel_prefix(['U', '<bar>', '+', '-'])
 
-" By default, in insert mode, C-@ (:h ^@) inserts the last inserted text and
-" leaves insert mode.
-" Usually, in a terminal C-space produces C-@. So, when we hit C-space by
-" accident (which occurs frequently), we insert the last inserted text.
-" We don't want that, so we disable the mapping.
-ino <c-@>     <nop>
-
-" We do the same for C-space, even though it shouldn't be necessary, because
-" hitting C-space doesn't produce the keycode C-space (it produces C-@).
-ino <c-space> <nop>
-
-
 " Disable C-z (suspension / iconize) in normal, visual, and select mode
 nno <c-z> <nop>
 vno <c-z> <nop>
@@ -2191,7 +2179,7 @@ nno <silent> <space>fc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
 " because it's not present in:
 "
 "     :h i_^g C-d
-"     :echo map(taglist('^i_CTRL-G'), { k,v -> v.name })
+"     :echo map(taglist('^i_CTRL-G'), { i,v -> v.name })
 "
 " There is no default equivalent for visual mode, but we often use `m` for
 " visual mode mappings. So, here again, we'll use `m` as a prefix.
@@ -2255,9 +2243,39 @@ cno <expr> <c-r><c-r> getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHisto
 
 " C-x           (prefix) {{{3
 
+" C-x C-a: dump cAndidates
+"
 " We lost the ability to insert all names matching the pattern in front of the
 " cursor. We map the Vim default `C-a` to `C-x C-a`.
 cno <c-x><c-a> <c-a>
+
+" C-x C-d: capture canDidates
+"
+" Capture  in default  register  all  completion candidates  you  could list  by
+" pressing `C-d` after/in the middle of a keyword (command name/argument) on the
+" command line.
+"
+"    ┌  usually, <silent> is a bad idea in command line mode,
+"    │  but here we need it when there are a lot of candidates:
+"    │
+"    │      if there are too many for a single line, they are briefly
+"    │      displayed on several lines, which makes the screen “flash”
+"    │
+cno <silent> <expr> <c-x><c-d>  '<c-a>'
+\                               .timer_start(0, {->   setreg('"', getcmdline(), 'l')
+\                                                   + feedkeys('<c-c>', 'int') })[-1]
+
+" Alternative:{{{
+"
+"     cno <silent> <expr> <c-x><c-d> '<c-a>'.&cedit.'dd:q<cr>'
+"          │
+"          └ usually, <silent> is a bad idea in command line mode,
+"            but here we need it to bypass multi-line message (hit enter prompt)
+"
+" Pro: simpler
+" Con: the tabline seems  to flash, because the name of  the command line window
+" briefly appears and disappears.
+"}}}
 
 " C-x C-e: edit-and-execute-command
 cno <expr> <c-x><c-e>  &cedit
@@ -2329,7 +2347,7 @@ ino <expr> <cr> <sid>cr()
 ino <c-g>< <c-d>
 ino <c-g>> <c-t>
 
-" C-g h
+" C-g C-h
 "
 " Sometimes, we want to do this:
 "
@@ -2344,9 +2362,13 @@ ino <c-g>> <c-t>
 ino <expr> <silent> <c-g><c-h> <sid>compact_whitespace()
 
 fu! s:compact_whitespace() abort
+    if empty(&l:cms)
+        return ''
+    endif
+    let cml = matchstr(split(&l:cms, '%s')[0], '\S*')
     call timer_start(0, {->
     \                      setline(line('.'),
-    \                              substitute(getline('.'), '\s*"\zs\s\+', ' ', ''))
+    \                              substitute(getline('.'), '\s*'.cml.'\zs\s\+', ' ', ''))
     \                   })
     return ''
 endfu
@@ -3020,8 +3042,8 @@ fu! s:op_source(type, ...) abort
     " (trigger completion).
     "
     " So, instead, we dump it in a temporary file and source the latter.
-    let lines     = filter(raw_lines, { k,v -> v !~# '[⇔→│└┌]' })
-    let lines     = map(raw_lines, { k,v -> substitute(v, '[✘✔].*', '', '') })
+    let lines     = filter(raw_lines, { i,v -> v !~# '[⇔→│└┌]' })
+    let lines     = map(raw_lines, { i,v -> substitute(v, '[✘✔].*', '', '') })
     let tempfile  = tempname()
     call writefile(lines, tempfile, 'b')
 
@@ -3381,7 +3403,7 @@ endfu
 
 fu! s:global_mark_go(char) abort
     if !exists('g:MY_GLOBAL_MARK_'.a:char)
-        let info = get(filter(split(execute('marks'), '\n'), { k,v -> v =~# '^\s*'.a:char }), 0 , '')
+        let info = get(filter(split(execute('marks'), '\n'), { i,v -> v =~# '^\s*'.a:char }), 0 , '')
         if !empty(info)
             let fpath = matchstr(info, '^\s*'.a:char.'\s\+\d\+\s\+\d\+\s\+\zs.*')
             let pos   = split(matchstr(info, '^\s*'.a:char.'\s\+\zs\d\+\s\+\d\+'))
@@ -3424,7 +3446,7 @@ fu! s:global_mark_go(char) abort
 endfu
 
 fu! s:global_mark_mappings() abort
-    for upper in map(range(char2nr('A'),char2nr('Z')), { k,v -> nr2char(v,1) })
+    for upper in map(range(char2nr('A'),char2nr('Z')), { i,v -> nr2char(v,1) })
         sil! exe "nno <silent> '".upper.' :<c-u>exe <sid>global_mark_go("'.upper.'")<cr>'
         sil! exe 'nno <silent> m'.upper.' :<c-u>exe <sid>global_mark_set("'.upper.'")<cr>'
     endfor
@@ -4144,9 +4166,9 @@ xno <silent> mJ :<c-u>exe myfuncs#join_blocks(1)<cr>
 " COMMANDS {{{1
 " Warning:{{{
 "
-" Do NOT create commands which are only relevant for a specific type of buffer.
-" Those  should be  defined  in a  script,  or  in a  filetype  plugin with  the
-" `-buffer` attribute.
+" Do NOT use `vimrc`  to create commands which are only  relevant for a specific
+" type of buffer.  Those should be defined  in a plugin, or in a filetype plugin
+" with the `-buffer` attribute.
 "}}}
 " CheckMyfuncs {{{2
 
@@ -4696,7 +4718,7 @@ com! -bar -bang -range XorLines <line1>,<line2>call myfuncs#xor_lines(<bang>0)
 augroup my_cmdline_window
     au!
     au CmdWinEnter * nno <buffer> <nowait> <silent> q      :q<cr>
-    au CmdWinEnter * nno <buffer> <nowait> <expr>   <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[1]
+    au CmdWinEnter * nno <buffer> <nowait> <expr>   <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
     " By default,  C-c is useful to  quit the command-line window,  and populate
     " the command-line with the command which was being edited in the window.
     " But, it doesn't get rid of the display of the command-line window.
@@ -4724,7 +4746,7 @@ fu! s:update_history() abort
     " update history of current session
     "                               remove any command 5 characters long or shorter ┐
     "                                                                ┌──────────────┤
-    let new_hist = filter(getline(1, '$'), { k,v -> v !~# '^\s*$' && v !~# '^.\{,5}$' })
+    let new_hist = filter(getline(1, '$'), { i,v -> v !~# '^\s*$' && v !~# '^.\{,5}$' })
     call histdel(':')
     for line in new_hist
         call histadd(':', line)
@@ -4743,16 +4765,16 @@ fu! s:update_history() abort
     "
     "                                               ┌ take the old history
     "                            ┌──────────────────┤
-    let deleted_entries = filter(copy(s:old_cmd_hist), { k,v -> index(new_hist, v) == -1 })
+    let deleted_entries = filter(copy(s:old_cmd_hist), { i,v -> index(new_hist, v) == -1 })
     "                                                           └──────────────────────┤
     "              … and keep only the entries which aren't in the new history anymore ┘
     "
     " convert the text entries to delete, into their numeric indexes inside
     " the list `info`
-    call map(deleted_entries, { k,v -> index(info, ':'.v) })
+    call map(deleted_entries, { i,v -> index(info, ':'.v) })
 
     " sort them, and check they were all found (no -1)
-    call sort(filter(deleted_entries, { k,v -> v >= 0 }))
+    call sort(filter(deleted_entries, { i,v -> v >= 0 }))
     if empty(deleted_entries)
         return
     endif
@@ -4891,7 +4913,7 @@ fu! s:dnb_clean() abort
     endif
 
     " Source: http://stackoverflow.com/a/6561076
-    let to_wipe = filter(range(1, bufnr('$')), { k,v ->    buflisted(v)
+    let to_wipe = filter(range(1, bufnr('$')), { i,v ->    buflisted(v)
     \                                                   && empty(bufname(v))
     \                                                   && empty(win_findbuf(v)) })
     "                                                      │
@@ -4974,7 +4996,7 @@ fu! s:didyoumean() abort
     " Filter out the swapfile, if there's one.
     let swapfile = fnamemodify(execute('swapname')[1:], ':p')
     if swapfile !=? 'no swap file'
-        call filter(matching_entries, { k,v -> fnamemodify(v, ':p') != swapfile })
+        call filter(matching_entries, { i,v -> fnamemodify(v, ':p') != swapfile })
     endif
 
     " We don't need to be suggested to load the current buffer.
@@ -4989,7 +5011,7 @@ fu! s:didyoumean() abort
     " its name before using it for filtering the matching entries.
 
     let current_entry = substitute(expand('%'), '/$', '', '')
-    call filter(matching_entries, { k,v -> v !=# current_entry })
+    call filter(matching_entries, { i,v -> v !=# current_entry })
 
     if empty(matching_entries)
         return
@@ -6403,8 +6425,8 @@ tno <s-tab> <left>
 "
 " We would put `file1`, `file2`, … with:
 "         put =map(filter(glob($HOME.'/.vim/plugged/{plugin-name}/**/*.vim', 0, 1),
-"         \               { k,v -> v !~# '/t\%[est]/' }),
-"         \        { k,v -> 'so '.v })
+"         \               { i,v -> v !~# '/t\%[est]/' }),
+"         \        { i,v -> 'so '.v })
 "
 " 95 -
 " Aren't `cob` and `coc` redundant?
@@ -6422,80 +6444,45 @@ tno <s-tab> <left>
 " And check whether some mappings would be better suited as commands.
 "
 " 97 -
+"                                ┌ 3rd character of all `]o?` mappings
+"         ┌──────────────────────┤
 "         BCILNSWacdfhilmnopqstvwz
-"         echo map(range(65,90)+range(97,122), {k,v -> nr2char(v)})
-"         echo filter(map(range(65,90)+range(97,122), {k,v -> nr2char(v)}), {k,v -> })
+"         echo map(range(65,90)+range(97,122), {i,v -> nr2char(v)})
+"         echo filter(map(range(65,90)+range(97,122), {i,v -> nr2char(v)}), {i,v -> })
 "              ^^^^^^^                                                    ^^^^^^^^^^^^
 "              create a transformation to automatically add this
 "              make it cycle between `filter()` and `map()`
 "
 " 98 -
-" implement C-x C-x on command line (should be easy)
+" install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
+" which would install a buffer-local autocmd listening to `BufWritePost`
+" which would give us a warning when we forget to undo a:
+"
+"         mapping/abbreviation/command/autocmd/variable
 "
 " 99 -
-" When `:lh` opens a vertical viewport, long lines are not wrapped.
-" They should.
-
-
-" Purpose:
-" Automate the process of finding a bug in our vimrc through a binary search.
-com! -bar DebugVimrc exe s:debug_vimrc()
-
-fu! s:debug_vimrc() abort
-    if !exists('$TMUX')
-        return 'echoerr "Only works inside Tmux"'
-    endif
-
-    " open a new file to use as a temporary vimrc
-    new /tmp/debug_vimrc
-    " wipe the buffer when it becomes hidden
-    " useful to not have to remove the next buffer-local autocmd
-    setl bh=wipe nobl
-    " disable automatic saving
-    norm [oa
-    " make sure the file is empty
-    %d_
-    " import our current vimrc
-    sil 0r $MYVIMRC
-    " write the file
-    sil update
-    " Every time  we'll change  and write  our temporary vimrc,  we want  Vim to
-    " start a new Vim  instance, in a new tmux pane, so that  we can begin a new
-    " test. We build the necessary tmux command.
-    let s:debug_vimrc = {}
-    let s:debug_vimrc.cmd  = 'tmux split-window -c /tmp'
-    let s:debug_vimrc.cmd .= ' -v -p 50'
-    let s:debug_vimrc.cmd .= ' -PF "#D"'
-    let s:debug_vimrc.cmd .= ' vim -Nu /tmp/debug_vimrc'
-
-    augroup my_debug_vimrc
-        au! * <buffer>
-        " start a Vim session sourcing the new temporary vimrc in a tmux pane
-        au BufWritePost <buffer> call s:debug_vimrc_act_on_pane(1)
-        " Warning:
-        " don't call `s:debug_vimrc_act_on_pane()` AFTER destroying `s:debug_vimrc`
-        " the function needs this variable
-        au BufWipeOut   <buffer> exe 'norm ]oa'
-        \|                       call s:debug_vimrc_act_on_pane(0)
-        \|                       unlet s:debug_vimrc
-    augroup END
-    return ''
-endfu
-
-fu! s:debug_vimrc_act_on_pane(open) abort
-    " if there's already a tmux pane opened to debug Vim, kill it
-    if    get(get(s:, 'debug_vimrc', ''), 'pane_id', -1) != -1
-    \&&   stridx(system('tmux list-pane -t %'.s:debug_vimrc.pane_id),
-    \            "can't find pane %".s:debug_vimrc.pane_id) == -1
-        call system('tmux kill-pane -t %'.s:debug_vimrc.pane_id)
-    endif
-    if a:open
-        " open  a tmux  pane, and  start a  Vim instance  with the  new modified
-        " minimal vimrc
-        let s:debug_vimrc.pane_id = systemlist(s:debug_vimrc.cmd)[0][1:]
-    endif
-endfu
-
+" normalize underscore/dash in plug mappings, and function names in shell init files
+"
+" 100 -
+" update the position of the mark in `vim-readline`
+" look for other mappings to implement, add them to a todo
+"
+" 101 -
+" Should we add `:noautocmd` every time we use `:wincmd`?
+"
+"     :vim /wincmd/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"     :Cfilter! -not_my_plugins
+"     :Cfilter! -not_relevant
+"     :Cfilter! noautocmd
+"
+" Same question for `:[cl]open`, `:[cl]window`?
+" Why this 2nd question?
+" `noautocmd` was useful in `vim-interactive-lists` to prevent the original window
+" from being minimized when it's a middle horizontal viewport (2nd of 3 for example).
+" The issue, if there's one, may be with l[open|window] only.
+"
+" 102 -
+" replace `k,v` with `i,v` when it makes more sense
 
 
 
@@ -6552,35 +6539,37 @@ endfu
 
 if has('vim_starting')
     let g:sandwich#default_recipes = [
-          \   {'buns': ['\s\+', '\s\+'], 'regex': 1, 'kind': ['delete', 'replace', 'query'], 'input': [' ']},
-          \   {'buns': ['', ''], 'action': ['add'], 'motionwise': ['line'], 'linewise': 1, 'input': ["\<CR>"]},
-          \   {'buns': ['^$', '^$'], 'regex': 1, 'linewise': 1, 'input': ["\<CR>"]},
-          \   {'buns': ['<', '>'], 'expand_range': 0, 'match_syntax': 1},
-          \   {'buns': ['"', '"'], 'quoteescape': 1, 'expand_range': 0, 'nesting': 0, 'linewise': 0, 'match_syntax': 1},
-          \   {'buns': ["'", "'"], 'quoteescape': 1, 'expand_range': 0, 'nesting': 0, 'linewise': 0, 'match_syntax': 1},
-          \   {'buns': ['{', '}'], 'nesting': 1, 'match_syntax': 1, 'skip_break': 1},
-          \   {'buns': ['[', ']'], 'nesting': 1, 'match_syntax': 1},
-          \   {'buns': ['(', ')'], 'nesting': 1, 'match_syntax': 1},
-          \   {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['add'], 'action': ['add'], 'input': ['t']},
-          \   {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['T']},
-          \   {'buns': 'sandwich#magicchar#t#tagname()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['t']},
-          \   {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['delete', 'textobj'], 'expr_filter': ['operator#sandwich#kind() !=# "replace"'], 'synchro': 1, 'linewise': 1, 'input': ['t', 'T']},
-          \   {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['replace', 'query'], 'expr_filter': ['operator#sandwich#kind() ==# "replace"'], 'synchro': 1, 'input': ['T']},
-          \   {'buns': ['sandwich#magicchar#f#fname()', '")"'], 'kind': ['add', 'replace'], 'action': ['add'], 'expr': 1, 'input': ['f']},
-          \   {'external': ["\<Plug>(textobj-sandwich-function-ip)", "\<Plug>(textobj-sandwich-function-i)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['f']},
-          \   {'external': ["\<Plug>(textobj-sandwich-function-ap)", "\<Plug>(textobj-sandwich-function-a)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['F']},
-          \   {'buns': 'sandwich#magicchar#i#input("operator")', 'kind': ['add', 'replace'], 'action': ['add'], 'listexpr': 1, 'input': ['i']},
-          \   {'buns': 'sandwich#magicchar#i#input("textobj", 1)', 'kind': ['delete', 'replace', 'query'], 'listexpr': 1, 'regex': 1, 'synchro': 1, 'input': ['i']},
-          \   {'buns': 'sandwich#magicchar#i#lastinput("operator", 1)', 'kind': ['add', 'replace'], 'action': ['add'], 'listexpr': 1, 'input': ['I']},
-          \   {'buns': 'sandwich#magicchar#i#lastinput("textobj")', 'kind': ['delete', 'replace', 'query'], 'listexpr': 1, 'regex': 1, 'synchro': 1, 'input': ['I']},
-          \ ]
+    \       {'buns': ['\s\+', '\s\+'], 'regex': 1, 'kind': ['delete', 'replace', 'query'], 'input': [' ']},
+    \       {'buns': ['', ''], 'action': ['add'], 'motionwise': ['line'], 'linewise': 1, 'input': ["\<CR>"]},
+    \       {'buns': ['^$', '^$'], 'regex': 1, 'linewise': 1, 'input': ["\<CR>"]},
+    \       {'buns': ['<', '>'], 'expand_range': 0, 'match_syntax': 1},
+    \       {'buns': ['"', '"'], 'quoteescape': 1, 'expand_range': 0, 'nesting': 0, 'linewise': 0, 'match_syntax': 1},
+    \       {'buns': ["'", "'"], 'quoteescape': 1, 'expand_range': 0, 'nesting': 0, 'linewise': 0, 'match_syntax': 1},
+    \       {'buns': ['{', '}'], 'nesting': 1, 'match_syntax': 1, 'skip_break': 1},
+    \       {'buns': ['[', ']'], 'nesting': 1, 'match_syntax': 1},
+    \       {'buns': ['(', ')'], 'nesting': 1, 'match_syntax': 1},
+    \       {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['add'], 'action': ['add'], 'input': ['t']},
+    \       {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['T']},
+    \       {'buns': 'sandwich#magicchar#t#tagname()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['t']},
+    \       {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['delete', 'textobj'], 'expr_filter': ['operator#sandwich#kind() !=# "replace"'], 'synchro': 1, 'linewise': 1, 'input': ['t', 'T']},
+    \       {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['replace', 'query'], 'expr_filter': ['operator#sandwich#kind() ==# "replace"'], 'synchro': 1, 'input': ['T']},
+    \       {'buns': ['sandwich#magicchar#f#fname()', '")"'], 'kind': ['add', 'replace'], 'action': ['add'], 'expr': 1, 'input': ['f']},
+    \       {'external': ["\<Plug>(textobj-sandwich-function-ip)", "\<Plug>(textobj-sandwich-function-i)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['f']},
+    \       {'external': ["\<Plug>(textobj-sandwich-function-ap)", "\<Plug>(textobj-sandwich-function-a)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['F']},
+    \       {'buns': 'sandwich#magicchar#i#input("operator")', 'kind': ['add', 'replace'], 'action': ['add'], 'listexpr': 1, 'input': ['i']},
+    \       {'buns': 'sandwich#magicchar#i#input("textobj", 1)', 'kind': ['delete', 'replace', 'query'], 'listexpr': 1, 'regex': 1, 'synchro': 1, 'input': ['i']},
+    \       {'buns': 'sandwich#magicchar#i#lastinput("operator", 1)', 'kind': ['add', 'replace'], 'action': ['add'], 'listexpr': 1, 'input': ['I']},
+    \       {'buns': 'sandwich#magicchar#i#lastinput("textobj")', 'kind': ['delete', 'replace', 'query'], 'listexpr': 1, 'regex': 1, 'synchro': 1, 'input': ['I']},
+    \     ]
 endif
 
 com! -bar -nargs=+ ProfilePlugin exe s:profile_plugin(<f-args>)
 
 fu! s:profile_plugin(...) abort
     " TODO:
-    " remove
+    " eliminate the need of providing the guard
+    " we should unlet it automatically
+    " study vim-scriptease
     if a:0 != 2
         return 'echoerr "Provide the names of the plugin, and of its guard"'
     endif
@@ -6591,8 +6580,8 @@ fu! s:profile_plugin(...) abort
         exe 'prof! file ~/.vim/plugged/'.plugin_name.'/**/*.vim'
         exe 'unlet! '.guard_name
         call writefile(map(filter(glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1),
-        \                         { k,v -> v !~# '/t\%[est]/' }),
-        \                  { k,v -> 'so '.v }), '/tmp/plugin_profiling_result')
+        \                         { i,v -> v !~# '/t\%[est]/' }),
+        \                  { i,v -> 'so '.v }), '/tmp/plugin_profiling_result')
         sil! so /tmp/plugin_profiling_result
 
     catch
@@ -6780,7 +6769,7 @@ augroup END
 "     endif
 " endfu
 
-" call fzf#run({'source': map(range(1, bufnr('$')), { k,v -> bufname(v) }),
+" call fzf#run({'source': map(range(1, bufnr('$')), { i,v -> bufname(v) }),
 "             \ 'sink': 'e', 'down': '30%'})
 
 

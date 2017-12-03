@@ -173,7 +173,7 @@ endtry
 
 " QuickFixLine {{{2
 
-" hide the current line in a qf window (the cursor should be enough)
+" hide the current line in a qf window (the cursor and the cursor line should be enough)
 hi! link QuickFixLine Normal
 " │
 " └─ :h E414

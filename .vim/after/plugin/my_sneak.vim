@@ -6,14 +6,14 @@
 " whose {lhs} can be typed by the user, ignoring  fFtT,;
 " We ignore the latter because, contrary to s, S, z, Z, they ARE consistent.
 "
-"     put =filter(split(execute('nno'), '\n'), { k,v -> v =~? 'sneak' && v !~? '^n\s\+\%([ft,;]\\|<plug>\)' })
+"     put =filter(split(execute('nno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^n\s\+\%([ft,;]\\|<plug>\)' })
 sil! nunmap s
 sil! nunmap S
 
-"     put =filter(split(execute('xno'), '\n'), { k,v -> v =~? 'sneak' && v !~? '^x\s\+\%([ft,;]\\|<plug>\)' })
+"     put =filter(split(execute('xno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^x\s\+\%([ft,;]\\|<plug>\)' })
 sil! xunmap s
 sil! xunmap Z
 
-"     put =filter(split(execute('ono'), '\n'), { k,v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)' })
+"     put =filter(split(execute('ono'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)' })
 sil! ounmap z
 sil! ounmap Z
