@@ -2393,9 +2393,17 @@ ino <silent> <c-r>E <c-r>=get(split(execute('filter /^E\d\+/ messages'), "\n"), 
 "                                                                     E\d\+
 
 " insert output of last eX command
-ino <silent> <c-r>X <c-r>=substitute(execute(histget(':')),'\n','','')<cr>
-" We remove the first newline, so that we can insert the output of a command
-" inline, and not on the next line.
+ino <expr> <silent> <c-r>X <sid>output_last_ex_command()
+fu! s:output_last_ex_command() abort
+    let paste_save = &paste
+    " enable 'paste' so that Vim  doesn't automatically add indentation when the
+    " output has multiple lines
+    set paste
+    call timer_start(0, {-> execute('set '.(paste_save ? '' : 'no').'paste')})
+    " We remove the first newline, so that we can insert the output of a command
+    " inline, and not on the next line.
+    return substitute(execute(histget(':')),'\n','','')
+endfu
 
 " C-x  C-…        completions {{{3
 " ]      tag completion {{{4
@@ -6570,6 +6578,15 @@ tno <s-tab> <left>
 " window id, because they both change.
 "
 " Maybe we could look at the qfl id, or tag the qfl with the `context` key…
+" Apparently, `context` can only contain a data type.
+"
+" 105 -
+" We should never use a `:catch` clause without returning explicitly an error.
+" And we must make sure the error is executed. We should never allow an error
+" to be silently ignored.
+"
+"         vim /endtry/gj ~/.vim/**/*.vim ~/.vim/vimrc
+
 
 
 " :h
