@@ -1281,6 +1281,13 @@ set showmatch
 
 set matchtime=0
 
+" matchpairs {{{2
+
+augroup my_matchpairs
+    au!
+    au FileType * setl mps+=“:”,‘:’
+augroup END
+
 " modelines {{{2
 
 " If 'modeline' is set, and the value of 'modelines' is greater than 0, then Vim
@@ -3886,27 +3893,86 @@ nno zV zv
 " OBJECTS {{{2
 " i% {{{3
 
-" By default, you can operate on the NEXT text surrounded by ' or "
-" But you can't do the same for the NEXT text surrounded by () [] {}
-" The following code fixes that.
-
+" OLD CODE:{{{
+"
 "                    ┌ move cursor to next surrounding symbols
 "               ┌────┤
-xno <silent> i% <esc>%:exe 'norm! vi'.getline('.')[col('.')-1]<cr>
-"                                     └──────────────────────┤
-"                                                            └ surrounding symbol
-"                                                              only works for single byte character
+"               │    │          ┌ do NOT add a bang:
+"               │    │          │ it would break the mapping for custom text-object like `i“`
+"               │    │          │
+" xno <silent> i% <esc>%:exe 'norm vi'.matchstr(getline('.'), '\%'.col('.').'c.')<cr>
+"                                    │
+"                                    └ surrounding symbol
 "
-"                                                              Alternative:
-"                                                                  matchstr(getline('.'), '\%'.col('.').'c.')
-"                                                              should work for multibyte characters
-
-ono <silent> i% :norm vi%<cr>
-
-" Commented, because it would shadow `v_a%` from the `matchit` plugin:
+"                                      We could also use:
+"
+"                                              getline('.')[col('.')-1]<cr>
+"
+"                                      … but it would not work for multibyte characters.
+"}}}
+" Why don't we use the old code anymore?{{{
+"
+" The new  one takes  into consideration  all pairs  stored in  the buffer-local
+" value of 'mps'. Including “” and ‘’.
+"}}}
+" Could the new code be improved?{{{
+"
+" Yes, currently  it doesn't always  work on multiline text-object,  because the
+" initial `%` finds an opening symbol, reliably, only when it's on the last line
+" of the text-object.
+"
+" Watch:
+"
+"         (foo
+"         b|ar
+"         baz)
+"
+"         “foo
+"         bar
+"         b|az”
+"
+" Press `vi%`, while the cursor is on the bar.
+"
+"}}}
+" Why no `v_a%`?{{{
+"
+" It would shadow `v_a%` from the `matchit` plugin:
 "
 "         xno <silent> a% <Esc>%v%
 "         ono <silent> a% :norm va%<cr>
+"}}}
+xno <silent>  i%  <esc>:call <sid>select_percent_object()<cr>
+ono <silent>  i%  :norm vi%<cr>
+
+fu! s:select_percent_object() abort
+    let pos = getpos('.')
+    " search for a closing/opening symbol
+    norm! %
+    if getpos('.') == pos
+        return
+    endif
+    " save closing/opening symbol
+    let sym = matchstr(getline('.'), '\%'.col('.').'c.')
+    " Maybe we could speed the process by storing the next 2 values in buffer-local
+    " variables every time `FileType *` is fired. Not sure it's worth it.
+    let opening_syms = map(split(&l:mps, ','), { i,v -> matchstr(v, '.')} )
+    let closing_syms = map(split(&l:mps, ','), { i,v -> matchstr(v, '.$')} )
+    " check it is indeed in 'mps'
+    if index(opening_syms, sym) < 0 && index(closing_syms, sym) < 0
+        return
+    endif
+    " check we're on a closing symbol
+    if index(opening_syms, sym) >= 0
+        norm! %
+    endif
+    " select object and quit to set the marks
+    exe "norm! v%\e"
+    " check there's at least one character inside the object
+    if getline("'<") == getline("'>") && virtcol("'>") == virtcol("'<") + 1
+        return
+    endif
+    norm! gvloh
+endfu
 
 " iE {{{3
 
@@ -6483,7 +6549,27 @@ tno <s-tab> <left>
 "
 " 102 -
 " replace `k,v` with `i,v` when it makes more sense
-
+"
+" 103 -
+" We should never  open the qf window manually. It's the  job of `vim-qf`, which
+" uses more logic.
+" Instead, we  should just  emit `QuickFixCmdPost` with  the right  pattern (ex:
+" `grep`, or `lgrep`). And make sure the list has always at least 1 valid entry:
+"
+"         map(list, {i,v -> extend(v, {'valid' :1})})
+"
+" … so that `:[cl]window` open the qf window.
+"
+" Refactor that everywhere.
+"
+"         vim /[cl]window\|[cl]open/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"
+" 104 -
+" If we apply some conceal in a qf window, close it, then reopen it, the conceal
+" is lost. How  to reapply it? We  can't rely on the  buffer number, nor  on the
+" window id, because they both change.
+"
+" Maybe we could look at the qfl id, or tag the qfl with the `context` key…
 
 
 " :h
