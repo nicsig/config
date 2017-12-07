@@ -277,7 +277,7 @@ endsnippet
 # map {{{1
 
 snippet map "prototype mapping" bm
-nno <silent> ${1:cd} :<c-u>call ${2:Func}()<cr>
+nno  <silent><unique>  ${1:cd}  :<c-u>call ${2:Func}()<cr>
 fu! $2() abort
 	$0
 endfu
@@ -286,7 +286,7 @@ endsnippet
 # map_ft {{{1
 
 snippet map_ft "mapping for ftplugin" bm
-nno <buffer> <nowait> <silent> $0
+nno  <buffer><nowait><silent>  $0
 endsnippet
 
 # Rappels:
@@ -302,8 +302,8 @@ endsnippet
 # map_plug {{{1
 
 snippet map_plug "plug mapping" bm
-nmap ${1:lhs} <plug>(${2:plugin_function})
-nno <silent> <plug>($2) :<c-u>call ${2/(.*?)_(.*)/$1#$2/}()<cr>
+nmap  <unique>  ${1:lhs}  <plug>(${2:plugin_function})
+nno  <silent>  <plug>($2)  :<c-u>call ${2/(.*?)_(.*)/$1#$2/}()<cr>
 $0
 endsnippet
 
@@ -311,9 +311,9 @@ endsnippet
 
 snippet map_user "Install user-respectful mappings" bm
 if empty(mapcheck('${1:key}', '${3:mode}')) && !hasmapto('<plug>(${2:plugin_some_func})', '$3')
-	$3map $1                   <plug>($2)
+	$3map  <unique>  $1  <plug>($2)
 endif
-$3no <silent> <plug>($2)    :<c-u>call ${2/_/#/}()<cr>
+$3no  <silent>  <plug>($2)  :<c-u>call ${2/_/#/}()<cr>
 $0
 endsnippet
 

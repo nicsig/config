@@ -19,7 +19,7 @@
 
 " Solution:
 " Define a simpler buffer-local mapping which doesn't use `:silent`.
-nno <buffer> <nowait> <silent> <c-s> :<c-u>update<cr>
+nno  <buffer><nowait><silent>  <c-s>  :<c-u>update<cr>
 
 " Teardown {{{1
 

@@ -1,38 +1,38 @@
 " Mappings {{{1
 " . {{{2
 
-xmap <buffer>        .                                <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
-xno  <buffer> <expr> <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 1')[0]
+xmap  <buffer>         .                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
+xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 1')[0]
 
 " [oP  ]oP  coP {{{2
 
-nno <buffer> <nowait> <silent> [oP   :<c-u>call my_dirvish#toggle_auto_preview(1)<cr>
-nno <buffer> <nowait> <silent> ]oP   :<c-u>call my_dirvish#toggle_auto_preview(0)<cr>
-nno <buffer> <nowait> <silent> coP   :<c-u>call my_dirvish#toggle_auto_preview(
-\                                                   !exists('#my_dirvish_auto_preview'))<cr>
+nno  <buffer><nowait><silent>  [oP  :<c-u>call my_dirvish#toggle_auto_preview(1)<cr>
+nno  <buffer><nowait><silent>  ]oP  :<c-u>call my_dirvish#toggle_auto_preview(0)<cr>
+nno  <buffer><nowait><silent>  coP  :<c-u>call my_dirvish#toggle_auto_preview(
+\                                                  !exists('#my_dirvish_auto_preview'))<cr>
 
 " a {{{2
 
-nmap <buffer> <nowait> <silent> a :<c-u>call dirvish#open('vsplit', 1)<cr>
+nmap  <buffer><nowait><silent>  a  :<c-u>call dirvish#open('vsplit', 1)<cr>
 
 " h    l {{{2
 
-nmap <buffer> <nowait> <silent> h <plug>(my_dirvish_update)<plug>(dirvish_up)
-nmap <buffer> <nowait> <silent> l <cr>
+nmap  <buffer><nowait><silent>  h  <plug>(my_dirvish_update)<plug>(dirvish_up)
+nmap  <buffer><nowait><silent>  l  <cr>
 
 " R {{{2
 
 " To "toggle" this, just press `R` to reload.
-nno <buffer> <nowait> <silent> R  :<c-u>call my_dirvish#reload()<cr>
+nno  <buffer><nowait><silent>  R  :<c-u>call my_dirvish#reload()<cr>
 
 " s {{{2
 
-nmap <buffer> <nowait> <silent> s :<c-u>call dirvish#open('split', 1)<cr>
+nmap  <buffer><nowait><silent>  s  :<c-u>call dirvish#open('split', 1)<cr>
 
 " t {{{2
 
-nno <buffer> <nowait> <silent> t :<c-u>call dirvish#open('tabedit', 1)<cr>
-xno <buffer> <nowait> <silent> t :call dirvish#open('tabedit', 1)<cr>
+nno  <buffer><nowait><silent>  t  :<c-u>call dirvish#open('tabedit', 1)<cr>
+xno  <buffer><nowait><silent>  t  :call dirvish#open('tabedit', 1)<cr>
 
 " zh {{{2
 "
@@ -68,7 +68,7 @@ xno <buffer> <nowait> <silent> t :call dirvish#open('tabedit', 1)<cr>
 "     • `R` and `zh`      DOES "
 
 " Map `zh` to toggle dot-prefixed entries.
-nno <buffer> <nowait> <silent> zh :<c-u>call my_dirvish#toggle_dot_entries()<cr>
+nno  <buffer><nowait><silent>  zh  :<c-u>call my_dirvish#toggle_dot_entries()<cr>
 
 " Sort and hide dot-prefixed files/directories {{{1
 

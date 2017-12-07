@@ -268,7 +268,7 @@ fu! myfuncs#box_create() abort
     let last_line  = line("'}") - 2
     for i in range(first_line, last_line)
         for j in col_pos
-            exe 'norm! '.i.'G'.j.'|r│'
+            exe 'norm! '.i.'G'.j."|r\u2502"
         endfor
     endfor
 
@@ -283,19 +283,19 @@ fu! s:box_create_border(where, col_pos) abort
         " duplicate first line in the box
         norm! '{+yyP
         " replace all characters with `─`
-        norm! v$r─
+        exe "norm! v$r\u2500"
         " draw corners
-        exe 'norm! '.col_pos[0].'|r┌'.col_pos[-1].'|r┐'
+        exe 'norm! '.col_pos[0]."|r\u250c".col_pos[-1]."|r\u2510"
     else
         " duplicate the `┌────┐` border below the box
         t'}-
         " draw corners
-        exe 'norm! '.col_pos[0].'|r└'.col_pos[-1].'|r┘'
+        exe 'norm! '.col_pos[0]."|r\u2514".col_pos[-1]."|r\u2518"
     endif
 
     " draw the '┬' or '┴' characters:
     for pos in col_pos[1:-2]
-        exe 'norm! '.pos.'|r'.(a:where ==? 'top' ? '┬' : '┴')
+        exe 'norm! '.pos.'|r'.(a:where ==? 'top' ? "\u252c" : "\u2534")
     endfor
 endfu
 
@@ -306,7 +306,7 @@ fu! s:box_create_separations() abort
     "
     " … useful to make our table more readable.
     norm! '{++yyp
-    keepj keepp sil! s/[^│┼]/ /g
+    keepj keepp sil! s/[^\u2502\u253c]/ /g
 
     " Delete it in the `s` (s for space) register, so that it's stored inside
     " default register and we can paste it wherever we want.
@@ -319,9 +319,9 @@ fu! s:box_create_separations() abort
     " … and store it inside `x` register.
     " So that we can paste it wherever we want.
     let @x = getline(line("'{")+1)
-    let @x = substitute(@x, '\S', '├', '')
-    let @x = substitute(@x, '.*\zs\S', '┤', '')
-    let @x = substitute(@x, '┬', '┼', 'g')
+    let @x = substitute(@x, '\S', "\u251c", '')
+    let @x = substitute(@x, '.*\zs\S', "\u2524", '')
+    let @x = substitute(@x, "\u252c", "\u253c", 'g')
 
     " Make the contents of the register linewise, so we don't need to hit
     " `"x]p`, but simply `"xp`.
@@ -330,12 +330,12 @@ endfu
 
 fu! myfuncs#box_destroy() abort
     " remove box (except pretty bars: │)
-    sil! '{,'}s/[─┴┬├┤┼└┘┐┌]//g
+    sil! '{,'}s/[\u2500\u2534\u252c\u251c\u2524\u253c\u2514\u2518\u2510\u250c]//g
 
     " replace pretty bars with regular bars
     " necessary, because we will need them to align the contents of the
     " paragraph later
-    sil! '{,'}s/│/|/g
+    sil! '{,'}s/\u2502/|/g
 
     " remove the bars at the beginning and at the end of the lines
     " we don't want them, because they would mess up the creation of a box
@@ -660,7 +660,7 @@ fu! myfuncs#edit_help_file() "{{{1
     sil! unmap <buffer> S
     sil! unmap <buffer> q
 
-    nno <buffer> <nowait> <silent>  <cr>  80<bar>
+    nno  <buffer><nowait><silent>  <cr>  80<bar>
 
     setl modifiable noreadonly
 endfu
@@ -899,7 +899,7 @@ fu! myfuncs#in_A_not_in_B(...) abort "{{{1
     sil! 0put =output
     sil! $d_
 
-    nno <buffer> <nowait> <silent> q    :<c-u>close<cr>
+    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     setl noma ro
 endfu
 
@@ -1652,7 +1652,7 @@ fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1
     setl noma
 
     if !bufexists('Counts') | sil file Counts | endif
-    nno <buffer> <nowait> <silent>  q  :<c-u>close<cr>
+    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     wincmd p | call winrestview(view) | wincmd p
 endfu
 
@@ -1783,8 +1783,8 @@ fu! myfuncs#plugin_symbols() abort "{{{1
     sil! $put =['', 'COMMANDS', ''] + commands
     g/^\v%(FUNCTIONS|COMMANDS|MAPPINGS)$/center
     setl noma ro
-    nno <buffer> <nowait> <silent>  <cr>  :<c-u>call <SID>plugin_symbols_clickable_toc()<cr>
-    nno <buffer> <nowait> <silent>  q     :<c-u>close<cr>
+    nno  <buffer><nowait><silent>  <cr>  :<c-u>call <SID>plugin_symbols_clickable_toc()<cr>
+    nno  <buffer><nowait><silent>  q     :<c-u>close<cr>
 endfu
 
 fu! s:plugin_symbols_clickable_toc() abort
@@ -2028,12 +2028,13 @@ fu! myfuncs#search_todo() abort "{{{1
     "                                              └── Tweak the text of each entry when there's a line
     "                                                  with just `todo` or `fixme`;
     "                                                  replace it with the text of the next non empty line instead
-    call setloclist(0, [], 'a', { 'title': 'FIXME LIST' })
+    call setloclist(0, [], 'a', { 'title': 'FIXME & TODO' })
 
-    " the ll window is correctly opened by our automcd in vimrc (with :lwindow),
-    " but the focus stays in the current window, so we manually give the focus to
-    " the ll window
-    noautocmd wincmd p
+    " Give the focus to the ll window.
+    " It has already been opened by our automcd in `vim-qf` (with `:lwindow`),
+    " but the focus has stayed in the current window.
+
+    call qf#focus_window('loc', 1)
 
     " now, we should be in the ll window, but double check
     if &l:buftype !=# 'quickfix'
@@ -2041,9 +2042,10 @@ fu! myfuncs#search_todo() abort "{{{1
     endif
 
     " hide location
-    call qf#conceal('location')
-
-    call matchadd('Todo', '\cfixme\|todo', -1)
+    " call qf#set_matches('myfuncs|#search_todo', 'Conceal', 'location')
+    call qf#set_matches('myfuncs:search_todo', 'Conceal', '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?')
+    call qf#set_matches('myfuncs:search_todo', 'Todo', '\cfixme\|todo')
+    call qf#create_matches()
 endfu
 
 fu! s:search_todo_text(dict) abort
@@ -2121,7 +2123,7 @@ fu! myfuncs#show_me_snippets() abort "{{{1
     sil %EasyAlign 1 : { 'left_margin': '',  'right_margin': ' ' }
     sil %s/:/
 
-    nno <buffer> <nowait> <silent> q    :<c-u>close<cr>
+    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     setl noma ro
     syn match snip_cheat_tab_trigger /^\S\+\ze\s*/
     hi link snip_cheat_tab_trigger Identifier
@@ -2367,7 +2369,7 @@ fu! s:trans_buffer(cmd) abort
     if !bufexists('translation') | sil file translation | else | return -1 | endif
 
     wincmd p | call winrestview(view) | wincmd p
-    nno <buffer> <nowait> <silent>  <c-c>  :<c-u>call myfuncs#trans_stop()<cr>
+    nno  <buffer><nowait><silent>  <c-c>  :<c-u>call myfuncs#trans_stop()<cr>
     let bufnum = bufnr('%')
     wincmd p
     return bufnum
@@ -2376,7 +2378,7 @@ endfu
 fu! myfuncs#trans_cycle() abort
     let s:trans_target = { 'fr' : 'en', 'en' : 'fr' }[get(s:, 'trans_target', 'fr')]
     let s:trans_source = { 'fr' : 'en', 'en' : 'fr' }[get(s:, 'trans_source', 'en')]
-    echo '[trans] '.s:trans_source.' → '.s:trans_target
+    echo '[trans] '.s:trans_source." \u2192 ".s:trans_target
 endfu
 
 fu! s:trans_grab_visual() abort
@@ -2433,7 +2435,7 @@ endfu
 
 fu! myfuncs#unicode_table() abort "{{{1
     UnicodeTable
-    nno <buffer> <nowait> <silent>  q  :<c-u>close<cr>
+    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
 endfu
 
 " unicode_toggle {{{1
@@ -2545,7 +2547,7 @@ fu! myfuncs#verbose_command(level, excmd) abort "{{{1
     " if we really get there...
     if &previewwindow
         " We use our custom `quit()` function to be able to undo the closing.
-        nno <buffer> <nowait> <silent> q :<c-u>exe my_lib#quit()<cr>
+        nno  <buffer><nowait><silent>  q  :<c-u>exe my_lib#quit()<cr>
         setl bh=wipe bt=nofile nobl nowrap noswf
     endif
 endfu
@@ -2657,7 +2659,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 
     exe 'vert res '.(max(map(getline(1, '$'), { i,v -> strchars(v) }))+4)
 
-    nno <buffer> <nowait> <silent>  q  :<c-u>close<cr>
+    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     setl noma ro
     wincmd p | call winrestview(view)
     wincmd p
