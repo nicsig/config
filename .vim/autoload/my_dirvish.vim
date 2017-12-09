@@ -62,6 +62,7 @@ fu! my_dirvish#toggle_dot_entries() abort "{{{1
         try
             norm! ``
         catch
+            return my_lib#catch_error()
         endtry
     else
         norm R

@@ -348,13 +348,7 @@ fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 			return ''
 		endif
 	catch
-		if index(['char', 'line', 'block'], a:type) >= 0
-			echohl ErrorMsg
-			echom v:exception
-			echohl NONE
-		else
-			return 'echoerr '.string(v:exception)
-		endif
+		return my_lib#catch_error()
 	finally
 		let &cb  = cb_save
 		let &sel = sel_save

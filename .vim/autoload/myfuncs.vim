@@ -208,10 +208,7 @@ fu! myfuncs#block_select_paragraph() abort
              \ .(end_col + 2)."|".(end_line + 1)."G"
 
     catch
-        echohl ErrorMsg
-        echo v:exception
-        echohl NONE
-
+        return my_lib#catch_error()
     finally
         let &ve = ve_save
     endtry
@@ -375,9 +372,7 @@ if !exists('*myfuncs#break_line')
             endif
             sil! call repeat#set("\<plug>(my_break_line)")
         catch
-            echohl ErrorMsg
-            echo v:exception
-            echohl NONE
+            return my_lib#catch_error()
         endtry
     endfu
 endif
@@ -742,11 +737,10 @@ fu! myfuncs#fix_spell() abort "{{{1
             call timer_start(0, {-> setline(line('.'), new_line)})
         endif
     catch
+        return my_lib#catch_error()
     finally
         let &l:spell = spell_save
     endtry
-
-    return ''
 endfu
 
 fu! myfuncs#fold_help() abort "{{{1
@@ -942,12 +936,10 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
         sil exe mods."*s/\<c-a>//e"
 
     catch
-        return 'echoerr '.string(v:exception)
+        return my_lib#catch_error()
     finally
         let &l:fen = fen_save
     endtry
-
-    return ''
 endfu
 
 fu! myfuncs#keyword_custom(chars) abort "{{{1
@@ -968,10 +960,10 @@ fu! myfuncs#keyword_custom(chars) abort "{{{1
                                   \| aug! keyword_custom
         augroup END
     catch
+        return my_lib#catch_error()
     " Do NOT add a finally clause to restore 'isk'.
     " It would be too soon. The completion function hasn't been invoked yet.
     endtry
-    return ''
 endfu
 
 fu! myfuncs#long_listing_split() abort "{{{1
@@ -1295,11 +1287,10 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
         redraw!
 
     catch
-        return 'echoerr '.string(v:exception)
+        return my_lib#catch_error()
     finally
         let &sp = save_sp
     endtry
-    return ''
 endfu
 
 fu! myfuncs#op_incremental_yank(type) abort "{{{2
@@ -2524,6 +2515,8 @@ fu! myfuncs#verbose_command(level, excmd) abort "{{{1
         "    removed? Add yet another substitution (or tweak an existing one)?
         "
         "    Also, shouldn't this code be moved inside the debug plugin?
+    catch
+        return my_lib#catch_error()
     finally
         " We empty the value of 'vfile' for 2 reasons:
         "
@@ -2547,7 +2540,7 @@ fu! myfuncs#verbose_command(level, excmd) abort "{{{1
     " if we really get there...
     if &previewwindow
         " We use our custom `quit()` function to be able to undo the closing.
-        nno  <buffer><nowait><silent>  q  :<c-u>exe my_lib#quit()<cr>
+        nno  <buffer><nowait><silent>  q  :<c-u>call my_lib#quit()<cr>
         setl bh=wipe bt=nofile nobl nowrap noswf
     endif
 endfu

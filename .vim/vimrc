@@ -2013,10 +2013,10 @@ nno  go<esc>  <nop>
 "       :no <leader>    →    display all mappings installed by third-party plugins
 "                            in normal / visual / operator-pending mode
 
-let mapleader = "\<S-F16>"
+let mapleader = "\<s-f16>"
 
 " same thing for localleader
-let maplocalleader = "\<S-F17>"
+let maplocalleader = "\<s-f17>"
 
 " SPACE {{{2
 " . {{{3
@@ -2667,7 +2667,7 @@ nno  <silent>  g\t  :<c-u>call myfuncs#search_todo()<cr>
 "
 "         keepj g//#
 
-nno  <silent>  g::  :<c-u>exe <sid>all_matches_in_buffer()<cr>
+nno  <silent>  g::  :<c-u>call <sid>all_matches_in_buffer()<cr>
 
 fu! s:all_matches_in_buffer() abort
     let view = winsaveview()
@@ -2679,9 +2679,8 @@ fu! s:all_matches_in_buffer() abort
             call qf#my_conceal('location')
         endif
     catch
-        return 'echoerr '.string(v:exception)
+        return my_lib#catch_error()
     endtry
-    return ''
 endfu
 
 " ga          easy align {{{4
@@ -2758,9 +2757,7 @@ fu! s:my_gq(type) abort
         let has_a_list_header = getline(lnum1) =~# &l:flp
         exe 'norm! '.lnum1.'G'.(has_a_list_header ? 'gw' : 'gq').lnum2.'G'
     catch
-        echohl ErrorMsg
-        echom v:exception
-        echohl NONE
+        return my_lib#catch_error()
     finally
         let &l:ai = ai_save
     endtry
@@ -2872,9 +2869,9 @@ nno  <silent>  m;  :tabmove +1<cr>
 " U                   (prefix) {{{3
 
 " go to previous save
-nno  <silent>  UU  :<c-u>exe <sid>undo_until_prev_save()<cr>
+nno  <silent>  UU  :<c-u>call <sid>undo_until_prev_save()<cr>
 " we use `M-u u` to upcase a visual selection, so don't worry about shadowing `U`
-xno  UU  :<c-u>exe <sid>undo_until_prev_save()<cr>
+xno  UU  :<c-u>call <sid>undo_until_prev_save()<cr>
 
 " go to next save
 nno  <silent>  UY  :<c-u>later   1f<cr>
@@ -2894,9 +2891,8 @@ fu! s:undo_until_prev_save() abort
         endfor
         earlier 1f
     catch
-        return 'echoerr '.string(v:exception)
+        return my_lib#catch_error()
     endtry
-    return ''
 endfu
 
 " |                   (prefix) {{{3
@@ -2916,7 +2912,7 @@ nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/' .
 nno  <silent>  <bar>g  :<c-u>set operatorfunc=myfuncs#op_grep<cr>g@
 
 " same thing for visual selection
-xno  <silent>  <bar>g  :<c-u>exe myfuncs#op_grep('vis')<cr>
+xno  <silent>  <bar>g  :<c-u>call myfuncs#op_grep('vis')<cr>
 
 " Why not `!g` for the `{lhs}` ?
 " Because it would introduce some "lag" whenever we hit `!` to filter some
@@ -2979,26 +2975,11 @@ nno  <silent>  -u  :<c-u>call myfuncs#show_me_snippets()<cr>
 nno  <silent>  -U  :<c-u>call myfuncs#unicode_table()<cr>
 
 " +                   (prefix) {{{3
-" ++            open terminal {{{4
+" ++            trim whitespace {{{4
 
-nno  <silent>  ++  :<c-u>call <sid>term_open()<cr>
-
-fu! s:term_open() abort
-    let mod = window#get_modifier_to_open_window()
-
-    if has('nvim')
-        let how_to_open = mod.' split | term'
-    else
-        let how_to_open = mod.' term'
-    endif
-
-    let resize = mod =~# '^vert'
-    \?               ' | vert resize 30 | resize 30'
-    \:               ''
-
-    let g:debug = printf('exe %s %s', string(how_to_open), resize)
-    exe printf('exe %s %s', string(how_to_open), resize)
-endfu
+nno  <silent>  ++   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
+xno  <silent>  ++   :<c-u>call myfuncs#op_trim_ws('vis')<cr>
+nno  <silent>  +++  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '.v:count1.'g@_'<cr>
 
 " +s            source text-object {{{4
 
@@ -3017,9 +2998,9 @@ xno  <silent>  +s   :<c-u>sil! update<bar>exe <sid>op_source('vis')<cr>
 nmap  +[  +s
 
 "                         ┌─ Source Selection
-"                         │                                ┌─ verbosity level
-"                         │                                │
-com! -bar -nargs=? -range SS exe s:op_source('Ex', !empty(<q-args>) ? <q-args> : 0, <line1>, <line2>)
+"                         │                                 ┌─ verbosity level
+"                         │                                 │
+com! -bar -nargs=? -range SS call s:op_source('Ex', !empty(<q-args>) ? <q-args> : 0, <line1>, <line2>)
 
 fu! s:op_source(type, ...) abort
     let cb_save  = &cb
@@ -3043,13 +3024,7 @@ fu! s:op_source(type, ...) abort
         let raw_lines = split(@", "\n")
 
     catch
-        if index(['char', 'line', 'block'], a:type) >= 0
-            echohl ErrorMsg
-            echom v:exception
-            echohl NONE
-        else
-            return 'echoerr '.string(v:exception)
-        endif
+        return my_lib#catch_error()
 
     finally
         let &cb  = cb_save
@@ -3081,21 +3056,14 @@ fu! s:op_source(type, ...) abort
             "   set it to 14 to see things pending in a finally clause
 
         catch
-            return 'echoerr '.v:exception
+            return my_lib#catch_error()
         finally
             ToggleEditingCommands 1
         endtry
     else
         exe 'source '.tempfile
     endif
-    return ''
 endfu
-
-" +t            trim whitespace {{{4
-
-nno  <silent>  +t   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
-xno  <silent>  +t   :<c-u>call myfuncs#op_trim_ws('vis')<cr>
-nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '.v:count1.'g@_'<cr>
 
 " +y  (+yc)     incremental yank (clear) {{{4
 
@@ -3419,9 +3387,8 @@ fu! s:global_mark_set(char) abort
         exe 'norm! m'.a:char
         let g:MY_GLOBAL_MARK_{a:char} = { 'fpath': expand('%:p'), 'pos': getpos('.')[1:2] }
     catch
-        return 'echoerr '.string(v:exception)
+        return my_lib#catch_error()
     endtry
-    return ''
 endfu
 
 fu! s:global_mark_go(char) abort
@@ -3451,7 +3418,7 @@ fu! s:global_mark_go(char) abort
         " with a question? How to catch it properly?
         exe 'e '.fnameescape(g:MY_GLOBAL_MARK_{a:char}.fpath)
     catch
-        return 'echoerr '.string(v:exception)
+        return my_lib#catch_error()
     endtry
 
     " '. may not exist (and other issues may occur).
@@ -3463,15 +3430,14 @@ fu! s:global_mark_go(char) abort
         exe 'norm! m'.a:char
         norm! g`.zvzz
     catch
+        return my_lib#catch_error()
     endtry
-
-    return ''
 endfu
 
 fu! s:global_mark_mappings() abort
     for upper in map(range(char2nr('A'),char2nr('Z')), { i,v -> nr2char(v,1) })
-        sil! exe "nno  <silent>  '".upper.'  :<c-u>exe <sid>global_mark_go("'.upper.'")<cr>'
-        sil! exe 'nno  <silent>  m'.upper.'  :<c-u>exe <sid>global_mark_set("'.upper.'")<cr>'
+        sil! exe "nno  <silent>  '".upper.'  :<c-u>call <sid>global_mark_go("'.upper.'")<cr>'
+        sil! exe 'nno  <silent>  m'.upper.'  :<c-u>call <sid>global_mark_set("'.upper.'")<cr>'
     endfor
 endfu
 
@@ -3871,12 +3837,11 @@ fu! s:my_z_equal() abort
     try
         call feedkeys(":setl spell\<cr>z=", 'in')
     catch
-        return 'echoerr '.string(v:exception)
+        return my_lib#catch_error()
     finally
         call timer_start(0, {-> execute('let &l:spell = '.spell_save, '')})
     endtry
     sil! call repeat#set("\<plug>(my_z_equal)")
-    return ''
 endfu
 
 " zd {{{3
@@ -4239,11 +4204,11 @@ xno  <silent>  mbd  :<c-u>call myfuncs#blocks_clear(0)<cr>
 "   • join the 2 blocks
 "   • align the blocks using ^A as a delimiter
 
-xno  <silent>  mj  :<c-u>exe myfuncs#join_blocks(0)<cr>
-xno  <silent>  mJ  :<c-u>exe myfuncs#join_blocks(1)<cr>
-"                                                │
-"                                                └─ first, reverse the order of the blocks
-"                                                   then, join them
+xno  <silent>  mj  :<c-u>call myfuncs#join_blocks(0)<cr>
+xno  <silent>  mJ  :<c-u>call myfuncs#join_blocks(1)<cr>
+"                                                 │
+"                                                 └─ first, reverse the order of the blocks
+"                                                    then, join them
 
 " COMMANDS {{{1
 " Warning:{{{
@@ -4382,8 +4347,8 @@ com! -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
 "                           literally (because of `shellescape() which quotes
 "                           the whole argument`)
 
-com! -bar -complete=file_in_path -nargs=+  Grep  exe myfuncs#op_grep('Ex', <q-args>, 0)
-com! -bar -complete=file_in_path -nargs=+ LGrep  exe myfuncs#op_grep('Ex', <q-args>, 1)
+com! -bar -complete=file_in_path -nargs=+   Grep  call myfuncs#op_grep('Ex', <q-args>, 0)
+com! -bar -complete=file_in_path -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
 "                       │
 "                       └─ enable tab-based completion by suggesting filenames matching
 "                          the beginning of the argument and which are in a directory present
@@ -6563,6 +6528,10 @@ tno  <s-tab>  <left>
 " from being minimized when it's a middle horizontal viewport (2nd of 3 for example).
 " The issue, if there's one, may be with l[open|window] only.
 "
+" Edit:
+" I think we should use `noautocmd`  whenever we temporarily change the focus to
+" a window.
+"
 " 102 -
 " replace `k,v` with `i,v` when it makes more sense
 "
@@ -6581,13 +6550,6 @@ tno  <s-tab>  <left>
 "         vim /[cl]window\|[cl]open/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "
 " 104 -
-" We should never use a `:catch` clause without returning explicitly an error.
-" And we must make sure the error is executed. We should never allow an error
-" to be silently ignored.
-"
-"         vim /endtry/gj ~/.vim/**/*.vim ~/.vim/vimrc
-"
-" 105 -
 " If we apply some conceal in a qf window, close it, then reopen it, the conceal
 " is lost. How  to reapply it? We  can't rely on the  buffer number, nor  on the
 " window id, because they both change.
@@ -6611,18 +6573,56 @@ tno  <s-tab>  <left>
 " So, we need a 2nd function in `vim-qf/autoload/qf.vim` to get the script-local
 " dictionary.
 "
-" 106 -
-" Use `<unique>` in all mappings in plugins, so that we get a warning when we try
-" to map 2 different actions to the same key sequence by accident.
+" 105 -
+" We should never use a `:catch` clause without returning explicitly an error.
+" And we must make sure the error is executed. We should never allow an error
+" to be silently ignored.
 "
-" Maybe we shouldn't do in filetype plugins though. Why? Because a conflict is harder
-" to fix. You can't remove a mapping in $VIMRUNTIME. And you can't change it in your
-" filetype plugin, if you like it. So, you have to unmap first.
-" Besides, you can't have a local mapping using the same key sequence as a global one,
-" if you use <unique>.
+"         vim /\v^%(\s*")@!\m.*endtry/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"
+" 106 -
+" refactor everywhere:
+"
+"     return 'echoerr '.string(v:exception)
+"
+"     →
+"
+"     return my_lib#catch_error()
+"
+" Also, make sure we invoke `my_lib#catch_error()` in all our custom operators:
+"
+" vim /\v^%(\s*")@!\m.*g@/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"
+" Edit:
+" We've almost finished the refactoring.
+" Check we didn't break anything.
+" For  example, if  there was  a return  statement, and  we replaced  it with  a
+" `call`, make sure there's no code after. If there is, replace `call` with `return`.
+"
+" Also, check there are no return statements returning a string. If there are,
+" it probably means that the interface execute it. And maybe we've, wrongly, replaced
+" an `:exe` with a `:call`.
+"
+" Also, we haven't finished refactoring `vim-session`. Tricky, because of `s:track()`.
 "
 " 107 -
-" Isn't there a conflict between `i_C-j` in vimrc and `i_C-@` in `vim-readline`?
+" Create a mapping/command to interactively delete an entry in the qfl.
+" Use DD in normal mode, and :Qdelete in Ex mode.
+"
+" 108 -
+" Sometimes, when we open a dirvish buffer, there's no conceal.
+" There should be. I suspect the cause is in `vim-qf` which resets 'cole' (setl cole<)
+" too frequently. Try to find a more restrictive condition before resetting 'cole'.
+"
+" 109 -
+" in  `vim-stacktrace`, we  hide double  bar with  conceal; we  should invoke  a
+" function from `vim-qf`
+"
+" 110 -
+" In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
+" A function implementing some abstract logic can be wrongly affected by the current
+" buffer settings ('isk' for example). Should we track this issue everywhere in our code?
+" Is this issue an argument in favor of delegating logic to external process / lua?
 
 
 
