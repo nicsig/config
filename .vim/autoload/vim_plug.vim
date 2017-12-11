@@ -1,8 +1,8 @@
 fu! vim_plug#scroll_preview(down) abort "{{{1
-    sil! wincmd P
+    sil! noautocmd wincmd P
     if &previewwindow
         exe 'norm! '.(a:down ? "\<c-e>" : "\<c-y>")
-        wincmd p
+        noautocmd wincmd p
     endif
 endfu
 

@@ -884,17 +884,14 @@ fu! myfuncs#in_A_not_in_B(...) abort "{{{1
         let [fileA, fileB] = [fileB, fileA]
     endif
 
-    vnew | exe 'vert resize '.(&columns/3)
-    setl bh=wipe nobl bt=nofile noswf
-    if !bufexists('in A but not in B') | sil file in\ A\ but\ not\ in\ B | endif
-
     " http://unix.stackexchange.com/a/28159
-    let output = system("diff -U $(wc -l < ".fileA.") ".fileA." ".fileB." | grep '^-' | sed 's/^-//g'")
-    sil! 0put =output
-    sil! $d_
-
-    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    setl noma ro
+    let output = systemlist('diff -U $(wc -l < '.fileA.') '.fileA.' '.fileB." | grep '^-' | sed 's/^-//g'")
+    call map(output, {i,v -> {'text': v}})
+    call setloclist(0, output)
+    call setloclist(0, [], 'a', {'title': 'in  '.fileA.'  but not in  '.fileB})
+    doautocmd <nomodeline> QuickFixCmdPost lopen
+    call qf#set_matches('myfuncs#in_A_not_in_B', 'Conceal', 'double_bar')
+    call qf#create_matches()
 endfu
 
 fu! myfuncs#join_blocks(first_reverse) abort "{{{1
@@ -1104,7 +1101,7 @@ endfu
 fu! myfuncs#mru_complete(arglead, _c, _p) abort
     return empty(a:arglead)
     \?         v:oldfiles
-    \:         map(filter(copy(v:oldfiles), { i,v -> v =~? a:arglead }),
+    \:         map(filter(copy(v:oldfiles), { i,v -> v[:strlen(a:arglead)-1] ==# a:arglead }),
     \                     { i,v -> fnamemodify(v, ':~:.') })
 endfu
 
@@ -1278,7 +1275,6 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                 │
             sil! exe 'grep! '.shellescape(@").' .'
 
-            " set the title of the quickfix window
             call setqflist([], 'a', { 'title': &grepprg.' '.@".' .' })
 
             call my_lib#reg_restore(['"', '+'])
@@ -1644,7 +1640,7 @@ fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1
 
     if !bufexists('Counts') | sil file Counts | endif
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    wincmd p | call winrestview(view) | wincmd p
+    noautocmd wincmd p | call winrestview(view) | noautocmd wincmd p
 endfu
 
 fu! myfuncs#patterns_favorite(arglead, _c, _p) abort
@@ -1656,7 +1652,6 @@ fu! myfuncs#patterns_favorite(arglead, _c, _p) abort
 endfu
 
 fu! myfuncs#plugin_install(url) abort "{{{1
-
     let pattern     =  '\vhttps?://github.com/(.{-})/(.*)/?'
     let replacement = 'Plug ''\1/\2'''
     let plug_line   = substitute(a:url, pattern, replacement, '')
@@ -1765,9 +1760,9 @@ fu! myfuncs#plugin_symbols() abort "{{{1
     " If `function!`, `abort` and `range` are missing, the cursor may be
     " positioned on a line where the function is called, whereas we want to go
     " to its definition.
-    setl concealcursor=nc conceallevel=3
     let pat = '\v^\s*fu%[nction]!\s+|%(\s+%(abort|range)){1,2}|\s+"\{\{\{\d+$'
-    call matchadd('Conceal', pat, 0, -1, {'conceal': 'x'})
+    call qf#set_matches('myfuncs:plugin_symbols', 'Conceal', pat)
+    call qf#create_matches()
 
     sil! 0put =['FUNCTIONS']
     sil! $put =['', 'MAPPINGS', ''] + mappings
@@ -1814,17 +1809,12 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
         "         :PQ grep -IRn foobar ~/.vim | grep -v backup    ✔
         cgetexpr systemlist(a:cmd)
 
-        " set the title of the quickfix window
         call setqflist([], 'a', { 'title': a:cmd })
 
     elseif a:list == 'arglist'
-        if empty(a:cmd)
-            return 'echoerr "Provide a shell command"'
-        endif
-
-        "          ┌─ get rid of entries which are not files, or not readable
-        "          │
-        tab args `=filter(systemlist(a:cmd), { i,v -> filereadable(v) })`
+        exe 'tab args '.join(map(filter(systemlist(a:cmd),
+        \                        { i,v -> filereadable(v) }),
+        \                    { i,v -> fnameescape(v) }))
         " enable item indicator in the statusline
         let g:my_stl_list_position = 1
     endif
@@ -1985,13 +1975,13 @@ endfu
 fu! myfuncs#search_internal_variables() abort "{{{1
     let view = winsaveview()
 
-    let help_file      = readfile($VIMRUNTIME.'/doc/eval.txt')
-    let lines_with_var = filter(help_file, { i,v -> v =~ '^\s*v:\S\+' })
-    let extract_var    = map(lines_with_var, { i,v -> matchstr(v, 'v:\zs\S\+') })
-    let list_var       = uniq(sort(extract_var))
+    let help_file = readfile($VIMRUNTIME.'/doc/eval.txt')
+    call filter(help_file, { i,v -> v =~ '^\s*v:\S\+' })
+    call map(help_file, { i,v -> matchstr(v, 'v:\zs\S\+') })
+    call uniq(sort(help_file))
 
     call cursor(1,1)
-    for var in list_var
+    for var in help_file
         if search('let\s\+'.var.'\s', 'cnW')
             let addr = search('let\s\+'.var.'\s', 'cW')
             echom 'line '.addr
@@ -2005,36 +1995,25 @@ endfu
 
 fu! myfuncs#search_todo() abort "{{{1
     try
-        lvim /\cfixme\|todo/ %
-        " Hit `]l`, so that we can move across the matches with `;` and `,`.
-        sil! norm [L
-        sil! norm [l
+        lvim /\cfixme\|todo/j %
+        let g:motion_to_repeat = ']l'
     catch
         echo 'no TODO or FIXME'
         return
     endtry
 
-    call setloclist(0, map(getloclist(0), { i,v -> s:search_todo_text(v) }), 'r')
+    "                                              ┌ Tweak the text of each entry when there's a line
+    "                                              │ with just `todo` or `fixme`;
+    "                                              │ replace it with the text of the next non empty line instead
     "                                              │
-    "                                              └── Tweak the text of each entry when there's a line
-    "                                                  with just `todo` or `fixme`;
-    "                                                  replace it with the text of the next non empty line instead
+    call setloclist(0, map(getloclist(0), { i,v -> s:search_todo_text(v) }), 'r')
     call setloclist(0, [], 'a', { 'title': 'FIXME & TODO' })
 
-    " Give the focus to the ll window.
-    " It has already been opened by our automcd in `vim-qf` (with `:lwindow`),
-    " but the focus has stayed in the current window.
-
-    call qf#focus_window('loc', 1)
-
-    " now, we should be in the ll window, but double check
     if &l:buftype !=# 'quickfix'
         return
     endif
 
-    " hide location
-    " call qf#set_matches('myfuncs|#search_todo', 'Conceal', 'location')
-    call qf#set_matches('myfuncs:search_todo', 'Conceal', '^\v.{-}\|\s*\d+%(\s+col\s+\d+\s*)?\s*\|\s?')
+    call qf#set_matches('myfuncs:search_todo', 'Conceal', 'location')
     call qf#set_matches('myfuncs:search_todo', 'Todo', '\cfixme\|todo')
     call qf#create_matches()
 endfu
@@ -2050,11 +2029,11 @@ fu! s:search_todo_text(dict) abort
         " … and which doesn't contain only the comment character:
         "
         "     ^\s*#\s*$    (example in a bash buffer)
-        let pattern = '^\s*\V'.escape(split(&l:commentstring, '%s')[0], '\').'\v\s*$|^\s*$'
+        let pattern = '^\s*\V'.escape(split(&l:cms, '%s')[0], '\').'\v\s*$|^\s*$'
         let dict.text = filter(
-                      \        getline(dict.lnum + 1, dict.lnum + 2),
-                      \        { i,v -> v !~ pattern }
-                      \ )[0]
+        \                      getbufline(bufnr('#'), dict.lnum + 1, dict.lnum + 2),
+        \                      { i,v -> v !~ pattern }
+        \                     )[0]
     endif
     return dict
 endfu
@@ -2256,14 +2235,15 @@ fu! myfuncs#tab_toc() abort "{{{1
 
     let is_help_file = &l:buftype ==# 'help'
 
-    doautocmd QuickFixCmdPost lvimgrep
+    doautocmd <nomodeline> QuickFixCmdPost lgrep
 
     if &l:buftype !=# 'quickfix'
         return
     endif
 
     " hide location
-    call qf#conceal('location')
+    call qf#set_matches('myfuncs:tab_toc', 'Conceal', 'location')
+    call qf#create_matches()
 
     " if the width of the window is maximized, limit its height to 10 lines
     " otherwise, maximize it
@@ -2276,8 +2256,8 @@ fu! myfuncs#tab_toc() abort "{{{1
     endif
 
     if is_help_file
-        setl cocu=nc cole=3
-        call matchadd('Conceal', '\*', 0, -1, {'conceal': 'x'})
+        call qf#set_matches('myfuncs:tab_toc', 'Conceal', '\*')
+        call qf#create_matches()
     endif
 endfu
 
@@ -2359,7 +2339,7 @@ fu! s:trans_buffer(cmd) abort
     setl nobl noma noswf nowrap ro
     if !bufexists('translation') | sil file translation | else | return -1 | endif
 
-    wincmd p | call winrestview(view) | wincmd p
+    noautocmd wincmd p | call winrestview(view) | noautocmd wincmd p
     nno  <buffer><nowait><silent>  <c-c>  :<c-u>call myfuncs#trans_stop()<cr>
     let bufnum = bufnr('%')
     wincmd p
@@ -2654,8 +2634,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     setl noma ro
-    wincmd p | call winrestview(view)
-    wincmd p
+    noautocmd wincmd p | call winrestview(view) | noautocmd wincmd p
 endfu
 
 fu! myfuncs#wf_complete(arglead, _c, _p) abort

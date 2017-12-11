@@ -16,10 +16,10 @@ fu! s:preview() abort "{{{1
     let file = getline('.')
     if filereadable(file)
         exe 'pedit '.file
-        wincmd P
+        noautocmd wincmd P
         if &previewwindow
             norm! zv
-            wincmd p
+            noautocmd wincmd p
         endif
 
     elseif isdirectory(file)
