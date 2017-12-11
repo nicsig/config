@@ -1,3 +1,9 @@
+if filereadable('/tmp/.vim_last_commit_message')
+    0r /tmp/.vim_last_commit_message
+endif
+
+call gitcommit#save_next_message()
+
 " Mappings {{{1
 
 " To save a buffer, we use a mapping like this:

@@ -60,7 +60,7 @@ fu! s:${1:complete_strings}(findstart, base) abort
 	else
 		let candidates = []
 		${3:sil keepj keepp %s/".\\\{-1,\}"/\=add(candidates, submatch(0))/gne}
-		return filter(candidates, 'v:val[:strlen(a:base)-1] ==# a:base')
+		return filter(candidates, { i,v -> v[:strlen(a:base)-1] ==# a:base })
 	endif
 endfu
 
@@ -169,17 +169,17 @@ snippet fu_comp "Completion Function for a custom command" bm
 fu! ${1:completion_function}(arglead, _c, _p) abort
 	let candidates = [ ${2:''} ]
 	return empty(a:arglead)
-			\ ? candidates
-			\ : filter(candidates, 'v:val[:strlen(a:arglead)-1] ==# a:arglead')
+	\?         candidates
+	\:         filter(candidates, { i,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
 endfu
 $0
 endsnippet
 
 # To filter the candidates, we don't use this condition:
-#          v:val =~ '^'.a:arglead
+#          v =~ '^'.a:arglead
 #
 # Instead, we use:
-#          v:val[:strlen(a:arglead)-1] ==# v:val
+#          v[:strlen(a:arglead)-1] ==# a:arglead
 #
 # Why?
 # Because `a:arglead` could contain special characters.
@@ -189,9 +189,9 @@ endsnippet
 #
 #                        ┌─ ''
 #                        │
-#          v:val[:strlen(a:arglead)-1]
-#        → v:val[:-1]
-#        → v:val
+#          v[:strlen(a:arglead)-1]
+#        → v[:-1]
+#        → v
 #          != a:arglead ('')
 #
 # … it won't return anything. We don't want that. We want the completion function
@@ -277,10 +277,7 @@ endsnippet
 # map {{{1
 
 snippet map "prototype mapping" bm
-nno  <silent><unique>  ${1:cd}  :<c-u>call ${2:Func}()<cr>
-fu! $2() abort
-	$0
-endfu
+nno  `!v expand('%:p:h:t') ==# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent><unique>'`  ${1:cd}  :<c-u>call ${2:Func}()<cr>
 endsnippet
 
 # map_ft {{{1
@@ -320,11 +317,11 @@ endsnippet
 # op {{{1
 
 snippet op "Custom Operator" bm
-nno <silent> ${1:key}     :<c-u>set opfunc=${2:function name}<cr>g@
-nno <silent> $1${1/.(.*)/$1/}    :<c-u>set opfunc=$2<bar>exe 'norm! '.v:count1.'g@_'<cr>
-xno <silent> $1     :<c-u>exe $2('vis')<cr>
+nno  <silent>  ${1:key}     :<c-u>set opfunc=${2:function name}<cr>g@
+nno  <silent>  $1${1/.(.*)/$1/}    :<c-u>set opfunc=$2<bar>exe 'norm! '.v:count1.'g@_'<cr>
+xno  <silent>  $1     :<c-u>call $2('vis')<cr>
 
-com! -bar -range ${3:MyCom} exe ${2/<(sid|SID)>/s:/}('Ex', <line1>, <line2>)
+com! -bar -range ${3:MyCom} call ${2/<(sid|SID)>/s:/}('Ex', <line1>, <line2>)
 
 fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 	let cb_save  = &cb
@@ -345,7 +342,7 @@ fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 		${8:elseif a:type ==# 'Ex'
 			${9:sil exe a:1.','.a:2.'y'}}
 		else
-			return ''
+			return
 		endif
 	catch
 		return my_lib#catch_error()
@@ -356,7 +353,6 @@ fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 	endtry
 
 	$0
-	return ''
 endfu
 endsnippet
 
@@ -504,7 +500,7 @@ endsnippet
 # vim_plug {{{1
 
 snippet vim_plug "Vim-Plug Plugin definition" bm
-Plug '${0}'
+Plug '$0'
 endsnippet
 
 # wh {{{1
