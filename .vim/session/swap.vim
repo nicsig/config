@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Dropbox/vim_plugins/swap.vim
+badd +3 ~/Dropbox/vim_plugins/swap.vim
 badd +2 ~/Dropbox/vim_plugins/swap_bis.vim
 argglobal
 silent! argdel *
@@ -19,8 +19,8 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -34,12 +34,12 @@ setlocal fen
 normal! zo
 65
 normal! zo
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 3 - ((2 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+3
+normal! 053|
 wincmd w
 argglobal
 if bufexists('~/Dropbox/vim_plugins/swap_bis.vim') | buffer ~/Dropbox/vim_plugins/swap_bis.vim | else | edit ~/Dropbox/vim_plugins/swap_bis.vim | endif
@@ -51,16 +51,15 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 2 - ((1 * winheight(0) + 14) / 29)
+let s:l = 2 - ((1 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 2
 normal! 0
 wincmd w
-2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

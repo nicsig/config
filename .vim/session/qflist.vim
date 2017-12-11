@@ -7,23 +7,16 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +6833 ~/.vim/vimrc
-badd +1 ~/Desktop/qflist.vim
-badd +1 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+badd +17 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+badd +252 ~/Desktop/qflist.vim
 badd +6 ~/Desktop/qfedit.vim
 argglobal
 silent! argdel *
 set stal=2
 edit ~/Desktop/qflist.vim
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -33,33 +26,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 3 - ((2 * winheight(0) + 0) / 1)
+let s:l = 251 - ((23 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
-normal! 0
-wincmd w
-argglobal
-if bufexists('/usr/local/share/vim/vim80/doc/usr_41.txt') | buffer /usr/local/share/vim/vim80/doc/usr_41.txt | else | edit /usr/local/share/vim/vim80/doc/usr_41.txt | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal nofen
-silent! normal! zE
-let s:l = 608 - ((8 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-608
-normal! 0
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+251
+normal! 023|
 tabedit ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
 set splitbelow splitright
 wincmd t
@@ -73,12 +45,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 17 - ((16 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+17
+normal! 01|
 tabedit ~/Desktop/qfedit.vim
 set splitbelow splitright
 wincmd t
@@ -98,26 +70,7 @@ exe s:l
 normal! zt
 5
 normal! 0
-tabedit ~/.vim/vimrc
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 6535 - ((2400 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-6535
-normal! 0
-tabnext 4
+tabnext 1
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
