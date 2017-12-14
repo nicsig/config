@@ -168,24 +168,37 @@ endsnippet
 snippet fu_comp "Completion Function for a custom command" bm
 fu! ${1:completion_function}(arglead, _c, _p) abort
 	let candidates = [ ${2:''} ]
-	return empty(a:arglead)
-	\?         candidates
-	\:         filter(candidates, { i,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
+	return filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
 endfu
 $0
 endsnippet
 
-# To filter the candidates, we don't use this condition:
+# Why not using  v =~ '^'.a:arglead  ?{{{
+#
+# To filter the candidates, we could write this condition:
 #          v =~ '^'.a:arglead
 #
-# Instead, we use:
-#          v[:strlen(a:arglead)-1] ==# a:arglead
+# But instead, we write:
+#          filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
 #
-# Why?
 # Because `a:arglead` could contain special characters.
 # If there are, we don't want them to be interpreted by the regex engine.
+#}}}
+# Is there a case-insensitive alternative?{{{
 #
-# Also, if the completion function didn't receive anything (`a:arglead` is empty):
+# Yes:
+#
+#	  return empty(a:arglead)
+#	  \?         candidates
+#	  \:         filter(candidates, { i,v -> v[:strlen(a:arglead)-1] ==? a:arglead })
+#                                                                      │
+#                                                                      └ ignore case
+#
+# Why treating the case where `a:arglead` is an empty string separately?
+#
+# If `a:arglead` is empty, the test will fail for all candidates, and the completion
+# function will not return anything. I don't want that. I want all candidates.
+# Watch:
 #
 #                        ┌─ ''
 #                        │
@@ -193,11 +206,7 @@ endsnippet
 #        → v[:-1]
 #        → v
 #          != a:arglead ('')
-#
-# … it won't return anything. We don't want that. We want the completion function
-# to return ALL the candidates. So, we handle this special case by testing if
-# `a:arglead` is empty, before invoking `filter()`.
-
+#}}}
 # guard {{{1
 
 # snippet guard "script reload guard" bm

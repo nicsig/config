@@ -1245,6 +1245,11 @@ let g:is_bash = 1
 " Don't insert two spaces after a '.', '?' and '!' with a join command.
 set nojoinspaces
 
+" kp {{{2
+
+" When I press `K` on a keyword, use Vim's help by default.
+set kp=:help
+
 " lazyredraw {{{2
 
 " Don't  redraw the  screen while  executing commands  which haven't  been typed
@@ -2075,18 +2080,6 @@ nno  <silent>  <space>al  :<c-u>arglocal<cr>
 " Add a bang to `:arglocal` to discard unsaved changes in the current buffer.
 nno  <silent>  <space>an  :<c-u>arglocal %<cr>
 
-" cd    lcd                     change working directory {{{3
-
-" %         = chemin relatif ou absolu vers fichier courant (ex: file)
-"             relatif s'il se trouve qq part dans le dossier courant
-"             absolu s'il se trouve ailleurs
-"
-" %:p       = full path to current file (ex: /path/to/file)
-" %:p:head  = head of full path (ex: /path/to/)
-
-nno  <space>cd   :<c-u>cd %:p:h<cr>:pwd<cr>
-nno  <space>lcd  :<c-u>lcd %:p:h<cr>:pwd<cr>
-
 " ec                            edit vimrc {{{3
 
 nno  <silent>  <space>ec  :<c-u>call myfuncs#vimrc_edit()<cr>
@@ -2243,15 +2236,18 @@ nmap  <space>s  saiw
 
 " t                             new tab page {{{3
 
-" nno <space><tab>    :<c-u>tabnew<cr>
-nno  <space>t  :<c-u>tabnew<cr>
+" nno <space><tab>    :<c-u>-tabnew<cr>
+nno  <space>t  :<c-u>-tabnew<cr>
+"                    │
+"                    └ useful to get back to our original tab page
+"                      when we will close this new one
 
 " COMMAND LINE {{{2
 " C-r C-l       insert current line {{{3
 
 cno  <c-r><c-l>  <c-r>=getline('.')<cr>
 
-" C-r C-r   fuzzy search history {{{3
+" C-r C-r       fuzzy search history {{{3
 
 cno  <expr>  <c-r><c-r>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHistory:<cr>'
 
@@ -2391,15 +2387,9 @@ ino  <expr>  <c-m>  <sid>c_m()
 
 ino  <expr><silent>  <c-p>  pumvisible() ? '<c-p>' : myfuncs#fix_spell()
 
-" C-r  E X        last Error / output of last eX command  {{{3
+" C-r  X          output of last eX command  {{{3
 
-" insert last Error message
-ino  <silent>  <c-r>E  <c-r>=get(split(execute('filter /^E\d\+/ messages'), "\n"), -1, '')<cr>
-"                                               └──────────────────────┤
-"                                                                      └ only messages beginning with the pattern:
-"                                                                        E\d\+
-
-" insert output of last eX command
+"insert output of last eX command
 ino  <expr><silent>  <c-r>X  <sid>output_last_ex_command()
 fu! s:output_last_ex_command() abort
     let paste_save = &paste
@@ -2407,9 +2397,18 @@ fu! s:output_last_ex_command() abort
     " output has multiple lines
     set paste
     call timer_start(0, {-> execute('set '.(paste_save ? '' : 'no').'paste')})
-    " We remove the first newline, so that we can insert the output of a command
-    " inline, and not on the next line.
-    return substitute(execute(histget(':')),'\n','','')
+    try
+        " We remove the first newline, so that we can insert the output of a command
+        " inline, and not on the next line.
+        return substitute(execute(histget(':')),'\n','','')
+    catch
+        " If the last command failed and produced an error, it will fail again.
+        " But we still want something to be inserted: the error message(s).
+        let messages = reverse(split(execute('messages'), '\n'))
+        let idx = match(messages, '^E\d\+')
+        call remove(messages, idx+1, -1)
+        return join(reverse(messages), "\n")
+    endtry
 endfu
 
 " C-x  C-…        completions {{{3
@@ -2635,6 +2634,51 @@ nno  \f  f
 " to draw a box around it.
 
 nno  <expr><silent>  \p  myfuncs#block_select_paragraph()
+
+" d                   (prefix) {{{3
+" d.    d:    d~               change working directory {{{4
+
+nno  d.  :<c-u>call <sid>cd_to_project_root(0)<cr>
+nno  d:  :<c-u>call <sid>cd_to_project_root(1)<cr>
+
+fu! s:cd_to_project_root(locally) abort
+    let dir = expand('%:p')
+
+    let known_dirs = [ 'autoload',
+    \                  'colors',
+    \                  'compiler',
+    \                  'doc',
+    \                  'ftdetect',
+    \                  'ftplugin',
+    \                  'indent',
+    \                  'plugin',
+    \                  'syntax' ]
+
+    let guard = 0
+    while guard <= 100
+        let dir = fnamemodify(dir, ':h')
+        if index(known_dirs, fnamemodify(dir, ':t')) >= 0
+            let dir = fnamemodify(dir, ':h:t') ==# 'after'
+            \?            fnamemodify(dir, ':h:h')
+            \:            fnamemodify(dir, ':h')
+            break
+        endif
+        let guard += 1
+    endwhile
+    if dir !=# '/' && isdirectory(dir)
+        exe (a:locally ? 'l' : '').'cd '.dir
+    endif
+    pwd
+endfu
+
+nno  <silent>  d~  :<c-u>call <sid>reset_working_directory()<cr>
+
+fu! s:reset_working_directory() abort
+    let orig = win_getid()
+    tabdo windo sil cd ~/.vim
+    call win_gotoid(orig)
+    call timer_start(0, {-> execute('pwd', '')})
+endfu
 
 " g                   (prefix) {{{3
 " g c-l       :Cloc {{{4
@@ -2958,6 +3002,7 @@ nno  <nowait><silent>  <bar>x  :<c-u>call myfuncs#tmux_last_command()<cr>
 nno  <nowait><silent>  <bar>X  :<c-u>call myfuncs#tmux_current_command()<cr>
 
 " -                   (prefix) {{{3
+" -f               show filetype {{{4
 
 nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : "\u2205") <bar> echohl NONE <cr>
 
@@ -2970,18 +3015,19 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : "\u220
 "     • unable to expand `~`
 "     • relative to the working directory
 
+" -p               show filepath {{{4
+
 nno  -p  :<c-u>echohl Title <bar> echo expand('%:p') <bar> echohl NONE <cr>
 
+" -u               show snippets {{{4
+
 nno  <silent>  -u  :<c-u>call myfuncs#show_me_snippets()<cr>
+
+" -U               show unicode table {{{4
+
 nno  <silent>  -U  :<c-u>call myfuncs#unicode_table()<cr>
 
 " +                   (prefix) {{{3
-" ++            trim whitespace {{{4
-
-nno  <silent>  ++   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
-xno  <silent>  ++   :<c-u>call myfuncs#op_trim_ws('vis')<cr>
-nno  <silent>  +++  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '.v:count1.'g@_'<cr>
-
 " +s            source text-object {{{4
 
 nno  <silent>  +S  :<c-u>sil! update<bar>source %<cr>
@@ -3065,6 +3111,12 @@ fu! s:op_source(type, ...) abort
         exe 'source '.tempfile
     endif
 endfu
+
+" +t            trim whitespace {{{4
+
+nno  <silent>  +t   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
+xno  <silent>  +t   :<c-u>call myfuncs#op_trim_ws('vis')<cr>
+nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '.v:count1.'g@_'<cr>
 
 " +y  (+yc)     incremental yank (clear) {{{4
 
@@ -3429,7 +3481,9 @@ fu! s:global_mark_go(char) abort
         "
         "         call cursor(g:MY_GLOBAL_MARK_{a:char}.pos)
         exe 'norm! m'.a:char
-        norm! g`.zvzz
+        sil! norm! g`.zvzz
+        "  │
+        "  └ E20: mark not set
     catch
         return my_lib#catch_error()
     endtry
@@ -3831,7 +3885,7 @@ xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 " z= {{{3
 
 nmap  z=                            <plug>(my_z_equal)
-nno   <silent>  <plug>(my_z_equal)  :<c-u>exe <sid>my_z_equal()<cr>
+nno   <silent>  <plug>(my_z_equal)  :<c-u>call <sid>my_z_equal()<cr>
 
 fu! s:my_z_equal() abort
     let spell_save = &l:spell
@@ -6225,7 +6279,7 @@ endfu
 "
 " 64 -
 " Refactor all our functions which populate the qfl to offload work to a single
-" autocmd in vimrc.
+" function in `vim-qf`?
 "
 "         vim /set\%(qf\|loc\)list/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "
@@ -6434,6 +6488,11 @@ tno  <s-tab>  <left>
 " Our session plugin would test the existence of the variable storing a possible
 " list and restore it if possible.
 "
+" Also, if we automatically restore a qfl, maybe we should stop clearing the arglist.
+" Instead, we could create a mapping/command to remove it. Or just do it manually:
+"
+"         %argd
+"
 " 89 -
 " finish reviewing  the section in our  notes which deals with  string functions
 " (match(), matchstr(),…); also talk about `matchstrpos()`
@@ -6570,6 +6629,39 @@ tno  <s-tab>  <left>
 "
 " 102 -
 " check that whenever we use `wincmd p` we get to the right window
+"
+" 103 -
+" c^s → only finds last match on line, not all matches (because of `.*` and `\zs`)
+" try to use `@=` or `@<=`
+"
+" 104 -
+" c^z shouldn't do anything on the search command-line, or sth relevant
+" current c^z should be limited to Ex (not debug, expression, …)
+"
+" Also, c-z may be dangerous. Use c-g instead?
+" And remap default `C-g` to `C-g C-g`?
+" Or C-q?
+
+
+
+augroup save_last_qfl
+    au!
+    " au VimLeavePre * call s:save_last_qfl()
+    " au VimEnter * call s:restore_last_qfl()
+augroup END
+
+fu! s:save_last_qfl() abort
+    let g:MY_LAST_QFL = getqflist()
+endfu
+
+fu! s:restore_last_qfl() abort
+    if !empty(g:MY_LAST_QFL)
+        " FIXME:
+        " whe are there spaces between `:` and the text in the title
+        " cexpr g:MY_LAST_QFL
+        " cexpr []
+    endif
+endfu
 
 
 
@@ -6697,8 +6789,9 @@ nmap  Q  gq
 " ino <c-c> <c-r>=eval(input('Calculate: '))<cr>
 
 
-nno  <silent>  <space>g  :<c-u>let g:my_goyo_without_syntax_hl = 1
-                         \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+" don't use `<space>g`, I press it by accident too often
+nno  <silent>  <space><c-g>  :<c-u>let g:my_goyo_without_syntax_hl = 1
+                             \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
 
 nno  <silent>  <space>G  :<c-u>let g:my_goyo_without_syntax_hl = 0
                          \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>

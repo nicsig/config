@@ -1099,10 +1099,8 @@ fu! myfuncs#mru(file, how_to_open) abort "{{{1
 endfu
 
 fu! myfuncs#mru_complete(arglead, _c, _p) abort
-    return empty(a:arglead)
-    \?         v:oldfiles
-    \:         map(filter(copy(v:oldfiles), { i,v -> v[:strlen(a:arglead)-1] ==# a:arglead }),
-    \                     { i,v -> fnamemodify(v, ':~:.') })
+    return map(filter(copy(v:oldfiles), { i,v -> stridx(v, a:arglead) == 0 }),
+    \          { i,v -> fnamemodify(v, ':~:.') })
 endfu
 
 fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
@@ -1646,9 +1644,7 @@ endfu
 fu! myfuncs#patterns_favorite(arglead, _c, _p) abort
     " We could put inside the following list some patterns that we often use
     let patterns = ['']
-    return empty(a:arglead)
-    \?         patterns
-    \:         filter(patterns, { i,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
+    return filter(patterns, { i,v -> stridx(v, a:arglead) == 0 })
 endfu
 
 fu! myfuncs#plugin_install(url) abort "{{{1
@@ -2369,6 +2365,7 @@ fu! s:trans_grab_visual() abort
     endif
     return text
 endfu
+" pyrolysis
 
 fu! s:trans_output(job,exit_status) abort
     if a:exit_status == -1
@@ -2646,9 +2643,7 @@ fu! myfuncs#wf_complete(arglead, _c, _p) abort
     \             '-weighted',
     \           ]
 
-    return empty(a:arglead)
-    \?         flags
-    \:         filter(flags, { i,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
+    return filter(flags, { i,v -> stridx(v, a:arglead) == 0 })
 endfu
 
 fu! myfuncs#word_single(action) abort "{{{1
@@ -2673,9 +2668,7 @@ endfu
 
 fu! myfuncs#word_single_complete(arglead, _c, _p) abort
     let candidates = ['highlight', 'del_words', 'del_lines']
-    return empty(a:arglead)
-    \?         candidates
-    \:         filter(candidates, { i,v -> v[:strlen(a:arglead)-1] ==# a:arglead })
+    return filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
 endfu
 
 fu! myfuncs#xor_lines(bang) abort range "{{{1

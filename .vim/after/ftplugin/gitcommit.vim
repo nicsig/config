@@ -1,5 +1,8 @@
 if filereadable('/tmp/.vim_last_commit_message')
     0r /tmp/.vim_last_commit_message
+    " need  to write,  otherwise if  we just  execute `:x`,  git doesn't  commit
+    " because, for some reason, it thinks we didn't write anything
+    w
 endif
 
 call gitcommit#save_next_message()
