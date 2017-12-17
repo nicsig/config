@@ -371,6 +371,7 @@ Plug 'lacygoill/vim-statusline'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
+Plug 'lacygoill/vim-selection-ring'
 Plug 'lacygoill/vim-window'
 
 " DGAF:
@@ -2466,6 +2467,30 @@ endfu
 " Update:
 " It should be fixed by patch `8.0.0282`:
 "         https://github.com/vim/vim/commit/0b5c93a7f266cd8c90ea27bdaf9f7214a95d64d7
+
+
+" s      function signature {{{4
+
+" Usage:
+"
+"         1. call matchadd(
+"         2. press `C-x C-s`
+"         3. call matchadd({group}, {pattern} [, {priority} [, {id} [, {dict}]]])
+
+ino  <expr><silent>  <c-x><c-s>  <sid>complete_signature()
+
+fu! s:complete_signature() abort
+    let func_name = matchstr(getline('.'), '\<\w\+\ze()\?\%'.col('.').'c')
+    if empty(func_name)
+        return ''
+    endif
+    let signature = get(filter(readfile($VIMRUNTIME.'/doc/eval.txt'),
+    \                          {i,v -> v =~ '^'.func_name.'('}),
+    \                   0, '')
+    let new_line = substitute(getline('.'), func_name.'\%[()]', signature, '')
+    call timer_start(0, {-> setline(line('.'), new_line)})
+    return ''
+endfu
 
 " t      synonym completion {{{4
 
@@ -6501,7 +6526,6 @@ tno  <s-tab>  <left>
 "
 " 90 -
 " study vim-sandwich
-" re-implement insertion of “ and ’
 " implement surrounding with → ← (for easier conceal)
 "
 " Also, read this (taken from vim-surround note), and try to reimplement it:
@@ -6641,6 +6665,32 @@ tno  <s-tab>  <left>
 " Also, c-z may be dangerous. Use c-g instead?
 " And remap default `C-g` to `C-g C-g`?
 " Or C-q?
+"
+" 105 -
+" There's an inconsistency in our mappings:
+"
+"         C-e
+"         C-y
+"
+"         i_C-s
+"         i_C-q
+"
+"         i_C-x C-e
+"         i_C-x C-y
+"
+" Ideally, we would use the same keys in all modes (normal, insert, C-x submode).
+" But it's going to be difficult.
+"
+" Example: C-j seems a good candidate in insert mode and C-x submode.
+" But we can't use it in normal mode (already used).
+" Maybe `C-z` and `C-q`?
+"
+" Also, don't use `C-y`, because it would be nice to use it for a kill ring
+" in normal mode (along with `M-y`).
+"
+" 106 -
+" Read all of this:
+"     https://neovim.io/news/archive/
 
 
 
@@ -6974,41 +7024,4 @@ augroup END
 "     let new_line = substitute(new_line, '[^└┌│'.split(&l:cms, '%s')[0].']', ' ', 'g')
 "     call setline('.', new_line)
 "     return repeat("\<Right>", col('$') - col('.'))
-" endfu
-
-
-" gv gV       traverse visual selection list {{{2
-
-" xno <silent> mm :<c-u>call <sid>add_selection_to_list()<cr>
-
-" nno <silent> gv :<c-u>call <sid>my_gv(1)<cr>
-" xno <silent> gv :<c-u>call <sid>my_gv(1)<cr>
-" nno <silent> gV :<c-u>call <sid>my_gv(0)<cr>
-" xno <silent> gV :<c-u>call <sid>my_gv(0)<cr>
-
-" fu! s:my_gv(fwd) abort
-"     if !exists('b:selection_list') || empty(b:selection_list)
-"         norm! gv
-"         return
-"     endif
-"
-"     let b:selection_list.position = (b:selection_list.position + v:count1*(a:fwd ? 1 : -1)) % b:selection_list.size
-"     let [ line1, col1, line2, col2, type ] = b:selection_list.coords[b:selection_list.position]
-"
-"     exe 'norm! '.line1.'G'.col1.'|'.type.line2.'G'.col2.'|'
-" endfu
-
-" fu! s:add_selection_to_list() abort
-"     let b:selection_list = get(b:, 'selection_list',
-"                                 \ { 'size': 0, 'coords': [], 'position': -1 })
-"
-"     if b:selection_list.size == 10
-"         call remove(b:selection_list.coords, 0)
-"         let b:selection_list.size -= 1
-"     endif
-"
-"     let b:selection_list.size   += 1
-"     let b:selection_list.coords += [[ line("'<"), col("'<"), line("'>"), col("'>"), visualmode() ]]
-"
-"     norm! gv
 " endfu

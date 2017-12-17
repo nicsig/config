@@ -64,7 +64,7 @@ fu! s:${1:complete_strings}(findstart, base) abort
 	endif
 endfu
 
-${4:" make sure `s:snr()` is defined
+${4:" make sure s:snr() is defined
 }let &l:cfu = s:snr().'$1'
 $0
 endsnippet
@@ -510,6 +510,19 @@ endsnippet
 
 snippet vim_plug "Vim-Plug Plugin definition" bm
 Plug '$0'
+endsnippet
+
+# vimrc_mini
+
+# Adding `…/plugin/after` is only necessary if the plugin we want to test
+# has something inside an `after/` subdirectory.
+# If we don't add it, none of its file will be sourced.
+snippet vimrc_mini "Minimal vimrc to test a plugin" bm
+set rtp+=${1:path/to/plugin/}${2:
+set rtp+=${1/$/after/}}
+filetype plugin indent on
+syntax enable
+$0
 endsnippet
 
 # wh {{{1

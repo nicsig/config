@@ -1117,7 +1117,9 @@ fu! myfuncs#textobj_func(inside) abort
         k<
         call search('^\s*endf\%[unction]\s*$', 'eW')
         k>
-        exe 'norm! gv$' . (a:inside ? 'koj' : '')
+        exe 'norm! gv$'.(a:inside ? 'koj' : '').'V'
+        "                                        │
+        "                                        └ we want a linewise selection
     endif
 endfu
 

@@ -1,3 +1,3 @@
-if exists(':Abolish')
+if exists(':Abolish') == 2
     Abolish teh the
 endif

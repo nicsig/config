@@ -10,15 +10,16 @@ set shortmess=aoO
 badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
 badd +79 ~/.vim/plugged/vim-debug/plugin/debug.vim
-badd +316 ~/.vim/plugged/vim-debug/autoload/debug.vim
+badd +329 ~/.vim/plugged/vim-debug/autoload/debug.vim
 badd +178 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
 badd +201 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 badd +523 ~/.vim/plugged/vim-readline/autoload/readline.vim
 badd +76 ~/.vim/plugged/vim-readline/plugin/readline.vim
-badd +49 ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim
-badd +272 ~/.vim/plugged/vim-qf/autoload/qf.vim
-badd +48 ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim
-badd +0 ~/Dropbox/conf/cheat/vim
+badd +109 ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim
+badd +213 ~/.vim/plugged/vim-qf/autoload/qf.vim
+badd +64 ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim
+badd +374 ~/.vim/vimrc
+badd +71 ~/Dropbox/conf/cheat/l2l
 argglobal
 silent! argdel *
 set stal=2
@@ -43,11 +44,11 @@ setlocal fdn=20
 setlocal fen
 100
 normal! zo
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 46 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+46
 normal! 0
 wincmd w
 argglobal
@@ -60,11 +61,11 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 8 - ((7 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-8
+1
 normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -115,12 +116,14 @@ setlocal fen
 normal! zo
 131
 normal! zc
-let s:l = 316 - ((73 * winheight(0) + 14) / 28)
+316
+normal! zo
+let s:l = 327 - ((62 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-316
-normal! 0
+327
+normal! 026|
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
@@ -266,14 +269,18 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-19
+35
 normal! zo
-let s:l = 25 - ((3 * winheight(0) + 0) / 1)
+103
+normal! zo
+112
+normal! zo
+let s:l = 108 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-25
-normal! 0
+108
+normal! 05|
 wincmd w
 argglobal
 if bufexists('~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim') | buffer ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim | else | edit ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim | endif
@@ -285,27 +292,21 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-48
+80
 normal! zo
-let s:l = 49 - ((48 * winheight(0) + 14) / 28)
+let s:l = 64 - ((63 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-49
-normal! 05|
+64
+normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabedit ~/.vim/plugged/vim-qf/autoload/qf.vim
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -317,92 +318,61 @@ setlocal fdn=20
 setlocal fen
 196
 normal! zo
-233
+197
 normal! zo
-321
+202
 normal! zo
-321
-normal! zc
-366
+259
 normal! zo
-let s:l = 262 - ((10 * winheight(0) + 14) / 28)
+let s:l = 213 - ((3 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-262
-normal! 013|
-wincmd w
-argglobal
-if bufexists('/usr/local/share/vim/vim80/doc/eval.txt') | buffer /usr/local/share/vim/vim80/doc/eval.txt | else | edit /usr/local/share/vim/vim80/doc/eval.txt | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal nofen
-silent! normal! zE
-let s:l = 4092 - ((24 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-4092
+213
 normal! 0
-wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabedit ~/Dropbox/conf/cheat/vim
+tabedit ~/Dropbox/conf/cheat/l2l
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=markdown#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=1
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 74 - ((17 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+74
+normal! 048|
+tabedit ~/.vim/vimrc
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
+27
+normal! zo
+65
+normal! zo
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
 1
-normal! zo
-23455
-normal! zo
-let s:l = 23593 - ((15 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-23593
-normal! 085|
-wincmd w
-argglobal
-if bufexists('/usr/local/share/vim/vim80/doc/eval.txt') | buffer /usr/local/share/vim/vim80/doc/eval.txt | else | edit /usr/local/share/vim/vim80/doc/eval.txt | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal nofen
-silent! normal! zE
-let s:l = 4089 - ((24 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-4089
-normal! 041|
-wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabnext 6
+normal! 0
+tabnext 7
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
