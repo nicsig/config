@@ -20,3 +20,15 @@ sil! let g:sandwich#recipes =  deepcopy(g:sandwich#default_recipes)
 \                             + [ {'buns': ['‘', '’'], 'input': ["u'"] } ]
 "                                            │
 "                                            └ used in man pages (ex: `man tmux`, search for ‘=’)
+
+" `vim-sandwich` installs the following mappings:
+"
+"         ono  is  <plug>(textobj-sandwich-query-i)
+"         ono  as  <plug>(textobj-sandwich-query-a)
+"
+" They  shadow  the  built-in  sentences  objects. But I  use  the  latter  less
+" frequently than  the sandwich objects. So,  I won't remove  the mappings. But,
+" instead, to restore the sentences objects, we install these mappings:
+
+ono  iS  is
+ono  aS  as

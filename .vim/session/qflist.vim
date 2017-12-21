@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +17 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
-badd +251 ~/Desktop/qflist.vim
+badd +237 ~/Desktop/qflist.vim
 badd +6 ~/Desktop/qfedit.vim
 argglobal
 silent! argdel *
@@ -26,12 +26,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 237 - ((11 * winheight(0) + 15) / 30)
+let s:l = 16 - ((15 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-237
-normal! 027|
+16
+normal! 066|
 tabedit ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
 set splitbelow splitright
 wincmd t

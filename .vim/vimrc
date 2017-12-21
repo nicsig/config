@@ -348,6 +348,7 @@ let g:mc_chain = [
 Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-freekeys'
 Plug 'lacygoill/vim-help'
+Plug 'lacygoill/vim-hydra'
 if !has('nvim')
     Plug 'lacygoill/vim-iabbrev'
 endif
@@ -4048,11 +4049,13 @@ ono  <silent>  iE  :<c-u>norm ViE<cr>
 
 " Vim function
 
+" FIXME:
+" not reliable text objects (check out kana plugin)
 xno  <silent>  if  :<c-u>call myfuncs#textobj_func(1)<cr>
-ono  <silent>  if  :<c-u>call myfuncs#textobj_func(1)<cr>
+ono  <silent>  if  :<c-u>norm Vif<cr>
 
 xno  <silent>  af  :<c-u>call myfuncs#textobj_func(0)<cr>
-ono  <silent>  af  :<c-u>call myfuncs#textobj_func(0)<cr>
+ono  <silent>  af  :<c-u>norm Vaf<cr>
 
 " il {{{3
 
@@ -4111,7 +4114,18 @@ tno  <esc><esc>  <c-\><c-n>
 " if !has('nvim')
 "     It wouldn't be needed  in Neovim if we used a single Escape  in the lhs of the
 "     previous mapping.
-    tno            <esc>:      <c-\><c-n>:
+
+    " Do NOT add this mapping:  tno  <esc>:  <c-\><c-n>:{{{
+    "
+    " Why?
+    "
+    "     z<      open a terminal
+    "     Esc :   enter command line
+    "     Esc     get back to terminal normal mode
+    "     z>      close terminal
+    "
+    " The meta keysyms are disabled.
+    "}}}
     tno  <silent>  <esc><c-j>  <c-\><c-n>:call window#navigate('j')<cr>
     tno  <silent>  <esc><c-k>  <c-\><c-n>:call window#navigate('k')<cr>
     tno  <silent>  <esc><c-h>  <c-\><c-n>:call window#navigate('h')<cr>
@@ -6469,9 +6483,6 @@ tno  <s-tab>  <left>
 "         • timer
 "
 " 83 -
-" Finish :GenerateCombinations (~/Desktop/generate_combinations.vim).
-"
-" 84 -
 "
 " create mapping to send current line to terminal, and execute it
 " use `g>` for the lhs?
@@ -6480,14 +6491,14 @@ tno  <s-tab>  <left>
 "     g> on visual selection
 "     g>> for line
 "
-" 85 -
+" 84 -
 " finish reviewing vim-math
 " What insight can we gain from it?
 "
-" 86 -
+" 85 -
 " finish reviewing ~/Dropbox/vim_plugins/pair_complete.vim
 "
-" 87 -
+" 86 -
 " We use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
 "         • iabbrev
@@ -6506,7 +6517,7 @@ tno  <s-tab>  <left>
 "
 "         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  !=#  'Comment'
 "
-" 88 -
+" 87 -
 " Save/restore qfl/ll when we restart Vim?
 " Not sure I want that. But it would be convenient to have a command which saves
 " a particular qfl/ll in `~/.viminfo`, and which could restore it when needed.
@@ -6518,13 +6529,13 @@ tno  <s-tab>  <left>
 "
 "         %argd
 "
-" 89 -
+" 88 -
 " finish reviewing  the section in our  notes which deals with  string functions
 " (match(), matchstr(),…); also talk about `matchstrpos()`
 "
 " finish reviewing indexage de chaîne
 "
-" 90 -
+" 89 -
 " study vim-sandwich
 " implement surrounding with → ← (for easier conceal)
 "
@@ -6571,15 +6582,15 @@ tno  <s-tab>  <left>
 "
 "           let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
 "
-" 91 -
+" 90 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
 "
-" 92 -
+" 91 -
 " Create a command in vim-debug, to automatically profile a plugin.
 " It would create a temporary script with the commands:
 "
-"         profile start /tmp/result
+"         profile start $XDG_RUNTIME_DIR/vim_profile_plugin.log
 "         prof! file ~/.vim/plugged/{plugin-name}/**/*.vim
 "         unlet! g:loaded_{guard-name}
 "         so file1.vim
@@ -6591,11 +6602,11 @@ tno  <s-tab>  <left>
 "         \               { i,v -> v !~# '/t\%[est]/' }),
 "         \        { i,v -> 'so '.v })
 "
-" 93 -
+" 92 -
 " Check whether some commands would be better suited as mappings.
 " And check whether some mappings would be better suited as commands.
 "
-" 94 -
+" 93 -
 "                                ┌ 3rd character of all `]o?` mappings
 "         ┌──────────────────────┤
 "         BCILNSWacdfhilmnopqstvwz
@@ -6605,21 +6616,21 @@ tno  <s-tab>  <left>
 "              create a transformation to automatically add this
 "              make it cycle between `filter()` and `map()`
 "
-" 95 -
+" 94 -
 " install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `BufWritePost`
 " which would give us a warning when we forget to undo a:
 "
 "         mapping/abbreviation/command/autocmd/variable
 "
-" 96 -
+" 95 -
 " normalize underscore/dash in plug mappings, and function names in shell init files
 "
-" 97 -
+" 96 -
 " update the position of the mark in `vim-readline`
 " look for other mappings to implement, add them to a todo
 "
-" 98 -
+" 97 -
 " Should we add `:noautocmd` every time we use `:wincmd`?
 "
 "
@@ -6638,27 +6649,27 @@ tno  <s-tab>  <left>
 " I think we should use `noautocmd`  whenever we TEMPORARILY change the focus to
 " a window.
 "
-" 99 -
+" 98 -
 " replace `k,v` with `i,v` when it makes more sense
 "
-" 100 -
+" 99 -
 " We've lost time debugging dirvish, because the issue was not in vimrc
 " but in filetype plugin. How to avoid it in the future?
 "
-" 101 -
+" 100 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
 " A function implementing some abstract logic can be wrongly affected by the current
 " buffer settings ('isk' for example). Should we track this issue everywhere in our code?
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
-" 102 -
+" 101 -
 " check that whenever we use `wincmd p` we get to the right window
 "
-" 103 -
+" 102 -
 " c^s → only finds last match on line, not all matches (because of `.*` and `\zs`)
 " try to use `@=` or `@<=`
 "
-" 104 -
+" 103 -
 " c^z shouldn't do anything on the search command-line, or sth relevant
 " current c^z should be limited to Ex (not debug, expression, …)
 "
@@ -6666,7 +6677,7 @@ tno  <s-tab>  <left>
 " And remap default `C-g` to `C-g C-g`?
 " Or C-q?
 "
-" 105 -
+" 104 -
 " There's an inconsistency in our mappings:
 "
 "         C-e
@@ -6688,16 +6699,28 @@ tno  <s-tab>  <left>
 " Also, don't use `C-y`, because it would be nice to use it for a kill ring
 " in normal mode (along with `M-y`).
 "
-" 106 -
+" 105 -
 " Read all of this:
 "     https://neovim.io/news/archive/
+"
+" 106 -
+" Read this:
+" https://dev.to/idanarye/omnipytent-5g5l
+" https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
+" https://github.com/idanarye/vim-omnipytent
+"
+" 107 -
+" Sometimes we  lost the meta  keys. It seems to occur  after we use  a terminal
+" buffer.  The issue probably comes from `vim-cmdline`, which temporarily disable
+" them. Check whether there is a circumstance where the plugin fails to re-enable
+" them.
 
 
 
 augroup save_last_qfl
     au!
     " au VimLeavePre * call s:save_last_qfl()
-    " au VimEnter * call s:restore_last_qfl()
+    " au VimEnter    * call s:restore_last_qfl()
 augroup END
 
 fu! s:save_last_qfl() abort
@@ -6813,20 +6836,20 @@ fu! s:profile_plugin(...) abort
     endif
 
     try
-        profile start /tmp/plugin_profiling_result
+        profile start $XDG_RUNTIME_DIR/plugin_profiling_result
         let [ plugin_name, guard_name ] = a:000
         exe 'prof! file ~/.vim/plugged/'.plugin_name.'/**/*.vim'
         exe 'unlet! '.guard_name
         call writefile(map(filter(glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1),
         \                         { i,v -> v !~# '/t\%[est]/' }),
         \                  { i,v -> 'so '.v }),
-        \              '/tmp/plugin_profiling_result')
-        sil! so /tmp/plugin_profiling_result
+        \              $XDG_RUNTIME_DIR.'/plugin_profiling_result')
+        sil! so $XDG_RUNTIME_DIR/plugin_profiling_result
 
     catch
         return my_lib#catch_error()
     endtry
-    echo 'Recreate the issue, restart Vim, and have a look at /tmp/plugin_profiling_result'
+    echo 'Recreate the issue, restart Vim, and have a look at '.$XDG_RUNTIME_DIR.'/plugin_profiling_result'
 endfu
 
 
@@ -6947,6 +6970,7 @@ augroup END
 " $ lrv
 
 
+
 " let g:nums = split(": one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen")
 " let g:tens = split(": ten twenty thirty fourty fifty sixty seventy eighty ninety")
 
@@ -6983,6 +7007,7 @@ augroup END
 " endfu
 
 
+
 " we can't be locked inside an infinite loop, because after first iteration,
 " we go from `n` to `n%1000` (which is < 1000). Then to `n%100` (< 100), then
 " to `n%10` (<9), at which point the function doesn't call itself anymore.
@@ -7009,8 +7034,11 @@ augroup END
 "     endif
 " endfu
 
+
+
 " call fzf#run({'source': map(range(1, bufnr('$')), { i,v -> bufname(v) }),
 "             \ 'sink': 'e', 'down': '30%'})
+
 
 
 " ino <c-g>d <c-r>=<sid>diagram_complete()<cr>

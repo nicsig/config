@@ -961,6 +961,7 @@ fu! myfuncs#keyword_custom(chars) abort "{{{1
     " Do NOT add a finally clause to restore 'isk'.
     " It would be too soon. The completion function hasn't been invoked yet.
     endtry
+    return ''
 endfu
 
 fu! myfuncs#long_listing_split() abort "{{{1
@@ -1117,9 +1118,10 @@ fu! myfuncs#textobj_func(inside) abort
         k<
         call search('^\s*endf\%[unction]\s*$', 'eW')
         k>
-        exe 'norm! gv$'.(a:inside ? 'koj' : '').'V'
-        "                                        │
-        "                                        └ we want a linewise selection
+        exe 'norm! gv$'.(a:inside ? 'koj' : '')
+        exe 'norm! gv$'.(a:inside ? 'koj' : '')
+        " we want a linewise selection no matter the original visual mode
+        exe (mode() !=# 'V' ? 'norm! V' : '')
     endif
 endfu
 
@@ -1517,7 +1519,7 @@ fu! myfuncs#open_gx(in_term) abort "{{{1
             "     split-window
             "     respawn-pane
             "     set-remain-on-exit
-            sil call system('tmux split-window -c /tmp')
+            sil call system('tmux split-window -c '.$XDG_RUNTIME_DIR)
             " maximize the pane
             sil call system('tmux resize-pane -Z')
             " start `w3m`
@@ -2120,7 +2122,7 @@ fu! myfuncs#tmux_current_command() abort
 
     if !exists('s:pane_id')
         let s:pane_id = systemlist(
-        \                           'tmux split-window -c /tmp -d -p 25 -PF "#D"'
+        \                           'tmux split-window -c $XDG_RUNTIME_DIR -d -p 25 -PF "#D"'
         \                         )[0]
     endif
 

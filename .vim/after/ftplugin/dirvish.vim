@@ -98,18 +98,6 @@ endif
 " Restore the position.
 call search('\V\^'.escape(b:dirvish['line'],'\').'\$', 'cw')
 
-" Because of the previous edits, when  we reload a dirvish buffer, `vim-dirvish`
-" resets 'cole' to 0, after this file has been sourced.
-"
-"     https://github.com/justinmk/vim-dirvish/commit/264ea014d302ea8b4c05c7bda072184a47395149
-"
-" We don't want that.
-call timer_start(0, {-> execute('setl cole=3')})
-
-" Alternative:
-"
-"     let b:dirvish._c = b:changedtick
-
 " Teardown {{{1
 
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
