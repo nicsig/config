@@ -319,15 +319,8 @@ Plug 'lacygoill/vim-awk'
 Plug 'lacygoill/vim-brackets'
 Plug 'lacygoill/vim-breakdown'
 Plug 'lacygoill/vim-bullet-list'
-" TODO:
-" remove the guard once Neovim has `CmdlineLeave`, `CmdLineEnter`
-" do the same for all plugins using these events
-if !has('nvim')
-    Plug 'lacygoill/vim-capslock'
-endif
-if !has('nvim')
-    Plug 'lacygoill/vim-cmdline'
-endif
+Plug 'lacygoill/vim-capslock'
+Plug 'lacygoill/vim-cmdline'
 Plug 'lacygoill/vim-column-object'
 Plug 'lacygoill/vim-comment'
 Plug 'lacygoill/vim-cursor'
@@ -349,22 +342,16 @@ Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-freekeys'
 Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
-if !has('nvim')
-    Plug 'lacygoill/vim-iabbrev'
-endif
+Plug 'lacygoill/vim-iabbrev'
 Plug 'lacygoill/vim-interactive-lists'
 Plug 'lacygoill/vim-lib'
 Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
 Plug 'lacygoill/vim-qf'
-if !has('nvim')
-    Plug 'lacygoill/vim-readline'
-endif
+Plug 'lacygoill/vim-readline'
 Plug 'lacygoill/vim-reorder'
 Plug 'lacygoill/vim-save'
-if !has('nvim')
-    Plug 'lacygoill/vim-search'
-endif
+Plug 'lacygoill/vim-search'
 Plug 'lacygoill/vim-session'
 Plug 'lacygoill/vim-sh'
 Plug 'lacygoill/vim-stacktrace'
@@ -1097,49 +1084,6 @@ set grepprg=ag\ --nogroup\ --nocolor\ --ignore-case\ --column\ --vimgrep\ -f\ --
 set grepformat=%f:%l:%c:%m,%f:%l:%m
 "   │
 "   └─ default value:  %f:%l:%m,%f:%l%m,%f  %l%m
-
-" highlight {{{2
-
-" The global 'highlight' / 'hl' option can be used to configure the style of
-" various elements in the UI. It contains a comma separated list of values.
-"
-" Each value follows one the following syntax:
-
-"                ┌ character standing for which element of the UI we want to configure
-"       ┌────────┤
-"       {occasion}{mode}
-"                 └────┤
-"                      └ character standing for which style we want to apply
-
-"       {occasion}:{HG}
-"                   │
-"                   └─ highlight group to color the element of the UI
-
-" The default values all use the 2nd syntax. They all use a HG.
-" But you could also use a mode:
-"
-"         r  reverse
-"         i  italic
-"         b  bold
-"         s  standout
-"         u  underline
-"         c  undercurl
-"         n  no highlighting
-
-
-"       ┌─ column used to separate vertically split windows
-"       │
-set hl-=c:VertSplit hl+=c:StatusLine
-"         │               │
-"         │               └─ new HG
-"         └─ default HG
-
-"       ┌─ Meta and special keys listed with ":map"
-"       │
-set hl-=8:SpecialKey hl+=8:Special
-
-" If you try to only change the new value in the `vimrc`, and resource, you
-" won't see any difference. Reset the option first `:set hl&vim | so $MYVIMRC`.
 
 " hidden {{{2
 
@@ -3193,19 +3137,6 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
 " through all the matches, without leaving the command-line.
 " We remap them to <tab> and <s-tab>.
 
-" FIXME:
-" There's a bug in Neovim concerning Tab/S-Tab:
-"
-"         nvim -Nu NONE
-"         :e Tab
-"         Esc
-"         :Tab
-"         → crash
-"
-" May have been fixed recently:
-"
-"         https://github.com/neovim/neovim/pull/6656
-
 if !has('nvim')
     cno  <expr>  <tab>    <sid>c_tab(1)
     cno  <expr>  <s-tab>  <sid>c_tab(0)
@@ -3370,11 +3301,6 @@ nno  <silent>  ]z  :<c-u>call myfuncs#be_repeatable(']z')<cr>
 
 nno  <silent>  g,  :<c-u>call myfuncs#be_repeatable('g;')<cr>
 nno  <silent>  g;  :<c-u>call myfuncs#be_repeatable('g,')<cr>
-
-nno  <silent>  Z<c-h>  :<c-u>call myfuncs#be_repeatable('Z c-h')<cr>
-nno  <silent>  Z<c-l>  :<c-u>call myfuncs#be_repeatable('Z c-l')<cr>
-nno  <silent>  Z<c-j>  :<c-u>call myfuncs#be_repeatable('Z c-j')<cr>
-nno  <silent>  Z<c-k>  :<c-u>call myfuncs#be_repeatable('Z c-k')<cr>
 
 nno  <silent>  zh  :<c-u>call myfuncs#be_repeatable('zh')<cr>
 nno  <silent>  zj  :<c-u>call myfuncs#be_repeatable('zj')<cr>
@@ -6714,6 +6640,10 @@ tno  <s-tab>  <left>
 " buffer.  The issue probably comes from `vim-cmdline`, which temporarily disable
 " them. Check whether there is a circumstance where the plugin fails to re-enable
 " them.
+"
+" 108 -
+" Read this (OOP in VimL):
+" https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
 
 
 
@@ -6863,11 +6793,11 @@ nmap  Q  gq
 
 
 " don't use `<space>g`, I press it by accident too often
-nno  <silent>  <space><c-g>  :<c-u>let g:my_goyo_without_syntax_hl = 1
-                             \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
-
-nno  <silent>  <space>G  :<c-u>let g:my_goyo_without_syntax_hl = 0
+nno  <silent>  <space>G  :<c-u>let g:my_goyo_without_syntax_hl = 1
                          \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+
+nno  <silent>  <space><c-g>  :<c-u>let g:my_goyo_without_syntax_hl = 0
+                             \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
 
 fu! s:goyo_enter() abort
     sil !tmux set status off

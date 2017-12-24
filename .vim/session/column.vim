@@ -9,38 +9,26 @@ endif
 set shortmess=aoO
 badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
-badd +79 ~/.vim/plugged/vim-debug/plugin/debug.vim
+badd +1 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +615 ~/.vim/plugged/vim-debug/autoload/debug.vim
-badd +178 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
+badd +1 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
 badd +201 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 badd +523 ~/.vim/plugged/vim-readline/autoload/readline.vim
 badd +414 ~/.vim/plugged/vim-readline/plugin/readline.vim
-badd +109 ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim
+badd +1 ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim
 badd +413 ~/.vim/plugged/vim-qf/autoload/qf.vim
 badd +95 ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim
-badd +9 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
+badd +1 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 badd +9 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
-badd +12 /tmp/vim.vim
-badd +34 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
-badd +17 ~/Desktop/result
+badd +17 /tmp/vim.vim
+badd +9 ~/Desktop/result
+badd +239 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
+badd +49 ~/Desktop/final_analysis.hydra
+badd +49 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
+badd +6648 ~/.vim/vimrc
+badd +4 /run/user/1000/hydra/head18.vim
 argglobal
 silent! argdel *
-$argadd /run/user/1000/hydra/head01.vim
-$argadd /run/user/1000/hydra/head02.vim
-$argadd /run/user/1000/hydra/head03.vim
-$argadd /run/user/1000/hydra/head04.vim
-$argadd /run/user/1000/hydra/head05.vim
-$argadd /run/user/1000/hydra/head06.vim
-$argadd /run/user/1000/hydra/head07.vim
-$argadd /run/user/1000/hydra/head08.vim
-$argadd /run/user/1000/hydra/head09.vim
-$argadd /run/user/1000/hydra/head10.vim
-$argadd /run/user/1000/hydra/head11.vim
-$argadd /run/user/1000/hydra/head12.vim
-$argadd /run/user/1000/hydra/head13.vim
-$argadd /run/user/1000/hydra/head14.vim
-$argadd /run/user/1000/hydra/head15.vim
-$argadd /run/user/1000/hydra/head16.vim
 set stal=2
 edit ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 set splitbelow splitright
@@ -53,7 +41,6 @@ set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-if bufexists('~/.vim/plugged/vim-column-object/autoload/column_object.vim') | buffer ~/.vim/plugged/vim-column-object/autoload/column_object.vim | else | edit ~/.vim/plugged/vim-column-object/autoload/column_object.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -101,7 +88,6 @@ set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-if bufexists('~/.vim/plugged/vim-debug/plugin/debug.vim') | buffer ~/.vim/plugged/vim-debug/plugin/debug.vim | else | edit ~/.vim/plugged/vim-debug/plugin/debug.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -139,7 +125,7 @@ normal! zo
 normal! zc
 316
 normal! zo
-let s:l = 329 - ((19 * winheight(0) + 14) / 28)
+let s:l = 329 - ((64 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -167,7 +153,6 @@ exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
 argglobal
-if bufexists('~/.vim/plugged/vim-cmdline/plugin/cmdline.vim') | buffer ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim | else | edit ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -261,7 +246,7 @@ normal! zc
 normal! zo
 305
 normal! zc
-let s:l = 76 - ((75 * winheight(0) + 12) / 24)
+let s:l = 76 - ((72 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -283,7 +268,6 @@ set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-if bufexists('~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim') | buffer ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim | else | edit ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -331,7 +315,6 @@ set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
-if bufexists('~/.vim/plugged/vim-qf/autoload/qf.vim') | buffer ~/.vim/plugged/vim-qf/autoload/qf.vim | else | edit ~/.vim/plugged/vim-qf/autoload/qf.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -357,7 +340,6 @@ set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-if bufexists('~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim') | buffer ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim | else | edit ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -370,11 +352,11 @@ setlocal fen
 normal! zo
 12
 normal! zo
-let s:l = 31 - ((5 * winheight(0) + 0) / 1)
+let s:l = 32 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-31
+32
 normal! 08|
 wincmd w
 argglobal
@@ -391,14 +373,14 @@ setlocal fen
 normal! zo
 11
 normal! zo
-82
+73
 normal! zo
-let s:l = 104 - ((51 * winheight(0) + 14) / 28)
+let s:l = 73 - ((63 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-104
-normal! 0
+73
+normal! 06|
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
@@ -408,16 +390,19 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-2wincmd k
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 26 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '4resize ' . ((&lines * 24 + 16) / 33)
 argglobal
-if bufexists('~/.vim/plugged/vim-hydra/autoload/hydra.vim') | buffer ~/.vim/plugged/vim-hydra/autoload/hydra.vim | else | edit ~/.vim/plugged/vim-hydra/autoload/hydra.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -426,16 +411,33 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-21
+24
 normal! zo
-216
+232
 normal! zo
-let s:l = 25 - ((3 * winheight(0) + 0) / 1)
+let s:l = 82 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-25
-normal! 029|
+82
+normal! 0
+wincmd w
+argglobal
+if bufexists('~/.vim/plugged/vim-hydra/plugin/hydra.vim') | buffer ~/.vim/plugged/vim-hydra/plugin/hydra.vim | else | edit ~/.vim/plugged/vim-hydra/plugin/hydra.vim | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 07|
 wincmd w
 argglobal
 if bufexists('/tmp/vim.vim') | buffer /tmp/vim.vim | else | edit /tmp/vim.vim | endif
@@ -447,11 +449,11 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 12 - ((11 * winheight(0) + 13) / 26)
+let s:l = 20 - ((19 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-12
+20
 normal! 0
 wincmd w
 argglobal
@@ -465,18 +467,88 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 18 - ((0 * winheight(0) + 0) / 1)
+let s:l = 4 - ((3 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-18
-normal! 07|
+4
+normal! 0
 wincmd w
-2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 26 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-tabnext 7
+exe '4resize ' . ((&lines * 24 + 16) / 33)
+tabedit /run/user/1000/hydra/head18.vim
+set splitbelow splitright
+wincmd _ | wincmd |
+vsplit
+1wincmd h
+wincmd w
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe 'vert 1resize ' . ((&columns * 59 + 59) / 119)
+exe 'vert 2resize ' . ((&columns * 59 + 59) / 119)
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 5 - ((4 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
+normal! 0
+wincmd w
+argglobal
+if bufexists('~/Desktop/final_analysis.hydra') | buffer ~/Desktop/final_analysis.hydra | else | edit ~/Desktop/final_analysis.hydra | endif
+setlocal fdm=expr
+setlocal fde=markdown#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+2
+normal! zo
+let s:l = 47 - ((46 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+47
+normal! 0
+wincmd w
+exe 'vert 1resize ' . ((&columns * 59 + 59) / 119)
+exe 'vert 2resize ' . ((&columns * 59 + 59) / 119)
+tabedit ~/.vim/vimrc
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+1
+normal! zo
+5442
+normal! zo
+let s:l = 5979 - ((6 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5979
+normal! 011|
+tabnext 9
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

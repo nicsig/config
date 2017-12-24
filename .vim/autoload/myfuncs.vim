@@ -741,6 +741,9 @@ fu! myfuncs#fix_spell() abort "{{{1
     finally
         let &l:spell = spell_save
     endtry
+    " Break undo sequence before `setline()` edits the line, so that we can undo
+    " if the fix is wrong.
+    return "\<c-g>u"
 endfu
 
 fu! myfuncs#fold_help() abort "{{{1
