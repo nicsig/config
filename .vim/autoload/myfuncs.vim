@@ -692,6 +692,8 @@ fu! myfuncs#fix_display() abort
     redraws!
     noh
     diffupdate!
+    " update folds
+    norm! zx
 
     syntax sync minlines=200
     syntax sync maxlines=400
@@ -1030,12 +1032,14 @@ endfu
 fu! myfuncs#be_repeatable(key) abort "{{{1
     let g:motion_to_repeat = a:key
 
-    let keys = a:key ==# 'zh' || a:key ==# 'zl'
-    \?             '5'.a:key
+    let keys = a:key ==# '[S' || a:key ==# ']S'
+    \?             '5'.(a:key ==# '[S' ? 'zh' : 'zl')
     \:         a:key =~# '\v^Z c-[hjkl]$'
     \?             s:resize_window(a:key)
-    \:         a:key =~# '^z[jk]$'
-    \?             v:count1.a:key.'zMzvzz'
+    \:         a:key ==# '[z' || a:key ==# ']z'
+    \?             v:count1.(a:key ==# '[z' ? 'zk' : 'zj').'zvzz'
+    \:         a:key ==# '[Z' || a:key ==# ']Z'
+    \?             v:count1.tolower(a:key).'zvzz'
     \:             v:count1.a:key.'zv'
 
     call feedkeys(keys, 'int')
@@ -2234,7 +2238,7 @@ fu! myfuncs#tab_toc() abort "{{{1
     "
     "}}}
     call setloclist(0, toc)
-    call setloclist(0, [], 'a', { 'title': 'Table Of Contents' })
+    call setloclist(0, [], 'a', { 'title': 'TOC' })
 
     let is_help_file = &l:buftype ==# 'help'
 
@@ -2243,10 +2247,6 @@ fu! myfuncs#tab_toc() abort "{{{1
     if &l:buftype !=# 'quickfix'
         return
     endif
-
-    " hide location
-    call qf#set_matches('myfuncs:tab_toc', 'Conceal', 'location')
-    call qf#create_matches()
 
     " if the width of the window is maximized, limit its height to 10 lines
     " otherwise, maximize it

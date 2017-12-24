@@ -3,7 +3,7 @@
 augroup my_tmux
     au! *            <buffer>
     au  BufWinEnter  <buffer>  setl fdm=marker
-                           \ | let &l:fdt = 'tmux#fold_text()'
+                           \ | let &l:fdt = 'fold#text()'
                            \ | setl cocu=nc
                            \ | setl cole=3
 augroup END

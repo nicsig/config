@@ -339,6 +339,7 @@ let g:mc_chain = [
 
 "}}}
 Plug 'lacygoill/vim-draw'
+Plug 'lacygoill/vim-fold'
 Plug 'lacygoill/vim-freekeys'
 Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
@@ -655,12 +656,12 @@ set backspace=indent,eol,start
 " with how we open the editor to edit the command line in a shell.
 
 let &cedit = "\<c-x>\<c-e>"
-
 " Will there be a conflict between i_C-x C-e and c_C-x C-e?{{{
 "
 " No.
-" By default,  in insert mode,  `C-x` makes us  enter a submode. In  the latter,
-" `C-e`  and `C-y`  scroll  the window. Do not confuse:
+" By default, in insert mode, `C-x` makes us enter a submode.
+" In the latter, `C-e` and `C-y` scroll the window.
+" Do not confuse:
 "
 "         • i_C-x C-e
 "         • c_C-x C-e
@@ -674,6 +675,7 @@ let &cedit = "\<c-x>\<c-e>"
 "         • C-x C-e C-e …
 "         • C-x C-y C-y …
 "}}}
+
 " clipboard {{{2
 " Do NOT tweak this option!
 " Why could you be tempted to change the value of this option?{{{
@@ -1197,21 +1199,40 @@ set nojoinspaces
 set kp=:help
 
 " lazyredraw {{{2
-
-" Don't  redraw the  screen while  executing commands  which haven't  been typed
-" (e.g.: macros, registers). Also, postpone the update of the window title.
-
-if !has('nvim')
-    " 'lazyredraw' is broken in Neovim atm.
-    " In particular,  it causes the index  message after a search  to be weirdly
-    " displayed.
-    "         https://github.com/neovim/neovim/pull/6366#issuecomment-289273001
-    "
-    " TODO:
-    " Revisit this when we update neovim. The PR may be merged and fix the issue.
-    " If it works, remove the guard.
-    set lazyredraw
-endif
+" What does it do?{{{
+"
+" Prevent the screen  from being redrawn while executing  commands which haven't
+" been typed (e.g.: macros, registers). Also,  postpone the update of the window
+" title.
+"}}}
+" Why do you set it?{{{
+"
+" • Because of the previous description.
+"
+" • Setting this option prevents the screen to “flash” when we use a custom
+"   mapping which makes the cursor move far from its initial position, then
+"   come back. Example:  zv  *
+"
+" • junegunn, tpope, justinmk, blueyed,  mhinz … they all  set this option.
+"}}}
+" Is there any pitfall?{{{
+"
+" Yes.
+" Because  of this  option, sometimes,  we may  need to  execute `:redraw`  in a
+" (function called by a) mapping.
+"
+" Example:    C-g j    (scroll-window; vim-submode)
+"}}}
+" TODO: Is 'lazyredraw' broken in Neovim?{{{
+"
+" In the past, I think it caused the  index message after a search to be weirdly
+" displayed.
+"
+"         https://github.com/neovim/neovim/pull/6366#issuecomment-289273001
+"
+" Revisit this when the PR is merged.
+"}}}
+set lazyredraw
 
 " match (showmatch / matchtime) {{{2
 
@@ -1925,6 +1946,12 @@ nno  go<esc>  <nop>
 " Pass it to the `s:cancel_prefix()` function.
 
 
+"    • C-g could be used as a prefix in normal mode
+"
+"    • C-q is not used in insert mode (except for exiting a completion menu)
+"      we could supercharge  it to do something  else when we aren't  in a completion
+"      menu
+"
 "    • C-z has been disabled in visual mode
 "
 "      in insert mode, we use it as an “easier-to-type“ C-x C-p
@@ -2160,6 +2187,9 @@ omap  m       <plug>(fzf-maps-o)
 " Source:
 " https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
 
+" In Neovim, they use `gO`. Should we do the same?
+" Pro: consistency
+" Con: harder to type
 nno  <silent>  <space>o  :<c-u>call myfuncs#tab_toc()<cr>
 
 " p                             gqip {{{3
@@ -2250,8 +2280,7 @@ cno  <c-x>k  <c-k>
 " If you add another mapping, try to not break undo sequence. Thanks.
 
 " C-g             (prefix) {{{3
-
-" C-g < >
+" <  > {{{4
 "
 " We lost the ability to change the level of indentation on the line.
 " Because we prefer to use `C-d` and `C-t` with their readline meanings.
@@ -2260,7 +2289,7 @@ cno  <c-x>k  <c-k>
 ino  <c-g><  <c-d>
 ino  <c-g>>  <c-t>
 
-" C-g C-h
+" C-h {{{4
 "
 " Sometimes, we want to do this:
 "
@@ -2333,6 +2362,13 @@ ino  <expr>  <c-m>  <sid>c_m()
 
 ino  <expr><silent>  <c-p>  pumvisible() ? '<c-p>' : myfuncs#fix_spell()
 
+" C-q             duplication {{{3
+
+" Because  of a  mapping in  `vim-readline`, we've  lost the  ability to  exit a
+" completion menu. Restore it on `c-q`.
+
+ino  <c-q>  <c-e>
+
 " C-r  X          output of last eX command  {{{3
 
 "insert output of last eX command
@@ -2357,8 +2393,8 @@ fu! s:output_last_ex_command() abort
     endtry
 endfu
 
-" C-x  C-…        completions {{{3
-" ]      tag completion {{{4
+" C-x             completions {{{3
+" C-]     tag completion {{{4
 
 " When a tag contains a colon (e.g. global variable `g:netrw`), the completion
 " function tries to complete only up until the colon (netrw).
@@ -2371,13 +2407,13 @@ endfu
 
 ino  <c-x><c-]>  <c-r>=myfuncs#keyword_custom(':-')<cr><c-x><c-]>
 
-" a      dot register {{{4
+" C-a     dot register {{{4
 
 " Our custom `C-a` makes us lose `i^a` which pastes the dot register.
 " To get this functionality back, we map it to `C-x C-a`.
 ino  <c-x><c-a>  <c-a>
 
-" k      dictionary completion {{{4
+" C-k     dictionary completion {{{4
 
 ino  <c-x><c-k>  <c-r>=<sid>set_dict()<cr><c-x><c-k>
 
@@ -2414,7 +2450,7 @@ endfu
 "         https://github.com/vim/vim/commit/0b5c93a7f266cd8c90ea27bdaf9f7214a95d64d7
 
 
-" s      function signature {{{4
+" C-s     function signature {{{4
 
 " Usage:
 "
@@ -2437,7 +2473,7 @@ fu! s:complete_signature() abort
     return ''
 endfu
 
-" t      synonym completion {{{4
+" C-t     synonym completion {{{4
 
 " Pb:
 " If a synonym contains several words (e.g. important → of vital importance),
@@ -2457,28 +2493,53 @@ endfu
 
 ino  <silent>  <c-x><c-t>  <c-r>=myfuncs#keyword_custom(' -')<cr><c-x><c-t>
 
-" C-q  C-s        duplication {{{3
+" j k     duplicate char below/above {{{4
+" Why these mappings? {{{
+"
+" • They are more consistent than the default ones.
+" • They are easier to repeat (via `vim-submode`).
+"}}}
+" What's the issue with the default ones ?{{{
+"
+" By default, Vim uses `C-e` and `C-y` in inconsistent ways:
+"
+"    i^e:            duplicate char below, or exit completion menu
+"                    ✘ 2 unrelated functionalities
+"                    ✘ shadows `end-of-line` in `vim-readline`
+"
+"    i^y:            duplicate char above
+"                    ✘ hard to remember;
+"                      it would be easier if Vim used `k` prefixed with some key
+"
+"    i^x^e  i^x^y:   scroll window
+"                    ✘ ^x is usually used to complete text
+"
+"                    ✘ usually Vim uses `j` and `k` in mappings which must interact
+"                      with a line below/above (example: gj, gk)
+"
+"                    ✘ i^x^e doesn't conflict with our custom c^x^e, but still
+"                      it's a little confusing
+"}}}
+call submode#enter_with('char-around', 'i', 'r', '<c-x>j', '<plug>(duplicate-char-below)' )
+call submode#map('char-around', 'i', 'r', 'j', '<plug>(duplicate-char-below)')
+ino  <expr>  <plug>(duplicate-char-below)  <sid>duplicate_char_around(0)
 
-" By default, `c-y` only duplicate the character right above.
-" If there's nothing, but there IS a character on the 2nd line above,
-" `c-y` ignores it. Make `c-y` smarter.
-ino  <expr><silent>  <c-s>  pumvisible() ? '<c-y>' : <sid>duplicate_line(1)
+call submode#enter_with('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-char-above)' )
+call submode#map('char-around', 'i', 'r', 'k', '<plug>(duplicate-char-above)')
+ino  <expr>  <plug>(duplicate-char-above)  <sid>duplicate_char_around(1)
 
-fu! s:duplicate_line(above) abort
+fu! s:duplicate_char_around(above) abort
+    " By default, `c-y` only duplicate the character right above.
+    " If there's nothing, but there IS a character on the 2nd line above,
+    " `c-y` ignores it.
+    "
+    " We use this function to reimplement `c-y` (and `c-e`) in a more powerful way.
+
     let pos  = virtcol('.')
     let line = search('\v%'.pos.'v.*\S', (a:above ? 'b' : '').'nW')
     let char = matchstr(getline(line), '\v%'.pos.'v.')
     return char
 endfu
-
-" Because of a mapping in `vim-readline`, we've lost the ability to:
-"
-"       • exit a completion menu (c-e)
-"       • duplicate the character below (c-e)
-"
-" Restore them on `c-q`.
-
-ino  <expr>  <c-q>  pumvisible() ? '<c-e>' : <sid>duplicate_line(0)
 
 " C-z             easy C-x C-p {{{3
 
@@ -2848,6 +2909,30 @@ nno  <silent>  gx  :<c-u>call myfuncs#open_gx(0)<cr>
 " Also, install a `gX` mapping opening the url under the cursor in `w3m` inside
 " a tmux pane.
 nno  <silent>  gX  :<c-u>call myfuncs#open_gx(1)<cr>
+
+" C-g                 (prefix) {{{3
+" j  k          scroll window {{{4
+
+" Make `i^gj` and `i^gk` repeatable with `j` and `k`.
+
+call submode#enter_with('scroll-window', 'n', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
+call submode#map('scroll-window', 'n', 'r', 'j', '<plug>(scroll-window-down)')
+nno  <silent>  <plug>(scroll-window-down)  <c-e>:redraw<cr>
+"                                               │
+"                                               └ needed because of 'lz'
+
+call submode#enter_with('scroll-window', 'n', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
+call submode#map('scroll-window', 'n', 'r', 'k', '<plug>(scroll-window-up)')
+nno  <silent>  <plug>(scroll-window-up)  <c-y>:redraw<cr>
+
+" Do the same for insert mode.
+call submode#enter_with('scroll-window', 'i', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
+call submode#map('scroll-window', 'i', 'r', 'j', '<plug>(scroll-window-down)')
+ino  <plug>(scroll-window-down)  <c-x><c-e>
+
+call submode#enter_with('scroll-window', 'i', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
+call submode#map('scroll-window', 'i', 'r', 'k', '<plug>(scroll-window-up)')
+ino  <plug>(scroll-window-up)  <c-x><c-y>
 
 " m                   (prefix) {{{3
 " m/  m?         put current location in loclist {{{4
@@ -3249,11 +3334,9 @@ if &term =~ '^screen'
     sil! exe "set <xLeft>=\e[1;*D"
 endif
 
-" C-e    C-y      scrolling accéléré {{{4
+" C-g C-g         show info about current file {{{4
 
-" accélération du scroll via C-e et C-y
-nno  <c-e>  2<c-e>
-nno  <c-y>  2<c-y>
+nno  <c-g><c-g>  <c-g>
 
 " C-np            move across tab pages {{{4
 
@@ -3293,21 +3376,40 @@ nno  <silent>  ]}  :<c-u>call myfuncs#be_repeatable(']}')<cr>
 nno  <silent>  ]c  :<c-u>call myfuncs#be_repeatable(']c')<cr>
 nno  <silent>  [c  :<c-u>call myfuncs#be_repeatable('[c')<cr>
 
+" Why the `[S` and `]S` mappings?{{{
+"
+" By default, `zh` and `zl` move the cursor on a long non-wrapped line.
+" But at the same time, we use `zj` and `zk` to split the window.
+" I don't like  the `hjkl` being used  with a same prefix (`z`)  for 2 different
+" purposes. So, instead we'll use `[S` and `]S`.
+"}}}
+"               ┌ mnemonics: Scroll
+"               │
+nno  <silent>  [S  :<c-u>call myfuncs#be_repeatable('[S')<cr>
+nno  <silent>  ]S  :<c-u>call myfuncs#be_repeatable(']S')<cr>
 nno  <silent>  [s  :<c-u>call myfuncs#be_repeatable('[s')<cr>
 nno  <silent>  ]s  :<c-u>call myfuncs#be_repeatable(']s')<cr>
 
+" Why the `[Z` and `]Z` mappings?{{{
+"
+" By default the cursor is moved to the previous/next fold:
+"
+"     • no matter its level
+"       with `zj` and `zk`
+"
+"     • on the condition its level is greater than the current one
+"       with `[z` and `]z`
+"
+" I don't like the asymmetry between the 2 pairs of mappings.
+" I prefer to use `[z`, `]z` and `[Z`, `]Z`.
+"}}}
+nno  <silent>  [Z  :<c-u>call myfuncs#be_repeatable('[Z')<cr>
+nno  <silent>  ]Z  :<c-u>call myfuncs#be_repeatable(']Z')<cr>
 nno  <silent>  [z  :<c-u>call myfuncs#be_repeatable('[z')<cr>
 nno  <silent>  ]z  :<c-u>call myfuncs#be_repeatable(']z')<cr>
 
 nno  <silent>  g,  :<c-u>call myfuncs#be_repeatable('g;')<cr>
 nno  <silent>  g;  :<c-u>call myfuncs#be_repeatable('g,')<cr>
-
-nno  <silent>  zh  :<c-u>call myfuncs#be_repeatable('zh')<cr>
-nno  <silent>  zj  :<c-u>call myfuncs#be_repeatable('zj')<cr>
-nno  <silent>  zk  :<c-u>call myfuncs#be_repeatable('zk')<cr>
-nno  <silent>  zl  :<c-u>call myfuncs#be_repeatable('zl')<cr>
-nno  <silent>  zH  :<c-u>call myfuncs#be_repeatable('zH')<cr>
-nno  <silent>  zL  :<c-u>call myfuncs#be_repeatable('zL')<cr>
 
 " =A                  toggle alignment {{{3
 
@@ -6604,46 +6706,34 @@ tno  <s-tab>  <left>
 " Or C-q?
 "
 " 104 -
-" There's an inconsistency in our mappings:
-"
-"         C-e
-"         C-y
-"
-"         i_C-s
-"         i_C-q
-"
-"         i_C-x C-e
-"         i_C-x C-y
-"
-" Ideally, we would use the same keys in all modes (normal, insert, C-x submode).
-" But it's going to be difficult.
-"
-" Example: C-j seems a good candidate in insert mode and C-x submode.
-" But we can't use it in normal mode (already used).
-" Maybe `C-z` and `C-q`?
-"
-" Also, don't use `C-y`, because it would be nice to use it for a kill ring
-" in normal mode (along with `M-y`).
-"
-" 105 -
 " Read all of this:
 "     https://neovim.io/news/archive/
 "
-" 106 -
+" 105 -
 " Read this:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 107 -
+" 106 -
 " Sometimes we  lost the meta  keys. It seems to occur  after we use  a terminal
 " buffer.  The issue probably comes from `vim-cmdline`, which temporarily disable
 " them. Check whether there is a circumstance where the plugin fails to re-enable
 " them.
 "
-" 108 -
+" 107 -
 " Read this (OOP in VimL):
 " https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
+"
+" 108 -
+" Replace `:silent!` with `:silent` whenever possible.
+" There may be errors to fix which we are missing because they are silent.
+" Also, if you wonder whether a plugin/(auto)command/function is working
+" as expected, and has no silent errors, use `:Verbose` to increase
+" the verbosity level.
+"
+" 109 -
+" use syntax hl in `vim-qf` instead of complex mechanism using matches
 
 
 
