@@ -587,114 +587,69 @@ fu! s:current_word_delete_old_highlight() abort
     endif
 endfu
 
-" RemoveDuplicateLines {{{1
-
-fu! myfuncs#remove_duplicate_lines(line1, line2, bang) abort
-    if !a:bang
-        return 'echoer "Add a bang"'
-    endif
-
-    let view = winsaveview()
-
-    " Iterate over the lines in the range, from the last one up to the first
-    " one (to avoid having to take into account a change of address when a line
-    " is deleted).
-    " The goal of each iteration is to determine whether the line is unique,
-    " and delete it when it's not.
-    let p = a:line2
-    while p > a:line1
-        " Iterate over the lines from the first in the range, up to line `p`.
-        " The goal of each iteration is to compare line `p` to a previous line.
-        let q = a:line1
-        while q < p
-            if getline(p) ==# getline(q)
-                exe p.'d_' | break
-            endif
-            let q += 1
-        endwhile
-        let p -= 1
-    endwhile
-
-    call winrestview(view)
-    return ''
-endfu
-
 fu! myfuncs#dump_wiki(url) abort "{{{1
     if a:url[:3] !=# 'http'
         return
     endif
+
     let [ x_save, y_save ] = [ getpos("'x"), getpos("'y") ]
+    try
+        let url = substitute(a:url, '/$', '', '').'.wiki'
+        let tempdir = substitute(tempname(), '\v.*/\zs.{-}', '', '')
+        call system('git clone '.shellescape(url).' '.tempdir)
+        let files = glob(tempdir.'/*', 0, 1)
+        call map(files, { i,v -> substitute(v, '^\V'.tempdir.'/', '', '') })
+        call filter(files, { i,v -> v !~# '\v\c_?footer$' })
 
-    let url = substitute(a:url, '/$', '', '').'.wiki'
-    let tempdir = substitute(tempname(), '\v.*/\zs.{-}', '', '')
-    call system('git clone '.shellescape(url).' '.tempdir)
-    let files = glob(tempdir.'/*', 0, 1)
-    call map(files, { i,v -> substitute(v, '^\V'.tempdir.'/', '', '') })
-    call filter(files, { i,v -> v !~# '\v\c_?footer$' })
+        mark x
+        for file in files
+            sil put =file
+        endfor
+        mark y
 
-    mark x
-    for file in files
-        sil put =file
-    endfor
-    mark y
+        sil 'x+,'ys/^/# /
+        sil 'x+,'yg/^/exe 'keepalt r '.tempdir.'/'.getline('.')[2:]
+        sil keepj keepp 'x+,'yg/^=\+\s*$/d_ | -s/^/## /
+        sil keepj keepp 'x+,'yg/^-\+\s*$/d_ | -s/^/### /
+        sil 'x+,'ys/\v^#.{-}\n\zs\s*\n\ze##//
+        sil update
 
-    sil 'x+,'ys/^/# /
-    sil 'x+,'yg/^/exe 'keepalt r '.tempdir.'/'.getline('.')[2:]
-    sil keepj keepp 'x+,'yg/^=\+\s*$/d_ | -s/^/## /
-    sil keepj keepp 'x+,'yg/^-\+\s*$/d_ | -s/^/### /
-    sil 'x+,'ys/\v^#.{-}\n\zs\s*\n\ze##//
-    sil update
+    catch
+        return my_lib#catch_error()
 
-    call setpos("'x", x_save) | call setpos("'y", y_save)
-endfu
-
-fu! myfuncs#edit_help_file() "{{{1
-    sil! unmap <buffer> o
-    sil! unmap <buffer> O
-    sil! unmap <buffer> s
-    sil! unmap <buffer> S
-    sil! unmap <buffer> q
-
-    nno  <buffer><nowait><silent>  <cr>  80<bar>
-
-    setl modifiable noreadonly
+    finally
+        call setpos("'x", x_save)
+        call setpos("'y", y_save)
+    endtry
 endfu
 
 " fix_display {{{1
 
-" Explanation: {{{
-
-"     :redraws!       update all status lines
-"     :diffupdate!    update differences between windows in diff mode
-"     :noh            cancel highlighting of last search pattern
-"
-"     :syntax sync minlines=200
-"     :syntax sync maxlines=400
-"
-"                     Reset the min/max number of lines above the viewport from
-"                     which Vim begins parsing the buffer to apply syntax
-"                     highlighting.
-"
-"                     Sometimes syntax highlighting is wrong, these commands
-"                     should fix that.
-"
-"                     We could also be more radical, and execute:
-"
-"                         :syntax sync fromstart
-"
-"                     … But after we execute it in our `vimrc`, every time we
-"                     source our vimrc, we experience lag.
-"
-" "}}}
-
 fu! myfuncs#fix_display() abort
+    " redraw screen
     redraw!
+    " redraw all status lines
     redraws!
     noh
+    " update differences between windows in diff mode
     diffupdate!
     " update folds
     norm! zx
 
+    " Purpose:{{{
+    "
+    " Reset the min/max number of lines above the viewport from which Vim begins
+    " parsing the buffer to apply syntax highlighting.
+    "
+    " Sometimes syntax highlighting is wrong, these commands should fix that.
+    "
+    " We could also be more radical, and execute:
+    "
+    "     :syntax sync fromstart
+    "
+    " But after we execute it in our `vimrc`, every time we source our vimrc, we
+    " experience lag.
+    "}}}
     syntax sync minlines=200
     syntax sync maxlines=400
 endfu
@@ -746,90 +701,6 @@ fu! myfuncs#fix_spell() abort "{{{1
     " Break undo sequence before `setline()` edits the line, so that we can undo
     " if the fix is wrong.
     return "\<c-g>u"
-endfu
-
-fu! myfuncs#fold_help() abort "{{{1
-    let [ a_save, b_save ] = [ getpos("'a"), getpos("'b") ]
-
-    update
-    " reload to erase possible existing folds
-    edit!
-
-    " On sauvegarde la position du curseur.
-    let cursor_save = getcurpos()
-
-    " Cette fonction a pour but de plier un fichier d'aide custom.
-    " Les sections à plier doivent être séparées par des lignes remplies de
-    " symbole =.
-    " La 1e ligne doit en être une également.
-
-    setl wrapscan syntax=help cocu=nc cole=3
-
-    " On se rend à la fin du fichier pour que lorsque la 1e recherche déplace
-    " le curseur on atterrisse bien sur la 1e occurrence du fichier (et non la
-    " 2e).
-    keepj $
-    " On cherche la chaîne === et on pose les marques a et b sur la ligne.
-    sil! exe "keepj keepp norm! /===\rmamb"
-
-    let i = 0
-    " Tant que le n° de la ligne portant la marque a est strictement
-    " inférieure à celle de la marque b (+1), on cherche à faire des plis.
-    " Pourquoi +1 ?
-    " Parce que parfois, les 2 lignes ont le même n°, alors qu'il reste des
-    " plis à chercher.
-    " Quand ça arrive ?
-    " Quand deux lignes === sont séparées de seulement une seule ligne.
-    " Ça arrive quand on veut séparer deux plis par une ligne remplie de +++
-    " pour visuellement distinguer deux ensembles de plis portant sur des
-    " thèmes distincts.
-    while line("'a") < line("'b") + 1
-
-        let i += 1
-
-        if i == 1
-            " Si on est à la 1e itération de la boucle, on se rend sur la 2e
-            " ligne car on suppose qu'on est sur la 1e ligne du fichier et que
-            " cette ligne est remplie de ===.
-            " Puis on pose la marque a.
-            keepj norm! 2Gma
-        else
-            " Le reste du temps, on se rend à la marque b (qui correspond à la
-            " dernière ligne du pli précédent), on descend de 2 lignes (une
-            " pour sortir du pli et une 2e pour descendre sous la ligne ===
-            " et bien atterrir sur la 1e ligne de la section suivante).
-            " Enfin on pose la marque a.
-            keepj norm! 'b2jma
-        endif
-
-        " On cherche la chaîne === et on remonte d'une ligne.
-        " On est censé être sur la dernière ligne d'une section, on pose donc la marque b.
-        sil! exe "keepj keepp norm! /===\rkmb"
-
-        " On plie seulement si la ligne de texte portant la marque a possède
-        " un n° strictement inférieur à celle de la marque b.
-        if line("'a") < line("'b")
-            keepj norm! 'azf'b
-        endif
-
-    endwhile
-
-    " À l'issue de la boucle, il reste un morceau de texte qui n'a pas été
-    " plié. Celui après la dernière ligne ===.
-    " On plie donc tout ce qui reste dans un dernier pli.
-    keepj norm! 'azfG
-
-    call setpos("'a", a_save)
-    call setpos("'b", b_save)
-
-    " On veut pouvoir écrire des lignes de plus de 78 caractères (par défaut
-    " dans un fichier help, tw=78).
-    setl tw=0
-
-    " On rétablit la position du curseur.
-    call setpos('.', cursor_save)
-
-    norm! zv
 endfu
 
 " gtfo {{{1
@@ -1029,86 +900,22 @@ fu! myfuncs#long_object_join() abort
     sil! call repeat#set("\<plug>(myfuncs_long_object_join)")
 endfu
 
-fu! myfuncs#be_repeatable(key) abort "{{{1
-    let g:motion_to_repeat = a:key
-
-    let keys = a:key ==# '[S' || a:key ==# ']S'
-    \?             '5'.(a:key ==# '[S' ? 'zh' : 'zl')
-    \:         a:key =~# '\v^Z c-[hjkl]$'
-    \?             s:resize_window(a:key)
-    \:         a:key ==# '[z' || a:key ==# ']z'
-    \?             v:count1.(a:key ==# '[z' ? 'zk' : 'zj').'zvzz'
-    \:         a:key ==# '[Z' || a:key ==# ']Z'
-    \?             v:count1.tolower(a:key).'zvzz'
-    \:             v:count1.a:key.'zv'
-
-    call feedkeys(keys, 'int')
-endfu
-
-fu! s:resize_window(key) abort
-    let orig_win = winnr()
-
-    if a:key ==# 'Z c-h' || a:key ==# 'Z c-l'
-        noautocmd wincmd l
-        let new_win = winnr()
-        exe 'noautocmd '.orig_win.'wincmd w'
-
-        let on_far_right = new_win != orig_win
-
-        " Why returning different keys depending on the position of the window?{{{
-        "
-        " `C-w <` moves a border of a vertical window:
-        "
-        "     • to the right, for the left  border of the   window  on the far right
-        "     • to the left,  for the right border of other windows
-        "
-        " 2 reasons for these inconsistencies:
-        "
-        "     • Vim can't move the right border of the window on the far
-        "       right, it would resize the whole “frame“, so it needs to
-        "       manipulate the left border
-        "
-        "     • the left border of the  window on the far right is moved to
-        "       the left instead of the right, to increase the visible size of
-        "       the window, like it does in the other windows
-        "}}}
-        if on_far_right
-            return a:key ==# 'Z c-h'
-            \                ?    "\<c-w>3<"
-            \                :    "\<c-w>3>"
-        else
-            return a:key ==# 'Z c-h'
-            \                ?    "\<c-w>3>"
-            \                :    "\<c-w>3<"
-        endif
-
-    else
-        noautocmd wincmd j
-        let new_win = winnr()
-        exe 'noautocmd '.orig_win.'wincmd w'
-
-        let on_far_bottom = new_win != orig_win
-
-        if on_far_bottom
-            return a:key ==# 'Z c-k'
-            \                ?    "\<c-w>3-"
-            \                :    "\<c-w>3+"
-        else
-            return a:key ==# 'Z c-k'
-            \                ?    "\<c-w>3+"
-            \                :    "\<c-w>3-"
-        endif
-    endif
-endfu
-
 fu! myfuncs#mru(file, how_to_open) abort "{{{1
     exe a:how_to_open a:file
     exe a:how_to_open ==# 'tabedit' ? 'lcd %:p:h' : ''
 endfu
 
 fu! myfuncs#mru_complete(arglead, _c, _p) abort
-    return map(filter(copy(v:oldfiles), { i,v -> stridx(v, a:arglead) == 0 }),
-    \          { i,v -> fnamemodify(v, ':~:.') })
+    " Why not filtering the files?{{{
+    "
+    " We don't need to, because the command invoking this completion function is
+    " defined with the attribute `-complete=custom`, not `-complete=customlist`,
+    " which means Vim performs a basic filtering automatically:
+    "
+    "     • each event must begin with `a:arglead`
+    "     • the comparison respects 'ic' and 'scs'
+    " }}}
+    return join(map(copy(v:oldfiles), { i,v -> fnamemodify(v, ':~:.') }), "\n")
 endfu
 
 fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
@@ -1183,6 +990,9 @@ endfu
 "                     norm! '[gq']
 "                 endif
 "
+"             catch
+"                 return my_lib#catch_error()
+"
 "             finally
 "                 let &cb        = cb_save
 "                 let &sel       = sel_save
@@ -1191,28 +1001,32 @@ endfu
 "         endfu
 
 fu! myfuncs#op_grep(type, ...) abort "{{{2
-    call my_lib#reg_save(['"', '+'])
-
-    if a:type ==# 'char'
-        norm! `[v`]y
-    elseif a:type ==# 'line'
-        norm! '[V']y
-    elseif a:type ==# 'block'
-        sil exe "norm! `[\<c-v>`]y"
-    elseif a:type ==# 'vis'
-        norm! gvy
-    endif
-
-    " By default, the output of `:grep` includes errors (“permission denied“).
-    " It's because of 'shellpipe' / 'sp', whose default value is `2>&1| tee`.
-    "
-    " When we're looking for a pattern in files, these errors are noise: remove them.
-    " We do so by temporarily tweaking 'sp':
-    "
-    "         2>&1| tee  →  |tee
-    let save_sp = &sp
+    let cb_save  = &cb
+    let sel_save = &selection
+    let sp_save  = &sp
+    let reg_save = [ getreg('"'), getregtype('"') ]
 
     try
+        set cb-=unnamed cb-=unnamedplus
+        set selection=inclusive
+
+        if a:type ==# 'char'
+            norm! `[v`]y
+        elseif a:type ==# 'line'
+            norm! '[V']y
+        elseif a:type ==# 'block'
+            sil exe "norm! `[\<c-v>`]y"
+        elseif a:type ==# 'vis'
+            norm! gvy
+        endif
+
+        " By default, the output of `:grep` includes errors (“permission denied“).
+        " It's because of 'shellpipe' / 'sp', whose default value is `2>&1| tee`.
+        "
+        " When we're looking for a pattern in files, these errors are noise: remove them.
+        " We do so by temporarily tweaking 'sp':
+        "
+        "         2>&1| tee  →  |tee
         let &l:sp = '| tee'
 
         if a:type ==# 'Ex'
@@ -1231,9 +1045,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             else
                 call setqflist([], 'a', { 'title': &grepprg.' '.pattern.' .' })
             endif
-
         else
-
             " Even though `:grep` is a Vim command, we really need to use `shellescape()`{{{
             " and NOT `fnameescape()`. Check this:
             "
@@ -1280,13 +1092,10 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                                          $ cat /tmp/foo%bar
             "                                              /tmp/foo%bar
             "                                              /tmp/foo\%bar
-"}}}
+            "}}}
             "                 │
             sil! exe 'grep! '.shellescape(@").' .'
-
             call setqflist([], 'a', { 'title': &grepprg.' '.@".' .' })
-
-            call my_lib#reg_restore(['"', '+'])
         endif
         " fix the display which could be messed up because we bypassed the shell prompt
         redraw!
@@ -1294,31 +1103,47 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
     catch
         return my_lib#catch_error()
     finally
-        let &sp = save_sp
+        let &cb  = cb_save
+        let &sel = sel_save
+        let &sp  = sp_save
+        call setreg('"', reg_save[0], reg_save[1])
     endtry
 endfu
 
 fu! myfuncs#op_incremental_yank(type) abort "{{{2
-    if a:type ==# 'char'
-        norm! `[v`]y
-    elseif a:type ==# 'line'
-        norm! '[V']y
-    elseif a:type ==# 'block'
-        exe "norm! `[\<c-v>`]y"
-    elseif a:type ==# 'vis'
-        norm! gvy
-    else
-        return
-    endif
+    let cb_save  = &cb
+    let sel_save = &selection
+    try
+        set cb-=unnamed cb-=unnamedplus
+        set selection=inclusive
 
-    " Append (flag 'a') what we just copied (unnamed register @")
-    " inside register 'z',
-    " and set its type to be the same as the one of the unnamed register
-    call setreg('z', @".(a:type ==# 'char' ? ' ' : ''), 'a'.getregtype('"'))
+        if a:type ==# 'char'
+            norm! `[v`]y
+        elseif a:type ==# 'line'
+            norm! '[V']y
+        elseif a:type ==# 'block'
+            exe "norm! `[\<c-v>`]y"
+        elseif a:type ==# 'vis'
+            norm! gvy
+        else
+            return
+        endif
 
-    " Copy the 'z' register inside the '+' register, so that we can paste it
-    " directly with p instead of "zp
-    call setreg('+', @z, getregtype('z'))
+        " Append (flag 'a') what we just copied (unnamed register @")
+        " inside register 'z',
+        " and set its type to be the same as the one of the unnamed register
+        call setreg('z', @".(a:type ==# 'char' ? ' ' : ''), 'a'.getregtype('"'))
+
+        " Copy the  'z' register  inside the  unnamed register,  so that  we can
+        " paste it directly with p instead of "zp
+        call setreg('"', @z, getregtype('z'))
+
+    catch
+        return my_lib#catch_error()
+    finally
+        let &cb  = cb_save
+        let &sel = sel_save
+    endtry
 endfu
 
 " op_replace_without_yank {{{2
@@ -1337,69 +1162,72 @@ fu! myfuncs#set_reg(reg_name) abort
 endfu
 
 fu! myfuncs#op_replace_without_yank(type) abort
-    " save registers and types to restore later.
-    call my_lib#reg_save(['"', '+', s:replace_reg_name])
+    let sel_save = &selection
+    try
+        " save registers and types to restore later.
+        call my_lib#reg_save(['"', s:replace_reg_name])
 
-    let replace_reg_contents = getreg(s:replace_reg_name)
-    let replace_reg_type     = getregtype(s:replace_reg_name)
+        let replace_reg_contents = getreg(s:replace_reg_name)
+        let replace_reg_type     = getregtype(s:replace_reg_name)
 
-    " build condition to check if we're replacing the current line
+        " build condition to check if we're replacing the current line
 
-    let replace_current_line = line("'[")==line("']")
-                                    \ && (col("'[")==1 && (col("']")==col('$')-1 || col('$')==1))
+        let replace_current_line =     line("'[") == line("']")
+        \                          &&  col("'[") == 1
+        \                          && (col("']") == col('$')-1 || col('$') == 1)
 
-    " If we copy a line containing leading whitespace, and try to replace
-    " another line like this: `0dr$`
-    " The leading whitespace (indentation) will be removed.
-    " Why?
-    "
-    " Because the text on which we operate doesn't include the ending newline.
-    " So, `g@` will pass the type `char`.
-    " So, our function will trim the leading / ending whitespace.
-    " We don't want that for a single line.
-    " For multiple lines, yes. A single one, no.
-    " We use the `replace_current_line` condition to be informed when this
-    " case happens. We treat it as linewise motion/text-object, to keep the
-    " indentation.
-
-    if a:type ==? 'line' || replace_current_line
-        exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
-
-    elseif a:type ==? 'block'
-        exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
-
-    elseif a:type ==? 'char'
-        " DWIM:
-        "       DWIM = Do What I Mean.
+        " If we copy a line containing leading whitespace, and try to replace
+        " another line like this: `0dr$`
+        " The leading whitespace (indentation) will be removed.
+        " Why?
         "
-        "       If pasting linewise contents in a _characterwise_ motion, trim
-        "       surrounding whitespace from the content to be pasted.
-        "
-        "       NOT the trailing whitespace on each line. JUST the leading
-        "       whitespace of the first line, and the ending whitespace of the
-        "       last.
+        " Because the text on which we operate doesn't include the ending newline.
+        " So, `g@` will pass the type `char`.
+        " So, our function will trim the leading / ending whitespace.
+        " We don't want that for a single line.
+        " For multiple lines, yes. A single one, no.
+        " We use the `replace_current_line` condition to be informed when this
+        " case happens. We treat it as linewise motion/text-object, to keep the
+        " indentation.
 
-        if replace_reg_type ==# 'V'
-            call setreg(s:replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
+        if a:type ==# 'line' || replace_current_line
+            exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
+
+        elseif a:type ==# 'block'
+            exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
+
+        elseif a:type ==# 'char'
+            " DWIM:
+            "       DWIM = Do What I Mean.
+            "
+            "       If pasting linewise contents in a _characterwise_ motion, trim
+            "       surrounding whitespace from the content to be pasted.
+            "
+            "       NOT the trailing whitespace on each line. JUST the leading
+            "       whitespace of the first line, and the ending whitespace of the
+            "       last.
+
+            if replace_reg_type ==# 'V'
+                call setreg(s:replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
+            endif
+
+            exe 'keepj norm! `[v`]"'.s:replace_reg_name.'p'
         endif
 
-        exe 'keepj norm! `[v`]"'.s:replace_reg_name.'p'
-    endif
-
-    " Now, the unnamed register contains the old text over which we pasted the
-    " new text.
-    " We don't want that, we want it to contain its original contents.
-    " Luckily, we saved at the beginning of the function.
-    " We restore it.
-    "
-    " We do the same for the replacement register, because we may have trimmed it
-    " in the process (type ==? 'char' && replace_reg_type ==# 'V').
-    "
-    " We do the same for the `+` register, even though it shouldn't be
-    " necessary, because by default, `s:replace_reg_name` will be `+`.
-    " But, better be safe than sorry.
-
-    call my_lib#reg_restore(['"', "+", s:replace_reg_name])
+    catch
+        return my_lib#catch_error()
+    finally
+        let &sel = sel_save
+        " Now, the unnamed register contains the old text over which we pasted the
+        " new text.
+        " We don't want that, we want it to contain its original contents.
+        " Luckily, we saved at the beginning of the function.
+        " We restore it.
+        "
+        " We do the same for the replacement register, because we may have trimmed it
+        " in the process (type ==# 'char' && replace_reg_type ==# 'V').
+        call my_lib#reg_restore(['"', s:replace_reg_name])
+    endtry
 endfu
 
 " TRIM WhiteSpace Multi-Line
@@ -1470,40 +1298,42 @@ endfu
 "     0 → the pattern is simply @/
 
 fu! myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
+    let s:yank_matches_view = winsaveview()
     let s:yank_where_match = a:yank_where_match
     let s:yank_comments    = a:yank_comments
 endfu
 
 fu! myfuncs#op_yank_matches(type) abort
-    let view = winsaveview()
-    let [ @", @+, @m ] = [ '', '', '' ]
+    let @z = ''
 
     let mods  = 'keepj keepp'
     let range = (a:type ==# 'char' || a:type ==# 'line')
     \?               line("'[").','.line("']")
     \:               line("'<").','.line("'>")
 
-    let cmd     = s:yank_where_match ? 'g' : 'v'
-    let pattern = s:yank_comments
-    \?                '^\s*'.split(&l:cms, '\s*%s\s*')[0]
-    \:                @/
+    let cmd = s:yank_where_match ? 'g' : 'v'
+    let pat = s:yank_comments
+    \?            '^\s*\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
+    \:            @/
 
-    exe mods.' '.range.cmd.'/'.pattern.'/y M'
+    exe mods.' '.range.cmd.'/'.pat.'/y Z'
 
     " Remove empty lines.
     " We can't use the pattern `\_^\s*\n` to describe an empty line, because
-    " we aren't in a buffer:    `@m` is just a big string
+    " we aren't in a buffer:    `@z` is just a big string
     if !s:yank_where_match
-        let @m = substitute(@m, '\v\n%(\s*\n)+', '\n', 'g')
+        let @z = substitute(@z, '\v\n%(\s*\n)+', '\n', 'g')
     endif
 
-    " the first time we've appended a match to `@m`, it created a newline
+    " the first time we've appended a match to `@z`, it created a newline
     " we don't want this one; remove it
-    let @m = substitute(@m, "^\n", '', '')
+    let @z = substitute(@z, "^\n", '', '')
 
-    call setreg('"', @m)
-    call setreg('+', @m)
-    call winrestview(view)
+    call setreg('"', @z, 'l')
+    if exists('s:yank_matches_view')
+        call winrestview(s:yank_matches_view)
+        unlet! s:yank_matches_view
+    endif
 endfu
 
 fu! myfuncs#open_gx(in_term) abort "{{{1
@@ -1619,16 +1449,17 @@ fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1
     " (and the pipe), otherwise they terminate the command prematurely.
 
     " put the patterns
-    sil! 0put =map(patterns, { i,v -> v."\<c-a>" })
-    "                                       │
-    "                                       └─ add a literal C-a to be used as a delimiter by `column`;
-    "                                          we don't want to align around spaces, because `column` would
-    "                                          consider all of them, while we want it to only consider the 1st
-    "                                          one on a line
-    "                                          with a single C-a on each line, we can be sure `column` will only
-    "                                          consider the first occurrence of the delimiter
+    call map(patterns, { i,v -> v."\<c-a>" })
+    "                             │
+    "                             └─ add a literal C-a to be used as a delimiter by `column`;
+    "                                we don't want to align around spaces, because `column` would
+    "                                consider all of them, while we want it to only consider the 1st
+    "                                one on a line
+    "                                with a single C-a on each line, we can be sure `column` will only
+    "                                consider the first occurrence of the delimiter
+    sil 0put =patterns
     " put the counts right below
-    sil! exe a:0.'put =counts'
+    sil exe a:0.'put =counts'
 
     " join each count with the corresponding pattern
     "
@@ -1654,8 +1485,8 @@ endfu
 
 fu! myfuncs#patterns_favorite(arglead, _c, _p) abort
     " We could put inside the following list some patterns that we often use
-    let patterns = ['']
-    return filter(patterns, { i,v -> stridx(v, a:arglead) == 0 })
+    let pat = ['']
+    return join(pat, "\n")
 endfu
 
 fu! myfuncs#plugin_install(url) abort "{{{1
@@ -1867,6 +1698,36 @@ fu! myfuncs#ranger_file_manager() abort
     redraw!
 endfu
 
+fu! myfuncs#remove_duplicate_lines(line1, line2, bang) abort "{{{1
+    if !a:bang
+        return 'echoer "Add a bang"'
+    endif
+
+    let view = winsaveview()
+
+    " Iterate over the lines in the range, from the last one up to the first
+    " one (to avoid having to take into account a change of address when a line
+    " is deleted).
+    " The goal of each iteration is to determine whether the line is unique,
+    " and delete it when it's not.
+    let p = a:line2
+    while p > a:line1
+        " Iterate over the lines from the first in the range, up to line `p`.
+        " The goal of each iteration is to compare line `p` to a previous line.
+        let q = a:line1
+        while q < p
+            if getline(p) ==# getline(q)
+                exe p.'d_' | break
+            endif
+            let q += 1
+        endwhile
+        let p -= 1
+    endwhile
+
+    call winrestview(view)
+    return ''
+endfu
+
 fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     call cursor(a:line1, 1)
@@ -2016,7 +1877,7 @@ fu! myfuncs#search_todo() abort "{{{1
     call setloclist(0, map(getloclist(0), { i,v -> s:search_todo_text(v) }), 'r')
     call setloclist(0, [], 'a', { 'title': 'FIXME & TODO' })
 
-    if &l:buftype !=# 'quickfix'
+    if &bt !=# 'quickfix'
         return
     endif
 
@@ -2027,8 +1888,8 @@ endfu
 
 fu! s:search_todo_text(dict) abort
     let dict = a:dict
-    " if there's no text outside of `fixme` or `todo`
-    if dict.text =~? '\v\c%(fixme|todo):?\s*$'
+    " if the text only contains `fixme` or `todo`
+    if dict.text =~? '\v\c%(fixme|todo):?\s*%(\{\{'.'\{)?\s*$'
         " get the text of the next line, which is not empty:
         "
         "     ^\s*$
@@ -2036,11 +1897,15 @@ fu! s:search_todo_text(dict) abort
         " … and which doesn't contain only the comment character:
         "
         "     ^\s*#\s*$    (example in a bash buffer)
-        let pattern = '^\s*\V'.escape(split(&l:cms, '%s')[0], '\').'\v\s*$|^\s*$'
-        let dict.text = filter(
-        \                      getbufline(bufnr('#'), dict.lnum + 1, dict.lnum + 2),
-        \                      { i,v -> v !~ pattern }
-        \                     )[0]
+        let pat = '^\s*\V'.escape(get(split(getbufvar('#', '&l:cms', ''),
+        \                                   '%s'),
+        \                             0, ''),
+        \                         '\')
+        \                 .'\v\s*$|^\s*$'
+        let dict.text = get(filter(
+        \                          getbufline(bufnr('#'), dict.lnum + 1, dict.lnum + 3),
+        \                          { i,v -> v !~ pat }
+        \                  ), 0, '')
     endif
     return dict
 endfu
@@ -2240,11 +2105,14 @@ fu! myfuncs#tab_toc() abort "{{{1
     call setloclist(0, toc)
     call setloclist(0, [], 'a', { 'title': 'TOC' })
 
-    let is_help_file = &l:buftype ==# 'help'
+    let is_help_file = &bt ==# 'help'
 
+    " The width of the current window is going to be reduced by the TOC window.
+    " Long lines may be wrapped. I don't like wrapped lines.
+    setl nowrap
     doautocmd <nomodeline> QuickFixCmdPost lgrep
 
-    if &l:buftype !=# 'quickfix'
+    if &bt !=# 'quickfix'
         return
     endif
 
@@ -2642,40 +2510,52 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 endfu
 
 fu! myfuncs#wf_complete(arglead, _c, _p) abort
-    " filter the list `flags` so that only the item matching the current
-    " text being completed (`a:arglead`) remains
-
-    let flags = [
-    \             '-min_length',
-    \             '-weighted',
-    \           ]
-
-    return filter(flags, { i,v -> stridx(v, a:arglead) == 0 })
+    " Why not filtering the candidates?{{{
+    "
+    " We don't need to, because the command invoking this completion function is
+    " defined with the attribute `-complete=custom`, not `-complete=customlist`,
+    " which means Vim performs a basic filtering automatically:
+    "
+    "     • each event must begin with `a:arglead`
+    "     • the comparison respects 'ic' and 'scs'
+    " }}}
+    return join(['-min_length', '-weighted'], "\n")
 endfu
 
 fu! myfuncs#word_single(action) abort "{{{1
     let [words, word_single] = [[], []]
-    sil keepj keepp %s/"\w\{-1,}"/\=add(words, submatch(0))/nge
+    sil keepj keepp %s/"\w\{-1,}"/\=add(words, submatch(0))/gen
+
     for a_word in words
         if count(words, a_word) == 1
             call add(word_single, a_word)
         endif
     endfor
-    let pattern = join(word_single, '\|')
+    let pat = join(word_single, '\|')
+
     " Define the dictionary actions which maps a command to an action
     " (passed as an argument to :WordSingle)
-    let actions = {'highlight': 'match SpellBad /' . pattern . '/',
-                 \ 'del_words': 'keepj keepp %s/'  . pattern . '//g',
-                 \ 'del_lines': 'keepj keepp g/'   . pattern . '/delete _'}
-    sil! exe actions[a:action]
+    let actions = {'highlight': 'match SpellBad /' . pat . '/',
+                 \ 'del_words': 'keepj keepp %s/'  . pat . '//ge',
+                 \ 'del_lines': 'keepj keepp g/'   . pat . '/delete _'}
+    sil exe actions[a:action]
+
     " Return the list of unique words as well as their pattern, so that we can
     " perform other custom actions.
-    return [word_single, pattern]
+    return [word_single, pat]
 endfu
 
 fu! myfuncs#word_single_complete(arglead, _c, _p) abort
-    let candidates = ['highlight', 'del_words', 'del_lines']
-    return filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
+    " Why not filtering the candidates?{{{
+    "
+    " We don't need to, because the command invoking this completion function is
+    " defined with the attribute `-complete=custom`, not `-complete=customlist`,
+    " which means Vim performs a basic filtering automatically:
+    "
+    "     • each event must begin with `a:arglead`
+    "     • the comparison respects 'ic' and 'scs'
+    " }}}
+    return join(['highlight', 'del_words', 'del_lines'], "\n")
 endfu
 
 fu! myfuncs#xor_lines(bang) abort range "{{{1

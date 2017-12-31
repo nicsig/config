@@ -7,14 +7,15 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +17 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
-badd +237 ~/Desktop/qflist.vim
-badd +6 ~/Desktop/qfedit.vim
+badd +73 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+badd +16 ~/Desktop/qflist.vim
+badd +5 ~/Desktop/qfedit.vim
 argglobal
 silent! argdel *
 set stal=2
 edit ~/Desktop/qflist.vim
 set splitbelow splitright
+set nosplitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
@@ -34,6 +35,7 @@ normal! zt
 normal! 066|
 tabedit ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
 set splitbelow splitright
+set nosplitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
@@ -45,14 +47,15 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 17 - ((16 * winheight(0) + 15) / 30)
+let s:l = 73 - ((72 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-17
+73
 normal! 0
 tabedit ~/Desktop/qfedit.vim
 set splitbelow splitright
+set nosplitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal

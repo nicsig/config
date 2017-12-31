@@ -53,14 +53,14 @@ endsnippet
 
 # cfu {{{1
 
-snippet cfu "Custom Completion Function" bm
+snippet cfu "Completion function for C-x C-u" bm
 fu! s:${1:complete_strings}(findstart, base) abort
 	if a:findstart
 		return searchpos('${2:"}', 'bnW', line('.'))[1] - 1
 	else
 		let candidates = []
 		${3:sil keepj keepp %s/".\\\{-1,\}"/\=add(candidates, submatch(0))/gne}
-		return filter(candidates, { i,v -> v[:strlen(a:base)-1] ==# a:base })
+		return filter(candidates, stridx(v, a:arglead) == 0 })
 	endif
 endfu
 
@@ -68,6 +68,41 @@ ${4:" make sure s:snr() is defined
 }let &l:cfu = s:snr().'$1'
 $0
 endsnippet
+
+# Why not using  v =~ '^'.a:arglead  ?{{{2
+#
+# To filter the candidates, we could write this condition:
+#          v =~ '^'.a:arglead
+#
+# But instead, we write:
+#          filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
+#
+# Because `a:arglead` could contain special characters.
+# If there are, we don't want them to be interpreted by the regex engine.
+
+# Is there a case-insensitive alternative?{{{2
+#
+# Yes:
+#
+#	  return empty(a:arglead)
+#	  \?         candidates
+#	  \:         filter(candidates, { i,v -> v[:strlen(a:arglead)-1] ==? a:arglead })
+#                                                                      │
+#                                                                      └ ignore case
+#
+# Why treating the case where `a:arglead` is an empty string separately?
+#
+# If `a:arglead` is empty, the test will fail for all candidates, and the completion
+# function will not return anything. I don't want that. I want all candidates.
+# Watch:
+#
+#                        ┌─ ''
+#                        │
+#          v[:strlen(a:arglead)-1]
+#        → v[:-1]
+#        → v
+#          != a:arglead ('')
+
 
 # conceal {{{1
 
@@ -165,48 +200,21 @@ endsnippet
 
 # fu_comp {{{1
 
-snippet fu_comp "Completion Function for a custom command" bm
+snippet fu_comp "Completion function for a custom command" bm
 fu! ${1:completion_function}(arglead, _c, _p) abort
 	let candidates = [ ${2:''} ]
-	return filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
+	return join(candidates, "\n")
 endfu
 $0
 endsnippet
 
-# Why not using  v =~ '^'.a:arglead  ?{{{
+# Is it necessary to filter the candidates?{{{2
 #
-# To filter the candidates, we could write this condition:
-#          v =~ '^'.a:arglead
+# It depends on the attributes given to the command which invokes this function:
 #
-# But instead, we write:
-#          filter(candidates, { i,v -> stridx(v, a:arglead) == 0 })
-#
-# Because `a:arglead` could contain special characters.
-# If there are, we don't want them to be interpreted by the regex engine.
-#}}}
-# Is there a case-insensitive alternative?{{{
-#
-# Yes:
-#
-#	  return empty(a:arglead)
-#	  \?         candidates
-#	  \:         filter(candidates, { i,v -> v[:strlen(a:arglead)-1] ==? a:arglead })
-#                                                                      │
-#                                                                      └ ignore case
-#
-# Why treating the case where `a:arglead` is an empty string separately?
-#
-# If `a:arglead` is empty, the test will fail for all candidates, and the completion
-# function will not return anything. I don't want that. I want all candidates.
-# Watch:
-#
-#                        ┌─ ''
-#                        │
-#          v[:strlen(a:arglead)-1]
-#        → v[:-1]
-#        → v
-#          != a:arglead ('')
-#}}}
+#	  • -complete=custom        Vim filters the candidates automatically
+#	  • -complete=customlist    Vim doesn't
+
 # guard {{{1
 
 # snippet guard "script reload guard" bm
@@ -413,7 +421,7 @@ if !bufexists('${1:buffer name}') | sil file ${1/ /\\ /g} | endif
 sil 0put =${2:put your text}
 sil $d_
 
-nno <buffer> <nowait> <silent> q    :<c-u>close<cr>
+nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
 setl noma ro
 
 $0
@@ -454,7 +462,7 @@ snippet try "try ... catch statement" bm
 try
 	${1:${VISUAL}}
 
-${4:catch ${2:/.*/}
+${4:catch ${2:/^Vim\%((\a\+)\)\?:E123/}
 	${3:echohl ErrorMsg
 	echo v:exception
 	echohl NONE}}

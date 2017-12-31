@@ -11,6 +11,24 @@ snippet bug_report "info when filing bug report for (Neo)Vim" bm
 $0
 endsnippet
 
+# snippet bug_report "info when filing bug report for (Neo)Vim" bm
+#  - \``!v has('nvim') ? 'n' : ''`vim --version\`:
+#    `!v substitute(join(split(execute('version'), '\n')[0:1]), '(.\{-})', '', '')`
+# `!v !has('nvim') ? '' :'
+#   - Vim (version: ) behaves differently?
+# '` - Operating system:
+# `!v matchstr(system('lsb_release -d'), 'Description:\s*\zs.*')[:-2]`
+#  - Terminal emulator:
+#    rxvt-unicode v9.22`!v !empty($TMUX) ? '
+#  - Terminal multiplexer:
+#    '.systemlist('tmux -V')[0] : ''`
+#  - \`$TERM\`:
+#    `echo $TERM`
+#  - Shell:
+#    `!v matchstr(systemlist('zsh --version')[0], '.\{-\}\ze\s*(')`
+# $0
+# endsnippet
+
 # note {{{1
 
 # FIXME:

@@ -64,4 +64,5 @@ augroup filetypedetect
     "         au BufNewFile,BufRead zsh*,zlog*      call s:StarSetf('zsh')
 
     au! BufRead,BufNewFile zsh.snippets set filetype=snippets
+    au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} set filetype=help
 augroup END

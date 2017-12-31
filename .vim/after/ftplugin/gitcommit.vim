@@ -1,15 +1,7 @@
-fu! s:read_last_commit_message() abort
-    let file = $XDG_RUNTIME_DIR.'/vim_last_commit_message'
-    if filereadable(file)
-        exe '0r '.file
-        " need  to write,  otherwise if  we just  execute `:x`,  git doesn't  commit
-        " because, for some reason, it thinks we didn't write anything
-        w
-    endif
-endfu
-call s:read_last_commit_message()
-
-call gitcommit#save_next_message()
+if fnamemodify(expand('%:p'), ':t') ==# 'COMMIT_EDITMSG'
+    call gitcommit#read_last_message()
+    call gitcommit#save_next_message()
+endif
 
 " Mappings {{{1
 

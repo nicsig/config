@@ -85,7 +85,7 @@ Plug 'lifepillar/vim-cheat40'
 Plug 'lacygoill/vim-debug'
 Plug 'junegunn/vim-easy-align'
 Plug 'tpope/vim-eunuch', { 'frozen': 1 }
-Plug 'tpope/vim-fugitive', { 'on': [] }
+Plug 'tpope/vim-fugitive'
 " settings {{{
 
 " We postpone the  loading of some plugins or some  of their configuration after
@@ -96,16 +96,24 @@ augroup lazy_load_plugins
     \|            exe 'au! lazy_load_plugins'
     \|            aug! lazy_load_plugins
 augroup END
+
 "}}}
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 " settings {{{
 
+" Make fzf use Vim's terminal, like it does in Neovim.
+" If you have an issue, see this:
+"
+"     https://github.com/junegunn/fzf/issues/1055
+
+let g:fzf_layout = { 'window': 'split' }
+
 let g:fzf_action = {
-            \   'ctrl-t': 'tab split',
-            \   'ctrl-s': 'split',
-            \   'ctrl-v': 'vsplit',
-            \ }
+\                    'ctrl-t': 'tab split',
+\                    'ctrl-s': 'split',
+\                    'ctrl-v': 'vsplit',
+\                  }
 
 " When we use `:[Fz]Buffers`, and we select a buffer which is already displayed
 " in a window, give the focus to it, instead of loading it in the current one.
@@ -126,7 +134,7 @@ let g:fzf_files_options =
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/limelight.vim', { 'frozen': 1 }
-Plug 'djmoch/vim-makejob', { 'frozen' : 1 }
+Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
@@ -138,8 +146,8 @@ Plug 'lacygoill/vim-matchit'
 "}}}
 Plug 'lacygoill/potion'
 Plug 'tpope/vim-rhubarb'
-Plug 'lacygoill/vim-schlepp', { 'frozen': 1, 'on': [] }
-Plug 'kana/vim-submode'
+Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
+Plug 'kana/vim-submode', { 'frozen': 1}
 Plug 'jebaum/vim-tmuxify', { 'frozen': 1 }
 Plug 'SirVer/ultisnips'
 " settings {{{
@@ -360,7 +368,12 @@ Plug 'lacygoill/vim-statusline'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
-Plug 'lacygoill/vim-selection-ring'
+" TODO:
+" Remove the guard once you have a way to listen to / emulate VisualLeave
+" in Neovim.
+if !has('nvim')
+    Plug 'lacygoill/vim-selection-ring'
+endif
 Plug 'lacygoill/vim-window'
 
 " DGAF:
@@ -1850,7 +1863,10 @@ set wcm=9
 
 set winaltkeys=no
 
-" word wrapping {{{2
+" word / line wrapping {{{2
+
+" don't wrap long lines by default
+set nowrap
 
 " display a character in front of a wrapped line
 set showbreak=↪
@@ -1996,228 +2012,6 @@ let mapleader = "\<s-f16>"
 " same thing for localleader
 let maplocalleader = "\<s-f17>"
 
-" SPACE {{{2
-" . {{{3
-
-" `.` repeats the last edit.
-" But if we want to repeat it on the same text which we've just changed (`@"`),
-" we have to look for it manually.
-"
-" Solution:
-" install a mapping which:
-"
-"         1. puts the last changed text in the search register
-"         2. cuts its next occurrence
-"         3. inserts the previously inserted text and stop insert
-
-" After `<space>.`  has been pressed,  you can repeat  with `.`, <space>  is not
-" needed anymore.
-nno  <expr><silent>  <space>.  <sid>repeat_last_edit_on_last_text()
-
-fu! s:repeat_last_edit_on_last_text() abort
-    " put the last changed text inside the search register, so that we can refer
-    " to it with the text-object `gn`
-
-    "                                      ┌─ last changed text
-    "                                      │
-    let last_text = '\V'.substitute(escape(@", '\'), '\n', '\\n', 'g')
-    " The last changed text may contain newlines, but if it ENDs with one, we
-    " usually don't want it.
-    let last_text = substitute(last_text, '\\n$', '', '')
-    let @/ = last_text
-
-    set hls
-    "               ┌ insert the previously inserted text and stop insert
-    "          ┌────┤
-    return "cgn\<c-@>"
-endfu
-
-" aa    ac    ad    al    an    arglist {{{3
-
-nno  <silent>  <space>aa  :<c-u>argedit %<cr>
-
-" load Current argument
-nno  <silent>  <space>ac  :<c-u>argument<cr>
-
-" Delete current argument
-nno  <silent>  <space>ad  :<c-u>.argdelete<cr>
-
-" create Local arglist (by copying the global one)
-nno  <silent>  <space>al  :<c-u>arglocal<cr>
-
-" start New arglist
-"
-" Define a new argument list, which is local to the
-" current window, and containing only the current buffer.
-" This causes the buffer to be reloaded.
-" Add a bang to `:arglocal` to discard unsaved changes in the current buffer.
-nno  <silent>  <space>an  :<c-u>arglocal %<cr>
-
-" ec                            edit vimrc {{{3
-
-nno  <silent>  <space>ec  :<c-u>call myfuncs#vimrc_edit()<cr>
-
-" ef  EF                        look for file                      {{{3
-
-" Define `find_file()` which installs 2 mappings for a given cmd:
-"
-"         • one to search from the working directory (lowercase)
-"         • one to search from the directory of the current buffer (uppercase)
-
-fu! s:find_file(lhs, cmd) abort
-    exe 'nno  <space>'.toupper(a:lhs[0].a:lhs[1]).'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
-    " TODO:
-    " `:drop`  is  special compared  to  `:find`  &friends, because  it  doesn't
-    " complete the path with values from &path.
-    " For the moment,  we complete the path  with `**`, but we  should tweak the
-    " code so that it tries to complete with all paths in &path.
-    if a:cmd ==# 'dr'
-        exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' **/*'
-    else
-        exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' *'
-    endif
-
-    " Sometimes, I think I hit `SPC Et` instead of `SPC ET`.
-    " If `SPC Et` isn't a mapping, the `t` command is executed:
-    " annoying. To make sure it doesn't happen, we also define the following
-    " mappings in case we've released shift too early.
-    exe 'nno  <space>'.toupper(a:lhs[0]).a:lhs[1].'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
-    " We may miss shift on the 1st key, instead of the 2nd.
-    exe 'nno  <space>'.a:lhs[0].toupper(a:lhs[1]).'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
-endfu
-
-" Install a bunch of mappings
-call s:find_file('ef', 'fin')
-call s:find_file('es', 'sf')
-call s:find_file('ev', 'vert sf')
-call s:find_file('et', 'tabf')
-call s:find_file('ew', 'dr')
-"                  │
-"                  └─ window
-"
-"                     if the file is already displayed in a window,
-"                     `:drop` gives the focus to it
-"
-"                     otherwise, `:drop` opens the file in the current window
-"
-"                     Alternative:
-"                     fzf-vim provides `:FzWindows`
-
-" f                             fuzzy search {{{3
-
-" Mnemonics:
-" SPC fl  = l for :ls (listing)
-" SPC fr  = most Recently used (files and buffers)
-" SPC fgc = Git Changed files
-
-" `:FzSnippets` only returns snippets whose tab trigger contains the text
-" before the cursor.
-
-fu! s:fuzzy_mappings() abort
-
-    let fuzzy_mappings = {
-                         \ 'a' : 'Ag',
-                         \ 'bt': 'BTags',
-                         \ 'f' : 'Files',
-                         \ 'gf': 'GFiles',
-                         \ 'gc': 'GFiles?',
-                         \ 'ht': 'Helptags',
-                         \ 'l' : 'Buffers',
-                         \ 'm' : 'Maps',
-                         \ 'M' : 'Marks',
-                         \ 'r' : 'History',
-                         \ 's' : 'Snippets',
-                         \ 't' : 'Tags',
-                         \ 'w' : 'Windows',
-                         \ }
-
-    for [l:char, cmd] in items(fuzzy_mappings)
-        exe 'nno  <space>f'.l:char.'  :<c-u>Fz'.cmd.'<cr>'
-    endfor
-endfu
-
-call s:fuzzy_mappings()
-
-" To use `:FzBCommits` and `:FzCommits`, we first need to be in the working
-" tree of the repo:
-"
-"     - on which the current file belong
-"
-"     - in which we are interested;
-"       let's say, again, the one where the current file belong
-
-nno  <silent>  <space>fbc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzBCommits<cr>
-nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
-
-" Fuzzy search mappings from insert / visual / operator-pending mode.
-
-" C-g is often used as a prefix to create mappings in insert mode.
-" So, to maintain some consistency, we use it to create a fuzzy search mapping
-" in insert mode.
-"
-" We can safely do it without overriding / shadowing and existing mapping,
-" because it's not present in:
-"
-"     :h i_^g C-d
-"     :echo map(taglist('^i_CTRL-G'), { i,v -> v.name })
-"
-" There is no default equivalent for visual mode, but we often use `m` for
-" visual mode mappings. So, here again, we'll use `m` as a prefix.
-
-imap  <c-g>m  <plug>(fzf-maps-i)
-xmap  mm      <plug>(fzf-maps-x)
-omap  m       <plug>(fzf-maps-o)
-
-" OLD CODE:
-"
-" Les 2 raccourcis qui suivent permettent de chercher un buffer via le
-" wildmenu. On peut donner un bout du nom du buffer qu'on cherche et
-" développer via le wildcharm = <tab>.
-" nno <space>b :<c-u>buffer *
-"
-" Ce mapping fait la même chose mais au lieu d'afficher le buffer trouvé dans
-" la fenêtre active, il passe le focus à une fenêtre qui l'affiche déjà s'il
-" y en a une, autrement il ouvre un viewport horizontal.
-" Pour un viewport vertical:
-" nno <space>B :vert sbuffer *
-" nno <space>B :<c-u>sbuffer *
-
-" o                             TOC {{{3
-
-" Source:
-" https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
-
-" In Neovim, they use `gO`. Should we do the same?
-" Pro: consistency
-" Con: harder to type
-nno  <silent>  <space>o  :<c-u>call myfuncs#tab_toc()<cr>
-
-" p                             gqip {{{3
-
-"                                            ┌─ don't write:
-"                                            │
-"                                            │      'sil norm <plug>(my_gq)ip'
-"                                            │
-"                                            │  for some reason, it doesn't work
-"                                            │
-nno  <silent>  <space>p  :<c-u>exe "sil norm \<plug>(my_gq)ip" <bar> sil update<cr>
-
-" ra                            Ranger FM {{{3
-
-nno  <space>ra  :<c-u>call myfuncs#ranger_file_manager()<cr>
-
-" s                             saiw {{{3
-
-nmap  <space>s  saiw
-
-" t                             new tab page {{{3
-
-" nno <space><tab>    :<c-u>-tabnew<cr>
-nno  <space>t  :<c-u>-tabnew<cr>
-"                    │
-"                    └ useful to get back to our original tab page
-"                      when we will close this new one
-
 " COMMAND LINE {{{2
 " C-r C-l       insert current line {{{3
 
@@ -2280,15 +2074,6 @@ cno  <c-x>k  <c-k>
 " If you add another mapping, try to not break undo sequence. Thanks.
 
 " C-g             (prefix) {{{3
-" <  > {{{4
-"
-" We lost the ability to change the level of indentation on the line.
-" Because we prefer to use `C-d` and `C-t` with their readline meanings.
-" So, we remap the Vim default `C-d` and `C-t`, to `C-g <` and `C-g >`.
-" Besides, these key sequences make much more sense, imho.
-ino  <c-g><  <c-d>
-ino  <c-g>>  <c-t>
-
 " C-h {{{4
 "
 " Sometimes, we want to do this:
@@ -2468,6 +2253,8 @@ fu! s:complete_signature() abort
     let signature = get(filter(readfile($VIMRUNTIME.'/doc/eval.txt'),
     \                          {i,v -> v =~ '^'.func_name.'('}),
     \                   0, '')
+    " needed, for example, for `deepcopy()`
+    let signature = matchstr(signature, '.\{-})')
     let new_line = substitute(getline('.'), func_name.'\%[()]', signature, '')
     call timer_start(0, {-> setline(line('.'), new_line)})
     return ''
@@ -2492,54 +2279,6 @@ endfu
 " the last word before the cursor.
 
 ino  <silent>  <c-x><c-t>  <c-r>=myfuncs#keyword_custom(' -')<cr><c-x><c-t>
-
-" j k     duplicate char below/above {{{4
-" Why these mappings? {{{
-"
-" • They are more consistent than the default ones.
-" • They are easier to repeat (via `vim-submode`).
-"}}}
-" What's the issue with the default ones ?{{{
-"
-" By default, Vim uses `C-e` and `C-y` in inconsistent ways:
-"
-"    i^e:            duplicate char below, or exit completion menu
-"                    ✘ 2 unrelated functionalities
-"                    ✘ shadows `end-of-line` in `vim-readline`
-"
-"    i^y:            duplicate char above
-"                    ✘ hard to remember;
-"                      it would be easier if Vim used `k` prefixed with some key
-"
-"    i^x^e  i^x^y:   scroll window
-"                    ✘ ^x is usually used to complete text
-"
-"                    ✘ usually Vim uses `j` and `k` in mappings which must interact
-"                      with a line below/above (example: gj, gk)
-"
-"                    ✘ i^x^e doesn't conflict with our custom c^x^e, but still
-"                      it's a little confusing
-"}}}
-call submode#enter_with('char-around', 'i', 'r', '<c-x>j', '<plug>(duplicate-char-below)' )
-call submode#map('char-around', 'i', 'r', 'j', '<plug>(duplicate-char-below)')
-ino  <expr>  <plug>(duplicate-char-below)  <sid>duplicate_char_around(0)
-
-call submode#enter_with('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-char-above)' )
-call submode#map('char-around', 'i', 'r', 'k', '<plug>(duplicate-char-above)')
-ino  <expr>  <plug>(duplicate-char-above)  <sid>duplicate_char_around(1)
-
-fu! s:duplicate_char_around(above) abort
-    " By default, `c-y` only duplicate the character right above.
-    " If there's nothing, but there IS a character on the 2nd line above,
-    " `c-y` ignores it.
-    "
-    " We use this function to reimplement `c-y` (and `c-e`) in a more powerful way.
-
-    let pos  = virtcol('.')
-    let line = search('\v%'.pos.'v.*\S', (a:above ? 'b' : '').'nW')
-    let char = matchstr(getline(line), '\v%'.pos.'v.')
-    return char
-endfu
 
 " C-z             easy C-x C-p {{{3
 
@@ -2594,6 +2333,225 @@ fu! s:indent_before_backslash() abort
 endfu
 
 " NORMAL {{{2
+" SPC                 (prefix) {{{3
+" . {{{4
+
+" `.` repeats the last edit.
+" But if we want to repeat it on the same text which we've just changed (`@"`),
+" we have to look for it manually.
+"
+" Solution:
+" install a mapping which:
+"
+"         1. puts the last changed text in the search register
+"         2. cuts its next occurrence
+"         3. inserts the previously inserted text and stop insert
+
+" After `<space>.`  has been pressed,  you can repeat  with `.`, <space>  is not
+" needed anymore.
+nno  <expr><silent>  <space>.  <sid>repeat_last_edit_on_last_text()
+
+fu! s:repeat_last_edit_on_last_text() abort
+    " put the last changed text inside the search register, so that we can refer
+    " to it with the text-object `gn`
+
+    "                                      ┌─ last changed text
+    "                                      │
+    let last_text = '\V'.substitute(escape(@", '\'), '\n', '\\n', 'g')
+    " The last changed text may contain newlines, but if it ENDs with one, we
+    " usually don't want it.
+    let last_text = substitute(last_text, '\\n$', '', '')
+    let @/ = last_text
+
+    set hls
+    "               ┌ insert the previously inserted text and stop insert
+    "          ┌────┤
+    return "cgn\<c-@>"
+endfu
+
+" aa    ac    ad    al    an    arglist {{{4
+
+nno  <silent>  <space>aa  :<c-u>argedit %<cr>
+
+" load Current argument
+nno  <silent>  <space>ac  :<c-u>argument<cr>
+
+" Delete current argument
+nno  <silent>  <space>ad  :<c-u>.argdelete<cr>
+
+" create Local arglist (by copying the global one)
+nno  <silent>  <space>al  :<c-u>arglocal<cr>
+
+" start New arglist
+"
+" Define a new argument list, which is local to the
+" current window, and containing only the current buffer.
+" This causes the buffer to be reloaded.
+" Add a bang to `:arglocal` to discard unsaved changes in the current buffer.
+nno  <silent>  <space>an  :<c-u>arglocal %<cr>
+
+" ec                            edit vimrc {{{4
+
+nno  <silent>  <space>ec  :<c-u>call myfuncs#vimrc_edit()<cr>
+
+" ef  EF                        look for file                      {{{4
+
+" Define `find_file()` which installs 2 mappings for a given cmd:
+"
+"         • one to search from the working directory (lowercase)
+"         • one to search from the directory of the current buffer (uppercase)
+
+fu! s:find_file(lhs, cmd) abort
+    exe 'nno  <space>'.toupper(a:lhs[0].a:lhs[1]).'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
+    " TODO:
+    " `:drop`  is  special compared  to  `:find`  &friends, because  it  doesn't
+    " complete the path with values from &path.
+    " For the moment,  we complete the path  with `**`, but we  should tweak the
+    " code so that it tries to complete with all paths in &path.
+    if a:cmd ==# 'dr'
+        exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' **/*'
+    else
+        exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' *'
+    endif
+
+    " Sometimes, I think I hit `SPC Et` instead of `SPC ET`.
+    " If `SPC Et` isn't a mapping, the `t` command is executed:
+    " annoying. To make sure it doesn't happen, we also define the following
+    " mappings in case we've released shift too early.
+    exe 'nno  <space>'.toupper(a:lhs[0]).a:lhs[1].'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
+    " We may miss shift on the 1st key, instead of the 2nd.
+    exe 'nno  <space>'.a:lhs[0].toupper(a:lhs[1]).'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
+endfu
+
+" Install a bunch of mappings
+call s:find_file('ef', 'fin')
+call s:find_file('es', 'sf')
+call s:find_file('ev', 'vert sf')
+call s:find_file('et', 'tabf')
+call s:find_file('ew', 'dr')
+"                  │
+"                  └─ window
+"
+"                     if the file is already displayed in a window,
+"                     `:drop` gives the focus to it
+"
+"                     otherwise, `:drop` opens the file in the current window
+"
+"                     Alternative:
+"                     fzf-vim provides `:FzWindows`
+
+" f                             fuzzy search {{{4
+
+" Mnemonics:
+" SPC fl  = l for :ls (listing)
+" SPC fr  = most Recently used (files and buffers)
+" SPC fgc = Git Changed files
+
+" `:FzSnippets` only returns snippets whose tab trigger contains the text
+" before the cursor.
+
+fu! s:fuzzy_mappings() abort
+
+    let fuzzy_mappings = {
+                         \ 'a' : 'Ag',
+                         \ 'bt': 'BTags',
+                         \ 'f' : 'Files',
+                         \ 'gf': 'GFiles',
+                         \ 'gc': 'GFiles?',
+                         \ 'ht': 'Helptags',
+                         \ 'l' : 'Buffers',
+                         \ 'm' : 'Maps',
+                         \ 'M' : 'Marks',
+                         \ 'r' : 'History',
+                         \ 's' : 'Snippets',
+                         \ 't' : 'Tags',
+                         \ 'w' : 'Windows',
+                         \ }
+
+    for [l:char, cmd] in items(fuzzy_mappings)
+        exe 'nno  <space>f'.l:char.'  :<c-u>Fz'.cmd.'<cr>'
+    endfor
+endfu
+
+call s:fuzzy_mappings()
+
+" To use `:FzBCommits` and `:FzCommits`, we first need to be in the working
+" tree of the repo:
+"
+"     - on which the current file belong
+"
+"     - in which we are interested;
+"       let's say, again, the one where the current file belong
+
+nno  <silent>  <space>fbc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzBCommits<cr>
+nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
+
+" Fuzzy search mappings from insert / visual / operator-pending mode.
+
+" C-g is often used as a prefix to create mappings in insert mode.
+" So, to maintain some consistency, we use it to create a fuzzy search mapping
+" in insert mode.
+"
+" We can safely do it without overriding / shadowing and existing mapping,
+" because it's not present in:
+"
+"     :h i_^g C-d
+"     :echo map(taglist('^i_CTRL-G'), { i,v -> v.name })
+"
+" There is no default equivalent for visual mode, but we often use `m` for
+" visual mode mappings. So, here again, we'll use `m` as a prefix.
+
+imap  <c-g>m  <plug>(fzf-maps-i)
+xmap  mm      <plug>(fzf-maps-x)
+omap  m       <plug>(fzf-maps-o)
+
+" OLD CODE:
+"
+" Les 2 raccourcis qui suivent permettent de chercher un buffer via le
+" wildmenu. On peut donner un bout du nom du buffer qu'on cherche et
+" développer via le wildcharm = <tab>.
+" nno <space>b :<c-u>buffer *
+"
+" Ce mapping fait la même chose mais au lieu d'afficher le buffer trouvé dans
+" la fenêtre active, il passe le focus à une fenêtre qui l'affiche déjà s'il
+" y en a une, autrement il ouvre un viewport horizontal.
+" Pour un viewport vertical:
+" nno <space>B :vert sbuffer *
+" nno <space>B :<c-u>sbuffer *
+
+" o                             TOC {{{4
+
+" Source:
+" https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
+
+" In Neovim, they use `gO`. Should we do the same?
+" Pro: consistency
+" Con: harder to type
+nno  <silent>  <space>o  :<c-u>call myfuncs#tab_toc()<cr>
+
+" p                             gqip {{{4
+
+"                                            ┌─ don't write:
+"                                            │
+"                                            │      'sil norm <plug>(my_gq)ip'
+"                                            │
+"                                            │  for some reason, it doesn't work
+"                                            │
+nno  <silent>  <space>p  :<c-u>exe "sil norm \<plug>(my_gq)ip" <bar> sil update<cr>
+
+" ra                            Ranger FM {{{4
+
+nno  <space>ra  :<c-u>call myfuncs#ranger_file_manager()<cr>
+
+" s                             saiw {{{4
+
+nmap  <space>s  saiw
+
+" t                             new tab page {{{4
+
+" nno <space><tab>    :<c-u>tabnew<cr>
+nno  <space>t  :<c-u>tabnew<cr>
+
 " [    ]              (prefix) {{{3
 " ]H    ]u                      move to Point Of Interest {{{4
 
@@ -2724,12 +2682,7 @@ xno  <silent>  g<c-l>  :Cloc<cr>
 "               └─ the Changed text
 nno  g<c-v>  `[v`]
 
-" g\t         search todo/fixme (Tags) {{{4
-
-nno  <silent>  g\t  :<c-u>call myfuncs#search_todo()<cr>
-"               ^✘ don't use `/`, too painful
-
-" g: {{{4
+" g:: {{{4
 
 " useful to display the subset of lines in the buffer containing the last search pattern
 " equivalent to:
@@ -2750,7 +2703,7 @@ fu! s:all_matches_in_buffer() abort
         lvim //g %
         call winrestview(view)
         wincmd p
-        if &l:buftype ==# 'quickfix'
+        if &bt ==# 'quickfix'
             call qf#set_matches('vimrc:all_matches_in_buffer', 'Conceal', 'location')
             call qf#create_matches()
         endif
@@ -2910,30 +2863,6 @@ nno  <silent>  gx  :<c-u>call myfuncs#open_gx(0)<cr>
 " a tmux pane.
 nno  <silent>  gX  :<c-u>call myfuncs#open_gx(1)<cr>
 
-" C-g                 (prefix) {{{3
-" j  k          scroll window {{{4
-
-" Make `i^gj` and `i^gk` repeatable with `j` and `k`.
-
-call submode#enter_with('scroll-window', 'n', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
-call submode#map('scroll-window', 'n', 'r', 'j', '<plug>(scroll-window-down)')
-nno  <silent>  <plug>(scroll-window-down)  <c-e>:redraw<cr>
-"                                               │
-"                                               └ needed because of 'lz'
-
-call submode#enter_with('scroll-window', 'n', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
-call submode#map('scroll-window', 'n', 'r', 'k', '<plug>(scroll-window-up)')
-nno  <silent>  <plug>(scroll-window-up)  <c-y>:redraw<cr>
-
-" Do the same for insert mode.
-call submode#enter_with('scroll-window', 'i', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
-call submode#map('scroll-window', 'i', 'r', 'j', '<plug>(scroll-window-down)')
-ino  <plug>(scroll-window-down)  <c-x><c-e>
-
-call submode#enter_with('scroll-window', 'i', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
-call submode#map('scroll-window', 'i', 'r', 'k', '<plug>(scroll-window-up)')
-ino  <plug>(scroll-window-up)  <c-x><c-y>
-
 " m                   (prefix) {{{3
 " m/  m?         put current location in loclist {{{4
 
@@ -2994,6 +2923,55 @@ fu! s:undo_until_prev_save() abort
         return my_lib#catch_error()
     endtry
 endfu
+
+" z                   (prefix) {{{3
+" z= {{{4
+
+nmap  z=                            <plug>(my_z_equal)
+nno   <silent>  <plug>(my_z_equal)  :<c-u>call <sid>my_z_equal()<cr>
+
+fu! s:my_z_equal() abort
+    let spell_save = &l:spell
+    try
+        call feedkeys(":setl spell\<cr>z=", 'in')
+    catch
+        return my_lib#catch_error()
+    finally
+        call timer_start(0, {-> execute('let &l:spell = '.spell_save, '')})
+    endtry
+    sil! call repeat#set("\<plug>(my_z_equal)")
+endfu
+
+" zd {{{4
+
+" make `zd` repeatable
+nno  <silent>  zd  zd:sil! call repeat#set('zd')<cr>
+
+" zf {{{4
+
+nno  <silent>  zf  :<c-u>set opfunc=<sid>my_zf<cr>g@
+xno  <silent>  zf  :<c-u>call <sid>my_zf('vis')<cr>
+
+fu! s:my_zf(type) abort
+    let cml = !empty(&l:cms) ? split(&l:cms, '%')[0] : ''
+    let pat = '^\s*'.cml.'.*\zs'.cml.'\ze\s*{'.'{{'
+    if a:type ==# 'vis'
+        norm! '<V'>zf
+        sil! exe 'keepj keepp ''<s/'.pat.'//'
+    else
+        norm! '[zf']
+        sil! exe 'keepj keepp ''[s/'.pat.'//'
+    endif
+endfu
+
+" zT               search todo/fixme (Tags) {{{4
+
+nno  <silent>  zT  :<c-u>call myfuncs#search_todo()<cr>
+
+" zv  zV {{{4
+
+nno  zv  zMzvzz
+nno  zV  zv
 
 " |                   (prefix) {{{3
 " |C  |F     open html file in firefox/chrome {{{4
@@ -3057,6 +3035,17 @@ nno  <nowait><silent>  <bar>x  :<c-u>call myfuncs#tmux_last_command()<cr>
 nno  <nowait><silent>  <bar>X  :<c-u>call myfuncs#tmux_current_command()<cr>
 
 " -                   (prefix) {{{3
+" -a  -8           ascii / bytes info {{{4
+
+" We remap `-a` to a function of the unicode.vim plugin which gives us more info
+" about the  character under the  cursor. In particular, its unicode  name, html
+" entity (&entity_name; OR &#entity_number;), and digraph inside parentheses (if
+" there's one defined).
+nmap  -a  <plug>(UnicodeGA)
+
+" We remap `-8` to `g8` for consistency.
+nno  -8  g8
+
 " -f               show filetype {{{4
 
 nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : "\u2205") <bar> echohl NONE <cr>
@@ -3110,6 +3099,9 @@ fu! s:op_source(type, ...) abort
     let reg_save = [ getreg('"'), getregtype('"') ]
 
     try
+        set cb-=unnamed cb-=unnamedplus
+        set selection=inclusive
+
         if a:type ==# 'char'
             sil norm! `[v`]y
         elseif a:type ==# 'line'
@@ -3223,7 +3215,7 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
 " We remap them to <tab> and <s-tab>.
 
 if !has('nvim')
-    cno  <expr>  <tab>    <sid>c_tab(1)
+    " cno  <expr>  <tab>    <sid>c_tab(1)
     cno  <expr>  <s-tab>  <sid>c_tab(0)
 
     fu! s:c_tab(fwd) abort
@@ -3363,18 +3355,28 @@ nno  <m-p>  ['
 
 " make frequent motions repeatable {{{3
 
-nno  <silent>  [(  :<c-u>call myfuncs#be_repeatable('[(')<cr>
-nno  <silent>  [)  :<c-u>call myfuncs#be_repeatable('[)')<cr>
-nno  <silent>  ](  :<c-u>call myfuncs#be_repeatable('](')<cr>
-nno  <silent>  ])  :<c-u>call myfuncs#be_repeatable('])')<cr>
+fu! s:be_repeatable(key) abort
+    let g:motion_to_repeat = a:key
 
-nno  <silent>  [{  :<c-u>call myfuncs#be_repeatable('[{')<cr>
-nno  <silent>  [}  :<c-u>call myfuncs#be_repeatable('[}')<cr>
-nno  <silent>  ]{  :<c-u>call myfuncs#be_repeatable(']{')<cr>
-nno  <silent>  ]}  :<c-u>call myfuncs#be_repeatable(']}')<cr>
+    let keys = a:key ==# '[S' || a:key ==# ']S'
+    \?             '5'.(a:key ==# '[S' ? 'zh' : 'zl')
+    \:             v:count1.a:key.'zv'
 
-nno  <silent>  ]c  :<c-u>call myfuncs#be_repeatable(']c')<cr>
-nno  <silent>  [c  :<c-u>call myfuncs#be_repeatable('[c')<cr>
+    call feedkeys(keys, 'int')
+endfu
+
+nno  <silent>  [(  :<c-u>call <sid>be_repeatable('[(')<cr>
+nno  <silent>  [)  :<c-u>call <sid>be_repeatable('[)')<cr>
+nno  <silent>  ](  :<c-u>call <sid>be_repeatable('](')<cr>
+nno  <silent>  ])  :<c-u>call <sid>be_repeatable('])')<cr>
+
+nno  <silent>  [{  :<c-u>call <sid>be_repeatable('[{')<cr>
+nno  <silent>  [}  :<c-u>call <sid>be_repeatable('[}')<cr>
+nno  <silent>  ]{  :<c-u>call <sid>be_repeatable(']{')<cr>
+nno  <silent>  ]}  :<c-u>call <sid>be_repeatable(']}')<cr>
+
+nno  <silent>  ]c  :<c-u>call <sid>be_repeatable(']c')<cr>
+nno  <silent>  [c  :<c-u>call <sid>be_repeatable('[c')<cr>
 
 " Why the `[S` and `]S` mappings?{{{
 "
@@ -3385,31 +3387,13 @@ nno  <silent>  [c  :<c-u>call myfuncs#be_repeatable('[c')<cr>
 "}}}
 "               ┌ mnemonics: Scroll
 "               │
-nno  <silent>  [S  :<c-u>call myfuncs#be_repeatable('[S')<cr>
-nno  <silent>  ]S  :<c-u>call myfuncs#be_repeatable(']S')<cr>
-nno  <silent>  [s  :<c-u>call myfuncs#be_repeatable('[s')<cr>
-nno  <silent>  ]s  :<c-u>call myfuncs#be_repeatable(']s')<cr>
+nno  <silent>  [S  :<c-u>call <sid>be_repeatable('[S')<cr>
+nno  <silent>  ]S  :<c-u>call <sid>be_repeatable(']S')<cr>
+nno  <silent>  [s  :<c-u>call <sid>be_repeatable('[s')<cr>
+nno  <silent>  ]s  :<c-u>call <sid>be_repeatable(']s')<cr>
 
-" Why the `[Z` and `]Z` mappings?{{{
-"
-" By default the cursor is moved to the previous/next fold:
-"
-"     • no matter its level
-"       with `zj` and `zk`
-"
-"     • on the condition its level is greater than the current one
-"       with `[z` and `]z`
-"
-" I don't like the asymmetry between the 2 pairs of mappings.
-" I prefer to use `[z`, `]z` and `[Z`, `]Z`.
-"}}}
-nno  <silent>  [Z  :<c-u>call myfuncs#be_repeatable('[Z')<cr>
-nno  <silent>  ]Z  :<c-u>call myfuncs#be_repeatable(']Z')<cr>
-nno  <silent>  [z  :<c-u>call myfuncs#be_repeatable('[z')<cr>
-nno  <silent>  ]z  :<c-u>call myfuncs#be_repeatable(']z')<cr>
-
-nno  <silent>  g,  :<c-u>call myfuncs#be_repeatable('g;')<cr>
-nno  <silent>  g;  :<c-u>call myfuncs#be_repeatable('g,')<cr>
+nno  <silent>  g,  :<c-u>call <sid>be_repeatable('g;')<cr>
+nno  <silent>  g;  :<c-u>call <sid>be_repeatable('g,')<cr>
 
 " =A                  toggle alignment {{{3
 
@@ -3438,22 +3422,6 @@ nno  <silent>  <plug>(myfuncs_box_destroy)  :<c-u>call myfuncs#box_destroy()<cr>
 " candidate.
 
 nno  <silent>  =d  :<c-u>call myfuncs#fix_display()<cr>
-
-" @?  @#              ascii / bytes info {{{3
-
-" We remap ga to a function of the unicode.vim plugin which gives us more
-" info about the character under the cursor. In particular, its unicode name,
-" html entity (&entity_name; OR &#entity_number;), and digraph inside parentheses
-" (if there's one defined).
-nmap  @?  <plug>(UnicodeGA)
-
-" We remap `@#` to `g8` for consistency.
-" mnemonics: # = nr sign = nr of bytes
-nno  @#  g8
-
-" @_                  edit help files {{{3
-
-nno  <silent>  @_  :<c-u>call myfuncs#edit_help_file()<cr>
 
 " SPC  SPC   za {{{3
 
@@ -3900,85 +3868,33 @@ nno  Y  y$
 " So, we use an  expression, to make sure that they are consecutive.
 xno  <expr>  Y  '$"'.v:register.'y'
 
-" yc/ym    yC/yM      yank (non) commented/matching lines {{{3
+" yc / yC    ym / yM      yank comments / Code  matching / non-matching lines {{{3
 
-" yank comments
-nno  <silent>  yc  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
-                   \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-
-" yank Code
-"                     don't yank where a commented line is found ┐
-"                                                                │
-nno  <silent>  yC  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
-                   \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-
-" yank all the lines matching the pattern inside the search register
-nno  <silent>  ym  :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
-                   \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-
-" yank all the lines which do NOT match the pattern inside the search register
-nno  <silent>  yM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
-                   \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-
-" my comments
+" comments
+nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
+                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  myc  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
                     \<bar> call myfuncs#op_yank_matches('vis')<cr>
 
-" my Code
+" Code
+"                      don't yank where a commented line is found ┐
+"                                                                 │
+nno  <silent>  yC   :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
+                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  myC  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
                     \<bar> call myfuncs#op_yank_matches('vis')<cr>
 
-" my matches
+" lines matching last search
+nno  <silent>  ym   :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
+                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  mym  :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
                     \<bar> call myfuncs#op_yank_matches('vis')<cr>
 
-" my non-matches
+" lines which do NOT match last search
+nno  <silent>  yM   :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
+                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
                     \<bar> call myfuncs#op_yank_matches('vis')<cr>
-
-" z= {{{3
-
-nmap  z=                            <plug>(my_z_equal)
-nno   <silent>  <plug>(my_z_equal)  :<c-u>call <sid>my_z_equal()<cr>
-
-fu! s:my_z_equal() abort
-    let spell_save = &l:spell
-    try
-        call feedkeys(":setl spell\<cr>z=", 'in')
-    catch
-        return my_lib#catch_error()
-    finally
-        call timer_start(0, {-> execute('let &l:spell = '.spell_save, '')})
-    endtry
-    sil! call repeat#set("\<plug>(my_z_equal)")
-endfu
-
-" zd {{{3
-
-" make `zd` repeatable
-nno  <silent>  zd  zd:sil! call repeat#set('zd')<cr>
-
-" zf {{{3
-
-nno  <silent>  zf  :<c-u>set opfunc=<sid>my_zf<cr>g@
-xno  <silent>  zf  :<c-u>call <sid>my_zf('vis')<cr>
-
-fu! s:my_zf(type) abort
-    let cml = !empty(&l:cms) ? split(&l:cms, '%')[0] : ''
-    let pat = '^\s*'.cml.'.*\zs'.cml.'\ze\s*{'.'{{'
-    if a:type ==# 'vis'
-        norm! '<V'>zf
-        sil! exe 'keepj keepp ''<s/'.pat.'//'
-    else
-        norm! '[zf']
-        sil! exe 'keepj keepp ''[s/'.pat.'//'
-    endif
-endfu
-
-" zv  zV {{{3
-
-nno  zv  zMzvzz
-nno  zV  zv
 
 " OBJECTS {{{2
 " i% {{{3
@@ -4271,10 +4187,10 @@ xno  <expr>  g<c-x>  <sid>niceblock('g C-x')
 
 " with this mapping, we can always access the last text we deleted in visual
 " mode, from the `v` register
-xno  <expr><silent>  d  'd'.execute('let @v=@"')
+xno  <expr><silent>  d  'd'.timer_start(0, {-> execute('let @v=@"')})[-1]
 
 " same thing when we yank
-xno  <expr><silent>  y  'y'.execute('let @v=@"')
+xno  <expr><silent>  y  'y'.timer_start(0, {-> execute('let @v=@"')})[-1]
 
 " gj          join lines {{{3
 
@@ -4376,7 +4292,7 @@ com! -bar -nargs=0 CleanRegisters call myfuncs#clean_reg()
 
 " CountPatterns {{{2
 
-com! -range=% -nargs=+ -complete=customlist,myfuncs#patterns_favorite CountPatterns
+com! -range=% -nargs=+ -complete=custom,myfuncs#patterns_favorite CountPatterns
 \|                      call myfuncs#patterns_count(<line1>, <line2>, <f-args>)
 
 " CV    Capture Variable {{{2
@@ -4589,10 +4505,10 @@ com! -bar -bang -nargs=1 JoinBlocks
 
 " MRU {{{2
 
-com! -bar -nargs=1 -complete=customlist,myfuncs#mru_complete MRE call myfuncs#mru(<f-args>, 'edit')
-com! -bar -nargs=1 -complete=customlist,myfuncs#mru_complete MRS call myfuncs#mru(<f-args>, 'split')
-com! -bar -nargs=1 -complete=customlist,myfuncs#mru_complete MRV call myfuncs#mru(<f-args>, 'vsplit')
-com! -bar -nargs=1 -complete=customlist,myfuncs#mru_complete MRT call myfuncs#mru(<f-args>, 'tabedit')
+com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRE call myfuncs#mru(<f-args>, 'edit')
+com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRS call myfuncs#mru(<f-args>, 'split')
+com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRV call myfuncs#mru(<f-args>, 'vsplit')
+com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRT call myfuncs#mru(<f-args>, 'tabedit')
 
 " OnlySelection {{{2
 
@@ -4880,7 +4796,7 @@ com! -bar -range=1 -nargs=1 -complete=command Verbose
 "         deletion
 "         deletion of the whole line
 
-com! -bar -nargs=1 -complete=customlist,myfuncs#word_single_complete WordSingle call myfuncs#word_single(<q-args>)
+com! -bar -nargs=1 -complete=custom,myfuncs#word_single_complete WordSingle call myfuncs#word_single(<q-args>)
 
 " WebPage {{{2
 
@@ -4901,7 +4817,7 @@ com! -bar -nargs=1 WebPageRead call myfuncs#webpage_read(<q-args>)
 com! -bar
 \    -nargs=?
 \    -range=%
-\    -complete=customlist,myfuncs#wf_complete
+\    -complete=custom,myfuncs#wf_complete
 \            WordFrequency
 \            call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
 
@@ -5332,17 +5248,6 @@ if !empty($MAN_PN)
     augroup END
 endif
 
-" Notes {{{2
-
-augroup notes
-    au!
-    " FIXME:
-    " Get rid of this. Learn folding based on an expression.
-
-    " automatically fold some files via `myfuncs#fold_help()`
-    au BufWinEnter $HOME/Dropbox/{notes,galore} call myfuncs#fold_help()
-augroup END
-
 " Read exotic files {{{2
 
 " The following autocmds allow us to read .doc, .odt, .odp, .pdf and .rtf
@@ -5552,8 +5457,8 @@ endfu
 "
 " We should always use the qfl. The latter gives us more commands to interact.
 " Exception:
-" If you need custom syntax highlighting,  and some kind of interactivity that a
-" qf window can't provide (think :PlugUpdate).
+" If you need some  kind of interactivity that a qf  window can't provide (think
+" :PlugUpdate).
 "
 " 2 - solve the following pbs:
 "
@@ -5589,7 +5494,7 @@ endfu
 "             let top   = search('\v^(.*'.c.'.)@!.*$\n.*\zs'.c, flags)
 "
 "             return a:fwd ? ((bot < top ? bot : top) - line('.')).'j'
-"                         \        : (line('.') - (bot > top ? bot : top)).'k'
+"             \                    : (line('.') - (bot > top ? bot : top)).'k'
 "         endfu
 "
 "         nno <expr> \j    "m'".<sid>vertical_jump(1)
@@ -5769,11 +5674,10 @@ endfu
 " Pb2:
 "
 "     https://neovim.io/doc/user/vim_diff.html#vim-differences
+"     :h vim-differences
 "
-" This page doesn't talk about the difference of syntax for the `setloclist()`
-" function (4th argument; dictionary in Vim, but string in Neovim).
-" Are there other differences missing from the page?
-" If so, where/how can we find them?
+" This page  doesn't talk about the  difference of keys inside  the 4th optional
+" argument passed to `setqflist()` and `setloclist()`.
 "
 " 20 -
 " read and integrate `:h slow-start` in our notes
@@ -6037,25 +5941,6 @@ endfu
 " none, find an indent plugin. If it's wrong, find a better one.
 "
 " 40 -
-" review:
-" https://github.com/tpope/vim-rsi/pull/30
-" https://github.com/tpope/vim-rsi/pull/30/commits/fe605597a224c14fede093af68e32baa539555e5
-"
-" 41 -
-" Study the difference between `BufEnter`, `WinEnter`, `BufWinEnter` with
-" `:LogEvents`. It seems that:
-"
-"         WinEnter + BufWinEnter = BufEnter
-"
-" In our vimrc/myfuncs/notes, talk about our conclusion.
-"
-" Hypothesis:
-" bufenter    = the cursor is moved to a new buffer
-" winenter    = "                            window
-" bufwinenter = a buffer is DISPLAYED in a window
-"               fired even if the buffer is already displayed somewhere else
-"
-" 42 -
 "
 " Pb:
 " Do you really understand what happens when we load a buffer?
@@ -6074,7 +5959,7 @@ endfu
 " Our section `FTPLUGINS + SYNTAX` has become too long.
 " Re-read. Summarize. Extract in markdown notes.
 "
-" 43 -
+" 41 -
 " Protect all temporary change of option with `try|catch|endtry`.
 " Look for the pattern:
 "
@@ -6100,7 +5985,7 @@ endfu
 "             mandatory conclusion (like restoring options)
 "         endtry
 "
-" 44 -
+" 42 -
 " Compare:
 "
 "     echoerr v:exception
@@ -6133,7 +6018,7 @@ endfu
 " window) introduces lag.
 " Make some tests inside our unimpaired mappings.
 "
-" 45 -
+" 43 -
 " Get rid of `visualmode(), 1` and `visualmode()` in favor of `'vis'`.
 " Also get rid of `index(['v', 'V', "\<c-v>"], a:type) >= 0` inside op functions.
 " Prefer `a:type ==# 'vis'`
@@ -6161,7 +6046,7 @@ endfu
 " good. If it had been visual, we could have a problem, because our function
 " would think we are operating from visual mode, instead of normal mode.
 "
-" 46 -
+" 44 -
 " Create a mapping to populate command-line with `:ltag /`, then open the
 " location window. Ex:
 "
@@ -6170,7 +6055,7 @@ endfu
 " What's the difference between `<space>ft` and `:tj /`?
 " It seems the latter is more accurate, gives less useless suggestions.
 "
-" 47 -
+" 45 -
 " In our notes we wrote that the best way to reload ftplugins was:
 "
 "         doautoall filetypeplugin FileType
@@ -6182,10 +6067,10 @@ endfu
 " What's the difference? Which is best?
 " Compare the 2 with `:2Verbose …`.
 "
-" 48 -
+" 46 -
 " finish debugging and try sections in our notes
 "
-" 49 -
+" 47 -
 " shell function to grep a pattern and populate the qfl
 " this one doesn't send the results to a Vim server, and allows to pass
 " arbitrary flags to grep
@@ -6194,7 +6079,7 @@ endfu
 "
 " Difference compared to our `nv()` shell function?
 "
-" 50 -
+" 48 -
 " Have a look at  :h UltiSnips-post-jump-actions
 "     to perform an action after every jump
 " And:            :h UltiSnips-post-expand-actions
@@ -6230,11 +6115,11 @@ endfu
 "
 " Document all of this.
 "
-" 51 -
+" 49 -
 " read :h cscope (useful to list tags in qfl?)
 " https://www.reddit.com/r/vim/comments/6p6uch/how_to_refactor_by_tags/dkn30bd/
 "
-" 52 -
+" 50 -
 " If we search a too complex pattern, `n` takes a long time to compute the nr
 " of matches (total & current).
 " The pb comes from this line:
@@ -6264,51 +6149,40 @@ endfu
 " PS: I've tried this solution but the message gets erased.
 " To continue…
 "
-" 53 -
+" 51 -
 " Split our big markdown notes in several files. Put the global mark on a file
 " containing a Table of Contents. Put the other files in a hidden directory.
 " When you need to look for a pattern in all files, use the built-in include
 " mechanism:  [i, ]i, [I, ]I, :ij, :il, :is, :isp, 'inex, …
 "
-" 54 -
+" For the hierarchy of files, take inspiration from a wiki on a github project.
+"
+" 52 -
 " use `:[c|l]bottom` in your jobs plugins (if they populate a qfl asynchronously)
 "
-" 55 -
-" implement general `My_fold_text()` function to support all ftplugins?
-" should we set cocu/cole globally?
-" should we set syntax globally for conceal?
-"
-" 56 -
-" When the first line in a fold is a commented line of code, the title isn't
-" properly concealed. We need to update the function returning the title. It
-" must take into consideration the @ character.
-"
-" 57 -
+" 53 -
 " In our syntax plugins (awk, markdown, sh, snippets, vim, …), apply a style
 " (bold, italics, …) to texts between backticks, and conceal the backticks
 " (less noise).
 "
-" 58 -
-" Implement toggling of things with more than 2 states
-"
-" 59 -
+" 54 -
 " Replace all occurrences of `norm ga` with appropriate code.
 " Do the same for other `norm` (ex: `norm gs`).
 "
 "         vim /\%(^\s*".*\|\<ono\>.*\)\@<!norm!\@!\>/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "         :Cfilter! -not_my_plugins
 "
-" 60 -
+" 55 -
 " implement a global `:FoldToggle` command
 " also, by default, folds should stack, not nest
 "
-" 61 -
-" In `myfuncs#mv_text()` use alphabetic marks to highlight the moved lines.
+" 56 -
+" In `brackets#mv_text()` use alphabetic marks to highlight the moved lines.
 " Also, if a line has only 1 character it's not highlighted, because the pattern
 " doesn't work (.*\%'e\_.*\%<'f.*): fix this.
 " The issue comes when the marks are in the same position.
 "
-" 62 -
+" 57 -
 " Refactor all the code dealing with repeatable motions.
 " Take inspiration from the plugin repeatable-motions.vim
 " Goal:
@@ -6319,7 +6193,7 @@ endfu
 " our plugins. It should only appear inside one plugin (custom version of
 " `repeatable-motions.vim`).
 "
-" 63 -
+" 58 -
 " Read :h ^w_<cr>
 "
 " Also, document the following trick:
@@ -6344,13 +6218,13 @@ endfu
 "
 " This requires a properly set 'efm'.
 "
-" 64 -
+" 59 -
 " Refactor all our functions which populate the qfl to offload work to a single
 " function in `vim-qf`?
 "
 "         vim /set\%(qf\|loc\)list/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "
-" 65 -
+" 60 -
 " move the setting of 'flp' in markdown ftplugin into vimrc
 " consistent with 'fo' which is in vimrc now
 " set 'flp' from an autocmd listening to FileType (filter *), to set it
@@ -6360,7 +6234,7 @@ endfu
 " does it cause an issue, if an option is set for all filetypes in vimrc?
 " there's no teardown anymore (b:undo_ftplugin)
 "
-" 66 -
+" 61 -
 " read `:h  'indk`; if  you are  in a buffer  where a  line is  reindented while
 " typing in  insert mode,  consider removing the  character which  triggered the
 " reindentation from 'indk' (in an indent plugin)
@@ -6368,7 +6242,7 @@ endfu
 " or look  for a  global variable  used by the  indentation plugin,  which could
 " disable it
 "
-" 67 -
+" 62 -
 " Idea: implement 2 mappings using the keys « (AltGr + w) and ® (AltGr + ®) to
 " repeat an edit in 2 directions.
 " We would need to create a 2nd new global variable (g:edit_to_repeat).
@@ -6380,25 +6254,17 @@ endfu
 " We would still need a 2nd global variable (g:edit_to_repeat), but not
 " the 2 mappings («®).
 "
-" 68 -
-" review all `catch /E123/` statements; the pattern should be more reliable
-" take inspiration from `matchit`
-"
-" 69 -
-" don't install the autocmd `my_scroll_preview_window` from `s:set_window_height()`;
-" separation of concern
-"
-" 70 -
+" 63 -
 " Restore  buffer-local  mappings, J  and  K,  if  they existed,  after  preview
 " mappings teardown?
 "
-" 71 -
+" 64 -
 " The double invocation of `scroll_preview_mappings()` is neat.
 " We don't create 2 functions, only 1.
 " Find where we should have done that. Look for functions containing the keyword
 " `maybe` or `later`.
 "
-" 72 -
+" 65 -
 " Are there places where we should have used:
 "         sil! call repeat#setreg(…, v:register)
 " … ?
@@ -6408,70 +6274,40 @@ endfu
 " But still, document in which environment `repeat#setreg()` might be useful,
 " and when to use it (at the very beginning of the function).
 "
-" 73 -
+" 66 -
 " refactor all operators, `g@`, so that they remove 'unnamed' and 'unnamedplus'
 " from 'cb', and set 'inclusive'
 "
-"         vim /\v%(opfunc|operatorfunc)\=\zs.*g\@/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"         vim /\v%(opfunc|operatorfunc)\=\zs.*g\@/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
+"         :Cfilter! -other_plugins
 "
-" Also, when the  function encounters an issue, after being  invoked from normal
-" mode, it should display an error msg or throw a real error.
-" Pro / Con for each choice:
+" Also:
+"         catch
+"             return my_lib#catch_error()
 "
-"         • real error     = noisy, but `:WTF` can parse the message
-"         • logged message = compact, but `:WTF` can't parse the message
-"
-" No matter  what you choose,  be consistent. If  from normal mode  the function
-" throw a real error, it should do the same when invoked from visual/Ex mode.
-"
-" 74 -
+" 67 -
 " Not a fan of `]h` and `]H`. Find better mappings.
 " Use `]C-h`?
 "
-" 75 -
-" Make fzf use Vim's terminal, like it does in Neovim.
-" https://github.com/junegunn/fzf/issues/1055
-"
-"
-"         let g:fzf_layout = { 'window': 'split' }
-"
-" Doesn't work properly.
-" After selecting a file, the one in the original window is lost. A term buffer
-" replaces it. We can recover it with c-^.
-" Also, we lose our position in the changelist:
-"
-"         echo getbufvar(bufname('vimrc'), '')
-"         → {'changedtick' : 123}
-"
-"         no `b:my_change_position`;
-"         this is probably due to ~/.fzf/plugin/fzf.vim
-"         which for some reason deletes the original buffer with `:bd`
-"
-"         indeed,  if  you  do  `:bd`  on  a  buffer,  it  seems  that  all  its
-"         buffer-local variables are deleted (except b:changedtick)
-"
-" 76 -
+" 68 -
 " experiment about the idea that it's  forbidden to call or simply DEFINE public
 " function inside plugin/ because it would cause autoload/ to be loaded
 "
 " use potion plugin to experiment
 " note what you learn
 "
-" 77 -
+" 69 -
 " https://github.com/chrisbra/vim_faq
 "
-" 78 -
-" no need to check `if &l:buftype  ==# 'quickfix'` before applying conceal abort
+" 70 -
+" no need to check `if &bt  ==# 'quickfix'` before applying conceal abort
 " and/or try conditional are enough
 " sure?
 "
-" 79 -
-" g:r → cob → cob
+"         vim /if\s\+&bt\s\+==#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 80 -
+" 71 -
 " S-Tab doesn't work in terminal buffer (neither in Vim nor in Neovim, even without config)
-" Maybe fixed in some recent version of Neovim:
-"         https://github.com/neovim/neovim/pull/5014
 "
 " Hints:
 " maybe not needed
@@ -6485,7 +6321,7 @@ endfu
 tno  <s-tab>  <left>
 " tno <s-tab> <c-p>
 "
-" 81 -
+" 72 -
 " https://github.com/justinmk/vim-dirvish/issues/62
 " https://github.com/bounceme/remote-viewer/
 " Alternative:
@@ -6493,7 +6329,7 @@ tno  <s-tab>  <left>
 " other "middleware"),  so that  any dumb local  navigator (like  dirvish) works
 " without adding special-case support for scp, FTP, webdav, …, netrw does.
 "
-" 82 -
+" 73 -
 " Do we really need a timer to display a message?
 "
 "         vim /execute(.*echo/gj ~/.vim/**
@@ -6510,7 +6346,7 @@ tno  <s-tab>  <left>
 "         • <expr>
 "         • timer
 "
-" 83 -
+" 74 -
 "
 " create mapping to send current line to terminal, and execute it
 " use `g>` for the lhs?
@@ -6519,14 +6355,14 @@ tno  <s-tab>  <left>
 "     g> on visual selection
 "     g>> for line
 "
-" 84 -
+" 75 -
 " finish reviewing vim-math
 " What insight can we gain from it?
 "
-" 85 -
+" 76 -
 " finish reviewing ~/Dropbox/vim_plugins/pair_complete.vim
 "
-" 86 -
+" 77 -
 " We use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
 "         • iabbrev
@@ -6545,7 +6381,7 @@ tno  <s-tab>  <left>
 "
 "         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  !=#  'Comment'
 "
-" 87 -
+" 78 -
 " Save/restore qfl/ll when we restart Vim?
 " Not sure I want that. But it would be convenient to have a command which saves
 " a particular qfl/ll in `~/.viminfo`, and which could restore it when needed.
@@ -6557,13 +6393,13 @@ tno  <s-tab>  <left>
 "
 "         %argd
 "
-" 88 -
+" 79 -
 " finish reviewing  the section in our  notes which deals with  string functions
 " (match(), matchstr(),…); also talk about `matchstrpos()`
 "
 " finish reviewing indexage de chaîne
 "
-" 89 -
+" 80 -
 " study vim-sandwich
 " implement surrounding with → ← (for easier conceal)
 "
@@ -6610,11 +6446,11 @@ tno  <s-tab>  <left>
 "
 "           let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
 "
-" 90 -
+" 81 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
 "
-" 91 -
+" 82 -
 " Create a command in vim-debug, to automatically profile a plugin.
 " It would create a temporary script with the commands:
 "
@@ -6630,11 +6466,11 @@ tno  <s-tab>  <left>
 "         \               { i,v -> v !~# '/t\%[est]/' }),
 "         \        { i,v -> 'so '.v })
 "
-" 92 -
+" 83 -
 " Check whether some commands would be better suited as mappings.
 " And check whether some mappings would be better suited as commands.
 "
-" 93 -
+" 84 -
 "                                ┌ 3rd character of all `]o?` mappings
 "         ┌──────────────────────┤
 "         BCILNSWacdfhilmnopqstvwz
@@ -6644,21 +6480,24 @@ tno  <s-tab>  <left>
 "              create a transformation to automatically add this
 "              make it cycle between `filter()` and `map()`
 "
-" 94 -
+" ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+" cmdline#transform() (bound to C-s)
+"
+" 85 -
 " install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `BufWritePost`
 " which would give us a warning when we forget to undo a:
 "
 "         mapping/abbreviation/command/autocmd/variable
 "
-" 95 -
+" 86 -
 " normalize underscore/dash in plug mappings, and function names in shell init files
 "
-" 96 -
+" 87 -
 " update the position of the mark in `vim-readline`
 " look for other mappings to implement, add them to a todo
 "
-" 97 -
+" 88 -
 " Should we add `:noautocmd` every time we use `:wincmd`?
 "
 "
@@ -6677,63 +6516,51 @@ tno  <s-tab>  <left>
 " I think we should use `noautocmd`  whenever we TEMPORARILY change the focus to
 " a window.
 "
-" 98 -
-" replace `k,v` with `i,v` when it makes more sense
-"
-" 99 -
+" 89 -
 " We've lost time debugging dirvish, because the issue was not in vimrc
 " but in filetype plugin. How to avoid it in the future?
 "
-" 100 -
+" 90 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
 " A function implementing some abstract logic can be wrongly affected by the current
 " buffer settings ('isk' for example). Should we track this issue everywhere in our code?
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
-" 101 -
+" 91 -
 " check that whenever we use `wincmd p` we get to the right window
 "
-" 102 -
-" c^s → only finds last match on line, not all matches (because of `.*` and `\zs`)
-" try to use `@=` or `@<=`
-"
-" 103 -
-" c^z shouldn't do anything on the search command-line, or sth relevant
-" current c^z should be limited to Ex (not debug, expression, …)
-"
-" Also, c-z may be dangerous. Use c-g instead?
-" And remap default `C-g` to `C-g C-g`?
-" Or C-q?
-"
-" 104 -
+" 92 -
 " Read all of this:
 "     https://neovim.io/news/archive/
 "
-" 105 -
+" 93 -
 " Read this:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 106 -
-" Sometimes we  lost the meta  keys. It seems to occur  after we use  a terminal
-" buffer.  The issue probably comes from `vim-cmdline`, which temporarily disable
-" them. Check whether there is a circumstance where the plugin fails to re-enable
-" them.
-"
-" 107 -
+" 94 -
 " Read this (OOP in VimL):
 " https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
 "
-" 108 -
+" 95 -
 " Replace `:silent!` with `:silent` whenever possible.
 " There may be errors to fix which we are missing because they are silent.
 " Also, if you wonder whether a plugin/(auto)command/function is working
 " as expected, and has no silent errors, use `:Verbose` to increase
 " the verbosity level.
 "
-" 109 -
+" 96 -
 " use syntax hl in `vim-qf` instead of complex mechanism using matches
+" also, in `vim-qf`, fix the fixme in the autocmd `my_qf`
+"
+" 97 -
+" add syntax hl in TOC menu, and make content more relevant in help TOC
+"
+" 98 -
+" The TOC  window may currently  be a little  too wide (see:  vim-qf, autoload/,
+" qf#open()). We could  compute the longest line,  and set the width  of the TOC
+" window dynamically.
 
 
 
@@ -6791,7 +6618,7 @@ endfu
 "         <plug>(textobj-sandwich-tagname-a)
 "
 "         sandwich#magicchar#t#a()
-"         /home/jean/.vim/plugged/vim-sandwich/autoload/sandwich/magicchar/t.vim
+"         ~/.vim/plugged/vim-sandwich/autoload/sandwich/magicchar/t.vim
 "
 "         call s:prototype('a')
 "                 execute printf('normal! v%dat', v:count1)
