@@ -1,3 +1,43 @@
+" FIXME: l'autoindentation (==) ne fonctionne pas toujours comme prévu{{{
+"
+"     foo bar,
+"     baz|
+"        ^
+"         ==
+"
+"     →
+"     foo bar,
+"         baz
+"
+" Ce n'est pas dû à un plugin mais probablement à une règle d'indentation
+" spécifique au type de fichier markdown.
+" MWE:
+"
+"     vim -u NORC -N test.md
+"
+" Par défaut, il ne semble pas y avoir de règles d'indentation pour markdown.
+" Je n'ai pas trouvé de fichier `markdown.vim` ou `md.vim` dans
+" $VIMRUNTIME/indent/.
+"
+" De base le comportement de l'opérateur `==` est influencé par 5 options:
+"
+"     'equalprg'
+"     'indentexpr'
+"     'autoindent'
+"     'smartindent'
+"     'cindent'
+"
+" Dans un fichier markdown, seule 'autoindent' est activée, et le pb persiste
+" même si je la désactive:
+"
+"    foo bar     →    foo bar
+"    baz              baz         ✔ (`==` ne fait pas bouger baz)
+"
+"    foo bar,    →    foo bar,
+"    baz                  baz     ✘ (`==`, fait bouger baz, pk?)
+"
+" Pour essayer de comprendre lire :h C-indenting et :h usr_30.txt
+"}}}
 fu! myfuncs#blocks_clear(clear_them_only) abort "{{{1
     let view       = winsaveview()
     let s:bc_block = s:bc_get_its_text()
@@ -355,61 +395,6 @@ fu! myfuncs#box_destroy() abort
 
     sil! call repeat#set("\<plug>(myfuncs_box_destroy)")
 endfu
-
-" break_line {{{1
-
-if !exists('*myfuncs#break_line')
-    fu! myfuncs#break_line() abort
-        try
-            " break the line
-            exe "norm! i\r"
-
-            " trim ending whitespace on both lines
-            keepj keepp .-,.s/\s\+$//e
-
-            if !empty(bufname('%')) && fnamemodify(bufname('%'), ':t') !=# 'vimrc'
-                sil update
-            endif
-            sil! call repeat#set("\<plug>(my_break_line)")
-        catch
-            return my_lib#catch_error()
-        endtry
-    endfu
-endif
-
-" FIXME: l'autoindentation (==) ne fonctionne pas comme prévu qd on casse la
-" ligne juste après une virgule dans un fichier markdown, ex:
-"
-"     foo bar, baz
-"
-" Ce n'est pas dû à un plugin mais probablement à une règle d'indentation
-" spécifique au type de fichier markdown.
-" MWE:
-"
-"     vim -u NORC -N test.md
-"
-" Par défaut, il ne semble pas y avoir de règles d'indentation pour markdown.
-" Je n'ai pas trouvé de fichier `markdown.vim` ou `md.vim` dans
-" $VIMRUNTIME/indent/.
-"
-" De base le comportement de l'opérateur `==` est influencé par 5 options:
-"
-"     'equalprg'
-"     'indentexpr'
-"     'autoindent'
-"     'smartindent'
-"     'cindent'
-"
-" Dans un fichier markdown, seule 'autoindent' est activée, et le pb persiste
-" même si je la désactive:
-"
-"    foo bar     →    foo bar
-"    baz              baz         ✔ (`==` ne fait pas bouger baz)
-"
-"    foo bar,    →    foo bar,
-"    baz                  baz     ✘ (`==`, fait bouger baz, pk?)
-"
-" Pour essayer de comprendre lire :h C-indenting et :h usr_30.txt
 
 fu! myfuncs#check_myfuncs() abort "{{{1
     let s:my_vimrc = join(readfile($MYVIMRC), "\n")

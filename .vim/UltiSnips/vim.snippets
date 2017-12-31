@@ -294,7 +294,7 @@ endsnippet
 # map {{{1
 
 snippet map "prototype mapping" bm
-nno  `!v expand('%:p:h:t') ==# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent><unique>'`  ${1:cd}  :<c-u>call ${2:Func}()<cr>
+nno  `!v expand('%:p:h:t') ==# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent>'`  ${1:cd}  :<c-u>call ${2:Func}()<cr>
 endsnippet
 
 # map_ft {{{1
