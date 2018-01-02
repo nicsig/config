@@ -92,7 +92,7 @@ Plug 'tpope/vim-fugitive'
 " 1s has elapsed.
 augroup lazy_load_plugins
     au!
-    au VimEnter * call timer_start(1000, {->  execute('runtime autoload/shortly_after_vimenter.vim')})
+    au VimEnter * call timer_start(1000, {->  execute('runtime! autoload/shortly_after_vimenter.vim')})
     \|            exe 'au! lazy_load_plugins'
     \|            aug! lazy_load_plugins
 augroup END
@@ -353,7 +353,7 @@ Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
 Plug 'lacygoill/vim-iabbrev'
 Plug 'lacygoill/vim-interactive-lists'
-Plug 'lacygoill/vim-lib'
+Plug 'lacygoill/vim-lg-lib'
 Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
 Plug 'lacygoill/vim-qf'
@@ -849,7 +849,7 @@ augroup my_colorscheme
     "             └─ the autocmds need to nest, so that when we set the colorscheme,
     "                `ColorScheme` is fired, and our customizations are sourced
 
-    au ColorScheme * runtime colors/my_customizations.vim
+    au ColorScheme * runtime! colors/my_customizations.vim
 
     au VimLeavePre * let g:MY_LAST_COLORSCHEME = get(g:, 'seoul256_current_bg', 253)
 augroup END
@@ -1980,8 +1980,6 @@ nno  go<esc>  <nop>
 "
 "    • gy, gz are free
 "
-"    • gt gT are useless
-"
 "    • PageUp PageDown are free
 "
 "    • S-Tab (not Tab, because it would also affect C-i used for moving
@@ -2699,7 +2697,7 @@ fu! s:break_line() abort
         endif
         sil call repeat#set("\<plug>(my_break_line)")
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -2779,7 +2777,7 @@ fu! s:all_matches_in_buffer() abort
             call qf#create_matches()
         endif
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -2850,7 +2848,7 @@ fu! s:my_gq(type) abort
         let has_a_list_header = getline(lnum1) =~# &l:flp
         exe 'norm! '.lnum1.'G'.(has_a_list_header ? 'gw' : 'gq').lnum2.'G'
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &l:ai = ai_save
     endtry
@@ -2988,7 +2986,7 @@ fu! s:undo_until_prev_save() abort
         endfor
         earlier 1f
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -3003,7 +3001,7 @@ fu! s:my_z_equal() abort
     try
         call feedkeys(":setl spell\<cr>z=", 'in')
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         call timer_start(0, {-> execute('let &l:spell = '.spell_save, '')})
     endtry
@@ -3458,7 +3456,7 @@ fu! s:global_mark_set(char) abort
         exe 'norm! m'.a:char
         let g:MY_GLOBAL_MARK_{a:char} = { 'fpath': expand('%:p'), 'pos': getpos('.')[1:2] }
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -3489,7 +3487,7 @@ fu! s:global_mark_go(char) abort
         " with a question? How to catch it properly?
         exe 'e '.fnameescape(g:MY_GLOBAL_MARK_{a:char}.fpath)
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 
     " '. may not exist (and other issues may occur).
@@ -3503,7 +3501,7 @@ fu! s:global_mark_go(char) abort
         "  │
         "  └ E20: mark not set
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
@@ -3598,16 +3596,14 @@ nno  <silent>  crs  :<c-u>call <sid>my_crs()<cr>
 fu! s:my_crs() abort
     " populate search register with original word
     norm! *``
+    let pat = @/
     "                           ┌ snake case
     "                           │
-    "                           │     ┌ type the keys now, before `:undo`
+    "                           │     ┌ type the keys now
     "                           │     │
     call feedkeys("\<plug>Coerces", 'ix')
     " save the coerced word
     let rep = expand('<cword>')
-    " undo, and re-perform the coercion in a repeatable way
-    sil undo
-    exe 'norm! cgn'.rep."\e"
 
     " Why do we need to restore the search register?{{{
     "
@@ -3617,7 +3613,6 @@ fu! s:my_crs() abort
     "
     " We need to undo this automatic restoration.
     "}}}
-    let pat = @/
     call timer_start(0, {-> execute('let @/ = '.string(pat))})
 
     " Make the  dot command repeat this  edition for the next  occurrence of the
@@ -4084,30 +4079,18 @@ snor  <c-d>  <esc>i<del>
 " neovim.
 tno  <esc><esc>  <c-\><c-n>
 
-" Even though we use  a double escape to go to  Terminal-Normal mode, it's still
-" convenient to use just one when we know the next key.
-
-" if !has('nvim')
-"     It wouldn't be needed  in Neovim if we used a single Escape  in the lhs of the
-"     previous mapping.
-
-    " Do NOT add this mapping:  tno  <esc>:  <c-\><c-n>:{{{
-    "
-    " Why?
-    "
-    "     z<      open a terminal
-    "     Esc :   enter command line
-    "     Esc     get back to terminal normal mode
-    "     z>      close terminal
-    "
-    " The meta keysyms are disabled.
-    "}}}
-    tno  <silent>  <esc><c-j>  <c-\><c-n>:call window#navigate('j')<cr>
-    tno  <silent>  <esc><c-k>  <c-\><c-n>:call window#navigate('k')<cr>
-    tno  <silent>  <esc><c-h>  <c-\><c-n>:call window#navigate('h')<cr>
-    tno  <silent>  <esc><c-l>  <c-\><c-n>:call window#navigate('l')<cr>
-" endif
-
+" Do NOT add this mapping:  tno  <esc>:  <c-\><c-n>:{{{
+"
+" Why?
+"
+"     z<      open a terminal
+"     Esc :   enter command line
+"     Esc     get back to terminal normal mode
+"     z>      close terminal
+"
+" The meta keysyms are disabled.
+" }}}
+"}}}
 " VISUAL {{{2
 " C-s {{{3
 
@@ -4460,7 +4443,7 @@ com! -bar -nargs=+ -complete=buffer InAButNotInB call myfuncs#in_A_not_in_B(<f-a
 
 " IsPrime {{{2
 
-com! -bar -nargs=1 IsPrime echo my_lib#is_prime(<args>)
+com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 
 " JoinBlocks {{{2
 
@@ -6334,7 +6317,7 @@ endfu
 "
 " Also:
 "         catch
-"             return my_lib#catch_error()
+"             return lg#catch_error()
 "
 " 66 -
 " Not a fan of `]h` and `]H`. Find better mappings.
@@ -6612,6 +6595,26 @@ tno  <s-tab>  <left>
 " The TOC  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " qf#open()). We could  compute the longest line,  and set the width  of the TOC
 " window dynamically.
+"
+" 98 -
+" Move every function called from several scripts inside `vim-lib`:
+"
+"     cmdline#reset_did_transform(
+"     comment#object(
+"     fold#md#stacked(
+"     fold#md#toggle_fde(
+"     fold#text(
+"     myfuncs#sections_custom(
+"     qf#create_matches(
+"     qf#open(
+"     qf#set_matches(
+"     repeat#set(            I think not necessary
+"     repeat#setreg(         I think not necessary
+"     window#get_modifier(
+"     window#qf_open(
+"
+" Also, make  sure they  are self-contained. They must  not call  functions from
+" one of our other plugins. If they do, move the latter inside `vim-lib` too.
 
 
 
@@ -6646,6 +6649,10 @@ endfu
 
 " :h
 " :vert sb#
+
+" saio(
+" surround column text-object with parentheses
+" (works even if the lines have different lengths)
 
 
 
@@ -6745,7 +6752,7 @@ fu! s:profile_plugin(...) abort
         sil! so $XDG_RUNTIME_DIR/plugin_profiling_result
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
     echo 'Recreate the issue, restart Vim, and have a look at '.$XDG_RUNTIME_DIR.'/plugin_profiling_result'
 endfu

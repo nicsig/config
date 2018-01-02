@@ -169,7 +169,7 @@ call s:set_tabline_hg()
 try
     hi EndOfBuffer ctermfg=bg guifg=bg
 catch
-    call my_lib#catch_error()
+    call lg#catch_error()
 endtry
 
 " QuickFixLine {{{2

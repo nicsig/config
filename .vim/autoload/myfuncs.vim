@@ -58,10 +58,10 @@ fu! myfuncs#blocks_clear(clear_them_only) abort "{{{1
 endfu
 
 fu! s:bc_get_its_text() abort
-    call my_lib#reg_save(['"', '+'])
+    call lg#reg_save(['"', '+'])
     sil norm! gvy
     let block = split(@", "\n")
-    call my_lib#reg_restore(['"', '+'])
+    call lg#reg_restore(['"', '+'])
 
     return block
 endfu
@@ -248,7 +248,7 @@ fu! myfuncs#block_select_paragraph() abort
              \ .(end_col + 2)."|".(end_line + 1)."G"
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &ve = ve_save
     endtry
@@ -600,7 +600,7 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         sil update
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
 
     finally
         call setpos("'x", x_save)
@@ -679,7 +679,7 @@ fu! myfuncs#fix_spell() abort "{{{1
             call timer_start(0, {-> setline(line('.'), new_line)})
         endif
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &l:spell = spell_save
     endtry
@@ -794,7 +794,7 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
         sil exe mods."*s/\<c-a>//e"
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &l:fen = fen_save
     endtry
@@ -818,7 +818,7 @@ fu! myfuncs#keyword_custom(chars) abort "{{{1
                                   \| aug! keyword_custom
         augroup END
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     " Do NOT add a finally clause to restore 'isk'.
     " It would be too soon. The completion function hasn't been invoked yet.
     endtry
@@ -976,7 +976,7 @@ endfu
 "                 endif
 "
 "             catch
-"                 return my_lib#catch_error()
+"                 return lg#catch_error()
 "
 "             finally
 "                 let &cb        = cb_save
@@ -1086,7 +1086,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
         redraw!
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &cb  = cb_save
         let &sel = sel_save
@@ -1124,7 +1124,7 @@ fu! myfuncs#op_incremental_yank(type) abort "{{{2
         call setreg('"', @z, getregtype('z'))
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &cb  = cb_save
         let &sel = sel_save
@@ -1150,7 +1150,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
     let sel_save = &selection
     try
         " save registers and types to restore later.
-        call my_lib#reg_save(['"', s:replace_reg_name])
+        call lg#reg_save(['"', s:replace_reg_name])
 
         let replace_reg_contents = getreg(s:replace_reg_name)
         let replace_reg_type     = getregtype(s:replace_reg_name)
@@ -1200,7 +1200,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
         endif
 
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &sel = sel_save
         " Now, the unnamed register contains the old text over which we pasted the
@@ -1211,7 +1211,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
         "
         " We do the same for the replacement register, because we may have trimmed it
         " in the process (type ==# 'char' && replace_reg_type ==# 'V').
-        call my_lib#reg_restore(['"', s:replace_reg_name])
+        call lg#reg_restore(['"', s:replace_reg_name])
     endtry
 endfu
 
@@ -2353,7 +2353,7 @@ fu! myfuncs#verbose_command(level, excmd) abort "{{{1
         "
         "    Also, shouldn't this code be moved inside the debug plugin?
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         " We empty the value of 'vfile' for 2 reasons:
         "
@@ -2377,7 +2377,7 @@ fu! myfuncs#verbose_command(level, excmd) abort "{{{1
     " if we really get there...
     if &previewwindow
         " We use our custom `quit()` function to be able to undo the closing.
-        nno  <buffer><nowait><silent>  q  :<c-u>call my_lib#quit()<cr>
+        nno  <buffer><nowait><silent>  q  :<c-u>call lg#quit()<cr>
         setl bh=wipe bt=nofile nobl nowrap noswf
     endif
 endfu
