@@ -526,10 +526,13 @@ endsnippet
 # has something inside an `after/` subdirectory.
 # If we don't add it, none of its file will be sourced.
 snippet vimrc_mini "Minimal vimrc to test a plugin" bm
+set rtp+=~/.vim/plugged/vim-lg-lib/
+set rtp+=~/.vim/plugged/vim-readline/
 set rtp+=${1:path/to/plugin/}${2:
 set rtp+=${1/$/after/}}
 filetype plugin indent on
 syntax enable
+set wildmenu
 $0
 endsnippet
 

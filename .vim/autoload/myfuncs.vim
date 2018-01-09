@@ -58,10 +58,10 @@ fu! myfuncs#blocks_clear(clear_them_only) abort "{{{1
 endfu
 
 fu! s:bc_get_its_text() abort
-    call lg#reg_save(['"', '+'])
+    call lg#reg#save(['"', '+'])
     sil norm! gvy
     let block = split(@", "\n")
-    call lg#reg_restore(['"', '+'])
+    call lg#reg#restore(['"', '+'])
 
     return block
 endfu
@@ -615,7 +615,6 @@ fu! myfuncs#fix_display() abort
     redraw!
     " redraw all status lines
     redraws!
-    noh
     " update differences between windows in diff mode
     diffupdate!
     " update folds
@@ -1077,6 +1076,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                                          $ cat /tmp/foo%bar
             "                                              /tmp/foo%bar
             "                                              /tmp/foo\%bar
+            "                                                      ^
             "}}}
             "                 │
             sil! exe 'grep! '.shellescape(@").' .'
@@ -1150,7 +1150,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
     let sel_save = &selection
     try
         " save registers and types to restore later.
-        call lg#reg_save(['"', s:replace_reg_name])
+        call lg#reg#save(['"', s:replace_reg_name])
 
         let replace_reg_contents = getreg(s:replace_reg_name)
         let replace_reg_type     = getregtype(s:replace_reg_name)
@@ -1211,7 +1211,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
         "
         " We do the same for the replacement register, because we may have trimmed it
         " in the process (type ==# 'char' && replace_reg_type ==# 'V').
-        call lg#reg_restore(['"', s:replace_reg_name])
+        call lg#reg#restore(['"', s:replace_reg_name])
     endtry
 endfu
 
@@ -1895,11 +1895,11 @@ fu! s:search_todo_text(dict) abort
     return dict
 endfu
 
-fu! myfuncs#sections_custom(pattern, fwd) abort "{{{1
+fu! myfuncs#sections_custom(pattern, is_fwd) abort "{{{1
     let c = v:count1
     norm! m'
     while c > 0
-        call search(a:pattern, a:fwd ? 'W' : 'bW')
+        call search(a:pattern, a:is_fwd ? 'W' : 'bW')
         let c -= 1
     endwhile
 endfu
@@ -2377,7 +2377,7 @@ fu! myfuncs#verbose_command(level, excmd) abort "{{{1
     " if we really get there...
     if &previewwindow
         " We use our custom `quit()` function to be able to undo the closing.
-        nno  <buffer><nowait><silent>  q  :<c-u>call lg#quit()<cr>
+        nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
         setl bh=wipe bt=nofile nobl nowrap noswf
     endif
 endfu

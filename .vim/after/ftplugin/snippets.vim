@@ -1,6 +1,6 @@
 " Mappings {{{1
 
-nno  <buffer><nowait><silent>  q  :<c-u>call lg#quit()<cr>
+nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
 
 " Options "{{{1
 

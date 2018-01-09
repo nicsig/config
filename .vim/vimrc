@@ -145,6 +145,9 @@ Plug 'lacygoill/vim-matchit'
 
 "}}}
 Plug 'lacygoill/potion'
+" TODO:
+" move `vim-repeatable-motions` in the DONE category once you've finished it
+Plug 'lacygoill/vim-repeatable-motions'
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
 Plug 'kana/vim-submode', { 'frozen': 1}
@@ -2296,8 +2299,8 @@ endfu
 ino  <silent>  <m-a>  <c-r>=<sid>move_by_sentence(0)<cr>
 ino  <silent>  <m-e>  <c-r>=<sid>move_by_sentence(1)<cr>
 
-fu! s:move_by_sentence(fwd) abort
-    if a:fwd
+fu! s:move_by_sentence(is_fwd) abort
+    if a:is_fwd
         norm! (
     else
         norm! )
@@ -2559,16 +2562,16 @@ nno  <silent>  [u  :<c-u>call <sid>move_to_poi('url', 0)<cr>
 
 "             ┌─ Point Of Interest
 "             │
-fu! s:move_to_poi(what, fwd) abort
+fu! s:move_to_poi(what, is_fwd) abort
     if a:what ==? 'path'
-        let g:motion_to_repeat = a:fwd ? ']H' : '[H'
+        let g:motion_to_repeat = a:is_fwd ? ']H' : '[H'
         let not_dot_special    = '%(\s\.%(\=|,))@!'
         let pattern            = '\v'.not_dot_special.'&%(^|\s)\zs[./~]\f+'
     else
-        let g:motion_to_repeat = a:fwd ? ']u' : '[u'
+        let g:motion_to_repeat = a:is_fwd ? ']u' : '[u'
         let pattern = '\vhttps?://'
     endif
-    call search(pattern, (a:fwd ? '': 'b').'W')
+    call search(pattern, (a:is_fwd ? '': 'b').'W')
     norm! zv
 endfu
 
@@ -3030,6 +3033,40 @@ fu! s:my_zf(type) abort
     endif
 endfu
 
+" zg (&friends) {{{4
+
+" The default commands to add good / bad words in:
+"
+"     • a temporary list  use an uppercase character
+"     • a persistent list use only lowercase characters
+"
+"     ┌────────────┬──────────────┬──────────────┐
+"     │            │ mark         │ undo         │
+"     ├────────────┼──────┬───────┼──────┬───────┤
+"     │            │ good │ wrong │ good │ wrong │
+"     ├────────────┼──────┼───────┼──────┼───────┤
+"     │ persistent │ zg   │ zw    │ zug  │ zuw   │
+"     ├────────────┼──────┼───────┼──────┼───────┤
+"     │ temporary  │ zG   │ zW    │ zuG  │ zuW   │
+"     └────────────┴──────┴───────┴──────┴───────┘
+"
+" For the moment, I  prefer to always add good / bad words  to a temporary list,
+" so that  my choices don't persist  across sessions. Therefore, I swap  all the
+" commands (easier to type lowercase characters):
+
+" mark word under cursor as good
+nno  zg  zG
+nno  zG  zg
+" mark word under cursor as wrong
+nno  zw  zW
+nno  zW  zw
+" undo the marking of word under cursor as good
+nno  zug  zuG
+nno  zuG  zug
+" undo the marking of word under cursor as wrong
+nno  zuw  zuW
+nno  zuW  zuw
+
 " zv  zV {{{4
 
 nno  zv  zMzvzz
@@ -3193,19 +3230,19 @@ if !has('nvim')
     cno  <expr>  <tab>    <sid>c_tab(1)
     cno  <expr>  <s-tab>  <sid>c_tab(0)
 
-    fu! s:c_tab(fwd) abort
+    fu! s:c_tab(is_fwd) abort
         if getcmdtype() =~ '[?/]'
             return empty(getcmdline())
             \?         "\<up>"
-            \:         a:fwd ? "\<c-g>" : "\<c-t>"
+            \:         a:is_fwd ? "\<c-g>" : "\<c-t>"
         else
-            let l:key = a:fwd ? "\<tab>" : "\<s-tab>"
-            let flags = 'in'.(!wildmenumode() && !a:fwd ? 't' : '')
-            "                                              │
-            "                     handle key as if typed,  ┘
-            "                     otherwise  it's handled  as if  coming from  a
-            "                     mapping, which matters when we try to open the
-            "                     wildmenu, or cycle through its entries
+            let l:key = a:is_fwd ? "\<tab>" : "\<s-tab>"
+            let flags = 'in'.(!wildmenumode() && !a:is_fwd ? 't' : '')
+            "                                                 │
+            "                        handle key as if typed,  ┘
+            "                        otherwise  it's handled  as if  coming from  a
+            "                        mapping, which matters when we try to open the
+            "                        wildmenu, or cycle through its entries
 
             " Why use `feedkeys()`?{{{
             "
@@ -3346,48 +3383,6 @@ nno  <silent>  <m-m>  :<c-u>noh <bar> call <sid>where_are_my_matches()<cr>
 
 nno  <m-n>  ]'
 nno  <m-p>  ['
-
-" make frequent motions repeatable {{{3
-
-fu! s:be_repeatable(key) abort
-    let g:motion_to_repeat = a:key
-
-    let keys = a:key ==# '[S' || a:key ==# ']S'
-    \?             '5'.(a:key ==# '[S' ? 'zh' : 'zl')
-    \:             v:count1.a:key.'zv'
-
-    call feedkeys(keys, 'int')
-endfu
-
-nno  <silent>  [(  :<c-u>call <sid>be_repeatable('[(')<cr>
-nno  <silent>  [)  :<c-u>call <sid>be_repeatable('[)')<cr>
-nno  <silent>  ](  :<c-u>call <sid>be_repeatable('](')<cr>
-nno  <silent>  ])  :<c-u>call <sid>be_repeatable('])')<cr>
-
-nno  <silent>  [{  :<c-u>call <sid>be_repeatable('[{')<cr>
-nno  <silent>  [}  :<c-u>call <sid>be_repeatable('[}')<cr>
-nno  <silent>  ]{  :<c-u>call <sid>be_repeatable(']{')<cr>
-nno  <silent>  ]}  :<c-u>call <sid>be_repeatable(']}')<cr>
-
-nno  <silent>  ]c  :<c-u>call <sid>be_repeatable(']c')<cr>
-nno  <silent>  [c  :<c-u>call <sid>be_repeatable('[c')<cr>
-
-" Why the `[S` and `]S` mappings?{{{
-"
-" By default, `zh` and `zl` move the cursor on a long non-wrapped line.
-" But at the same time, we use `zj` and `zk` to split the window.
-" I don't like  the `hjkl` being used  with a same prefix (`z`)  for 2 different
-" purposes. So, instead we'll use `[S` and `]S`.
-"}}}
-"               ┌ mnemonics: Scroll
-"               │
-nno  <silent>  [S  :<c-u>call <sid>be_repeatable('[S')<cr>
-nno  <silent>  ]S  :<c-u>call <sid>be_repeatable(']S')<cr>
-nno  <silent>  [s  :<c-u>call <sid>be_repeatable('[s')<cr>
-nno  <silent>  ]s  :<c-u>call <sid>be_repeatable(']s')<cr>
-
-nno  <silent>  g,  :<c-u>call <sid>be_repeatable('g;')<cr>
-nno  <silent>  g;  :<c-u>call <sid>be_repeatable('g,')<cr>
 
 " =A                  toggle alignment {{{3
 
@@ -3594,8 +3589,10 @@ nmap  crgg  <plug>(MakeDigraph)_
 nno  <silent>  crs  :<c-u>call <sid>my_crs()<cr>
 
 fu! s:my_crs() abort
+    let view = winsaveview()
     " populate search register with original word
     norm! *``
+    call winrestview(view)
     let pat = @/
     "                           ┌ snake case
     "                           │
@@ -3653,12 +3650,6 @@ if has('vim_starting')
     \                                  'up/down'    : [ '.*_\zsup\ze.*', 'down' ],
     \                                  'left/right' : [ '.*_\zsleft\ze.*', 'right' ],
     \                                  'g%'         : ['g%',  '%'],
-    \                                  'g,'         : ['g,', 'g;'],
-    \                                  'gk'         : ['gk', 'gj'],
-    \                                  'Z c-h'      : ['Z c-h', 'Z c-l'],
-    \                                  'Z c-j'      : ['Z c-j', 'Z c-k'],
-    \                                  'zH'         : ['zH', 'zL'],
-    \                                  'zk'         : ['zk', 'zj'],
     \                              },
     \
     \                          ',' : {
@@ -3666,15 +3657,17 @@ if has('vim_starting')
     \                                  'up/down'    : [ '.*_\zsdown\ze.*', 'up' ],
     \                                  'left/right' : [ '.*_\zsright\ze.*', 'left' ],
     \                                  '%'          : ['%',  'g%'],
-    \                                  'g;'         : ['g;', 'g,'],
-    \                                  'gj'         : ['gj', 'gk'],
-    \                                  'Z c-k'      : ['Z c-k', 'Z c-j'],
-    \                                  'Z c-l'      : ['Z c-l', 'Z c-h'],
-    \                                  'zL'         : ['zL', 'zH'],
-    \                                  'zj'         : ['zj', 'zk'],
     \                              },
     \                        }
 endif
+
+" TODO:
+" We've  commented these  mappings, because  they  conflict with  the ones  in`
+" `vim-repeatable-motions  It  must  have  broken the  repeatability  of  some`
+" motions. Fix this. Eliminate `s:motion_wrapper()`. For example `]oL`.
+"
+    " nno   <expr>  ;  <sid>motion_wrapper(';')
+    " nno   <expr>  ,  <sid>motion_wrapper(',')
 
 fu! s:motion_wrapper(key) abort
     let l:key = a:key
@@ -3714,11 +3707,13 @@ endfu
 fu! s:reset_motion_to_repeat(key) abort
     " If the repetition of a motion does not what is expected, remap it like this:
     "
-    "         nno <expr> <key> <sid>reset_motion_to_repeat('<key>')
+    "         nno  <expr>  <key>  <sid>reset_motion_to_repeat('<key>')
 
     augroup sneak_open_folds
         au!
-        au CursorMoved * exe 'norm! zv' | exe 'au! sneak_open_folds ' | aug! sneak_open_folds
+        au CursorMoved * exe 'norm! zv'
+        \|               exe 'au! sneak_open_folds '
+        \|               aug! sneak_open_folds
     augroup END
 
     sil call feedkeys("\<plug>Sneak_".a:key, 'i')
@@ -3736,10 +3731,10 @@ fu! s:reset_motion_to_repeat(key) abort
     return ''
 endfu
 
-fu! s:visual_repeat_sneak(fwd) abort
+fu! s:visual_repeat_sneak(is_fwd) abort
     let fen_save = &l:fen
     let &l:fen = 0
-    call feedkeys("\<plug>Sneak_".(a:fwd ? ';' : ','), 'it')
+    call feedkeys("\<plug>Sneak_".(a:is_fwd ? ';' : ','), 'it')
     call timer_start(0, {-> execute('let &l:fen ='.fen_save.'|norm! zv')})
     return ''
 endfu
@@ -3770,8 +3765,6 @@ xno  Ss  <nop>
 " Also, the whole code seems to be a mess.
 " Tidy all that in a plugin (vim-repeat-motion).
 
-nno   <expr>  ;  <sid>motion_wrapper(';')
-nno   <expr>  ,  <sid>motion_wrapper(',')
 xmap  <expr>  ;  <sid>visual_repeat_sneak(1)
 xmap  <expr>  ,  <sid>visual_repeat_sneak(0)
 omap          ;  <plug>Sneak_;
@@ -4312,7 +4305,7 @@ com! -bar -nargs=0 CleanRegisters call myfuncs#clean_reg()
 com! -range=% -nargs=+ -complete=custom,myfuncs#patterns_favorite CountPatterns
 \|                      call myfuncs#patterns_count(<line1>, <line2>, <f-args>)
 
-" CV    Capture Variable {{{2
+" CV {{{2
 
 " This command is useful to create a copy of a variable local to a function or a
 " script into the global namespace, for debugging purpose.
@@ -4757,7 +4750,7 @@ endfu
 
 com! -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | exe '.!bc' | -j
 
-" TW    TrimWhitespace {{{2
+" TW {{{2
 
 com! -bar -range=% TW call s:trim_whitespace(<line1>,<line2>)
 fu! s:trim_whitespace(line1,line2) abort
@@ -5504,13 +5497,13 @@ endfu
 " Also see this, slightly different purpose, but similar:
 " https://www.reddit.com/r/vim/comments/4j4duz/vim_how_can_i_jump_to_next_line_containing_a/
 "
-"         fu! s:vertical_jump(fwd) abort
+"         fu! s:vertical_jump(is_fwd) abort
 "             let c     = '%'.virtcol('.').'v'
-"             let flags = a:fwd ? 'nW' : 'bnW'
+"             let flags = a:is_fwd ? 'nW' : 'bnW'
 "             let bot   = search('\v'.c.'.*\n^(.*'.c.'.)@!.*$', flags)
 "             let top   = search('\v^(.*'.c.'.)@!.*$\n.*\zs'.c, flags)
 "
-"             return a:fwd ? ((bot < top ? bot : top) - line('.')).'j'
+"             return a:is_fwd ? ((bot < top ? bot : top) - line('.')).'j'
 "             \                    : (line('.') - (bot > top ? bot : top)).'k'
 "         endfu
 "
@@ -6437,6 +6430,12 @@ tno  <s-tab>  <left>
 " study vim-sandwich
 " implement surrounding with → ← (for easier conceal)
 "
+" Also, document this:
+"
+"     saio(
+"     surround column text-object with parentheses
+"     (works even if the lines have different lengths)
+"
 " Also, read this (taken from vim-surround note), and try to reimplement it:
 "
 "     Au moment d'encadrer un text-object, on peut également interroger
@@ -6597,7 +6596,7 @@ tno  <s-tab>  <left>
 " window dynamically.
 "
 " 98 -
-" Move every function called from several scripts inside `vim-lib`:
+" Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     cmdline#reset_did_transform(
 "     comment#object(
@@ -6608,13 +6607,31 @@ tno  <s-tab>  <left>
 "     qf#create_matches(
 "     qf#open(
 "     qf#set_matches(
-"     repeat#set(            I think not necessary
-"     repeat#setreg(         I think not necessary
-"     window#get_modifier(
+"     repeat#set(            yes, even this one (we want as few dependencies as possible for all our plugins)
+"     repeat#setreg(
 "     window#qf_open(
 "
 " Also, make  sure they  are self-contained. They must  not call  functions from
-" one of our other plugins. If they do, move the latter inside `vim-lib` too.
+" one of our other plugins. If they do, move the latter inside `vim-lg-lib` too.
+"
+" 99 -
+" implement a search ring, and install mappings to cycle through it
+" useful to search for an old pattern without having to do `/ Up …`
+" (; and ,  would be more comfy)
+"
+" 100 -
+" When you create a loclist, replace the  old one if its title is `Breakdown` or
+" `FIXME & TODO`.
+" Also, maybe create a mapping to show  the stack of location lists, and another
+" to remove the current one.
+"
+" 101 -
+"     SPC fr    (:FzHistory)
+"     Escape
+"     :tabnew
+"
+" A new tab page is correctly opened, but the focus stay in the same window,
+" and the fzf buffer is replaced with the last visited buffer.
 
 
 
@@ -6644,15 +6661,6 @@ endfu
 "     let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
 "     call append(line('.'), cml.repeat(' ', virtcol('.')-1-strchars(cml, 1))."^\u2718")
 " endfu
-
-
-
-" :h
-" :vert sb#
-
-" saio(
-" surround column text-object with parentheses
-" (works even if the lines have different lengths)
 
 
 

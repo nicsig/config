@@ -186,3 +186,46 @@ ino  <plug>(scroll-window-down)  <c-x><c-e>
 call submode#enter_with('scroll-window', 'i', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
 call submode#map('scroll-window', 'i', 'r', 'k', '<plug>(scroll-window-up)')
 ino  <plug>(scroll-window-up)  <c-x><c-y>
+
+"        repeatable_motions {{{2
+" z, z; {{{3
+
+" Why no visual mode?
+" It doesn't makes sense to create a submode in visual mode when we move across files.
+
+call submode#enter_with('repeat-motion-2', 'n', 'r', 'z;', '<plug>(z_semicolon)')
+call submode#enter_with('repeat-motion-2', 'n', 'r', 'z,', '<plug>(z_comma)')
+call submode#map(       'repeat-motion-2', 'n', 'r',  ';', '<plug>(z_semicolon)')
+call submode#map(       'repeat-motion-2', 'n', 'r',  ',', '<plug>(z_comma)')
+" We may be in the submode, but think we aren't anymore, and thus press `z;`.
+" If that's the case, we want `z;` to keep its original meaning (the one outside the submode).
+call submode#map(       'repeat-motion-2', 'n', 'r', 'z;', '<plug>(z_semicolon)')
+call submode#map(       'repeat-motion-2', 'n', 'r', 'z,', '<plug>(z_comma)')
+
+" +, +; {{{3
+
+call submode#enter_with('repeat-motion-3', 'n', 'r', '+;', '<plug>(plus_semicolon)')
+call submode#enter_with('repeat-motion-3', 'n', 'r', '+,', '<plug>(plus_comma)')
+call submode#map(       'repeat-motion-3', 'n', 'r',  ';', '<plug>(plus_semicolon)')
+call submode#map(       'repeat-motion-3', 'n', 'r',  ',', '<plug>(plus_comma)')
+call submode#map(       'repeat-motion-3', 'n', 'r', '+;', '<plug>(plus_semicolon)')
+call submode#map(       'repeat-motion-3', 'n', 'r', '+,', '<plug>(plus_comma)')
+
+call submode#enter_with('repeat-motion-3', 'x', 'r', '+;', '<plug>(plus_semicolon)')
+call submode#enter_with('repeat-motion-3', 'x', 'r', '+,', '<plug>(plus_comma)')
+call submode#map(       'repeat-motion-3', 'x', 'r',  ';', '<plug>(plus_semicolon)')
+call submode#map(       'repeat-motion-3', 'x', 'r',  ',', '<plug>(plus_comma)')
+call submode#map(       'repeat-motion-3', 'x', 'r', '+;', '<plug>(plus_semicolon)')
+call submode#map(       'repeat-motion-3', 'x', 'r', '+,', '<plug>(plus_comma)')
+
+" co, co; {{{3
+
+" Why no visual mode?
+" It doesn't makes sense to create a submode in visual mode to cycle through options values.
+
+call submode#enter_with('repeat-motion-4', 'n', 'r', 'co;', '<plug>(co_semicolon)')
+call submode#enter_with('repeat-motion-4', 'n', 'r', 'co,', '<plug>(co_comma)')
+call submode#map(       'repeat-motion-4', 'n', 'r',   ';', '<plug>(co_semicolon)')
+call submode#map(       'repeat-motion-4', 'n', 'r',   ',', '<plug>(co_comma)')
+call submode#map(       'repeat-motion-4', 'n', 'r', 'co;', '<plug>(co_semicolon)')
+call submode#map(       'repeat-motion-4', 'n', 'r', 'co,', '<plug>(co_comma)')

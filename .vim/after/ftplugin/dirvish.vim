@@ -1,9 +1,4 @@
 " Mappings {{{1
-" . {{{2
-
-xmap  <buffer>         .                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
-xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 1')[0]
-
 " [oP  ]oP  coP {{{2
 
 nno  <buffer><nowait><silent>  [oP  :<c-u>call my_dirvish#toggle_auto_preview(1)<cr>
@@ -33,6 +28,11 @@ nmap  <buffer><nowait><silent>  s  :<c-u>call dirvish#open('split', 1)<cr>
 
 nno  <buffer><nowait><silent>  t  :<c-u>call dirvish#open('tabedit', 1)<cr>
 xno  <buffer><nowait><silent>  t  :call dirvish#open('tabedit', 1)<cr>
+
+" x {{{2
+
+xmap  <buffer>         x                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
+xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 2')[0]
 
 " zh {{{2
 "
@@ -103,7 +103,7 @@ call search('\V\^'.escape(b:dirvish['line'],'\').'\$', 'cw')
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   exe 'xunmap <buffer> .'
+                    \   exe 'xunmap <buffer> x'
                     \|  exe 'nunmap <buffer> [oP'
                     \|  exe 'nunmap <buffer> ]oP'
                     \|  exe 'nunmap <buffer> coP'
