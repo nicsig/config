@@ -1004,6 +1004,13 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             norm! gvy
         endif
 
+        " Old Code:{{{
+        "
+        " It was necessary in the past, because we used `:grep`.
+        " But now we use `:cgetexpr`, for which this code doesn't work:
+        " we use `filter()` instead. I keep it for educational purpose.
+        "
+        "
         " By default, the output of `:grep` includes errors (“permission denied“).
         " It's because of 'shellpipe' / 'sp', whose default value is `2>&1| tee`.
         "
@@ -1011,26 +1018,33 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
         " We do so by temporarily tweaking 'sp':
         "
         "         2>&1| tee  →  |tee
-        let &l:sp = '| tee'
+        "
+        " let &l:sp = '| tee'
+        "}}}
 
         if a:type ==# 'Ex'
-            let [ pattern, is_loclist ] = [ a:1, a:2 ]
+            let [ pat, is_loclist ] = [ a:1, a:2 ]
 
-            " ┌─ bypass the shell prompt: "Press Enter or type command to continue"
-            " │
-            sil exe (is_loclist ? 'l' : '').'grep! '.shellescape(pattern)
-            "                                    │
-            "                                    └─ prevent Vim from automatically jumping
-            "                                       to the 1st entry in the qfl
-
-            " set the title of the qf window
+            " Why `:lgetexpr` instead of `:lgrep!`?{{{
+            "
+            " The latter shows us the output of the shell command (`$ ag …`).
+            " This makes the screen “flash”, which is distracting.
+            "
+            " `:lgetexpr` executes the shell command silently.
+            "}}}
             if is_loclist
-                call setloclist(0, [], 'a', { 'title': &grepprg.' '.pattern.' .' })
+                lgetexpr s:op_grep_get_qfl(pat)
+                call setloclist(0, [], 'a', { 'title': &grepprg.' '.pat.' .' })
             else
-                call setqflist([], 'a', { 'title': &grepprg.' '.pattern.' .' })
+                cgetexpr s:op_grep_get_qfl(a:pat)
+                call setqflist([], 'a', { 'title': &grepprg.' '.pat.' .' })
             endif
         else
-            " Even though `:grep` is a Vim command, we really need to use `shellescape()`{{{
+            " Old Interesting Alternative:{{{
+            "
+            "     sil! exe 'grep! '.shellescape(@").' .'
+            "
+            " Even though `:grep` is a Vim command, we really need to use `shellescape()`
             " and NOT `fnameescape()`. Check this:
             "
             "     let @" = 'foo;ls'
@@ -1078,21 +1092,21 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                                              /tmp/foo\%bar
             "                                                      ^
             "}}}
-            "                 │
-            sil! exe 'grep! '.shellescape(@").' .'
+            cgetexpr s:op_grep_get_qfl(@")
             call setqflist([], 'a', { 'title': &grepprg.' '.@".' .' })
         endif
-        " fix the display which could be messed up because we bypassed the shell prompt
-        redraw!
 
     catch
         return lg#catch_error()
     finally
         let &cb  = cb_save
         let &sel = sel_save
-        let &sp  = sp_save
         call setreg('"', reg_save[0], reg_save[1])
     endtry
+endfu
+
+fu! s:op_grep_get_qfl(pat) abort
+    return filter(systemlist(&grepprg.' '.shellescape(a:pat)), {i,v -> v !~# '^ERR: Skipping'})
 endfu
 
 fu! myfuncs#op_incremental_yank(type) abort "{{{2
@@ -1849,6 +1863,9 @@ endfu
 fu! myfuncs#search_todo() abort "{{{1
     try
         lvim /\cfixme\|todo/j %
+        " TODO:
+        " create a function in the plugin which makes motions repeatable
+        " to manually set the last motion on a given axis
         let g:motion_to_repeat = ']l'
     catch
         echo 'no TODO or FIXME'

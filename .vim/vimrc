@@ -92,7 +92,8 @@ Plug 'tpope/vim-fugitive'
 " 1s has elapsed.
 augroup lazy_load_plugins
     au!
-    au VimEnter * call timer_start(1000, {->  execute('runtime! autoload/shortly_after_vimenter.vim')})
+    au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
+    \|                                                 runtime! autoload/slow_mappings/*.vim')})
     \|            exe 'au! lazy_load_plugins'
     \|            aug! lazy_load_plugins
 augroup END
@@ -145,9 +146,6 @@ Plug 'lacygoill/vim-matchit'
 
 "}}}
 Plug 'lacygoill/potion'
-" TODO:
-" move `vim-repeatable-motions` in the DONE category once you've finished it
-Plug 'lacygoill/vim-repeatable-motions'
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
 Plug 'kana/vim-submode', { 'frozen': 1}
@@ -1941,6 +1939,14 @@ nno  <expr>  dp  &l:diff ? 'dp' : ''
 " buffer (1st byte, see `:h go`). Annoying.
 nno  go<esc>  <nop>
 
+nno  s<esc>  <nop>
+nno  S<esc>  <nop>
+
+nno  sS  <nop>
+nno  Ss  <nop>
+xno  sS  <nop>
+xno  Ss  <nop>
+
 " FREE {{{2
 
 " A key can be used as a prefix iff one of these conditions is true:
@@ -3639,150 +3645,124 @@ nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
 
 " f  F  t  T  ;  ,    vim-sneak {{{3
 
-if has('vim_starting')
-    let g:motion_to_repeat = ''
-    " Why the `.\?` inside the value of the `[ {char}` key?
-    " It allows to repeat mappings with more than 2 keys, such as `]r)`
-    " (move region of text inside parentheses, forward).
-    let s:normalize_motion = {
-    \                          ';' : {
-    \                                  '[ {char}'   : ['\[\ze..\?', ']'],
-    \                                  'up/down'    : [ '.*_\zsup\ze.*', 'down' ],
-    \                                  'left/right' : [ '.*_\zsleft\ze.*', 'right' ],
-    \                                  'g%'         : ['g%',  '%'],
-    \                              },
-    \
-    \                          ',' : {
-    \                                  '] {char}'   : ['\]\ze..\?', '['],
-    \                                  'up/down'    : [ '.*_\zsdown\ze.*', 'up' ],
-    \                                  'left/right' : [ '.*_\zsright\ze.*', 'left' ],
-    \                                  '%'          : ['%',  'g%'],
-    \                              },
-    \                        }
-endif
+" if has('vim_starting')
+"     let g:motion_to_repeat = ''
+"     " Why the `.\?` inside the value of the `[ {char}` key?
+"     " It allows to repeat mappings with more than 2 keys, such as `]r)`
+"     " (move region of text inside parentheses, forward).
+"     let s:normalize_motion = {
+"     \                          ';' : {
+"     \                                  '[ {char}'   : ['\[\ze..\?', ']'],
+"     \                                  'up/down'    : [ '.*_\zsup\ze.*', 'down' ],
+"     \                                  'left/right' : [ '.*_\zsleft\ze.*', 'right' ],
+"     \                              },
+"     \
+"     \                          ',' : {
+"     \                                  '] {char}'   : ['\]\ze..\?', '['],
+"     \                                  'up/down'    : [ '.*_\zsdown\ze.*', 'up' ],
+"     \                                  'left/right' : [ '.*_\zsright\ze.*', 'left' ],
+"     \                              },
+"     \                        }
+" endif
 
 " TODO:
 " We've  commented these  mappings, because  they  conflict with  the ones  in`
 " `vim-repeatable-motions  It  must  have  broken the  repeatability  of  some`
-" motions. Fix this. Eliminate `s:motion_wrapper()`. For example `]oL`.
+" motions. Fix this. Eliminate `s:motion_wrapper()`.
 "
-    " nno   <expr>  ;  <sid>motion_wrapper(';')
-    " nno   <expr>  ,  <sid>motion_wrapper(',')
+"     nno   <expr>  ;  <sid>motion_wrapper(';')
+"     nno   <expr>  ,  <sid>motion_wrapper(',')
 
-fu! s:motion_wrapper(key) abort
-    let l:key = a:key
+" fu! s:motion_wrapper(key) abort
+"     let l:key = a:key
 
-    if !empty(g:motion_to_repeat)
-        let motion = g:motion_to_repeat
+"     if !empty(g:motion_to_repeat)
+"         let motion = g:motion_to_repeat
 
-        if motion != '[[' && motion != ']]'
-            for [pat, rep] in values(s:normalize_motion[l:key])
-                let motion = substitute(motion, '^'.pat.'$', rep, '')
-            endfor
-            " Not  sure we  can get  around this  extra substitution  because of
-            " C-j. A  literal C-j  would probably  need extra  precaution to  be
-            " passed as an argument to a function.
-            if motion =~# '^Z c-[hjkl]$'
-                let motion = substitute(motion, ' ', '\\<', '')
-                let motion = substitute(motion, '$', '>', '')
-                let motion = eval('"'.motion.'"')
-            endif
-        else
-            let motion = motion == '[[' && l:key == ';'
-            \?               ']]'
-            \:           motion == ']]' && l:key == ','
-            \?               '[['
-            \:               motion
-        endif
-        sil call feedkeys(motion, 'i')
+"         if motion != '[[' && motion != ']]'
+"             for [pat, rep] in values(s:normalize_motion[l:key])
+"                 let motion = substitute(motion, '^'.pat.'$', rep, '')
+"             endfor
+"             " Not  sure we  can get  around this  extra substitution  because of
+"             " C-j. A  literal C-j  would probably  need extra  precaution to  be
+"             " passed as an argument to a function.
+"             if motion =~# '^Z c-[hjkl]$'
+"                 let motion = substitute(motion, ' ', '\\<', '')
+"                 let motion = substitute(motion, '$', '>', '')
+"                 let motion = eval('"'.motion.'"')
+"             endif
+"         else
+"             let motion = motion == '[[' && l:key == ';'
+"             \?               ']]'
+"             \:           motion == ']]' && l:key == ','
+"             \?               '[['
+"             \:               motion
+"         endif
+"         sil call feedkeys(motion, 'i')
 
-    elseif l:key ==# ';' || l:key ==# ','
-        sil call feedkeys("\<plug>Sneak_".l:key, 'i')
-        sil call feedkeys('zv', 'int')
-    endif
+"     elseif l:key ==# ';' || l:key ==# ','
+"         sil call feedkeys("\<plug>Sneak_".l:key, 'i')
+"         sil call feedkeys('zv', 'int')
+"     endif
 
-    return ''
-endfu
+"     return ''
+" endfu
 
-fu! s:reset_motion_to_repeat(key) abort
-    " If the repetition of a motion does not what is expected, remap it like this:
-    "
-    "         nno  <expr>  <key>  <sid>reset_motion_to_repeat('<key>')
+" fu! s:reset_motion_to_repeat(key) abort
+"     augroup sneak_open_folds
+"         au!
+"         au CursorMoved * exe 'norm! zv'
+"         \|               exe 'au! sneak_open_folds '
+"         \|               aug! sneak_open_folds
+"     augroup END
 
-    augroup sneak_open_folds
-        au!
-        au CursorMoved * exe 'norm! zv'
-        \|               exe 'au! sneak_open_folds '
-        \|               aug! sneak_open_folds
-    augroup END
+"     sil call feedkeys("\<plug>Sneak_".a:key, 'i')
+"     let g:motion_to_repeat = ''
+"     return ''
+" endfu
 
-    sil call feedkeys("\<plug>Sneak_".a:key, 'i')
-    let g:motion_to_repeat = ''
-
-    " Each key which is remapped through `reset_motion_to_repeat()` will clear
-    " `g:motion_to_repeat`.
-    " The contents of this variable dictates what kind of motion the next
-    " `;` `,` will do.
-    "
-    " However, if for some reason, we had to remap `Z`, there's a trick.
-    " The previous call to `feedkeys()` should be replaced like this:
-    "
-    "         sil call feedkeys("\<plug>Sneak_" . tr(key, 'Z', 'S'), 'i')
-    return ''
-endfu
-
-fu! s:visual_repeat_sneak(is_fwd) abort
-    let fen_save = &l:fen
-    let &l:fen = 0
-    call feedkeys("\<plug>Sneak_".(a:is_fwd ? ';' : ','), 'it')
-    call timer_start(0, {-> execute('let &l:fen ='.fen_save.'|norm! zv')})
-    return ''
-endfu
+" fu! s:visual_repeat_sneak(is_fwd) abort
+"     let fen_save = &l:fen
+"     let &l:fen = 0
+"     call feedkeys("\<plug>Sneak_".(a:is_fwd ? ';' : ','), 'it')
+"     call timer_start(0, {-> execute('let &l:fen ='.fen_save.'|norm! zv')})
+"     return ''
+" endfu
 
 " Vim-sneak default mappings are too inconsistent to be memorized.
 " They also conflict with `vim-sandwich`.
-nmap  <expr>  ss  <sid>reset_motion_to_repeat('s')
-nmap  <expr>  SS  <sid>reset_motion_to_repeat('S')
-xmap  <expr>  ss  <sid>reset_motion_to_repeat('s')
-xmap  <expr>  SS  <sid>reset_motion_to_repeat('S')
-omap  <expr>  ss  <sid>reset_motion_to_repeat('s')
-omap  <expr>  SS  <sid>reset_motion_to_repeat('S')
-
-nno  s<esc>  <nop>
-nno  S<esc>  <nop>
-
-nno  sS  <nop>
-nno  Ss  <nop>
-xno  sS  <nop>
-xno  Ss  <nop>
+"
+"         xmap  <expr>  ss  <sid>reset_motion_to_repeat('s')
+"         xmap  <expr>  SS  <sid>reset_motion_to_repeat('S')
+"         omap  <expr>  ss  <sid>reset_motion_to_repeat('s')
+"         omap  <expr>  SS  <sid>reset_motion_to_repeat('S')
 
 " FIXME:
 " v_f (&friends v_F, v_t, v_T) doesn't open folds.
 " Make sure all commands open folds.
+"
+"     https://github.com/justinmk/vim-sneak/issues/212
+"
 " Also, try to refactor the code. We have  code to open folds in functions which
 " have a different purpose.  It's ugly (separation of concern).
 "
 " Also, the whole code seems to be a mess.
 " Tidy all that in a plugin (vim-repeat-motion).
 
-xmap  <expr>  ;  <sid>visual_repeat_sneak(1)
-xmap  <expr>  ,  <sid>visual_repeat_sneak(0)
-omap          ;  <plug>Sneak_;
-omap          ,  <plug>Sneak_,
+"         xmap  <expr>  ;  <sid>visual_repeat_sneak(1)
+"         xmap  <expr>  ,  <sid>visual_repeat_sneak(0)
+"         omap          ;  <plug>Sneak_;
+"         omap          ,  <plug>Sneak_,
 
-nno  <expr>  f  <sid>reset_motion_to_repeat('f')
-nno  <expr>  F  <sid>reset_motion_to_repeat('F')
-xmap         f  <plug>Sneak_f
-xmap         F  <plug>Sneak_F
-omap         f  <plug>Sneak_f
-omap         F  <plug>Sneak_F
+"         xmap         f  <plug>Sneak_f
+"         xmap         F  <plug>Sneak_F
+"         omap         f  <plug>Sneak_f
+"         omap         F  <plug>Sneak_F
 
-nno  <expr>  t  <sid>reset_motion_to_repeat('t')
-nno  <expr>  T  <sid>reset_motion_to_repeat('T')
-xmap         t  <plug>Sneak_t
-xmap         T  <plug>Sneak_T
-omap         t  <plug>Sneak_t
-omap         T  <plug>Sneak_T
+"         xmap         t  <plug>Sneak_t
+"         xmap         T  <plug>Sneak_T
+"         omap         t  <plug>Sneak_t
+"         omap         T  <plug>Sneak_T
 
 " j  k  ^  0  $       gj  gk  … {{{3
 
@@ -4920,10 +4900,9 @@ fu! s:update_history() abort
     call writefile(info, viminfo, 'b')
 endfu
 
-" Create Non Existing Directory {{{2
+" Create Missing Directory {{{2
 
-fu! s:make_non_existing_dir(file, buf) abort
-
+fu! s:make_missing_dir(file, buf) abort
     " Before creating a directory, make sure that the current buffer:
     "
     "     • is not a special one    :h special-buffers
@@ -4931,8 +4910,6 @@ fu! s:make_non_existing_dir(file, buf) abort
     "
     " Found here:    http://stackoverflow.com/a/4294176
 
-    " let g:afile = deepcopy(expand('<afile>'))
-    " let g:abuf  = deepcopy(expand('<abuf>'))
     if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'\v^\w+\:\/'
         let dir = fnamemodify(a:file, ':h')
         if !isdirectory(dir)
@@ -4941,9 +4918,9 @@ fu! s:make_non_existing_dir(file, buf) abort
     endif
 endfu
 
-augroup make_non_existing_dir
+augroup make_missing_dir
     au!
-    au BufWritePre * call s:make_non_existing_dir(expand('<afile>'), expand('<abuf>'))
+    au BufWritePre * call s:make_missing_dir(expand('<afile>'), expand('<abuf>'))
 augroup END
 
 " Default Extension {{{2
@@ -6204,12 +6181,6 @@ endfu
 " also, by default, folds should stack, not nest
 "
 " 55 -
-" In `brackets#mv_text()` use alphabetic marks to highlight the moved lines.
-" Also, if a line has only 1 character it's not highlighted, because the pattern
-" doesn't work (.*\%'e\_.*\%<'f.*): fix this.
-" The issue comes when the marks are in the same position.
-"
-" 56 -
 " Refactor all the code dealing with repeatable motions.
 " Take inspiration from the plugin repeatable-motions.vim
 " Goal:
@@ -6220,7 +6191,7 @@ endfu
 " our plugins. It should only appear inside one plugin (custom version of
 " `repeatable-motions.vim`).
 "
-" 57 -
+" 56 -
 " Read :h ^w_<cr>
 "
 " Also, document the following trick:
@@ -6245,13 +6216,13 @@ endfu
 "
 " This requires a properly set 'efm'.
 "
-" 58 -
+" 57 -
 " Refactor all our functions which populate the qfl to offload work to a single
 " function in `vim-qf`?
 "
 "         vim /set\%(qf\|loc\)list/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "
-" 59 -
+" 58 -
 " move the setting of 'flp' in markdown ftplugin into vimrc
 " consistent with 'fo' which is in vimrc now
 " set 'flp' from an autocmd listening to FileType (filter *), to set it
@@ -6261,7 +6232,7 @@ endfu
 " does it cause an issue, if an option is set for all filetypes in vimrc?
 " there's no teardown anymore (b:undo_ftplugin)
 "
-" 60 -
+" 59 -
 " read `:h  'indk`; if  you are  in a buffer  where a  line is  reindented while
 " typing in  insert mode,  consider removing the  character which  triggered the
 " reindentation from 'indk' (in an indent plugin)
@@ -6269,29 +6240,17 @@ endfu
 " or look  for a  global variable  used by the  indentation plugin,  which could
 " disable it
 "
-" 61 -
-" Idea: implement 2 mappings using the keys « (AltGr + w) and ® (AltGr + ®) to
-" repeat an edit in 2 directions.
-" We would need to create a 2nd new global variable (g:edit_to_repeat).
-" Useful to avoid overwriting `g:motion_to_repeat`. Would make `]r` better.
-"
-" OR:
-" We could implement 1 mapping which would toggle what `,` and `;` repeat.
-" A motion or an edit.
-" We would still need a 2nd global variable (g:edit_to_repeat), but not
-" the 2 mappings («®).
-"
-" 62 -
+" 60 -
 " Restore  buffer-local  mappings, J  and  K,  if  they existed,  after  preview
 " mappings teardown?
 "
-" 63 -
+" 61 -
 " The double invocation of `scroll_preview_mappings()` is neat.
 " We don't create 2 functions, only 1.
 " Find where we should have done that. Look for functions containing the keyword
 " `maybe` or `later`.
 "
-" 64 -
+" 62 -
 " Are there places where we should have used:
 "         sil! call repeat#setreg(…, v:register)
 " … ?
@@ -6301,7 +6260,7 @@ endfu
 " But still, document in which environment `repeat#setreg()` might be useful,
 " and when to use it (at the very beginning of the function).
 "
-" 65 -
+" 63 -
 " refactor all operators, `g@`, so that they remove 'unnamed' and 'unnamedplus'
 " from 'cb', and set 'inclusive'
 "
@@ -6312,28 +6271,28 @@ endfu
 "         catch
 "             return lg#catch_error()
 "
-" 66 -
+" 64 -
 " Not a fan of `]h` and `]H`. Find better mappings.
 " Use `]C-h`?
 "
-" 67 -
+" 65 -
 " experiment about the idea that it's  forbidden to call or simply DEFINE public
 " function inside plugin/ because it would cause autoload/ to be loaded
 "
 " use potion plugin to experiment
 " note what you learn
 "
-" 68 -
+" 66 -
 " https://github.com/chrisbra/vim_faq
 "
-" 69 -
+" 67 -
 " no need to check `if &bt  ==# 'quickfix'` before applying conceal abort
 " and/or try conditional are enough
 " sure?
 "
 "         vim /if\s\+&bt\s\+==#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 70 -
+" 68 -
 " S-Tab doesn't work in terminal buffer (neither in Vim nor in Neovim, even without config)
 "
 " Hints:
@@ -6348,7 +6307,7 @@ endfu
 tno  <s-tab>  <left>
 " tno <s-tab> <c-p>
 "
-" 71 -
+" 69 -
 " https://github.com/justinmk/vim-dirvish/issues/62
 " https://github.com/bounceme/remote-viewer/
 " Alternative:
@@ -6356,7 +6315,7 @@ tno  <s-tab>  <left>
 " other "middleware"),  so that  any dumb local  navigator (like  dirvish) works
 " without adding special-case support for scp, FTP, webdav, …, netrw does.
 "
-" 72 -
+" 70 -
 " Do we really need a timer to display a message?
 "
 "         vim /execute(.*echo/gj ~/.vim/**
@@ -6373,7 +6332,7 @@ tno  <s-tab>  <left>
 "         • <expr>
 "         • timer
 "
-" 73 -
+" 71 -
 "
 " create mapping to send current line to terminal, and execute it
 " use `g>` for the lhs?
@@ -6382,14 +6341,14 @@ tno  <s-tab>  <left>
 "     g> on visual selection
 "     g>> for line
 "
-" 74 -
+" 72 -
 " finish reviewing vim-math
 " What insight can we gain from it?
 "
-" 75 -
+" 73 -
 " finish reviewing ~/Dropbox/vim_plugins/pair_complete.vim
 "
-" 76 -
+" 74 -
 " We use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
 "         • iabbrev
@@ -6408,7 +6367,7 @@ tno  <s-tab>  <left>
 "
 "         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  !=#  'Comment'
 "
-" 77 -
+" 75 -
 " Save/restore qfl/ll when we restart Vim?
 " Not sure I want that. But it would be convenient to have a command which saves
 " a particular qfl/ll in `~/.viminfo`, and which could restore it when needed.
@@ -6420,13 +6379,13 @@ tno  <s-tab>  <left>
 "
 "         %argd
 "
-" 78 -
+" 76 -
 " finish reviewing  the section in our  notes which deals with  string functions
 " (match(), matchstr(),…); also talk about `matchstrpos()`
 "
 " finish reviewing indexage de chaîne
 "
-" 79 -
+" 77 -
 " study vim-sandwich
 " implement surrounding with → ← (for easier conceal)
 "
@@ -6479,11 +6438,11 @@ tno  <s-tab>  <left>
 "
 "           let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
 "
-" 80 -
+" 78 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
 "
-" 81 -
+" 79 -
 " Create a command in vim-debug, to automatically profile a plugin.
 " It would create a temporary script with the commands:
 "
@@ -6499,11 +6458,11 @@ tno  <s-tab>  <left>
 "         \               { i,v -> v !~# '/t\%[est]/' }),
 "         \        { i,v -> 'so '.v })
 "
-" 82 -
+" 80 -
 " Check whether some commands would be better suited as mappings.
 " And check whether some mappings would be better suited as commands.
 "
-" 83 -
+" 81 -
 "                                ┌ 3rd character of all `]o?` mappings
 "         ┌──────────────────────┤
 "         BCILNSWacdfhilmnopqstvwz
@@ -6516,21 +6475,21 @@ tno  <s-tab>  <left>
 " ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 " cmdline#transform() (bound to C-s)
 "
-" 84 -
+" 82 -
 " install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `BufWritePost`
 " which would give us a warning when we forget to undo a:
 "
 "         mapping/abbreviation/command/autocmd/variable
 "
-" 85 -
+" 83 -
 " normalize underscore/dash in plug mappings, and function names in shell init files
 "
-" 86 -
+" 84 -
 " update the position of the mark in `vim-readline`
 " look for other mappings to implement, add them to a todo
 "
-" 87 -
+" 85 -
 " Should we add `:noautocmd` every time we use `:wincmd`?
 "
 "
@@ -6549,53 +6508,53 @@ tno  <s-tab>  <left>
 " I think we should use `noautocmd`  whenever we TEMPORARILY change the focus to
 " a window.
 "
-" 88 -
+" 86 -
 " We've lost time debugging dirvish, because the issue was not in vimrc
 " but in filetype plugin. How to avoid it in the future?
 "
-" 89 -
+" 87 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
 " A function implementing some abstract logic can be wrongly affected by the current
 " buffer settings ('isk' for example). Should we track this issue everywhere in our code?
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
-" 90 -
+" 88 -
 " check that whenever we use `wincmd p` we get to the right window
 "
-" 91 -
+" 89 -
 " Read all of this:
 "     https://neovim.io/news/archive/
 "
-" 92 -
+" 90 -
 " Read this:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 93 -
+" 91 -
 " Read this (OOP in VimL):
 " https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
 "
-" 94 -
+" 92 -
 " Replace `:silent!` with `:silent` whenever possible.
 " There may be errors to fix which we are missing because they are silent.
 " Also, if you wonder whether a plugin/(auto)command/function is working
 " as expected, and has no silent errors, use `:Verbose` to increase
 " the verbosity level.
 "
-" 95 -
+" 93 -
 " use syntax hl in `vim-qf` instead of complex mechanism using matches
 " also, in `vim-qf`, fix the fixme in the autocmd `my_qf`
 "
-" 96 -
+" 94 -
 " add syntax hl in TOC menu, and make content more relevant in help TOC
 "
-" 97 -
+" 95 -
 " The TOC  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " qf#open()). We could  compute the longest line,  and set the width  of the TOC
 " window dynamically.
 "
-" 98 -
+" 96 -
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     cmdline#reset_did_transform(
@@ -6614,18 +6573,18 @@ tno  <s-tab>  <left>
 " Also, make  sure they  are self-contained. They must  not call  functions from
 " one of our other plugins. If they do, move the latter inside `vim-lg-lib` too.
 "
-" 99 -
+" 97 -
 " implement a search ring, and install mappings to cycle through it
 " useful to search for an old pattern without having to do `/ Up …`
 " (; and ,  would be more comfy)
 "
-" 100 -
+" 98 -
 " When you create a loclist, replace the  old one if its title is `Breakdown` or
 " `FIXME & TODO`.
 " Also, maybe create a mapping to show  the stack of location lists, and another
 " to remove the current one.
 "
-" 101 -
+" 99 -
 "     SPC fr    (:FzHistory)
 "     Escape
 "     :tabnew
