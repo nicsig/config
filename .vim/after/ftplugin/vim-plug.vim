@@ -16,8 +16,8 @@ nmap  <buffer><nowait><silent>  <c-k>  <plug>(my_noa_on)<c-p>o<plug>(my_noa_off)
 "                                                      otherwise, the latter will be minimized
 "                                                      (because of one of our custom autocmd?)
 
-nmap  <buffer><nowait><silent>  <plug>(my_noa_on)   :<c-u>set ei=WinEnter,WinLeave<cr>
-nmap  <buffer><nowait><silent>  <plug>(my_noa_off)  :<c-u>set ei=<cr>
+nno  <buffer><nowait><silent>  <plug>(my_noa_on)   :<c-u>set ei=WinEnter,WinLeave<cr>
+nno  <buffer><nowait><silent>  <plug>(my_noa_off)  :<c-u>set ei=<cr>
 
 " Teardown {{{1
 

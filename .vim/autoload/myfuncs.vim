@@ -119,14 +119,14 @@ fu! s:bc_remove_it(clear_them_only) abort
 
     for text in s:bc_block
         let pattern_block_line = '\V\%'.idx_line.'l\%'.start_col.'c'.escape(text,'\')
-        let replacement        = '\=repeat('
-                                      \ .    string((a:clear_them_only ? ' ' : "\<c-a>"))
-                                      \ .     ','
-                                      \ .     len(text)
-                                      \ .')'
+        let rep = '\=repeat('
+        \.                    string((a:clear_them_only ? ' ' : "\<c-a>"))
+        \.                     ','
+        \.                     len(text)
+        \.                ')'
 
         exe 'sil keepj keepp '.idx_line.
-                 \ 's/'.pattern_block_line.'/'.replacement.'/e'
+                 \ 's/'.pattern_block_line.'/'.rep.'/e'
 
         let idx_line += 1
     endfor
@@ -1862,13 +1862,13 @@ endfu
 
 fu! myfuncs#search_todo() abort "{{{1
     try
-        lvim /\cfixme\|todo/j %
+        exe 'lvim /\CFIX'.'ME\|TO'.'DO/j %'
         " TODO:
         " create a function in the plugin which makes motions repeatable
         " to manually set the last motion on a given axis
         let g:motion_to_repeat = ']l'
     catch
-        echo 'no TODO or FIXME'
+        echo 'no TO'.'DO or FIX'.'ME'
         return
     endtry
 
@@ -1910,15 +1910,6 @@ fu! s:search_todo_text(dict) abort
         \                  ), 0, '')
     endif
     return dict
-endfu
-
-fu! myfuncs#sections_custom(pattern, is_fwd) abort "{{{1
-    let c = v:count1
-    norm! m'
-    while c > 0
-        call search(a:pattern, a:is_fwd ? 'W' : 'bW')
-        let c -= 1
-    endwhile
 endfu
 
 fu! myfuncs#set_indent(indent) abort range "{{{1

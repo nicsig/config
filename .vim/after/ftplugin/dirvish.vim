@@ -8,7 +8,7 @@ nno  <buffer><nowait><silent>  coP  :<c-u>call my_dirvish#toggle_auto_preview(
 
 " a {{{2
 
-nmap  <buffer><nowait><silent>  a  :<c-u>call dirvish#open('vsplit', 1)<cr>
+nno  <buffer><nowait><silent>  a  :<c-u>call dirvish#open('vsplit', 1)<cr>
 
 " h    l {{{2
 
@@ -22,7 +22,7 @@ nno  <buffer><nowait><silent>  R  :<c-u>call my_dirvish#reload()<cr>
 
 " s {{{2
 
-nmap  <buffer><nowait><silent>  s  :<c-u>call dirvish#open('split', 1)<cr>
+nno  <buffer><nowait><silent>  s  :<c-u>call dirvish#open('split', 1)<cr>
 
 " t {{{2
 

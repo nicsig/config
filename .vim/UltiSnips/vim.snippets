@@ -238,7 +238,7 @@ endsnippet
 # guard_plugin {{{1
 
 snippet guard_plugin "plugin guard" bm
-if exists('${2:g:`!v expand('%:p:h:t') ==# 'autoload' ? 'auto' : ''`loaded_${1:`!v expand('%:t:r')`}}')
+if exists('${2:g:`!v expand('%:p') =~# '/autoload/' ? 'auto' : ''`loaded_${1:`!v expand('%:t:r')`}}')
 	finish
 endif
 let $2 = 1
@@ -532,7 +532,7 @@ set rtp+=${1:path/to/plugin/}${2:
 set rtp+=${1/$/after/}}
 filetype plugin indent on
 syntax enable
-set wildmenu
+set wildmenu showcmd
 $0
 endsnippet
 
