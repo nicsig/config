@@ -2049,7 +2049,7 @@ cno  <c-x><c-a>  <c-a>
 "     │
 cno  <silent><expr>  <c-x><c-d>  '<c-a>'
 \                               .timer_start(0, {->   setreg('"', getcmdline(), 'l')
-\                                                   + feedkeys('<c-c>', 'int') })[-1]
+\                                                   + feedkeys('<c-c>', 'in') })[-1]
 
 " Alternative:{{{
 "
@@ -3519,7 +3519,7 @@ fu! s:global_marks(key) abort
     unmap '
     unmap m
     let keys = a:key.nr2char(getchar(),1)
-    call feedkeys(keys, 'it')
+    call feedkeys(keys, 'i')
     return ''
 endfu
 
@@ -3602,10 +3602,10 @@ fu! s:my_crs() abort
     call winrestview(view)
     let pat = @/
     "                           ┌ snake case
-    "                           │
-    "                           │     ┌ type the keys now
-    "                           │     │
-    call feedkeys("\<plug>Coerces", 'ix')
+    "                           │     ┌ matters for undo (?)
+    "                           │     │┌ type the keys now
+    "                           │     ││
+    call feedkeys("\<plug>Coerces", 'itx')
     " save the coerced word
     let rep = expand('<cword>')
 
@@ -3725,7 +3725,7 @@ nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
 " fu! s:visual_repeat_sneak(is_fwd) abort
 "     let fen_save = &l:fen
 "     let &l:fen = 0
-"     call feedkeys("\<plug>Sneak_".(a:is_fwd ? ';' : ','), 'it')
+"     call feedkeys("\<plug>Sneak_".(a:is_fwd ? ';' : ','), 'i')
 "     call timer_start(0, {-> execute('let &l:fen ='.fen_save.'|norm! zv')})
 "     return ''
 " endfu

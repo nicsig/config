@@ -1036,7 +1036,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
                 lgetexpr s:op_grep_get_qfl(pat)
                 call setloclist(0, [], 'a', { 'title': &grepprg.' '.pat.' .' })
             else
-                cgetexpr s:op_grep_get_qfl(a:pat)
+                cgetexpr s:op_grep_get_qfl(pat)
                 call setqflist([], 'a', { 'title': &grepprg.' '.pat.' .' })
             endif
         else
@@ -1863,9 +1863,6 @@ endfu
 fu! myfuncs#search_todo() abort "{{{1
     try
         exe 'lvim /\CFIX'.'ME\|TO'.'DO/j %'
-        " TODO:
-        " create a function in the plugin which makes motions repeatable
-        " to manually set the last motion on a given axis
         let g:motion_to_repeat = ']l'
     catch
         echo 'no TO'.'DO or FIX'.'ME'

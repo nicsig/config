@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +149 ~/.vim/plugged/vim-eunuch/plugin/eunuch.vim
+badd +145 ~/.vim/plugged/vim-eunuch/plugin/eunuch.vim
 argglobal
 silent! argdel *
 edit ~/.vim/plugged/vim-eunuch/plugin/eunuch.vim
@@ -27,12 +27,14 @@ setlocal fen
 normal! zo
 80
 normal! zo
-let s:l = 149 - ((69 * winheight(0) + 15) / 31)
+129
+normal! zo
+let s:l = 136 - ((3 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-149
-normal! 01|
+136
+normal! 09|
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
