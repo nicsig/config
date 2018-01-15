@@ -8,7 +8,7 @@ nno  <buffer><nowait><silent>  <c-p>  :<c-u>call vim_plug#move_between_commits(0
 
 nno  <buffer><nowait><silent>  H  :<c-u>call vim_plug#show_documentation()<cr>
 
-try
+if has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
     call lg#motion#main#make_repeatable({
     \        'mode': 'n',
     \        'buffer': 1,
@@ -16,9 +16,7 @@ try
     \                     {'bwd': '<c-p>',  'fwd': '<c-n>',  'axis': 1},
     \                   ]
     \ })
-catch
-    unsilent call lg#catch_error()
-endtry
+endif
 
 " Teardown {{{1
 

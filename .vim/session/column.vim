@@ -10,8 +10,8 @@ set shortmess=aoO
 badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
 badd +193 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
-badd +240 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
-badd +169 ~/.vim/plugged/vim-readline/autoload/readline.vim
+badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+badd +4 ~/.vim/plugged/vim-readline/autoload/readline.vim
 badd +389 ~/.vim/plugged/vim-readline/plugin/readline.vim
 badd +1 ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim
 badd +95 ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim
@@ -26,14 +26,8 @@ badd +1 /run/user/1000/hydra/head18.vim
 badd +24 ~/Desktop/show_toc_help.vim
 badd +9 ~/.vim/after/ftplugin/help.vim
 badd +5 ~/Desktop/vertical_jump.vim
-badd +44 ~/Desktop/vimrc
-badd +104 ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
-badd +121 ~/.vim/autoload/slow_mappings/repeatable_motions.vim
-badd +1042 ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim
-badd +103 ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/section.vim
-badd +248 ~/.vim/plugged/vim-matchit/autoload/matchit.vim
-badd +21 ~/.vim/plugged/vim-matchit/plugin/matchit.vim
-badd +0 ~/.vim/after/ftplugin/vim-plug.vim
+badd +307 ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim
+badd +6 ~/.vim/autoload/slow_mappings/repeatable_motions.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -136,23 +130,47 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-6
+8
 normal! zo
-157
+26
 normal! zo
-220
+75
 normal! zo
-278
+110
 normal! zo
-313
+158
 normal! zo
-353
+168
 normal! zo
-let s:l = 210 - ((207 * winheight(0) + 0) / 1)
+179
+normal! zo
+183
+normal! zo
+194
+normal! zo
+221
+normal! zo
+230
+normal! zo
+252
+normal! zo
+258
+normal! zo
+275
+normal! zo
+279
+normal! zo
+286
+normal! zo
+296
+normal! zo
+314
+normal! zo
+let s:l = 211 - ((11 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-210
+211
 normal! 069|
 wincmd w
 argglobal
@@ -513,20 +531,16 @@ exe s:l
 normal! zt
 2
 normal! 05|
-tabedit ~/Desktop/vimrc
+tabedit ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -536,93 +550,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 38 - ((37 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 017|
-wincmd w
-argglobal
-if bufexists('~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim') | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-706
-normal! zo
-let s:l = 706 - ((126 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-706
-normal! 039|
-wincmd w
-argglobal
-if bufexists('~/.vim/plugged/vim-lg-lib/autoload/lg/motion/section.vim') | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/section.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/section.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-47
-normal! zo
-76
-normal! zo
-76
-normal! zc
-let s:l = 49 - ((48 * winheight(0) + 13) / 26)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-49
-normal! 0
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
-tabedit ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
-wincmd w
-wincmd w
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-68
-normal! zo
-let s:l = 104 - ((11 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-104
-normal! 0
+38
+normal! 07|
 wincmd w
 argglobal
 if bufexists('~/.vim/autoload/slow_mappings/repeatable_motions.vim') | buffer ~/.vim/autoload/slow_mappings/repeatable_motions.vim | else | edit ~/.vim/autoload/slow_mappings/repeatable_motions.vim | endif
@@ -634,80 +567,17 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-19
-normal! zo
-let s:l = 19 - ((18 * winheight(0) + 0) / 1)
+let s:l = 175 - ((27 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-19
+175
 normal! 0
 wincmd w
-argglobal
-if bufexists('~/.vim/plugged/vim-matchit/plugin/matchit.vim') | buffer ~/.vim/plugged/vim-matchit/plugin/matchit.vim | else | edit ~/.vim/plugged/vim-matchit/plugin/matchit.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-6
-normal! zo
-let s:l = 26 - ((20 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-26
-normal! 0
-wincmd w
-argglobal
-if bufexists('~/.vim/plugged/vim-matchit/autoload/matchit.vim') | buffer ~/.vim/plugged/vim-matchit/autoload/matchit.vim | else | edit ~/.vim/plugged/vim-matchit/autoload/matchit.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-63
-normal! zo
-247
-normal! zo
-let s:l = 248 - ((245 * winheight(0) + 12) / 24)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-248
-normal! 07|
-wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabedit ~/.vim/after/ftplugin/vim-plug.vim
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 11 - ((10 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-11
-normal! 0
-tabnext 12
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext 10
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

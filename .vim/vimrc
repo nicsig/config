@@ -2560,10 +2560,42 @@ nmap  <space>s  saiw
 nno  <space>t  :<c-u>tabnew<cr>
 
 " [    ]              (prefix) {{{3
-" ]H    ]u                      move to Point Of Interest {{{4
+" ]h    ]u                      move to Point Of Interest {{{4
 
-nno  <silent>  ]H  :<c-u>call <sid>move_to_poi('path', 1)<cr>
-nno  <silent>  [H  :<c-u>call <sid>move_to_poi('path', 0)<cr>
+" Why not `]H`?{{{
+"
+" `]u` (next url) is lowercase. `]h` (next path) should be too.
+"}}}
+" But, doesn't it cause an inconsistency in some filetype plugins?{{{
+"
+" Yes.
+"
+" For example, in `vim-help`, we use `]e`, with a lowercase character to move to
+" the next example, while we have to use `]H` to move to the next hypertext link.
+" Same kind of inconsistency in `vim-man`.
+"}}}
+" Is it bad to use `]H`?{{{
+"
+" It's ok.
+"
+" There was already an inconsistency in those filetype plugins: because of `]O`.
+" If we  used `]o` to  move to the  next option, we would  need to wait  for the
+" timeout (because of the mappings  which toggle options values). So, instead we
+" have to use `]O`.
+"
+" I  prefer to  keep all  inconsistencies in  the filetype  plugins, instead  of
+" spreading them across more plugins.
+"
+" Besides, there are other arguments in favor of this choice:
+"
+"     • a path is a universal concept,  while an option tag is specific  to
+"       documentation; its mapping  should be  easier to type
+"
+"     • a hypertext link,  or a heading, sounds  like something more important
+"}}}
+
+nno  <silent>  ]h  :<c-u>call <sid>move_to_poi('path', 1)<cr>
+nno  <silent>  [h  :<c-u>call <sid>move_to_poi('path', 0)<cr>
 nno  <silent>  ]u  :<c-u>call <sid>move_to_poi('url', 1)<cr>
 nno  <silent>  [u  :<c-u>call <sid>move_to_poi('url', 0)<cr>
 
@@ -2571,7 +2603,7 @@ nno  <silent>  [u  :<c-u>call <sid>move_to_poi('url', 0)<cr>
 "             │
 fu! s:move_to_poi(what, is_fwd) abort
     if a:what ==? 'path'
-        let g:motion_to_repeat = a:is_fwd ? ']H' : '[H'
+        let g:motion_to_repeat = a:is_fwd ? ']h' : '[h'
         let not_dot_special    = '%(\s\.%(\=|,))@!'
         let pattern            = '\v'.not_dot_special.'&%(^|\s)\zs[./~]\f+'
     else
@@ -2790,6 +2822,19 @@ fu! s:all_matches_in_buffer() abort
         return lg#catch_error()
     endtry
 endfu
+
+" g,; {{{4
+
+" Why the guard?{{{
+"
+" Without it, as  soon as we would  resource the vimrc, the  wrappers which make
+" these motions repeatable  would be overwritten, and we would  lose the ability
+" to repeat without `g`.
+"}}}
+if has('vim_starting')
+    nno  g;  g,zv
+    nno  g,  g;zv
+endif
 
 " ga          easy align {{{4
 
@@ -6315,27 +6360,23 @@ endfu
 "             return lg#catch_error()
 "
 " 63 -
-" Not a fan of `]h` and `]H`. Find better mappings.
-" Use `]C-h`?
-"
-" 64 -
 " experiment about the idea that it's  forbidden to call or simply DEFINE public
 " function inside plugin/ because it would cause autoload/ to be loaded
 "
 " use potion plugin to experiment
 " note what you learn
 "
-" 65 -
+" 64 -
 " https://github.com/chrisbra/vim_faq
 "
-" 66 -
+" 65 -
 " no need to check `if &bt  ==# 'quickfix'` before applying conceal abort
 " and/or try conditional are enough
 " sure?
 "
 "         vim /if\s\+&bt\s\+==#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 67 -
+" 66 -
 " S-Tab doesn't work in terminal buffer (neither in Vim nor in Neovim, even without config)
 "
 " Hints:
@@ -6350,7 +6391,7 @@ endfu
 tno  <s-tab>  <left>
 " tno <s-tab> <c-p>
 "
-" 68 -
+" 67 -
 " https://github.com/justinmk/vim-dirvish/issues/62
 " https://github.com/bounceme/remote-viewer/
 " Alternative:
@@ -6358,7 +6399,7 @@ tno  <s-tab>  <left>
 " other "middleware"),  so that  any dumb local  navigator (like  dirvish) works
 " without adding special-case support for scp, FTP, webdav, …, netrw does.
 "
-" 69 -
+" 68 -
 " Do we really need a timer to display a message?
 "
 "         vim /execute(.*echo/gj ~/.vim/**
@@ -6375,7 +6416,7 @@ tno  <s-tab>  <left>
 "         • <expr>
 "         • timer
 "
-" 70 -
+" 69 -
 "
 " create mapping to send current line to terminal, and execute it
 " use `g>` for the lhs?
@@ -6384,14 +6425,14 @@ tno  <s-tab>  <left>
 "     g> on visual selection
 "     g>> for line
 "
-" 71 -
+" 70 -
 " finish reviewing vim-math
 " What insight can we gain from it?
 "
-" 72 -
+" 71 -
 " finish reviewing ~/Dropbox/vim_plugins/pair_complete.vim
 "
-" 73 -
+" 72 -
 " We use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
 "         • iabbrev
@@ -6410,7 +6451,7 @@ tno  <s-tab>  <left>
 "
 "         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  !=#  'Comment'
 "
-" 74 -
+" 73 -
 " Save/restore qfl/ll when we restart Vim?
 " Not sure I want that. But it would be convenient to have a command which saves
 " a particular qfl/ll in `~/.viminfo`, and which could restore it when needed.
@@ -6422,13 +6463,13 @@ tno  <s-tab>  <left>
 "
 "         %argd
 "
-" 75 -
+" 74 -
 " finish reviewing  the section in our  notes which deals with  string functions
 " (match(), matchstr(),…); also talk about `matchstrpos()`
 "
 " finish reviewing indexage de chaîne
 "
-" 76 -
+" 75 -
 " study vim-sandwich
 " implement surrounding with → ← (for easier conceal)
 "
@@ -6481,11 +6522,11 @@ tno  <s-tab>  <left>
 "
 "           let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
 "
-" 77 -
+" 76 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
 "
-" 78 -
+" 77 -
 " Create a command in vim-debug, to automatically profile a plugin.
 " It would create a temporary script with the commands:
 "
@@ -6501,11 +6542,11 @@ tno  <s-tab>  <left>
 "         \               { i,v -> v !~# '/t\%[est]/' }),
 "         \        { i,v -> 'so '.v })
 "
-" 79 -
+" 78 -
 " Check whether some commands would be better suited as mappings.
 " And check whether some mappings would be better suited as commands.
 "
-" 80 -
+" 79 -
 "                                ┌ 3rd character of all `]o?` mappings
 "         ┌──────────────────────┤
 "         BCILNSWacdfhilmnopqstvwz
@@ -6518,21 +6559,21 @@ tno  <s-tab>  <left>
 " ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 " cmdline#transform() (bound to C-s)
 "
-" 81 -
+" 80 -
 " install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `BufWritePost`
 " which would give us a warning when we forget to undo a:
 "
 "         mapping/abbreviation/command/autocmd/variable
 "
-" 82 -
+" 81 -
 " normalize underscore/dash in plug mappings, and function names in shell init files
 "
-" 83 -
+" 82 -
 " update the position of the mark in `vim-readline`
 " look for other mappings to implement, add them to a todo
 "
-" 84 -
+" 83 -
 " Should we add `:noautocmd` every time we use `:wincmd`?
 "
 "
@@ -6551,53 +6592,53 @@ tno  <s-tab>  <left>
 " I think we should use `noautocmd`  whenever we TEMPORARILY change the focus to
 " a window.
 "
-" 85 -
+" 84 -
 " We've lost time debugging dirvish, because the issue was not in vimrc
 " but in filetype plugin. How to avoid it in the future?
 "
-" 86 -
+" 85 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
 " A function implementing some abstract logic can be wrongly affected by the current
 " buffer settings ('isk' for example). Should we track this issue everywhere in our code?
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
-" 87 -
+" 86 -
 " check that whenever we use `wincmd p` we get to the right window
 "
-" 88 -
+" 87 -
 " Read all of this:
 "     https://neovim.io/news/archive/
 "
-" 89 -
+" 88 -
 " Read this:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 90 -
+" 89 -
 " Read this (OOP in VimL):
 " https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
 "
-" 91 -
+" 90 -
 " Replace `:silent!` with `:silent` whenever possible.
 " There may be errors to fix which we are missing because they are silent.
 " Also, if you wonder whether a plugin/(auto)command/function is working
 " as expected, and has no silent errors, use `:Verbose` to increase
 " the verbosity level.
 "
-" 92 -
+" 91 -
 " use syntax hl in `vim-qf` instead of complex mechanism using matches
 " also, in `vim-qf`, fix the fixme in the autocmd `my_qf`
 "
-" 93 -
+" 92 -
 " add syntax hl in TOC menu, and make content more relevant in help TOC
 "
-" 94 -
+" 93 -
 " The TOC  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " qf#open()). We could  compute the longest line,  and set the width  of the TOC
 " window dynamically.
 "
-" 95 -
+" 94 -
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     cmdline#reset_did_transform(
@@ -6615,18 +6656,18 @@ tno  <s-tab>  <left>
 " Also, make  sure they  are self-contained. They must  not call  functions from
 " one of our other plugins. If they do, move the latter inside `vim-lg-lib` too.
 "
-" 96 -
+" 95 -
 " implement a search ring, and install mappings to cycle through it
 " useful to search for an old pattern without having to do `/ Up …`
 " (; and ,  would be more comfy)
 "
-" 97 -
+" 96 -
 " When you create a loclist, replace the  old one if its title is `Breakdown` or
 " `FIX_ME & TO_DO`.
 " Also, maybe create a mapping to show  the stack of location lists, and another
 " to remove the current one.
 "
-" 98 -
+" 97 -
 "     SPC fr    (:FzHistory)
 "     Escape
 "     :tabnew
@@ -6634,7 +6675,7 @@ tno  <s-tab>  <left>
 " A new tab page is correctly opened, but the focus stay in the same window,
 " and the fzf buffer is replaced with the last visited buffer.
 "
-" 99 -
+" 98 -
 " Create a submode to insert numbers more easily.
 " Ex:
 "
@@ -6678,7 +6719,7 @@ tno  <s-tab>  <left>
 "         return ''
 "     endfu
 "
-" 100 -
+" 99 -
 " Create a mapping to dump in the buffer information printed by a mapping
 " prefixed with `-`. Example: `-a`, `-p`
 "

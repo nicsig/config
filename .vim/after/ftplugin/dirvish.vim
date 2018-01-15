@@ -70,6 +70,10 @@ xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_lis
 " Map `zh` to toggle dot-prefixed entries.
 nno  <buffer><nowait><silent>  zh  :<c-u>call my_dirvish#toggle_dot_entries()<cr>
 
+" TODO:
+" dirvish has introduced `g:dirvish_mode`. Use it to sort the entries, and maybe
+" to toggle hidden files. It would simplify our code.
+
 " Sort and hide dot-prefixed files/directories {{{1
 
 " make sure  that `b:dirvish` exists,  because it  doesn't when we  use this
