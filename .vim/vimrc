@@ -1133,6 +1133,8 @@ set includeexpr=substitute(v:fname,'.*=','','')
 
 " indentation {{{2
 
+set autoindent
+
 set expandtab
 
 
@@ -2021,7 +2023,7 @@ let maplocalleader = "\<s-f17>"
 " COMMAND LINE {{{2
 " C-r C-l       insert current line {{{3
 
-cno  <c-r><c-l>  <c-r>=getline('.')<cr>
+cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\s*:\?', '', '')<cr>
 
 " C-r C-r       fuzzy search history {{{3
 
@@ -2185,6 +2187,14 @@ fu! s:output_last_ex_command() abort
     endtry
 endfu
 
+" C-s {{{3
+
+" I often type C-s in insert mode to save, and miss/forget the escape
+" to get back in normal mode first.
+" Alternative:
+"     imap  <c-s>  <esc><c-s>
+ino  <silent>  <c-s>  <esc>:sil update<cr>
+
 " C-x             completions {{{3
 " C-]     tag completion {{{4
 
@@ -2257,11 +2267,16 @@ fu! s:complete_signature() abort
     if empty(func_name)
         return ''
     endif
+
     let signature = get(filter(readfile($VIMRUNTIME.'/doc/eval.txt'),
     \                          {i,v -> v =~ '^'.func_name.'('}),
     \                   0, '')
     " needed, for example, for `deepcopy()`
     let signature = matchstr(signature, '.\{-})')
+    if empty(signature)
+        return ''
+    endif
+
     let new_line = substitute(getline('.'), func_name.'\%[()]', signature, '')
     call timer_start(0, {-> setline(line('.'), new_line)})
     return ''
@@ -2560,7 +2575,7 @@ nmap  <space>s  saiw
 nno  <space>t  :<c-u>tabnew<cr>
 
 " [    ]              (prefix) {{{3
-" ]h    ]u                      move to Point Of Interest {{{4
+" ]h    ]u                      move to next path/url {{{4
 
 " Why not `]H`?{{{
 "
@@ -2594,25 +2609,10 @@ nno  <space>t  :<c-u>tabnew<cr>
 "     • a hypertext link,  or a heading, sounds  like something more important
 "}}}
 
-nno  <silent>  ]h  :<c-u>call <sid>move_to_poi('path', 1)<cr>
-nno  <silent>  [h  :<c-u>call <sid>move_to_poi('path', 0)<cr>
-nno  <silent>  ]u  :<c-u>call <sid>move_to_poi('url', 1)<cr>
-nno  <silent>  [u  :<c-u>call <sid>move_to_poi('url', 0)<cr>
-
-"             ┌─ Point Of Interest
-"             │
-fu! s:move_to_poi(what, is_fwd) abort
-    if a:what ==? 'path'
-        let g:motion_to_repeat = a:is_fwd ? ']h' : '[h'
-        let not_dot_special    = '%(\s\.%(\=|,))@!'
-        let pattern            = '\v'.not_dot_special.'&%(^|\s)\zs[./~]\f+'
-    else
-        let g:motion_to_repeat = a:is_fwd ? ']u' : '[u'
-        let pattern = '\vhttps?://'
-    endif
-    call search(pattern, (a:is_fwd ? '': 'b').'W')
-    norm! zv
-endfu
+noremap  <expr>  <silent>  [h  lg#motion#regex#rhs('path', 0)
+noremap  <expr>  <silent>  ]h  lg#motion#regex#rhs('path', 1)
+noremap  <expr>  <silent>  [u  lg#motion#regex#rhs('url', 0)
+noremap  <expr>  <silent>  ]u  lg#motion#regex#rhs('url', 1)
 
 " ]kj                           various alignments {{{4
 
@@ -2770,7 +2770,7 @@ fu! s:all_matches_in_buffer() abort
         "
         " Because Vim copies the indentation of the command.
         "
-        " Watch:
+        " MWE:
         "     nno  cd  :lvim /./ % <bar> lopen<cr>
         "
         "     cd
@@ -2898,14 +2898,23 @@ fu! s:my_gq(type) abort
         " 'ai' needs to be set so that `gw` can properly indent the formatted lines.
         setl ai
         let [ lnum1, lnum2 ] = a:type ==# 'vis'
-                             \ ?    [ line("'<"), line("'>") ]
-                             \ :    [ line("'["), line("']") ]
+        \?                         [ line("'<"), line("'>") ]
+        \:                         [ line("'["), line("']") ]
         let has_a_list_header = getline(lnum1) =~# &l:flp
-        exe 'norm! '.lnum1.'G'.(has_a_list_header ? 'gw' : 'gq').lnum2.'G'
+        sil exe 'norm! '.lnum1.'G'.(has_a_list_header ? 'gw' : 'gq').lnum2.'G'
     catch
         return lg#catch_error()
     finally
         let &l:ai = ai_save
+        " For some reason, if we're editing a help file, and use `gq`, Vim makes
+        " the buffer noreadonly back.
+        " MWE:
+        "     :h
+        "     coH
+        "     :norm! gqq
+        if &ft ==# 'help' && &l:ro
+            setl noro
+        endif
     endtry
 endfu
 
@@ -2942,12 +2951,12 @@ endfu
 " the 2nd  line is not commented. We  want it to  be commented, and `par`  to be
 " reinvoked on the 2 lines.
 
-nmap           gqq  <plug>(my_gqq)
-nno  <silent>  gqq  :<c-u>call <sid>gqq()<cr>
+nmap           gqq              <plug>(my_gqq)
+nno  <silent>  <plug>(my_gqq)  :<c-u>call <sid>gqq()<cr>
 
 fu! s:gqq() abort
     let was_commented = !empty(&l:cms)
-    \                   ?    match(getline('.'), split(&l:cms, '%s')[0]) != -1
+    \                   ?    stridx(getline('.'), split(&l:cms, '%s')[0]) != -1
     \                   :    0
     let orig = line('.')
 
@@ -3312,7 +3321,7 @@ if !has('nvim')
             "
             " It breaks the  replay of a macro during which  we've pressed `Tab`
             " or `S-Tab` on the command line.
-            " Watch:
+            " MWE:
             "         qqq
             "         qq : Tab Tab CR    (should execute `:#`)
             "         q
@@ -3689,127 +3698,6 @@ nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
                     \<bar>set opfunc=myfuncs#op_replace_without_yank
                     \<bar>exe 'norm! '.v:count1.'g@_'<cr>
 
-" f  F  t  T  ;  ,    vim-sneak {{{3
-
-" if has('vim_starting')
-"     let g:motion_to_repeat = ''
-"     " Why the `.\?` inside the value of the `[ {char}` key?
-"     " It allows to repeat mappings with more than 2 keys, such as `]r)`
-"     " (move region of text inside parentheses, forward).
-"     let s:normalize_motion = {
-"     \                          ';' : {
-"     \                                  '[ {char}'   : ['\[\ze..\?', ']'],
-"     \                                  'up/down'    : [ '.*_\zsup\ze.*', 'down' ],
-"     \                                  'left/right' : [ '.*_\zsleft\ze.*', 'right' ],
-"     \                              },
-"     \
-"     \                          ',' : {
-"     \                                  '] {char}'   : ['\]\ze..\?', '['],
-"     \                                  'up/down'    : [ '.*_\zsdown\ze.*', 'up' ],
-"     \                                  'left/right' : [ '.*_\zsright\ze.*', 'left' ],
-"     \                              },
-"     \                        }
-" endif
-
-" TODO:
-" We've  commented these  mappings, because  they  conflict with  the ones  in`
-" `vim-repeatable-motions  It  must  have  broken the  repeatability  of  some`
-" motions. Fix this. Eliminate `s:motion_wrapper()`.
-"
-"     nno   <expr>  ;  <sid>motion_wrapper(';')
-"     nno   <expr>  ,  <sid>motion_wrapper(',')
-
-" fu! s:motion_wrapper(key) abort
-"     let l:key = a:key
-
-"     if !empty(g:motion_to_repeat)
-"         let motion = g:motion_to_repeat
-
-"         if motion != '[[' && motion != ']]'
-"             for [pat, rep] in values(s:normalize_motion[l:key])
-"                 let motion = substitute(motion, '^'.pat.'$', rep, '')
-"             endfor
-"             " Not  sure we  can get  around this  extra substitution  because of
-"             " C-j. A  literal C-j  would probably  need extra  precaution to  be
-"             " passed as an argument to a function.
-"             if motion =~# '^Z c-[hjkl]$'
-"                 let motion = substitute(motion, ' ', '\\<', '')
-"                 let motion = substitute(motion, '$', '>', '')
-"                 let motion = eval('"'.motion.'"')
-"             endif
-"         else
-"             let motion = motion == '[[' && l:key == ';'
-"             \?               ']]'
-"             \:           motion == ']]' && l:key == ','
-"             \?               '[['
-"             \:               motion
-"         endif
-"         sil call feedkeys(motion, 'i')
-
-"     elseif l:key ==# ';' || l:key ==# ','
-"         sil call feedkeys("\<plug>Sneak_".l:key, 'i')
-"         sil call feedkeys('zv', 'int')
-"     endif
-
-"     return ''
-" endfu
-
-" fu! s:reset_motion_to_repeat(key) abort
-"     augroup sneak_open_folds
-"         au!
-"         au CursorMoved * exe 'norm! zv'
-"         \|               exe 'au! sneak_open_folds '
-"         \|               aug! sneak_open_folds
-"     augroup END
-
-"     sil call feedkeys("\<plug>Sneak_".a:key, 'i')
-"     let g:motion_to_repeat = ''
-"     return ''
-" endfu
-
-" fu! s:visual_repeat_sneak(is_fwd) abort
-"     let fen_save = &l:fen
-"     let &l:fen = 0
-"     call feedkeys("\<plug>Sneak_".(a:is_fwd ? ';' : ','), 'i')
-"     call timer_start(0, {-> execute('let &l:fen ='.fen_save.'|norm! zv')})
-"     return ''
-" endfu
-
-" Vim-sneak default mappings are too inconsistent to be memorized.
-" They also conflict with `vim-sandwich`.
-"
-"         xmap  <expr>  ss  <sid>reset_motion_to_repeat('s')
-"         xmap  <expr>  SS  <sid>reset_motion_to_repeat('S')
-"         omap  <expr>  ss  <sid>reset_motion_to_repeat('s')
-"         omap  <expr>  SS  <sid>reset_motion_to_repeat('S')
-
-" FIXME:
-" v_f (&friends v_F, v_t, v_T) doesn't open folds.
-" Make sure all commands open folds.
-"
-"     https://github.com/justinmk/vim-sneak/issues/212
-"
-" Also, try to refactor the code. We have  code to open folds in functions which
-" have a different purpose.  It's ugly (separation of concern).
-"
-" Also, the whole code seems to be a mess.
-" Tidy all that in a plugin (vim-repeat-motion).
-
-"         xmap  <expr>  ;  <sid>visual_repeat_sneak(1)
-"         xmap  <expr>  ,  <sid>visual_repeat_sneak(0)
-"         omap          ;  <plug>Sneak_;
-"         omap          ,  <plug>Sneak_,
-
-"         xmap         f  <plug>Sneak_f
-"         xmap         F  <plug>Sneak_F
-"         omap         f  <plug>Sneak_f
-"         omap         F  <plug>Sneak_F
-
-"         xmap         t  <plug>Sneak_t
-"         xmap         T  <plug>Sneak_T
-"         omap         t  <plug>Sneak_t
-"         omap         T  <plug>Sneak_T
-
 " j  k  ^  0  $       gj  gk  … {{{3
 
 " By default, we can't move across several lines of a long wrapped line with
@@ -3904,7 +3792,7 @@ nno  Y  y$
 
 " We can't separate a register name from the `y` command, with a motion.
 " They  must be consecutive. Otherwise the  yanking fails to target  the desired
-" register. Watch:
+" register. MWE:
 "
 "         C-v 3j "+ $ y    ✘
 "         C-v 3j $ "+ y    ✔
@@ -3973,7 +3861,7 @@ xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 " initial `%` finds an opening symbol, reliably, only when it's on the last line
 " of the text-object.
 "
-" Watch:
+" MWE:
 "
 "         (foo
 "         b|ar
@@ -4373,9 +4261,8 @@ endfu
 com! -bar DiffOrig echo s:diff_orig()
 
 fu! s:diff_orig() abort
-    sil norm [oa
+    sil call save#toggle_auto(0)
     let cole_save = &l:cole
-    let w:diff_orig_cmd = 'setl cole='.cole_save.' | diffoff! | unlet! w:diff_orig_cmd | norm! zvzz'
     setl cole=0
 
     vnew
@@ -4388,15 +4275,23 @@ fu! s:diff_orig() abort
     let &ft = getbufvar('#', '&ft')
     setl noma ro
 
+    let s:tmp_partial = function('s:diff_orig_restore_settings', [cole_save])
     augroup diff_orig_restore_settings
         au! * <buffer>
-        au BufWipeOut <buffer> exe 'sil norm ]oa'
-        \|                     call timer_start(0, {-> execute(get(w:, 'diff_orig_cmd', ''))})
+        au BufWipeOut <buffer> sil call save#toggle_auto(1)
+        \|                     call timer_start(0, s:tmp_partial)
     augroup END
 
-    wincmd p
-    diffthis
+    exe winnr('#').'windo diffthis'
     return ''
+endfu
+
+fu! s:diff_orig_restore_settings(cole,_) abort
+    exe 'setl cole='.a:cole
+    diffoff!
+    norm! zvzz
+    aug! diff_orig_restore_settings
+    unlet s:tmp_partial
 endfu
 
 " DumpWiki {{{2
@@ -4817,11 +4712,6 @@ com! -bar -range=% UnicodeToggle call myfuncs#unicode_toggle(<line1>,<line2>)
 
 " `D` toggles the diff window.
 com! -bar UTS UndotreeShow
-
-" Verbose {{{2
-
-com! -bar -range=1 -nargs=1 -complete=command Verbose
-\                                             call myfuncs#verbose_command(<count>, <q-args>)
 
 " WordSingle {{{2
 
@@ -5437,9 +5327,9 @@ augroup END
 " the binary (.add.spl) is older than the original addition file (.add).
 
 for spell_file in glob('~/.vim/spell/*.add', 1, 1)
-    if filereadable(spell_file) && !filereadable(spell_file . '.spl')
-  \ || (getftime(spell_file) > getftime(spell_file . '.spl'))
-        exe 'mkspell! ' . fnameescape(spell_file)
+    if filereadable(spell_file) && !filereadable(spell_file.'.spl')
+  \ || (getftime(spell_file) > getftime(spell_file.'.spl'))
+        exe 'mkspell! '.fnameescape(spell_file)
     endif
 endfor
 
@@ -5592,7 +5482,7 @@ endfu
 "
 " 4 - Vimcast, Episode 50, An introduction to vspec
 "
-"     https://github.com/junegunn/vader.vim (923 sloc)
+"     https://github.com/junegunn/vader.vim (927 sloc)
 "
 "     http://whileimautomaton.net/2013/02/13211500
 "     https://github.com/kana/vim-vspec
@@ -5819,8 +5709,11 @@ endfu
 " 1 si elle est vraie, 0 autrement.
 "
 " 26 -
-" When replicating plugin cheat40, automatically populate g:motion_to_repeat
-" with `zl`. This way, we can move along long lines with ; and ,
+" When replicating plugin cheat40, automatically set last motion with:
+"
+"     sil! call lg#motion#repeatable#main#set_last_used(']S', 1)
+"
+" This way, we can move along long lines with ; and ,
 "
 " 27 -
 " integrate ~/Dropbox/conf/cheat/diff into ~/Dropbox/conf/cheat/vim
@@ -6017,6 +5910,9 @@ endfu
 " Edit2:
 " Every popular vimrc which I'm watching sets 'ai', except justinmk's.
 " Should we reconsider 'ai'?
+"
+" Edit3:
+" I've restore 'ai'; let's see what happens.
 "
 " 39 -
 "
@@ -6272,8 +6168,8 @@ endfu
 " Replace all occurrences of `norm ga` with appropriate code.
 " Do the same for other `norm` (ex: `norm gs`).
 "
-"         vim /\%(^\s*".*\|\<ono\>.*\)\@<!norm!\@!\>/gj ~/.vim/**/*.vim ~/.vim/vimrc
-"         :Cfilter! -not_my_plugins
+"         vim /\C\%(^\s*".*\|\<ono\>.*\)\@<!norm!\@!\>/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"         :Cfilter! -other_plugins
 "
 " 54 -
 " implement a global `:FoldToggle` command
@@ -6667,6 +6563,13 @@ tno  <s-tab>  <left>
 " Also, maybe create a mapping to show  the stack of location lists, and another
 " to remove the current one.
 "
+" Also,  if you  execute  `:WTF` several  times consecutively,  `vim-stacktrace`
+" keeps recreating and adding the  same qfl. It shouldn't. It should replace the
+" old one, or better leave it alone.
+" To do so, it should remember the last qfl it produced, or the last `:messages`
+" it parsed, or any information sufficient to know that there's no need to
+" recreate a qfl.
+"
 " 97 -
 "     SPC fr    (:FzHistory)
 "     Escape
@@ -6729,6 +6632,27 @@ tno  <s-tab>  <left>
 " Like what we did to repeat motions.
 " The wrapper would save the last `-X` mapping used, and `C-r X` would
 " check this info to know what to dump.
+"
+" 100 -
+" Suggestion:
+"
+"              ┌ script-local
+"              │
+"     vim /let s:\l/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
+"     Cfilter! -other_plugins
+"     Cfilter! -tmp
+"
+" Uppercase all names of variables whose  value don't change during runtime.  It
+" seems kana does  this in `vim-submode`. And I've also seen  this when studying
+" `vim-repeat-motion`.
+"
+" If we do it, should we do the same for the buffer-local scope?
+
+
+augroup ultisnips_assimil
+    au!
+    au BufReadPost $HOME/Desktop/ultisnips.txt set ft=help | norm coH
+augroup END
 
 
 

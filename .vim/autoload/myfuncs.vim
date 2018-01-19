@@ -434,7 +434,6 @@ fu! myfuncs#clean_reg() abort "{{{1
 endfu
 
 fu! myfuncs#cloc(lnum1,lnum2,path) abort "{{{1
-
     if !empty(a:path)
         if a:path =~# '^http'
             let tempdir = tempname()
@@ -988,7 +987,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
     let cb_save  = &cb
     let sel_save = &selection
     let sp_save  = &sp
-    let reg_save = [ getreg('"'), getregtype('"') ]
+    let reg_save = [ '"', getreg('"'), getregtype('"') ]
 
     try
         set cb-=unnamed cb-=unnamedplus
@@ -1082,7 +1081,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                                          `:!` is the only command to remove the backslashes
             "                                          added by the 2nd non-nul argument
             "
-            "                                Watch:
+            "                                MWE:
             "                                :e /tmp/foo%bar
             "                                :call system('echo '.shellescape(expand('%')).' >>/tmp/file')
             "                                :call system('echo '.shellescape(expand('%'),1).' >>/tmp/file')
@@ -1101,7 +1100,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
     finally
         let &cb  = cb_save
         let &sel = sel_save
-        call setreg('"', reg_save[0], reg_save[1])
+        call call('setreg', reg_save)
     endtry
 endfu
 
@@ -1479,7 +1478,7 @@ fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1
 
     if !bufexists('Counts') | sil file Counts | endif
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    noautocmd wincmd p | call winrestview(view) | noautocmd wincmd p
+    exe winnr('#').'windo call winrestview(view)'
 endfu
 
 fu! myfuncs#patterns_favorite(arglead, _c, _p) abort
@@ -1862,8 +1861,8 @@ endfu
 
 fu! myfuncs#search_todo() abort "{{{1
     try
-        exe 'lvim /\CFIX'.'ME\|TO'.'DO/j %'
-        let g:motion_to_repeat = ']l'
+        sil exe 'lvim /\CFIX'.'ME\|TO'.'DO/j %'
+        sil! call lg#motion#repeatable#main#set_last_used(']l', 1)
     catch
         echo 'no TO'.'DO or FIX'.'ME'
         return
@@ -2106,16 +2105,6 @@ fu! myfuncs#tab_toc() abort "{{{1
         return
     endif
 
-    " if the width of the window is maximized, limit its height to 10 lines
-    " otherwise, maximize it
-    exe (&columns == winwidth(0) ? '10 ': '').'wincmd _'
-
-    " if there's only 1 other window in the current tabpage, move the qf window
-    " to the right
-    if winnr('$') == 2
-        wincmd L | exe 'vert resize '.(&columns/4)
-    endif
-
     if is_help_file
         call qf#set_matches('myfuncs:tab_toc', 'Conceal', '\*')
         call qf#create_matches()
@@ -2200,7 +2189,7 @@ fu! s:trans_buffer(cmd) abort
     setl nobl noma noswf nowrap ro
     if !bufexists('translation') | sil file translation | else | return -1 | endif
 
-    noautocmd wincmd p | call winrestview(view) | noautocmd wincmd p
+    exe winnr('#').'windo call winrestview(view)'
     nno  <buffer><nowait><silent>  <c-c>  :<c-u>call myfuncs#trans_stop()<cr>
     let bufnum = bufnr('%')
     wincmd p
@@ -2302,89 +2291,6 @@ fu! myfuncs#unicode_toggle(line1, line2) abort
     \                        ]
     sil exe mods.range.'s/'.pat.'/\=l:Rep()/ge'
     call winrestview(view)
-endfu
-
-fu! myfuncs#verbose_command(level, excmd) abort "{{{1
-    let tempfile = tempname()
-
-    "                                                ┌ if the level is 1, just write `:Verbose`
-    "                                                │ instead of `:1Verbose`
-    "                    ┌───────────────────────────┤
-    call writefile([ ':'.(a:level == 1 ? '' : a:level).'Verbose '.a:excmd ],
-                  \ tempfile, 'b')
-                  "            │
-                  "            └─ use binary mode to NOT add a linefeed after
-                  "            `:Verbose my_cmd`
-
-    " How do you know Vim adds a linefeed?
-    " Watch:
-    "         :!touch /tmp/file
-    "         :call writefile(['text'], '/tmp/file')
-    "         :!xxd /tmp/file
-    "                 → 00000000: 7465 7874 0a    text.
-    "                                       └┤        │
-    "                                        │        └─ LF glyph
-    "                                        └─ LF hex code
-
-    try
-        " We set 'vfile' to `tempfile`.
-        " It will redirect (append) all messages to the end of this file.
-        let &verbosefile = tempfile
-
-        "                        ┌─ From `:h :verb`:
-        "                        │
-        "                        │          When concatenating another command,
-        "                        │          the ":verbose" only applies to the first one.
-        "                        │
-        "                        │  We want `:Verbose` to apply to the whole “pipeline“.
-        "                        │  Not just the part before the 1st pipe.
-        "                        │
-        sil exe a:level.'verbose exe '.string(a:excmd)
-        " │
-        " └─ even though verbose messages are redirected to a file, regular
-        "    messages are still displayed on the command-line; we don't want that
-        "    Watch:
-        "           Verbose echo "foo\nbar"
-        "
-        "    FIXME:
-        "    Does tpope also have a `[noeol]` in his preview window?
-        "    It's annoying, because when we empty 'shm' (set shm=), the
-        "    message is much longer:
-        "                             [Incomplete last line]
-        "
-        "    Also, when 'shm' is empty, and we hit `g?`, why does the preview
-        "    window keep piling up these messages? Shouldn't this noise be
-        "    removed? Add yet another substitution (or tweak an existing one)?
-        "
-        "    Also, shouldn't this code be moved inside the debug plugin?
-    catch
-        return lg#catch_error()
-    finally
-        " We empty the value of 'vfile' for 2 reasons:
-        "
-        "     1. to restore the original value
-        "
-        "     2. writes are buffered, thus may not show up for some time
-        "        Writing to the file ends when […] 'verbosefile' is made empty.
-        "
-        " These info are from `:h 'vfile'`.
-        let &verbosefile = ''
-    endtry
-
-    " Load the file in the preview window. Useful to avoid having to close it if
-    " we execute another `:Verbose` command. From `:h :ptag`:
-    "         If a "Preview" window already exists, it is re-used
-    "         (like a help window is).
-    exe 'pedit '.tempfile
-
-    " Vim doesn't give the focus to the preview window. Jump to it.
-    wincmd P
-    " if we really get there...
-    if &previewwindow
-        " We use our custom `quit()` function to be able to undo the closing.
-        nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
-        setl bh=wipe bt=nofile nobl nowrap noswf
-    endif
 endfu
 
 fu! s:vim_parent() abort "{{{1
@@ -2496,7 +2402,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     setl noma ro
-    noautocmd wincmd p | call winrestview(view) | noautocmd wincmd p
+    exe winnr('#').'windo call winrestview(view)'
 endfu
 
 fu! myfuncs#wf_complete(arglead, _c, _p) abort

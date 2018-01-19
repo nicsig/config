@@ -2,7 +2,7 @@
 "
 " I use this file just to wrap the autocmds at the end inside an augroup.
 " Without the augroup, they are duplicated every time we reload a `dircolors`
-" file. Watch:
+" file. MWE:
 "
 "     $ vim ~/.dircolors
 "     :e

@@ -16,10 +16,11 @@ fu! s:preview() abort "{{{1
     let file = getline('.')
     if filereadable(file)
         exe 'pedit '.file
-        noautocmd wincmd P
-        if &previewwindow
+        noa wincmd P
+        if &l:pvw
             norm! zv
-            noautocmd wincmd p
+            wincmd L
+            noa wincmd p
         endif
 
     elseif isdirectory(file)
@@ -27,6 +28,11 @@ fu! s:preview() abort "{{{1
         let b:dirvish['preview_ls'] = get(b:dirvish, 'preview_ls', tempname())
         call writefile(ls, b:dirvish['preview_ls'])
         exe 'sil pedit '.b:dirvish['preview_ls']
+        noa wincmd P
+        if &l:pvw
+            wincmd L
+            noa wincmd p
+        endif
     endif
 endfu
 

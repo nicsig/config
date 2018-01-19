@@ -1,6 +1,13 @@
 " Mappings {{{1
 " [oP  ]oP  coP {{{2
 
+" Dirvish installs the mappings `C-n` and `C-p` to preview the contents
+" of the previous/next file or directory.
+" It's redundant with `coP`, and it clashes with our own `C-n` and `C-p`
+" to move across tabpages.
+sil nunmap  <buffer>  <c-n>
+sil nunmap  <buffer>  <c-p>
+
 nno  <buffer><nowait><silent>  [oP  :<c-u>call my_dirvish#toggle_auto_preview(1)<cr>
 nno  <buffer><nowait><silent>  ]oP  :<c-u>call my_dirvish#toggle_auto_preview(0)<cr>
 nno  <buffer><nowait><silent>  coP  :<c-u>call my_dirvish#toggle_auto_preview(
@@ -96,7 +103,7 @@ sort r /[^/]$/
 let first_file = search('[^/]$', 'cW')
 if first_file
     " sort all the files
-    norm gsG
+    .,$sort
 endif
 
 " Restore the position.

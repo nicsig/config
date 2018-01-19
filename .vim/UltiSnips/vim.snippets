@@ -6,12 +6,12 @@ endsnippet
 
 # abbrev
 
-#                    ┌ text of 1st placeholder ${1}
-#                 ┌──┤
-# '`!p snip.rv = (t[1][0]).upper() + t[1][1:]`' : '$1'
-#                      │                  └┤
-#                      │                   └ remaining characters
-#                      └ first character
+#                   ┌ text of 1st placeholder ${1}
+#                ┌──┤
+# `!p snip.rv = (t[1][0]).upper() + t[1][1:]`
+#                     │                  └┤
+#                     │                   └ remaining characters
+#                     └ first character
 snippet abbrev "uppercase abbreviation on command line" bm
 cnorea <expr> <buffer> ${1:lhs}  getcmdtype() ==# ':' && getcmdline() ==# '$1'
 \                                ?    '`!p snip.rv = (t[1][0]).upper() + t[1][1:]`'
@@ -94,7 +94,7 @@ endsnippet
 #
 # If `a:arglead` is empty, the test will fail for all candidates, and the completion
 # function will not return anything. I don't want that. I want all candidates.
-# Watch:
+# MWE:
 #
 #                        ┌─ ''
 #                        │
@@ -238,26 +238,12 @@ endsnippet
 # guard_plugin {{{1
 
 snippet guard_plugin "plugin guard" bm
-if exists('${2:g:`!v expand('%:p') =~# '/autoload/' ? 'auto' : ''`loaded_${1:`!v expand('%:t:r')`}}')
+if exists('${2:g:`!v expand('%:p') =~# '/autoload/' ? 'auto' : ''`loaded_${1:`!v expand('%:p') =~# '/autoload/' ? substitute(matchstr(expand('%:p'), 'autoload/\zs.*\ze\.vim'), '/', '#', 'g') : expand('%:t:r')`}}')
 	finish
 endif
 let $2 = 1
 $0
 endsnippet
-
-# This version is more full-fledged, but it's overkill for my personal use.
-#
-# snippet guard_plugin "plugin guard" bm
-# if exists('g:loaded_${1:myplugin}') || &compatible || v:version < 700
-# 	finish
-# endif
-# let g:loaded_$1 = 1
-#
-# let s:save_cpo = &cpo
-# set cpo&vim
-#
-# $0
-# endsnippet
 
 # guard_syntax {{{1
 
@@ -343,7 +329,7 @@ com! -bar -range ${3:MyCom} call ${2/<(sid|SID)>/s:/}('Ex', <line1>, <line2>)
 fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 	let cb_save  = &cb
 	let sel_save = &selection
-	let reg_save = [ getreg('"'), getregtype('"') ]
+	let reg_save = [ '"', getreg('"'), getregtype('"') ]
 	try
 		set cb-=unnamed cb-=unnamedplus
 		set selection=inclusive
@@ -366,7 +352,7 @@ fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 	finally
 		let &cb  = cb_save
 		let &sel = sel_save
-		call setreg('"', reg_save[0], reg_save[1])
+		call call('setreg', reg_save)
 	endtry
 
 	$0
@@ -510,7 +496,7 @@ endsnippet
 #     | some commands
 #
 # The empty command before the pipe may have unexpected effect.
-# Watch:
+# MWE:
 #		:|echo 'hello'
 #		    → prints current line, then echo 'hello'
 

@@ -9,25 +9,26 @@ endif
 set shortmess=aoO
 badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
-badd +193 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
-badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
-badd +4 ~/.vim/plugged/vim-readline/autoload/readline.vim
-badd +389 ~/.vim/plugged/vim-readline/plugin/readline.vim
+badd +1 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
+badd +292 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+badd +181 ~/.vim/plugged/vim-readline/autoload/readline.vim
+badd +116 ~/.vim/plugged/vim-readline/plugin/readline.vim
 badd +1 ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim
 badd +95 ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim
 badd +1 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 badd +9 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
 badd +22 ~/Dropbox/vim_plugins/fastfold.vim
 badd +9 ~/Desktop/result
-badd +5 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
+badd +222 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 badd +49 ~/Desktop/final_analysis.hydra
 badd +49 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
 badd +1 /run/user/1000/hydra/head18.vim
 badd +24 ~/Desktop/show_toc_help.vim
 badd +9 ~/.vim/after/ftplugin/help.vim
-badd +5 ~/Desktop/vertical_jump.vim
-badd +307 ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim
-badd +6 ~/.vim/autoload/slow_mappings/repeatable_motions.vim
+badd +2 ~/Desktop/vertical_jump.vim
+badd +72 ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/repeatable/main.vim
+badd +95 ~/.vim/autoload/slow_mappings/repeatable_motions.vim
+badd +1 ~/.vim/plugged/vim-lg-lib/plugin/lg.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -530,17 +531,21 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 2
-normal! 05|
-tabedit ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/main.vim
+normal! 0
+tabedit ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/repeatable/main.vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -550,34 +555,127 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 38 - ((37 * winheight(0) + 0) / 1)
+47
+normal! zo
+64
+normal! zo
+159
+normal! zo
+160
+normal! zo
+222
+normal! zo
+242
+normal! zo
+330
+normal! zo
+337
+normal! zo
+415
+normal! zo
+421
+normal! zo
+462
+normal! zo
+494
+normal! zo
+563
+normal! zo
+571
+normal! zo
+652
+normal! zo
+669
+normal! zo
+724
+normal! zo
+746
+normal! zo
+772
+normal! zo
+784
+normal! zo
+807
+normal! zo
+845
+normal! zo
+961
+normal! zo
+let s:l = 72 - ((24 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-38
-normal! 07|
-wincmd w
-argglobal
-if bufexists('~/.vim/autoload/slow_mappings/repeatable_motions.vim') | buffer ~/.vim/autoload/slow_mappings/repeatable_motions.vim | else | edit ~/.vim/autoload/slow_mappings/repeatable_motions.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 175 - ((27 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-175
+72
 normal! 0
 wincmd w
-2wincmd w
+argglobal
+if bufexists('~/.vim/plugged/vim-lg-lib/doc/lg.txt') | buffer ~/.vim/plugged/vim-lg-lib/doc/lg.txt | else | edit ~/.vim/plugged/vim-lg-lib/doc/lg.txt | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 139 - ((3 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+139
+normal! 02|
+wincmd w
+argglobal
+if bufexists('~/.vim/plugged/vim-lg-lib/plugin/lg.vim') | buffer ~/.vim/plugged/vim-lg-lib/plugin/lg.vim | else | edit ~/.vim/plugged/vim-lg-lib/plugin/lg.vim | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 2 - ((1 * winheight(0) + 13) / 26)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+2
+normal! 0
+wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 10
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+tabedit ~/.vim/autoload/slow_mappings/repeatable_motions.vim
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+13
+normal! zo
+19
+normal! zo
+21
+normal! zo
+25
+normal! zo
+55
+normal! zo
+let s:l = 95 - ((41 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+95
+normal! 0
+tabnext 11
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

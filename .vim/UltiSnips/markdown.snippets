@@ -31,17 +31,12 @@ endsnippet
 
 # note {{{1
 
-# FIXME:
-# trim the whitespace after the tab_trigger
-# center the text
-
 snippet note "NOTE header" m
-
-
-                                     NOTE:
+`!p snip.rv = ' ' * int((int(snip.opt('&l:tw', 0))/2 - 3))`NOTE:
 
 $0
 endsnippet
+
 # wpm {{{1
 
 # snippet wrds "Log a 750words.com session" b

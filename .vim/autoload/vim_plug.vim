@@ -1,18 +1,27 @@
 fu! vim_plug#move_between_commits(is_fwd) abort "{{{1
     call search('^  \X*\zs\x', a:is_fwd ? '' : 'b')
-    " don't fire  `WinEnter` nor `WinLeave`  when we (`o`) temporarily  give the
-    " focus  to the  preview window;  otherwise,  the latter  will be  minimized
-    " (because of one of our custom autocmd?)
-    set ei=WinEnter,WinLeave
-    norm o
-    " Alternative: call feedkeys('o', 'ix')
+
+    " Alternative: call feedkeys('o', 'ix'){{{
     "                                   │
-    "                                   └ necessary:
+    "                                   └ necessary!
     "
-    " Otherwise  Vim  will  type  `o`  after  having  finished  processing  this
-    " function,  that is  after we  have  reset 'ei',  so the  WinEnter/WinLeave
-    " autocmds will interfere.
-    set ei=
+    " Without  'x' Vim  will  type  `o` AFTER  having  finished processing  this
+    " function. Because of this, `wincmd P`  will be executed before the preview
+    " window is opened,  which will raise an error, and  prevent the function to
+    " finish its work.
+    "}}}
+    norm o
+
+    " Why?{{{
+    "
+    " We have an autocmd in `vim-window` which sets the height of a window.
+    " It should set the height of the preview window to `&l:pvh` lines, but
+    " for some reason, it sets it to only 1.
+    " So, we need to manually set its height.
+    "}}}
+    noa wincmd P
+    exe 'resize '.&l:pvh
+    noa wincmd p
 endfu
 
 fu! vim_plug#show_documentation() abort "{{{1
