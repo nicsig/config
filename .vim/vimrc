@@ -6649,6 +6649,7 @@ tno  <s-tab>  <left>
 " If we do it, should we do the same for the buffer-local scope?
 
 
+
 augroup ultisnips_assimil
     au!
     au BufReadPost $HOME/Desktop/ultisnips.txt set ft=help | norm coH

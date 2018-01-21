@@ -2,6 +2,14 @@ if !has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
     finish
 endif
 
+" after/ftplugin/vim-plug.vim
+" autoload/slow_mappings/repeatable_motions.vim
+" plugged/vim-help/after/ftplugin/help.vim
+" plugged/vim-lg-lib/autoload/lg/motion/repeatable/main.vim
+" plugged/vim-man/ftplugin/man.vim
+" plugged/vim-markdown/ftplugin/markdown.vim
+" plugged/vim-vim/after/ftplugin/vim.vim
+
 " Alternative:{{{
 "
 "     sil verb runtime autoload/lg/motion/main.vim
@@ -18,26 +26,6 @@ com!  -nargs=?  -complete=custom,lg#motion#repeatable#listing#complete
 
 " Mappings to repeat motions (; …) {{{1
 
-" Why `:noremap` instead of `:nno`?{{{
-"
-" To also support visual mode + operator pending mode.
-"}}}
-" Why no `<unique>` for `,` and `;`?{{{
-"
-" Because `vim-sneak` has already remapped them.
-" `<unique>` would prevent our needed custom mappings to overwrite
-" the old definition.
-"}}}
-noremap  <expr>            ,  lg#motion#repeatable#main#move_again(1,'bwd')
-noremap  <expr>            ;  lg#motion#repeatable#main#move_again(1,'fwd')
-
-noremap  <expr><unique>   z,  lg#motion#repeatable#main#move_again(2,'bwd')
-noremap  <expr><unique>   z;  lg#motion#repeatable#main#move_again(2,'fwd')
-noremap  <expr><unique>   +,  lg#motion#repeatable#main#move_again(3,'bwd')
-noremap  <expr><unique>   +;  lg#motion#repeatable#main#move_again(3,'fwd')
-nno      <expr><unique>  co,  lg#motion#repeatable#main#move_again(4,'bwd')
-nno      <expr><unique>  co;  lg#motion#repeatable#main#move_again(4,'fwd')
-
 noremap  <expr><unique>  t   lg#motion#repeatable#main#fts('t')
 noremap  <expr><unique>  T   lg#motion#repeatable#main#fts('T')
 noremap  <expr><unique>  f   lg#motion#repeatable#main#fts('f')
@@ -45,12 +33,12 @@ noremap  <expr><unique>  F   lg#motion#repeatable#main#fts('F')
 noremap  <expr><unique>  ss  lg#motion#repeatable#main#fts('s')
 noremap  <expr><unique>  SS  lg#motion#repeatable#main#fts('S')
 
-nnoremap  <expr>  <plug>(z_semicolon)     lg#motion#repeatable#main#move_again(2,'fwd')
-nnoremap  <expr>  <plug>(z_comma)         lg#motion#repeatable#main#move_again(2,'bwd')
-nnoremap  <expr>  <plug>(plus_semicolon)  lg#motion#repeatable#main#move_again(3,'fwd')
-nnoremap  <expr>  <plug>(plus_comma)      lg#motion#repeatable#main#move_again(3,'bwd')
-nno      <expr>  <plug>(co_semicolon)     lg#motion#repeatable#main#move_again(4,'fwd')
-nno      <expr>  <plug>(co_comma)         lg#motion#repeatable#main#move_again(4,'bwd')
+nnoremap  <expr>  <plug>(z_semicolon)     lg#motion#repeatable#main#move_again('z, z;','fwd')
+nnoremap  <expr>  <plug>(z_comma)         lg#motion#repeatable#main#move_again('z, z;','bwd')
+nnoremap  <expr>  <plug>(plus_semicolon)  lg#motion#repeatable#main#move_again('+, +;','fwd')
+nnoremap  <expr>  <plug>(plus_comma)      lg#motion#repeatable#main#move_again('+, +;','bwd')
+nno       <expr>  <plug>(co_semicolon)    lg#motion#repeatable#main#move_again('co, co;','fwd')
+nno       <expr>  <plug>(co_comma)        lg#motion#repeatable#main#move_again('co, co;','bwd')
 
 " Make motions repeatable {{{1
 
@@ -69,7 +57,7 @@ nno      <expr>  <plug>(co_comma)         lg#motion#repeatable#main#move_again(4
 "}}}
 " Rule: For a motion to be made repeatable, it must ALREADY be defined.{{{
 "
-" Don't invoke `lg#motion#repeatable#main#make_repeatable()` for a custom motion
+" Don't invoke `lg#motion#repeatable#main#make()` for a custom motion
 " which you're not sure whether it has been defined, or will be later.
 "
 " Indeed, the function needs to save all the information relative to the
@@ -85,110 +73,142 @@ nno      <expr>  <plug>(co_comma)         lg#motion#repeatable#main#move_again(4
 "        until Vim has started, and to keep a short startup time.
 "}}}
 
+" TODO:
+" Shouldn't we move the 'mode' and 'buffer' key in each motion?
+" Pro:
+" We would only need 1 invocation of the function.
+" Con:
+" We would have a fucking big dictionary as argument.
+" Also, we would need to change the code of the function.
+" Would it be complex?
+
 " cycle through help topics relevant for last errors
 " we don't have a pair of motions to move in 2 directions,
 " so I just repeat the same keys for 'bwd' and 'fwd'
-call lg#motion#repeatable#main#make_repeatable({
+call lg#motion#repeatable#main#make({
 \        'mode':    'n',
 \        'buffer':  0,
+\        'axis': ['z,', 'z;'],
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
-\        'motions': [{'bwd': '-e',  'fwd': '-e',  'axis': 2}]
+\        'motions': [{'bwd': '-e',  'fwd': '-e'}]
 \ })
 
 " resize window
-call lg#motion#repeatable#main#make_repeatable({
+call lg#motion#repeatable#main#make({
 \        'mode':    'n',
 \        'buffer':  0,
+\        'axis': ['z,', 'z;'],
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
-\                     { 'bwd': 'Z<c-h>',  'fwd': 'Z<c-l>',  'axis': 2 },
-\                     { 'bwd': 'Z<c-k>',  'fwd': 'Z<c-j>',  'axis': 2 },
+\                     { 'bwd': 'Z<c-h>',  'fwd': 'Z<c-l>' },
+\                     { 'bwd': 'Z<c-k>',  'fwd': 'Z<c-j>' },
 \                   ]
 \ })
 
 " built-in motions
-call lg#motion#repeatable#main#make_repeatable({
+call lg#motion#repeatable#main#make({
 \        'mode':    '',
 \        'buffer':  0,
+\        'axis': [',', ';'],
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
-\                     { 'bwd': 'F' ,  'fwd': 'f' ,  'axis': 1 },
-\                     { 'bwd': 'T' ,  'fwd': 't' ,  'axis': 1 },
-\                     { 'bwd': 'SS',  'fwd': 'ss',  'axis': 1 },
-\                     { 'bwd': 'g,',  'fwd': 'g;',  'axis': 1 },
-\                     { 'bwd': 'g%',  'fwd': '%' ,  'axis': 1 },
-\                     { 'bwd': "['",  'fwd': "]'",  'axis': 1 },
-\                     { 'bwd': '["',  'fwd': ']"',  'axis': 1 },
-\                     { 'bwd': '[#',  'fwd': ']#',  'axis': 1 },
-\                     { 'bwd': '[(',  'fwd': '])',  'axis': 1 },
-\                     { 'bwd': '[*',  'fwd': ']*',  'axis': 1 },
-\                     { 'bwd': '[/',  'fwd': ']/',  'axis': 1 },
-\                     { 'bwd': '[@',  'fwd': ']@',  'axis': 1 },
-\                     { 'bwd': '[M',  'fwd': ']M',  'axis': 1 },
-\                     { 'bwd': '[S',  'fwd': ']S',  'axis': 1 },
-\                     { 'bwd': '[[',  'fwd': ']]',  'axis': 1 },
-\                     { 'bwd': '[]',  'fwd': '][',  'axis': 1 },
-\                     { 'bwd': '[`',  'fwd': ']`',  'axis': 1 },
-\                     { 'bwd': '[c',  'fwd': ']c',  'axis': 1 },
-\                     { 'bwd': '[m',  'fwd': ']m',  'axis': 1 },
-\                     { 'bwd': '[s',  'fwd': ']s',  'axis': 1 },
-\                     { 'bwd': '[{',  'fwd': ']}',  'axis': 1 },
+\                     { 'bwd': 'F' ,  'fwd': 'f'  },
+\                     { 'bwd': 'T' ,  'fwd': 't'  },
+\                     { 'bwd': 'SS',  'fwd': 'ss' },
+\                     { 'bwd': 'g,',  'fwd': 'g;' },
+\                     { 'bwd': 'g%',  'fwd': '%'  },
+\                     { 'bwd': "['",  'fwd': "]'" },
+\                     { 'bwd': '["',  'fwd': ']"' },
+\                     { 'bwd': '[#',  'fwd': ']#' },
+\                     { 'bwd': '[(',  'fwd': '])' },
+\                     { 'bwd': '[*',  'fwd': ']*' },
+\                     { 'bwd': '[/',  'fwd': ']/' },
+\                     { 'bwd': '[@',  'fwd': ']@' },
+\                     { 'bwd': '[M',  'fwd': ']M' },
+\                     { 'bwd': '[S',  'fwd': ']S' },
+\                     { 'bwd': '[[',  'fwd': ']]' },
+\                     { 'bwd': '[]',  'fwd': '][' },
+\                     { 'bwd': '[`',  'fwd': ']`' },
+\                     { 'bwd': '[c',  'fwd': ']c' },
+\                     { 'bwd': '[m',  'fwd': ']m' },
+\                     { 'bwd': '[s',  'fwd': ']s' },
+\                     { 'bwd': '[{',  'fwd': ']}' },
 \                   ],
 \ })
 
 " custom motions
-call lg#motion#repeatable#main#make_repeatable({
+call lg#motion#repeatable#main#make({
 \        'mode':    'n',
 \        'buffer':  0,
+\        'axis':  [',', ';'],
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
-\                     { 'bwd': '[<c-l>',  'fwd': ']<c-l>',  'axis': 2 },
-\                     { 'bwd': '[<c-q>',  'fwd': ']<c-q>',  'axis': 2 },
-\                     { 'bwd': '[Z'    ,  'fwd': ']Z'    ,  'axis': 1 },
-\                     { 'bwd': '[z'    ,  'fwd': ']z'    ,  'axis': 1 },
-\                     { 'bwd': '[a'    ,  'fwd': ']a'    ,  'axis': 2 },
-\                     { 'bwd': '[b'    ,  'fwd': ']b'    ,  'axis': 2 },
-\                     { 'bwd': '[e'    ,  'fwd': ']e'    ,  'axis': 3 },
-\                     { 'bwd': '[f'    ,  'fwd': ']f'    ,  'axis': 2 },
-\                     { 'bwd': '[h'    ,  'fwd': ']h'    ,  'axis': 1 },
-\                     { 'bwd': '[l'    ,  'fwd': ']l'    ,  'axis': 1 },
-\                     { 'bwd': '[q'    ,  'fwd': ']q'    ,  'axis': 2 },
-\                     { 'bwd': '[t'    ,  'fwd': ']t'    ,  'axis': 2 },
-\                     { 'bwd': '[u'    ,  'fwd': ']u'    ,  'axis': 1 },
+\                     { 'bwd': '[Z'    ,  'fwd': ']Z' },
+\                     { 'bwd': '[z'    ,  'fwd': ']z' },
+\                     { 'bwd': '[h'    ,  'fwd': ']h' },
+\                     { 'bwd': '[l'    ,  'fwd': ']l' },
+\                     { 'bwd': '[u'    ,  'fwd': ']u' },
+\                  ]
+\ })
+
+call lg#motion#repeatable#main#make({
+\        'mode':    'n',
+\        'buffer':  0,
+\        'axis':  ['z,', 'z;'],
+\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'motions': [
+\                     { 'bwd': '[<c-l>',  'fwd': ']<c-l>' },
+\                     { 'bwd': '[<c-q>',  'fwd': ']<c-q>' },
+\                     { 'bwd': '[a'    ,  'fwd': ']a'     },
+\                     { 'bwd': '[b'    ,  'fwd': ']b'     },
+\                     { 'bwd': '[f'    ,  'fwd': ']f'     },
+\                     { 'bwd': '[q'    ,  'fwd': ']q'     },
+\                     { 'bwd': '[t'    ,  'fwd': ']t'     },
+\                  ]
+\ })
+
+call lg#motion#repeatable#main#make({
+\        'mode':    'n',
+\        'buffer':  0,
+\        'axis':  ['+,', '+;'],
+\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'motions': [
+\                     { 'bwd': '[e', 'fwd': ']e'},
 \                  ]
 \ })
 
 " toggle settings
-call lg#motion#repeatable#main#make_repeatable({
+call lg#motion#repeatable#main#make({
 \        'mode':    'n',
 \        'buffer':  0,
+\        'axis':  ['co,', 'co;'],
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
-\                     { 'bwd': '[oB',  'fwd': ']oB',  'axis': 4, },
-\                     { 'bwd': '[oC',  'fwd': ']oC',  'axis': 4, },
-\                     { 'bwd': '[oD',  'fwd': ']oD',  'axis': 4, },
-\                     { 'bwd': '[oH',  'fwd': ']oH',  'axis': 4, },
-\                     { 'bwd': '[oI',  'fwd': ']oI',  'axis': 4, },
-\                     { 'bwd': '[oL',  'fwd': ']oL',  'axis': 4, },
-\                     { 'bwd': '[oN',  'fwd': ']oN',  'axis': 4, },
-\                     { 'bwd': '[oS',  'fwd': ']oS',  'axis': 4, },
-\                     { 'bwd': '[oW',  'fwd': ']oW',  'axis': 4, },
-\                     { 'bwd': '[oc',  'fwd': ']oc',  'axis': 4, },
-\                     { 'bwd': '[od',  'fwd': ']od',  'axis': 4, },
-\                     { 'bwd': '[of',  'fwd': ']of',  'axis': 4, },
-\                     { 'bwd': '[og',  'fwd': ']og',  'axis': 4, },
-\                     { 'bwd': '[oh',  'fwd': ']oh',  'axis': 4, },
-\                     { 'bwd': '[oi',  'fwd': ']oi',  'axis': 4, },
-\                     { 'bwd': '[ol',  'fwd': ']ol',  'axis': 4, },
-\                     { 'bwd': '[on',  'fwd': ']on',  'axis': 4, },
-\                     { 'bwd': '[oo',  'fwd': ']oo',  'axis': 4, },
-\                     { 'bwd': '[op',  'fwd': ']op',  'axis': 4, },
-\                     { 'bwd': '[oq',  'fwd': ']oq',  'axis': 4, },
-\                     { 'bwd': '[os',  'fwd': ']os',  'axis': 4, },
-\                     { 'bwd': '[ot',  'fwd': ']ot',  'axis': 4, },
-\                     { 'bwd': '[ov',  'fwd': ']ov',  'axis': 4, },
-\                     { 'bwd': '[ow',  'fwd': ']ow',  'axis': 4, },
-\                     { 'bwd': '[oy',  'fwd': ']oy',  'axis': 4, },
-\                     { 'bwd': '[oz',  'fwd': ']oz',  'axis': 4, },
+\                     { 'bwd': '[oB',  'fwd': ']oB' },
+\                     { 'bwd': '[oC',  'fwd': ']oC' },
+\                     { 'bwd': '[oD',  'fwd': ']oD' },
+\                     { 'bwd': '[oH',  'fwd': ']oH' },
+\                     { 'bwd': '[oI',  'fwd': ']oI' },
+\                     { 'bwd': '[oL',  'fwd': ']oL' },
+\                     { 'bwd': '[oN',  'fwd': ']oN' },
+\                     { 'bwd': '[oS',  'fwd': ']oS' },
+\                     { 'bwd': '[oW',  'fwd': ']oW' },
+\                     { 'bwd': '[oc',  'fwd': ']oc' },
+\                     { 'bwd': '[od',  'fwd': ']od' },
+\                     { 'bwd': '[of',  'fwd': ']of' },
+\                     { 'bwd': '[og',  'fwd': ']og' },
+\                     { 'bwd': '[oh',  'fwd': ']oh' },
+\                     { 'bwd': '[oi',  'fwd': ']oi' },
+\                     { 'bwd': '[ol',  'fwd': ']ol' },
+\                     { 'bwd': '[on',  'fwd': ']on' },
+\                     { 'bwd': '[oo',  'fwd': ']oo' },
+\                     { 'bwd': '[op',  'fwd': ']op' },
+\                     { 'bwd': '[oq',  'fwd': ']oq' },
+\                     { 'bwd': '[os',  'fwd': ']os' },
+\                     { 'bwd': '[ot',  'fwd': ']ot' },
+\                     { 'bwd': '[ov',  'fwd': ']ov' },
+\                     { 'bwd': '[ow',  'fwd': ']ow' },
+\                     { 'bwd': '[oy',  'fwd': ']oy' },
+\                     { 'bwd': '[oz',  'fwd': ']oz' },
 \                   ]
 \ })
