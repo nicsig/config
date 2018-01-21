@@ -73,32 +73,23 @@ nno       <expr>  <plug>(co_comma)        lg#motion#repeatable#main#move_again('
 "        until Vim has started, and to keep a short startup time.
 "}}}
 
-" TODO:
-" Shouldn't we move the 'mode' and 'buffer' key in each motion?
-" Pro:
-" We would only need 1 invocation of the function.
-" Con:
-" We would have a fucking big dictionary as argument.
-" Also, we would need to change the code of the function.
-" Would it be complex?
-
 " cycle through help topics relevant for last errors
 " we don't have a pair of motions to move in 2 directions,
 " so I just repeat the same keys for 'bwd' and 'fwd'
 call lg#motion#repeatable#main#make({
 \        'mode':    'n',
 \        'buffer':  0,
-\        'axis': ['z,', 'z;'],
+\        'axis':    {'bwd': 'z,', 'fwd': 'z;'},
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [{'bwd': '-e',  'fwd': '-e'}]
 \ })
 
 " resize window
 call lg#motion#repeatable#main#make({
-\        'mode':    'n',
-\        'buffer':  0,
-\        'axis': ['z,', 'z;'],
-\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'mode':   'n',
+\        'buffer': 0,
+\        'axis':   {'bwd': 'z,', 'fwd': 'z;'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': 'Z<c-h>',  'fwd': 'Z<c-l>' },
 \                     { 'bwd': 'Z<c-k>',  'fwd': 'Z<c-j>' },
@@ -107,10 +98,10 @@ call lg#motion#repeatable#main#make({
 
 " built-in motions
 call lg#motion#repeatable#main#make({
-\        'mode':    '',
-\        'buffer':  0,
-\        'axis': [',', ';'],
-\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'mode':   '',
+\        'buffer': 0,
+\        'axis':   {'bwd': ',', 'fwd': ';'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': 'F' ,  'fwd': 'f'  },
 \                     { 'bwd': 'T' ,  'fwd': 't'  },
@@ -138,10 +129,10 @@ call lg#motion#repeatable#main#make({
 
 " custom motions
 call lg#motion#repeatable#main#make({
-\        'mode':    'n',
-\        'buffer':  0,
-\        'axis':  [',', ';'],
-\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'mode':   'n',
+\        'buffer': 0,
+\        'axis':   {'bwd': ',', 'fwd': ';'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': '[Z'    ,  'fwd': ']Z' },
 \                     { 'bwd': '[z'    ,  'fwd': ']z' },
@@ -152,10 +143,10 @@ call lg#motion#repeatable#main#make({
 \ })
 
 call lg#motion#repeatable#main#make({
-\        'mode':    'n',
-\        'buffer':  0,
-\        'axis':  ['z,', 'z;'],
-\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'mode':   'n',
+\        'buffer': 0,
+\        'axis':   {'bwd': 'z,', 'fwd': 'z;'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': '[<c-l>',  'fwd': ']<c-l>' },
 \                     { 'bwd': '[<c-q>',  'fwd': ']<c-q>' },
@@ -168,10 +159,10 @@ call lg#motion#repeatable#main#make({
 \ })
 
 call lg#motion#repeatable#main#make({
-\        'mode':    'n',
-\        'buffer':  0,
-\        'axis':  ['+,', '+;'],
-\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'mode':   'n',
+\        'buffer': 0,
+\        'axis':   {'bwd': '+,', 'fwd': '+;'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': '[e', 'fwd': ']e'},
 \                  ]
@@ -179,10 +170,10 @@ call lg#motion#repeatable#main#make({
 
 " toggle settings
 call lg#motion#repeatable#main#make({
-\        'mode':    'n',
-\        'buffer':  0,
-\        'axis':  ['co,', 'co;'],
-\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'mode':   'n',
+\        'buffer': 0,
+\        'axis':   {'bwd': 'co,', 'fwd': 'co;', 'mode': 'n'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': '[oB',  'fwd': ']oB' },
 \                     { 'bwd': '[oC',  'fwd': ']oC' },

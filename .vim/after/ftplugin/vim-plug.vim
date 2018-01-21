@@ -10,9 +10,9 @@ nno  <buffer><nowait><silent>  H  :<c-u>call vim_plug#show_documentation()<cr>
 
 if has_key(get(g:, 'plugs', {}), 'vim-lg-lib') && !exists('b:repeatable_motions')
     call lg#motion#repeatable#main#make({
-    \        'mode':    'n',
-    \        'buffer':  1,
-    \        'axis':  [',', ';'],
+    \        'mode':   'n',
+    \        'buffer': 1,
+    \        'axis':   {'bwd': ',', 'fwd': ';'},
     \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
     \        'motions': [
     \                     {'bwd': '<c-p>',  'fwd': '<c-n>'},
