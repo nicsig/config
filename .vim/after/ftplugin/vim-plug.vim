@@ -8,8 +8,8 @@ nno  <buffer><nowait><silent>  <c-p>  :<c-u>call vim_plug#move_between_commits(0
 
 nno  <buffer><nowait><silent>  H  :<c-u>call vim_plug#show_documentation()<cr>
 
-if has_key(get(g:, 'plugs', {}), 'vim-lg-lib') && !exists('b:repeatable_motions')
-    call lg#motion#repeatable#main#make({
+if has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
+    call lg#motion#repeatable#make#all({
     \        'mode':   'n',
     \        'buffer': 1,
     \        'axis':   {'bwd': ',', 'fwd': ';'},
