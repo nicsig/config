@@ -13,9 +13,18 @@ nno  <buffer><nowait><silent>  ]oP  :<c-u>call my_dirvish#toggle_auto_preview(0)
 nno  <buffer><nowait><silent>  coP  :<c-u>call my_dirvish#toggle_auto_preview(
 \                                                  !exists('#my_dirvish_auto_preview'))<cr>
 
-" a {{{2
+" c-s {{{2
 
-nno  <buffer><nowait><silent>  a  :<c-u>call dirvish#open('vsplit', 1)<cr>
+nno  <buffer><nowait><silent>  <c-s>  :<c-u>call dirvish#open('split', 1)<cr>
+
+" c-t {{{2
+
+nno  <buffer><nowait><silent>  <c-t>  :<c-u>call dirvish#open('tabedit', 1)<cr>
+xno  <buffer><nowait><silent>  <c-t>  :call dirvish#open('tabedit', 1)<cr>
+
+" c-v c-v {{{2
+
+nno  <buffer><nowait><silent>  <c-v><c-v>  :<c-u>call dirvish#open('vsplit', 1)<cr>
 
 " h    l {{{2
 
@@ -26,15 +35,6 @@ nmap  <buffer><nowait><silent>  l  <cr>
 
 " To "toggle" this, just press `R` to reload.
 nno  <buffer><nowait><silent>  R  :<c-u>call my_dirvish#reload()<cr>
-
-" s {{{2
-
-nno  <buffer><nowait><silent>  s  :<c-u>call dirvish#open('split', 1)<cr>
-
-" t {{{2
-
-nno  <buffer><nowait><silent>  t  :<c-u>call dirvish#open('tabedit', 1)<cr>
-xno  <buffer><nowait><silent>  t  :call dirvish#open('tabedit', 1)<cr>
 
 " x {{{2
 
@@ -114,16 +114,16 @@ call search('\V\^'.escape(b:dirvish['line'],'\').'\$', 'cw')
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   exe 'xunmap <buffer> x'
+                    \   exe 'nunmap <buffer> <c-s>'
+                    \|  exe 'nunmap <buffer> <c-t>'
+                    \|  exe 'xunmap <buffer> <c-t>'
+                    \|  exe 'nunmap <buffer> <c-v><c-v>'
+                    \|  exe 'nunmap <buffer> R'
                     \|  exe 'nunmap <buffer> [oP'
                     \|  exe 'nunmap <buffer> ]oP'
                     \|  exe 'nunmap <buffer> coP'
-                    \|  exe 'nunmap <buffer> a'
                     \|  exe 'nunmap <buffer> h'
                     \|  exe 'nunmap <buffer> l'
-                    \|  exe 'nunmap <buffer> R'
-                    \|  exe 'nunmap <buffer> s'
-                    \|  exe 'nunmap <buffer> t'
-                    \|  exe 'xunmap <buffer> t'
                     \|  exe 'nunmap <buffer> zh'
+                    \|  exe 'xunmap <buffer> x'
                     \  "

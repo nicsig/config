@@ -317,10 +317,6 @@ let g:UltiSnipsMappingsToIgnore = [ 'mycompletion#snippet_or_complete' ]
 " More info on this here:    :h UltiSnips-warning-smapping
 " Edit:
 " It doesn't seem necessary anymore, but I'll keep it anyway, just in case …
-
-" We define a shorter command (:USE), to edit our snippet files.
-com! -bar USE UltiSnipsEdit
-
 "}}}
 
 " DONE:
@@ -1014,14 +1010,14 @@ set formatprg=par\ -w80rjeq
 " 'formatoptions' / 'fo' handles the automatic formatting of text.
 "
 " I  don't   use  them,  but  the   `c`  and  `t`  flags   control  whether  Vim
-" auto-wrap  comments (using  textwidth,  inserting the  current comment  leader
-" automatically), and text (using textwidth).
+" auto-wrap  Comments (using  textwidth,  inserting the  current comment  leader
+" automatically), and Text (using textwidth).
 
 
 " if:
-"     • we're in normal mode, on a line longer than `&l:tw`
-"     • we switch to insert mode
-"     • we insert something at the end
+"     1. we're in normal mode, on a line longer than `&l:tw`
+"     2. we switch to insert mode
+"     3. we insert something at the end
 "
 " … don't break the line automatically
 set fo=l
@@ -1116,12 +1112,13 @@ set history=1000
 " invisible characters {{{2
 
 " We define which symbol Vim must use to display certain symbols:
-" tab                       ▸ (u25b8)
-" end of line               ¬ (u00ac)
-" scroll unwrapped lines    > <
-" non breaking space        +
+"
+"     tab                       ▸
+"     end of line               ¬
+"     scroll unwrapped lines    » «
+"     no-break space            ∅
 
-set listchars=tab:▸\ ,eol:¬,extends:>,precedes:<,nbsp:+
+set listchars=tab:▸\ ,eol:¬,precedes:«,extends:»,nbsp:∅
 
 " includeexpr (gf) {{{2
 
@@ -1983,15 +1980,13 @@ xno  Ss  <nop>
 "      in insert mode, we use it as an “easier-to-type“ C-x C-p
 "      in normal/command-line mode, we use it to cycle through a set of commands
 "
-"    • ZZ (we already use C-s to save)
-"
-"    • gh, gH, g C-h, v_C-g
+"    • gh, gH, g C-h, gl, v_C-g
 "
 "    • @# has been mapped to g8, so g8 is free
 "
-"    • gy, gz are free
+"    • gy, gz
 "
-"    • PageUp PageDown are free
+"    • PageUp PageDown
 "
 "    • S-Tab (not Tab, because it would also affect C-i used for moving
 "      inside the jumplist)
@@ -2575,45 +2570,6 @@ nmap  <space>s  saiw
 nno  <space>t  :<c-u>tabnew<cr>
 
 " [    ]              (prefix) {{{3
-" ]h    ]u                      move to next path/url {{{4
-
-" Why not `]H`?{{{
-"
-" `]u` (next url) is lowercase. `]h` (next path) should be too.
-"}}}
-" But, doesn't it cause an inconsistency in some filetype plugins?{{{
-"
-" Yes.
-"
-" For example, in `vim-help`, we use `]e`, with a lowercase character to move to
-" the next example, while we have to use `]H` to move to the next hypertext link.
-" Same kind of inconsistency in `vim-man`.
-"}}}
-" Is it bad to use `]H`?{{{
-"
-" It's ok.
-"
-" There was already an inconsistency in those filetype plugins: because of `]O`.
-" If we  used `]o` to  move to the  next option, we would  need to wait  for the
-" timeout (because of the mappings  which toggle options values). So, instead we
-" have to use `]O`.
-"
-" I  prefer to  keep all  inconsistencies in  the filetype  plugins, instead  of
-" spreading them across more plugins.
-"
-" Besides, there are other arguments in favor of this choice:
-"
-"     • a path is a universal concept,  while an option tag is specific  to
-"       documentation; its mapping  should be  easier to type
-"
-"     • a hypertext link,  or a heading, sounds  like something more important
-"}}}
-
-noremap  <expr>  <silent>  [h  lg#motion#regex#rhs('path', 0)
-noremap  <expr>  <silent>  ]h  lg#motion#regex#rhs('path', 1)
-noremap  <expr>  <silent>  [u  lg#motion#regex#rhs('url', 0)
-noremap  <expr>  <silent>  ]u  lg#motion#regex#rhs('url', 1)
-
 " ]kj                           various alignments {{{4
 
 "  [k [j align the beginning of the current line with the one of the
@@ -2742,99 +2698,6 @@ fu! s:break_line() abort
         return lg#catch_error()
     endtry
 endfu
-
-" g:: {{{4
-
-" useful to display the subset of lines in the buffer containing the last search pattern
-" equivalent to:
-"                 :Ilist pattern    without slash around pattern
-"                                   because our custom implementation of
-"                                   `:ilist` doesn't add anchors (\<, \>)
-"                                   contrary to the default `:ilist`
-
-" Alternative:
-"
-"         keepj g//#
-
-nno  <silent>  g::  :<c-u>call <sid>all_matches_in_buffer()<cr>
-
-fu! s:all_matches_in_buffer() abort
-    let view = winsaveview()
-    try
-        " Why `:exe`?{{{
-        "
-        " It removes excessive spaces in the title of the qf window, between the
-        " colon and the rest of the command.
-        "}}}
-        " Why is it necessary?{{{
-        "
-        " Because Vim copies the indentation of the command.
-        "
-        " MWE:
-        "     nno  cd  :lvim /./ % <bar> lopen<cr>
-        "
-        "     cd
-        "     :lopen
-        "         → title = ':lvim /./ %'    ✔
-        "
-        "     nno  cd  :call Func()<cr>
-        "     fu! Func() abort
-        "         lvim /./ %
-        "         lopen
-        "     endfu
-        "
-        "     cd
-        "         → title = ':    lvim /./ %'
-        "                     ^^^^
-        "                      ✘ because `:lvim` is executed from a line
-        "                        with a level of indentation of 4 spaces
-        "
-        "     nno  cd  :call Func()<cr>
-        "     fu! Func() abort
-        "         try
-        "             lvim /./ %
-        "             lopen
-        "         endtry
-        "     endfu
-        "
-        "     cd
-        "         → title = ':        lvim /./ %'
-        "                     ^^^^^^^^
-        "                      ✘ because `:lvim` is executed from a line
-        "                        with a level of indentation of 8 spaces
-        "}}}
-        " Is there an alternative?{{{
-        "
-        " Yes, but it's more complicated:
-        "
-        "     if &bt ==# 'quickfix'
-        "         let w:quickfix_title = ':'.matchstr(w:quickfix_title, ':\s*\zs\S.*')
-        "     endif
-        "}}}
-        exe 'lvim //g %'
-        call winrestview(view)
-        wincmd p
-        if &bt ==# 'quickfix'
-            call qf#set_matches('vimrc:all_matches_in_buffer', 'Conceal', 'location')
-            call qf#create_matches()
-        endif
-    catch
-        return lg#catch_error()
-    endtry
-endfu
-
-" g,; {{{4
-
-" Why the guard?{{{
-"
-" Without it, as  soon as we would  resource the vimrc, the  wrappers which make
-" these motions repeatable  would be overwritten, and we would  lose the ability
-" to repeat without `g`.
-"}}}
-if has('vim_starting')
-    nno  g;  g,zv
-    nno  g,  g;zv
-endif
 
 " ga          easy align {{{4
 
@@ -3054,6 +2917,22 @@ fu! s:undo_until_prev_save() abort
     endtry
 endfu
 
+" fugitive
+nno  <silent>  Up  :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
+nno  <silent>  Us  :<c-u>call <sid>try_fugitive_cmd('Gstatus')<cr>
+
+fu! s:try_fugitive_cmd(cmd) abort
+    if exists(':'.a:cmd) != 2
+        echo 'Not in a git repo'
+        return
+    endif
+
+    exe a:cmd
+    if a:cmd ==# 'Gstatus'
+        sil! 1;/^# Changes/
+    endif
+endfu
+
 " z                   (prefix) {{{3
 " z= {{{4
 
@@ -3223,13 +3102,17 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : "\u220
 
 nno  -p  :<c-u>echohl Title <bar> echo expand('%:p') <bar> echohl NONE <cr>
 
-" -u               show snippets {{{4
+" -u -U            edit/show snippets {{{4
 
-nno  <silent>  -u  :<c-u>call myfuncs#show_me_snippets()<cr>
+nno  <silent>  -u  :<c-u>UltiSnipsEdit<cr>
+nno  <silent>  -U  :<c-u>call myfuncs#show_me_snippets()<cr>
 
-" -U               show unicode table {{{4
+" - C-u            show unicode table {{{4
 
-nno  <silent>  -U  :<c-u>call myfuncs#unicode_table()<cr>
+nno  <silent>  -<c-u>  :<c-u>call myfuncs#unicode_table()<cr>
+"                │ │
+"                │ └ Unicode
+"                └ uniCode
 
 " +                   (prefix) {{{3
 " +t            trim whitespace {{{4
@@ -3254,7 +3137,7 @@ fu! s:clear_z() abort
 endfu
 
 " CR / Tab / Shift / Control / Meta {{{3
-" CR              move cursor on 80/100 column {{{4
+" CR                  move cursor on 80/100 column {{{4
 
 " If the buffer is special (`!empty(&buftype)`), we let `CR` unchanged.
 " Special buffers include the ones displayed in the quickfix and the command-line windows.
@@ -3374,7 +3257,7 @@ endif
 "}}}
 xno  <silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
-" S-→    C-↑ …    modified arrow keys {{{4
+" S-→    C-↑ …        modified arrow keys {{{4
 
 " A terminal emulator gives its name to the programs through the shell
 " environment variable $TERM.
@@ -3418,16 +3301,16 @@ if &term =~ '^screen'
     sil! exe "set <xLeft>=\e[1;*D"
 endif
 
-" C-g C-g         show info about current file {{{4
+" C-g C-g             show info about current file {{{4
 
 nno  <c-g><c-g>  <c-g>
 
-" C-np            move across tab pages {{{4
+" C-np                move across tab pages {{{4
 
 nno  <silent>  <c-p>  :<c-u>tabprevious<cr>
 nno  <silent>  <c-n>  :<c-u>tabnext<cr>
 
-" M-m             matchadd / matchdelete search pattern {{{4
+" M-m                 matchadd / matchdelete search pattern {{{4
 
 fu! s:where_are_my_matches() abort
     if exists('w:my_matches')
@@ -3440,7 +3323,7 @@ endfu
 
 nno  <silent>  <m-m>  :<c-u>noh <bar> call <sid>where_are_my_matches()<cr>
 
-" M-n    M-p      navigate between marks {{{4
+" M-n    M-p          navigate between marks {{{4
 
 nno  <m-n>  ]'
 nno  <m-p>  ['
@@ -3477,108 +3360,6 @@ nno  <silent>  =d  :<c-u>call myfuncs#fix_display()<cr>
 
 nno  <space><space>  za
 xno  <space><space>  za
-
-" 'A … 'Z  mA … mZ {{{3
-
-" When we load a buffer, we have an autocmd (`:au jump_last_position`) which
-" moves the cursor to the last edit performed in that buffer.
-" Unfortunately, it doesn't work when we load a file with a global mark.
-" Indeed, the global mark contains several info (`:marks`):
-"
-"         • path to file
-"         • line nr
-"         • column nr
-"
-" When we load a file with a global mark, Vim will position the cursor on the
-" line where we saved the mark.
-" But that's not what we want. We want the cursor to be on the last edit.
-" To fix this, we override all the 'A … 'Z mappings so that after the loading
-" of a marked file, Vim types g`.
-
-" Also, Vim  may erase a global  mark when it execute  `:bwipe`. For example, it
-" happens when we  execute `:vimgrep` to look  for a pattern in a  set of files,
-" and the latter  contains a file with  a global mark which  doesn't contain the
-" pattern:
-"             https://github.com/vim/vim/issues/2166
-
-" So, all in  all, the global marks system is  pretty broken. We install wrapper
-" mappings around the  'A … 'Z mA  … mZ commands to fix  all these problems.
-" These  mappings will  save/use info  about  global marks  in global  variables
-" inside `~/.viminfo`. Work only if 'viminfo' contains `!`.
-
-
-fu! s:global_mark_set(char) abort
-    try
-        exe 'norm! m'.a:char
-        let g:MY_GLOBAL_MARK_{a:char} = { 'fpath': expand('%:p'), 'pos': getpos('.')[1:2] }
-    catch
-        return lg#catch_error()
-    endtry
-endfu
-
-fu! s:global_mark_go(char) abort
-    if !exists('g:MY_GLOBAL_MARK_'.a:char)
-        let info = get(filter(split(execute('marks'), '\n'), { i,v -> v =~# '^\s*'.a:char }), 0 , '')
-        if !empty(info)
-            let fpath = matchstr(info, '^\s*'.a:char.'\s\+\d\+\s\+\d\+\s\+\zs.*')
-            let pos   = split(matchstr(info, '^\s*'.a:char.'\s\+\zs\d\+\s\+\d\+'))
-            let g:MY_GLOBAL_MARK_{a:char} = { 'fpath': fpath, 'pos': pos }
-        else
-            return ''
-        endif
-    endif
-
-    try
-        " FIXME:
-        " If the file is already loaded in another instance, it will raise the error:
-        "         :h E325
-        "
-        " But the error won't be catched because Vim prompts us with a question to know
-        " what we want to do (edit, quit, …).
-        " Worse, the question is not visible.
-        "
-        " Solution: for the moment, press `e` to choose to edit the file.
-        "
-        " But this begs the question. How to deal with an error prompting us
-        " with a question? How to catch it properly?
-        exe 'e '.fnameescape(g:MY_GLOBAL_MARK_{a:char}.fpath)
-    catch
-        return lg#catch_error()
-    endtry
-
-    " '. may not exist (and other issues may occur).
-    try
-        " If you prefer  to position the cursor  where it was, the  last time we
-        " set the mark, replace previous line with:
-        "
-        "         call cursor(g:MY_GLOBAL_MARK_{a:char}.pos)
-        exe 'norm! m'.a:char
-        sil! norm! g`.zvzz
-        "  │
-        "  └ E20: mark not set
-    catch
-        return lg#catch_error()
-    endtry
-endfu
-
-fu! s:global_mark_mappings() abort
-    for upper in map(range(char2nr('A'),char2nr('Z')), { i,v -> nr2char(v,1) })
-        sil! exe "nno  <silent>  '".upper.'  :<c-u>call <sid>global_mark_go("'.upper.'")<cr>'
-        sil! exe 'nno  <silent>  m'.upper.'  :<c-u>call <sid>global_mark_set("'.upper.'")<cr>'
-    endfor
-endfu
-
-fu! s:global_marks(key) abort
-    call s:global_mark_mappings()
-    unmap '
-    unmap m
-    let keys = a:key.nr2char(getchar(),1)
-    call feedkeys(keys, 'i')
-    return ''
-endfu
-
-nno  <expr><silent>  '  <sid>global_marks("'")
-nno  <expr><silent>  m  <sid>global_marks('m')
 
 " ':                  NOTE: {{{3
 
@@ -3929,6 +3710,7 @@ ono  <silent>  iE  :<c-u>norm ViE<cr>
 
 " FIXME:
 " not reliable text objects (check out kana plugin)
+" fix also `o_il` and `o_al` (i.e. add support for visual mode)
 xno  <silent>  if  :<c-u>call myfuncs#textobj_func(1)<cr>
 ono  <silent>  if  :<c-u>norm Vif<cr>
 
@@ -4434,13 +4216,6 @@ com! -bar -bang -nargs=1 JoinBlocks
 \|                                  exe "keepp .,.+<args>-1g/^/''+<args>m.|-j<bang>"
 \|                                  let &l:fen = 1
 
-" MRU {{{2
-
-com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRE call myfuncs#mru(<f-args>, 'edit')
-com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRS call myfuncs#mru(<f-args>, 'split')
-com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRV call myfuncs#mru(<f-args>, 'vsplit')
-com! -bar -nargs=1 -complete=custom,myfuncs#mru_complete MRT call myfuncs#mru(<f-args>, 'tabedit')
-
 " OnlySelection {{{2
 
 " This command deletes everything except the current visual selection (or any
@@ -4917,11 +4692,6 @@ augroup END
 " We want to automatically delete buffers which are empty and don't have a name.
 " So we install an autocmd listening to `BufHidden`.
 
-fu! s:snr()
-    return matchstr(expand('<sfile>'), '<SNR>\d\+_')
-endfu
-let g:vimrc_snr = s:snr()
-
 augroup delete_noname_buffers
     au!
     " Why delay `s:dnb_clean()`?{{{
@@ -4938,7 +4708,7 @@ augroup delete_noname_buffers
     " BufHidden). At that moment, we could be sure the last hidden noname buffer
     " is really hidden. And the autocmd would just have to call `s:dnb_clean()`.
 "}}}
-    au BufHidden * call timer_start(0, {-> {g:vimrc_snr}dnb_clean()})
+    au BufHidden * call timer_start(0, {-> s:dnb_clean()})
 augroup END
 
 fu! s:dnb_clean() abort
@@ -5182,7 +4952,7 @@ endif
 "       • pdftotext
 "       • unrtf
 
-augroup read_special_files
+augroup filter_special_file
     au!
     " Why not use `BufReadPost`?{{{
     "
@@ -5203,10 +4973,10 @@ augroup read_special_files
     " Maybe it's because the event is fired too early, and the built-in tar plugin
     " processes the buffer after the event.
     "}}}
-    au BufWinEnter  *.{doc,docx,epub,odp,odt,pdf,rtf}  call s:filter_special_files()
+    au BufWinEnter  *.{doc,docx,epub,odp,odt,pdf,rtf}  call s:filter_special_file()
 augroup END
 
-fu! s:filter_special_files() abort
+fu! s:filter_special_file() abort
     if get(b:, 'did_filter_special_file', 0)
         return
     endif
@@ -5224,6 +4994,12 @@ fu! s:filter_special_files() abort
     \             }
 
     if has_key(ext2cmd, ext)
+        let filter = matchstr(ext2cmd[ext], '%!\zs\S*')
+        if !executable(filter)
+            echom 'cannot filter '.expand('%:p').'; please install '.filter
+            return
+        endif
+
         setl ma noro
     " About: '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' -'{{{
     "                                                             │
@@ -5400,7 +5176,7 @@ endfu
 
 " Trailing whitespace in red but not in insert mode, and not if the filetype
 " is in the list:
-let s:no_trailing_whitespace_ft = [ 'help', 'qf', '' ]
+let s:no_trailing_whitespace_ft = ['' , 'git', 'help', 'qf']
 
 augroup trailing_whitespace
     au!
@@ -5460,26 +5236,6 @@ endfu
 "        nno cd /\%<c-r>=virtcol('.')<cr>v\S<cr>
 "        nno cu ?\%<c-r>=virtcol('.')<cr>v\S<cr>
 "
-" Also see this, slightly different purpose, but similar:
-" https://www.reddit.com/r/vim/comments/4j4duz/vim_how_can_i_jump_to_next_line_containing_a/
-"
-"         fu! s:vertical_jump(is_fwd) abort
-"             let c     = '%'.virtcol('.').'v'
-"             let flags = a:is_fwd ? 'nW' : 'bnW'
-"             let bot   = search('\v'.c.'.*\n^(.*'.c.'.)@!.*$', flags)
-"             let top   = search('\v^(.*'.c.'.)@!.*$\n.*\zs'.c, flags)
-"
-"             return a:is_fwd ? ((bot < top ? bot : top) - line('.')).'j'
-"             \                    : (line('.') - (bot > top ? bot : top)).'k'
-"         endfu
-"
-"         nno <expr> \j    "m'".<sid>vertical_jump(1)
-"         nno <expr> \k    "m'".<sid>vertical_jump(0)
-"         xno <expr> \j         <sid>vertical_jump(1)
-"         xno <expr> \k         <sid>vertical_jump(0)
-"         ono <expr> \j         <sid>vertical_jump(1)
-"         ono <expr> \k         <sid>vertical_jump(0)
-"
 " 4 - Vimcast, Episode 50, An introduction to vspec
 "
 "     https://github.com/junegunn/vader.vim (927 sloc)
@@ -5499,7 +5255,7 @@ endfu
 " … but the source code is too long (1500 sloc) for what it does.
 " Take inspiration from it.
 "
-" 6 - Implement ]u, ]x, ]s, ]n from unimpaired.vim
+" 6 - Implement ]n, ]s, ]u, ]x, ]y from unimpaired.vim
 "
 " 7 - tmux navigation
 " La navigation entre les panes de tmux et les viewports de Vim n'est pas
@@ -5711,7 +5467,7 @@ endfu
 " 26 -
 " When replicating plugin cheat40, automatically set last motion with:
 "
-"     sil! call lg#motion#repeatable#main#set_last_used(']S', 1)
+"     sil! call lg#motion#repeatable#make#set_last_used(']S', {'bwd': ',', 'fwd': ';'})
 "
 " This way, we can move along long lines with ; and ,
 "
@@ -6095,12 +5851,8 @@ endfu
 " This can be achieved, by installing an autocmd which waits for us to
 " traverse all the tabstops (UltiSnipsExitLastSnippet). But even then,
 " UltiSnips hasn't quite finished. So we also need a timer to slightly delay
-" our code. Have a look at:
+" our code.
 "
-"         ~/.vim/after/plugin/ultisnips.vim
-"
-" We don't need it anymore, but it could be useful as a template for sth else
-" in the future.
 " Also, if you want to pass an argument to your function, you can do it by passing
 " a partial to `timer_start()`:
 "
@@ -6462,6 +6214,8 @@ tno  <s-tab>  <left>
 "
 "         mapping/abbreviation/command/autocmd/variable
 "
+" or when we undo a non-existing …
+"
 " 81 -
 " normalize underscore/dash in plug mappings, and function names in shell init files
 "
@@ -6547,7 +6301,6 @@ tno  <s-tab>  <left>
 "     qf#set_matches(
 "     repeat#set(            yes, even this one (we want as few dependencies as possible for all our plugins)
 "     repeat#setreg(
-"     window#qf_open(
 "
 " Also, make  sure they  are self-contained. They must  not call  functions from
 " one of our other plugins. If they do, move the latter inside `vim-lg-lib` too.
@@ -6647,6 +6400,26 @@ tno  <s-tab>  <left>
 " `vim-repeat-motion`.
 "
 " If we do it, should we do the same for the buffer-local scope?
+"
+" 101 -
+"
+"     $ vim
+"     :e /tmp/file
+"     $ vim (a 2nd instance)
+"     :try | e /tmp/file | catch | call lg#catch_error() | endtry
+"
+" If the file is already loaded in another instance, it will raise the error:
+"         :h E325
+"
+" But the error won't be catched because Vim prompts us with a question to know
+" what we want to do (edit, quit, …).
+" Worse, the question is not visible.
+"
+" Solution: for the moment, press `e` to choose to edit the file.
+"
+" But this begs the question. How to deal with an error prompting us
+" with a question? How to catch it properly?
+
 
 
 
@@ -6659,20 +6432,27 @@ augroup END
 
 augroup save_last_qfl
     au!
-    " au VimLeavePre * call s:save_last_qfl()
-    " au VimEnter    * call s:restore_last_qfl()
+    au VimLeavePre * call s:save_last_qfl()
+    au VimEnter    * call s:restore_last_qfl()
 augroup END
 
 fu! s:save_last_qfl() abort
-    let g:MY_LAST_QFL = getqflist()
+    let qfl = getqflist()
+    call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
+    call map(qfl, {i,v -> remove(v, 'bufnr') ? v : v})
+    let g:MY_LAST_QFL = {'qfl': qfl, 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
 endfu
 
 fu! s:restore_last_qfl() abort
-    if !empty(g:MY_LAST_QFL)
-        " FIXME:
-        " whe are there spaces between `:` and the text in the title
-        " cexpr g:MY_LAST_QFL
-        " cexpr []
+    if empty(get(g:, 'MY_LAST_QFL', {}))
+        return
+    endif
+
+    if has_key(g:MY_LAST_QFL, 'qfl')
+        call setqflist(g:MY_LAST_QFL.qfl)
+    endif
+    if has_key(g:MY_LAST_QFL, 'title')
+        call setqflist([], 'a', {'title': g:MY_LAST_QFL.title})
     endif
 endfu
 
@@ -6854,6 +6634,7 @@ fu! s:goyo_enter() abort
         \                     'Statement',
         \                     'String',
         \                     'Type',
+        \                     'snipSnippet',
         \                   ]
 
         for group in syntax_groups

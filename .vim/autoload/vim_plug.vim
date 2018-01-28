@@ -1,5 +1,12 @@
 fu! vim_plug#move_between_commits(is_fwd) abort "{{{1
-    call search('^  \X*\zs\x', a:is_fwd ? '' : 'b')
+    " There's no commit in the main / initial window.
+    "
+    " We're going to press `o` later  to open the preview window showing details
+    " about the commit under the cursor; this will raise an error if we haven't
+    " pressed `D` / executed `:PlugDiff`.
+    if !search('^  \X*\zs\x', a:is_fwd ? '' : 'b')
+        return
+    endif
 
     " Alternative: call feedkeys('o', 'ix'){{{
     "                                   │

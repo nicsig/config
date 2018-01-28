@@ -883,24 +883,6 @@ fu! myfuncs#long_object_join() abort
     sil! call repeat#set("\<plug>(myfuncs_long_object_join)")
 endfu
 
-fu! myfuncs#mru(file, how_to_open) abort "{{{1
-    exe a:how_to_open a:file
-    exe a:how_to_open ==# 'tabedit' ? 'lcd %:p:h' : ''
-endfu
-
-fu! myfuncs#mru_complete(arglead, _c, _p) abort
-    " Why not filtering the files?{{{
-    "
-    " We don't need to, because the command invoking this completion function is
-    " defined with the attribute `-complete=custom`, not `-complete=customlist`,
-    " which means Vim performs a basic filtering automatically:
-    "
-    "     • each event must begin with `a:arglead`
-    "     • the comparison respects 'ic' and 'scs'
-    " }}}
-    return join(map(copy(v:oldfiles), { i,v -> fnamemodify(v, ':~:.') }), "\n")
-endfu
-
 fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
     let lines = getline(a:lnum1,a:lnum2)
     keepj sil %d_
@@ -1862,7 +1844,7 @@ endfu
 fu! myfuncs#search_todo() abort "{{{1
     try
         sil exe 'lvim /\CFIX'.'ME\|TO'.'DO/j %'
-        sil! call lg#motion#repeatable#main#set_last_used(']l', 1)
+        sil! call lg#motion#repeatable#make#set_last_used(']l', {'bwd': ',', 'fwd': ';'})
     catch
         echo 'no TO'.'DO or FIX'.'ME'
         return

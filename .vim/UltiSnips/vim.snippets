@@ -1,17 +1,49 @@
+# TODO
+# Document all  of this,  in our notes  and when we  write global  python helper
+# functions.
+#
+# List comprehension (python construct):
+#
+#     http://www.i-programmer.info/programming/python/3942-arrays-in-python.html?start=1
+#
+# Useful to understand the syntax of this statement:
+#
+#     opts = [ m[len(t):] for m in opts if m.startswith(t) ]
+#              └────────┤ └───────────┤ └────────────────┤
+#                       │             │                  └ but keep only the ones
+#                       │             │                    which start with the text stored in `t`
+#                       │             │
+#                       │             └ make the variable `m` iterate over the values
+#                       │               stored in the list `opts`
+#                       │
+#                       └ expression which will be evaluated with a range of values
+#                         for `m` (`t` is fixed; it's passed as an argument to the
+#                         surrounding function)
+#
+#                         the set of all the evaluations will populate the list `opts`
+#
+# Found in the last screencast of SirVer.
+#
+# Note that `opts` and `t` should probably be renamed `candidates` and `base`.
+# To be consistent with how we write a completion function in Vim:
+#
+#     candidates = [ c[len(base):] for c in candidates if c.startswith(base) ]
+
 # ?: {{{1
 
 snippet ?: "(test ? expr1 : expr2)" im
 ($1 ? $2 : $3)
 endsnippet
 
-# abbrev
+# abbrev {{{1
 
-#                   ┌ text of 1st placeholder ${1}
+#                   ┌ text of 1st placeholder $1
 #                ┌──┤
 # `!p snip.rv = (t[1][0]).upper() + t[1][1:]`
 #                     │                  └┤
 #                     │                   └ remaining characters
 #                     └ first character
+
 snippet abbrev "uppercase abbreviation on command line" bm
 cnorea <expr> <buffer> ${1:lhs}  getcmdtype() ==# ':' && getcmdline() ==# '$1'
 \                                ?    '`!p snip.rv = (t[1][0]).upper() + t[1][1:]`'
@@ -20,36 +52,41 @@ endsnippet
 
 # au {{{1
 
-snippet au  "augroup ... autocmd block" bm
-augroup ${1:augroup name}
-	au!${2: * <buffer>}
-	au ${3:BufWinEnter}${2/( \*)|.*/(?1:: \*)/} ${0:${VISUAL}}
-augroup END
-endsnippet
-# Explanation of the mirror:
+# Explanation of the mirror:{{{
 #
 #                 ┌ look for a space followed by a star,
-#                 │ and capture it so that I can refer to it via `?1`
+#                 │ and capture it so that I can test whether the subpattern has been matched, via `?1`
 #                 │
-#                 │  ┌ OR, anything
+#                 │  ┌ OR, look for anything
 #             ┌───┤ ┌┤
 #		  ${2/( \*)|.*/(?1:: \*)/}
 #                       └┤└┤└─┤
-#                        │ │  └ otherwise, if you find the 2nd branch (anything),
-#                        │ │	replace it with a space followed by a star (any pattern)
+#                        │ │  └ otherwise, insert a space followed by a star
+#                        │ │	(to leave the autocmd pattern unchanged)
 #                        │ │
-#                        │ └ replace it with nothing
+#                        │ └ replace its contents with nothing
+#                        │   (SPC * SPC <buffer>  →  SPC <buffer>)
 #                        │
-#                        └ if you found the 1st capturing group
-
-# Also, from :h UltiSnips-replacement-string:
+#                        └ if the 1st capturing group is not empty (SPC *)
+#}}}
+# Also, from :h UltiSnips-replacement-string:{{{
 #
 #         Finally, the  replacement string can contain  conditional replacements
-#         using the syntax (?no:text:other text). This  reads as follows: if the
-#         group $no has  matched, insert "text", otherwise  insert "other text".
-#         "other text"  is optional and  if not  provided defaults to  the empty
-#         string,  "". This  feature  is  very powerful. It  allows  you to  add
-#         optional text into snippets.
+#         using the syntax (?123:foo:bar). This  reads as follows:
+#
+#             if the group 123 has matched, replace it with "foo", otherwise insert "bar"
+#
+#         "bar"  is  optional  and  if   not  provided  defaults  to  the  empty
+#         string. This feature is  very powerful. It allows you  to add OPTIONAL
+#         text into snippets.
+#}}}
+
+snippet au  "augroup ... autocmd block" bm
+augroup ${1:augroup name}
+	au!${2: * <buffer>}
+	au ${3:BufWinEnter}${2/( \*)|.*/(?1:: \*)/} ${0:$VISUAL}
+augroup END
+endsnippet
 
 # cfu {{{1
 
@@ -106,7 +143,7 @@ endsnippet
 
 # conceal {{{1
 
-# Why set the priority of the match to 0 is important?{{{
+# Why setting the priority of the match to 0 is important?{{{
 #
 # If the priority is greater, for some reason, any text matching the search register
 # is concealed too.
@@ -150,14 +187,6 @@ endif
 $0
 endsnippet
 
-# f {{{1
-
-# snippet f function
-# 	fun! ${1:`expand('%') =~ 'autoload' ? substitute(matchstr(expand('%:p'),'autoload/\zs.*\ze.vim'),'[/\\]','#','g').'#' : ''`}${2:function_name}(${3})
-# 		${0}
-# 	endf
-# endsnippet
-
 # for {{{1
 
 snippet for "for … in loop" bm
@@ -168,12 +197,11 @@ endsnippet
 
 # forkv {{{1
 
-# snippet forkv "for [key, value] in loop"
-# 	for [${1},${2}] in items(${3})
-# 		${0}
-# 		unlet $1 $2
-# 	endfor
-# endsnippet
+snippet forkv "for [key, value] in loop"
+	for [$1,$2] in items($3)
+		$0
+	endfor
+endsnippet
 
 # fu {{{1
 
@@ -193,7 +221,7 @@ endsnippet
 # I commented the `post_expand` statement, because it sometimes raised an error.
 # post_expand "vim.command('call My_ulti_remove_empty_lines()')"
 snippet fu "function definition" bm
-fu! ${1:Func}(${2:args}) abort
+fu! ${1:`!v snippets#get_funcname()`}($2) abort
 	${0:${VISUAL}}
 endfu
 endsnippet
@@ -506,7 +534,7 @@ snippet vim_plug "Vim-Plug Plugin definition" bm
 Plug '$0'
 endsnippet
 
-# vimrc_mini
+# vimrc_mini {{{1
 
 # Adding `…/plugin/after` is only necessary if the plugin we want to test
 # has something inside an `after/` subdirectory.
@@ -539,15 +567,3 @@ augroup my_${1:filetype}_window_local_options
 	$0
 augroup END
 endsnippet
-
-# global !p
-# def insert_method_call(name):
-# 	vim.command('normal G')
-# 	snip.expand_anon(name + '($1)\n')
-# endglobal
-#
-# post_jump "if snip.tabstop == 0: insert_method_call(snip.tabstops[1].current_text)"
-# snippet d "method declaration" b
-# def $1():
-# 	$2
-# endsnippet

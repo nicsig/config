@@ -160,19 +160,19 @@ call submode#map(       'scroll-window', 'i', 'r',      'k', '<plug>(scroll-wind
 ino  <plug>(scroll-window-up)  <c-x><c-y>
 
 "        repeatable_motions {{{1
-" z, z; {{{2
+"  z,   z; {{{2
 
 " Why no visual mode?
 " It doesn't makes sense to create a submode in visual mode when we move across files.
 
-call submode#enter_with('repeat-motion-2', 'n', 'r', 'z;', '<plug>(z_semicolon)<plug>(submode-redraw)')
-call submode#enter_with('repeat-motion-2', 'n', 'r', 'z,', '<plug>(z_comma)<plug>(submode-redraw)')
-call submode#map(       'repeat-motion-2', 'n', 'r',  ';', '<plug>(z_semicolon)<plug>(submode-redraw)')
-call submode#map(       'repeat-motion-2', 'n', 'r',  ',', '<plug>(z_comma)<plug>(submode-redraw)')
+call submode#enter_with('repeat-motion-z', 'n', 'r', 'z;', '<plug>(forward-z,_z;)<plug>(submode-redraw)')
+call submode#enter_with('repeat-motion-z', 'n', 'r', 'z,', '<plug>(backward-z,_z;)<plug>(submode-redraw)')
+call submode#map(       'repeat-motion-z', 'n', 'r',  ';', '<plug>(forward-z,_z;)<plug>(submode-redraw)')
+call submode#map(       'repeat-motion-z', 'n', 'r',  ',', '<plug>(backward-z,_z;)<plug>(submode-redraw)')
 " We may be in the submode, but think we aren't anymore, and thus press `z;`.
 " If that's the case, we want `z;` to keep its original meaning (the one outside the submode).
-call submode#map(       'repeat-motion-2', 'n', 'r', 'z;', '<plug>(z_semicolon)<plug>(submode-redraw)')
-call submode#map(       'repeat-motion-2', 'n', 'r', 'z,', '<plug>(z_comma)<plug>(submode-redraw)')
+call submode#map(       'repeat-motion-z', 'n', 'r', 'z;', '<plug>(forward-z,_z;)<plug>(submode-redraw)')
+call submode#map(       'repeat-motion-z', 'n', 'r', 'z,', '<plug>(backward-z,_z;)<plug>(submode-redraw)')
 
 " Map the dot and undo commands in the submode.{{{
 "
@@ -198,8 +198,8 @@ call submode#map(       'repeat-motion-2', 'n', 'r', 'z,', '<plug>(z_comma)<plug
 "     .
 "     …
 "}}}
-call submode#map(       'repeat-motion-2', 'n', 'r',  '.', '.')
-call submode#map(       'repeat-motion-2', 'n', 'r',  'u', 'u')
+call submode#map(       'repeat-motion-z', 'n', 'r',  '.', '.')
+call submode#map(       'repeat-motion-z', 'n', 'r',  'u', 'u')
 "                                                │
 "                                                └ we need recursiveness:
 "                                                `.` and `u` are customized by `vim-repeat`
@@ -238,30 +238,30 @@ call submode#map(       'repeat-motion-2', 'n', 'r',  'u', 'u')
 "}}}
 nno  <silent>  <plug>(submode-redraw)  :redraw<cr>
 
-" +, +; {{{2
+"  +,   +; {{{2
 
-call submode#enter_with('repeat-motion-3', 'n', 'r', '+;', '<plug>(plus_semicolon)')
-call submode#enter_with('repeat-motion-3', 'n', 'r', '+,', '<plug>(plus_comma)')
-call submode#map(       'repeat-motion-3', 'n', 'r',  ';', '<plug>(plus_semicolon)')
-call submode#map(       'repeat-motion-3', 'n', 'r',  ',', '<plug>(plus_comma)')
-call submode#map(       'repeat-motion-3', 'n', 'r', '+;', '<plug>(plus_semicolon)')
-call submode#map(       'repeat-motion-3', 'n', 'r', '+,', '<plug>(plus_comma)')
+call submode#enter_with('repeat-motion-+', 'n', 'r', '+;', '<plug>(forward-+,_+;)')
+call submode#enter_with('repeat-motion-+', 'n', 'r', '+,', '<plug>(backward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'n', 'r',  ';', '<plug>(forward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'n', 'r',  ',', '<plug>(backward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'n', 'r', '+;', '<plug>(forward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'n', 'r', '+,', '<plug>(backward-+,_+;)')
 
-call submode#enter_with('repeat-motion-3', 'x', 'r', '+;', '<plug>(plus_semicolon)')
-call submode#enter_with('repeat-motion-3', 'x', 'r', '+,', '<plug>(plus_comma)')
-call submode#map(       'repeat-motion-3', 'x', 'r',  ';', '<plug>(plus_semicolon)')
-call submode#map(       'repeat-motion-3', 'x', 'r',  ',', '<plug>(plus_comma)')
-call submode#map(       'repeat-motion-3', 'x', 'r', '+;', '<plug>(plus_semicolon)')
-call submode#map(       'repeat-motion-3', 'x', 'r', '+,', '<plug>(plus_comma)')
+call submode#enter_with('repeat-motion-+', 'x', 'r', '+;', '<plug>(forward-+,_+;)')
+call submode#enter_with('repeat-motion-+', 'x', 'r', '+,', '<plug>(backward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'x', 'r',  ';', '<plug>(forward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'x', 'r',  ',', '<plug>(backward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'x', 'r', '+;', '<plug>(forward-+,_+;)')
+call submode#map(       'repeat-motion-+', 'x', 'r', '+,', '<plug>(backward-+,_+;)')
 
-" co, co; {{{2
+" co,  co; {{{2
 
 " Why no visual mode?
 " It doesn't makes sense to create a submode in visual mode to cycle through options values.
 
-call submode#enter_with('repeat-motion-4', 'n', 'r', 'co;', '<plug>(co_semicolon)')
-call submode#enter_with('repeat-motion-4', 'n', 'r', 'co,', '<plug>(co_comma)')
-call submode#map(       'repeat-motion-4', 'n', 'r',   ';', '<plug>(co_semicolon)')
-call submode#map(       'repeat-motion-4', 'n', 'r',   ',', '<plug>(co_comma)')
-call submode#map(       'repeat-motion-4', 'n', 'r', 'co;', '<plug>(co_semicolon)')
-call submode#map(       'repeat-motion-5', 'n', 'r', 'co,', '<plug>(co_comma)')
+call submode#enter_with('repeat-motion-co', 'n', 'r', 'co;', '<plug>(forward-co,_co;)')
+call submode#enter_with('repeat-motion-co', 'n', 'r', 'co,', '<plug>(backward-co,_co;)')
+call submode#map(       'repeat-motion-co', 'n', 'r',   ';', '<plug>(forward-co,_co;)')
+call submode#map(       'repeat-motion-co', 'n', 'r',   ',', '<plug>(backward-co,_co;)')
+call submode#map(       'repeat-motion-co', 'n', 'r', 'co;', '<plug>(forward-co,_co;)')
+call submode#map(       'repeat-motion-co', 'n', 'r', 'co,', '<plug>(backward-co,_co;)')
