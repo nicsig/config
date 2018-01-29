@@ -21,6 +21,17 @@ access it, relies on you passing it as an argument.
 
 ---
 
+`snip.cursor` is ONLY accessible in a context expression.
+So, in  the function of a  custom module, don't use  `snip.cursor[0]` to express
+the current line address, unless maybe, if the function is evaluated from a context
+expression. Instead use `vim.current.window.cursor[0])`.
+
+See `:h UltiSnips-context-snippets` and:
+
+    https://github.com/SirVer/ultisnips/issues/835#issuecomment-286365371
+
+---
+
 Contrary to a snippet file, where UltiSnips automatically pre-import the modules:
 
  - os

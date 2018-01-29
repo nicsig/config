@@ -11,8 +11,18 @@
 import re
 import vim
 
-def trim_ws(snip):
-    pat = re.compile('^\s+$')
+def my_index(a_list, pattern): #{{{1
+    pat = re.compile(pattern)
+    for i, s in enumerate(a_list):
+        if pat.search(s):
+            return i
+    return -1
+
+def trim_ws(snip): #{{{1
+    # no need  to use the  `^` anchor, because  we're going to  invoke `match()`
+    # which, contrary to  `search()`, always searches from the  beginning of the
+    # string
+    ws = re.compile('\s+$')
     #                                                    ┌ address of first line in snippet{{{
     #                                                    │ the tuple `snip.snippet_start` contains 2 numbers:
     #                                                    │
@@ -40,42 +50,16 @@ def trim_ws(snip):
     #}}}
         # check  whether  each  line  in  the  snippet  matches  an  empty  line
         # containing whitespace
-        if pat.match(l):
+        if ws.match(l):
             # if so, remove the whitespace
-            snip.buffer[i+1] = ''
+            snip.buffer[snip.snippet_start[0]+i] = ''
+            # necessary to avoid error when we expand `fu` without a visual token
+            #
+            #     RuntimeError: line under the cursor was modified,
+            #     but "snip.cursor" variable is not set;
+            #     either set set "snip.cursor" to new cursor position,
+            #     or do not modify cursor line
+            snip.cursor.preserve()
+            # Alternative:
+            #     snip.cursor.set(i, 0)
 
-def my_index(a_list, pat):
-    pattern = re.compile(pat)
-    for i, s in enumerate(a_list):
-        if pattern.match(s):
-            return i
-    return -1
-
-def find_tagname(snip):
-    # TODO:
-    # replace `4` with the number of lines inside the expanded snippet
-    # return ''
-    a_list = reversed(snip.buffer[0 : vim.current.window.cursor[0] - 4])
-    idx = my_index(a_list, '.*lg-lib-\d+')
-    address = len(snip.buffer) - 1 - idx - 4
-    text = snip.buffer[address - 1]
-    # FIXME:
-    # Doesn't work.
-    # It  does if  you replace  `address  - 1`  in  the previous  line with  the
-    # value it gets at runtime.
-    # Or if you add after the `address` assignment:
-    #
-    #     address = address + (idx - {some_number})
-    #
-    # … where {some_number} is the value of `idx` at runtime.
-    #
-    # For some reason, because we retrieve the line from `snip.buffer` via
-    # `address - 1`, `re.search('…', text)` outputs None. IOW, `search()`
-    # fails to find the pattern in the line.
-    return get_info(text)
-
-def get_info(text):
-    try:
-       return re.search('.*lg-lib-(\d+)', text).group(1)
-    except AttributeError:
-       return ''

@@ -342,7 +342,7 @@ fu! myfuncs#cloc(lnum1,lnum2,path) abort "{{{1
         endif
     else
         let file    = tempname()
-        let to_scan = file.'.'.&ft
+        let to_scan = file.'.'.expand('%:e')
         let lines   = getline(a:lnum1, a:lnum2)
         call writefile(lines, to_scan)
 

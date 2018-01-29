@@ -260,17 +260,15 @@ endsnippet
 
 # fu {{{1
 
-# How to trim whitespace automatically, when the visual selection contain empty lines?{{{
+# Why `post_expand`?{{{
 #
-#		  post_expand "python code using snip.buffer" ?
-#
-# An issue was opened on the issue tracker:
+# When the visual selection contains an empty line, and our snippet inserts
+# the `VISUAL` token, UltiSnips inserts 4 spaces on the line.
+# We need to trim it. The `m` option doesn't work.
+# So, we use a python function invoked via a `post_expand` statement.
+# Also, see this:
 #
 #		  https://github.com/SirVer/ultisnips/issues/391
-#
-# The solution which was found was the `m` option. It doesn't work with
-# the visual placeholder.
-# Why? Is it a bug?
 #}}}
 post_expand "trim_ws(snip)"
 snippet fu "function definition" bm

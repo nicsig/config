@@ -7,6 +7,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
+badd +268 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+badd +118 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
+badd +263 ~/.vim/UltiSnips/vim.snippets
 badd +1 ~/Desktop/show_toc_help.vim
 badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +1 ~/Dropbox/vim_plugins/vim-qf/autoload/qf/filter.vim
@@ -14,10 +17,8 @@ badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
 badd +1 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
 badd +95 ~/Dropbox/vim_plugins/vim-qf/autoload/qf.vim
 badd +9 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
-badd +118 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 badd +1 /run/user/1000/hydra/head18.vim
 badd +17 ~/.vim/after/ftplugin/help.vim
-badd +302 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 badd +250 ~/.vim/plugged/vim-readline/autoload/readline.vim
 badd +4 ~/Desktop/result
 badd +49 ~/Desktop/final_analysis.hydra
@@ -27,11 +28,7 @@ badd +1 ~/Dropbox/vim_plugins/fastfold.vim
 badd +1 fugitive:///home/jean/.vim/plugged/vim-cmdline/.git//047a32664392868454f4538a689c5c782b93884d/plugin/cmdline.vim
 badd +10 ~/.vim/UltiSnips/markdown.snippets
 badd +1 /tmp/md.md
-badd +71 ~/.vim/UltiSnips/help.snippets
-badd +581 ~/.vim/UltiSnips/vim.snippets
-badd +4 ~/.vim/plugged/vim-pythonx/pythonx/px/snippets.py
-badd +44 ~/.vim/pythonx/snippet_helpers.py
-badd +0 /tmp/vim.vim
+badd +9 ~/.vim/UltiSnips/help.snippets
 argglobal
 silent! argdel *
 set stal=2
@@ -533,11 +530,11 @@ setlocal fml=1
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
-let s:l = 324 - ((11 * winheight(0) + 0) / 1)
+let s:l = 323 - ((10 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-324
+323
 normal! 0
 wincmd w
 argglobal
@@ -601,85 +598,12 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabedit ~/.vim/pythonx/snippet_helpers.py
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 26 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 44 - ((42 * winheight(0) + 13) / 26)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-44
-normal! 042|
-wincmd w
-argglobal
-if bufexists('~/.vim/plugged/vim-pythonx/pythonx/px/snippets.py') | buffer ~/.vim/plugged/vim-pythonx/pythonx/px/snippets.py | else | edit ~/.vim/plugged/vim-pythonx/pythonx/px/snippets.py | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 6 - ((5 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-6
-normal! 0
-wincmd w
-argglobal
-if bufexists('~/.vim/UltiSnips/vim.snippets') | buffer ~/.vim/UltiSnips/vim.snippets | else | edit ~/.vim/UltiSnips/vim.snippets | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-261
-normal! zo
-263
-normal! zo
-542
-normal! zo
-let s:l = 266 - ((158 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-266
-normal! 0
-wincmd w
-exe '1resize ' . ((&lines * 26 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-tabedit /tmp/vim.vim
+tabedit ~/.vim/UltiSnips/vim.snippets
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
-setlocal fdm=manual
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -687,14 +611,15 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 3 - ((2 * winheight(0) + 15) / 30)
+540
+normal! zo
+let s:l = 585 - ((26 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
+585
 normal! 0
-tabnext 10
+tabnext 9
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
