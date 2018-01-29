@@ -55,7 +55,7 @@ nno  <buffer><nowait><silent>  <c-s>  :<c-u>update<cr>
 " We can't listen to FileType because the mapping is not installed yet,
 " so `maparg(…)` is empty.
 "}}}
-call timer_start(0, {-> gitcommit#remap_minus()})
+call timer_start(0, {-> gitcommit#backtick_minus()})
 " Is there an alternative to the timer?{{{
 "
 " Maybe.

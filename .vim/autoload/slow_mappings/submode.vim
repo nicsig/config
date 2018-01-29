@@ -1,6 +1,10 @@
-" TODO:
-" Create mappings to be able to scroll in preview window with `j` and `k`, after
-" an initial `J` or `K`.
+" Usage example:
+"
+"     call submode#enter_with('undo/redo', 'n', '', 'g-', 'g-')
+"     call submode#enter_with('undo/redo', 'n', '', 'g+', 'g+')
+"     call submode#map(       'undo/redo', 'n', '',  '-', 'g-')
+"     call submode#map(       'undo/redo', 'n', '',  '+', 'g+')
+"     call submode#leave_with('undo/redo', 'n', '', '<Esc>')
 
 
 " TODO:
@@ -11,15 +15,13 @@
 "    call submode#map('half-screen', 'n', '', 'd', '<c-d>')
 "    call submode#map('half-screen', 'n', '', 'u', '<c-u>')
 
-" Issue1:
-" Entering the submode with  `C-d` and `C-u` is annoying, if we  want to use the
-" `d` operator  right after moving  the cursor.
-" Besides, `hjkl` don't work right after `C-d`. Annoying.
-" We should  use a special  key to enter the submode “half-screen”.
+" Issue:
+" Entering the submode with `C-d` and `C-u`  is dangerous, we could press `d` or
+" `u` outside the submode and delete/undo instead of simply moving the cursor.
+" Maybe, we should  use a special  key to enter the submode “half-screen”.
 "
 " Issue2:
-" We should see the  submode in the command-line, because I  don't want to press
-" `u` to move the cursor, and instead undo by accident.
+" We should see the  submode in the command-line.
 " Tweak `submode#enter_with()` so that we can ask for the submode to be shown
 " on a per-submode basis (i.e. for some of them nothing shown, for other yes).
 " Currently, we don't see in which submode we are because we've disabled 'showmode'
@@ -64,12 +66,17 @@ call submode#map(       'schlepp', 'x', 'r', 'l', '<plug>(schlepp_right)')
 "
 "         ✘
 "         call submode#leave_with('schlepp', 'x', '', 'U')
-
-" call submode#enter_with('undo/redo', 'n', '', 'g-', 'g-')
-" call submode#enter_with('undo/redo', 'n', '', 'g+', 'g+')
-" call submode#leave_with('undo/redo', 'n', '', '<Esc>')
-" call submode#map(       'undo/redo', 'n', '', '-', 'g-')
-" call submode#map(       'undo/redo', 'n', '', '+', 'g+')
+"
+" Update:
+" For the moment, we don't need this  anymore, because we've tweaked the code of
+" `vim-submode`. Basically, it's as if we had  set this variable in the original
+" plugin:
+"
+"     let g:submode_keep_leaving_key = 1
+"
+" With this setting,  we can press `UU`  from visual mode; it will  make us quit
+" the submode,  then `UU` will  be processed (from Visual  mode: we also  have a
+" custom mapping in visual mode; x_UU).
 
 " <  > {{{1
 
@@ -80,8 +87,8 @@ call submode#map(       'schlepp', 'x', 'r', 'l', '<plug>(schlepp_right)')
 "
 " Also, make the mappings repeatable without the prefix `C-g`.
 
-call submode#enter_with('change-indent', 'i', '', '<c-g>>', '<c-t>' )
-call submode#enter_with('change-indent', 'i', '', '<c-g><', '<c-d>' )
+call submode#enter_with('change-indent', 'i', '', '<c-g>>', '<c-t>')
+call submode#enter_with('change-indent', 'i', '', '<c-g><', '<c-d>')
 call submode#map(       'change-indent', 'i', '',      '>', '<c-t>')
 call submode#map(       'change-indent', 'i', '',      '<', '<c-d>')
 

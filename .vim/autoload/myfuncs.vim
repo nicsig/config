@@ -38,100 +38,6 @@
 "
 " Pour essayer de comprendre lire :h C-indenting et :h usr_30.txt
 "}}}
-fu! myfuncs#blocks_clear(clear_them_only) abort "{{{1
-    let view       = winsaveview()
-    let s:bc_block = s:bc_get_its_text()
-
-    call cursor(1,1)
-    while s:bc_you_find_a_block()
-        let orig_pos = getpos('.')
-        call s:bc_remove_it(a:clear_them_only)
-        call setpos('.', orig_pos)
-    endwhile
-
-    if !a:clear_them_only
-        sil exe "keepj keepp %s/\<c-a>//ge"
-    endif
-
-    unlet s:bc_block
-    call winrestview(view)
-endfu
-
-fu! s:bc_get_its_text() abort
-    call lg#reg#save(['"', '+'])
-    sil norm! gvy
-    let block = split(@", "\n")
-    call lg#reg#restore(['"', '+'])
-
-    return block
-endfu
-
-fu! s:bc_you_find_a_block() abort
-    let pattern_first_line = '\V'.escape(s:bc_block[0],'\')
-    let find_a_first_line  = search(pattern_first_line, 'cW')
-
-    " as long as we find the first line of our block
-    while find_a_first_line
-        let orig_pos      = getpos('.')
-        let idx_line      = line('.')+1
-        let start_col     = col('.')
-
-        " If the rest of the block isn't there, restore the cursor position to
-        " the first line of the uncomplete block, and look for a possible next
-        " occurrence of the first line of our block (`continue`).
-        " We won't find again the current occurrence (the one right after the
-        " cursor), because we don't pass the `c` flag to `search()`.
-        if !s:bc_is_complete(idx_line, start_col)
-            call setpos('.', orig_pos)
-            let find_a_first_line = search(pattern_first_line, 'W')
-            continue
-        endif
-
-        call setpos('.', orig_pos)
-        return 1
-    endwhile
-
-    return 0
-endfu
-
-fu! s:bc_is_complete(idx_line, start_col) abort
-    let idx_line          = a:idx_line
-    let start_col         = a:start_col
-    let rest_is_there_too = 1
-
-    for text in s:bc_block[1:]
-        let pattern_subsequent_line = '\V\%'.idx_line.'l\%'.start_col.'c'.escape(text,'\')
-
-        if !search(pattern_subsequent_line, 'W')
-            let rest_is_there_too = 0
-            break
-        endif
-
-        let idx_line += 1
-    endfor
-
-    return rest_is_there_too
-endfu
-
-fu! s:bc_remove_it(clear_them_only) abort
-    let idx_line  = line('.')
-    let start_col = col('.')
-
-    for text in s:bc_block
-        let pattern_block_line = '\V\%'.idx_line.'l\%'.start_col.'c'.escape(text,'\')
-        let rep = '\=repeat('
-        \.                    string((a:clear_them_only ? ' ' : "\<c-a>"))
-        \.                     ','
-        \.                     len(text)
-        \.                ')'
-
-        exe 'sil keepj keepp '.idx_line.
-                 \ 's/'.pattern_block_line.'/'.rep.'/e'
-
-        let idx_line += 1
-    endfor
-endfu
-
 fu! myfuncs#block_select_box() abort "{{{1
 " this function selects an ascii box that we drew with our `draw-it` plugin
     let view = winsaveview()
@@ -425,14 +331,6 @@ fu! s:search_superfluous_myfuncs() abort
     endif
 endfu
 
-fu! myfuncs#clean_reg() abort "{{{1
-    let registers = ['"', '+', '-', '*', '/', '=']
-    call extend(registers, map(range(48,57)+range(97,122), { i,v -> nr2char(v,1) }))
-    for register in registers
-        call setreg(register, '')
-    endfor
-endfu
-
 fu! myfuncs#cloc(lnum1,lnum2,path) abort "{{{1
     if !empty(a:path)
         if a:path =~# '^http'
@@ -605,36 +503,6 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         call setpos("'x", x_save)
         call setpos("'y", y_save)
     endtry
-endfu
-
-" fix_display {{{1
-
-fu! myfuncs#fix_display() abort
-    " redraw screen
-    redraw!
-    " redraw all status lines
-    redraws!
-    " update differences between windows in diff mode
-    diffupdate!
-    " update folds
-    norm! zx
-
-    " Purpose:{{{
-    "
-    " Reset the min/max number of lines above the viewport from which Vim begins
-    " parsing the buffer to apply syntax highlighting.
-    "
-    " Sometimes syntax highlighting is wrong, these commands should fix that.
-    "
-    " We could also be more radical, and execute:
-    "
-    "     :syntax sync fromstart
-    "
-    " But after we execute it in our `vimrc`, every time we source our vimrc, we
-    " experience lag.
-    "}}}
-    syntax sync minlines=200
-    syntax sync maxlines=400
 endfu
 
 fu! myfuncs#fix_spell() abort "{{{1
@@ -888,20 +756,6 @@ fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
     keepj sil %d_
     sil put =lines
     keepj 1d_
-endfu
-
-" TEXTOBJ {{{1
-
-fu! myfuncs#textobj_func(inside) abort
-    if search('^\s*fu\%[nction]', 'bcW')
-        k<
-        call search('^\s*endf\%[unction]\s*$', 'eW')
-        k>
-        exe 'norm! gv$'.(a:inside ? 'koj' : '')
-        exe 'norm! gv$'.(a:inside ? 'koj' : '')
-        " we want a linewise selection no matter the original visual mode
-        exe (mode() !=# 'V' ? 'norm! V' : '')
-    endif
 endfu
 
 " OPERATORS {{{1
@@ -1639,45 +1493,6 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
     return ''
 endfu
 
-" ranger_file_manager {{{1
-
-" Inspiration:
-" https://github.com/ranger/ranger/blob/master/examples/vim_file_chooser.vim
-
-" The following function is called by one of our mapping to launch Ranger from
-" Vim.
-" It probably doesn't work for Neovim. To make it work with Neovim, the code
-" will have to be tweaked. Potential solution here:
-" https://github.com/francoiscabrol/ranger.vim/blob/master/plugin/ranger.vim
-
-fu! myfuncs#ranger_file_manager() abort
-    let tempfile = tempname()
-
-    if has('gui_running')
-
-        call system('x-terminal-emulator -e
-                    \ python ~/GitRepos/ranger/ranger.py --choosefiles=' . shellescape(tempfile))
-
-        else
-        " start `ranger` with the following command:
-        "     ranger --choosefiles={tempfile} {current dir}
-        "              │
-        "              └─ write the path to the selected file inside `tempfile`
-
-            sil! exe '!python ~/GitRepos/ranger/ranger.py --choosefiles='
-                        \ . shellescape(tempfile, 1).' '.expand('%:p:h')
-        "                                               │
-        "                                               └─ open ranger in to the current directory (:pwd)
-        endif
-
-    if filereadable(tempfile)
-        exe 'edit '.readfile(tempfile, '', 1)[0]
-        call delete(tempfile)
-    endif
-
-    redraw!
-endfu
-
 fu! myfuncs#remove_duplicate_lines(line1, line2, bang) abort "{{{1
     if !a:bang
         return 'echoer "Add a bang"'
@@ -1792,15 +1607,15 @@ endfu
 "     autocmd BufEnter,BufWritePost * if g:repeat_tick == 0|let g:repeat_tick = b:changedtick|endif
 " augroup END
 
-" nmap          .                              <plug>(myfuncs_repeat_dot)
-" nmap          u                              <plug>(myfuncs_repeat_undo)
-" nmap          U                              <plug>(myfuncs_repeat_undo_line)
-" nmap          <c-r>                          <plug>(myfuncs_repeat_redo)
+" nmap  .      <plug>(myfuncs_repeat_dot)
+" nmap  u      <plug>(myfuncs_repeat_undo)
+" nmap  U      <plug>(myfuncs_repeat_undo_line)
+" nmap  <c-r>  <plug>(myfuncs_repeat_redo)
 
-" nno <silent> <plug>(myfuncs_repeat_dot)      :<c-u>exe myfuncs#repeat_dot(v:count)<cr>
-" nno <silent> <plug>(myfuncs_repeat_undo)     :<c-u>exe myfuncs#repeat_wrap('u')<cr>
-" nno <silent> <plug>(myfuncs_repeat_undo_line) :<c-u>exe myfuncs#repeat_wrap('U')<cr>
-" nno <silent> <plug>(myfuncs_repeat_redo)     :<c-u>exe myfuncs#repeat_wrap("\<Lt>C-R>")<cr>
+" nno  <silent>  <plug>(myfuncs_repeat_dot)        :<c-u>exe myfuncs#repeat_dot(v:count)<cr>
+" nno  <silent>  <plug>(myfuncs_repeat_undo)       :<c-u>exe myfuncs#repeat_wrap('u')<cr>
+" nno  <silent>  <plug>(myfuncs_repeat_undo_line)  :<c-u>exe myfuncs#repeat_wrap('U')<cr>
+" nno  <silent>  <plug>(myfuncs_repeat_redo)       :<c-u>exe myfuncs#repeat_wrap("\<Lt>C-R>")<cr>
 
 " retab {{{1
 
@@ -1938,8 +1753,7 @@ fu! myfuncs#show_me_snippets() abort "{{{1
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     setl noma ro
-    syn match snip_cheat_tab_trigger /^\S\+\ze\s*/
-    hi link snip_cheat_tab_trigger Identifier
+    call matchadd('Identifier', '^\S\+\ze\s*', 0, -1)
 endfu
 
 " tmux_{current|last}_command {{{1
@@ -1988,8 +1802,8 @@ endfu
 " tmux-navigator {{{1
 
 " OLD CODE:
-" I don't like this code anymore. I frequently hit `c-j` to go the next
-" horizontal viewport, and this code made me go a tmux pane instead.
+" I don't like this code anymore. I frequently press `c-j` to go the next
+" horizontal viewport, and this code made me go to a tmux pane instead.
 " I don't know what was the idea/intention behind this code.
 " Everything related to tmux is a mess anyway.
 "
@@ -2291,14 +2105,6 @@ fu! s:vim_parent() abort "{{{1
     return expand('`ps -p $(ps -p '.getpid().' -o ppid=) -o comm=`')
 endfu
 
-fu! myfuncs#vimrc_edit() abort "{{{1
-    if tabpagenr('$') == 1 && winnr('$') == 1 && line2byte(line('$')+1) <= 2
-        e $MYVIMRC
-    else
-        tabnew $MYVIMRC
-    endif
-endfu
-
 fu! myfuncs#webpage_read(url) abort "{{{1
     let tempfile = tempname()
     exe 'tabe '.tempfile
@@ -2398,42 +2204,6 @@ fu! myfuncs#wf_complete(arglead, _c, _p) abort
     "     • the comparison respects 'ic' and 'scs'
     " }}}
     return join(['-min_length', '-weighted'], "\n")
-endfu
-
-fu! myfuncs#word_single(action) abort "{{{1
-    let [words, word_single] = [[], []]
-    sil keepj keepp %s/"\w\{-1,}"/\=add(words, submatch(0))/gen
-
-    for a_word in words
-        if count(words, a_word) == 1
-            call add(word_single, a_word)
-        endif
-    endfor
-    let pat = join(word_single, '\|')
-
-    " Define the dictionary actions which maps a command to an action
-    " (passed as an argument to :WordSingle)
-    let actions = {'highlight': 'match SpellBad /' . pat . '/',
-                 \ 'del_words': 'keepj keepp %s/'  . pat . '//ge',
-                 \ 'del_lines': 'keepj keepp g/'   . pat . '/delete _'}
-    sil exe actions[a:action]
-
-    " Return the list of unique words as well as their pattern, so that we can
-    " perform other custom actions.
-    return [word_single, pat]
-endfu
-
-fu! myfuncs#word_single_complete(arglead, _c, _p) abort
-    " Why not filtering the candidates?{{{
-    "
-    " We don't need to, because the command invoking this completion function is
-    " defined with the attribute `-complete=custom`, not `-complete=customlist`,
-    " which means Vim performs a basic filtering automatically:
-    "
-    "     • each event must begin with `a:arglead`
-    "     • the comparison respects 'ic' and 'scs'
-    " }}}
-    return join(['highlight', 'del_words', 'del_lines'], "\n")
 endfu
 
 fu! myfuncs#xor_lines(bang) abort range "{{{1
