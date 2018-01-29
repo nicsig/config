@@ -260,7 +260,7 @@ endsnippet
 
 # fu {{{1
 
-# FIXME: How to trim whitespace automatically, when the visual selection contain empty lines?{{{
+# How to trim whitespace automatically, when the visual selection contain empty lines?{{{
 #
 #		  post_expand "python code using snip.buffer" ?
 #
@@ -272,11 +272,7 @@ endsnippet
 # the visual placeholder.
 # Why? Is it a bug?
 #}}}
-
-# I commented the `post_expand` statement, because it sometimes raised an error.
-# post_expand "vim.command('call My_ulti_remove_empty_lines()')"
-# post_expand "snip.buffer[snip.snippet_start[0]:snip.snippet_end[0]] = [snip.buffer[snip.line], snip.buffer[snip.line+1], snip.buffer[snip.line+2]]; snip.cursor.set(snip.line, snip.column)"
-post_expand "my_func(snip)"
+post_expand "trim_ws(snip)"
 snippet fu "function definition" bm
 fu! ${1:`!v snippets#get_funcname()`${2:Func}}($3) abort
 	${0:${VISUAL}}
@@ -578,12 +574,22 @@ endsnippet
 # when you expand this snippet, if you remove the `setl` line,
 # make sure to remove the first pipe on the next line.
 # Otherwise, the value of `b:undo_ftplugin` may begin with a pipe:
+#
 #     | some commands
 #
 # The empty command before the pipe may have unexpected effect.
 # MWE:
 #		:|echo 'hello'
 #		    → prints current line, then echo 'hello'
+#
+# Update:
+# We could use this:
+#
+#	  `!p snip.rv = ' ' if t[1] == '' else '|'`
+#
+# But what if we remove `:setl …` and `:unlet! …`.
+# And what if we remove `:setl …`, and `:unlet! …`, and `:exe 'au! …'`.
+# …
 
 # vim_plug {{{1
 
