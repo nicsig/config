@@ -1,18 +1,30 @@
+# coding=utf-8
+#
+# The previous line  allows us to use unicode characters  in comments (like …)
+# without python raising an exception.
+#
+#     https://stackoverflow.com/a/10589674/9110115
+#     https://stackoverflow.com/a/729016/9110115
+#
+# The `-*-` prefix/suffix are not necessary, unless you use Emacs.
+
+import re
 import vim
 
+def my_func(snip):
+    return snip.line
+
 def my_index(a_list, pat):
-    # FIXME:
-    # The `re` module seems unaccessible (from here; it works from the snippet file).
     pattern = re.compile(pat)
     for i, s in enumerate(a_list):
         if pattern.match(s):
             return i
     return -1
 
-def find_tagname():
+def find_tagname(snip):
     # TODO:
     # replace `4` with the number of lines inside the expanded snippet
-    return ''
+    # return ''
     a_list = reversed(snip.buffer[0 : vim.current.window.cursor[0] - 4])
     idx = my_index(a_list, '.*lg-lib-\d+')
     address = len(snip.buffer) - 1 - idx - 4

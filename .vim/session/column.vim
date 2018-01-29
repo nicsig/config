@@ -7,7 +7,6 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +22 ~/.vim/plugged/vim-pythonx/plugin/pythonx.vim
 badd +1 ~/.vim/autoload/snippets.vim
 badd +1 ~/Desktop/show_toc_help.vim
 badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
@@ -30,8 +29,10 @@ badd +1 fugitive:///home/jean/.vim/plugged/vim-cmdline/.git//047a32664392868454f
 badd +10 ~/.vim/UltiSnips/markdown.snippets
 badd +1 /tmp/md.md
 badd +71 ~/.vim/UltiSnips/help.snippets
-badd +5 ~/.vim/UltiSnips/vim.snippets
-badd +70 ~/.vim/plugged/vim-pythonx/pythonx/px/snippets.py
+badd +279 ~/.vim/UltiSnips/vim.snippets
+badd +4 ~/.vim/plugged/vim-pythonx/pythonx/px/snippets.py
+badd +11 ~/.vim/pythonx/snippet_helpers.py
+badd +0 ~/.vim/pythonx/README.md
 argglobal
 silent! argdel *
 set stal=2
@@ -533,12 +534,12 @@ setlocal fml=1
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
-let s:l = 325 - ((11 * winheight(0) + 0) / 1)
+let s:l = 324 - ((11 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-325
-normal! 08|
+324
+normal! 0
 wincmd w
 argglobal
 if bufexists('~/.vim/UltiSnips/help.snippets') | buffer ~/.vim/UltiSnips/help.snippets | else | edit ~/.vim/UltiSnips/help.snippets | endif
@@ -601,7 +602,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabedit ~/.vim/UltiSnips/vim.snippets
+tabedit ~/.vim/autoload/snippets.vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -609,31 +610,21 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-3wincmd k
+wincmd _ | wincmd |
+split
+4wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 22 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 1 + 16) / 33)
 argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 611 - ((315 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-611
-normal! 0
-wincmd w
-argglobal
-if bufexists('~/.vim/autoload/snippets.vim') | buffer ~/.vim/autoload/snippets.vim | else | edit ~/.vim/autoload/snippets.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -644,11 +635,46 @@ setlocal fdn=20
 setlocal fen
 1
 normal! zo
-let s:l = 5 - ((4 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5
+1
+normal! 0
+wincmd w
+argglobal
+if bufexists('~/.vim/pythonx/snippet_helpers.py') | buffer ~/.vim/pythonx/snippet_helpers.py | else | edit ~/.vim/pythonx/snippet_helpers.py | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 11 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+11
+normal! 0
+wincmd w
+argglobal
+if bufexists('~/.vim/pythonx/README.md') | buffer ~/.vim/pythonx/README.md | else | edit ~/.vim/pythonx/README.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 14 - ((13 * winheight(0) + 11) / 22)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+14
 normal! 0
 wincmd w
 argglobal
@@ -662,15 +688,15 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 6 - ((5 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 02|
+6
+normal! 0
 wincmd w
 argglobal
-if bufexists('~/.vim/plugged/vim-pythonx/plugin/pythonx.vim') | buffer ~/.vim/plugged/vim-pythonx/plugin/pythonx.vim | else | edit ~/.vim/plugged/vim-pythonx/plugin/pythonx.vim | endif
+if bufexists('~/.vim/UltiSnips/vim.snippets') | buffer ~/.vim/UltiSnips/vim.snippets | else | edit ~/.vim/UltiSnips/vim.snippets | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -679,16 +705,64 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 31 - ((5 * winheight(0) + 0) / 1)
+261
+normal! zo
+263
+normal! zo
+let s:l = 279 - ((11 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-31
-normal! 0
+279
+normal! 025|
 wincmd w
-4wincmd w
-wincmd =
-tabnext 9
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 22 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 1 + 16) / 33)
+tabnew
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+if bufexists('~/.vim/plugged/ultisnips/doc/UltiSnips.txt') | buffer ~/.vim/plugged/ultisnips/doc/UltiSnips.txt | else | edit ~/.vim/plugged/ultisnips/doc/UltiSnips.txt | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal nofen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+tabedit ~/.vim/plugged/vim-lg-lib/doc/lg.txt
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal nofen
+silent! normal! zE
+let s:l = 324 - ((23 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+324
+normal! 0
+tabnext 10
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
