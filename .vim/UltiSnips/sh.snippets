@@ -1,5 +1,9 @@
-# Shebang.
-#
+# #! {{{1
+
+snippet #! "bash shebang" bm
+#!/bin/bash
+endsnippet
+
 # Executing bash via:
 #
 #         #!/usr/bin/env bash
@@ -10,17 +14,13 @@
 # `#!/usr/bin/env bash` could execute another `bash` binary from a directory
 # in the `PATH`, one which would be before `/bin/`.
 
-snippet #! "bash shebang" bm
-#!/bin/bash
+# $ {{{1
+
+snippet $ "value of var in assigment" i
+"${$0}"
 endsnippet
 
-# https://stackoverflow.com/a/18216122/8243465
-snippet guard_root "check we've enough rights to run script" bm
-if [ "$EUID" -ne 0 ]
-	then echo "Please run as root"
-	exit
-fi
-endsnippet
+# case {{{1
 
 snippet case "case condition" bm
 case ${1:my_var} in
@@ -38,6 +38,8 @@ case ${1:my_var} in
 		${0:final action}
 esac
 endsnippet
+
+# elvi {{{1
 
 snippet elvi "Template to create a custom elvi for surfraw" bm
 #!/bin/sh
@@ -64,11 +66,39 @@ else
 fi
 endsnippet
 
+# for {{{1
+
 snippet for "for ... in ... done"
 for ${1:i} in ${2:words}; do
 	${0:#statements}
 done
 endsnippet
+
+# fu {{{1
+
+snippet fu "function" bm
+${1:my_func}() {
+	${0:${VISUAL}}
+}
+endsnippet
+
+# http://mywiki.wooledge.org/BashPitfalls#function_foo.28.29
+#
+#     foo() { … ; }             ✔ more portable
+#     function foo { … ; }      ✔ resists to alias collision (alias foo=…)
+#     function foo() { … ; }    ✘
+
+# guard_root {{{1
+
+# https://stackoverflow.com/a/18216122/8243465
+snippet guard_root "check we've enough rights to run script" bm
+if [ "$EUID" -ne 0 ]
+	then echo "Please run as root"
+	exit
+fi
+endsnippet
+
+# if {{{1
 
 snippet if "if … fi" bm
 if [[ $1 ]]; then
@@ -76,12 +106,16 @@ if [[ $1 ]]; then
 fi
 endsnippet
 
+# ife {{{1
+
 snippet ife "if … else … fi" bm
 if [[ $1 ]]; then
 	${0:${VISUAL}}
 else
 fi
 endsnippet
+
+# log {{{1
 
 snippet log "log output of script" bm
 exec 3>&1 4>&2
@@ -91,6 +125,22 @@ exec 1>~/log/"\$(basename "\$0" .sh)".log 2>&1
 
 endsnippet
 
+# rgx_comp {{{1
+
+snippet rgx_comp "test if pattern match string" bm
+case "${1:string}" in
+	${2:pat1|pat2}) $3 ;;
+	*) $4 ;;
+esac
+endsnippet
+# This syntax doesn't seem to handle complex regexes, but is POSIX, contrary to:
+#     [[ "string" == "pattern" ]]
+#
+# For other valid syntaxes:
+# https://stackoverflow.com/questions/21115121/how-to-check-pattern-match-by-using-bin-sh-not-by-bin-bash
+
+# select {{{1
+
 snippet select "select instruction" bm
 echo -e "\n${1:Which action do you want to perform?}\n"
 
@@ -99,32 +149,7 @@ select ${2:action} in ${3:list of values}; do
 done
 endsnippet
 
-snippet $ "value of var in assigment" i
-"${$0}"
-endsnippet
-
-# http://mywiki.wooledge.org/BashPitfalls#function_foo.28.29
-#
-#     foo() { … ; }             ✔ more portable
-#     function foo { … ; }      ✔ resists to alias collision (alias foo=…)
-#     function foo() { … ; }    ✘
-snippet fu "function" bm
-${1:my_func}() {
-	${0:${VISUAL}}
-}
-endsnippet
-
-# This syntax doesn't seem to handle complex regexes, but is POSIX, contrary to:
-#     [[ "string" == "pattern" ]]
-#
-# For other valid syntaxes:
-# https://stackoverflow.com/questions/21115121/how-to-check-pattern-match-by-using-bin-sh-not-by-bin-bash
-snippet rgx_comp "test if pattern match string" bm
-case "${1:string}" in
-	${2:pat1|pat2}) $3 ;;
-	*) $4 ;;
-esac
-endsnippet
+# tmp {{{1
 
 snippet tmp "create temporary file" bm
 TMP="$(mktemp /tmp/.${1:pgm}.XXXXXXXXXX)"

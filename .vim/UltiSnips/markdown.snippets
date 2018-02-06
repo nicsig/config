@@ -1,6 +1,6 @@
 # bug_report {{{1
 
-snippet bug_report "info when filing bug report for (Neo)Vim" bm
+snippet bug_report "filing bug report for (Neo)Vim" bm
  - \``!v
     has('nvim') ? 'n' : ''
 `vim --version\`:      `!v
@@ -38,6 +38,16 @@ endsnippet
 # $0
 # endsnippet
 
+# spoiler {{{1
+
+snippet spoiler "hide long code" bm
+<details>
+<summary>${1:title}</summary>
+
+	${0:${VISUAL}}
+</details>
+endsnippet
+
 # wpm {{{1
 
 # Kept for educational purpose.
@@ -49,6 +59,13 @@ endsnippet
 #
 #     • newlines inside an interpolation are ignored;
 #       allow to write the code on several lines to make it more readable
+#
+#     • creating a tabstop for an unpredictable information MAY be suboptimal
+#
+#       For example, here, we don't know in advance the average speed, so we
+#       could be tempted to create a tabstop. But the average speed is not
+#       a fundamental information. It derives from 2 other info.
+#       So, it's best to write an interpolation to compute it.
 
 # snippet wpm "average speed" bm
 # I typed ${1:750} words in ${2:30} minutes; my speed is `!p

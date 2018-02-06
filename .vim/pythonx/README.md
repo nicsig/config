@@ -1,3 +1,5 @@
+# Misc
+
 To  store your  python helper  functions, you  can use  any sub-directory  named
 `pythonx` inside a directory of the runtimepath.
 
@@ -21,18 +23,7 @@ access it, relies on you passing it as an argument.
 
 ---
 
-`snip.cursor` is ONLY accessible in a context expression.
-So, in  the function of a  custom module, don't use  `snip.cursor[0]` to express
-the current line address, unless maybe, if the function is evaluated from a context
-expression. Instead use `vim.current.window.cursor[0])`.
-
-See `:h UltiSnips-context-snippets` and:
-
-    https://github.com/SirVer/ultisnips/issues/835#issuecomment-286365371
-
----
-
-Contrary to a snippet file, where UltiSnips automatically pre-import the modules:
+Contrary to an interpolation, in which UltiSnips automatically pre-import the modules:
 
  - os
  - random
@@ -44,3 +35,20 @@ Contrary to a snippet file, where UltiSnips automatically pre-import the modules
 
 If you need one of them in one of your helper function, import it at the beginning
 of the file.
+
+---
+
+When you need to debug some code and capture the value of a variable, try this:
+
+    vim.command('let g:debug = ' + '"' + str(your_variable) + '"')
+
+`str()` must be invoked to cast `your_variable` into a string.
+Contrary to  Vim's `string()`, if  `your_variable` is already a  string, `str()`
+won't add quotes inside it, which is why, here, you need to concatenate 2 '"'.
+A double invocation won't have any effect:
+
+    str(str(your_variable))
+    ✘
+
+    '"' + str(your_variable) + '"'
+    ✔

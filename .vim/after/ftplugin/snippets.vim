@@ -4,6 +4,8 @@ nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
 
 " Options "{{{1
 
+setl isk+=#
+
 " We want real tabs  in a snippet file, because they have  a special meaning for
 " UltiSnips (“increase the level of indentation of the line“).
 setl noet sw=4 ts=4
@@ -23,7 +25,7 @@ augroup END
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   setl cocu< cole< et< fdm< fdt< sw< ts<
+                    \   setl cocu< cole< et< fdm< fdt< isk< sw< ts<
                     \|  exe 'au!  my_snippets * <buffer>'
                     \|  exe 'nunmap <buffer> q'
                     \  "
