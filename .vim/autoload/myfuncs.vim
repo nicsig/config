@@ -710,7 +710,6 @@ endfu
 " long_object_{split|join} {{{1
 
 fu! myfuncs#long_object_split() abort
-
     let view = winsaveview()
     let line = getline('.')
 
@@ -1172,9 +1171,14 @@ endfu
 
 fu! myfuncs#open_gx(in_term) abort "{{{1
     let url = s:open_gx_get_url()
+    if empty(url)
+        return
+    endif
 
     if match(url, '\v^%(https?|ftp|www)') == -1
-        return
+        let ext = fnamemodify(url, ':e')
+        let cmd = get({'pdf': 'zathura'}, ext, 'xdg-open')
+        call system(cmd.' '.url)
     else
         if a:in_term
             " We could pass the shell command we want to execute directly to
@@ -1218,34 +1222,38 @@ fu! s:open_gx_get_url() abort
         let line = getline('.')
         let sha  = matchstr(line, '^  \X*\zs\x\{7}\ze ')
         let name = empty(sha) ? matchstr(line, '^[-x+] \zs[^:]\+\ze:')
-                    \ : getline(search('^- .*:$', 'bn'))[2:-2]
+        \ : getline(search('^- .*:$', 'bn'))[2:-2]
         let uri  = get(get(g:plugs, name, {}), 'uri', '')
         if uri !~ 'github.com'
             return
         endif
         let repo = matchstr(uri, '[^:/]*/'.name)
         let url  = empty(sha) ? 'https://github.com/'.repo
-                    \ : printf('https://github.com/%s/commit/%s', repo, sha)
+        \ : printf('https://github.com/%s/commit/%s', repo, sha)
 
     else
         let url = expand('<cWORD>')
+        if url =~# 'http\|ftp\|www'
+            " Which characters make a URL invalid?
+            " https://stackoverflow.com/a/13500078
 
-        " Which characters make a URL invalid?
-        " https://stackoverflow.com/a/13500078
+            " remove everything before the first `http`, `ftp` or `www`
+            let url = substitute(url, '\v.{-}\ze%(http|ftp|www)', '', '')
 
-        " remove everything before the first `http`, `ftp` or `www`
-        let url = substitute(url, '\v.{-}\ze%(http|ftp|www)', '', '')
+            " remove everything after the first `⟩`, `>`, `)`, `]`, `}`
+            let url = substitute(url, '\v.{-}\zs%(%u27e9|\>|\)|\]|\}).*', '', '')
 
-        " remove everything after the first `⟩`, `>`, `)`, `]`, `}`
-        let url = substitute(url, '\v.{-}\zs%(⟩|\>|\)|\]|\}).*', '', '')
-        "                                     │
-        "                                     └─ don't write it at the end, let it
-        "                                        here at the beginning (it could
-        "                                        break otherwise; not sure why)
+            " remove everything after the last `"`
+            let url = substitute(url, '\v".*', '', '')
 
-        " remove everything after the last `"`
-        let url = substitute(url, '\v".*', '', '')
-
+        elseif url =~# '\[.\{-}\](.\{-})'
+            " [text](path_to_local_file)
+            let url = matchstr(url, '\[.\{-}\](\zs.\{-}\ze)')
+            let url = substitute(url, '^\s*\.', expand('%:p:h'), '')
+        else
+            " garbage
+            let url = ''
+        endif
     endif
     return url
 endfu

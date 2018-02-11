@@ -70,7 +70,7 @@ call plug#begin('~/.vim/plugged')
 
 " TO_STUDY:
 
-Plug 'tmux-plugins/vim-tmux-focus-events'
+Plug 'tmux-plugins/vim-focus-events', {'frozen': 1}
 Plug 'lacygoill/vim-graph'
 
 Plug 'tpope/vim-abolish', { 'frozen': 1 }
@@ -2507,7 +2507,7 @@ call s:find_file('ew', 'dr')
 
 " f                             fuzzy search {{{4
 
-" Mnemonics:
+" Mnemonic:
 " SPC fl  = l for :ls (listing)
 " SPC fr  = most Recently used (files and buffers)
 " SPC fgc = Git Changed files
@@ -2721,9 +2721,9 @@ xno  <silent>  g<c-l>  :Cloc<cr>
 
 " g c-v       select last edited text {{{4
 
-"                 ┌─ Visually select
-" mnemonics:    c-v
-"               └─ the Changed text
+"                ┌─ Visually select
+" Mnemonic:    c-v
+"              └─ the Changed text
 nno  g<c-v>  `[v`]
 
 " g SPC       break line {{{4
@@ -5552,15 +5552,14 @@ endfu
 " in particular to improve our options
 "
 " 31 -
-" I think there's a concept of plugin I didn't know: compiler plugin.
-" It probably allows the user to configure 'errorformat' on a compiler basis,
-" and not a filetype basis.
-" It means that depending on the program you use in 'makeprg', the
-" 'errorformat' will be adjusted accordingly.
-" See the readme of the `makejob` plugin for more info.
+" Talk about compiler plugins.
 "
-" Also, read this:
-" https://www.reddit.com/r/vim/comments/6rpzg8/newbie_vim_user_need_help_setting_up_ale/dl72sav/
+" It allows  the user to configure  'errorformat' and 'mp' on  a compiler basis,
+" and not a filetype basis. It means that  depending on the compiler you set via
+" `:compiler`, 'mp' and 'efm' will be set automatically.
+"
+" To_finish:
+" ~/Desktop/compiler.md
 "
 " 32 -
 " our abbreviations are slow in big markdown buffers, probably because of folding
@@ -5615,12 +5614,12 @@ endfu
 " Write this in a file:
 "
 "         digraph {
-"           start -> adsuck;
-"           adsuck -> block;
-"           block -> noop[label="yes"];
-"           block -> unbound[label="no"];
-"           noop -> serve_noop[label="yes"];
-"           noop -> serve_empty[label="no"];
+"             start -> adsuck;
+"             adsuck -> block;
+"             block -> noop[label="yes"];
+"             block -> unbound[label="no"];
+"             noop -> serve_noop[label="yes"];
+"             noop -> serve_empty[label="no"];
 "         }
 "
 " Visually select it, and type:
@@ -6491,18 +6490,74 @@ tno  <s-tab>  <left>
 " https://github.com/neovim/neovim/issues/7063
 "
 " 102 -
-" We've lost the blinking after a search.
-" The issue comes from a patch between `v8.0.1445` and `v.8.0.1464`.
-" Also:
-"
-" M-u u/l/c suffer from a delay of the redrawing of the screen,
-" but only in normal mode.
-"
-" Probably_because_of:
-" https://github.com/vim/vim/issues/2612
+" https://github.com/roxma/vim-tmux-clipboard
 "
 " 103 -
-" https://github.com/roxma/vim-tmux-clipboard
+" :h quickref
+"
+" 104 -
+" Play with:
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1364
+"
+"         win_screenpos()
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1395
+"
+"         $VIMRUNTIME/colors/tools/check_colors.vim
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1406
+"
+"         changedtick in qfl
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1445
+"
+"         CmdlineChanged
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1459
+"
+"         DirChanged
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1489
+"
+"         Make getcwd(-1) return the global directory.
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1493
+"
+"         Add a "user_data" entry to the completion item.
+"
+" https://github.com/vim/vim/releases/tag/v8.0.1494
+"
+"         TextChangedP
+
+
+
+augroup quick_and_dirty_settings
+    au!
+    au BufReadPost * call s:quick_and_dirty_settings()
+augroup END
+
+fu! s:quick_and_dirty_settings() abort
+    if getline(1) !=# 'QnD'
+        return
+    endif
+
+    call cursor(1,1)
+    let end = search('^END_QnD$')
+    if !end
+        norm! g`.
+    endif
+
+    let settings = getline(2, end - 1)
+    let b:quick_and_dirty_settings = tempname()
+    call writefile(settings, b:quick_and_dirty_settings)
+    augroup apply_quick_and_dirty_settings
+        au! * <buffer>
+        au BufWinEnter <buffer> exe 'so '.b:quick_and_dirty_settings
+    augroup END
+
+    norm! g`.
+endfu
 
 
 
@@ -6536,15 +6591,6 @@ fu! s:painful_chars(char) abort
     call timer_start(0, {-> feedkeys("\<bs>", 'in')})
     return ''
 endfu
-
-
-
-
-
-augroup ultisnips_assimil
-    au!
-    au BufReadPost $HOME/Desktop/ultisnips.txt set ft=help | norm coH
-augroup END
 
 
 

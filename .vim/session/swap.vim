@@ -34,11 +34,11 @@ setlocal fen
 normal! zo
 65
 normal! zo
-let s:l = 3 - ((2 * winheight(0) + 14) / 29)
+let s:l = 13 - ((12 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
+13
 normal! 053|
 wincmd w
 argglobal
@@ -65,7 +65,7 @@ if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOcFIsW
+set winheight=1 winwidth=20 shortmess=filnxtToOAacFIsW
 set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
