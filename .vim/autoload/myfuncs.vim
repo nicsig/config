@@ -1074,7 +1074,7 @@ fu! s:is_right_aligned(line1, line2) abort
     let first_non_empty_line = search('\S', 'cnW', a:line2)
     let length               = strlen(getline(first_non_empty_line))
     for line in getline(a:line1, a:line2)
-        if strlen(line) != length && line !~# '^\s*$'
+        if strlen(line) !=# length && line !~# '^\s*$'
             return 0
         endif
     endfor
@@ -1869,7 +1869,7 @@ fu! myfuncs#tab_toc() abort "{{{1
     let toc = []
     for l:lnum in range(1, line('$'))
         let col = match(getline(l:lnum), patterns[&ft])
-        if col != -1 && synIDattr(synID(l:lnum, col, 0), 'name') =~? syntaxes[&ft]
+        if col !=# -1 && synIDattr(synID(l:lnum, col, 0), 'name') =~? syntaxes[&ft]
             let text = substitute(getline(l:lnum), '\s\+', ' ', 'g')
             call add(toc, {'bufnr': bufnr('%'), 'lnum': l:lnum, 'text': text})
         endif
@@ -2123,7 +2123,7 @@ endfu
 fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     let flags  = {
     \              'min_length' : matchstr(a:1, '-min_length\s\+\zs\d\+'),
-    \              'weighted'   : stridx(a:1, '-weighted') != -1,
+    \              'weighted'   : stridx(a:1, '-weighted') !=# -1,
     \            }
 
     let view       = winsaveview()

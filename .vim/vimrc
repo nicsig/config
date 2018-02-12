@@ -2868,7 +2868,7 @@ nno  <silent>  <plug>(my_gqq)  :<c-u>call <sid>gqq()<cr>
 
 fu! s:gqq() abort
     let was_commented = !empty(&l:cms)
-    \                   ?    stridx(getline('.'), split(&l:cms, '%s')[0]) != -1
+    \                   ?    stridx(getline('.'), split(&l:cms, '%s')[0]) !=# -1
     \                   :    0
     let orig = line('.')
 
@@ -2877,7 +2877,7 @@ fu! s:gqq() abort
 
     " if the line was commented, and has been split into several new lines (i.e.
     " the current line address has changed)
-    if was_commented && line('.') != orig
+    if was_commented && line('.') !=# orig
         let range = orig+1.','.line('.')
         " then comment the lines between the new lines
         exe range.'CommentToggle'
@@ -2971,7 +2971,7 @@ nno  <silent>  Up  :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
 nno  <silent>  Us  :<c-u>call <sid>try_fugitive_cmd('Gstatus')<cr>
 
 fu! s:try_fugitive_cmd(cmd) abort
-    if exists(':'.a:cmd) != 2
+    if exists(':'.a:cmd) !=# 2
         echo 'Not in a git repo'
         return
     endif
@@ -6506,10 +6506,6 @@ tno  <s-tab>  <left>
 "    • TextChangedP
 "    • changedtick in qfl
 "    • win_screenpos()
-"
-" 105 -
-" ==#  →  ==
-" !=#  →  !=
 
 
 
@@ -6691,7 +6687,7 @@ fu! s:profile_plugin(...) abort
     " eliminate the need of providing the guard
     " we should unlet it automatically
     " study vim-scriptease
-    if a:0 != 2
+    if a:0 !=# 2
         return 'echoerr "Provide the names of the plugin, and of its guard"'
     endif
 
@@ -6891,7 +6887,7 @@ augroup END
 "     elseif n >= 20
 "         return g:tens[n/10].' '.Read_number(n%10)
 "     else
-"         return (n != 0 ? g:nums[n] : '')
+"         return (n !=# 0 ? g:nums[n] : '')
 "     endif
 " endfu
 
@@ -6907,7 +6903,7 @@ augroup END
 " fu! s:diagram_complete() abort
 "     let previous_line = getline(line('.')-1)
 "     let new_line      = substitute(previous_line, '\v%(└|┌).*', '', '')
-"     if stridx(previous_line, '┌') != -1
+"     if stridx(previous_line, '┌') !=# -1
 "         let new_line .= '│'
 "     endif
 "     let new_line = substitute(new_line, '[^└┌│'.split(&l:cms, '%s')[0].']', ' ', 'g')
