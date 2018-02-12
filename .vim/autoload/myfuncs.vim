@@ -57,7 +57,7 @@ fu! myfuncs#block_select_box() abort "{{{1
         norm! bhj
         " if that's the case, we've found the upper-left corner of the box
         " stop the loop
-        if getline('.')[col('.') - 1] ==# '|'
+        if getline('.')[col('.') - 1] is# '|'
             norm! k
             break
         else
@@ -81,7 +81,7 @@ fu! myfuncs#block_select_box() abort "{{{1
     " select the left border of the box
     while guard < 30
         norm! j
-        if getline('.')[col('.') - 1] !=# '|'
+        if getline('.')[col('.') - 1] isnot# '|'
             norm! k
             break
         endif
@@ -191,7 +191,7 @@ fu! myfuncs#box_create() abort
     let i       = 0
     for char in split(getline('.'), '\zs')
         let i += 1
-        if char ==# '|'
+        if char is# '|'
             let col_pos += [i]
         endif
     endfor
@@ -222,7 +222,7 @@ endfu
 fu! s:box_create_border(where, col_pos) abort
     let col_pos = a:col_pos
 
-    if a:where ==? 'top'
+    if a:where is# 'top'
         " duplicate first line in the box
         norm! '{+yyP
         " replace all characters with `─`
@@ -238,7 +238,7 @@ fu! s:box_create_border(where, col_pos) abort
 
     " draw the '┬' or '┴' characters:
     for pos in col_pos[1:-2]
-        exe 'norm! '.pos.'|r'.(a:where ==? 'top' ? "\u252c" : "\u2534")
+        exe 'norm! '.pos.'|r'.(a:where is# 'top' ? "\u252c" : "\u2534")
     endfor
 endfu
 
@@ -470,7 +470,7 @@ fu! s:current_word_delete_old_highlight() abort
 endfu
 
 fu! myfuncs#dump_wiki(url) abort "{{{1
-    if a:url[:3] !=# 'http'
+    if a:url[:3] isnot# 'http'
         return
     endif
 
@@ -559,7 +559,7 @@ endfu
 fu! s:gtfo_init() abort
     let s:istmux       = !empty($TMUX)
     " terminal Vim running within a GUI environment
-    let s:is_X_running = !empty($DISPLAY) && $TERM !=# 'linux'
+    let s:is_X_running = !empty($DISPLAY) && $TERM isnot# 'linux'
     let s:launch_term  = 'urxvt -cd'
 endfu
 
@@ -802,7 +802,7 @@ endfu
 "                 set inclusive
 "                 let &formatprg = get(b:, 'formatprg', &formatprg)
 "
-"                 if a:type ==# 'vis'
+"                 if a:type is# 'vis'
 "                     norm! '<V'>gq
 "                 else
 "                     norm! '[gq']
@@ -828,13 +828,13 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
         set cb-=unnamed cb-=unnamedplus
         set selection=inclusive
 
-        if a:type ==# 'char'
+        if a:type is# 'char'
             norm! `[v`]y
-        elseif a:type ==# 'line'
+        elseif a:type is# 'line'
             norm! '[V']y
-        elseif a:type ==# 'block'
+        elseif a:type is# 'block'
             sil exe "norm! `[\<c-v>`]y"
-        elseif a:type ==# 'vis'
+        elseif a:type is# 'vis'
             norm! gvy
         endif
 
@@ -856,7 +856,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
         " let &l:sp = '| tee'
         "}}}
 
-        if a:type ==# 'Ex'
+        if a:type is# 'Ex'
             let [ pat, is_loclist ] = [ a:1, a:2 ]
 
             " Why `:lgetexpr` instead of `:lgrep!`?{{{
@@ -950,13 +950,13 @@ fu! myfuncs#op_incremental_yank(type) abort "{{{2
         set cb-=unnamed cb-=unnamedplus
         set selection=inclusive
 
-        if a:type ==# 'char'
+        if a:type is# 'char'
             norm! `[v`]y
-        elseif a:type ==# 'line'
+        elseif a:type is# 'line'
             norm! '[V']y
-        elseif a:type ==# 'block'
+        elseif a:type is# 'block'
             exe "norm! `[\<c-v>`]y"
-        elseif a:type ==# 'vis'
+        elseif a:type is# 'vis'
             norm! gvy
         else
             return
@@ -965,7 +965,7 @@ fu! myfuncs#op_incremental_yank(type) abort "{{{2
         " Append (flag 'a') what we just copied (unnamed register @")
         " inside register 'z',
         " and set its type to be the same as the one of the unnamed register
-        call setreg('z', @".(a:type ==# 'char' ? ' ' : ''), 'a'.getregtype('"'))
+        call setreg('z', @".(a:type is# 'char' ? ' ' : ''), 'a'.getregtype('"'))
 
         " Copy the  'z' register  inside the  unnamed register,  so that  we can
         " paste it directly with p instead of "zp
@@ -1023,13 +1023,13 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " case happens. We treat it as linewise motion/text-object, to keep the
         " indentation.
 
-        if a:type ==# 'line' || replace_current_line
+        if a:type is# 'line' || replace_current_line
             exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
 
-        elseif a:type ==# 'block'
+        elseif a:type is# 'block'
             exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
 
-        elseif a:type ==# 'char'
+        elseif a:type is# 'char'
             " DWIM:
             "       DWIM = Do What I Mean.
             "
@@ -1040,7 +1040,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
             "       whitespace of the first line, and the ending whitespace of the
             "       last.
 
-            if replace_reg_type ==# 'V'
+            if replace_reg_type is# 'V'
                 call setreg(s:replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
             endif
 
@@ -1058,7 +1058,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " We restore it.
         "
         " We do the same for the replacement register, because we may have trimmed it
-        " in the process (type ==# 'char' && replace_reg_type ==# 'V').
+        " in the process (type is# 'char' && replace_reg_type is# 'V').
         call lg#reg#restore(['"', s:replace_reg_name])
     endtry
 endfu
@@ -1082,7 +1082,7 @@ fu! s:is_right_aligned(line1, line2) abort
 endfu
 
 fu! myfuncs#op_toggle_alignment(type) abort
-    if a:type ==# 'vis'
+    if a:type is# 'vis'
         let [mark1, mark2] = ["'<", "'>"]
     else
         let [mark1, mark2] = ["'[", "']"]
@@ -1107,11 +1107,11 @@ fu! myfuncs#align_with_end(offset) abort
 endfu
 
 fu! myfuncs#op_trim_ws(type) abort "{{{2
-    if &l:binary || &ft ==# 'diff'
+    if &l:binary || &ft is# 'diff'
         return
     endif
 
-    if a:type ==# 'vis'
+    if a:type is# 'vis'
         sil! exe line("'<").','.line("'>").'TW'
     else
         sil! exe line("'[").','.line("']").'TW'
@@ -1140,7 +1140,7 @@ fu! myfuncs#op_yank_matches(type) abort
     let @z = ''
 
     let mods  = 'keepj keepp'
-    let range = (a:type ==# 'char' || a:type ==# 'line')
+    let range = (a:type is# 'char' || a:type is# 'line')
     \?               line("'[").','.line("']")
     \:               line("'<").','.line("'>")
 
@@ -1218,7 +1218,7 @@ endfu
 
 fu! s:open_gx_get_url() abort
     " https://github.com/junegunn/vim-plug/wiki/extra
-    if &ft ==# 'vim-plug'
+    if &ft is# 'vim-plug'
         let line = getline('.')
         let sha  = matchstr(line, '^  \X*\zs\x\{7}\ze ')
         let name = empty(sha) ? matchstr(line, '^[-x+] \zs[^:]\+\ze:')
@@ -1481,7 +1481,7 @@ fu! s:get_matches(pattern)
 endfu
 
 fu! myfuncs#populate_list(list, cmd) abort "{{{1
-    if a:list == 'quickfix'
+    if a:list is# 'quickfix'
         " The output of the shell command passed to `:PQ` must be recognized by Vim.
         " It must match a value in 'grepformat'.
         " Example:
@@ -1491,7 +1491,7 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
 
         call setqflist([], 'a', { 'title': a:cmd })
 
-    elseif a:list == 'arglist'
+    elseif a:list is# 'arglist'
         exe 'tab args '.join(map(filter(systemlist(a:cmd),
         \                        { i,v -> filereadable(v) }),
         \                    { i,v -> fnameescape(v) }))
@@ -1519,7 +1519,7 @@ fu! myfuncs#remove_duplicate_lines(line1, line2, bang) abort "{{{1
         " The goal of each iteration is to compare line `p` to a previous line.
         let q = a:line1
         while q < p
-            if getline(p) ==# getline(q)
+            if getline(p) is# getline(q)
                 exe p.'d_' | break
             endif
             let q += 1
@@ -1680,7 +1680,7 @@ fu! myfuncs#search_todo() abort "{{{1
     call setloclist(0, map(getloclist(0), { i,v -> s:search_todo_text(v) }), 'r')
     call setloclist(0, [], 'a', { 'title': 'FIXME & TODO' })
 
-    if &bt !=# 'quickfix'
+    if &l:bt isnot# 'quickfix'
         return
     endif
 
@@ -1898,14 +1898,14 @@ fu! myfuncs#tab_toc() abort "{{{1
     call setloclist(0, toc)
     call setloclist(0, [], 'a', { 'title': 'TOC' })
 
-    let is_help_file = &bt ==# 'help'
+    let is_help_file = &bt is# 'help'
 
     " The width of the current window is going to be reduced by the TOC window.
     " Long lines may be wrapped. I don't like wrapped lines.
     setl nowrap
     doautocmd <nomodeline> QuickFixCmdPost lgrep
 
-    if &bt !=# 'quickfix'
+    if &l:bt isnot# 'quickfix'
         return
     endif
 
@@ -2168,7 +2168,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         let abbrev_length = '(
         \                        strchars(v:key) == 4
         \                      ?     2
-        \                      : v:key[-1:-1] ==# "s" && index(keys(freq), v:key[:strlen(v:key)-1]) >= 0
+        \                      : v:key[-1:-1] is# "s" && index(keys(freq), v:key[:strlen(v:key)-1]) >= 0
         \                      ?     4
         \                      :     3
         \                    )'
@@ -2241,7 +2241,7 @@ fu! myfuncs#xor_lines(bang) abort range "{{{1
     " Build a pattern matching the characters which are different
     let pattern = ''
     for i in range(min_chars)
-        if chars1[i] !=# chars2[i]
+        if chars1[i] isnot# chars2[i]
 
             " FIXME: for some reason, we need to write a dot at the end of each
             " branch of the pattern, so we add 'v.' at the end instead of just 'v'.

@@ -140,7 +140,7 @@ let g:fzf_files_options =
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/limelight.vim', { 'frozen': 1 }
-Plug 'djmoch/vim-makejob'
+Plug 'djmoch/vim-makejob', {'frozen': 1}
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
@@ -964,7 +964,7 @@ set cpo+=M
 
 " cwd {{{2
 
-if has('vim_starting') && $PWD ==# $HOME
+if has('vim_starting') && $PWD is# $HOME
     cd $HOME/.vim
 endif
 
@@ -1211,7 +1211,7 @@ set softtabstop=-1
 "
 " Indeed, most of the time, we'll use `bash`, and some bash constructs don't exist
 " in Bourne shell, like commands substitutions ($(…)). These bashisms are
-" considered as errors if   b:current_syntax == 'sh'
+" considered as errors if   b:current_syntax is# 'sh'
 "
 " For more info, read `:h sh.vim`.
 let g:is_bash = 1
@@ -2255,14 +2255,14 @@ ino  <c-x><c-a>  <c-a>
 ino  <c-x><c-k>  <c-r>=<sid>set_dict()<cr><c-x><c-k>
 
 fu! s:set_dict() abort
-    exe 'setl dict='.(&l:spelllang ==# 'en' ? '/usr/share/dict/words' : '/usr/share/dict/french')
+    exe 'setl dict='.(&l:spelllang is# 'en' ? '/usr/share/dict/words' : '/usr/share/dict/french')
     return ''
 endfu
 
 " Previously, we used this code:
 "
 "     ino <c-x><c-k> <c-o>:exe 'setl dict=' .
-"                       \ (&l:spelllang ==# 'en' ?
+"                       \ (&l:spelllang is# 'en' ?
 "                       \ '/usr/share/dict/words' :
 "                       \ '/usr/share/dict/french')<cr><c-x><c-k>
 "
@@ -2473,7 +2473,7 @@ fu! s:find_file(lhs, cmd) abort
     " complete the path with values from &path.
     " For the moment,  we complete the path  with `**`, but we  should tweak the
     " code so that it tries to complete with all paths in &path.
-    if a:cmd ==# 'dr'
+    if a:cmd is# 'dr'
         exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' **/*'
     else
         exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' *'
@@ -2686,14 +2686,14 @@ fu! s:cd_to_project_root(locally) abort
     while guard <= 100
         let dir = fnamemodify(dir, ':h')
         if index(known_dirs, fnamemodify(dir, ':t')) >= 0
-            let dir = fnamemodify(dir, ':h:t') ==# 'after'
+            let dir = fnamemodify(dir, ':h:t') is# 'after'
             \?            fnamemodify(dir, ':h:h')
             \:            fnamemodify(dir, ':h')
             break
         endif
         let guard += 1
     endwhile
-    if dir !=# '/' && isdirectory(dir)
+    if dir isnot# '/' && isdirectory(dir)
         exe (a:locally ? 'l' : '').'cd '.dir
     endif
     pwd
@@ -2739,7 +2739,7 @@ fu! s:break_line() abort
         " trim ending whitespace on both lines
         keepj keepp .-,.s/\s\+$//e
 
-        if !empty(bufname('%')) && fnamemodify(bufname('%'), ':p') !=# $MYVIMRC
+        if !empty(bufname('%')) && fnamemodify(bufname('%'), ':p') isnot# $MYVIMRC
             sil update
         endif
         sil call repeat#set("\<plug>(my_break_line)")
@@ -2809,7 +2809,7 @@ fu! s:my_gq(type) abort
     try
         " 'ai' needs to be set so that `gw` can properly indent the formatted lines.
         setl ai
-        let [ lnum1, lnum2 ] = a:type ==# 'vis'
+        let [ lnum1, lnum2 ] = a:type is# 'vis'
         \?                         [ line("'<"), line("'>") ]
         \:                         [ line("'["), line("']") ]
         let has_a_list_header = getline(lnum1) =~# &l:flp
@@ -2824,7 +2824,7 @@ fu! s:my_gq(type) abort
         "     :h
         "     coH
         "     :norm! gqq
-        if &ft ==# 'help' && &l:ro
+        if &ft is# 'help' && &l:ro
             setl noro
         endif
     endtry
@@ -2977,7 +2977,7 @@ fu! s:try_fugitive_cmd(cmd) abort
     endif
 
     exe a:cmd
-    if a:cmd ==# 'Gstatus'
+    if a:cmd is# 'Gstatus'
         sil! 1;/^# Changes/
     endif
 endfu
@@ -3013,7 +3013,7 @@ xno  <silent>  zf  :<c-u>call <sid>my_zf('vis')<cr>
 fu! s:my_zf(type) abort
     let cml = !empty(&l:cms) ? split(&l:cms, '%')[0] : ''
     let pat = '^\s*'.cml.'.*\zs'.cml.'\ze\s*{'.'{{'
-    if a:type ==# 'vis'
+    if a:type is# 'vis'
         norm! '<V'>zf
         sil! exe 'keepj keepp ''<s/'.pat.'//'
     else
@@ -3535,7 +3535,7 @@ nno  <silent>  0  g0
 " To draw freely, sometimes we need to enable 'virtualedit'.
 " And then, when we hit `$`, the cursor moves to the very end of the screen.
 " We never want that. We want the cursor on the last non whitespace.
-nno  <expr>  $  &virtualedit ==# 'block' ? 'g$' : 'g_'
+nno  <expr>  $  &virtualedit is# 'block' ? 'g$' : 'g_'
 
 " FIXME:
 " Consider the following buffer:
@@ -3759,7 +3759,7 @@ fu! s:textobj_func(inside) abort
         exe 'norm! gv$'.(a:inside ? 'koj' : '')
         exe 'norm! gv$'.(a:inside ? 'koj' : '')
         " we want a linewise selection no matter the original visual mode
-        exe (mode() !=# 'V' ? 'norm! V' : '')
+        exe (mode() isnot# 'V' ? 'norm! V' : '')
     endif
 endfu
 
@@ -3944,8 +3944,8 @@ xno  <expr><silent>  y  'y'.timer_start(0, {-> execute('let @v=@"')})[-1]
 
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
-xno  <expr>  h  mode() ==# '<c-v>' && virtcol('.') == 1            ? '' : 'h'
-xno  <expr>  l  mode() ==# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
+xno  <expr>  h  mode() is# '<c-v>' && virtcol('.') == 1            ? '' : 'h'
+xno  <expr>  l  mode() is# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
 
 " ip          disable on empty line {{{3
 
@@ -4359,7 +4359,7 @@ fu! s:plugins_update() abort
 "}}}
 
     " wipe the Vim buffer containing the snapshot
-    if getline(1) ==# '" Generated by vim-plug'
+    if getline(1) is# '" Generated by vim-plug'
         bw
     endif
     PlugUpgrade
@@ -4674,12 +4674,12 @@ augroup END
 "     " so that our autocmd `didyoumean` has a chance of fixing it, by
 "     " suggesting alternatives.
 "
-"     if a:buffer[-1:-1] ==# '.'
+"     if a:buffer[-1:-1] is# '.'
 "         return
 "     endif
 "
 "     " If the buffer is created inside /tmp and has no extension
-"     if strpart(fnamemodify(a:buffer, ':p:h'),0,4) ==# '/tmp' && empty(fnamemodify(a:buffer, ':e'))
+"     if strpart(fnamemodify(a:buffer, ':p:h'),0,4) is# '/tmp' && empty(fnamemodify(a:buffer, ':e'))
 "
 "         " make sure it will be wiped when it's hidden
 "         " which will happen after the next command
@@ -4815,7 +4815,7 @@ fu! s:didyoumean() abort
 
     if empty(fname)
       \ || (!empty(glob(fname)) && !isdirectory(fname))
-      \ || (isdirectory(fname) && fname[-1:] == '/')
+      \ || (isdirectory(fname) && fname[-1:] is# '/')
         return
     endif
 
@@ -4830,8 +4830,8 @@ fu! s:didyoumean() abort
 
     " Filter out the swapfile, if there's one.
     let swapfile = fnamemodify(execute('swapname')[1:], ':p')
-    if swapfile !=? 'no swap file'
-        call filter(matching_entries, { i,v -> fnamemodify(v, ':p') != swapfile })
+    if swapfile isnot? 'no swap file'
+        call filter(matching_entries, { i,v -> fnamemodify(v, ':p') isnot# swapfile })
     endif
 
     " We don't need to be suggested to load the current buffer.
@@ -4846,7 +4846,7 @@ fu! s:didyoumean() abort
     " its name before using it for filtering the matching entries.
 
     let current_entry = substitute(expand('%'), '/$', '', '')
-    call filter(matching_entries, { i,v -> v !=# current_entry })
+    call filter(matching_entries, { i,v -> v isnot# current_entry })
 
     if empty(matching_entries)
         return
@@ -5141,7 +5141,7 @@ augroup my_terminal
     if has('nvim')
         au TermOpen * call s:setup_neovim_terminal()
     else
-        au BufWinEnter * if &buftype ==# 'terminal'
+        au BufWinEnter * if &bt is# 'terminal'
                       \|     call s:setup_vim_terminal()
                       \| endif
     endif
@@ -5770,14 +5770,14 @@ endfu
 " 41 -
 " Get rid of `visualmode(), 1` and `visualmode()` in favor of `'vis'`.
 " Also get rid of `index(['v', 'V', "\<c-v>"], a:type) >= 0` inside op functions.
-" Prefer `a:type ==# 'vis'`
+" Prefer `a:type is# 'vis'`
 "
 " Makes code more readable (no: wtf is this `a:0`?!)
 " + allows to call the function from an Ex command:
 "
 "         com! MyCom call OpFunc('Ex', <line1>, <line2>)
 "         fu! OpFunc(type)
-"             if a:type ==# 'Ex'
+"             if a:type is# 'Ex'
 "                 " operate on lines between `a:1` and `a:2`
 "             endif
 "         endfu
@@ -6005,7 +6005,7 @@ endfu
 " https://github.com/chrisbra/vim_faq
 "
 " 63 -
-" no need to check `if &bt  ==# 'quickfix'` before applying conceal abort
+" no need to check `if &bt  is# 'quickfix'` before applying conceal abort
 " and/or try conditional are enough
 " sure?
 "
@@ -6084,7 +6084,7 @@ tno  <s-tab>  <left>
 " We solved the 1st problem in `vim-comment`.
 " For the 2nd one, try this expression:
 "
-"         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  !=#  'Comment'
+"         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  isnot#  'Comment'
 "
 " 71 -
 " Save/restore qfl/ll when we restart Vim?
@@ -6498,37 +6498,20 @@ tno  <s-tab>  <left>
 " 104 -
 " Play with:
 "
-" https://github.com/vim/vim/releases/tag/v8.0.1364
+"    • $VIMRUNTIME/colors/tools/check_colors.vim
+"    • 'user_data' entry in completion item
+"    • CmdlineChanged
+"    • DirChanged
+"    • `getcwd(-1)` return the global directory
+"    • TextChangedP
+"    • changedtick in qfl
+"    • win_screenpos()
 "
-"         win_screenpos()
-"
-" https://github.com/vim/vim/releases/tag/v8.0.1395
-"
-"         $VIMRUNTIME/colors/tools/check_colors.vim
-"
-" https://github.com/vim/vim/releases/tag/v8.0.1406
-"
-"         changedtick in qfl
-"
-" https://github.com/vim/vim/releases/tag/v8.0.1445
-"
-"         CmdlineChanged
-"
-" https://github.com/vim/vim/releases/tag/v8.0.1459
-"
-"         DirChanged
-"
-" https://github.com/vim/vim/releases/tag/v8.0.1489
-"
-"         Make getcwd(-1) return the global directory.
-"
-" https://github.com/vim/vim/releases/tag/v8.0.1493
-"
-"         Add a "user_data" entry to the completion item.
-"
-" https://github.com/vim/vim/releases/tag/v8.0.1494
-"
-"         TextChangedP
+" 105 -
+" &l:bt  →  &bt
+" &filetype  →  &ft
+" ==#  →  ==
+" !=#  →  !=
 
 
 
@@ -6538,7 +6521,7 @@ augroup quick_and_dirty_settings
 augroup END
 
 fu! s:quick_and_dirty_settings() abort
-    if getline(1) !=# 'QnD'
+    if getline(1) isnot# 'QnD'
         return
     endif
 
@@ -6639,7 +6622,7 @@ endfu
 " We need to remove this item from `g:sandwich#default_recipes`:
 "
 "         { 'noremap':     0,
-"         \ 'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
+"         \ 'expr_filter': ['operator#sandwich#kind() is# "replace"'],
 "         \ 'kind':        ['replace', 'textobj'],
 "         \ 'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
 "         \ 'input':       ['t'],
@@ -6691,8 +6674,8 @@ if has('vim_starting')
     \       {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['add'], 'action': ['add'], 'input': ['t']},
     \       {'buns': 'sandwich#magicchar#t#tag()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['T']},
     \       {'buns': 'sandwich#magicchar#t#tagname()', 'listexpr': 1, 'kind': ['replace'], 'action': ['add'], 'input': ['t']},
-    \       {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['delete', 'textobj'], 'expr_filter': ['operator#sandwich#kind() !=# "replace"'], 'synchro': 1, 'linewise': 1, 'input': ['t', 'T']},
-    \       {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['replace', 'query'], 'expr_filter': ['operator#sandwich#kind() ==# "replace"'], 'synchro': 1, 'input': ['T']},
+    \       {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['delete', 'textobj'], 'expr_filter': ['operator#sandwich#kind() isnot# "replace"'], 'synchro': 1, 'linewise': 1, 'input': ['t', 'T']},
+    \       {'external': ["\<Plug>(textobj-sandwich-tag-i)", "\<Plug>(textobj-sandwich-tag-a)"], 'noremap' : 0, 'kind' : ['replace', 'query'], 'expr_filter': ['operator#sandwich#kind() is# "replace"'], 'synchro': 1, 'input': ['T']},
     \       {'buns': ['sandwich#magicchar#f#fname()', '")"'], 'kind': ['add', 'replace'], 'action': ['add'], 'expr': 1, 'input': ['f']},
     \       {'external': ["\<Plug>(textobj-sandwich-function-ip)", "\<Plug>(textobj-sandwich-function-i)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['f']},
     \       {'external': ["\<Plug>(textobj-sandwich-function-ap)", "\<Plug>(textobj-sandwich-function-a)"], 'noremap': 0, 'kind': ['delete', 'replace', 'query'], 'input': ['F']},

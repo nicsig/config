@@ -1,7 +1,7 @@
 " Alternative:{{{
 "
 "     sil verb runtime autoload/lg/motion/main.vim
-"     if v:errmsg ==# 'not found in ''runtimepath'': "autoload/lg/motion/main.vim"'
+"     if v:errmsg is# 'not found in ''runtimepath'': "autoload/lg/motion/main.vim"'
 "         finish
 "     endif
 "}}}
@@ -46,7 +46,7 @@ let s:snr = s:snr()
 fu! s:vertical_jump_rhs(is_fwd) abort
     let mode = mode(1)
 
-    if mode ==# "\<c-v>"
+    if mode is# "\<c-v>"
         let mode = "\<c-v>\<c-v>"
     endif
 
@@ -68,7 +68,7 @@ fu! s:vertical_jump_rhs(is_fwd) abort
 endfu
 
 fu! s:vertical_jump_go(is_fwd, mode) abort
-    if a:mode ==# 'n'
+    if a:mode is# 'n'
         norm! m'
     elseif index(['v', 'V', "\<c-v>"], a:mode) >= 0
         norm! gv
@@ -87,7 +87,7 @@ fu! s:vertical_jump_go(is_fwd, mode) abort
     let &l:fen = fen_save
 
     " open just enough folds to see where we are
-    if a:mode ==# 'n'
+    if a:mode is# 'n'
         norm! zMzv
     elseif index(['v', 'V', "\<c-v>"], a:mode) >= 0
         norm! zv
@@ -373,6 +373,7 @@ call lg#motion#repeatable#make#all({
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': '[l',  'fwd': ']l' },
+\                     { 'bwd': '[q',  'fwd': ']q' },
 \                   ]
 \ })
 
@@ -401,7 +402,6 @@ call lg#motion#repeatable#make#all({
 \                     { 'bwd': '[a'    ,  'fwd': ']a'     },
 \                     { 'bwd': '[b'    ,  'fwd': ']b'     },
 \                     { 'bwd': '[f'    ,  'fwd': ']f'     },
-\                     { 'bwd': '[q'    ,  'fwd': ']q'     },
 \                     { 'bwd': '[t'    ,  'fwd': ']t'     },
 \                   ]
 \ })

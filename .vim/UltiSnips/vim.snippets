@@ -38,7 +38,7 @@ endsnippet
 #                                         └ first character
 
 snippet abr "uppercase abbreviation on command line" bm
-cnorea  <buffer><expr>  ${1:lhs}  getcmdtype() ==# ':' && getcmdline() ==# '$1'
+cnorea  <buffer><expr>  ${1:lhs}  getcmdtype() is# ':' && getcmdline() is# '$1'
 \\`!p snip.rv = ' '*(25 + len(t[1]))`?    '`!p snip.rv = '' if not t[1] else (t[1][0]).upper() + t[1][1:]`'
 \\`!p snip.rv = ' '*(25 + len(t[1]))`:    '`!p snip.rv = t[1]`'
 endsnippet
@@ -118,7 +118,7 @@ endsnippet
 #
 #	  return empty(a:base)
 #	  \?         candidates
-#	  \:         filter(candidates, { i,v -> v[:strlen(a:base)-1] ==? a:base })
+#	  \:         filter(candidates, { i,v -> v[:strlen(a:base)-1] is? a:base })
 #                                                                   │
 #                                                                   └ ignore case
 #
@@ -327,7 +327,7 @@ endsnippet
 # map {{{1
 
 snippet map "prototype mapping" bm
-nno  `!v expand('%:p:h:t') ==# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent>'`  ${1:cd}  :<c-u>call ${2:Func}()<cr>
+nno  `!v expand('%:p:h:t') is# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent>'`  ${1:cd}  :<c-u>call ${2:Func}()<cr>
 endsnippet
 
 # map_ft {{{1
@@ -377,15 +377,15 @@ fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 		set cb-=unnamed cb-=unnamedplus
 		set selection=inclusive
 
-		if a:type ==# 'char'
+		if a:type is# 'char'
 			${4:sil norm! \`[v\`]y}
-		elseif a:type ==# 'line'
+		elseif a:type is# 'line'
 			${5:sil norm! '[V']y}
-		elseif a:type ==# 'block'
+		elseif a:type is# 'block'
 			${6:sil exe "norm! \`[\<c-v>\`]y"}
-		elseif a:type ==# 'vis'
+		elseif a:type is# 'vis'
 			${7:sil norm! gvy}
-		${8:elseif a:type ==# 'Ex'
+		${8:elseif a:type is# 'Ex'
 			${9:sil exe a:1.','.a:2.'y'}}
 		else
 			return

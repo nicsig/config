@@ -1,4 +1,4 @@
-if fnamemodify(expand('%:p'), ':t') ==# 'COMMIT_EDITMSG'
+if fnamemodify(expand('%:p'), ':t') is# 'COMMIT_EDITMSG'
     if empty(getline(1))
         call gitcommit#read_last_message()
     endif

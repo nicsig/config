@@ -55,17 +55,17 @@ fu! s:set_user_hg() abort "{{{2
     "
     "         Error detected while processing function <SNR>18_set_user_hg:
     "         E421: Color name or number not recognized: ctermfg= ctermbg=
-    if attributes.fg == '' || attributes.bg == ''
+    if attributes.fg is# '' || attributes.bg is# ''
         return
     endif
 
     let style1 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? '' : 'reverse')
-    if style1 == '' | return | endif
+    if style1 is# '' | return | endif
 
     exe printf(cmd1, style1, attributes.fg, attributes.bg)
 
     let style2 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? 'reverse' : '')
-    if style2 == '' | return | endif
+    if style2 is# '' | return | endif
 
     exe printf(cmd2, style2, todo_fg, attributes.bg)
 endfu
@@ -90,7 +90,7 @@ fu! s:set_tabline_hg() abort "{{{2
     " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
     " Tabline doesn't have any value in gui. In this case, executing the command
     " will fail.
-    if attributes.fg == ''
+    if attributes.fg is# ''
         return
     endif
     exe printf(cmd, attributes.fg)
