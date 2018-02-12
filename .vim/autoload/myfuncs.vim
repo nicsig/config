@@ -70,7 +70,7 @@ fu! myfuncs#block_select_box() abort "{{{1
         let guard += 1
     endwhile
 
-    if guard == 99
+    if guard ==# 99
         call winrestview(view)
         return
     endif
@@ -326,7 +326,7 @@ endfu
 fu! s:search_superfluous_myfuncs() abort
     let line      = getline('.')
     let func_name = matchstr(line, 'myfuncs#\k\+')
-    if stridx(s:my_vimrc, func_name) == -1
+    if stridx(s:my_vimrc, func_name) ==# -1
         call writefile([func_name], s:tempfile, 'a')
     endif
 endfu
@@ -624,7 +624,7 @@ endfu
 fu! myfuncs#join_blocks(first_reverse) abort "{{{1
     let [ line1, line2 ] = [ line("'<"), line("'>") ]
 
-    if (line2 - line1 + 1) % 2 == 1
+    if (line2 - line1 + 1) % 2 ==# 1
         echohl ErrorMsg
         echo ' Total number of lines must be even'
         echohl None
@@ -693,7 +693,7 @@ endfu
 
 fu! myfuncs#long_listing_split() abort "{{{1
     let line = getline('.')
-    if stridx(line, ',') == -1
+    if stridx(line, ',') ==# -1
         return
     endif
 
@@ -715,7 +715,7 @@ fu! myfuncs#long_object_split() abort
 
     " If the line doesn't contain a list ([]), a dictionary ({}), don't do anything.
 
-    if match(line, '\[.*\]\|{.*}') == -1
+    if match(line, '\[.*\]\|{.*}') ==# -1
         return
     endif
 
@@ -1005,9 +1005,9 @@ fu! myfuncs#op_replace_without_yank(type) abort
 
         " build condition to check if we're replacing the current line
 
-        let replace_current_line =     line("'[") == line("']")
-        \                          &&  col("'[") == 1
-        \                          && (col("']") == col('$')-1 || col('$') == 1)
+        let replace_current_line =     line("'[") ==# line("']")
+        \                          &&  col("'[") ==# 1
+        \                          && (col("']") ==# col('$')-1 || col('$') ==# 1)
 
         " If we copy a line containing leading whitespace, and try to replace
         " another line like this: `0dr$`
@@ -1175,7 +1175,7 @@ fu! myfuncs#open_gx(in_term) abort "{{{1
         return
     endif
 
-    if match(url, '\v^%(https?|ftp|www)') == -1
+    if match(url, '\v^%(https?|ftp|www)') ==# -1
         let ext = fnamemodify(url, ':e')
         let cmd = get({'pdf': 'zathura'}, ext, 'xdg-open')
         call system(cmd.' '.url)
@@ -1567,7 +1567,7 @@ endfu
 
 " fu! myfuncs#repeat_dot(cnt)
 "     try
-"         if g:repeat_tick == b:changedtick
+"         if g:repeat_tick ==# b:changedtick
 "             let c = g:repeat_count
 "             let cnt = (a:cnt ? a:cnt : (c ? c : ''))
 "             " No n flag, otherwise "\<plug>(...)" won't be interpreted as the
@@ -1596,7 +1596,7 @@ endfu
 " endfu
 
 " fu! myfuncs#repeat_wrap(command)
-"     let sync_test = (g:repeat_tick == b:changedtick)
+"     let sync_test = (g:repeat_tick ==# b:changedtick)
 "     try
 "         exe 'norm! ' . a:command . 'zv'
 "     catch /.*/
@@ -1611,8 +1611,8 @@ endfu
 " let g:repeat_tick = -1
 " augroup repeatPlugin
 "     autocmd!
-"     autocmd BufLeave,BufWritePre,BufReadPre * let g:repeat_tick = (g:repeat_tick == b:changedtick || g:repeat_tick == 0) ? 0 : -1
-"     autocmd BufEnter,BufWritePost * if g:repeat_tick == 0|let g:repeat_tick = b:changedtick|endif
+"     autocmd BufLeave,BufWritePre,BufReadPre * let g:repeat_tick = (g:repeat_tick ==# b:changedtick || g:repeat_tick ==# 0) ? 0 : -1
+"     autocmd BufEnter,BufWritePost * if g:repeat_tick ==# 0|let g:repeat_tick = b:changedtick|endif
 " augroup END
 
 " nmap  .      <plug>(myfuncs_repeat_dot)
@@ -1680,7 +1680,7 @@ fu! myfuncs#search_todo() abort "{{{1
     call setloclist(0, map(getloclist(0), { i,v -> s:search_todo_text(v) }), 'r')
     call setloclist(0, [], 'a', { 'title': 'FIXME & TODO' })
 
-    if &l:bt isnot# 'quickfix'
+    if &bt isnot# 'quickfix'
         return
     endif
 
@@ -1830,7 +1830,7 @@ endfu
 " fu! s:tmux_navigate(dir) abort
 "     let x = winnr()
 "     call s:vim_navigate(a:dir)
-"     if winnr() == x
+"     if winnr() ==# x
 "         "                                       ┌ path to tmux socket
 "         "                    ┌──────────────────┤
 "         let cmd = 'tmux -S '.split($TMUX, ',')[0].' '.
@@ -1850,7 +1850,7 @@ endfu
 " endfu
 
 fu! myfuncs#tab_toc() abort "{{{1
-    if index(['help', 'man', 'markdown'], &ft) == -1
+    if index(['help', 'man', 'markdown'], &ft) ==# -1
         return
     endif
 
@@ -1905,7 +1905,7 @@ fu! myfuncs#tab_toc() abort "{{{1
     setl nowrap
     doautocmd <nomodeline> QuickFixCmdPost lgrep
 
-    if &l:bt isnot# 'quickfix'
+    if &bt isnot# 'quickfix'
         return
     endif
 
@@ -2011,7 +2011,7 @@ fu! s:trans_grab_visual() abort
     let [ c1, c2 ] = [ col("'<"),  col("'>)") ]
 
     " single line visual selection
-    if l1 == l2
+    if l1 ==# l2
         let text = matchstr(getline(l1), '\v%'.c1.'c.*%'.c2.'c.?\ze.*$')
     else
         " multi lines
@@ -2026,7 +2026,7 @@ endfu
 " pyrolysis
 
 fu! s:trans_output(job,exit_status) abort
-    if a:exit_status == -1
+    if a:exit_status ==# -1
         return
     endif
     " FIXME:
@@ -2166,7 +2166,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         "   • otherwise, by default, an abbreviation should be 3 characters long
 
         let abbrev_length = '(
-        \                        strchars(v:key) == 4
+        \                        strchars(v:key) ==# 4
         \                      ?     2
         \                      : v:key[-1:-1] is# "s" && index(keys(freq), v:key[:strlen(v:key)-1]) >= 0
         \                      ?     4
@@ -2229,7 +2229,7 @@ fu! myfuncs#xor_lines(bang) abort range "{{{1
     "                chars1/chars2 = lists of characters
     "
     " If a:firstline = a:lastline, it means :XorLines was called without a range
-    if a:firstline == a:lastline
+    if a:firstline ==# a:lastline
         let [ln1, ln2] = [line('.'), line('.')+1]
     else
         let [ln1, ln2] = [a:firstline, a:lastline]

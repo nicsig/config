@@ -2452,7 +2452,7 @@ nno  <silent>  <space>an  :<c-u>arglocal %<cr>
 nno  <silent>  <space>ec  :<c-u>call <sid>vimrc_edit()<cr>
 
 fu! s:vimrc_edit() abort
-    if tabpagenr('$') == 1 && winnr('$') == 1 && line2byte(line('$')+1) <= 2
+    if tabpagenr('$') ==# 1 && winnr('$') ==# 1 && line2byte(line('$')+1) <= 2
         e $MYVIMRC
     else
         tabnew $MYVIMRC
@@ -2849,7 +2849,7 @@ fu! s:format_comment() abort
     "           └─ the '< '> marks are not set until we get back to normal mode
 
     " format the comment
-    if line("'<") == line("'>") || cur_line < line("'<") || cur_line > line("'>")
+    if line("'<") ==# line("'>") || cur_line < line("'<") || cur_line > line("'>")
         return
     else
         exe "norm gv\<plug>(my_gq)"
@@ -3703,7 +3703,7 @@ fu! s:select_percent_object() abort
     let pos = getpos('.')
     " search for a closing/opening symbol
     norm! %
-    if getpos('.') == pos
+    if getpos('.') ==# pos
         return
     endif
     " save closing/opening symbol
@@ -3723,7 +3723,7 @@ fu! s:select_percent_object() abort
     " select object and quit to set the marks
     exe "norm! v%\e"
     " check there's at least one character inside the object
-    if getline("'<") == getline("'>") && virtcol("'>") == virtcol("'<") + 1
+    if getline("'<") ==# getline("'>") && virtcol("'>") ==# virtcol("'<") + 1
         return
     endif
     norm! gvloh
@@ -3944,8 +3944,8 @@ xno  <expr><silent>  y  'y'.timer_start(0, {-> execute('let @v=@"')})[-1]
 
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
-xno  <expr>  h  mode() is# '<c-v>' && virtcol('.') == 1            ? '' : 'h'
-xno  <expr>  l  mode() is# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
+xno  <expr>  h  mode() is# '<c-v>' && virtcol('.') ==# 1            ? '' : 'h'
+xno  <expr>  l  mode() is# '<c-v>' && virtcol('.') ==# &columns - 2 ? '' : 'l'
 
 " ip          disable on empty line {{{3
 
@@ -4059,9 +4059,9 @@ fu! s:doc(...) abort
     "         https://devdocs.io/help#search
     let url = 'http://devdocs.io/?q='
 
-    let args = a:0 == 0
+    let args = a:0 ==# 0
     \?            url.&ft.' '.expand('<cword>')
-    \:        a:0 == 1
+    \:        a:0 ==# 1
     \?            url.&ft.' '.a:1
     \:            url.join(a:000)
 
@@ -4608,9 +4608,9 @@ fu! s:update_history() abort
     "
     "                                               ┌ take the old history
     "                            ┌──────────────────┤
-    let deleted_entries = filter(copy(s:old_cmd_hist), { i,v -> index(new_hist, v) == -1 })
-    "                                                           └──────────────────────┤
-    "              … and keep only the entries which aren't in the new history anymore ┘
+    let deleted_entries = filter(copy(s:old_cmd_hist), { i,v -> index(new_hist, v) ==# -1 })
+    "                                                           └───────────────────────┤
+    "               … and keep only the entries which aren't in the new history anymore ┘
     "
     " convert the text entries to delete, into their numeric indexes inside
     " the list `info`
@@ -5211,7 +5211,7 @@ fu! s:trailing_whitespace(create_match) abort
 
     elseif a:create_match
        \&& !exists('w:my_trailing_whitespace')
-       \&& index(s:no_trailing_whitespace_ft, &ft) == -1
+       \&& index(s:no_trailing_whitespace_ft, &ft) ==# -1
         "                                                            ┌ non breaking space (C-k NS)
         "                                                        ┌───┤
         let w:my_trailing_whitespace = matchadd('Error', '\%(\s\|\%ua0\)\+$', -1)
@@ -5471,10 +5471,10 @@ endfu
 " 24 -
 " Syntaxe à documenter (dans nos notes Vim et Awk):
 "
-" let myvar = other_var == 2    ⇔    let myvar = other_var == 2 ? 1 : 0
-"                                                               -------
-"                                                                  |
-"                                                               inutile
+" let myvar = other_var ==# 2    ⇔    let myvar = other_var ==# 2 ? 1 : 0
+"                                                                 -------
+"                                                                    |
+"                                                                 inutile
 "
 " En VimL, comme en awk, une comparaison est une expression dont la valeur est
 " 1 si elle est vraie, 0 autrement.
@@ -5801,7 +5801,7 @@ endfu
 "
         nno  <expr>  gT  <sid>ltag(1)
         fu! s:ltag(step) abort
-            if a:step == 1
+            if a:step ==# 1
                 augroup my_ltag
                     au!
                     " Why the timer?{{{
@@ -5817,7 +5817,7 @@ endfu
                     au FileType qf call s:ltag(2) | exe 'au! my_ltag ' | aug! my_ltag
                 augroup END
                 return ':ltag / | lw'.repeat("\<left>", 5)
-            elseif a:step == 2
+            elseif a:step ==# 2
                 let pat = '|.\{-}|'
                 call qf#set_matches('vimrc:ltag', 'Conceal', pat)
                 call qf#create_matches()
@@ -6508,8 +6508,6 @@ tno  <s-tab>  <left>
 "    • win_screenpos()
 "
 " 105 -
-" &l:bt  →  &bt
-" &filetype  →  &ft
 " ==#  →  ==
 " !=#  →  !=
 

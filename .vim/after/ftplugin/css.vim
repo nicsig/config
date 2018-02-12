@@ -1,6 +1,6 @@
 " Mappings "{{{1
 
-if exists(':EmmetInstall') == 2
+if exists(':EmmetInstall') ==# 2
     EmmetInstall
 endif
 

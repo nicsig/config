@@ -7,14 +7,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +113 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+badd +83 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
+badd +1115 ~/.vim/plugged/vim-graph/autoload/graph.vim
+badd +302 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
+badd +550 ~/.vim/UltiSnips/vim.snippets
+badd +338 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 badd +48 ~/.vim/plugged/vim-cmdline/plugin/cmdline.vim
-badd +51 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +6 ~/.vim/plugged/vim-graph/after/ftplugin/dot.vim
-badd +1129 ~/.vim/plugged/vim-graph/autoload/graph.vim
-badd +262 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 badd +486 ~/.vim/plugged/vim-readline/plugin/readline.vim
-badd +136 ~/.vim/UltiSnips/vim.snippets
 badd +2 ~/.Xresources
 badd +1 ~/.vim/plugged/vim-focus-events/plugin/focus_events.vim
 badd +113 ~/.vim/plugged/vim-cursor/plugin/cursor.vim
@@ -40,7 +40,8 @@ badd +53 ~/.vim/UltiSnips/help.snippets
 badd +1 ~/.vim/UltiSnips/README.md
 badd +126 ~/Desktop/terminal.md
 badd +556 ~/.tmux.conf
-badd +6912 ~/.vim/vimrc
+badd +52 ~/.vim/plugged/vim-bullet-list/autoload/bullet_list.vim
+badd +1 ~/.vim/plugged/vim-bullet-list/.git/index
 argglobal
 silent! argdel *
 set stal=2
@@ -876,7 +877,7 @@ setlocal fdn=20
 setlocal fen
 539
 normal! zo
-let s:l = 556 - ((139 * winheight(0) + 0) / 1)
+let s:l = 556 - ((11 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -924,10 +925,16 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabedit ~/.vim/vimrc
+tabedit ~/.vim/plugged/vim-bullet-list/autoload/bullet_list.vim
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -937,46 +944,36 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-545
+13
 normal! zo
-1875
-normal! zo
-1931
-normal! zo
-2392
-normal! zo
-2666
-normal! zo
-2667
-normal! zo
-2711
-normal! zo
-2729
-normal! zo
-2860
-normal! zo
-2940
-normal! zo
-3648
-normal! zo
-3741
-normal! zo
-4555
-normal! zo
-4762
-normal! zo
-4787
-normal! zo
-5221
-normal! zo
-6830
-normal! zo
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 52 - ((14 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+52
+normal! 049|
+wincmd w
+argglobal
+if bufexists('~/.vim/plugged/vim-bullet-list/.git/index') | buffer ~/.vim/plugged/vim-bullet-list/.git/index | else | edit ~/.vim/plugged/vim-bullet-list/.git/index | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 14
 set stal=1
 if exists('s:wipebuf')
