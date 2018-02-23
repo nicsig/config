@@ -1,1 +1,918 @@
-/home/jean/Dropbox/conf/shrc
+# TODO:
+# It would be useful to be able to search for a pattern inside all configuration
+# files with `:vimrgrep`. Including the ones for the shell.
+# We could create symlinks inside `~/.config` which would point to the config files
+# that we can't (easily) move, like `~/.bashrc` or `~/.tmux.conf`.
+# But there are still a lot of  irrelevant files in `~/.config` (cache of chrome
+# for example).  Think about a better way of grepping all config files.
+
+# TODO:
+# In your functions, try to create as few temporary files as you can.
+# Maybe you could eliminate some of them, using process redirection:
+#
+#         https://www.reddit.com/r/vim/comments/7czgrd/profiling_and_optimizing_vim/dpvzt9h/
+#
+# Example:
+#
+#         vim -c\ q --startuptime /tmp/vim.log && tail -n1 $_
+#             vs
+#         vim -c\ q --startuptime >(tail -n1)
+
+
+
+# Recomment the aliases/functions we've recovered after the loss of this file.
+# Also, re-read the rest of the file. Maybe some parts need to be re-factored again.
+# Try to remember the fixme/todo.
+
+# We have defined 2 `nv()` functions. 1 in this file, the other in `~/.zshrc`.
+# Get rid of one of them. Merge the best of the 2 codes. Write the result in
+# this file.
+
+
+# Recovered Aliases:
+
+alias check_glob='printf "%s\n"'
+alias checki='sudo rlwrap checkinstall -y'
+alias df=dfc
+alias fxk='~/bin/keyboard.sh'
+alias fxt='echo -e "\033c"'
+alias fzo='sh -c "$(fc -ln -1)|fzf"'
+alias gsearch='git log --all --source -p -S'
+alias l=ls++
+# ls folders only
+#
+# -1    list one file per line
+# -d, --directory
+#       list directory entries instead of contents,
+#       and do not dereference symbolic links
+#
+# ls *        list everything
+# ls */       list every folder and their contents
+# ls -d */    list every folder (only their entries)
+alias lsd='ls++ -1d */'
+# n for new?
+alias lsn='ls -Ggthr --time=ctime'
+# o for owner?
+alias lso='ls++ --potsf'
+# s for size?
+alias lss='ls++ --psf'
+# ls by time/changes, newest at bottom
+#
+# -c    with  -lt:
+#       sort  by,  and show, ctime (time of last modification of file status information)
+#
+# Mnemonic:    t for Time
+alias lst='ls++ --ptsf'
+alias mountc='grc mount'
+alias prof_zsh='repeat 10 time zsh -i -c exit'
+alias reload_conky='killall -SIGUSR1 conky'
+alias reload_xres='xrdb -merge -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
+alias web='WWW_HOME=duckduckgo.com w3m'
+
+
+# Recovered Functions:
+alert() {
+  local icon summary
+  icon='$([ $? = 0 ] && echo terminal || echo error)'
+  summary="$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
+  eval "notify-send --urgency=low -i " "${icon}" '"${summary}"'
+}
+
+catch_signal_usr1() {
+  # reset a trap for next time
+  trap catch_signal_usr1 USR1
+  # useful to get rid of error messages which were displayed during last Vim
+  # session
+  clear
+  # re-start Vim
+  # FIXME:
+  # if we quit Neovim, `nv` should restart Neovim, not Vim
+  nv
+}
+trap catch_signal_usr1 USR1
+
+# TODO:
+# Source:
+# https://www.reddit.com/r/vim/comments/5lj75f/how_to_reload_vim_completely_using_zsh_exit_to/
+#
+# In vim-session, we use this function to reload a session:
+#
+#         fu! s:vim_quit_reload() abort
+#             " Send the signal `USR1` to the shell parent of the current Vim instance
+#             " to relaunch Vim.
+#             !kill -USR1 $(ps -p $(ps -p $$ -o ppid=) -o ppid=)
+#             qa!
+#         endfu
+#
+# How does it work? I mean, we ask the parent to restart a Vim instance, THEN we
+# close the current one. Why does the focus switch to the new Vim instance, even
+# though it has been started while we were still in this instance?
+
+
+cdt() {
+  builtin cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
+}
+
+help() {
+	if [[ $0 == "bash" ]]; then
+		builtin help -m "$@" | vipe
+	else
+		run-help "$@" | vipe
+	fi
+}
+
+img_w3m() {
+	w3m -o imgdisplay=/usr/lib/w3m/w3mimgdisplay "$1"
+}
+
+# check alias is free
+is_it_free() {
+	apt-file -x search "/$1$"
+}
+
+prof_vim() {
+	TMP="$(mktemp /tmp/.profile_vim.XXXXXXXXXX)"
+	builtin cd /tmp
+	vim --cmd "prof start "${TMP}"" --cmd 'prof! file ~/.vim/vimrc' -cq
+	vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
+	builtin cd -
+}
+
+startup_vim() {
+	TMP="$(mktemp /tmp/.startup_vim.XXXXXXXXXX)"
+	builtin cd /tmp
+	vim --startuptime "${TMP}" +'q' startup_vim_file && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' +'sil 7,$!sort -k2' +'$' "${TMP}"
+	builtin cd -
+}
+
+# Testing eNViRonment
+tnvr() {
+	builtin cd "$(mktemp -d /tmp/.tvr.XXXXXXXXXX)"
+	cp -R "${OLDPWD}"/* .
+}
+
+what_is_in_checkinstall() {
+  aptitude search "?section(checkinstall)"
+}
+
+what_is_in_repo() {
+  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' /var/lib/apt/lists/*$1*
+}
+
+# useful to check the contents of a value of an environment variable:
+#         what_is_in_var $IFS
+#
+# The number which is displayed in the lower right corner seems to be a weight
+# in bytes.
+what_is_in_var() {
+	var="$1"
+	printf "%s" "$var" | od -t c
+}
+
+
+# Alias {{{1
+# color {{{2
+
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias grep='grep --color=auto'
+
+alias ls='ls --color=auto'
+
+alias top='htop'
+
+# aptitude {{{2
+
+alias api='sudo aptitude install'
+alias app='sudo aptitude purge'
+alias aps='aptitude show'
+
+# git {{{2
+
+# Usage:
+#     config status
+#     config add /path/to/file
+#     config commit -m 'my message'
+#     config push
+alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+
+alias ga='git add'
+
+# Do not add `rlwrap` before `git commit`.{{{
+# Why?
+#     1. It's not needed here.
+#     2. It causes an issue.
+#
+# How to reproduce the issue?
+#
+#   1. write at the beginning of vimrc:
+#
+#         nno <silent> cd :sil w<cr>
+#         set rtp+=~/.vim/plugged/vim-gutentags/
+#         finish
+#
+#   2. tweak some repo
+#   3. try to commit with `rlwrap git commit`
+#   4. write something on the 1st line and stay on the 1st line
+#   5. while the buffer is still modified, hit `cd`
+#
+# → the line disappears
+#
+# It  has nothing  to do  with  the conceal  feature. It's reproducible  without
+# syntax highglighting.
+#
+# Solutions:
+#
+#         • nno          cd :sil w<cr>
+#         • nno <silent> cd :w<cr>
+#         • commit without `rlwrap`
+#
+# We have several mechanisms to save a buffer (including an autocmd).
+# It's easier (and more future-proof) to just NOT use `rlwrap`.
+#}}}
+alias gc='git commit'
+alias gp='rlwrap -H /dev/null git push'
+# Git Restore Last Commit
+alias grlc='git reset --hard $(git rev-parse HEAD)'
+
+# surfraw {{{2
+
+alias sr='sr -browser=xdg-open'
+alias srr='sr ixquick'
+alias surfraw='surfraw -browser=w3m'
+
+# others {{{2
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
+
+# l'option -l charge la librairie mathématique standard et configure
+# automatiquement `scale` sur 20
+alias bc='bc -q -l'
+
+# CD into most Recent accessed subdirectory in current directory
+alias cdr='cd "$(ls -dt */ | head -1)"'
+#             │     ││ │    │
+#             │     ││ │    └── only first entry
+#             │     ││ └── only list directories
+#             │     │└── sort by modification time, newest first
+#             │     └── don't display all the contents of the directories, only their names
+#             └── quote the command substitution, in case the name of the resulting directory
+#                 contains a space
+
+alias dl_mp3='youtube-dl -x --audio-format mp3 -o "%(title)s.%(ext)s"'
+alias dl_pl='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(autonumber)02d - %(title)s.%(ext)s"'
+alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
+
+# FIXME:
+# Why can't we restore the old working directory (`cd -`)?
+# Why ANY command after `subliminal` is skipped?
+dl_sub() {
+  cd ~/Videos/
+  subliminal -l fr -- $1
+}
+
+alias emacs='emacs -nw'
+
+alias fm='[[ -n $TMUX ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
+
+# `iotop` est un outil en cli qui permet de savoir quels processus accèdent
+# (lecture / écriture) au disque:
+#
+#     -o    seulement les processus actifs
+#     -P    seulement des processus (pas les threads)
+alias iotop='iotop -o -P'
+
+#              ┌─ --no-group in a long listing, don't print group names
+#              │┌─ like -l, but do not list owner
+#              ││ ┌─ --almost-all do not list implied . and ..
+#              ││ │
+alias lsa='ls -GghA'
+#       │
+#       └─ mnemonic: all
+
+#                             ┌─ --indicator-style=slash append / indicator to directories
+#                             │
+alias lsf='ls --color=always -p | grep -v "/$"'
+#       │
+#       └─ mnemonic: files only
+
+# -X    Sort alphabetically by extension, then by the rest.
+#       Directories can't have an extension, so they always come first.
+#       Handy to sort files from folders.
+#
+# Mnemnonic:    x for eXtension
+alias lsx='ls -lX'
+
+alias maj='[[ -n $TMUX ]] && tmux rename-window maj; sudo aptitude update && sudo aptitude safe-upgrade && majyt'
+# https://rg3.github.io/youtube-dl/download.html
+alias majyt='sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && sudo chmod a+rx /usr/local/bin/youtube-dl'
+
+alias mybookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
+alias mydate='date "+Today is %x, day number %j of %Y."'
+
+# -f, --format=FORMAT
+#        Change edit format of text file.
+#        Available edit formats are:
+#
+#        `single-column'       (or `sc')
+#        `dual-column'         (or `dc')
+#        `destination-only'    (or `do')
+#
+#        The default format is dual-column.
+alias qmv='qmv --format=destination-only'
+
+alias record_audio='ffmpeg -f pulse -i default -y /tmp/rec.wav'
+
+# Par défaut, quand on donne une commande à bash, il ne teste la présence d'un
+# alias que sur le 1er mot.
+# Exception : le 1er mot est un alias dont la valeur se finit par un espace.
+# Pour conserver ses alias même lorsqu'on les fait précéder d'un sudo,
+# il faut donc définir un alias pour sudo lui-même.
+# Voir ici: https://askubuntu.com/questions/22037/aliases-not-available-when-using-sudo
+alias sudo='sudo '
+
+alias vb='VBoxManage'
+
+# `nethogs` est un outil en cli qui permet de savoir quels processus bouffe de
+# la bande passante.
+alias watch_net='nethogs enp3s0'
+
+# Environment Variables {{{1
+# CDPATH {{{2
+
+export CDPATH=:$HOME:/tmp
+
+# EDITOR {{{2
+
+# We export a custom variable (`not_called_by_me`) inside the environment of any
+# Vim process which is started by another process.
+# Usually, when a process needs to start an editor (vipe, …), they look at the
+# value of `$EDITOR`.
+#
+# This could be useful, for example, in a Vim function:
+#
+#       if $not_called_by_me == 1
+#           …
+#       else
+#           …
+#       endif
+
+export EDITOR='env not_called_by_me=1 vim'
+
+# LC_TIME {{{2
+
+# to get the name of the day/month in english
+export LC_TIME=en_US.UTF-8
+
+# LS_COLORS {{{2
+
+eval "$(dircolors ~/.dircolors)"
+
+# MANPAGER / MANPATH {{{2
+
+# Use Vim as default man pager.
+
+#                         ┌──────── wrap the whole command in `/bin/sh -c`
+#                         │         because the value of $MANPAGER can't use a pipe directly
+#                         │
+#                         │       ┌ remove some control characters like ^H
+#                ┌────────┤  ┌────┤
+export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
+#                                  │         │
+#                                  │         └ don't display  “Vim: Reading from stdin...”
+#                                  └ replace tabs with spaces
+
+# add man pages for `dasht`
+export MANPATH=$HOME/GitRepos/dasht/man:$MANPATH
+
+# PARINIT {{{2
+
+# According to `man par`, it's recommended to assign the value:
+#
+#         rTbgqR B=.,?_A_a Q=_s>|
+#
+# … to the environment variable `PARINIT`.
+#
+# It's useful to prevent the following kind of wrong formatting:
+#
+#     par <<< 'The quick brown fox jumps over the lazy dog.
+#     The quick brown fox jumps over the lazy dog foo bar baz.'
+#
+#         The quick brown fox jumps over the lazy dog.
+#         The quick brown fox jumps over the lazy dog foo bar baz                .    ✘
+#
+# With the right value for `PARINIT`:
+#
+#         The quick brown fox jumps over the lazy dog.  The quick brown fox jumps
+#         over the lazy dog foo bar baz.                                              ✔
+
+# TODO:
+# Read `man par` to explain this value.
+# And  read the  whole  documentation (not  that long)  and  summarize what  you
+# understand in a file note. `par` is probably an important program to master.
+export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
+
+# PATH {{{2
+# add the `dasht` binary to our path
+export PATH=$PATH:$HOME/GitRepos/dasht/bin
+
+# TERM {{{2
+#     What's `$TERM` inside a terminal, by default?{{{
+#
+# In many terminals, including xfce-terminal and guake:
+#
+#   $TERM = xterm
+#
+# Yeah, they lie about their identity to the programs they run.
+#
+# In urxvt:
+#
+#   $TERM = rxvt-unicode-256color
+#
+# urxvt tells the truth.
+#}}}
+#     Where is the configuration file for a terminal?{{{
+#
+# xfce-terminal and guake don't seem to have one.
+# However, you may find a way to  configure how they advertise themselves to the
+# programs they run, like this:
+#
+#     1. right-click
+#     2. preferences
+#     3. compatibility
+#
+# urxvt has ~/.Xresources.
+#}}}
+#     Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
+#
+# For the  colorschemes of programs to  be displayed correctly in  the terminal,
+# `$TERM`  must contain  '-256color'. Otherwise,  the programs  will assume  the
+# terminal is only  able to interpret a limited amount  of escape sequences used
+# to encode 8 colors, and they will restrict themselves to a limited palette.
+#}}}
+#     Ok, but why do it in this file?{{{
+#
+# The configuration  of `$TERM` should  happen only in a  terminal configuration
+# file. But for xfce4-terminal, I haven't found  one.  So, we must try to detect
+# the identity of the terminal from here.
+#}}}
+#     How to detect we're in an xfce terminal?{{{
+#
+# If you look at  the output of `env` and search for  'terminal' or 'xfce4', you
+# should find `COLORTERM`  whose value is set to  'xfce4-terminal'.  We're going
+# to use it to detect an xfce4 terminal.
+#}}}
+#     Is it enough?{{{
+#
+# No, watch this:
+#
+#   1. start xfce4-terminal
+#   2. $ tmux (start server)
+#   3. $ echo $TERM  →  tmux-256color  ✔
+#
+#   4. start another xfce4-terminal
+#   5. $ tmux (connect to running server)
+#   6. $ echo $TERM  →  xterm-256color  ✘
+#
+# We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
+# server. Because the  latter will already  have set `$TERM`  to 'tmux-256color'
+# (thanks to the  option 'default-terminal' in `~/.tmux.conf`), which  is one of
+# the few valid value ({screen|tmux}[-256color]).
+#
+# One way to be sure that we're not connected to Tmux , is to check that `$TERM`
+# is set to 'xterm'.  That's the default value set by xfce4-terminal.
+#}}}
+if [ "${COLORTERM}" = "xfce4-terminal" -a "${TERM}" = "xterm" ] ; then
+  export TERM=xterm-256color
+fi
+#     Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
+#
+#     if [ $TERM == "xterm" ] ; then
+#         if [ -n $COLORTERM ] ; then
+#             if [ $COLORTERM = "gnome-terminal" -o $COLORTERM = "xfce-terminal" ] ; then
+#                 TERM=xterm-256color
+#             if
+#         elif [ -n "$VTE_VERSION" ] ; then
+#             TERM=xterm-256color
+#         fi
+#     fi
+#
+# Source:
+# https://github.com/romainl/Apprentice/wiki/256-colors-and-you
+#
+#}}}
+
+# XDG {{{2
+
+# https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+
+# directories relative to  which various kinds of user-specific  files should be
+# written
+
+# data files:
+#
+#     • trash
+#     • icons
+#     • viminfo
+#     • swap files
+#     • .desktop files
+#     • .keyring files
+#     • …
+export XDG_DATA_HOME=$HOME/.local/share
+
+# configuration files
+export XDG_CONFIG_HOME=$HOME/.config
+
+# non-essential (cached) data
+export XDG_CACHE_HOME=$HOME/.cache
+
+# runtime files and other file objects
+# (temporary files created by processes owned by the logged user)
+export XDG_RUNTIME_DIR=/run/user/$UID
+#                      └────────┤
+#                               └ should exist on any OS using systemd
+#                                 not sure about the others
+
+# Functions {{{1
+# aunpack {{{2
+
+# This custom shell function extracts an archive using the `atool` command.
+# Then, it cd's into the directory where the contents of the archive was
+# extracted. The code is taken from `:Man atool`.
+
+aunpack() {
+  TMP=$(mktemp /tmp/aunpack.XXXXXXXXXX)
+  #     │                   │
+  #     │                   └── template for the filename, the `X` will be
+  #     │                       randomly replaced with characters matched
+  #     │                       by the regex `[0-9a-zA-Z]`
+  #     └── create a temporary file and store its path into `TMP`
+
+  atool -x --save-outdir=$TMP "$@"
+  #          │
+  #          └── write the name of the folder in which the files have been
+  #              extracted inside the temporary file
+
+  # Assign the name of the extraction folder inside to the variable `DIR`.
+  DIR="$(cat $TMP)"
+  [ -d "$DIR" -a "$DIR" != "" ] && cd "$DIR"
+  #  │         │         │          │
+  #  │         │         │          └── go into it
+  #  │         │         └── its name is not empty
+  #  │         └── and if
+  #  └── if the directory `DIR` exists
+
+  # Delete temporary file.
+  rm $TMP
+}
+
+# Trigonometry  {{{2
+# Trigonometric functions (input is expected in degrees).
+# For more formulas (in degrees or radians):
+# http://advantage-bash.blogspot.fr/2012/12/trignometry-calculator.html
+# TODO:
+# Check whether these formulas are always correct.
+
+sin()
+{
+  echo "scale=5;s($1*0.017453293)" | bc -l
+}
+
+cos()
+{
+  echo "scale=5;c($1*0.017453293)" | bc -l
+}
+
+tan()
+{
+  echo "scale=5;s($1*0.017453293)/c($1*0.017453293)" | bc -l
+}
+
+asin()
+{
+  if (( $(echo "$1 == 1" | bc -l) ));then
+    echo "90"
+  elif (( $(echo "$1 < 1" | bc -l) ));then
+    echo "scale=3;a(sqrt((1/(1-($1^2)))-1))/0.017453293" | bc -l
+  elif (( $(echo "$1 > 1" | bc -l) ));then
+    echo "error"
+  fi
+}
+
+acos()
+{
+  if (( $(echo "$1 == 0" | bc -l) ));then
+    echo "90"
+  elif (( $(echo "$1 <= 1" | bc -l) ));then
+    echo "scale=3;a(sqrt((1/($1^2))-1))/0.017453293" | bc -l
+  elif (( $(echo "$1 > 1" | bc -l) ));then
+    echo "error"
+  fi
+}
+
+atan()
+{
+  echo "scale=3;a($1)/0.017453293" | bc -l
+}
+
+ccheat() { #{{{2
+  # cette fonction a pour but de coloriser la sortie de la commande cheat{{{
+  # pour ce faire, on utilise la commande highlight (à installer)
+  # à laquelle on fait passer 3 arguments :
+  # -O xterm256 : formatage destiné à un terminal (il existe d'autres formats, html, ansi, bbcode...)
+  # -S bash : syntaxe bash
+  # -s olive :    thème olive (il en existe d'autres : 'highlight -w' pour en voir une liste)
+  # -O, -s, -S, -w = --out-format, --style, --syntax, --list-themes
+
+  # pour ajouter à bash l'autocomplétion des arguments passés à cheat :
+  # cd /etc/bash_completion.d/ && wget https://raw.githubusercontent.com/chrisallenlane/cheat/master/cheat/autocompletion/cheat.bash
+
+  # autre solution utilisant pygments
+  # documentation de pygments : http://pygments.org/docs/
+  #
+  # pygmentize fait partie soit du paquet .deb python-pygments soit du paquet pip pygments
+  #
+  # on utilise pygmentize pour coloriser la sortie de la commande cheat
+  # l'option -l permet de spécifier un lexer
+  # un lexer est un programme réalisant une analyse syntaxique : https://en.wikipedia.org/wiki/Lexical_analysis
+  # 'pygmentize -L' liste les différents lexers disponibles
+  # le lexer bash ne produit pas la colorisation que j'attends
+  # du coup pour le moment j'utilise le lexer spécifique au language C (mieux mais pas parfait)
+
+  # on peut aussi utiliser l'option -g (guess), qui laisse le soin à pygmentize de deviner le type de code qu'il est en train d'analyser
+
+  # cheat "$1" | pygmentize -l c
+
+  # Remarque : on pourrait se passer du pgm cheat :
+  # cd ~/.cheat && cat <cmd> | highlight | less -iR# }}}
+
+  cheat "$1" | highlight -O xterm256 -S bash -s olive
+}
+
+# cfg-* {{{2
+
+cfg_bash() { nv ~/.bash_aliases ;}
+cfg_conky_system() { nv ~/.conky/system ;}
+cfg_conky_rings() { nv ~/.conky/system_rings.lua ;}
+cfg_conky_time() { nv ~/.conky/time ;}
+cfg_firefox() { nv ~/.mozilla/firefox/*.default/chrome/userContent.css ;}
+cfg_mpv() { nv ~/.mpv/config ;}
+cfg_mpv_shortcuts() { nv ~/.mpv/input.conf ;}
+cfg_tmux() { nv ~/.tmux.conf ;}
+cfg_vim() { nv ~/.vimrc ;}
+cfg_shell() { nv ~/.shrc ;}
+cfg_xmodmap() { nv ~/.Xmodmap ;}
+cfg_w3m() { vim ~/.w3m/config ;}
+cfg_zsh() { nv ~/.zsh_aliases ;}
+
+cmdfu() { #{{{2
+
+  # Cette fonction permet de faire des recherches sur le site www.commandlinefu.com depuis le terminal.
+
+  keywords=$(echo "$@" | sed 's/ /-/g')   # on affecte à keywords les mots-clés recherchés en remplaçant les espaces par des tirets
+  encoding=$(echo -n "$@" | base64)   # on affecte à encoding l'encodage en base64 des mots-clés
+  # -n =  suppression de la newline à la fin
+  #   en effet, une newline altère légèrement le résultat de l'encodage
+  curl -s "http://www.commandlinefu.com/commands/matching/$keywords/$encoding/sort-by-votes/plaintext"\
+    | highlight -O xterm256 -S bash -s olive | less -iR
+  # Pour finir on télécharge la page web en mode silencieux (-s) pour ne pas afficher la progression ni les erreurs.
+
+}
+
+fzf-sr() { #{{{2
+  #                                                 ┌────────── remove empty lines
+  #                                                 │         ┌ numeric sort
+  #                                       ┌─────────┤   ┌─────┤
+  sr "$(cat ~/.config/surfraw/bookmarks | sed '/^$/d' | sort -n | fzf -e)"
+  #                                                               └────┤
+  #                                                                    └ fuzzy search
+  #                                                                      `-e` = `--exact` exact-match
+}
+
+fzf-surfraw() { #{{{2
+  surfraw "$(cat ~/.config/surfraw/bookmarks | sed '/^$/d' | sort -n | fzf -e)"
+}
+
+lrv() { #{{{2
+
+  # Fonction lrv (Locate with Regexp and Vim) qui permet de simplifier
+  # la syntaxe d'une recherche avec locate quand on veut utiliser une expression régulière.
+
+  # En effet si on cherche tous les fichiers contenant foo et (bar ou baz), il faut taper :
+  # locate -ir 'foo.*\(bar\|baz\)'
+
+  # Grâce à la fonction qui suit on peut se contenter de taper :  lrv 'foo (bar|baz)'
+
+  # On echo tous les arguments passés à la fonction, et on fait 4 substitutions
+  # (en affectant le résultat à la variable `keywords`) :
+
+  #     <space>   →  .*  du coup 'foo bar' devient 'foo.*bar'
+
+  #     (         →  \(
+  #     |         →  \|      plus besoin d'échapper les symboles (,| et )
+  #     )         →  \)
+
+  # Vim lit le résultat de la commande `locate` (via le dernier tiret qui redirige
+  # stdin vers le pipe précédent), en mode read-only (-R).
+  # Ceci permet d'ouvrir ensuite les fichiers trouvés via le raccourci go de vim.
+  # Le mode read-only évite d'écrire un fichier par accident (et en plus pas de .swp).
+
+  keywords=$(echo "$@" | sed 's/ /.*/g' | sed 's:(:\\(:g'| sed 's:|:\\|:g' | sed 's:):\\):g')
+  locate -ir "$keywords" | vim -R --not-a-term -
+
+}
+mcheat() { #{{{2
+
+  cheat "$1" | highlight -O xterm256 -S bash -s olive | less -iR
+
+  # -i = --ignore-case, insensible à la casse lors de recherches
+  # -R = --RAW-CONTROL-CHARS,
+  #      nécessaire pour que less n'affiche pas les caractères de contrôle définissant les couleurs
+  #      mais les envoie à l'émulateur de terminal qui les interprètera pour coloriser le texte
+
+}
+mkcd() { #{{{2
+# create directory and cd into it right away
+  mkdir "$*" && cd "$*"
+}
+
+mountp() { #{{{2
+
+  # mount pretty ; fonction qui espace / rend plus jolie la sortie de la commande mount
+  mount | awk '{ print $1 "\t", $2 "\t", $3 "\t", $4 "\t", $5 "\t", $6 }' -
+
+}
+
+# nstring() { #{{{2
+
+# Synopsis : nstring str foo{{{
+# Description : compte le nb d'occurrences de la sous-chaîne str dans la chaîne foo.
+
+# -o = --only-matching ;
+# n'affiche que le pattern str trouvé, autant de fois qu'il y a de matchs et à chaque fois sur une ligne différente
+
+# <<< = redirige la chaîne "$2" en entrée à grep (qui par défaut n'accepte qu'un nom de fichier en entrée) # }}}
+
+# grep -o "$1" <<< "$2" | wc -l
+
+# }
+
+# nv {{{2
+
+#    ┌─ use parentheses instead of curly braces, to create a subshell in which
+#    │  we can safely change `IFS` without affecting current shell.
+#    │
+nv() (
+
+  # check whether a Vim server is running
+  #
+  #                             ┌─ Why do we look for a server whose name is VIM?
+  #                             │  By default, when we execute:
+  #                             │          vim --remote file
+  #                             │
+  #                             │  … without `--servername`, Vim tries to open `file` in a Vim server
+  #                             │  whose name is VIM.
+  #                             │  So, we'll use this name for our default server.
+  #                             │  This way, we won't have to specify the name of the server later.
+  #                             │
+  if vim --serverlist | grep -q VIM; then
+  #                           │
+  #                           └─ be quiet (no output); if you find sth, just return 0
+
+    # From now on, assume a VIM server is running.
+
+    # If no argument was given, just start a new Vim session.
+    if [[ $# -eq 0 ]]; then
+      vim
+
+    # If the 1st argumennt is `-b`, we want to edit binary files.
+    elif [[ $1 == -b ]]; then
+      # Get rid of `-b` before send the rest of the arguments to the server, by
+      # shifting the arguments to the right.
+      shift 1
+      # Make sure that the shell uses a space, and only a space, to separate
+      # 2 consecutive arguments, when it will expand the special parameter `$*`.
+      IFS=' '
+
+      # send the filenames to the server
+      vim --remote "$@"
+      # For each buffer in the arglist:
+      #
+      #         enable the 'binary' option.
+      #         Among other things, il will prevent Vim from doing any kind of
+      #         conversion, which could damage the files.
+      #
+      #         set the filetype to `xxd` (to have syntax highlighting)
+      vim --remote-send ":argdo setl binary ft=xxd<cr>"
+      # filter the contents of the binary buffer through `xxd`
+      vim --remote-send ":argdo %!xxd<cr><cr>"
+
+    # If the 1st argument is `-d`, we want to compare files.
+    elif [[ $1 == -d ]]; then
+      shift 1
+      IFS=' '
+      # open a new tabpage
+      vim --remote-send ":tabnew<cr>"
+      # send the files to the server
+      vim --remote "$@"
+      # display the buffers of the arglist in a dedicated vertical split
+      vim --remote-send ":argdo vsplit<cr>:q<cr>"
+      # execute `:diffthis` in each window
+      vim --remote-send ":windo diffthis<cr>"
+
+    # If the 1st argument is `-o`, we want to open each file in a dedicated horizontal split
+    elif [[ $1 == -o ]]; then
+
+      shift 1
+      IFS=' '
+
+      vim --remote "$@"
+      vim --remote-send ":argdo split<cr>:q<cr><cr>"
+      #                                  └────┤
+      #                                       └ close last window, because the last file
+      #                                         is displayed twice, in 2 windows
+
+    # If the 1st argument is `-O`, we want to open each file in a dedicated vertical split
+    elif [[ $1 == -O ]]; then
+      shift 1
+      IFS=' '
+      vim --remote "$@"
+      vim --remote-send ":argdo vsplit<cr>:q<cr><cr>"
+
+    # If the 1st argument is `-p`, we want to open each file in a dedicated tabpage.
+    elif [[ $1 == -p ]]; then
+      shift 1
+      IFS=' '
+      vim --remote "$@"
+      vim --remote-send ":argdo tabedit<cr>:q<cr>"
+
+    # If the 1st argument is `-q`, we want to populate the qfl with the output
+    # of a shell command. The syntax should be:
+    #
+    #               ┌─ Use single quotes to prevent the current shell from expanding a glob.
+    #               │  The glob is for the Vim function `system()`, which will send it back
+    #               │  to another shell later.
+    #               │
+    #         nv -q 'grep -Rn foo *'
+    #
+    # This syntax is NOT possible with Vim:
+    #
+    #         vim -q grep -Rn foo *       ✘
+    #
+    # With Vim, you should type:
+    #
+    #         vim -q <(grep -Rn foo *)    ✔
+
+    elif [[ $1 == -q ]]; then
+
+      shift 1
+      IFS=' '
+
+      #                                 ┌─ Why not $@?
+      #                                 │  $@ would be expanded into:
+      #                                 │
+      #                                 │      '$1' '$2' …
+      #                                 │
+      #                                 │  … but `system()` expects a single string.
+      #                                 │
+      vim --remote-send ":cexpr system('$*')<cr>"
+
+
+    # If no option was used, -[bdoOpq], we just want to send files to the server.
+    else
+      vim --remote "$@"
+    fi
+
+  # Finally, if `grep` didn't find any VIM server earlier, start one.
+  else
+    vim -w /tmp/.vimkeys --servername VIM "$@"
+  fi
+)
+
+ppa_what_have_you(){ #{{{2
+  # FIXME:
+  # move this function in zsh config, to create a completion function which
+  # would suggest files in /var/lib/apt/lists/
+  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$@"
+}
+
+vc() { #{{{2
+  cd ~/.cheat; vim $1; cd - >/dev/null;
+}
+# Various {{{1
+
+stty -ixon
+
+# Disable XON/XOFF flow control.
+# By default, `C-s` and `C-q`  are interpreted by the terminal driver as
+# “stop sending data“, “continue sending“.
+#
+# Explanations:
+#         http://unix.stackexchange.com/a/12108/125618
+#         http://unix.stackexchange.com/a/12146/125618
+#         http://unix.stackexchange.com/a/72092/125618
+#         https://en.wikipedia.org/wiki/Software_flow_control
