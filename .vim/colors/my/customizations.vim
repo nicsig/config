@@ -1,4 +1,4 @@
-" Let the functions at the top, they're called later.
+" Define the functions at the top; they're called later.
 " Functions {{{1
 fu! s:set_backticks_hg() abort "{{{2
     let attributes = {
@@ -6,14 +6,44 @@ fu! s:set_backticks_hg() abort "{{{2
     \                  'bg'      : 0,
     \                  'bold'    : 0,
     \                  'reverse' : 0,
-    \                }
+    \ }
 
-    call map(attributes, 'synIDattr(synIDtrans(hlID("Comment")), v:key)')
+    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Comment')), k)})
 
     let cmd = has('gui_running')
-    \?            'hi MyBackticks gui=bold guifg=%s'
-    \:            'hi MyBackticks term=bold cterm=bold ctermfg=%s'
+    \?            'hi Backticks gui=bold guifg=%s'
+    \:        &tgc
+    \?            'hi Backticks term=bold cterm=bold guifg=%s'
+    \:            'hi Backticks term=bold cterm=bold ctermfg=%s'
 
+    exe printf(cmd, attributes.fg)
+endfu
+
+fu! s:set_tabline_hg() abort "{{{2
+    " the purpose of this function is to remove the underline value from the HG
+    " TabLine
+
+    let attributes = {
+    \                  'fg'      : 0,
+    \                  'bg'      : 0,
+    \                  'bold'    : 0,
+    \                  'reverse' : 0,
+    \ }
+
+    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
+
+    let cmd = has('gui_running')
+    \?            'hi TabLine gui=none guifg=%s'
+    \:        &tgc
+    \?            'hi TabLine term=none cterm=none guifg=%s'
+    \:            'hi TabLine term=none cterm=none ctermfg=%s'
+
+    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
+    " Tabline doesn't have any value in gui. In this case, executing the command
+    " will fail.
+    if attributes.fg is# ''
+        return
+    endif
     exe printf(cmd, attributes.fg)
 endfu
 
@@ -27,27 +57,36 @@ fu! s:set_user_hg() abort "{{{2
     \                  'bg'      : 0,
     \                  'bold'    : 0,
     \                  'reverse' : 0,
-    \                }
+    \ }
 
-    call map(attributes, 'synIDattr(synIDtrans(hlID("StatusLine")), v:key)')
+    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
 
-    let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
+    if has('gui_running')
+        " When 'termguicolors' is set, you set up:
+        "
+        "     • the style  of a HG with the argument  `cterm`   , not `gui`
+        "     • the colors of a HG with the arguments `gui[fb]g`, not `cterm[fb]g`
+        "
+        " IOW, 'tgc' has an effect on how you set up the COLORS of a HG, but not
+        " its STYLE.
+        let cmd1 = 'hi User1  gui=%s  guifg=%s  guibg=%s'
+        let cmd2 = 'hi User2  gui=%s  guifg=%s  guibg=%s'
 
-    let cmd1 = has('gui_running')
-    \?             'hi User1  gui=%s   guifg=%s   guibg=%s'
-    \:             'hi User1  cterm=%s ctermfg=%s ctermbg=%s'
-    "                                           │
-    "                                           └ yes, you could use `%d`
-    "                                             but you couldn't use `%d` for `guifg`
-    "                                             nor `%x`
-    "                                             nor `%X`
-    "                                             only `%s`
-    "                                             so, we use `%s` everywhere
+    elseif &tgc
+        let cmd1 = 'hi User1  cterm=%s  guifg=%s  guibg=%s'
+        let cmd2 = 'hi User2  cterm=%s  guifg=%s  guibg=%s'
 
-    let cmd2 = has('gui_running')
-    \?             'hi User2  gui=%s   guifg=%s   guibg=%s'
-    \:             'hi User2  cterm=%s ctermfg=%s ctermbg=%s'
-
+    else
+        let cmd1 = 'hi User1  cterm=%s ctermfg=%s ctermbg=%s'
+        let cmd2 = 'hi User2  cterm=%s ctermfg=%s ctermbg=%s'
+        "                                       │
+        "                                       └ yes, you could use `%d`
+        "                                         but you couldn't use `%d` for `guifg`
+        "                                         nor `%x`
+        "                                         nor `%X`
+        "                                         only `%s`
+        "                                         so, we use `%s` everywhere
+    endif
 
     " For some  colorschemes (default, darkblue,  …), some values used  in the
     " command which is  going to be executed may be  empty. If that happens, the
@@ -67,33 +106,8 @@ fu! s:set_user_hg() abort "{{{2
     let style2 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? 'reverse' : '')
     if style2 is# '' | return | endif
 
+    let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
     exe printf(cmd2, style2, todo_fg, attributes.bg)
-endfu
-
-fu! s:set_tabline_hg() abort "{{{2
-    " the purpose of this function is to remove the underline value from the HG
-    " TabLine
-
-    let attributes = {
-    \                  'fg'      : 0,
-    \                  'bg'      : 0,
-    \                  'bold'    : 0,
-    \                  'reverse' : 0,
-    \                }
-
-    call map(attributes, 'synIDattr(synIDtrans(hlID("Tabline")), v:key)')
-
-    let cmd = has('gui_running')
-    \?            'hi TabLine gui=none guifg=%s'
-    \:            'hi TabLine term=none cterm=none ctermfg=%s'
-
-    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
-    " Tabline doesn't have any value in gui. In this case, executing the command
-    " will fail.
-    if attributes.fg is# ''
-        return
-    endif
-    exe printf(cmd, attributes.fg)
 endfu
 
 " Custom HGs {{{1
@@ -104,8 +118,8 @@ endfu
 "     • the filename
 "     • the modified flag
 "
-" We want the values of their attributes to be the same as the ones of the HG
-" `StatusLine`, except for one:    `reverse` (boolean flag).
+" We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
+" except for one: `reverse` (boolean flag).
 "
 " `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
 " Also, we set the color of the background of `User2` as the same as the

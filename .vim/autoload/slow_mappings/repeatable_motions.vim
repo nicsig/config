@@ -113,7 +113,7 @@ fu! s:get_jump_height(is_fwd) abort
     \:         line('.') - max(lnums)
 endfu
 
-" ]h  ]u      move to next path/url {{{2
+" ]h  ]r  ]u      move to next path/ref/url {{{2
 
 " Why not `]H`?{{{
 "
@@ -149,6 +149,8 @@ endfu
 
 noremap  <expr>  <silent><unique>  [h  lg#motion#regex#rhs('path', 0)
 noremap  <expr>  <silent><unique>  ]h  lg#motion#regex#rhs('path', 1)
+noremap  <expr>  <silent><unique>  [r  lg#motion#regex#rhs('ref', 0)
+noremap  <expr>  <silent><unique>  ]r  lg#motion#regex#rhs('ref', 1)
 noremap  <expr>  <silent><unique>  [u  lg#motion#regex#rhs('url', 0)
 noremap  <expr>  <silent><unique>  ]u  lg#motion#regex#rhs('url', 1)
 
@@ -385,6 +387,7 @@ call lg#motion#repeatable#make#all({
 \        'motions': [
 \                     { 'bwd': '[Z',  'fwd': ']Z' },
 \                     { 'bwd': '[h',  'fwd': ']h' },
+\                     { 'bwd': '[r',  'fwd': ']r' },
 \                     { 'bwd': '[u',  'fwd': ']u' },
 \                     { 'bwd': '[z',  'fwd': ']z' },
 \                     { 'bwd': 'gk',  'fwd': 'gj' },

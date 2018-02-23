@@ -70,8 +70,9 @@ call plug#begin('~/.vim/plugged')
 
 " TO_STUDY:
 
-Plug 'tmux-plugins/vim-focus-events', {'frozen': 1}
+Plug 'lacygoill/vim-cursor'
 Plug 'lacygoill/vim-graph'
+Plug 'tmux-plugins/vim-focus-events', { 'frozen': 1 }
 
 Plug 'tpope/vim-abolish', { 'frozen': 1 }
 " settings {{{
@@ -140,7 +141,7 @@ let g:fzf_files_options =
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/limelight.vim', { 'frozen': 1 }
-Plug 'djmoch/vim-makejob', {'frozen': 1}
+Plug 'djmoch/vim-makejob', { 'frozen': 1 }
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
@@ -153,7 +154,8 @@ Plug 'lacygoill/vim-matchit'
 Plug 'lacygoill/potion'
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
-Plug 'kana/vim-submode', { 'frozen': 1}
+Plug 'kana/vim-submode', { 'frozen': 1 }
+Plug 'kana/vim-textobj-user'
 Plug 'jebaum/vim-tmuxify', { 'frozen': 1 }
 Plug 'SirVer/ultisnips'
 " settings {{{
@@ -353,7 +355,6 @@ Plug 'lacygoill/vim-capslock'
 Plug 'lacygoill/vim-cmdline'
 Plug 'lacygoill/vim-column-object'
 Plug 'lacygoill/vim-comment'
-Plug 'lacygoill/vim-cursor'
 Plug 'lacygoill/vim-completion'
 " settings {{{
 
@@ -848,7 +849,7 @@ augroup my_colorscheme
     " This solves 3 issues:
     "
     "         • gVim encounters some errors when trying to set up too early
-    "           some of our custom HGs (~/.vim/colors/my_customizations.vim)
+    "           some of our custom HGs (~/.vim/colors/my/customizations.vim)
     "
     "         • loading the colorscheme directly from vimrc would mean
     "           that every time we write it, the colorscheme would be reloaded,
@@ -871,7 +872,7 @@ augroup my_colorscheme
     "             └─ the autocmds need to nest, so that when we set the colorscheme,
     "                `ColorScheme` is fired, and our customizations are sourced
 
-    au ColorScheme * runtime! colors/my_customizations.vim
+    au ColorScheme * runtime colors/my/customizations.vim
 
     au VimLeavePre * let g:MY_LAST_COLORSCHEME = get(g:, 'seoul256_current_bg', 253)
 augroup END
@@ -2056,59 +2057,13 @@ let mapleader = "\<s-f16>"
 let maplocalleader = "\<s-f17>"
 
 " COMMAND LINE {{{2
+" C-r C-h       fuzzy search history {{{3
+
+cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHistory:<cr>'
+
 " C-r C-l       insert current line {{{3
 
 cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\s*:\?', '', '')<cr>
-
-" C-r C-r       fuzzy search history {{{3
-
-cno  <expr>  <c-r><c-r>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHistory:<cr>'
-
-" C-x           (prefix) {{{3
-
-" C-x C-a: dump cAndidates
-"
-" We lost the ability to insert all names matching the pattern in front of the
-" cursor. We map the Vim default `C-a` to `C-x C-a`.
-cno  <c-x><c-a>  <c-a>
-
-" C-x C-d: capture canDidates
-"
-" Capture  in default  register  all  completion candidates  you  could list  by
-" pressing `C-d` after/in the middle of a keyword (command name/argument) on the
-" command line.
-"
-"     ┌  usually, <silent> is a bad idea in command line mode,
-"     │  but here we need it when there are a lot of candidates:
-"     │
-"     │      if there are too many for a single line, they are briefly
-"     │      displayed on several lines, which makes the screen “flash”
-"     │
-cno  <silent><expr>  <c-x><c-d>  '<c-a>'
-\                               .timer_start(0, {->   setreg('"', getcmdline(), 'l')
-\                                                   + feedkeys('<c-c>', 'in') })[-1]
-
-" Alternative:{{{
-"
-"     cno <silent> <expr> <c-x><c-d> '<c-a>'.&cedit.'dd:q<cr>'
-"          │
-"          └ usually, <silent> is a bad idea in command line mode,
-"            but here we need it to bypass multi-line message (hit enter prompt)
-"
-" Pro: simpler
-" Con: the tabline seems  to flash, because the name of  the command line window
-" briefly appears and disappears.
-"}}}
-
-" C-x C-e: edit-and-execute-command
-cno  <expr>  <c-x><c-e>  &cedit
-
-" C-x C-k: digraph
-"
-" On the command-line, we want C-k to  behave like in the shell: kill everything
-" after the cursor. But doing so, we  lose the possibility to insert digraph. To
-" restore this functionality, we map it to C-x k.
-cno  <c-x>k  <c-k>
 
 " INSERT {{{2
 
@@ -3388,6 +3343,24 @@ fu! s:fix_display() abort
     "}}}
     syntax sync minlines=200
     syntax sync maxlines=400
+endfu
+
+" =m                  fix macro {{{3
+
+" Usage:
+"     =ma  →  edit macro a
+"     …
+"     =mz  →  edit macro z
+nno  <expr><silent>  =m  <sid>fix_macro()
+
+fu! s:fix_macro() abort
+    let c = getchar()
+    if c < 97 || c > 123
+        call timer_start(0, {-> execute('redraw')})
+        return ''
+    endif
+    let c = nr2char(c)
+    return printf("q:ilet @%s = \<c-r>\<c-r>=string(@%s)\r\e0f'", c, c)
 endfu
 
 " SPC  SPC   za {{{3
@@ -5875,8 +5848,7 @@ endfu
 "         • refactor the code to use a while loop, and monitor the total time
 "           taken after each iteration
 "
-"           pb: the while loop seems 6 times slower overall, compared to
-"           `s///gen`
+"           pb: the while loop seems 6 times slower overall, compared to `s///gen`
 "
 " Solution proposed by Ingo:
 "         :help catch-interrupt
@@ -6012,21 +5984,6 @@ endfu
 "         vim /if\s\+&bt\s\+==#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
 " 64 -
-" S-Tab doesn't work in terminal buffer (neither in Vim nor in Neovim, even without config)
-"
-" Hints:
-" maybe not needed
-"         set t_kB=[Z
-"
-" better but still doesn't work completely
-"
-"     tno <s-tab> <esc>[Z
-"
-" better, but not quite there yet
-tno  <s-tab>  <left>
-" tno <s-tab> <c-p>
-"
-" 65 -
 " https://github.com/justinmk/vim-dirvish/issues/62
 " https://github.com/bounceme/remote-viewer/
 " Alternative:
@@ -6034,7 +5991,7 @@ tno  <s-tab>  <left>
 " other "middleware"),  so that  any dumb local  navigator (like  dirvish) works
 " without adding special-case support for scp, FTP, webdav, …, netrw does.
 "
-" 66 -
+" 65 -
 " Do we really need a timer to display a message?
 "
 "         vim /execute(.*echo/gj ~/.vim/**
@@ -6051,7 +6008,7 @@ tno  <s-tab>  <left>
 "         • <expr>
 "         • timer
 "
-" 67 -
+" 66 -
 "
 " create mapping to send current line to terminal, and execute it
 " use `g>` for the lhs?
@@ -6060,14 +6017,14 @@ tno  <s-tab>  <left>
 "     g> on visual selection
 "     g>> for line
 "
-" 68 -
+" 67 -
 " finish reviewing vim-math
 " What insight can we gain from it?
 "
-" 69 -
+" 68 -
 " finish reviewing ~/Dropbox/vim_plugins/pair_complete.vim
 "
-" 70 -
+" 69 -
 " We use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
 "         • iabbrev
@@ -6086,7 +6043,7 @@ tno  <s-tab>  <left>
 "
 "         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  isnot#  'Comment'
 "
-" 71 -
+" 70 -
 " Save/restore qfl/ll when we restart Vim?
 " Not sure I want that. But it would be convenient to have a command which saves
 " a particular qfl/ll in `~/.viminfo`, and which could restore it when needed.
@@ -6098,13 +6055,13 @@ tno  <s-tab>  <left>
 "
 "         %argd
 "
-" 72 -
+" 71 -
 " finish reviewing  the section in our  notes which deals with  string functions
 " (match(), matchstr(),…); also talk about `matchstrpos()`
 "
 " finish reviewing indexage de chaîne
 "
-" 73 -
+" 72 -
 " study vim-sandwich
 " implement surrounding with → ← (for easier conceal)
 "
@@ -6157,11 +6114,11 @@ tno  <s-tab>  <left>
 "
 "           let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
 "
-" 74 -
+" 73 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
 "
-" 75 -
+" 74 -
 " Create a command in vim-debug, to automatically profile a plugin.
 " It would create a temporary script with the commands:
 "
@@ -6177,11 +6134,11 @@ tno  <s-tab>  <left>
 "         \               { i,v -> v !~# '/t\%[est]/' }),
 "         \        { i,v -> 'so '.v })
 "
-" 76 -
+" 75 -
 " Check whether some commands would be better suited as mappings.
 " And check whether some mappings would be better suited as commands.
 "
-" 77 -
+" 76 -
 "                                ┌ 3rd character of all `]o?` mappings
 "         ┌──────────────────────┤
 "         BCILNSWacdfhilmnopqstvwz
@@ -6194,7 +6151,7 @@ tno  <s-tab>  <left>
 " ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 " cmdline#transform() (bound to C-s)
 "
-" 78 -
+" 77 -
 " install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `BufWritePost`
 " which would give us a warning when we forget to undo a:
@@ -6203,10 +6160,10 @@ tno  <s-tab>  <left>
 "
 " or when we undo a non-existing …
 "
-" 79 -
+" 78 -
 " normalize underscore/dash in plug mappings, and function names in shell init files
 "
-" 80 -
+" 79 -
 " update the position of the mark in `vim-readline`
 "
 " Watch:
@@ -6242,7 +6199,7 @@ tno  <s-tab>  <left>
 "
 " Look for other mappings to implement, add them to a todo.
 "
-" 81 -
+" 80 -
 " Should we add `:noautocmd` every time we use `:wincmd`?
 "
 "
@@ -6261,53 +6218,53 @@ tno  <s-tab>  <left>
 " I think we should use `noautocmd`  whenever we TEMPORARILY change the focus to
 " a window.
 "
-" 82 -
+" 81 -
 " We've lost time debugging dirvish, because the issue was not in vimrc
 " but in filetype plugin. How to avoid it in the future?
 "
-" 83 -
+" 82 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
 " A function implementing some abstract logic can be wrongly affected by the current
 " buffer settings ('isk' for example). Should we track this issue everywhere in our code?
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
-" 84 -
+" 83 -
 " check that whenever we use `wincmd p` we get to the right window
 "
-" 85 -
+" 84 -
 " Read all of this:
 "     https://neovim.io/news/archive/
 "
-" 86 -
+" 85 -
 " Read this:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 87 -
+" 86 -
 " Read this (OOP in VimL):
 " https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
 "
-" 88 -
+" 87 -
 " Replace `:silent!` with `:silent` whenever possible.
 " There may be errors to fix which we are missing because they are silent.
 " Also, if you wonder whether a plugin/(auto)command/function is working
 " as expected, and has no silent errors, use `:Verbose` to increase
 " the verbosity level.
 "
-" 89 -
+" 88 -
 " use syntax hl in `vim-qf` instead of complex mechanism using matches
 " also, in `vim-qf`, fix the fixme in the autocmd `my_qf`
 "
-" 90 -
+" 89 -
 " add syntax hl in TOC menu, and make content more relevant in help TOC
 "
-" 91 -
+" 90 -
 " The TOC  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " qf#open()). We could  compute the longest line,  and set the width  of the TOC
 " window dynamically.
 "
-" 92 -
+" 91 -
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     cmdline#reset_did_transform(
@@ -6324,12 +6281,12 @@ tno  <s-tab>  <left>
 " Also, make  sure they  are self-contained. They must  not call  functions from
 " one of our other plugins. If they do, move the latter inside `vim-lg-lib` too.
 "
-" 93 -
+" 92 -
 " implement a search ring, and install mappings to cycle through it
 " useful to search for an old pattern without having to do `/ Up …`
 " (; and ,  would be more comfy)
 "
-" 94 -
+" 93 -
 " When you create a loclist, replace the  old one if its title is `Breakdown` or
 " `FIX_ME & TO_DO`.
 " Also, maybe create a mapping to show  the stack of location lists, and another
@@ -6342,7 +6299,7 @@ tno  <s-tab>  <left>
 " it parsed, or any information sufficient to know that there's no need to
 " recreate a qfl.
 "
-" 95 -
+" 94 -
 "     SPC fr    (:FzHistory)
 "     Escape
 "     :tabnew
@@ -6350,7 +6307,7 @@ tno  <s-tab>  <left>
 " A new tab page is correctly opened, but the focus stay in the same window,
 " and the fzf buffer is replaced with the last visited buffer.
 "
-" 96 -
+" 95 -
 " Create a submode to insert numbers more easily.
 " Ex:
 "
@@ -6394,7 +6351,7 @@ tno  <s-tab>  <left>
 "         return ''
 "     endfu
 "
-" 97 -
+" 96 -
 " Create a mapping to dump in the buffer information printed by a mapping
 " prefixed with `-`. Example: `-a`, `-p`
 "
@@ -6414,7 +6371,7 @@ tno  <s-tab>  <left>
 "  -f
 "  -p
 "
-" 98 -
+" 97 -
 " Suggestion:
 "
 "              ┌ script-local
@@ -6429,7 +6386,7 @@ tno  <s-tab>  <left>
 "
 " If we do it, should we do the same for the buffer-local scope?
 "
-" 99 -
+" 98 -
 "
 "     $ vim
 "     :e /tmp/file
@@ -6448,7 +6405,7 @@ tno  <s-tab>  <left>
 " But this begs the question. How to deal with an error prompting us
 " with a question? How to catch it properly?
 "
-" 100 -
+" 99 -
 " Write your own colorscheme.
 " Take inspiration from seoul.
 " There should be a dark and light version, with different level of lightness.
@@ -6460,7 +6417,7 @@ tno  <s-tab>  <left>
 "
 "     https://github.com/lifepillar/vim-colortemplate
 "
-" 101 -
+" 100 -
 "
 " Add sth like this  for Neovim; it could make neovim  faster (especially if you
 " use UltiSnips):
@@ -6489,13 +6446,13 @@ tno  <s-tab>  <left>
 " https://github.com/neovim/neovim/issues/5702
 " https://github.com/neovim/neovim/issues/7063
 "
-" 102 -
+" 101 -
 " https://github.com/roxma/vim-tmux-clipboard
 "
-" 103 -
+" 102 -
 " :h quickref
 "
-" 104 -
+" 103 -
 " Play with:
 "
 "    • $VIMRUNTIME/colors/tools/check_colors.vim
@@ -6506,6 +6463,25 @@ tno  <s-tab>  <left>
 "    • TextChangedP
 "    • changedtick in qfl
 "    • win_screenpos()
+"
+" 104 -
+" In `vim-window`, don't do this:
+"
+"     let changelist = split(execute('changes'), '\n')
+"     let b:my_change_position = index(changelist, matchstr(changelist, '^>'))
+"
+" Instead do this:
+"
+"     let changelist = get(getchanglist('%'), 0, [])
+"     let b:my_change_position = get(getchanglist('%'), 1, -1)
+"
+" Requires the  new `getchanglist()` function,  which atm is not  implemented in
+" Neovim. Wait for Neovim to catch up.
+
+
+
+nno  <silent>  {  :<c-u>call search('\v(^\s*$<bar>%^)\_s*\zs\S', 'bW')<cr>zv
+nno  <silent>  }  :<c-u>call search('\v\S+.*\ze\n\s*$', 'W')<cr>zv
 
 
 
