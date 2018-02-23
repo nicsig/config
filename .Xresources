@@ -1,0 +1,285 @@
+! TODO:
+! Read all of this:
+! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.7.pod
+
+
+URxvt.perl-ext-common:  ...,keyboard-select
+URxvt.keysym.M-Escape:  perl:keyboard-select:activate
+! URXVT config
+! FIXME:
+! Some unicode characters are not rendered at all. Ex, euler number:
+!
+!         𝑒
+!
+! Google: urxvt unicode character missing
+! Also, read `man urxvt` and search for `font`.
+!
+! NOTE:
+! We can see that `DejaVu Sans Mono` support this glyph:
+!
+!         • start `gucharmap`
+!         • select `DejaVu Sans Mono`
+!         • select size `20`
+!         • search for the glyph (C-f)
+!
+! It works in `xfce4-terminal` and in `guake`, so why not in `urxvt`?
+! What's puzzling, is that `urxvt` is able to render other “exotic“ glyphs,
+! like `ᵢ`.
+!
+! Solution:
+! Install another font:
+!         api xfonts-terminus
+!
+! And use it:
+!
+!       URxvt.font:             xft:Terminus:pixelsize=20:antialias=false
+!       URxvt.boldFont:         xft:Terminus:bold:pixelsize=20:antialias=false
+!
+! Problem:
+! How to use `DejaVu Sans Mono`, and `Terminus` as a fallback?
+! This doesn't work:
+!                                                             ┌ necessary?
+!                                                          ┌──┤
+!       URxvt.font:           xft:DejaVu Sans Mono:size=20,xft:Terminus:size=20
+!       URxvt.boldFont:       xft:DejaVu Sans Mono:bold:size=20,xft:Terminus:bold:size=20
+!
+! Read this:
+! https://forums.gentoo.org/viewtopic-t-783140-start-0-postdays-0-postorder-asc-highlight-urxvt.html
+! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.7.pod#How_does_rxvt_unicode_choose_fonts
+!
+! I tried this:
+!
+!         1. copy this file:
+!                 https://github.com/muennich/urxvt-perls/blob/master/keyboard-select
+!
+!            … inside ~/.urxvt/ext/
+!
+!         2. start urxvt like this:
+!
+!                 urxvt -fn  'xft:DejaVu Sans Mono:size=20,xft:Terminus:size=20' \
+!                       -fi  'xft:DejaVu Sans Mono:italic:size=20,xft:Terminus:italic:size=20' \
+!                       -fb  'xft:DejaVu Sans Mono:bold:size=20,xft:Terminus:bold:size=20' \
+!                       -fbi 'xft:DejaVu Sans Mono:bold:italic:size=20,xft:Terminus:bold:italic:size=20'
+!
+! Doesn't work.
+! Even though I chose a size for the  2nd font which is not greater than the one
+! of the base font:
+!
+!         The only limitation is  that none of the fonts may  be larger than the
+!         base font, as the base font  defines the terminal character cell size,
+!         which must be the same due to the way terminals work.
+!
+! Maybe `urxvt` doesn't recognize that the glyph is not supported and so doesn't
+! try to use  the 2nd font? If so,  maybe we should just create  a mapping which
+! would toggle the font on-the-fly?
+!
+! Update:
+!
+! Try:    C-v U 1d434 Esc
+!         C-v U 1d435 Esc
+!         …
+!
+! Some characters are correctly rendered, but not others.
+!
+! Update:
+!
+! Now they all fail …
+
+
+! TODO:
+! read ~/.vim/plugged/seoul256.vim/urxvt/seoul256-light
+
+! TODO:
+! In `vim-readline` we could install this mapping:
+!
+!         exe "set <m-y>=\e[99~"
+!         ino  <expr><unique>  <m-y>  readline#yank('i', 1)
+!
+! And here we could rebind `M-y`:
+!
+!         URxvt.keysym.Meta-y: \033[99~
+!
+! This would fix the conflict between `yank-and-pop` and `ù`.
+!
+! See also:
+!
+!     man 7 urxvt    /URxvt.keysym.Up
+!     https://unix.stackexchange.com/a/76591/275162
+!
+! But, how  to make sure  we choose a sequence  which doesn't conflict  with any
+! existing key?
+!
+! Update:
+! It would break the keys in other programs.
+! For example, M-y wouldn't work in the shell anymore.
+
+! choose a font
+URxvt.font:            xft:DejaVu Sans Mono:size=20
+URxvt.boldFont:        xft:DejaVu Sans Mono:bold:size=20
+
+URxvt.ItalicFont:      xft:DejaVu Sans Mono:italic:size=20
+URxvt.boldItalicFont:  xft:DejaVu Sans Mono:bold:italic:size=20
+
+! set `$TERM` correctly
+!
+! It's not needed atm, because the package I installed seems to already set it
+! correctly, but if we install a new package in the future, better be safe than
+! sorry.
+URxvt.termName:  rxvt-unicode-256color
+
+! disable scrollbar
+URxvt.scrollBar:  false
+
+! default geometry
+
+!                ┌─ a little bigger than $COLUMNS
+!                │
+URxvt.geometry:  121x35
+!                    │
+!                    └─  a little bigger than $LINES
+
+
+Xft.dpi:        96
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    true
+Xft.hintstyle:  hintslight
+Xft.autohint:   false
+Xft.lcdfilter:  lcddefault
+
+
+
+! URxvt.perl-ext-common: default,matcher
+! URxvt.url-launcher: /usr/bin/xdg-open
+! URxvt.matcher.button: 1
+!
+! URxvt.keysym.C-Delete: perl:matcher:last
+! URxvt.keysym.M-Delete: perl:matcher:list
+!
+! URxvt.matcher.rend.0: Uline Bold fg5
+!
+! URxvt.colorUL: #4682B4
+
+
+
+! Perl extensions
+URxvt.perl-ext-common:  default,-searchable-scrollback,selection-to-clipboard,pasta,matcher,keyboard-select,confirm-paste
+!                               │
+!                               └── disable `searchable scrollback` extension
+!                                   because it shadows our Vim mapping `M-s`
+
+! All extensions are implemented in `/usr/lib/urxvt/perl/`.
+
+! Matcher:
+! Underline arbitrary patterns and make them clickable.
+! By default, it's used to make URLs clickable.
+
+! `selection-to-clipboard`:
+! Put the selection into the system clipboard.
+! Select some text in the terminal, and you can automatically paste it in the
+! browser, hitting `C-S-v`.
+! In tmux, you need to disable the mouse (pfx + m) for the extension to work.
+
+
+! temporarily disabled, we need to find another key to not shadow `M-u` (readline capitalize)
+! besides, the next key binding can't work because we don't have any url-select extension
+! inside    /usr/lib/urxvt/perl/    nor inside    ~/.urxvt/ext/
+!
+!     URxvt.keysym.M-u:     perl:url-select:select_next
+!     URxvt.keysym.M-u:     perl:searchable-scrollback
+URxvt.url-launcher:  /usr/bin/firefox
+
+! If you don't want URLs to be underlines, the following resource isn't enough.
+! You also need to either:
+!
+!         • disable the perl extension `matcher` in `URxvt.perl-ext-common`
+!         • tweak the resource `URxvt.matcher.pattern.0`
+URxvt.underlineURLs:  false
+URxvt.matcher.pattern.0:  urxvt_matcher_pattern_garbage
+
+URxvt.matcher.button:  1
+URxvt.keysym.M-Escape:  perl:keyboard-select:activate
+URxvt.keysym.Control-Shift-V:  perl:pasta:paste
+! Comment this if you don't want copy when text is selected
+URxvt.clipboard.autocopy:  true
+
+! disable picture insert mode and ISO 14755 mode
+! these modes prevent us from pasting with C-S-v
+!
+!     https://wilmer.gaa.st/blog/archives/36-rxvt-unicode-and-ISO-14755-mode.html#c289
+
+URxvt.iso14755:  false
+URxvt.iso14755_52:  false
+
+
+
+! To find a good palette, look here:
+!
+!     https://terminal.sexy/
+!
+! When you want  to export a scheme,  you have to select the  export tab, BUT
+! ALSO to click on the export button.
+
+
+
+! NOTE:
+! If you prefer to use the same colors used by seoul256:
+!
+!         ~/.vim/plugged/seoul256.vim/urxvt/seoul256-light
+!
+! Warning:
+! The syntax highlighting applied by the `zsh-syntax-highlighting` plugin
+! may override some of these colors for some tokens.
+! Atm, it's the case for the double/single quoted strings. They aren't colored
+! by the yellow defined in this file.
+
+
+! google light
+!
+! special
+! output of commands
+*.foreground:   #373b41
+
+! terminal background
+! value taken from `bespin` light palette
+*.background:   #dbd6d1
+
+! If you change the color here, make sure to also change it in:
+!
+!         ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
+!
+! … in `s:colorscheme()`.
+*.cursorColor:  #373b41
+
+! black
+*.color0:  #1d1f21
+*.color8:  #969896
+
+! red
+*.color1:  #cc342b
+*.color9:  #cc342b
+
+! green
+*.color2:   #198844
+*.color10:  #198844
+
+! yellow
+! Taken from:    ~/.vim/plugged/seoul256.vim/urxvt/seoul256-light
+*.color3:   #af8760
+*.color11:  #d8865f
+
+! blue
+*.color4:   #3971ed
+*.color12:  #3971ed
+
+! magenta
+*.color5:   #a36ac7
+*.color13:  #a36ac7
+
+! cyan
+*.color6:   #3971ed
+*.color14:  #3971ed
+
+! white
+*.color7:   #c5c8c6
+*.color15:  #ffffff
