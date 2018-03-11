@@ -1,10 +1,13 @@
 ! TODO:
+! Learn how to start the urxvt daemon.
+! It  would  reduce the  memory  footprint  when  we  temporarily open  2  urxvt
+! terminals.
+
+! TODO:
 ! Read all of this:
 ! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.7.pod
 
 
-URxvt.perl-ext-common:  ...,keyboard-select
-URxvt.keysym.M-Escape:  perl:keyboard-select:activate
 ! URXVT config
 ! FIXME:
 ! Some unicode characters are not rendered at all. Ex, euler number:
@@ -211,6 +214,50 @@ URxvt.clipboard.autocopy:  true
 URxvt.iso14755:  false
 URxvt.iso14755_52:  false
 
+
+
+! XTERM
+
+! $TERM should be `xterm-256color`, so that our programs use the full palette of
+! the terminal
+XTerm*termName: xterm-256color
+
+! Make key bindings using the meta modifier work.
+!
+! If “true”,  Meta characters (a  character combined with the  Meta modifier
+! key) are  converted into  a two-character sequence  with the  character itself
+! preceded by  ESC.
+XTerm*metaSendsEscape: true
+
+! font (face and size)
+xterm*faceName: DejaVu Sans Mono
+xterm*faceSize: 20
+
+! Let us paste the system clipboard via C-S-v.
+! https://unix.stackexchange.com/a/225076/277716
+xterm*VT100.Translations: #override \
+                 Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
+                 Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
+
+
+
+! COLORS (for all X programs)
+
+! don't choose the closest match in the palette for a true color
+!
+! Source:
+!
+!     http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
+!     CSI Pm m  Character Attributes (SGR).
+!
+!     If  xterm  is  compiled  with   direct-color  support,  and  the  resource
+!     directColor is  true, then rather  than choosing the closest  match, xterm
+!     asks the X server to directly render a given color.
+!
+! Also useful for xterm to use the colors defined in this file.
+! Without enabling  `directColor`, xterm  chooses a  black background  no matter
+! what we we set up here.
+directColor: true
 
 
 ! To find a good palette, look here:

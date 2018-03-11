@@ -66,7 +66,7 @@ alias lst='ls++ --ptsf'
 alias mountc='grc mount'
 alias prof_zsh='repeat 10 time zsh -i -c exit'
 alias reload_conky='killall -SIGUSR1 conky'
-alias reload_xres='xrdb -merge -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
+alias reload_xres='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
 alias web='WWW_HOME=duckduckgo.com w3m'
 
 
@@ -420,10 +420,16 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 # add the `dasht` binary to our path
 export PATH=$PATH:$HOME/GitRepos/dasht/bin
 
+# PDFVIEWER {{{2
+
+# Choose which program should be used to open pdf documents.
+# Useful for `texdoc`.
+export PDFVIEWER=zathura
+
 # TERM {{{2
 #     What's `$TERM` inside a terminal, by default?{{{
 #
-# In many terminals, including xfce-terminal and guake:
+# In many terminals, including xfce-terminal, guake, konsole:
 #
 #   $TERM = xterm
 #
@@ -486,8 +492,12 @@ export PATH=$PATH:$HOME/GitRepos/dasht/bin
 # One way to be sure that we're not connected to Tmux , is to check that `$TERM`
 # is set to 'xterm'.  That's the default value set by xfce4-terminal.
 #}}}
-if [ "${COLORTERM}" = "xfce4-terminal" -a "${TERM}" = "xterm" ] ; then
-  export TERM=xterm-256color
+if [ "${TERM}" = "xterm" ]; then
+  if [ "${COLORTERM}" = "xfce4-terminal" -o -n "${KONSOLE_PROFILE_NAME}" ] ; then
+  #                                           └──────────────────────────┤
+  #                                                                      └ to also detect the Konsole terminal
+    export TERM=xterm-256color
+  fi
 fi
 #     Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
 #
@@ -893,6 +903,16 @@ nv() (
   fi
 )
 
+
+palette(){ #{{{2
+  for i in {0..255} ; do
+    printf '\e[48;5;%sm%3d\e[0m ' "$i" "$i"
+    if (( i == 15 )) || (( i > 15 )) && (( (i-15) % 6 == 0 )); then
+      printf "\n";
+    fi
+  done
+}
+
 ppa_what_have_you(){ #{{{2
   # FIXME:
   # move this function in zsh config, to create a completion function which
@@ -900,9 +920,52 @@ ppa_what_have_you(){ #{{{2
   awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$@"
 }
 
+truecolor() { #{{{2
+  local i r g b
+
+  # What's `r`, `g` and `b`?{{{
+  #
+  # The quantities of red (r), green (g) and blue (b) for each color we're going to test.}}}
+  # How do we make them evolve?{{{
+  #
+  # To produce a specrum of colors,  they need to evolve in completely different
+  # ways. So, we make:
+  #
+  #     • `r` decrease from 255  (to make the specrum begin from very red)
+  #                  to     0  (to get most shades of red)
+  #
+  #     • `b` increase from   0
+  #                  to   255
+  #
+  #     • `g`    increase from 0   to 255  (but faster than blue so that we produce more various colors)
+  #       then decrease from 255 to 0    (via `if (g > 255) g = 2*255 - g;`)
+  #
+  # Summary:
+  #
+  #     r:  255 → 0
+  #     g:  0   → 255 → 0
+  #     b:  0   → 255
+  #}}}
+  # Why 79?{{{
+  #
+  # By default terminals have 80 columns.
+  #}}}
+  for ((i = 0; i <= 79; i++)); do
+    b=$(($i*255/79))
+    g=$((2*$b))
+    r=$((255-$b))
+    if [[ $g -gt 255 ]]; then
+      g=$((2*255 - $g))
+    fi
+    printf '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
+  done
+  printf '\n'
+}
+
 vc() { #{{{2
   cd ~/.cheat; vim $1; cd - >/dev/null;
 }
+
 # Various {{{1
 
 stty -ixon
