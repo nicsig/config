@@ -153,6 +153,8 @@ noremap  <expr>  <silent><unique>  [r  lg#motion#regex#rhs('ref', 0)
 noremap  <expr>  <silent><unique>  ]r  lg#motion#regex#rhs('ref', 1)
 noremap  <expr>  <silent><unique>  [u  lg#motion#regex#rhs('url', 0)
 noremap  <expr>  <silent><unique>  ]u  lg#motion#regex#rhs('url', 1)
+noremap  <expr>  <silent><unique>  [U  lg#motion#regex#rhs('concealed_url', 0)
+noremap  <expr>  <silent><unique>  ]U  lg#motion#regex#rhs('concealed_url', 1)
 
 " Make `fx` motion, &friends, repeatable {{{1
 
@@ -389,6 +391,7 @@ call lg#motion#repeatable#make#all({
 \                     { 'bwd': '[h',  'fwd': ']h' },
 \                     { 'bwd': '[r',  'fwd': ']r' },
 \                     { 'bwd': '[u',  'fwd': ']u' },
+\                     { 'bwd': '[U',  'fwd': ']U' },
 \                     { 'bwd': '[z',  'fwd': ']z' },
 \                     { 'bwd': 'gk',  'fwd': 'gj' },
 \                   ]

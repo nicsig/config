@@ -303,7 +303,7 @@ fu! myfuncs#box_destroy() abort
 endfu
 
 fu! myfuncs#check_myfuncs() abort "{{{1
-    let s:my_vimrc = join(readfile($MYVIMRC), "\n")
+    let s:MY_VIMRC = join(readfile($MYVIMRC), "\n")
     let s:tempfile = tempname()
 
     call writefile([ '    Warning: a function whose name appears here could be moved in the script-local scope,',
@@ -320,13 +320,13 @@ fu! myfuncs#check_myfuncs() abort "{{{1
     g/\v^\s*fu%[nction]!\s+myfuncs#/call s:search_superfluous_myfuncs()
 
     exe 'tabe '.s:tempfile
-    unlet! s:my_vimrc s:tempfile
+    unlet! s:MY_VIMRC s:tempfile
 endfu
 
 fu! s:search_superfluous_myfuncs() abort
     let line      = getline('.')
     let func_name = matchstr(line, 'myfuncs#\k\+')
-    if stridx(s:my_vimrc, func_name) ==# -1
+    if stridx(s:MY_VIMRC, func_name) ==# -1
         call writefile([func_name], s:tempfile, 'a')
     endif
 endfu
@@ -519,11 +519,11 @@ fu! myfuncs#fix_spell() abort "{{{1
     let spell_save = &l:spell
     setl spell
     try
-        let orig_line = getline('.')
-        "                                                  ┌ don't eliminate a keyword nor a single quote
-        "                                                  │ when you split the line
-        "                                         ┌────────┤
-        let words = reverse(split(orig_line, '\v%(%(\k|'')@!.)+'))
+        let before_cursor = matchstr(getline('.'), '.*\%'.col('.').'c')
+        "                                                      ┌ don't eliminate a keyword nor a single quote
+        "                                                      │ when you split the line
+        "                                             ┌────────┤
+        let words = reverse(split(before_cursor, '\v%(%(\k|'')@!.)+'))
 
         let found_a_badword = 0
         for word in words
@@ -541,7 +541,7 @@ fu! myfuncs#fix_spell() abort "{{{1
         endfor
 
         if found_a_badword
-            let new_line = substitute(orig_line, '\<'.badword.'\>', suggestion, 'g')
+            let new_line = substitute(getline('.'), '\<'.badword.'\>', suggestion, 'g')
             call timer_start(0, {-> setline(line('.'), new_line)})
         endif
     catch
@@ -557,10 +557,10 @@ endfu
 " gtfo {{{1
 
 fu! s:gtfo_init() abort
-    let s:istmux       = !empty($TMUX)
+    let s:IS_TMUX      = !empty($TMUX)
     " terminal Vim running within a GUI environment
-    let s:is_X_running = !empty($DISPLAY) && $TERM isnot# 'linux'
-    let s:launch_term  = 'urxvt -cd'
+    let s:IS_X_RUNNING = !empty($DISPLAY) && $TERM isnot# 'linux'
+    let s:LAUNCH_TERM  = 'urxvt -cd'
 endfu
 
 fu! s:gtfo_error(s) abort
@@ -586,14 +586,14 @@ fu! myfuncs#gtfo_open_term(dir) abort
         return
     endif
 
-    if s:istmux
+    if s:IS_TMUX
         "                                   ┌─ splits vertically (by default tmux splits horizontally)
         "                                   │
         sil call system('tmux split-window -h -c '.string(a:dir))
         "                                      │
         "                                      └── start-directory
-    elseif s:is_X_running
-        sil call system(s:launch_term.' '.shellescape(a:dir).' &')
+    elseif s:IS_X_RUNNING
+        sil call system(s:LAUNCH_TERM.' '.shellescape(a:dir).' &')
         redraw!
     else
         call s:gtfo_error('failed to open terminal')
@@ -686,7 +686,7 @@ fu! myfuncs#keyword_custom(chars) abort "{{{1
     catch
         return lg#catch_error()
     " Do NOT add a finally clause to restore 'isk'.
-    " It would be too soon. The completion function hasn't been invoked yet.
+    " It would be too soon. The completion hasn't been done yet.
     endtry
     return ''
 endfu
@@ -1246,15 +1246,16 @@ fu! s:open_gx_get_url() abort
             " remove everything after the last `"`
             let url = substitute(url, '\v".*', '', '')
 
-        elseif url =~# '\[.\{-}\](.\{-})'
-            " [text](path_to_local_file)
-            let url = matchstr(url, '\[.\{-}\](\zs.\{-}\ze)')
-            let url = substitute(url, '^\s*\.', expand('%:p:h'), '')
         else
-            " garbage
-            let url = ''
+            " [text](path_to_local_file)
+            let cursor_not_before = '%(%'.col('.').'c|%(%'.col('.').'c.*)@<!)'
+            let cursor_not_after = '%(.*%'.col('.').'c)@!'
+            let pat = '\v'.cursor_not_before.'\[.{-}\]\(\zs.{-}\ze\)'.cursor_not_after
+
+            let url = matchstr(getline('.'), pat)
         endif
     endif
+
     return url
 endfu
 

@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +1 ~/Dropbox/conf/cheat/ffmpeg
-badd +2 ~/Desktop/gif-ffmpeg.md
+badd +1 ~/Desktop/gif-ffmpeg.md
 badd +1 ~/Dropbox/conf/bin/gifrec.sh
 badd +1 ~/Dropbox/conf/bin/gifenc.sh
 argglobal
@@ -22,11 +22,11 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '2resize ' . ((&lines * 11 + 8) / 16)
 argglobal
 setlocal fdm=expr
-setlocal fde=markdown#stacked()
+setlocal fde=fold#md#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -38,27 +38,27 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 21
-normal! 01|
+normal! 0
 wincmd w
 argglobal
 if bufexists('~/Desktop/gif-ffmpeg.md') | buffer ~/Desktop/gif-ffmpeg.md | else | edit ~/Desktop/gif-ffmpeg.md | endif
 setlocal fdm=expr
-setlocal fde=markdown#stacked()
+setlocal fde=fold#md#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 144 - ((17 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-144
+1
 normal! 0
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '2resize ' . ((&lines * 11 + 8) / 16)
 tabedit ~/Dropbox/conf/bin/gifrec.sh
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -67,8 +67,8 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 11 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -82,12 +82,12 @@ setlocal fen
 normal! zo
 9
 normal! zo
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
-normal! 04|
+normal! 02|
 wincmd w
 argglobal
 if bufexists('~/Dropbox/conf/bin/gifenc.sh') | buffer ~/Dropbox/conf/bin/gifenc.sh | else | edit ~/Dropbox/conf/bin/gifenc.sh | endif
@@ -99,22 +99,22 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 10 - ((9 * winheight(0) + 0) / 1)
+let s:l = 10 - ((7 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 10
 normal! 0
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 11 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 tabnext 2
 set stal=1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOcFIsW
+set winheight=1 winwidth=20 shortmess=filnxtToOAacFIsW
 set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)

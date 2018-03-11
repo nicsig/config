@@ -7,11 +7,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Dropbox/galore
 badd +108 ~/Desktop/backup.md
+badd +1 ~/.vim/doc/misc/galore
 argglobal
 silent! argdel *
-edit ~/Dropbox/galore
+edit ~/.vim/doc/misc/galore
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -22,56 +22,40 @@ wincmd w
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 27 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
+exe '3resize ' . ((&lines * 10 + 8) / 16)
 argglobal
-setlocal fdm=manual
-setlocal fde=0
+setlocal fdm=expr
+setlocal fde=<SNR>147_fold_expr()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-2,90fold
-92,111fold
-113,144fold
-146,182fold
-184,277fold
-279,345fold
-347,410fold
-412,436fold
-438,474fold
-476,553fold
-555,671fold
-673,701fold
-703,807fold
-809,924fold
-925,925fold
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 166 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+166
 normal! 0
 wincmd w
 argglobal
 if bufexists('~/Desktop/backup.md') | buffer ~/Desktop/backup.md | else | edit ~/Desktop/backup.md | endif
 setlocal fdm=expr
-setlocal fde=markdown#stacked()
+setlocal fde=fold#md#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 108 - ((8 * winheight(0) + 13) / 27)
+let s:l = 203 - ((9 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-108
+203
 normal! 0
 wincmd w
 argglobal
@@ -85,23 +69,23 @@ setlocal fml=1
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
-let s:l = 423 - ((3 * winheight(0) + 0) / 1)
+let s:l = 423 - ((5 * winheight(0) + 5) / 10)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 423
-normal! 072|
+normal! 0
 wincmd w
-2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 27 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+3wincmd w
+exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
+exe '3resize ' . ((&lines * 10 + 8) / 16)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOcFIsW
+set winheight=1 winwidth=20 shortmess=filnxtToOAacFIsW
 set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)

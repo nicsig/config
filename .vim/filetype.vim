@@ -65,4 +65,6 @@ augroup filetypedetect
 
     au! BufRead,BufNewFile zsh.snippets set filetype=snippets
     au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} set filetype=help
+
+    au! BufRead,BufNewFile $HOME/.config/zathura/zathurarc set filetype=conf
 augroup END
