@@ -1,0 +1,24 @@
+# Copy the selected text inside the CLIPBOARD clipboard{{{
+#
+# By default, when  we select some text  in zathura, it's copied  in the PRIMARY
+# clipboard, which we  can access via the  `*` register. We want to  use the `+`
+# register instead, because  it's more consistent with other  programs (like the
+# browser).
+#}}}
+# Where did you find this option?{{{
+#
+# $ man zathurarc
+#
+#     /selection-clipboard
+#
+# The  'selection-clipboard'   option  defines   the  X  clipboard   into  which
+# mouse-selected data  will be written.   When it is "clipboard",  selected data
+# will be written to the CLIPBOARD clipboard, and can be pasted using the Ctrl+v
+# key combination.  When  it is "primary", selected data will  be written to the
+# PRIMARY clipboard,  and can be  pasted using the  middle mouse button,  or the
+# Shift-Insert key combination.
+#
+# Default value: primary
+#}}}
+
+set selection-clipboard clipboard
