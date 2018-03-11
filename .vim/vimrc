@@ -384,6 +384,7 @@ Plug 'lacygoill/vim-vim'
 if !has('nvim')
     Plug 'lacygoill/vim-selection-ring'
 endif
+Plug 'lervag/vimtex'
 Plug 'lacygoill/vim-window'
 
 " DGAF:
@@ -6433,14 +6434,6 @@ endfu
 " 101 -
 " Prevent vim-session from checking swap files.
 " Annoying when a session crashed, and we can't restore a session.
-
-
-" Your files  could be accidently removed  (by something like rm  -rf git reset)
-" Surely anyone who might run  destructive commands "accidentally" should not be
-" let near a  command line might also accidentally delete  files created outside
-" of vim, that this plugin wouldn't catch? Perhaps a filesystem-level continuous
-" data protection like cdpfgl would be safer.
-
 
 
 
