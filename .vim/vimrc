@@ -178,7 +178,16 @@ Plug 'mbbill/undotree', { 'on': 'UndotreeShow' }
     PlugCfg undotree.vim
 Plug 'chrisbra/unicode.vim'
 
-PlugCfg lazy_load/lazy_load.vim
+" Some plugins, or their configuration, take too much time to source during startup.
+" We delay their loading
+augroup lazy_load_plugins
+    au!
+    au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
+    \|                                                 runtime! autoload/plugin_conf/lazy_load/*.vim', '')
+    \                                    })
+    \|            exe 'au! lazy_load_plugins'
+    \|            aug! lazy_load_plugins
+augroup END
 call plug#end()
 
 " OPTIONS_2 {{{1
