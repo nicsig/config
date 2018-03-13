@@ -561,14 +561,25 @@ endsnippet
 
 # vimrc_mini {{{1
 
-# Adding `…/plugin/after` is only necessary if the plugin we want to test
-# has something inside an `after/` subdirectory.
-# If we don't add it, none of its file will be sourced.
+# Why `after/`?{{{
+#
+# Necessary  if the  plugin we  want to  test has  something inside  an `after/`
+# subdirectory. If we don't add it, none of its file will be sourced.
+#}}}
+# Why ^= instead of +=?{{{
+#
+# Necessary if  the plugin we  want to test  has something inside  a `ftplugin/`
+# subdirectory.
+#
+# If we used `+=` instead, the  default filetype plugin would be sourced before,
+# while it shouldn't be  sourced at all (thanks to a guard).   And if the custom
+# ftplugin contains a guard, it wouldn't be sourced, while it should.
+#}}}
 snippet vimrc_mini "Minimal vimrc to test a plugin" bm
-set rtp+=~/.vim/plugged/vim-lg-lib/
-set rtp+=~/.vim/plugged/vim-readline/
-set rtp+=${1:path/to/plugin/}${2:
-set rtp+=${1/$/after/}}
+set rtp^=~/.vim/plugged/vim-lg-lib/
+set rtp^=~/.vim/plugged/vim-readline/
+set rtp^=${1:path/to/plugin/}${2:
+set rtp+=${1/$/\/after/}}
 filetype plugin indent on
 syntax enable
 set wildmenu showcmd

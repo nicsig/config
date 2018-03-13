@@ -7,14 +7,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Dropbox/conf/cheat/ffmpeg
+badd +1 ~/Dropbox/conf/wiki/ffmpeg
 badd +1 ~/Desktop/gif-ffmpeg.md
 badd +1 ~/Dropbox/conf/bin/gifrec.sh
 badd +1 ~/Dropbox/conf/bin/gifenc.sh
 argglobal
 silent! argdel *
 set stal=2
-edit ~/Dropbox/conf/cheat/ffmpeg
+edit ~/Dropbox/conf/wiki/ffmpeg
 set splitbelow splitright
 wincmd _ | wincmd |
 split

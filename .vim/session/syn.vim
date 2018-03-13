@@ -8,15 +8,15 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +1 ~/.bashrc
-badd +1 ~/Dropbox/conf/bin/awk/study/histogram.awk
+badd +1 ~/Dropbox/conf/wiki/awk/CODE/histogram.awk
 badd +5013 ~/Dropbox/notes
-badd +16618 ~/Dropbox/conf/cheat/vim
+badd +16618 ~/Dropbox/conf/wiki/vim
 badd +0 ~/.vim/plugged/vim-sh/after/syntax/sh.vim
 badd +0 ~/.vim/plugged/vim-awk/after/syntax/awk.vim
 argglobal
 silent! argdel *
 set stal=2
-edit ~/Dropbox/conf/cheat/vim
+edit ~/Dropbox/conf/wiki/vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -160,7 +160,7 @@ normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabedit ~/Dropbox/conf/bin/awk/study/histogram.awk
+tabedit ~/Dropbox/conf/wiki/awk/CODE/histogram.awk
 set splitbelow splitright
 wincmd _ | wincmd |
 split

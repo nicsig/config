@@ -370,7 +370,7 @@ alias -s gif=ristretto
 alias -s {epub,mobi}=ebook-viewer
 alias -s {md,markdown,txt,html,css}=vim
 alias -s odt=libreoffice
-alias -s pdf=evince
+alias -s pdf=zathura
 
 # Environment Variables {{{1
 

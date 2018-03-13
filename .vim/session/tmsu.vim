@@ -7,10 +7,10 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +451 ~/Dropbox/conf/cheat/tmsu
+badd +451 ~/Dropbox/conf/wiki/tmsu
 argglobal
 silent! argdel *
-edit ~/Dropbox/conf/cheat/tmsu
+edit ~/Dropbox/conf/wiki/tmsu
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1

@@ -6,7 +6,7 @@
 "
 " Example:
 "        $ vim ~/.vim/ftdetect/notes.vim
-"          au BufRead $HOME/{Dropbox/conf/cheat/,.cheat/}* set filetype=markdown
+"          au BufRead $HOME/{Dropbox/wiki/,.wiki/}* set filetype=markdown
 "
 " No need for an augroup, Vim would wrap the autocmd automatically.
 " No need to move the file in an `after/` subdirectory, Vim will look for
@@ -27,9 +27,6 @@ if exists('did_load_filetypes')
 endif
 
 augroup filetypedetect
-    " markdown for our notes
-    au! BufRead $HOME/{Dropbox/conf/cheat/,.cheat/}* set filetype=markdown
-
     " `$VIMRUNTIME/filetype.vim` thinks that the filetype of `~/.shrc` is `conf`:
     "
     "         " Generic configuration file (check this last, it's just guessing!)

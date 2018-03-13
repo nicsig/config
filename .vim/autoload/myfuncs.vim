@@ -272,32 +272,36 @@ fu! s:box_create_separations() abort
 endfu
 
 fu! myfuncs#box_destroy() abort
+    let [lnum1, lnum2] = [line("'{"), line("'}")]
+    let range = lnum1.','.lnum2
     " remove box (except pretty bars: │)
-    sil! '{,'}s/[\u2500\u2534\u252c\u251c\u2524\u253c\u2514\u2518\u2510\u250c]//g
+    sil exe range.'s/[\u2500\u2534\u252c\u251c\u2524\u253c\u2514\u2518\u2510\u250c]//ge'
 
     " replace pretty bars with regular bars
     " necessary, because we will need them to align the contents of the
     " paragraph later
-    sil! '{,'}s/\u2502/|/g
+    sil exe range.'s/\%u2502/|/ge'
 
     " remove the bars at the beginning and at the end of the lines
     " we don't want them, because they would mess up the creation of a box
     " later
-    sil! '{,'}s/|//
-    sil! '{,'}s/.*\zs|//
-
-    " move the paragraphe one line up ([e), and one character left ([E)
-    " why?
-    " because when we create and destroy a box, the contents doesn't come back
-    " where it was, it goes down one line, and right one character
-    sil norm! vip
-    sil norm [egv[E
+    sil exe range.'s/|//e'
+    sil exe range.'s/.*\zs|//e'
 
     " trim whitespace
-    sil! '{,'}TW
+    sil! exe range.'TW'
+    " remove empty lines
+    sil! exe range.'g/^\s*$/d_'
+
+    " Move the paragraph one line up, and one character left.
+    " Why?
+    " Because when we  create and destroy a box, the  contents doesn't come back
+    " where it was, it goes down one line, and right one character.
+    exe (lnum1-1)."put =''"
+    sil '{,'}s/^.//e
 
     " position the cursor on the upper left corner of the paragraph
-    norm! {j_
+    exe 'norm! '.lnum1.'Gj_'
 
     sil! call repeat#set("\<plug>(myfuncs_box_destroy)")
 endfu

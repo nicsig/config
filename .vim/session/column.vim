@@ -7,16 +7,13 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +3 ~/.vim/plugged/vim-graph/after/ftplugin/dot.vim
+badd +55 ~/.vim/after/ftplugin/tex.vim
+badd +368 ~/.vim/UltiSnips/vim.snippets
 badd +349 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 badd +43 ~/.vim/UltiSnips/markdown.snippets
-badd +1181 ~/.vim/plugged/vim-graph/autoload/graph.vim
 badd +51 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
-badd +136 ~/.vim/UltiSnips/vim.snippets
 badd +17 ~/.vim/after/ftplugin/help.vim
 badd +69 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
-badd +22 ~/Desktop/file.dot
-badd +29 ~/Dropbox/conf/cheat/graphviz
 badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
 badd +1 ~/Desktop/show_toc_help.vim
 badd +9 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
@@ -28,6 +25,8 @@ badd +1 ~/Dropbox/vim_plugins/fastfold.vim
 badd +1 /tmp/md.md
 badd +53 ~/.vim/UltiSnips/help.snippets
 badd +40 ~/.vim/UltiSnips/README.md
+badd +1 ~/Dropbox/wiki/latex/README/latex.md
+badd +9 ~/Dropbox/wiki/latex/CODE/LaTeX\ Beginner\ Guide/2_Formatting_Words_Lines_and_Paragraphs/7_switch_font.tex
 argglobal
 silent! argdel *
 set stal=2
@@ -40,7 +39,7 @@ wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -50,9 +49,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-100
-normal! zo
-let s:l = 51 - ((13 * winheight(0) + 0) / 1)
+let s:l = 51 - ((8 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -69,15 +66,15 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 5 - ((4 * winheight(0) + 14) / 28)
+let s:l = 6 - ((3 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5
-normal! 0
+6
+normal! 03|
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 tabedit ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -87,7 +84,7 @@ wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -97,10 +94,6 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-6
-normal! zo
-12
-normal! zo
 let s:l = 5 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -118,9 +111,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-11
-normal! zo
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -128,7 +119,7 @@ normal! zt
 normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 tabedit ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -146,7 +137,7 @@ set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '4resize ' . ((&lines * 7 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -156,7 +147,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 349 - ((67 * winheight(0) + 0) / 1)
+let s:l = 349 - ((1 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -173,7 +164,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 49 - ((48 * winheight(0) + 0) / 1)
+let s:l = 49 - ((46 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -208,7 +199,7 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 4 - ((3 * winheight(0) + 12) / 24)
+let s:l = 4 - ((3 * winheight(0) + 3) / 7)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -218,7 +209,7 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '4resize ' . ((&lines * 7 + 16) / 33)
 tabedit /run/user/1000/hydra/head18.vim
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -227,7 +218,9 @@ vsplit
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 13 + 16) / 33)
 exe 'vert 1resize ' . ((&columns * 56 + 59) / 119)
+exe '2resize ' . ((&lines * 13 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 62 + 59) / 119)
 argglobal
 setlocal fdm=marker
@@ -238,7 +231,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 6) / 13)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -255,14 +248,16 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 65 - ((63 * winheight(0) + 15) / 30)
+let s:l = 65 - ((41 * winheight(0) + 6) / 13)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 65
 normal! 0
 wincmd w
+exe '1resize ' . ((&lines * 13 + 16) / 33)
 exe 'vert 1resize ' . ((&columns * 56 + 59) / 119)
+exe '2resize ' . ((&lines * 13 + 16) / 33)
 exe 'vert 2resize ' . ((&columns * 62 + 59) / 119)
 tabedit ~/Desktop/show_toc_help.vim
 set splitbelow splitright
@@ -273,7 +268,7 @@ wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -300,9 +295,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-21
-normal! zo
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -310,7 +303,7 @@ normal! zt
 normal! 02|
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 tabedit ~/.vim/plugged/vim-lg-lib/doc/lg.txt
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -328,7 +321,7 @@ set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '4resize ' . ((&lines * 7 + 16) / 33)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -352,14 +345,10 @@ setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
-setlocal fdl=0
+setlocal fdl=99
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-29
-normal! zo
-29
-normal! zc
 let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -373,11 +362,11 @@ setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
-setlocal fdl=0
+setlocal fdl=99
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 51 - ((50 * winheight(0) + 0) / 1)
+let s:l = 51 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -394,7 +383,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 3) / 7)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -404,8 +393,99 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '4resize ' . ((&lines * 7 + 16) / 33)
 tabedit ~/.vim/UltiSnips/README.md
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
+argglobal
+setlocal fdm=expr
+setlocal fde=fold#md#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 40 - ((5 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+40
+normal! 027|
+wincmd w
+argglobal
+if bufexists('~/.vim/UltiSnips/vim.snippets') | buffer ~/.vim/UltiSnips/vim.snippets | else | edit ~/.vim/UltiSnips/vim.snippets | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=99
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 582 - ((5 * winheight(0) + 5) / 11)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+582
+normal! 0
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
+tabedit ~/.vim/after/ftplugin/tex.vim
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 55 - ((14 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+55
+normal! 0
+wincmd w
+argglobal
+if bufexists('~/.vim/plugged/vimtex/doc/vimtex.txt') | buffer ~/.vim/plugged/vimtex/doc/vimtex.txt | else | edit ~/.vim/plugged/vimtex/doc/vimtex.txt | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 2292 - ((5 * winheight(0) + 5) / 11)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+2292
+normal! 038|
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
+tabedit ~/Dropbox/wiki/latex/README/latex.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -429,97 +509,10 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
-normal! 03|
-wincmd w
-argglobal
-if bufexists('~/.vim/UltiSnips/vim.snippets') | buffer ~/.vim/UltiSnips/vim.snippets | else | edit ~/.vim/UltiSnips/vim.snippets | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-86
-normal! zo
-201
-normal! zo
-288
-normal! zo
-let s:l = 201 - ((32 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-201
-normal! 0
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/.vim/plugged/vim-graph/after/ftplugin/dot.vim
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 34 - ((33 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-34
 normal! 0
 wincmd w
 argglobal
-if bufexists('~/.vim/plugged/vim-graph/autoload/graph.vim') | buffer ~/.vim/plugged/vim-graph/autoload/graph.vim | else | edit ~/.vim/plugged/vim-graph/autoload/graph.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-34
-normal! zo
-843
-normal! zo
-1144
-normal! zo
-1260
-normal! zo
-let s:l = 1178 - ((24 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1178
-normal! 08|
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/Desktop/file.dot
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+if bufexists('~/Dropbox/wiki/latex/CODE/LaTeX\ Beginner\ Guide/2_Formatting_Words_Lines_and_Paragraphs/7_switch_font.tex') | buffer ~/Dropbox/wiki/latex/CODE/LaTeX\ Beginner\ Guide/2_Formatting_Words_Lines_and_Paragraphs/7_switch_font.tex | else | edit ~/Dropbox/wiki/latex/CODE/LaTeX\ Beginner\ Guide/2_Formatting_Words_Lines_and_Paragraphs/7_switch_font.tex | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -529,29 +522,12 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 60 - ((13 * winheight(0) + 0) / 1)
+let s:l = 8 - ((7 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-60
-normal! 0
-wincmd w
-argglobal
-if bufexists('~/Dropbox/conf/cheat/graphviz') | buffer ~/Dropbox/conf/cheat/graphviz | else | edit ~/Dropbox/conf/cheat/graphviz | endif
-setlocal fdm=expr
-setlocal fde=fold#md#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 189 - ((188 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-189
-normal! 0
+8
+normal! 07|
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
