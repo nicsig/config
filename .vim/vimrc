@@ -68,12 +68,13 @@ let g:plug_shallow = 0
 " They will be downloaded inside `~/.vim/plugged/`.
 call plug#begin('~/.vim/plugged')
 
-let $PLUGIN_CONF_DIR = $HOME.'/.vim/autoload/plugin_conf'
-com! -bar -nargs=1 PlugCfg if has('vim_starting') | so $PLUGIN_CONF_DIR/<args> | endif
+com! -bar -nargs=1 PlugCfg
+\        if has('vim_starting')
+\|           so $HOME/.vim/autoload/plugin_conf/<args>
+\|       endif
 
 " TO_STUDY:
 Plug 'lacygoill/vim-graph'
-
 " FIXME: {{{
 
 " Type: :fu! Func() C-v C-j endfu
@@ -91,8 +92,7 @@ Plug 'junegunn/vim-easy-align'
 Plug 'tpope/vim-eunuch', { 'frozen': 1 }
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
-    PlugCfg fzf.vim
+Plug 'junegunn/fzf.vim' | PlugCfg fzf.vim
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/limelight.vim', { 'frozen': 1 }
@@ -100,19 +100,13 @@ Plug 'djmoch/vim-makejob', { 'frozen': 1 }
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
-" Plug 'beloglazov/vim-online-thesaurus'
-" let g:online_thesaurus_map_keys = 0
-
 Plug 'lacygoill/potion'
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
 Plug 'tpope/vim-speeddating'
 Plug 'kana/vim-submode', { 'frozen': 1 }
 Plug 'jebaum/vim-tmuxify', { 'frozen': 1 }
-
-Plug 'SirVer/ultisnips'
-    PlugCfg ultisnips.vim
-
+Plug 'SirVer/ultisnips' | PlugCfg ultisnips.vim
 
 " DONE:
 Plug 'lacygoill/vim-awk'
@@ -150,32 +144,21 @@ Plug 'lacygoill/vim-term'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
-" TODO:
-" Remove the guard once you have a way to listen to / emulate VisualLeave
-" in Neovim.
-if !has('nvim')
-    Plug 'lacygoill/vim-selection-ring'
-endif
-Plug 'lervag/vimtex'
-    PlugCfg vimtex.vim
+Plug 'lacygoill/vim-selection-ring'
+Plug 'lervag/vimtex' | PlugCfg vimtex.vim
+Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-window'
 
 " DGAF:
 Plug 'justinmk/vim-dirvish'
-Plug 'mattn/emmet-vim', { 'for' : ['html', 'css'] }
-    PlugCfg emmet.vim
-Plug 'tommcdo/vim-exchange'
-    PlugCfg exchange.vim
-
+Plug 'mattn/emmet-vim', { 'for' : ['html', 'css'] } | PlugCfg emmet.vim
+Plug 'tommcdo/vim-exchange' | PlugCfg exchange.vim
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
-Plug 'machakann/vim-sandwich'
-    PlugCfg sandwich.vim
+Plug 'machakann/vim-sandwich' | PlugCfg sandwich.vim
 Plug 'junegunn/seoul256.vim'
-Plug 'justinmk/vim-sneak'
-    PlugCfg sneak.vim
+Plug 'justinmk/vim-sneak' | PlugCfg sneak.vim
 Plug 'keith/tmux.vim'
-Plug 'mbbill/undotree', { 'on': 'UndotreeShow' }
-    PlugCfg undotree.vim
+Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree.vim
 Plug 'chrisbra/unicode.vim'
 
 " Some plugins, or their configuration, take too much time to source during startup.
@@ -2274,7 +2257,8 @@ fu! s:cd_to_project_root(locally) abort
     \                  'ftplugin',
     \                  'indent',
     \                  'plugin',
-    \                  'syntax' ]
+    \                  'syntax',
+    \                  'CODE' ]
 
     let guard = 0
     while guard <= 100
@@ -2643,17 +2627,32 @@ endfu
 " commands (easier to type lowercase characters):
 
 " mark word under cursor as good
-nno  zg  zG
-nno  zG  zg
+
+nno  <expr>  zg  <sid>repeatable_spell_commands('zG')
+nno  <expr>  zG  <sid>repeatable_spell_commands('zg')
+
 " mark word under cursor as wrong
-nno  zw  zW
-nno  zW  zw
+nno  <expr>  zw  <sid>repeatable_spell_commands('zW')
+nno  <expr>  zW  <sid>repeatable_spell_commands('zw')
+
 " undo the marking of word under cursor as good
-nno  zug  zuG
-nno  zuG  zug
+nno  <expr>  zug  <sid>repeatable_spell_commands('zuG')
+nno  <expr>  zuG  <sid>repeatable_spell_commands('zug')
+
 " undo the marking of word under cursor as wrong
-nno  zuw  zuW
-nno  zuW  zuw
+nno  <expr>  zuw  <sid>repeatable_spell_commands('zuW')
+nno  <expr>  zuW  <sid>repeatable_spell_commands('zuw')
+
+fu! s:repeatable_spell_commands(cmd) abort
+    let last_char = a:cmd[-1:-1]
+    let last_char_is_uppercase = last_char is# toupper(a:cmd[-1:-1])
+    let cmd_to_repeat = a:cmd[:-2].(last_char_is_uppercase
+    \?                                  tolower(last_char)
+    \:                                  toupper(last_char))
+
+    call repeat#set(cmd_to_repeat)
+    return a:cmd
+endfu
 
 " zv  zV {{{4
 
@@ -4991,6 +4990,11 @@ endfu
 "
 "     https://github.com/beloglazov/vim-online-thesaurus/
 "
+" Ajoute ça dans le vimrc:
+"
+"     Plug 'beloglazov/vim-online-thesaurus'
+"     let g:online_thesaurus_map_keys = 0
+"
 " Très court (144 sloc).
 " Comme le plugin est court, on pourrait peut-être l'adapter pour le support
 " du français.
@@ -6099,6 +6103,25 @@ endfu
 " current Neovim instance. But what about Vim?
 "
 "     https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
+"
+" 101 -
+" Load an awk buffer, and press `1zs` on a comment:
+"
+"     awkComment     xxx match /#.*/  contains=@Spell,awkTodo
+"                        matchgroup=Comment start=/^\s*\zs#@\@!\s\?/ end=/$/  concealends contains=@Spell,awkTodo
+"
+" Two syntax items are displayed.
+" I think the first one is the original one ($VIMRUNTIME).
+" The second one is my custom version to conceal the comment leader.
+" Shouldn't we remove the first one, before installing the second one?
+"
+"         syn clear awkComment
+"
+" Try to  answer this question once  we've a better understanding  of the syntax
+" mechanism.
+" Once you do, if you remove the original syntax item, do the same in all plugins.
+"
+"         :vim /syn.*concealends/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 
 
 
@@ -6136,36 +6159,36 @@ endfu
 
 
 
-inorea  <expr>  aa  <sid>painful_chars('angle')
-cnorea  <expr>  aa  <sid>painful_chars('angle')
+" inorea  <expr>  aa  <sid>painful_chars('angle')
+" cnorea  <expr>  aa  <sid>painful_chars('angle')
 
-inorea  <expr>  cc  <sid>painful_chars('curly')
-cnorea  <expr>  cc  <sid>painful_chars('curly')
+" inorea  <expr>  cc  <sid>painful_chars('curly')
+" cnorea  <expr>  cc  <sid>painful_chars('curly')
 
-inorea  <expr>  rr  <sid>painful_chars('round')
-cnorea  <expr>  rr  <sid>painful_chars('round')
+" inorea  <expr>  rr  <sid>painful_chars('round')
+" cnorea  <expr>  rr  <sid>painful_chars('round')
 
-inorea  <expr>  ss  <sid>painful_chars('square')
-cnorea  <expr>  ss  <sid>painful_chars('square')
+" inorea  <expr>  ss  <sid>painful_chars('square')
+" cnorea  <expr>  ss  <sid>painful_chars('square')
 
-inorea  <expr>  tt  <sid>painful_chars('tick')
-cnorea  <expr>  tt  <sid>painful_chars('tick')
+" inorea  <expr>  tt  <sid>painful_chars('tick')
+" cnorea  <expr>  tt  <sid>painful_chars('tick')
 
-fu! s:painful_chars(char) abort
-    let seq = {
-    \           'angle':  '<>',
-    \           'curly':  '{}',
-    \           'round':  '()',
-    \           'square': '[]',
-    \           'tick':   '``',
-    \}
-    if !has_key(seq, a:char)
-        return ''
-    endif
-    call feedkeys(seq[a:char]."\<left>", 'in')
-    call timer_start(0, {-> feedkeys("\<bs>", 'in')})
-    return ''
-endfu
+" fu! s:painful_chars(char) abort
+"     let seq = {
+"     \           'angle':  '<>',
+"     \           'curly':  '{}',
+"     \           'round':  '()',
+"     \           'square': '[]',
+"     \           'tick':   '``',
+"     \}
+"     if !has_key(seq, a:char)
+"         return ''
+"     endif
+"     call feedkeys(seq[a:char]."\<left>", 'in')
+"     call timer_start(0, {-> feedkeys("\<bs>", 'in')})
+"     return ''
+" endfu
 
 
 
@@ -6346,7 +6369,7 @@ fu! s:goyo_enter() abort
         exe "norm! r\e"
     endif
 
-    let pos = getpos('.')
+    let pos = getcurpos()
     " The new window created by `:tab sp` inherits the window-local options of
     " the original window. But `:tab sp` doesn't fire `BufWinEnter` so we lose
     " our position in the changelist.

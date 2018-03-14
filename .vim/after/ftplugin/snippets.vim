@@ -15,9 +15,9 @@ setl noet sw=4 ts=4
 augroup my_snippets
     au! *            <buffer>
     au  BufWinEnter  <buffer>  setl fdm=marker
-                           \ | let &l:fdt = 'fold#text()'
-                           \ | setl cocu=nc
-                           \ | setl cole=3
+                           \|  setl fdt=fold#text()
+                           \|  setl cocu=nc
+                           \|  setl cole=3
 augroup END
 
 " Teardown {{{1
