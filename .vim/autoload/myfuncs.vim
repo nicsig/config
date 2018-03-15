@@ -825,7 +825,6 @@ endfu
 fu! myfuncs#op_grep(type, ...) abort "{{{2
     let cb_save  = &cb
     let sel_save = &selection
-    let sp_save  = &sp
     let reg_save = [ '"', getreg('"'), getregtype('"') ]
 
     try
@@ -999,8 +998,11 @@ fu! myfuncs#set_reg(reg_name) abort
 endfu
 
 fu! myfuncs#op_replace_without_yank(type) abort
+    let cb_save  = &cb
     let sel_save = &selection
     try
+        set selection=inclusive
+
         " save registers and types to restore later.
         call lg#reg#save(['"', s:replace_reg_name])
 
@@ -1054,6 +1056,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
     catch
         return lg#catch_error()
     finally
+        let &cb  = cb_save
         let &sel = sel_save
         " Now, the unnamed register contains the old text over which we pasted the
         " new text.
@@ -1141,36 +1144,47 @@ fu! myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
 endfu
 
 fu! myfuncs#op_yank_matches(type) abort
-    let @z = ''
+    let cb_save  = &cb
+    let reg_save = [ 'z', getreg('z'), getregtype('z') ]
+    try
+        let @z = ''
 
-    let mods  = 'keepj keepp'
-    let range = (a:type is# 'char' || a:type is# 'line')
-    \?               line("'[").','.line("']")
-    \:               line("'<").','.line("'>")
+        let mods  = 'keepj keepp'
+        let range = (a:type is# 'char' || a:type is# 'line')
+        \?               line("'[").','.line("']")
+        \:               line("'<").','.line("'>")
 
-    let cmd = s:yank_where_match ? 'g' : 'v'
-    let pat = s:yank_comments
-    \?            '^\s*\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
-    \:            @/
+        let cmd = s:yank_where_match ? 'g' : 'v'
+        let pat = s:yank_comments
+        \?            '^\s*\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
+        \:            @/
 
-    exe mods.' '.range.cmd.'/'.pat.'/y Z'
+        exe mods.' '.range.cmd.'/'.pat.'/y Z'
 
-    " Remove empty lines.
-    " We can't use the pattern `\_^\s*\n` to describe an empty line, because
-    " we aren't in a buffer:    `@z` is just a big string
-    if !s:yank_where_match
-        let @z = substitute(@z, '\v\n%(\s*\n)+', '\n', 'g')
-    endif
+        " Remove empty lines.
+        " We can't use the pattern `\_^\s*\n` to describe an empty line, because
+        " we aren't in a buffer:    `@z` is just a big string
+        if !s:yank_where_match
+            let @z = substitute(@z, '\v\n%(\s*\n)+', '\n', 'g')
+        endif
 
-    " the first time we've appended a match to `@z`, it created a newline
-    " we don't want this one; remove it
-    let @z = substitute(@z, "^\n", '', '')
+        " the first time we've appended a match to `@z`, it created a newline
+        " we don't want this one; remove it
+        let @z = substitute(@z, "^\n", '', '')
 
-    call setreg('"', @z, 'l')
-    if exists('s:yank_matches_view')
-        call winrestview(s:yank_matches_view)
-        unlet! s:yank_matches_view
-    endif
+        call setreg('"', @z, 'l')
+        if exists('s:yank_matches_view')
+            call winrestview(s:yank_matches_view)
+            unlet! s:yank_matches_view
+        endif
+
+    catch
+        return lg#catch_error()
+
+    finally
+        let &cb  = cb_save
+        call call('setreg', reg_save)
+    endtry
 endfu
 
 fu! myfuncs#open_gx(in_term) abort "{{{1

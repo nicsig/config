@@ -31,3 +31,4 @@ endfu
 fu! s:snr() "{{{1
     return matchstr(expand('<sfile>'), '<SNR>\d\+_')
 endfu
+

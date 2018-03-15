@@ -7,10 +7,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +19 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/8_switch_font.tex
-badd +388 ~/Dropbox/wiki/latex/README/latex.md
-badd +16 ~/.vim/after/ftplugin/help.vim
 badd +368 ~/.vim/UltiSnips/vim.snippets
+badd +40 ~/.vim/UltiSnips/README.md
+badd +34 ~/.vim/after/ftplugin/help.vim
 badd +349 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 badd +43 ~/.vim/UltiSnips/markdown.snippets
 badd +51 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
@@ -23,11 +22,10 @@ badd +4 ~/Desktop/result
 badd +49 ~/Desktop/final_analysis.hydra
 badd +1 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 badd +1 ~/Dropbox/vim_plugins/fastfold.vim
-badd +6 /tmp/md.md
+badd +1 /tmp/md.md
 badd +53 ~/.vim/UltiSnips/help.snippets
-badd +40 ~/.vim/UltiSnips/README.md
-badd +6372 ~/.vim/vimrc
-badd +34 ~/.vim/autoload/plugin_conf/vimtex.vim
+badd +1 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/3_example.tex
+badd +363 ~/Dropbox/wiki/latex/README/latex.md
 argglobal
 silent! argdel *
 set stal=2
@@ -219,8 +217,8 @@ vsplit
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe 'vert 1resize ' . ((&columns * 56 + 59) / 119)
-exe 'vert 2resize ' . ((&columns * 62 + 59) / 119)
+exe 'vert 1resize ' . ((&columns * 86 + 59) / 119)
+exe 'vert 2resize ' . ((&columns * 32 + 59) / 119)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -254,8 +252,8 @@ normal! zt
 65
 normal! 0
 wincmd w
-exe 'vert 1resize ' . ((&columns * 56 + 59) / 119)
-exe 'vert 2resize ' . ((&columns * 62 + 59) / 119)
+exe 'vert 1resize ' . ((&columns * 86 + 59) / 119)
+exe 'vert 2resize ' . ((&columns * 32 + 59) / 119)
 tabedit ~/Desktop/show_toc_help.vim
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -275,11 +273,13 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 130 - ((38 * winheight(0) + 0) / 1)
+12
+normal! zo
+let s:l = 55 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-130
+55
 normal! 0
 wincmd w
 argglobal
@@ -292,12 +292,14 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+31
+normal! zo
+let s:l = 5 - ((4 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 02|
+5
+normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
@@ -457,66 +459,19 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 288 - ((26 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-288
-normal! 0
-wincmd w
-argglobal
-if bufexists('~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/8_switch_font.tex') | buffer ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/8_switch_font.tex | else | edit ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/8_switch_font.tex | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 4 - ((3 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-4
-normal! 0
-lcd ~/.vim
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/.vim/vimrc
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-27
+339
 normal! zo
-65
+370
 normal! zo
-let s:l = 148 - ((3 * winheight(0) + 0) / 1)
+let s:l = 366 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-148
-normal! 041|
-lcd ~/.vim
+366
+normal! 022|
 wincmd w
 argglobal
-if bufexists('~/.vim/autoload/plugin_conf/vimtex.vim') | buffer ~/.vim/autoload/plugin_conf/vimtex.vim | else | edit ~/.vim/autoload/plugin_conf/vimtex.vim | endif
+if bufexists('~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/3_example.tex') | buffer ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/3_example.tex | else | edit ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/3_example.tex | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -525,32 +480,17 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
 1
-normal! zo
-45
-normal! zo
-45
-normal! zc
-68
-normal! zo
-68
-normal! zc
-100
-normal! zo
-100
-normal! zc
-let s:l = 34 - ((33 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-34
-normal! 0
-lcd ~/.vim
+normal! 02|
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 9
+tabnext 8
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf

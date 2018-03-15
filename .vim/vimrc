@@ -5389,7 +5389,7 @@ endfu
 "
 " Update:
 " Should we save/restore the visual marks, in all our plugins?
-" Should we yank with notautocmd to prevent our visual ring from saving
+" Should we yank with noautocmd to prevent our visual ring from saving
 " a possible selection?
 "
 " 38 -
@@ -5845,7 +5845,12 @@ endfu
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
 " 77 -
-" check that whenever we use `wincmd p` we get to the right window
+" Check that whenever we use `wincmd p` we get to the right window.
+" Maybe we should use this instead:
+"
+"     let id = win_getid()
+"     …
+"     call win_gotoid(id)
 "
 " 78 -
 " Read all of this:

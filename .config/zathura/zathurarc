@@ -1,3 +1,7 @@
+# default geometry
+set window-height 400
+set window-width 1000
+
 # Copy the selected text inside the CLIPBOARD clipboard{{{
 #
 # By default, when  we select some text  in zathura, it's copied  in the PRIMARY
@@ -22,3 +26,6 @@
 #}}}
 
 set selection-clipboard clipboard
+
+# don't display a notification after selecting text
+set selection-notification false
