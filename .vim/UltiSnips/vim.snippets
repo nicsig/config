@@ -559,7 +559,7 @@ snippet vim_plug "Vim-Plug Plugin definition" bm
 Plug '$0'
 endsnippet
 
-# vimrc_mini {{{1
+# vimrc {{{1
 
 # Why `after/`?{{{
 #
@@ -575,7 +575,7 @@ endsnippet
 # while it shouldn't be  sourced at all (thanks to a guard).   And if the custom
 # ftplugin contains a guard, it wouldn't be sourced, while it should.
 #}}}
-snippet vimrc_mini "Minimal vimrc to test a plugin" bm
+snippet vimrc "Minimal vimrc to test a plugin" bm
 set rtp^=~/.vim/plugged/vim-lg-lib/
 set rtp^=~/.vim/plugged/vim-readline/
 set rtp^=${1:path/to/plugin/}${2:

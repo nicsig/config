@@ -1,0 +1,12 @@
+
+You can install mappings in 3 modes:
+
+        • normal (default)
+        • fullscreen
+        • index (≈ command-line ?)
+
+To do so, you need to pass the optional argument `[fullscreen]` or `[index]`, to
+the `:map` command. For more info:
+
+        :man zathurarc
+        /Mode
