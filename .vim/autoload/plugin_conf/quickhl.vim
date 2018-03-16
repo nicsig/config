@@ -20,20 +20,6 @@
 " ALL be highlighted; not just the one we selected.
 " Also, it could highlight matches where the lines are broken in different ways.
 
-" FIXME:
-" What's the difference between `manual-this` and `manual-this-whole-word`?
-" I assume the  first one should highlight  a word, while the  second one should
-" highlight a WORD. That's not what happens. MWE:
-"
-"     foo:bar:baz
-"
-"     The cursor being on `bar`, press:
-"
-"         viw
-"         viW
-"         SPC hm
-"         SPC hw
-
 " TODO:
 " Study:
 "
@@ -70,23 +56,23 @@
 " find a subset of matches we want to clear.
 
 " highlight word under cursor
-nmap  <space>hm  <plug>(quickhl-manual-this)
-xmap  <space>hm  <plug>(quickhl-manual-this)
+nmap  <unique>  +h*  <plug>(quickhl-manual-this)
+xmap  <unique>  +h*  <plug>(quickhl-manual-this)
 
-" highlight word (?) under cursor
-nmap  <space>hw  <plug>(quickhl-manual-this-whole-word)
-xmap  <space>hw  <plug>(quickhl-manual-this-whole-word)
+" highlight word under cursor, adding boundaries (\< word \>)
+nmap  <unique>  +hg*  <plug>(quickhl-manual-this-whole-word)
+xmap  <unique>  +hg*  <plug>(quickhl-manual-this-whole-word)
 
-" clear the highlight under the cursor
-nmap  <space>hc  <plug>(quickhl-manual-clear)
-xmap  <space>hc  <plug>(quickhl-manual-clear)
+" cleaN the highlight under the cursor
+nmap  <unique>  +hn  <plug>(quickhl-manual-clear)
+xmap  <unique>  +hn  <plug>(quickhl-manual-clear)
 
-" clear all highlights
-nmap  <space>hr  <plug>(quickhl-manual-reset)
-xmap  <space>hr  <plug>(quickhl-manual-reset)
+" cleaN all highlights
+nmap  <unique>  +hN  <plug>(quickhl-manual-reset)
+xmap  <unique>  +hN  <plug>(quickhl-manual-reset)
 
-" highlight word under cursor dynamically
-nmap  <space>ht  <plug>(quickhl-cword-toggle)
+" highlight word under cursor Dynamically
+nmap  <unique>  +hd  <plug>(quickhl-cword-toggle)
 
 " FIXME: Utterly broken:{{{
 "
@@ -116,8 +102,11 @@ nmap  <space>ht  <plug>(quickhl-cword-toggle)
 " Same thing for the command:
 "
 "         :QuickhlTagToggle
+"
+" Check whether you can reproduce with a minimal vimrc.
 "}}}
-" nmap  <space>]  <plug>(quickhl-tag-toggle)
+" nmap  <unique>  +]  <plug>(quickhl-tag-toggle)
 
 " highlight text-object
-map  <space>hh  <plug>(operator-quickhl-manual-this-motion)
+nmap  <unique>  +h  <plug>(operator-quickhl-manual-this-motion)
+xmap  <unique>  +h  <plug>(operator-quickhl-manual-this-motion)

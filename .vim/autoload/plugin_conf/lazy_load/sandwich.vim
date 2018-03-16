@@ -32,8 +32,8 @@ sil! let g:sandwich#recipes =  deepcopy(g:sandwich#default_recipes)
 " frequently than  the sandwich objects. So,  I won't remove  the mappings. But,
 " instead, to restore the sentences objects, we install these mappings:
 "}}}
-xno  iS  is
-xno  aS  as
+xno  <unique>  iS  is
+xno  <unique>  aS  as
 
-ono  iS  is
-ono  aS  as
+ono  <unique>  iS  is
+ono  <unique>  aS  as

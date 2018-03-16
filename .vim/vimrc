@@ -2191,6 +2191,13 @@ nmap           <space>P                      <plug>(split-long-paragraph)
 nno  <silent>  <plug>(split-long-paragraph)  :<c-u>call <sid>split_long_paragraph()<cr>
 
 fu! s:split_long_paragraph() abort
+    " The last character of the paragraph needs to be a valid punctuation ending
+    " for a sentence. Otherwise, our function could wrongly delete some lines.
+    if getline(line("'}")-1) =~# '\s*[^.!?;]$'
+        echo 'last char is not a valid punctuation ending for a sentence'
+        return
+    endif
+
     let lnum1 = line("'{")+1
     let indent = matchstr(getline(line("'{")+1), '^\s*')
     keepj '{+,'}-j
@@ -2457,8 +2464,8 @@ fu! s:my_gq(type) abort
             " For more info,  on how `par` use the quote  characters, search for
             " “quote” in the `Details` section of our notes on `par`.
             "}}}
-            exe printf("keepj keepp %d,%ds/^%s\\s*\\zs\\%%u250c/%s/e", lnum1, lnum2, cml, '||')
-            exe printf("keepj keepp %d,%ds/^%s\\s*\\zs\\%%u2502/%s/e", lnum1, lnum2, cml, '|')
+            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs\\%%u250c/%s/e", lnum1, lnum2, cml, '||')
+            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs\\%%u2502/%s/e", lnum1, lnum2, cml, '|')
 
             " format the lines in the diagram
             sil exe 'norm! '.lnum1.'Ggq'.lnum2.'G'
@@ -2469,10 +2476,10 @@ fu! s:my_gq(type) abort
             " You must process the substitutions from the one replacing the most
             " bars, to the one replacing the least ones.
             "}}}
-            exe printf("keepj keepp %d,%ds/^%s\\s*\\zs||/\u250c/e", lnum1, lnum2, cml)
-            exe printf("keepj keepp %d,%ds/^%s\\s*\\zs|/\u2502 /e", lnum1, lnum2, cml)
-            "                                                 │
-            "                                                 └ leave it!
+            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs||/\u250c/e", lnum1, lnum2, cml)
+            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs|/\u2502 /e", lnum1, lnum2, cml)
+            "                                                     │
+            "                                                     └ leave it!
 
             " TODO:
             " Add support for └ (and maybe ┘ ┐).
@@ -6238,6 +6245,9 @@ endfu
 " All our mappings dealing with formatting (gq, gqq, gqic, SPC p, SPC P)
 " are becoming too complex for this vimrc.
 " We would benefit from moving all of them in a dedicated plugin.
+"
+" 102 -
+" finish refactoring `~/Dropbox/wiki/vim/qf.md`
 
 
 
