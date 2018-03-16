@@ -30,9 +30,9 @@ set selection-clipboard clipboard
 # don't display a notification after selecting text
 set selection-notification false
 
-# toggle the fullscreen mode when `F` is pressed
-map                F  toggle_fullscreen
-map  [fullscreen]  F  toggle_fullscreen
+# toggle the fullscreen mode when `f` is pressed
+map                f  toggle_fullscreen
+map  [fullscreen]  f  toggle_fullscreen
 #      └──────────┤
 #                 └ optional argument, to install the mapping in fullscreen mode
 #                   in addition to the normal mode (see README)
