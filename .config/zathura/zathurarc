@@ -24,7 +24,6 @@ set window-width 1000
 #
 # Default value: primary
 #}}}
-
 set selection-clipboard clipboard
 
 # don't display a notification after selecting text

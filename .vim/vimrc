@@ -70,7 +70,7 @@ call plug#begin('~/.vim/plugged')
 
 com! -bar -nargs=1 PlugCfg
 \        if has('vim_starting')
-\|           so $HOME/.vim/autoload/plugin_conf/<args>
+\|           so $HOME/.vim/autoload/plugin_conf/<args>.vim
 \|       endif
 
 " TO_STUDY:
@@ -92,7 +92,7 @@ Plug 'junegunn/vim-easy-align'
 Plug 'tpope/vim-eunuch', { 'frozen': 1 }
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim' | PlugCfg fzf.vim
+Plug 'junegunn/fzf.vim' | PlugCfg fzf
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/limelight.vim', { 'frozen': 1 }
@@ -100,13 +100,15 @@ Plug 'djmoch/vim-makejob', { 'frozen': 1 }
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
+Plug 'kana/vim-operator-user/', { 'frozen': 1 }
 Plug 'lacygoill/potion'
+Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
 Plug 'tpope/vim-speeddating'
 Plug 'kana/vim-submode', { 'frozen': 1 }
 Plug 'jebaum/vim-tmuxify', { 'frozen': 1 }
-Plug 'SirVer/ultisnips' | PlugCfg ultisnips.vim
+Plug 'SirVer/ultisnips' | PlugCfg ultisnips
 
 " DONE:
 Plug 'lacygoill/vim-awk'
@@ -145,20 +147,20 @@ Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-selection-ring'
-Plug 'lervag/vimtex' | PlugCfg vimtex.vim
+Plug 'lervag/vimtex' | PlugCfg vimtex
 Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-window'
 
 " DGAF:
 Plug 'justinmk/vim-dirvish'
-Plug 'mattn/emmet-vim', { 'for' : ['html', 'css'] } | PlugCfg emmet.vim
-Plug 'tommcdo/vim-exchange' | PlugCfg exchange.vim
+Plug 'mattn/emmet-vim', { 'for' : ['html', 'css'] } | PlugCfg emmet
+Plug 'tommcdo/vim-exchange' | PlugCfg exchange
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
-Plug 'machakann/vim-sandwich' | PlugCfg sandwich.vim
+Plug 'machakann/vim-sandwich' | PlugCfg sandwich
 Plug 'junegunn/seoul256.vim'
-Plug 'justinmk/vim-sneak' | PlugCfg sneak.vim
+Plug 'justinmk/vim-sneak' | PlugCfg sneak
 Plug 'keith/tmux.vim'
-Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree.vim
+Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree
 Plug 'chrisbra/unicode.vim'
 
 " Some plugins, or their configuration, take too much time to source during startup.
@@ -6236,6 +6238,18 @@ endfu
 " All our mappings dealing with formatting (gq, gqq, gqic, SPC p, SPC P)
 " are becoming too complex for this vimrc.
 " We would benefit from moving all of them in a dedicated plugin.
+
+
+
+" xno  <silent>  <m-m>  :<c-u>call Func()<cr>
+" fu! Func() abort
+"     let marks = [getpos("'<"), getpos("'>")]
+"     let lnum1 = marks[0][1]
+"     let lnum2 = marks[1][1]
+"     let col1  = marks[0][2]
+"     let col2  = marks[1][2]
+"     echo [lnum1, col1, lnum2, col2]
+" endfu
 
 
 
