@@ -9,53 +9,12 @@ endif
 set shortmess=aoO
 badd +73 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
 badd +16 ~/Desktop/qflist.vim
-badd +5 ~/Desktop/qfedit.vim
+badd +54 ~/Desktop/qfedit.vim
 argglobal
 silent! argdel *
 set stal=2
 edit ~/Desktop/qflist.vim
 set splitbelow splitright
-set nosplitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 16 - ((15 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-16
-normal! 066|
-tabedit ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
-set splitbelow splitright
-set nosplitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 73 - ((72 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-73
-normal! 0
-tabedit ~/Desktop/qfedit.vim
-set splitbelow splitright
-set nosplitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
@@ -72,14 +31,58 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 5
+normal! 042|
+tabedit ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+1
+normal! zo
+46
+normal! zo
+46
+normal! zc
+let s:l = 46 - ((45 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+46
 normal! 0
+tabedit ~/Desktop/qfedit.vim
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 54 - ((53 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+54
+normal! 01|
 tabnext 1
 set stal=1
-if exists('s:wipebuf')
+if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOcFIsW
+set winheight=1 winwidth=20 shortmess=filnxtToOAacFIsW
 set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)

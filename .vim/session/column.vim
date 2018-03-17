@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +41 ~/Dropbox/wiki/latex/README/latex.md
+badd +79 ~/Dropbox/wiki/latex/README/latex.md
 badd +581 ~/.vim/UltiSnips/vim.snippets
 badd +40 ~/.vim/UltiSnips/README.md
 badd +34 ~/.vim/after/ftplugin/help.vim
@@ -25,8 +25,9 @@ badd +1 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 badd +1 ~/Dropbox/vim_plugins/fastfold.vim
 badd +1 /tmp/md.md
 badd +53 ~/.vim/UltiSnips/help.snippets
-badd +1 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/10_using_an_environment_to_adjust_the_font_size.tex
-badd +23 ~/.vim/autoload/plugin_conf/quickhl.vim
+badd +20 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex
+badd +1 ~/.vim/UltiSnips/tex.snippets
+badd +2 ~/.vim/template/tex.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -415,12 +416,12 @@ setlocal fdn=20
 setlocal fen
 42
 normal! zo
-let s:l = 149 - ((13 * winheight(0) + 0) / 1)
+let s:l = 40 - ((13 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-149
-normal! 044|
+40
+normal! 027|
 wincmd w
 argglobal
 if bufexists('~/.vim/UltiSnips/vim.snippets') | buffer ~/.vim/UltiSnips/vim.snippets | else | edit ~/.vim/UltiSnips/vim.snippets | endif
@@ -432,11 +433,11 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 368 - ((353 * winheight(0) + 14) / 28)
+let s:l = 581 - ((412 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-368
+581
 normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -445,12 +446,16 @@ tabedit ~/Dropbox/wiki/latex/README/latex.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#stacked()
@@ -460,17 +465,17 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-38
+53
 normal! zo
-let s:l = 40 - ((0 * winheight(0) + 0) / 1)
+let s:l = 86 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-40
-normal! 026|
+86
+normal! 0
 wincmd w
 argglobal
-if bufexists('~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/10_using_an_environment_to_adjust_the_font_size.tex') | buffer ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/10_using_an_environment_to_adjust_the_font_size.tex | else | edit ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/10_using_an_environment_to_adjust_the_font_size.tex | endif
+if bufexists('~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex') | buffer ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex | else | edit ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -479,21 +484,39 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 14 - ((13 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 015|
+14
+normal! 0
+wincmd w
+argglobal
+if bufexists('~/.vim/UltiSnips/tex.snippets') | buffer ~/.vim/UltiSnips/tex.snippets | else | edit ~/.vim/UltiSnips/tex.snippets | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+let s:l = 21 - ((17 * winheight(0) + 13) / 26)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+21
+normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/.vim/autoload/plugin_conf/quickhl.vim
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+tabedit ~/.vim/template/tex.vim
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
-setlocal fdm=marker
+setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -501,11 +524,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+silent! normal! zE
+let s:l = 2 - ((1 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+2
 normal! 0
 tabnext 9
 set stal=1

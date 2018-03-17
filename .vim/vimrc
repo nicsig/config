@@ -2470,6 +2470,15 @@ fu! s:my_gq(type) abort
             " format the lines in the diagram
             sil exe 'norm! '.lnum1.'Ggq'.lnum2.'G'
 
+            " Update the last line of the formatted text.
+            " Why?{{{
+            "
+            " `gq` could have increased the number of lines, or reduced it.
+            " There's no  guarantee that  `lnum2` still matches  the end  of the
+            " original text.
+            "}}}
+            let lnum2 = line("']")
+
             " restore │ and ┌
             " Warning:{{{
             "
@@ -2506,6 +2515,10 @@ fu! s:my_gq(type) abort
         endif
     endtry
 endfu
+
+" gqs         remove excessive spaces  {{{4
+
+nno  <silent>  gqs  :<c-u>s/\s\{2,}/ /gc<cr>
 
 " gqic        format comment {{{4
 
@@ -6248,18 +6261,6 @@ endfu
 "
 " 102 -
 " finish refactoring `~/Dropbox/wiki/vim/qf.md`
-
-
-
-" xno  <silent>  <m-m>  :<c-u>call Func()<cr>
-" fu! Func() abort
-"     let marks = [getpos("'<"), getpos("'>")]
-"     let lnum1 = marks[0][1]
-"     let lnum2 = marks[1][1]
-"     let col1  = marks[0][2]
-"     let col2  = marks[1][2]
-"     echo [lnum1, col1, lnum2, col2]
-" endfu
 
 
 

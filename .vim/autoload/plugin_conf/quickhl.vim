@@ -1,7 +1,18 @@
-" TODO:
-" I don't like the plugin highlighting all windows.
-" I would prefer it to affect only the current window.
-" And maybe all the others via an option, command argument, ...
+" FIXME:
+" We have no way to expand a match.
+"
+" I.e. we can highlight a line:
+"
+"     SPC h h _
+"
+" We can highlight another:
+"
+"     SPC h h _
+"
+" But they will be colored differently.
+"
+" Maybe we could use `SPC H` as another prefix to add/remove
+" a match to/from another.
 
 " TODO:
 " We can't highlight a multi-line visual selection:
@@ -21,7 +32,12 @@
 " Also, it could highlight matches where the lines are broken in different ways.
 
 " TODO:
-" Study:
+" I don't like the plugin highlighting all windows.
+" I would prefer it to affect only the current window.
+" And maybe all the others via an option, command argument, ...
+
+" TODO:
+" Study vim-operator-user:
 "
 "     ~/.vim/plugged/vim-operator-user/doc/operator-user.txt
 "
@@ -32,22 +48,11 @@
 " We can't clear a highlight installed from a visual selection,
 " nor from an operation on a text-object.
 " We can only reset everything.
-
-" FIXME:
-" We have no way to expand a match.
 "
-" I.e. we can highlight a line:
-"
-"     SPC h h _
-"
-" We can highlight another:
-"
-"     SPC h h _
-"
-" But they will be colored differently.
-"
-" Maybe we could use `SPC H` as another prefix to add/remove
-" a match to/from another.
+" Update:
+" We  can  clear  a particular  highlight,  but  we  need  to target  the  exact
+" same  text. This can  be done  by reselecting  the same  visual selection,  or
+" reperforming the same operation on the same text-object.
 
 " TODO:
 " Add a command/mapping to populate the  loclist with the positions matching the
@@ -57,11 +62,12 @@
 
 " highlight word under cursor
 nmap  <unique>  +h*  <plug>(quickhl-manual-this)
-xmap  <unique>  +h*  <plug>(quickhl-manual-this)
+
+" highlight visual Selection
+xmap  <unique>  +hs  <plug>(quickhl-manual-this)
 
 " highlight word under cursor, adding boundaries (\< word \>)
 nmap  <unique>  +hg*  <plug>(quickhl-manual-this-whole-word)
-xmap  <unique>  +hg*  <plug>(quickhl-manual-this-whole-word)
 
 " cleaN the highlight under the cursor
 nmap  <unique>  +hn  <plug>(quickhl-manual-clear)
@@ -69,7 +75,6 @@ xmap  <unique>  +hn  <plug>(quickhl-manual-clear)
 
 " cleaN all highlights
 nmap  <unique>  +hN  <plug>(quickhl-manual-reset)
-xmap  <unique>  +hN  <plug>(quickhl-manual-reset)
 
 " highlight word under cursor Dynamically
 nmap  <unique>  +hd  <plug>(quickhl-cword-toggle)
@@ -105,8 +110,7 @@ nmap  <unique>  +hd  <plug>(quickhl-cword-toggle)
 "
 " Check whether you can reproduce with a minimal vimrc.
 "}}}
-" nmap  <unique>  +]  <plug>(quickhl-tag-toggle)
+" nmap  <unique>  +h]  <plug>(quickhl-tag-toggle)
 
 " highlight text-object
 nmap  <unique>  +h  <plug>(operator-quickhl-manual-this-motion)
-xmap  <unique>  +h  <plug>(operator-quickhl-manual-this-motion)
