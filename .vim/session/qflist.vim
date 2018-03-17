@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +73 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
-badd +16 ~/Desktop/qflist.vim
+badd +46 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+badd +5 ~/Desktop/qflist.vim
 badd +54 ~/Desktop/qfedit.vim
 argglobal
 silent! argdel *
@@ -31,7 +31,7 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 5
-normal! 042|
+normal! 0
 tabedit ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
 set splitbelow splitright
 wincmd t
@@ -75,8 +75,8 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 54
-normal! 01|
-tabnext 1
+normal! 0
+tabnext 3
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
