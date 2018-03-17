@@ -26,8 +26,6 @@ badd +1 ~/Dropbox/vim_plugins/fastfold.vim
 badd +4 /tmp/md.md
 badd +53 ~/.vim/UltiSnips/help.snippets
 badd +20 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex
-badd +0 ~/.config/zathura/zathurarc
-badd +0 ~/.Xresources
 argglobal
 silent! argdel *
 set stal=2
@@ -450,8 +448,8 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#stacked()
@@ -463,7 +461,7 @@ setlocal fdn=20
 setlocal fen
 53
 normal! zo
-let s:l = 79 - ((24 * winheight(0) + 14) / 28)
+let s:l = 79 - ((24 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -480,65 +478,17 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 20 - ((19 * winheight(0) + 0) / 1)
+let s:l = 20 - ((19 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 20
 normal! 013|
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabedit ~/.config/zathura/zathurarc
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-37
-normal! zo
-38
-normal! zo
-90
-normal! zo
-90
-normal! zc
-let s:l = 85 - ((21 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-85
-normal! 0
-lcd ~/
-tabedit ~/.Xresources
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 84 - ((14 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-84
-normal! 0
-lcd ~/
-tabnext 10
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext 8
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
