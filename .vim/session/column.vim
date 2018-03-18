@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +79 ~/Dropbox/wiki/latex/README/latex.md
+badd +45 ~/Dropbox/wiki/latex/README/latex.md
 badd +581 ~/.vim/UltiSnips/vim.snippets
 badd +40 ~/.vim/UltiSnips/README.md
 badd +34 ~/.vim/after/ftplugin/help.vim
@@ -25,7 +25,7 @@ badd +1 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 badd +1 ~/Dropbox/vim_plugins/fastfold.vim
 badd +4 /tmp/md.md
 badd +53 ~/.vim/UltiSnips/help.snippets
-badd +20 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex
+badd +32 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex
 argglobal
 silent! argdel *
 set stal=2
@@ -459,13 +459,13 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-53
+24
 normal! zo
-let s:l = 79 - ((24 * winheight(0) + 0) / 1)
+let s:l = 38 - ((6 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-79
+38
 normal! 0
 wincmd w
 argglobal
@@ -478,12 +478,15 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 20 - ((19 * winheight(0) + 14) / 28)
+15
+normal! zo
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-20
-normal! 013|
+1
+normal! 014|
+lcd ~/.vim
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)

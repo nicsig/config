@@ -64,14 +64,13 @@
 nmap  <unique>  +h*  <plug>(quickhl-manual-this)
 
 " highlight visual Selection
-xmap  <unique>  +hs  <plug>(quickhl-manual-this)
+xmap  <unique>  +h  <plug>(quickhl-manual-this)
 
 " highlight word under cursor, adding boundaries (\< word \>)
 nmap  <unique>  +hg*  <plug>(quickhl-manual-this-whole-word)
 
 " cleaN the highlight under the cursor
 nmap  <unique>  +hn  <plug>(quickhl-manual-clear)
-xmap  <unique>  +hn  <plug>(quickhl-manual-clear)
 
 " cleaN all highlights
 nmap  <unique>  +hN  <plug>(quickhl-manual-reset)

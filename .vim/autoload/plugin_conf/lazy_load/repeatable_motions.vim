@@ -22,7 +22,7 @@ endif
 " these motions repeatable  would be overwritten, and we would  lose the ability
 " to repeat the motions.
 "
-" So, why nto using the guard?
+" So, why not using the guard?
 "
 " We'll undoubtedly forget it sometimes, and then lose time wondering why one
 " of our motion is not repeatable.
@@ -376,8 +376,14 @@ call lg#motion#repeatable#make#all({
 \        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
-\                     { 'bwd': '[l',  'fwd': ']l' },
-\                     { 'bwd': '[q',  'fwd': ']q' },
+\                     { 'bwd': '[<c-l>',  'fwd': ']<c-l>' },
+\                     { 'bwd': '[<c-q>',  'fwd': ']<c-q>' },
+\                     { 'bwd': '[a'    ,  'fwd': ']a'     },
+\                     { 'bwd': '[b'    ,  'fwd': ']b'     },
+\                     { 'bwd': '[f'    ,  'fwd': ']f'     },
+\                     { 'bwd': '[l'    ,  'fwd': ']l'     },
+\                     { 'bwd': '[q'    ,  'fwd': ']q'     },
+\                     { 'bwd': '[t'    ,  'fwd': ']t'     },
 \                   ]
 \ })
 
@@ -394,21 +400,6 @@ call lg#motion#repeatable#make#all({
 \                     { 'bwd': '[U',  'fwd': ']U' },
 \                     { 'bwd': '[z',  'fwd': ']z' },
 \                     { 'bwd': 'gk',  'fwd': 'gj' },
-\                   ]
-\ })
-
-call lg#motion#repeatable#make#all({
-\        'mode':   'n',
-\        'buffer': 0,
-\        'axis':   {'bwd': 'z,', 'fwd': 'z;'},
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
-\        'motions': [
-\                     { 'bwd': '[<c-l>',  'fwd': ']<c-l>' },
-\                     { 'bwd': '[<c-q>',  'fwd': ']<c-q>' },
-\                     { 'bwd': '[a'    ,  'fwd': ']a'     },
-\                     { 'bwd': '[b'    ,  'fwd': ']b'     },
-\                     { 'bwd': '[f'    ,  'fwd': ']f'     },
-\                     { 'bwd': '[t'    ,  'fwd': ']t'     },
 \                   ]
 \ })
 
