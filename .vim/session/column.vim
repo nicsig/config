@@ -7,25 +7,27 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
+badd +46 ~/Desktop/result
+badd +140 ~/Dropbox/wiki/vim/qf.md
 badd +45 ~/Dropbox/wiki/latex/README/latex.md
+badd +1 ~/Desktop/show_toc_help.vim
+badd +11 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
+badd +1 ~/Dropbox/vim_plugins/fastfold.vim
+badd +37 ~/Desktop/final_analysis.hydra
+badd +1 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex
 badd +581 ~/.vim/UltiSnips/vim.snippets
 badd +40 ~/.vim/UltiSnips/README.md
 badd +34 ~/.vim/after/ftplugin/help.vim
 badd +349 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 badd +43 ~/.vim/UltiSnips/markdown.snippets
 badd +51 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
-badd +69 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
+badd +68 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
 badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
-badd +1 ~/Desktop/show_toc_help.vim
-badd +9 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
 badd +1 /run/user/1000/hydra/head18.vim
-badd +4 ~/Desktop/result
-badd +49 ~/Desktop/final_analysis.hydra
 badd +1 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
-badd +1 ~/Dropbox/vim_plugins/fastfold.vim
-badd +4 /tmp/md.md
+badd +1 /tmp/md.md
 badd +53 ~/.vim/UltiSnips/help.snippets
-badd +32 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex
+badd +8 /tmp/answer
 argglobal
 silent! argdel *
 set stal=2
@@ -198,11 +200,11 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 4 - ((3 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-4
+1
 normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -461,11 +463,11 @@ setlocal fdn=20
 setlocal fen
 24
 normal! zo
-let s:l = 38 - ((6 * winheight(0) + 0) / 1)
+let s:l = 45 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-38
+45
 normal! 0
 wincmd w
 argglobal
@@ -478,20 +480,64 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-15
-normal! zo
 let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
-normal! 014|
-lcd ~/.vim
+normal! 0
 wincmd w
-2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 8
+tabedit ~/Dropbox/wiki/vim/qf.md
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+argglobal
+setlocal fdm=expr
+setlocal fde=fold#md#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+139
+normal! zo
+let s:l = 150 - ((117 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+150
+normal! 0
+wincmd w
+argglobal
+if bufexists('/tmp/answer') | buffer /tmp/answer | else | edit /tmp/answer | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+wincmd w
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+tabnext 9
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf

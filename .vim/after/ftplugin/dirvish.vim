@@ -31,6 +31,41 @@ nno  <buffer><nowait><silent>  <c-v><c-v>  :<c-u>call dirvish#open('vsplit', 1)<
 nmap  <buffer><nowait><silent>  h  <plug>(my_dirvish_update)<plug>(dirvish_up)
 nmap  <buffer><nowait><silent>  l  <cr>
 
+" q {{{2
+
+" Why?{{{
+"
+" MWE:
+"
+"     $ cat /tmp/vimrc
+"
+"         set rtp^=~/.vim/plugged/vim-dirvish
+"         filetype plugin indent on
+"
+"     $ vim -Nu /tmp/vimrc
+"     :tabnew
+"     :e /etc/apt
+"     q
+"         ✘ nothing happens
+"
+" The issue comes from this file:
+"
+"     ~/.vim/plugged/vim-dirvish/autoload/dirvish.vim:204
+"
+" More specifically from this line:
+"
+"     \ && (1 == bufnr('%') || (prevbuf != bufnr('%') && altbuf != bufnr('%')))
+"
+" Probably because `prevbuf`, `bufnr('%')` and `altbuf` have all the same value.
+"}}}
+" FIXME:{{{
+"
+" We shouldn't need to overwrite this simple dirvish mapping.
+" Submit a bug report.
+" Or re-implement dirvish.
+"}}}
+nno  <buffer><nowait><silent>  q  :<c-u>bd<cr>
+
 " R {{{2
 
 " To "toggle" this, just press `R` to reload.

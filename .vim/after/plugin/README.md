@@ -1,3 +1,8 @@
+If a command pollute your tab completion suggestions, remove it in:
+
+        tidy_tab_completion.vim
+
+
 Some third-party plugins need to be customized after they have been sourced.
 
 We write these default plugin customizations inside dedicated files in this directory.
@@ -49,3 +54,4 @@ If you don't like this you could:
 
 This way, they would only be sourced from the vimrc. Not when you start Vim with
 a minimum of customizations.
+

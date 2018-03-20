@@ -306,35 +306,6 @@ fu! myfuncs#box_destroy() abort
     sil! call repeat#set("\<plug>(myfuncs_box_destroy)")
 endfu
 
-fu! myfuncs#check_myfuncs() abort "{{{1
-    let s:MY_VIMRC = join(readfile($MYVIMRC), "\n")
-    let s:tempfile = tempname()
-
-    call writefile([ '    Warning: a function whose name appears here could be moved in the script-local scope,',
-                   \ "    because it doesn't appear anywhere in your vimrc.",
-                   \ '',
-                   \ "    However, maybe it's called somewhere else, like in a ftplugin,",
-                   \ "    so check with `ag` before doing anything:",
-                   \ '',
-                   \ "            cd ~; ag 'myfuncs#…'",
-                   \ '', ''],
-                   \
-                   \ s:tempfile)
-
-    g/\v^\s*fu%[nction]!\s+myfuncs#/call s:search_superfluous_myfuncs()
-
-    exe 'tabe '.s:tempfile
-    unlet! s:MY_VIMRC s:tempfile
-endfu
-
-fu! s:search_superfluous_myfuncs() abort
-    let line      = getline('.')
-    let func_name = matchstr(line, 'myfuncs#\k\+')
-    if stridx(s:MY_VIMRC, func_name) ==# -1
-        call writefile([func_name], s:tempfile, 'a')
-    endif
-endfu
-
 fu! myfuncs#cloc(lnum1,lnum2,path) abort "{{{1
     if !empty(a:path)
         if a:path =~# '^http'
@@ -430,47 +401,6 @@ fu! myfuncs#cloc(lnum1,lnum2,path) abort "{{{1
     endfor
 
     echo to_display
-endfu
-
-fu! myfuncs#current_word_toggle_highlight() abort "{{{1
-    " Check if an autocmd watching the CursorHold event in the my_current_word
-    " augroup exists.
-    if exists('#my_current_word#CursorHold')
-        " If it exists, we reset 'updatetime', remove the autocmd, the augroup
-        " and the highlighting
-        let &updatetime = s:update_time_save
-        unlet! s:update_time_save
-        au! my_current_word
-        aug! my_current_word
-        call s:current_word_delete_old_highlight()
-
-    else
-        let s:update_time_save = &updatetime
-        set updatetime=100
-        augroup my_current_word
-            au!
-            au CursorHold <buffer> call s:current_word_delete_old_highlight()
-                                \| call s:current_word_highlight()
-        augroup END
-    endif
-endfu
-
-fu! s:current_word_highlight() abort
-    if strcharpart(getline('.'), virtcol('.')-1, 1) =~ '\k'
-        " The following line  is responsible for highlighting  the current word.
-        " It highlights all the occurrences.  If we wanted to highlight only the
-        " occurrence under the cursor:
-        "
-        "         exe 'match WordUnderCursor /\k*\%#\k*/'
-        let w:my_current_word = matchadd('WildMenu', '\V\<'.escape(expand('<cword>'), '\').'\>', 10)
-    endif
-endfu
-
-fu! s:current_word_delete_old_highlight() abort
-    if exists('w:my_current_word')
-        sil! call matchdelete(w:my_current_word)
-        unlet! w:my_current_word
-    endif
 endfu
 
 fu! myfuncs#dump_wiki(url) abort "{{{1
@@ -2078,11 +2008,6 @@ fu! myfuncs#trans_stop() abort
     call job_stop(s:trans_job)
 endfu
 
-fu! myfuncs#unicode_table() abort "{{{1
-    UnicodeTable
-    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-endfu
-
 " unicode_toggle {{{1
 
 fu! myfuncs#unicode_toggle(line1, line2) abort
@@ -2135,6 +2060,13 @@ endfu
 fu! myfuncs#webpage_read(url) abort "{{{1
     let tempfile = tempname()
     exe 'tabe '.tempfile
+    " Alternative shell command:{{{
+    "
+    "     $ lynx -dump -width=1000 url
+    "                         │
+    "                         └─ high nr to be sure that
+    "                         `lynx` won't break long lines of code
+    "}}}
     sil! exe 'read !w3m -cols 100 '.shellescape(a:url, 1)
     setl bh=wipe nobl bt=nofile noswf nowrap
 endfu

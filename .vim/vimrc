@@ -37,6 +37,21 @@ let g:loaded_netrw = 1
 " after the beginning of the name of a command.
 let g:loaded_getscriptPlugin = 1
 
+" Disable the Vimball plugin.
+" Alternative:{{{
+" These commands remove the interface of the Vimball plugin:
+"
+"     sil! delc MkVimball
+"     sil! delc RmVimball
+"     sil! delc UseVimball
+"     sil! delc VimballList
+"     sil! delc Vimuntar
+"}}}
+" interface
+let g:loaded_vimballPlugin= 1
+" autoload
+let g:loaded_vimball      = 1
+
 " vim-plug:  installation {{{2
 
 " We install vim-plug if it's not already.
@@ -86,7 +101,6 @@ Plug 'lacygoill/vim-graph'
 " function of the abolish plugin.
 "}}}
 Plug 'tpope/vim-abolish', { 'frozen': 1 }
-Plug 'lifepillar/vim-cheat40'
 Plug 'lacygoill/vim-debug'
 Plug 'junegunn/vim-easy-align'
 Plug 'tpope/vim-eunuch', { 'frozen': 1 }
@@ -162,6 +176,8 @@ Plug 'justinmk/vim-sneak' | PlugCfg sneak
 Plug 'keith/tmux.vim'
 Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree
 Plug 'chrisbra/unicode.vim'
+
+delc PlugCfg
 
 " Some plugins, or their configuration, take too much time to source during startup.
 " We delay their loading
@@ -568,7 +584,15 @@ set cpo+=M
 " cwd {{{2
 
 if has('vim_starting') && $PWD is# $HOME
-    cd $HOME/.vim
+    " Why a timer?{{{
+    "
+    "     $ cd
+    "     $ grep -noH pat *
+    "     $ vim -q <(!!)
+    "
+    "             The path to the matches would be prefixed with `~/.vim`, instead of `~`.
+    "}}}
+    call timer_start(0, {-> execute('cd $HOME/.vim')})
 endif
 
 " display {{{2
@@ -2896,9 +2920,22 @@ endfu
 nno  <silent>  -s  :<c-u>UltiSnipsEdit<cr>
 nno  <silent>  -S  :<c-u>call myfuncs#show_me_snippets()<cr>
 
-" - u              show unicode table {{{4
+" -U               show unicode table {{{4
 
-nno  <silent>  -u  :<c-u>call myfuncs#unicode_table()<cr>
+" We define this mappping because  it's more convenient than the `:UnicodeTable`
+" command, and  to install a buffer-local  mapping to close the  “unicode table“
+" window with a single `q` (instead of `:q`).
+nno  <silent>  -U  :<c-u>call <sid>unicode_table()<cr>
+
+fu! s:unicode_table() abort
+    UnicodeTable
+    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
+endfu
+
+" -u               :UndotreeShow {{{4
+
+" `D` toggles the diff window.
+nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
 " +                   (prefix) {{{3
 " +t            trim whitespace {{{4
@@ -3756,11 +3793,33 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 " type of buffer.  Those should be defined  in a plugin, or in a filetype plugin
 " with the `-buffer` attribute.
 "}}}
-" CheckMyfuncs {{{2
+" CGrep / LGrep {{{2
 
-" Check whether some public fonctions inside `~/.vim/autoload/myfuncs.vim`
-" could be moved into the script-local scope.
-com! -bar CheckMyfuncs call myfuncs#check_myfuncs()
+" :Grep / :LGrep are custom commands which grep for a pattern across a set of
+" files using the external shell program defined by the option 'grepprg'.
+" At the moment, it's `$ ag`.
+" Usage:
+"         CGrep pattern
+"
+" Don't type:
+"         CGrep pattern .
+"                       │
+"                       └─ ✘ current directory
+"                            our command would include ` .` inside the pattern
+"                            literally (because of `shellescape() which quotes
+"                            the whole argument`)
+
+com! -bar -complete=file_in_path -nargs=+  CGrep  call myfuncs#op_grep('Ex', <q-args>, 0)
+com! -bar -complete=file_in_path -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
+"                       │
+"                       └─ enable tab-based completion by suggesting filenames matching
+"                          the beginning of the argument and which are in a directory present
+"                          in the 'path' option
+"
+"                          atm, my path is `.,**`
+"                          it means Vim will complete by looking for files in the directory of the
+"                          current buffer (.), as well as for files in the working directory and all
+"                          its subdirectories (**)
 
 " Cloc {{{2
 
@@ -3791,12 +3850,6 @@ com! -bar -range=% -nargs=? -complete=file Cloc call myfuncs#cloc(<line1>,<line2
 
 com! -range=% -nargs=+ -complete=custom,myfuncs#patterns_favorite CountPatterns
 \|                      call myfuncs#patterns_count(<line1>, <line2>, <f-args>)
-
-" CV {{{2
-
-" This command is useful to create a copy of a variable local to a function or a
-" script into the global namespace, for debugging purpose.
-com! -bar CV t. | sil keepj keepp s/\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*/g:\1\2= deepcopy(\1)/e
 
 " Doc    {{{2
 
@@ -3872,38 +3925,6 @@ endfu
 "         DumpWiki https://github.com/oniony/TMSU/
 
 com! -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
-
-" Grep / LGrep {{{2
-
-" :Grep / :LGrep are custom commands which grep for a pattern across a set of
-" files using the external shell program defined by the option 'grepprg'.
-" At the moment, it's `$ ag`.
-" Usage:
-"         Grep pattern
-"
-" Don't type:
-"         Grep pattern .
-"                      │
-"                      └─ ✘ current directory
-"                           our command would include ` .` inside the pattern
-"                           literally (because of `shellescape() which quotes
-"                           the whole argument`)
-
-com! -bar -complete=file_in_path -nargs=+   Grep  call myfuncs#op_grep('Ex', <q-args>, 0)
-com! -bar -complete=file_in_path -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
-"                       │
-"                       └─ enable tab-based completion by suggesting filenames matching
-"                          the beginning of the argument and which are in a directory present
-"                          in the 'path' option
-"
-"                          atm, my path is `.,**`
-"                          it means Vim will complete by looking for files in the directory of the
-"                          current buffer (.), as well as for files in the working directory and all
-"                          its subdirectories (**)
-
-" HighlightCurrentWord {{{2
-
-com! -bar HighlightCurrentWord call myfuncs#current_word_toggle_highlight()
 
 " Hex2Dec {{{2
 
@@ -4176,11 +4197,6 @@ fu! s:reverse_every_n_lines(n, line1, line2) abort
     sil exe mods.' '.range.'g/^/exe "m .-".l:Address()'
 endfu
 
-" SC    SCratch buffer {{{2
-
-" We don't use :SB because the lowercase version (:sb[uffer]) already exists.
-com! -bar SC tabnew | setl bh=wipe nobl bt=nofile noswf
-
 " SearchInternalVariables {{{2
 
 " The purpose of this command is to place the cursor on a line where it thinks
@@ -4271,22 +4287,6 @@ fu! s:trim_whitespace(line1,line2) abort
     call winrestview(view)
 endfu
 
-" UnicodeTable {{{2
-
-" We define this command to install a buffer-local mapping to close the
-" “unicode table“ window with a single `q` (instead of `:q`).
-
-com! -bar UCT call myfuncs#unicode_table()
-
-" We have to call a function, instead of simply:
-"
-"     com! UCT UnicodeTable | nno <buffer> <nowait> q :<c-u>close<cr>
-"
-" … Why?
-" Because `:UnicodeTable` wasn't defined with the attribute `-bar`, therefore,
-" it would interpret `| nno …` as a part of its argument instead of another
-" command.
-
 " UnicodeToggle {{{2
 
 " This command  looks for  special characters  \u or \U  + code  points (\u1234)
@@ -4299,18 +4299,7 @@ com! -bar UCT call myfuncs#unicode_table()
 
 com! -bar -range=% UnicodeToggle call myfuncs#unicode_toggle(<line1>,<line2>)
 
-" UTS    UndotreeShow {{{2
-
-" `D` toggles the diff window.
-com! -bar UTS UndotreeShow
-
-" WebPage {{{2
-
-" this command dumps the raw contents of web page in the current buffer
-com! -bar -nargs=1 WebPageDump read !lynx -dump -width=1000 <q-args>
-"                                                      │
-"                                                      └─ high nr to be sure that
-"                                                      `lynx` won't break long lines of code
+" WebPageRead {{{2
 
 " this command opens a new tab page, loads a temporary buffer, and dumps
 " the contents of a webpage inside the latter
@@ -5196,7 +5185,7 @@ endfu
 "                                            → `:ucs`
 "
 " 15 -
-" Extract big chunks of code from `myfuncs.vim` into dedicated plugins.
+" Extract big chunks of code from `myfuncs.vim` into separate plugins.
 "
 " 16 -
 " Read/bookmark/follow this:
@@ -6257,10 +6246,40 @@ endfu
 " 101 -
 " All our mappings dealing with formatting (gq, gqq, gqic, SPC p, SPC P)
 " are becoming too complex for this vimrc.
-" We would benefit from moving all of them in a dedicated plugin.
+" We would benefit from moving all of them in a separate plugin.
 "
 " 102 -
 " finish refactoring `~/Dropbox/wiki/vim/qf.md`
+"
+" 103 -
+" > I added my home directory to the path in my vim config
+"
+"         It is a bad idea in general  because 'path' is used all over the place
+"         for many  features. By adding your  $HOME to path you  are essentially
+"         telling Vim to  search across thousands of  irrelevant directories for
+"         no  good reason. The  more specific  and precise  'path' is,  the more
+"         useful it is.
+"
+" > I  start vim  from home,  because  I open  lots  of files  from there,  very
+" > often. I don't want multiple instances of vim everywhere open from different
+" > directories, that sounds like a nightmare.
+"
+"         By doing that you get:
+"
+"             • a meaningless and useless working directory
+"
+"             • huge filenames
+"
+"             • useless path/filename completion
+"
+"             • registers filled with irrelevant data
+"
+"             • lots of buffers unrelated to the task at hand
+"
+"             • an artificial need for "fast" plugins you wouldn't have if you
+"               used Vim normally
+"
+"             • etc.
 
 
 
@@ -6280,7 +6299,7 @@ fu! s:quick_and_dirty_settings() abort
     endif
 
     call cursor(1,1)
-    let end = search('^END_QnD$')
+    let end = search('^QnD_END$')
     if !end
         norm! g`.
     endif
@@ -6339,13 +6358,47 @@ augroup END
 
 fu! s:save_last_qfl() abort
     let qfl = getqflist()
+    if empty(qfl)
+        return
+    endif
     call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
     call map(qfl, {i,v -> remove(v, 'bufnr') ? v : v})
     let g:MY_LAST_QFL = {'qfl': qfl, 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
 endfu
 
 fu! s:restore_last_qfl() abort
-    if empty(get(g:, 'MY_LAST_QFL', {}))
+    " Why check the value of 'errorfile'?{{{
+    "
+    " Suppose we start Vim like this:
+    "
+    "     $ vim -q <(!!)
+    "
+    " To populate the qfl with the output of the last shell command.
+    " When we'll execute `:copen`, I want to see the result IMMEDIATELY.
+    " I don't want to have to execute `:colder`.
+    "
+    " Otherwise, we may lose time wondering why we're seeing an irrelevant qfl.
+    "}}}
+    " Which values could it have?{{{
+    "
+    " By default, &errorfile = 'errors.err'.
+    " Except when we start Vim with the `-q` option.
+    " In this case, it's:
+    "
+    "         • '/dev/stdin'    if we read a file
+    "
+    "                 cmd       | vim -q /dev/stdin
+    "                 cmd >file | vim -q file
+    "
+    "         • '/proc/self/fd/123'    if we read the output of a process substitution
+    "
+    "                 vim -q <(shell cmd)
+    "
+    " So,  inspecting the  value of  this option  is a  good way  of determining
+    " whether we can restore an old qfl.
+    "}}}
+    if  &errorfile isnot# 'errors.err'
+    \|| empty(get(get(g:, 'MY_LAST_QFL', {}), 'qfl', []))
         return
     endif
 
