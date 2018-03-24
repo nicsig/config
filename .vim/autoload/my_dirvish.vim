@@ -1,5 +1,5 @@
 fu! s:do_i_preview() abort "{{{1
-    if get(b:dirvish, 'last_preview', 0) !=# line('.')
+    if get(b:dirvish, 'last_preview', 0) != line('.')
         let b:dirvish['last_preview'] = line('.')
         call s:preview()
     endif

@@ -1119,14 +1119,21 @@ endfu
 
 fu! myfuncs#open_gx(in_term) abort "{{{1
     let url = s:open_gx_get_url()
+    let g:url = deepcopy(url)
+
     if empty(url)
         return
     endif
 
     if match(url, '\v^%(https?|ftp|www)') ==# -1
+        " expand a possible tilde in the path to a local file
+        let url = expand(url)
+        if !filereadable(url)
+            return
+        endif
         let ext = fnamemodify(url, ':e')
         let cmd = get({'pdf': 'zathura'}, ext, 'xdg-open')
-        call system(cmd.' '.url)
+        call system(cmd.' '.url.' &')
     else
         if a:in_term
             " We could pass the shell command we want to execute directly to
@@ -1194,7 +1201,7 @@ fu! s:open_gx_get_url() abort
             " remove everything after the last `"`
             let url = substitute(url, '\v".*', '', '')
 
-        else
+        elseif url !~# '\.pdf$'
             " [text](path_to_local_file)
             let cursor_not_before = '%(%'.col('.').'c|%(%'.col('.').'c.*)@<!)'
             let cursor_not_after = '%(.*%'.col('.').'c)@!'

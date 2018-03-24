@@ -111,5 +111,17 @@ nmap  <unique>  +hd  <plug>(quickhl-cword-toggle)
 "}}}
 " nmap  <unique>  +h]  <plug>(quickhl-tag-toggle)
 
+" FIXME:
+"
+" MWE:
+"     ] SPC    insert a blank line below
+"     .        repeat
+"     uu       undo
+"     +h_      highlight current line
+"     j        move to line below
+"     .        try to highlight the line
+"
+"                  → Vim inserts a blank line    ✘
+
 " highlight text-object
 nmap  <unique>  +h  <plug>(operator-quickhl-manual-this-motion)

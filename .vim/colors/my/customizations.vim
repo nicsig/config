@@ -206,7 +206,7 @@ hi! link SpecialKey Special
 
 " VertSplit {{{2
 
-hi! link VertSplit StatusLine
+hi! link VertSplit Normal
 
 " Is there an alternative?{{{
 "

@@ -1,4 +1,12 @@
 # FIXME:
+# Stop using `rm`, directly or indirectly via `dD` in ranger.
+#
+# Instead  use  a utility  such  as  `trash-cli`, to  move  deleted  files in  a
+# temporary directory. This way, you could at least recover them until a reboot.
+# Or, move them to a non-temporary directory, and install a cron job which would
+# empty the trash every week.
+
+# FIXME:
 #
 # The plugin `zsh-syntax-highlighting` breaks the `yank-pop` widget (M-y).
 # After you paste a deleted text with  C-y, M-y allows you to rotate between the
@@ -918,6 +926,14 @@ bindkey -s '^Xr' '^A^Kfor f in *; do mv \"$f\" \"${f}\";done\e7^B'
 
 # C-z        fancy-ctrl-z {{{3
 #
+# FIXME:
+# I can't bring a suspended process to the foreground anymore.
+# MWE:
+#
+#     $ vim
+#     C-z
+#     C-z
+
 # Hit `C-z` to temporarily discard the current command line.
 # If the command line is empty, instead, resume execution of the last paused
 # background process, so that we can put a running command in the background

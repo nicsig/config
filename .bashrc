@@ -3,6 +3,7 @@
 
 
 # TODO:
+#
 # `blink-matching-paren` is a (recent) bash option, which I set in `~/.inputrc`.
 # Suppose I forget from which man page it comes from.
 # How to look for it in all man pages?

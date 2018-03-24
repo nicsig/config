@@ -544,6 +544,14 @@ set noshowmode
 " Even though we should never see it, disable it explicitly.
 set noruler
 
+" cms {{{2
+
+" Without the  guard, when  you reload  the vimrc, the  fold titles  display the
+" comment leader.
+if has('vim_starting')
+    set cms=
+endif
+
 " cpoptions {{{2
 
 " When I type `:r some_file` or `:'<,'>w some_file`, I don't want `some_file`
@@ -609,11 +617,15 @@ set display+=lastline
 " guard to prevent Vim from appending the value every time we source manually
 " our vimrc
 if has('vim_starting')
-    " Pad end of title lines with spaces instead of dashes.
-    let &fillchars .= ',fold: '
+    " Replace ugly separators (`|`) used for vertical splits, with prettier utf8
+    " characters, to get a continuous line.
+    set fillchars=vert:┃
 
-    " remove vertical separators (`|`) inside bars used to separate vertical splits
-    let &fillchars.=',vert: '
+    " Pad end of title lines with spaces instead of dashes.
+    exe 'set fillchars+=fold:\ '
+    " For some reason, this doesn't work:
+    "
+    "         let &fillchars .= 'fold: '
 endif
 
 " folding {{{2
@@ -1587,19 +1599,24 @@ set whichwrap+=h,l
 " MAPPINGS {{{1
 " DISABLED {{{2
 
-" We may press a prefix by accident, then want to cancel.
-" Without these mappings,  if the prefix is  bound to a default  command in Vim,
-" the latter would be executed. Example `U`.
 fu! s:cancel_prefix(prefixes) abort
     for pfx in a:prefixes
+        " We may press a prefix by accident, then want to cancel.
+        " Without these mappings,  if the prefix is  bound to a default  command in Vim,
+        " the latter would be executed. Example `U`.
         exe 'nno  '.pfx.'<esc>  <esc>'
         exe 'xno  '.pfx.'<esc>  <esc>'
+
+        " Also, we may let the timeout elapse. In this case, the key should have
+        " no effect.
+        exe 'nno  '.pfx.'  <nop>'
+        exe 'xno  '.pfx.'  <nop>'
     endfor
 endfu
 call s:cancel_prefix(['U', '<bar>', '+', '-'])
 
 " Disable C-z (suspension / iconize) in operator-pending, visual, and select mode
-ono <c-z> <nop>
+ono  <c-z>  <nop>
 vno  <c-z>  <nop>
 
 " Disable keyword completion
@@ -1718,7 +1735,7 @@ cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHi
 
 " C-r C-l       insert current line {{{3
 
-cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\s*:\?', '', '')<cr>
+cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\?\s*:\?', '', '')<cr>
 
 " INSERT {{{2
 
@@ -1800,7 +1817,7 @@ ino  <expr>  <c-m>  <sid>c_m()
 
 ino  <expr><silent>  <c-p>  pumvisible() ? '<c-p>' : myfuncs#fix_spell()
 
-" C-q             duplication {{{3
+" C-q             exit completion menu {{{3
 
 " Because  of a  mapping in  `vim-readline`, we've  lost the  ability to  exit a
 " completion menu. Restore it on `c-q`.
@@ -1832,7 +1849,7 @@ fu! s:output_last_ex_command() abort
     endtry
 endfu
 
-" C-s {{{3
+" C-s             save {{{3
 
 " I often type C-s in insert mode to save, and miss/forget the escape
 " to get back in normal mode first.
@@ -1841,7 +1858,7 @@ endfu
 ino  <silent>  <c-s>  <esc>:sil update<cr>
 
 " C-x             completions {{{3
-" C-]     tag completion {{{4
+" C-]     tag {{{4
 
 " When a tag contains a colon (e.g. global variable `g:netrw`), the completion
 " function tries to complete only up until the colon (netrw).
@@ -1854,7 +1871,7 @@ ino  <silent>  <c-s>  <esc>:sil update<cr>
 
 ino  <c-x><c-]>  <c-r>=myfuncs#keyword_custom(':-')<cr><c-x><c-]>
 
-" C-k     dictionary completion {{{4
+" C-k     dictionary {{{4
 
 ino  <c-x><c-k>  <c-r>=<sid>set_dict()<cr><c-x><c-k>
 
@@ -1920,7 +1937,7 @@ fu! s:complete_signature() abort
     return ''
 endfu
 
-" C-t     synonym completion {{{4
+" C-t     synonym {{{4
 
 " Pb:
 " If a synonym contains several words (e.g. important → of vital importance),
@@ -1994,6 +2011,11 @@ endfu
 
 " NORMAL {{{2
 " SPC                 (prefix) {{{3
+" SPC                           za {{{4
+
+nno  <space><space>  za
+xno  <space><space>  za
+
 " . {{{4
 
 " `.` repeats the last edit.
@@ -2225,7 +2247,7 @@ fu! s:split_long_paragraph() abort
     let lnum1 = line("'{")+1
     let indent = matchstr(getline(line("'{")+1), '^\s*')
     keepj '{+,'}-j
-    sil keepj keepp '{+,'}-s/[.!?;]\zs\s*/\="\n\n".indent/g
+    sil keepj keepp '{+,'}-s/[.!?;]\zs\%(\s\+\|$\)/\="\n\n".indent/g
     -,d_
     let lnum2 = line('.')
     sil exe printf('keepj keepp %d,%dg/\S/norm gqq', lnum1, lnum2)
@@ -2332,7 +2354,7 @@ nno  <silent>  d~  :<c-u>call <sid>reset_working_directory()<cr>
 
 fu! s:reset_working_directory() abort
     let orig = win_getid()
-    tabdo windo sil cd ~/.vim
+    sil tabdo windo sil ~/.vim
     call win_gotoid(orig)
     call timer_start(0, {-> execute('pwd', '')})
 endfu
@@ -2706,7 +2728,7 @@ fu! s:try_fugitive_cmd(cmd) abort
 
     exe a:cmd
     if a:cmd is# 'Gstatus'
-        sil! 1;/^# Changes/
+        sil! keepj keepp 1;/^# Changes/
     endif
 endfu
 
@@ -2893,6 +2915,60 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : "\u220
 " -p               show filepath {{{4
 
 nno  -p  :<c-u>echohl Title <bar> echo expand('%:p') <bar> echohl NONE <cr>
+
+" -q               faq {{{4
+
+" Purpose:{{{
+"
+" Open a split in which you can write answers to a faq in a wiki.
+" The height of the split will stay the same, even when you focus the wiki,
+" because we temporarily set its window option 'pvw'.
+" Also, we temporarily enable the “auto open folds” mode.
+"}}}
+" Usage:{{{
+"
+"     :FAQ
+"             begin answering a faq in a wiki
+"
+"     :FAQ!
+"             stop answering the faq
+"}}}
+
+nno  <silent>  -q  :<c-u>exe <sid>faq()<cr>
+
+fu! s:faq() abort
+    if stridx(expand('%:p'), '/wiki/') ==# -1 && expand('%:p') isnot# $XDG_RUNTIME_DIR.'/faq'
+        return 'echo "you''re not in a wiki"'
+    endif
+
+    let this_tab = tabpagenr()
+    let win_in_this_tab = filter(getwininfo(), {i,v -> v.tabnr ==# this_tab})
+    let faq_file = $XDG_RUNTIME_DIR.'/faq'
+
+    for win in win_in_this_tab
+        if bufname(get(win, 'bufnr', -1)) is# faq_file
+            exe win.winnr.'close'
+            sil norm ]oz
+            return ''
+        endif
+    endfor
+
+    call map(deepcopy(win_in_this_tab), {i,v -> getwinvar(v.winnr, '&pvw', 0)})
+    if index(win_in_this_tab , 1) !=# -1
+        return "E590: A preview window already exists: previewwindow"
+    endif
+
+    if index(map(deepcopy(win_in_this_tab), {i,v -> bufname(v.bufnr)}), faq_file) !=# -1
+        echo 'a window displaying  '.faq_file.'  already exists'
+        return ''
+    endif
+
+    exe 'sp '.faq_file
+    sil norm [oP
+    sil norm [oz
+    wincmd p
+    return ''
+endfu
 
 " -r               edit README {{{4
 
@@ -3186,11 +3262,6 @@ fu! s:fix_macro() abort
     let c = nr2char(c)
     return printf("q:ilet @%s = \<c-r>\<c-r>=string(@%s)\r\e0f'", c, c)
 endfu
-
-" SPC  SPC   za {{{3
-
-nno  <space><space>  za
-xno  <space><space>  za
 
 " ':                  NOTE: {{{3
 
@@ -6162,17 +6233,16 @@ endfu
 " :h quickref
 "
 " 93 -
-" Play with:
+" Play with (or document):
 "
+"        • $VIMRUNTIME/colors/tools/check_colors.vim
+"        • 'user_data' entry in completion item
 "        • CmdlineChanged
 "        • DirChanged
 "        • ExitPre
-"        • TerminalOpen
 "        • TextChangedP
-"        • $VIMRUNTIME/colors/tools/check_colors.vim
-"        • 'user_data' entry in completion item
 "        • `getcwd(-1)` return the global directory
-"        • changedtick in qfl
+"        • `trim()`
 "
 " 94 -
 " In `vim-window`, don't do this:
@@ -6249,9 +6319,6 @@ endfu
 " We would benefit from moving all of them in a separate plugin.
 "
 " 102 -
-" finish refactoring `~/Dropbox/wiki/vim/qf.md`
-"
-" 103 -
 " > I added my home directory to the path in my vim config
 "
 "         It is a bad idea in general  because 'path' is used all over the place
@@ -6280,6 +6347,28 @@ endfu
 "               used Vim normally
 "
 "             • etc.
+"
+" Bottom_line:
+" When  you start  working  on a  project,  use  a plugin,  or  some config,  to
+" automatically configure `:pwd` with a relevant path.
+"
+" Also,  don't mix  two projects  in  the same  session. Otherwise, you'll  need
+" `:lcd`, which I don't like (because you're never quite sure what's the working
+" directory).
+"
+" 103 -
+" Read:
+"
+"     :h channel.txt
+"     :h syntax.txt (only some parts; too long otherwise)
+"     :h tagsrch.txt
+"     :h terminal.txt
+"
+"     :h if_lua.txt
+"
+"     :h diff.txt
+"     :h recover.txt
+"     :h tips.txt
 
 
 

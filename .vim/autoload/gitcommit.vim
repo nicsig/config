@@ -16,7 +16,9 @@ fu! gitcommit#backtick_minus(...) abort "{{{1
 
     let mode = a:0 ? a:1 : 'n'
     let minus_map = maparg('-', mode, 0, 1)
-    if !has_key(minus_map, 'rhs') || !has_key(minus_map, 'sid')
+    if  !has_key(minus_map, 'rhs')
+    \|| !has_key(minus_map, 'sid')
+    \|| !get(minus_map, 'buffer', 0)
         return
     endif
     "                                             ┌ We could use just -, but if we press it
@@ -44,7 +46,7 @@ endfu
 fu! gitcommit#save_next_message() abort "{{{1
     augroup my_commit_msg_save
         au! * <buffer>
-        au BufWinLeave <buffer> 1;/^# Please enter the commit message/-2w! $XDG_RUNTIME_DIR/vim_last_commit_message
+        au BufWinLeave <buffer> keepj keepp 1;/^# Please enter the commit message/-2w! $XDG_RUNTIME_DIR/vim_last_commit_message
         \|                      exe 'au! my_commit_msg_save'
         \|                      exe 'aug! my_commit_msg_save'
     augroup END

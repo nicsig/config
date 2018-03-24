@@ -169,7 +169,6 @@ what_is_in_var() {
 	printf "%s" "$var" | od -t c
 }
 
-
 # Alias {{{1
 # color {{{2
 
@@ -240,6 +239,10 @@ alias grlc='git reset --hard $(git rev-parse HEAD)'
 alias sr='sr -browser=xdg-open'
 alias srr='sr ixquick'
 alias surfraw='surfraw -browser=w3m'
+
+# tlmgr_gui {{{2
+
+alias tlmgr_gui='nohup tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 &'
 
 # others {{{2
 
@@ -372,6 +375,11 @@ export LC_TIME=en_US.UTF-8
 
 eval "$(dircolors ~/.dircolors)"
 
+# INFOPATH {{{2
+
+# https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
+export INFOPATH=$HOME/texlive/2017/texmf-dist/doc/info:$INFOPATH
+
 # MANPAGER / MANPATH {{{2
 
 # Use Vim as default man pager.
@@ -386,8 +394,8 @@ export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
 #                                  │         └ don't display  “Vim: Reading from stdin...”
 #                                  └ replace tabs with spaces
 
-# add man pages for `dasht`
-export MANPATH=$HOME/GitRepos/dasht/man:$MANPATH
+# add man pages for `texlive` and `dasht`
+export MANPATH=$HOME/texlive/2017/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
 
 # PARINIT {{{2
 
@@ -417,8 +425,9 @@ export MANPATH=$HOME/GitRepos/dasht/man:$MANPATH
 export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 
 # PATH {{{2
-# add the `dasht` binary to our path
-export PATH=$PATH:$HOME/GitRepos/dasht/bin
+
+# add the `texlive` and `dasht` binaries to our path
+export PATH=$HOME/texlive/2017/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
 
 # PDFVIEWER {{{2
 

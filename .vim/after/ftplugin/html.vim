@@ -5,7 +5,7 @@
 " markdown. But, this cause an issue for the next command `:EmmetInstall`. It
 " won't exist, until we have read at least one html file.
 " So, check `:EmmetInstall` exists before trying to execute it.
-if exists(':EmmetInstall') ==# 2
+if exists(':EmmetInstall') == 2
     EmmetInstall
     " Install the mapping for expanding emmet abbreviations.
     "
