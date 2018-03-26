@@ -64,7 +64,16 @@ nmap  <buffer><nowait><silent>  l  <cr>
 " Submit a bug report.
 " Or re-implement dirvish.
 "}}}
-nno  <buffer><nowait><silent>  q  :<c-u>bd<cr>
+"       nno  <buffer><nowait><silent>  q  :<c-u>bd<cr>
+"
+" Update:
+" I've commented the mapping, because of this:
+"
+"      $ vim file
+"      :tabnew
+"      --
+"      q
+"          →  closes the current window and tabpage (✘)
 
 " R {{{2
 

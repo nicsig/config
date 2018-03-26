@@ -244,6 +244,14 @@ alias surfraw='surfraw -browser=w3m'
 
 alias tlmgr_gui='nohup tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 &'
 
+# trash {{{2
+
+alias tl='trash-list'
+
+alias tp='trash-put'
+
+alias trash-restore='rlwrap restore-trash'
+
 # others {{{2
 
 alias ..='cd ..'

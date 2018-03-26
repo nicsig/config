@@ -144,8 +144,8 @@ fu! myfuncs#block_select_paragraph() abort
             " if a line in the paragraph is longer than the previous value of
             " `end_col`, update the latter
             let end_col = searchpos('.*\zs\S\s*' ,'nW')[1] > end_col
-            \?                searchpos('.*\zs\S\s*' ,'nW')[1]
-            \:                end_col
+                      \ ?     searchpos('.*\zs\S\s*' ,'nW')[1]
+                      \ :     end_col
         endfor
 
         " execute the command which will select a block containing the paragraph
@@ -1081,13 +1081,13 @@ fu! myfuncs#op_yank_matches(type) abort
 
         let mods  = 'keepj keepp'
         let range = (a:type is# 'char' || a:type is# 'line')
-        \?               line("'[").','.line("']")
-        \:               line("'<").','.line("'>")
+                \ ?     line("'[").','.line("']")
+                \ :     line("'<").','.line("'>")
 
         let cmd = s:yank_where_match ? 'g' : 'v'
         let pat = s:yank_comments
-        \?            '^\s*\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
-        \:            @/
+              \ ?     '^\s*\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
+              \ :     @/
 
         exe mods.' '.range.cmd.'/'.pat.'/y Z'
 
@@ -2033,17 +2033,17 @@ fu! myfuncs#unicode_toggle(line1, line2) abort
     "         string '\u1234'
     "         where `1234` is the conversion of the decimal code point into hexa
     let [ pat, l:Rep ] = search('\\u\x\+', 'nW', a:line2)
-    \?                       [ '\\u\x\+'      , { -> eval('"'.submatch(0).'"') } ]
-    \
-    \:                       [ '[^\x00-\xff]' ,
-    \                          { -> printf(
-    \                                      char2nr(submatch(0)) <= 65535
-    \                                      ?    '\u%x'
-    \                                      :    '\U%x',
-    \                                      char2nr(submatch(0))
-    \                                     )
-    \                          }
-    \                        ]
+                     \ ?     [ '\\u\x\+'      , { -> eval('"'.submatch(0).'"') } ]
+                     \
+                     \ :     [ '[^\x00-\xff]' ,
+                     \         { -> printf(
+                     \                     char2nr(submatch(0)) <= 65535
+                     \                     ?    '\u%x'
+                     \                     :    '\U%x',
+                     \                     char2nr(submatch(0))
+                     \                    )
+                     \         }
+                     \       ]
     sil exe mods.range.'s/'.pat.'/\=l:Rep()/ge'
     call winrestview(view)
 endfu
