@@ -11,10 +11,10 @@ fu! s:set_backticks_hg() abort "{{{2
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Comment')), k)})
 
     let cmd = has('gui_running')
-    \?            'hi Backticks gui=bold guifg=%s'
-    \:        &tgc
-    \?            'hi Backticks term=bold cterm=bold guifg=%s'
-    \:            'hi Backticks term=bold cterm=bold ctermfg=%s'
+          \ ?     'hi Backticks gui=bold guifg=%s'
+          \ : &tgc
+          \ ?     'hi Backticks term=bold cterm=bold guifg=%s'
+          \ :     'hi Backticks term=bold cterm=bold ctermfg=%s'
 
     exe printf(cmd, attributes.fg)
 endfu
@@ -33,10 +33,10 @@ fu! s:set_tabline_hg() abort "{{{2
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
 
     let cmd = has('gui_running')
-    \?            'hi TabLine gui=none guifg=%s'
-    \:        &tgc
-    \?            'hi TabLine term=none cterm=none guifg=%s'
-    \:            'hi TabLine term=none cterm=none ctermfg=%s'
+          \ ?     'hi TabLine gui=none guifg=%s'
+          \ : &tgc
+          \ ?     'hi TabLine term=none cterm=none guifg=%s'
+          \ :     'hi TabLine term=none cterm=none ctermfg=%s'
 
     " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
     " Tabline doesn't have any value in gui. In this case, executing the command

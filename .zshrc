@@ -938,6 +938,9 @@ bindkey -s '^Xr' '^A^Kfor f in *; do mv \"$f\" \"${f}\";done\e7^B'
 # If the command line is empty, instead, resume execution of the last paused
 # background process, so that we can put a running command in the background
 # with 2 `C-z`.
+# Try to reimplement what is shown here:
+#
+#     https://www.youtube.com/watch?v=SW-dKIO3IOI
 #
 # https://unix.stackexchange.com/a/10851/232487
 fancy-ctrl-z () {

@@ -102,27 +102,32 @@ Plug 'lacygoill/vim-graph'
 "}}}
 Plug 'tpope/vim-abolish', { 'frozen': 1 }
 Plug 'lacygoill/vim-debug'
+Plug 'justinmk/vim-dirvish'
 Plug 'junegunn/vim-easy-align'
-Plug 'tpope/vim-eunuch', { 'frozen': 1 }
+Plug 'tommcdo/vim-exchange' | PlugCfg exchange
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim' | PlugCfg fzf
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/limelight.vim', { 'frozen': 1 }
-Plug 'djmoch/vim-makejob', { 'frozen': 1 }
+Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
 Plug 'kana/vim-operator-user/', { 'frozen': 1 }
 Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
+Plug 'tpope/vim-repeat', { 'frozen': 1 }
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
+Plug 'junegunn/seoul256.vim'
+Plug 'justinmk/vim-sneak' | PlugCfg sneak
 Plug 'tpope/vim-speeddating'
 Plug 'kana/vim-submode', { 'frozen': 1 }
 Plug 'jebaum/vim-tmuxify', { 'frozen': 1 }
 Plug 'SirVer/ultisnips' | PlugCfg ultisnips
+Plug 'lacygoill/vim-unix'
 
 " DONE:
 Plug 'lacygoill/vim-awk'
@@ -166,13 +171,8 @@ Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-window'
 
 " DGAF:
-Plug 'justinmk/vim-dirvish'
 Plug 'mattn/emmet-vim', { 'for' : ['html', 'css'] } | PlugCfg emmet
-Plug 'tommcdo/vim-exchange' | PlugCfg exchange
-Plug 'tpope/vim-repeat', { 'frozen': 1 }
 Plug 'machakann/vim-sandwich' | PlugCfg sandwich
-Plug 'junegunn/seoul256.vim'
-Plug 'justinmk/vim-sneak' | PlugCfg sneak
 Plug 'keith/tmux.vim'
 Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree
 Plug 'chrisbra/unicode.vim'
@@ -1307,11 +1307,13 @@ endfu
 fu! s:save_backup(backupdir) abort
     let filename = expand('%:p')
     let backup = a:backupdir =~ '//$'
-    \?               escape(substitute(filename, '/', '%', 'g').&backupext, '%')
-    \:               escape(expand('%').&backupext, '%')
+             \ ?     escape(substitute(filename, '/', '%', 'g').&backupext, '%')
+             \ :     escape(expand('%').&backupext, '%')
     let backup_path = a:backupdir.backup
     sil! exe '!cp '.resolve(filename).' '.backup_path
     if v:shell_error
+        " reset `v:shell_error`
+        call system('')
         return 1
     endif
 endfu
@@ -1464,13 +1466,13 @@ set ttimeoutlen=6
 "     1. resizing is brittle/wonky no matter what
 "     2. `xterm2` might be a better value than default `xterm`:
 "
-"            This works much faster and more precise.
+"            “This works much faster and more precise.”
 "
 "     3. why do we sometimes get into visual mode when we try to resize?
 "
-"        ┌─ nvim doesn't have this issue, and 'ttym' has been removed from it
+"        ┌ nvim doesn't have this issue, and 'ttym' has been removed from it
 "        │
-if !has('nvim') && &term =~ '^\%(screen\|tmux\)'
+if !has('nvim') && &term =~# '^\%(screen\|tmux\)'
     set ttym=xterm2
 endif
 
@@ -2338,8 +2340,8 @@ fu! s:cd_to_project_root(locally) abort
         let dir = fnamemodify(dir, ':h')
         if index(known_dirs, fnamemodify(dir, ':t')) >= 0
             let dir = fnamemodify(dir, ':h:t') is# 'after'
-            \?            fnamemodify(dir, ':h:h')
-            \:            fnamemodify(dir, ':h')
+                  \ ?     fnamemodify(dir, ':h:h')
+                  \ :     fnamemodify(dir, ':h')
             break
         endif
         let guard += 1
@@ -2462,8 +2464,8 @@ fu! s:my_gq(type) abort
         setl ai
 
         let [ lnum1, lnum2 ] = a:type is# 'vis'
-        \?                         [ line("'<"), line("'>") ]
-        \:                         [ line("'["), line("']") ]
+                           \ ?     [ line("'<"), line("'>") ]
+                           \ :     [ line("'["), line("']") ]
 
         let cml = get(split(&l:cms, '%s'), 0, '')
         let cml = '\%(\V'.escape(cml, '\').'\m\)\?'
@@ -2581,8 +2583,12 @@ fu! s:format_comment() abort
     " TODO:
     " This is an ugly hack.
     " It's not needed anymore.
-    " Look at how we dealt with lines containing multibyte characters (such as│).
-    " Hint: we (ab)use the notion of quote characters.
+    "
+    " Look  at how  we dealt  with lines  containing multibyte  characters (such
+    " as│), in `s:my_gq()`.
+    "
+    " Hint: in  the configuration  of `$  par`, we (ab)use  the notion  of quote
+    " characters.
     "
     " Once you've removed this hack.
     " Simplify  the  code in  `vim-comment`,  by  removing the  second  optional
@@ -2673,8 +2679,8 @@ nno  <silent>  m?  :<c-u>call <sid>add_to_loclist(0)<cr>
 
 fu! s:add_to_loclist(populate) abort
     let s:my_marks = a:populate
-    \?                   get(s:, 'my_marks', []) + [ {'bufnr': bufnr('%'), 'lnum': line('.'), 'col': col('.')} ]
-    \:                   []
+                 \ ?     get(s:, 'my_marks', []) + [ {'bufnr': bufnr('%'), 'lnum': line('.'), 'col': col('.')} ]
+                 \ :     []
     "                               ┌─ without this, Vim would create a new
     "                               │  loclist every time we invoke the function
     "                               │
@@ -2728,7 +2734,7 @@ fu! s:try_fugitive_cmd(cmd) abort
 
     exe a:cmd
     if a:cmd is# 'Gstatus'
-        sil! keepj keepp 1;/^# Changes/
+        sil! keepj keepp 1;/^# \%(Changes\|Untracked files\)/
     endif
 endfu
 
@@ -2814,8 +2820,8 @@ fu! s:repeatable_spell_commands(cmd) abort
     let last_char = a:cmd[-1:-1]
     let last_char_is_uppercase = last_char is# toupper(a:cmd[-1:-1])
     let cmd_to_repeat = a:cmd[:-2].(last_char_is_uppercase
-    \?                                  tolower(last_char)
-    \:                                  toupper(last_char))
+                    \ ?                 tolower(last_char)
+                    \ :                 toupper(last_char))
 
     call repeat#set(cmd_to_repeat)
     return a:cmd
@@ -3053,8 +3059,8 @@ endfu
 " 'hello'.
 
 nno  <expr><silent>  <cr>  !empty(&buftype)
-\?                             '<cr>'
-\:                             ':<c-u>'.getbufvar('%', 'cr_command', 'norm! 80<bar>').'<cr>'
+                       \ ?     '<cr>'
+                       \ :     ':<c-u>'.getbufvar('%', 'cr_command', 'norm! 80<bar>').'<cr>'
 "                                 │
 "                                 └── important, otherwise, if we hit a nr
 "                                 (e.g. 42) by accident before `CR`, it would do:    :42norm! 100|
@@ -3075,8 +3081,8 @@ cno  <expr>  <s-tab>  <sid>c_tab(0)
 fu! s:c_tab(is_fwd) abort
     if getcmdtype() =~ '[?/]'
         return empty(getcmdline())
-        \?         "\<up>"
-        \:         a:is_fwd ? "\<c-g>" : "\<c-t>"
+           \ ?     "\<up>"
+           \ :     a:is_fwd ? "\<c-g>" : "\<c-t>"
     else
         let l:key = a:is_fwd ? "\<tab>" : "\<s-tab>"
         let flags = 'in'.(!wildmenumode() && !a:is_fwd ? 't' : '')
@@ -3680,6 +3686,14 @@ snor  <c-d>  <esc>i<del>
 "
 " But  I prefer to  stay consistent. Double Escape in  Vim → double  escape in
 " neovim.
+" TODO:
+" Find a  way to send  an Escape  key to the  foreground program running  in the
+" terminal. Maybe something like this:
+"
+"         exe "set <m-[>=\e["
+"         tno  <m-[>  <esc>
+"
+" It doesn't work, but you get the idea.
 tno  <esc><esc>  <c-\><c-n>
 
 " Do NOT add this mapping:  tno  <esc>:  <c-\><c-n>:{{{
@@ -3944,10 +3958,10 @@ fu! s:doc(...) abort
     let url = 'http://devdocs.io/?q='
 
     let args = a:0 ==# 0
-    \?            url.&ft.' '.expand('<cword>')
-    \:        a:0 ==# 1
-    \?            url.&ft.' '.a:1
-    \:            url.join(a:000)
+           \ ?     url.&ft.' '.expand('<cword>')
+           \ : a:0 ==# 1
+           \ ?     url.&ft.' '.a:1
+           \ :     url.join(a:000)
 
     sil! call system(cmd.' '.string(args))
 endfu
@@ -4866,29 +4880,29 @@ fu! s:filter_special_file() abort
         endif
 
         setl ma noro
-    " About: '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' -'{{{
-    "                                                             │
-    "                                                             └ write output on STDOUT, which is piped to `par`
-    "}}}
-    " FIXME: Initially, we used the shell utility `fmt`:{{{
-    "
-    "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | fmt -w78'
-    "
-    " The formatting was awful (too much random spacing everywhere).
-    " `par` gives a more readable text:
-    "
-    "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | par -w80rjeq'
-    "
-    " However, there are still errors.
-    " Look at  the bottom  of a  `pdf` file,  filtered by  `par`, to  find error
-    " messages. It's often  due to  a too long  “word” (more  precisely what
-    " `par` considers a word). Because of this, a pdf is often truncated.
-    " So, I don't use it atm.
-    "
-    " Try to fix these errors by learning how to better configure `par`, through
-    " command-line options, and/or through  `$PARINIT`. Then use `par` to format
-    " a pdf.
-    "}}}
+        " About: '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' -'{{{
+        "                                                             │
+        "                                                             └ write output on STDOUT, which is piped to `par`
+        "}}}
+        " FIXME: Initially, we used the shell utility `fmt`:{{{
+        "
+        "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | fmt -w78'
+        "
+        " The formatting was awful (too much random spacing everywhere).
+        " `par` gives a more readable text:
+        "
+        "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | par -w80rjeq'
+        "
+        " However, there are still errors.
+        " Look at the bottom  of a `pdf` file, filtered by  `par`, to find error
+        " messages. It's often  due to  a too long  “word” (more  precisely what
+        " `par` considers a word). Because of this, a pdf is often truncated.
+        " So, I don't use it atm.
+        "
+        " Try to  fix these errors  by learning  how to better  configure `par`,
+        " through  command-line  options,  and/or through  `$PARINIT`. Then  use
+        " `par` to format a pdf.
+        "}}}
         sil exe ext2cmd[ext]
         let b:did_filter_special_file = 1
         setl noma ro nomod
@@ -5452,8 +5466,8 @@ endfu
 "
 "     if has('nvim')
 "       cno  <expr>  !  getcmdtype() is# ':' && getcmdline() is# ''
-"       \?                  '!tmux split-window -c '.getcwd().' '
-"       \:                  '!'
+"                   \ ?     '!tmux split-window -c '.getcwd().' '
+"                   \ :     '!'
 "     endif
 "
 " https://github.com/neovim/neovim/issues/1496
@@ -5944,7 +5958,7 @@ endfu
 " 71 -
 " update the position of the mark in `vim-readline`
 "
-" Watch:
+" MWE:
 "
 "     $ echo 'h|ello'
 "              ^
@@ -6219,7 +6233,7 @@ endfu
 "     augroup END
 "
 " It has a significant impact in Neovim.
-" Watch:
+" MWE:
 "
 "     1000i some text
 "         → several seconds with the autocmd
@@ -6370,6 +6384,15 @@ endfu
 "     :h recover.txt
 "     :h tips.txt
 
+augroup test_sth
+    au!
+    au  BufWritePost * call Func_to_test()
+augroup END
+
+fu! Func_to_test()
+     echom 'hello'
+endfu
+
 
 
 nno  <silent>  {  :<c-u>call search('\v(^\s*$<bar>%^)\_s*\zs\S', 'bW')<cr>zv
@@ -6448,6 +6471,9 @@ augroup END
 fu! s:save_last_qfl() abort
     let qfl = getqflist()
     if empty(qfl)
+        if exists('g:MY_LAST_QFL')
+            unlet g:MY_LAST_QFL
+        endif
         return
     endif
     call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
