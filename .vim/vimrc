@@ -120,6 +120,7 @@ Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
 Plug 'tpope/vim-rhubarb'
+Plug 'airblade/vim-cwd'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak' | PlugCfg sneak
@@ -588,20 +589,6 @@ set cpo+=M
 "         visually select lines
 "         :norm .
 "}}}
-
-" cwd {{{2
-
-if has('vim_starting') && $PWD is# $HOME
-    " Why a timer?{{{
-    "
-    "     $ cd
-    "     $ grep -noH pat *
-    "     $ vim -q <(!!)
-    "
-    "             The path to the matches would be prefixed with `~/.vim`, instead of `~`.
-    "}}}
-    call timer_start(0, {-> execute('cd $HOME/.vim')})
-endif
 
 " display {{{2
 
@@ -1154,31 +1141,86 @@ set synmaxcol=250
 
 " tags {{{2
 
-" when searching the tags file, ignore case unless an upper case letter is used
+" When searching the tags file, ignore the case unless an upper case letter is used.
 set tagcase=smart
 
-" We can complete (C-x C-]) the word before the cursor with a tag name.
-" The completion function looks for candidates in the tags files whose
-" path is stored in the value of the option 'tags'.
-" Its default value is:
+" What's the default value? {{{
 "
 "         ./tags,./TAGS,tags,TAGS
 "
-"          ./tags    file in the directory of the current file and whose name is tags
-"          tags      file in the working directory             and whose name is tags
+" Explanation:
 "
-" We define a new value by adding a semicolon after `tags` and `./tags`.
-" The semicolon tells Vim to look UP recursively.
-" Opposite of `**` which looks DOWN recursively.
+"        ┌────────┬──────────────────────────────────────────────────────────────────┐
+"        │ ./tags │ file in the directory of the CURRENT FILE and whose name is tags │
+"        ├────────┼──────────────────────────────────────────────────────────────────┤
+"        │ tags   │ file in the WORKING DIRECTORY             and whose name is tags │
+"        └────────┴──────────────────────────────────────────────────────────────────┘
+"}}}
+" What's the effect of this new value?{{{
 "
-"         ./tags;    file in the directory of the current buffer, then
-"                    in its parent directory, then in the parent of the parent
-"                    and so on, recursively
+" We define a new value by adding a semicolon after `./tags`.
+" `;` tells Vim to look UP recursively.
+" It's the opposite of `**` which looks DOWN recursively.
+" You could also include the value `tags;`:
 "
-"         tags;      file in the working directory, then in its parent directory,
-"                    then in the parent of the parent and so on, recursively
-
-set tags=./tags;,tags;
+"         set tags=./tags;,tags;
+"
+" Explanation:
+"
+"       ┌─────────┬──────────────────────────────────────────────────────────────┐
+"       │ ./tags; │ file in the directory of the CURRENT FILE, then              │
+"       │         │ in its parent directory, then in the parent of the parent    │
+"       │         │ and so on, recursively                                       │
+"       ├─────────┼──────────────────────────────────────────────────────────────┤
+"       │ tags;   │ file in the WORKING DIRECTORY, then in its parent directory, │
+"       │         │ then in the parent of the parent and so on, recursively      │
+"       └─────────┴──────────────────────────────────────────────────────────────┘
+"
+" The value of 'tags' influence commands such as `:tj` and `:ltag`.
+" But also, tag completion in insert mode.
+" The completion function  invoked by `i_^x^]` looks for candidates  in the tags
+" files whose path are stored in the value of 'tags'.
+"}}}
+set tags=./tags;
+" Why could a command such as `:tj` or `:ltag` include some irrelevant tags? {{{
+"
+" It's probably due to the combination of two factors:
+"
+"         • vim-gutentags is enabled
+"
+"         • you have a tags file in a big directory containing many different
+"           projects
+"
+"           For example,  you may have  executed `$ ctags  -R` by accident  in a
+"           wrong directory, such as `~/.vim` or `~/.vim/plugged`.
+"
+"           Or maybe it  was executed by `vim-gutentags`  because you accidently
+"           created  a git  repo (via  something like  `git {add|commit|push}`),
+"           where you shouldn't have.
+"
+" `vim-gutentags` appends the global value  of 'tags' to the buffer-local value,
+" for buffers inside a git repo.
+"
+" So, if `./tags;` and/or `tags;` is  inside the global value of 'tags', because
+" of `vim-gutentags`, it will also be in the local value.
+"
+" And thus, when  you'll be working on a project,  like the `vim-session` plugin
+" for example, here's the kind of local value that 'tags' will contain:
+"
+"         tags=~/.vim/plugged/vim-session/tags,./tags;,tags;
+"                                                    ^     ^
+"  Because  of  the semicolons,  Vim  may  include a  wrong  tags  file such  as
+" `~/.vim/tags`. If that happens, you'll end up with way too many tags.
+"}}}
+" What to do if that happens? {{{
+"
+" 1. Try  to configure  `vim-gutentags` and  prevent it  from including  the
+"    global value of 'tags' inside the local one.
+"
+" 2. Remove wrong tags files (`$ rm`), and make sure there's no `.git/`
+"    directory outside a valid  repository.
+"    Otherwise, `vim-gutentags` may recreate a tags file.
+"}}}
 
 " In our vimrc file, we want the ability to jump from the call of a function
 " defined in `myfuncs.vim`, to its definition, with `C-]`.
@@ -1189,16 +1231,6 @@ augroup tags_vimrc
     exe 'au BufWritePost '.resolve($HOME.'/.vim/autoload/myfuncs.vim')
     \.  ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
 augroup END
-
-" We also add the tags files from the various plugins installed.
-" This way we can write a plugin tag in any buffer, and with any working
-" directory.
-
-"         set tags+=$HOME/.vim/plugged/**/doc/tags
-"         set tags+=$VIMRUNTIME/doc/tags
-"
-" Commented at the moment because it pollutes suggestions when we use `:tj`,
-" or `:ltag`.
 
 " temporary files:  undo, swap, backup {{{2
 
@@ -1862,13 +1894,15 @@ ino  <silent>  <c-s>  <esc>:sil update<cr>
 " C-x             completions {{{3
 " C-]     tag {{{4
 
-" When a tag contains a colon (e.g. global variable `g:netrw`), the completion
+" When a tag  contains a colon (e.g. global variable  `g:netrw`), the completion
 " function tries to complete only up until the colon (netrw).
-" In the same way we try to fix the problem of multi words synonyms
-" ('thesaurus'), by temporarily adding the colon character (58) to the value of
-" 'iskeyword' when C-x C-] is hit, and then removing it as soon as the completion
-" is done.
-" We also add the hyphen character (useful for something like
+"
+" In  the  same  way  we  try  to  fix  the  problem  of  multi  words  synonyms
+" ('thesaurus'), by temporarily adding the colon  character (58) to the value of
+" 'iskeyword'  when  C-x C-]  is  hit,  and then  removing  it  as soon  as  the
+" completion is done.
+"
+" We   also   add   the   hyphen    character   (useful   for   something   like
 " `ins-completion-menu`).
 
 ino  <c-x><c-]>  <c-r>=myfuncs#keyword_custom(':-')<cr><c-x><c-]>
@@ -2211,16 +2245,6 @@ omap  m       <plug>(fzf-maps-o)
 " nno <space>B :vert sbuffer *
 " nno <space>B :<c-u>sbuffer *
 
-" o                             TOC {{{4
-
-" Source:
-" https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
-
-" In Neovim, they use `gO`. Should we do the same?
-" Pro: consistency
-" Con: harder to type
-nno  <silent>  <space>o  :<c-u>call myfuncs#tab_toc()<cr>
-
 " p                             gqip {{{4
 
 "                                              ┌─ don't write:
@@ -2241,7 +2265,7 @@ nno  <silent>  <plug>(split-long-paragraph)  :<c-u>call <sid>split_long_paragrap
 fu! s:split_long_paragraph() abort
     " The last character of the paragraph needs to be a valid punctuation ending
     " for a sentence. Otherwise, our function could wrongly delete some lines.
-    if getline(line("'}")-1) =~# '\s*[^.!?;]$'
+    if getline(line("'}")-1) =~# '\s*[^.!?:]$'
         echo 'last char is not a valid punctuation ending for a sentence'
         return
     endif
@@ -2249,7 +2273,8 @@ fu! s:split_long_paragraph() abort
     let lnum1 = line("'{")+1
     let indent = matchstr(getline(line("'{")+1), '^\s*')
     keepj '{+,'}-j
-    sil keepj keepp '{+,'}-s/[.!?;]\zs\%(\s\+\|$\)/\="\n\n".indent/g
+    let pat = '[.!?]\zs\%(\s\+\|$\)\|:\zs\s*$'
+    sil exe printf("keepj keepp '{+,'}-s/%s/\\=%s/g", pat, string("\n\n".indent))
     -,d_
     let lnum2 = line('.')
     sil exe printf('keepj keepp %d,%dg/\S/norm gqq', lnum1, lnum2)
@@ -2314,52 +2339,6 @@ nno  \f  f
 " to draw a box around it.
 
 nno  <expr><silent>  \p  myfuncs#block_select_paragraph()
-
-" d                   (prefix) {{{3
-" d.    d:    d~               change working directory {{{4
-
-nno  d.  :<c-u>call <sid>cd_to_project_root(0)<cr>
-nno  d:  :<c-u>call <sid>cd_to_project_root(1)<cr>
-
-fu! s:cd_to_project_root(locally) abort
-    let dir = expand('%:p')
-
-    let known_dirs = [ 'autoload',
-    \                  'colors',
-    \                  'compiler',
-    \                  'doc',
-    \                  'ftdetect',
-    \                  'ftplugin',
-    \                  'indent',
-    \                  'plugin',
-    \                  'syntax',
-    \                  'CODE' ]
-
-    let guard = 0
-    while guard <= 100
-        let dir = fnamemodify(dir, ':h')
-        if index(known_dirs, fnamemodify(dir, ':t')) >= 0
-            let dir = fnamemodify(dir, ':h:t') is# 'after'
-                  \ ?     fnamemodify(dir, ':h:h')
-                  \ :     fnamemodify(dir, ':h')
-            break
-        endif
-        let guard += 1
-    endwhile
-    if dir isnot# '/' && isdirectory(dir)
-        exe (a:locally ? 'l' : '').'cd '.dir
-    endif
-    pwd
-endfu
-
-nno  <silent>  d~  :<c-u>call <sid>reset_working_directory()<cr>
-
-fu! s:reset_working_directory() abort
-    let orig = win_getid()
-    sil tabdo windo sil ~/.vim
-    call win_gotoid(orig)
-    call timer_start(0, {-> execute('pwd', '')})
-endfu
 
 " g                   (prefix) {{{3
 " g^ g$       first/last tabpage {{{4
@@ -2643,9 +2622,9 @@ fu! s:gqq() abort
     sil! call repeat#set("\<plug>(my_gqq)", v:count1)
 endfu
 
-" gt          search todo/fixme (Tags) {{{4
+" gT          search todo/fixme (Tags) {{{4
 
-nno  <silent>  gt  :<c-u>call myfuncs#search_todo()<cr>
+nno  <silent>  gT  :<c-u>call myfuncs#search_todo()<cr>
 
 " gx          open url {{{4
 
@@ -3001,6 +2980,14 @@ endfu
 
 nno  <silent>  -s  :<c-u>UltiSnipsEdit<cr>
 nno  <silent>  -S  :<c-u>call myfuncs#show_me_snippets()<cr>
+
+" -t               TOC {{{4
+
+" Source:
+" https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
+
+" In Neovim, they use `gO`. Should we do the same?
+nno  <silent>  -t  :<c-u>call myfuncs#tab_toc()<cr>
 
 " -U               show unicode table {{{4
 
@@ -3894,17 +3881,8 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 "                            literally (because of `shellescape() which quotes
 "                            the whole argument`)
 
-com! -bar -complete=file_in_path -nargs=+  CGrep  call myfuncs#op_grep('Ex', <q-args>, 0)
-com! -bar -complete=file_in_path -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
-"                       │
-"                       └─ enable tab-based completion by suggesting filenames matching
-"                          the beginning of the argument and which are in a directory present
-"                          in the 'path' option
-"
-"                          atm, my path is `.,**`
-"                          it means Vim will complete by looking for files in the directory of the
-"                          current buffer (.), as well as for files in the working directory and all
-"                          its subdirectories (**)
+com! -bar -complete=file -nargs=+  CGrep  call myfuncs#op_grep('Ex', <q-args>, 0)
+com! -bar -complete=file -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
 
 " Cloc {{{2
 
@@ -5451,17 +5429,6 @@ endfu
 " dot/semicolon/comma repeatable.
 "
 " 30 -
-" document how `setglobal` is useful to avoid that the buffer local value of
-" an option is reset when we source $MYVIMRC from a buffer different from
-" vimrc
-"
-" Don't overuse `:setglobal`. Counter-example:
-" replace `:set scl=yes` ('signcolumn') with `setg scl=yes`
-" it won't take effect in `vimrc` (but it seems it would everywhere else)
-" BTW, why? Probably because when vimrc is sourced, it's too late, it already
-" has a local value, so changing the global one can't override the local one.
-"
-" 31 -
 " :! (bang) and system() are not interactive / show ANSI codes (besides try `!cat`)
 "
 "     if has('nvim')
@@ -5472,7 +5439,7 @@ endfu
 "
 " https://github.com/neovim/neovim/issues/1496
 "
-" 32 -
+" 31 -
 " When we try to paste a Tmux buffer, the indentation is increasingly wrong.
 " The cause seems to be 'autoindent'/'ai' which should be temporarily
 " disabled (and maybe temporarily enable 'paste'?).
@@ -5491,7 +5458,7 @@ endfu
 " Edit3:
 " I've restore 'ai'; let's see what happens.
 "
-" 33 -
+" 32 -
 "
 " Pb:
 " Do you really understand what happens when we load a buffer?
@@ -5510,7 +5477,7 @@ endfu
 " Our section `FTPLUGINS + SYNTAX` has become too long.
 " Re-read. Summarize. Extract in markdown notes.
 "
-" 34 -
+" 33 -
 " Protect all temporary change of option with `try|catch|endtry`.
 " Look for the pattern:
 "
@@ -5536,7 +5503,7 @@ endfu
 "             mandatory conclusion (like restoring options)
 "         endtry
 "
-" 35 -
+" 34 -
 " Compare:
 "
 "     echoerr v:exception
@@ -5569,7 +5536,7 @@ endfu
 " window) introduces lag.
 " Make some tests inside our unimpaired mappings.
 "
-" 36 -
+" 35 -
 "
 " Re-read our snippet `op`, and refactor this section in our notes:
 "
@@ -5604,11 +5571,11 @@ endfu
 " Should we yank with noautocmd to prevent our visual ring from saving
 " a possible selection?
 "
-" 37 -
+" 36 -
 " Create a mapping to populate command-line with `:ltag /`, then open the
 " location window. Ex:
 "
-        nno  <expr>  gT  <sid>ltag(1)
+        nno  <expr>  gt  <sid>ltag(1)
         fu! s:ltag(step) abort
             if a:step ==# 1
                 augroup my_ltag
@@ -5628,6 +5595,13 @@ endfu
                 return ':ltag / | lw'.repeat("\<left>", 5)
             elseif a:step ==# 2
                 let pat = '|.\{-}|'
+                " FIXME:
+                " It works if we press `gt`, which invokes this function.
+                " But  if we  execute `:ltag`  manually, the  function won't  be
+                " invoked, and the conceal won't be applied.
+                " This brings an inconsistent user experience.
+                " Try to use a syntax highlighting file (inspiration: man plugin
+                " in neovim).
                 call qf#set_matches('vimrc:ltag', 'Conceal', pat)
                 call qf#create_matches()
             endif
@@ -5638,7 +5612,7 @@ endfu
 " It seems the latter is more accurate, gives less useless suggestions.
 " Can we configure fzf.vim so that it gives more relevant suggestions?
 "
-" 38 -
+" 37 -
 " In our notes we wrote that the best way to reload ftplugins was:
 "
 "         doautoall filetypeplugin FileType
@@ -5650,10 +5624,10 @@ endfu
 " What's the difference? Which is best?
 " Compare the 2 with `:2Verbose …`.
 "
-" 39 -
+" 38 -
 " finish debugging and try sections in our notes
 "
-" 40 -
+" 39 -
 " shell function to grep a pattern and populate the qfl
 " this one doesn't send the results to a Vim server, and allows to pass
 " arbitrary flags to grep
@@ -5662,11 +5636,11 @@ endfu
 "
 " Difference compared to our `nv()` shell function?
 "
-" 41 -
+" 40 -
 " read :h cscope (useful to list tags in qfl?)
 " https://www.reddit.com/r/vim/comments/6p6uch/how_to_refactor_by_tags/dkn30bd/
 "
-" 42 -
+" 41 -
 " If we search a too complex pattern, `n` takes a long time to compute the nr
 " of matches (total & current).
 " The pb comes from this line:
@@ -5696,31 +5670,31 @@ endfu
 " PS: I've tried this solution but the message gets erased.
 " To continue…
 "
-" 43 -
+" 42 -
 " use `:[c|l]bottom` in your jobs plugins (if they populate a qfl asynchronously)
 "
-" 44 -
+" 43 -
 " In our syntax plugins (awk, markdown, sh, snippets, vim, …), apply a style
 " (bold, italics, …) to texts between backticks, and conceal the backticks
 " (less noise).
 "
-" 45 -
+" 44 -
 " Replace all occurrences of `norm ga` with appropriate code.
 " Do the same for other `norm` (ex: `norm gs`).
 "
 "         vim /\C\%(^\s*".*\|\<ono\>.*\)\@<!norm!\@!\>/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "         :Cfilter! -other_plugins
 "
-" 46 -
+" 45 -
 " implement a global `:FoldToggle` command
 "
-" 47 -
+" 46 -
 " Refactor all our functions which populate the qfl to offload work to a single
 " function in `vim-qf`?
 "
 "         vim /set\%(qf\|loc\)list/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "
-" 48 -
+" 47 -
 " move the setting of 'flp' in markdown ftplugin into vimrc
 " consistent with 'fo' which is in vimrc now
 " set 'flp' from an autocmd listening to FileType (filter *), to set it
@@ -5730,7 +5704,7 @@ endfu
 " does it cause an issue, if an option is set for all filetypes in vimrc?
 " there's no teardown anymore (b:undo_ftplugin)
 "
-" 49 -
+" 48 -
 " read `:h  'indk`; if  you are  in a buffer  where a  line is  reindented while
 " typing in  insert mode,  consider removing the  character which  triggered the
 " reindentation from 'indk' (in an indent plugin)
@@ -5738,17 +5712,17 @@ endfu
 " or look  for a  global variable  used by the  indentation plugin,  which could
 " disable it
 "
-" 50 -
+" 49 -
 " Restore  buffer-local  mappings, J  and  K,  if  they existed,  after  preview
 " mappings teardown?
 "
-" 51 -
+" 50 -
 " The double invocation of `scroll_preview_mappings()` is neat.
 " We don't create 2 functions, only 1.
 " Find where we should have done that. Look for functions containing the keyword
 " `maybe` or `later`.
 "
-" 52 -
+" 51 -
 " Are there places where we should have used:
 "         sil! call repeat#setreg(…, v:register)
 " … ?
@@ -5758,24 +5732,24 @@ endfu
 " But still, document in which environment `repeat#setreg()` might be useful,
 " and when to use it (hint: at the very beginning of the function).
 "
-" 53 -
+" 52 -
 " experiment about the idea that it's  forbidden to call or simply DEFINE public
 " function inside plugin/ because it would cause autoload/ to be loaded
 "
 " use potion plugin to experiment
 " note what you learn
 "
-" 54 -
+" 53 -
 " https://github.com/chrisbra/vim_faq
 "
-" 55 -
+" 54 -
 " no need to check `if &bt  is# 'quickfix'` before applying conceal
 " abort and/or try conditional are enough
 " sure?
 "
 "         vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 56 -
+" 55 -
 " https://github.com/justinmk/vim-dirvish/issues/62
 " https://github.com/bounceme/remote-viewer/
 " Alternative:
@@ -5783,7 +5757,7 @@ endfu
 " other "middleware"),  so that  any dumb local  navigator (like  dirvish) works
 " without adding special-case support for scp, FTP, webdav, …, netrw does.
 "
-" 57 -
+" 56 -
 " Do we really need a timer to display a message?
 "
 "         vim /execute(.*echo/gj ~/.vim/**
@@ -5800,7 +5774,7 @@ endfu
 "         • <expr>
 "         • timer
 "
-" 58 -
+" 57 -
 "
 " create mapping to send current line to terminal, and execute it
 " use `g>` for the lhs?
@@ -5809,14 +5783,14 @@ endfu
 "     g> on visual selection
 "     g>> for line
 "
-" 59 -
+" 58 -
 " finish reviewing vim-math
 " What insight can we gain from it?
 "
-" 60 -
+" 59 -
 " finish reviewing ~/Dropbox/vim_plugins/pair_complete.vim
 "
-" 61 -
+" 60 -
 " We use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
 "         • iabbrev
@@ -5835,7 +5809,7 @@ endfu
 "
 "         synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  isnot#  'Comment'
 "
-" 62 -
+" 61 -
 " Save/restore qfl/ll when we restart Vim?
 " Not sure I want that. But it would be convenient to have a command which saves
 " a particular qfl/ll in `~/.viminfo`, and which could restore it when needed.
@@ -5847,13 +5821,13 @@ endfu
 "
 "         %argd
 "
-" 63 -
+" 62 -
 " finish reviewing  the section in our  notes which deals with  string functions
 " (match(), matchstr(),…); also talk about `matchstrpos()`
 "
 " finish reviewing indexage de chaîne
 "
-" 64 -
+" 63 -
 " study vim-sandwich
 " implement surrounding with → ← (for easier conceal)
 "
@@ -5906,11 +5880,11 @@ endfu
 "
 "           let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
 "
-" 65 -
+" 64 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
 "
-" 66 -
+" 65 -
 " Create a command in vim-debug, to automatically profile a plugin.
 " It would create a temporary script with the commands:
 "
@@ -5926,11 +5900,11 @@ endfu
 "         \               { i,v -> v !~# '/t\%[est]/' }),
 "         \        { i,v -> 'so '.v })
 "
-" 67 -
+" 66 -
 " Check whether some commands would be better suited as mappings.
 " And check whether some mappings would be better suited as commands.
 "
-" 68 -
+" 67 -
 "                                ┌ 3rd character of all `]o?` mappings
 "         ┌──────────────────────┤
 "         BCILNSWacdfhilmnopqstvwz
@@ -5943,7 +5917,7 @@ endfu
 " ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 " cmdline#transform() (bound to C-s)
 "
-" 69 -
+" 68 -
 " install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `BufWritePost`
 " which would give us a warning when we forget to undo a:
@@ -5952,10 +5926,10 @@ endfu
 "
 " or when we undo a non-existing …
 "
-" 70 -
+" 69 -
 " normalize underscore/dash in plug mappings, and function names in shell init files
 "
-" 71 -
+" 70 -
 " update the position of the mark in `vim-readline`
 "
 " MWE:
@@ -5991,7 +5965,7 @@ endfu
 "
 " Look for other mappings to implement, add them to a todo.
 "
-" 72 -
+" 71 -
 " Should we add `:noautocmd` every time we use `:wincmd`?
 "
 "
@@ -6010,7 +5984,7 @@ endfu
 " I think we should use `noautocmd`  whenever we TEMPORARILY change the focus to
 " a window.
 "
-" 73 -
+" 72 -
 " We've lost time debugging dirvish, because the issue was not in vimrc
 " but in filetype plugin. How to avoid it in the future?
 "
@@ -6025,13 +5999,13 @@ endfu
 "
 " To improve
 "
-" 74 -
+" 73 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
 " A function implementing some abstract logic can be wrongly affected by the current
 " buffer settings ('isk' for example). Should we track this issue everywhere in our code?
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
-" 75 -
+" 74 -
 " Check that whenever we use `wincmd p` we get to the right window.
 " Maybe we should use this instead:
 "
@@ -6039,40 +6013,40 @@ endfu
 "     …
 "     call win_gotoid(id)
 "
-" 76 -
+" 75 -
 " Read all of this:
 "     https://neovim.io/news/archive/
 "
-" 77 -
+" 76 -
 " Read this:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 78 -
+" 77 -
 " Read this (OOP in VimL):
 " https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
 "
-" 79 -
+" 78 -
 " Replace `:silent!` with `:silent` whenever possible.
 " There may be errors to fix which we are missing because they are silent.
 " Also, if you wonder whether a plugin/(auto)command/function is working
 " as expected, and has no silent errors, use `:Verbose` to increase
 " the verbosity level.
 "
-" 80 -
+" 79 -
 " use syntax hl in `vim-qf` instead of complex mechanism using matches
 " also, in `vim-qf`, fix the fixme in the autocmd `my_qf`
 "
-" 81 -
+" 80 -
 " add syntax hl in TOC menu, and make content more relevant in help TOC
 "
-" 82 -
+" 81 -
 " The TOC  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " qf#open()). We could  compute the longest line,  and set the width  of the TOC
 " window dynamically.
 "
-" 83 -
+" 82 -
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     cmdline#reset_did_transform(
@@ -6089,12 +6063,12 @@ endfu
 " Also, make  sure they  are self-contained. They must  not call  functions from
 " one of our other plugins. If they do, move the latter inside `vim-lg-lib` too.
 "
-" 84 -
+" 83 -
 " implement a search ring, and install mappings to cycle through it
 " useful to search for an old pattern without having to do `/ Up …`
 " (; and ,  would be more comfy)
 "
-" 85 -
+" 84 -
 " When you create a loclist, replace the  old one if its title is `Breakdown` or
 " `FIX_ME & TO_DO`.
 " Also, maybe create a mapping to show  the stack of location lists, and another
@@ -6107,7 +6081,7 @@ endfu
 " it parsed, or any information sufficient to know that there's no need to
 " recreate a qfl.
 "
-" 86 -
+" 85 -
 "     SPC fr    (:FzHistory)
 "     Escape
 "     :tabnew
@@ -6115,7 +6089,7 @@ endfu
 " A new tab page is correctly opened, but the focus stay in the same window,
 " and the fzf buffer is replaced with the last visited buffer.
 "
-" 87 -
+" 86 -
 " Create a submode to insert numbers more easily.
 " Ex:
 "
@@ -6159,7 +6133,7 @@ endfu
 "         return ''
 "     endfu
 "
-" 88 -
+" 87 -
 " Create a mapping to dump in the buffer information printed by a mapping
 " prefixed with `-`. Example: `-a`, `-p`
 "
@@ -6179,7 +6153,7 @@ endfu
 "  -f
 "  -p
 "
-" 89 -
+" 88 -
 "
 "     $ vim
 "     :e /tmp/file
@@ -6198,7 +6172,7 @@ endfu
 " But this begs the question. How to deal with an error prompting us
 " with a question? How to catch it properly?
 "
-" 90 -
+" 89 -
 " Write your own colorscheme.
 " Take inspiration from seoul.
 " There should be a dark and light version, with different level of lightness.
@@ -6214,7 +6188,7 @@ endfu
 "
 " https://speakerdeck.com/cocopon/creating-your-lovely-color-scheme
 "
-" 91 -
+" 90 -
 "
 " Add sth like this  for Neovim; it could make neovim  faster (especially if you
 " use UltiSnips):
@@ -6243,10 +6217,10 @@ endfu
 " https://github.com/neovim/neovim/issues/5702
 " https://github.com/neovim/neovim/issues/7063
 "
-" 92 -
+" 91 -
 " :h quickref
 "
-" 93 -
+" 92 -
 " Play with (or document):
 "
 "        • $VIMRUNTIME/colors/tools/check_colors.vim
@@ -6258,7 +6232,7 @@ endfu
 "        • `getcwd(-1)` return the global directory
 "        • `trim()`
 "
-" 94 -
+" 93 -
 " In `vim-window`, don't do this:
 "
 "     let changelist = split(execute('changes'), '\n')
@@ -6272,7 +6246,7 @@ endfu
 " Requires the  new `getchanglist()` function,  which atm is not  implemented in
 " Neovim. Wait for Neovim to catch up.
 "
-" 95 -
+" 94 -
 " `vim-save`  is  really   small. Move  it  in  vimrc,  or   in  another  plugin
 " (vim-toggle-settings).
 "
@@ -6280,22 +6254,22 @@ endfu
 " could  be useful  in  a future  one. Useless in  Neovim,  because it's  always
 " enabled there.
 "
-" 96 -
+" 95 -
 " Sometimes, some text which should be displayed in italics is not.
 " Reloading the buffer solves the issue.
 " But where does it come from?
 "
-" 97 -
+" 96 -
 " Prevent vim-session from checking swap files.
 " Annoying when a session crashed, and we can't restore a session.
 "
-" 98 -
+" 97 -
 " In  Neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
 " current Neovim instance. But what about Vim?
 "
 "     https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 "
-" 99 -
+" 98 -
 " Load an awk buffer, and press `1zs` on a comment:
 "
 "     awkComment     xxx match /#.*/  contains=@Spell,awkTodo
@@ -6314,7 +6288,7 @@ endfu
 "
 "         :vim /syn.*concealends/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 100 -
+" 99 -
 " We have an issue with mappings which contain C-j (and C-m?) and which are made
 " repeatable. For an example, look at `Z C-j`.
 " It doesn't work the first time it's invoked. But it works fine when you repeat
@@ -6327,12 +6301,12 @@ endfu
 " We could tweak the code to protect such a special character with `<lt>`.
 " But then we would need to translate `<c-j>` manually.
 "
-" 101 -
+" 100 -
 " All our mappings dealing with formatting (gq, gqq, gqic, SPC p, SPC P)
 " are becoming too complex for this vimrc.
 " We would benefit from moving all of them in a separate plugin.
 "
-" 102 -
+" 101 -
 " > I added my home directory to the path in my vim config
 "
 "         It is a bad idea in general  because 'path' is used all over the place
@@ -6370,7 +6344,7 @@ endfu
 " `:lcd`, which I don't like (because you're never quite sure what's the working
 " directory).
 "
-" 103 -
+" 102 -
 " Read:
 "
 "     :h channel.txt
@@ -6383,15 +6357,38 @@ endfu
 "     :h diff.txt
 "     :h recover.txt
 "     :h tips.txt
+"
+" 103 -
+" Try to implement a `:Tr` command to restore the trash.
+"
+" 104 -
+" Document the fact that when a backtick  expansion causes an issue, you can see
+" which shell command was executed by increasing the verbosity level to 4:
+"
+"     :set verbose=4 | cmd
+"     OR
+"     :4verb cmd
 
-augroup test_sth
-    au!
-    au  BufWritePost * call Func_to_test()
-augroup END
 
-fu! Func_to_test()
-     echom 'hello'
-endfu
+
+" sessions:
+" tag → cwd → unix → column (break this one down, then go back to keyboard, then terminal)
+
+
+
+" augroup test_sth
+"     au!
+"     " FIXME:
+"     " Why does this autocmd fails to print 'hello' when we write the vimrc?
+"     " Why does it work if I rename the augroup, then `:w` again?
+"     " Why does it work in another file?
+"     " Does `:unsilent` have any effect on `:echom`?
+"     au  BufWritePost * call Func_to_test()
+" augroup END
+"
+" fu! Func_to_test()
+"      echom 'hello'
+" endfu
 
 
 

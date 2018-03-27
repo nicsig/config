@@ -7,19 +7,19 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +590 ~/Dropbox/wiki/latex/README/latex.md
+badd +1 ~/Dropbox/wiki/latex/README/latex.md
 badd +12 ~/Dropbox/wiki/latex/CODE/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/13_creating_a_macro_for_formatting_keywords.tex
 badd +46 ~/Desktop/result
 badd +1 ~/Desktop/show_toc_help.vim
 badd +11 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
 badd +1 ~/Dropbox/vim_plugins/fastfold.vim
 badd +37 ~/Desktop/final_analysis.hydra
-badd +581 ~/.vim/UltiSnips/vim.snippets
+badd +121 ~/.vim/UltiSnips/vim.snippets
 badd +1 ~/.vim/UltiSnips/README.md
 badd +32 ~/.vim/after/ftplugin/help.vim
-badd +302 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
+badd +1 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
 badd +43 ~/.vim/UltiSnips/markdown.snippets
-badd +83 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
+badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
 badd +68 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
 badd +8 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
 badd +1 /run/user/1000/hydra/head18.vim
@@ -150,7 +150,7 @@ setlocal fdn=20
 setlocal fen
 29
 normal! zo
-let s:l = 29 - ((28 * winheight(0) + 0) / 1)
+let s:l = 29 - ((22 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -491,7 +491,7 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 77
-normal! 01|
+normal! 0
 tabnext 9
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')

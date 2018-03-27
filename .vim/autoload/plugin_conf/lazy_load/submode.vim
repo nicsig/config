@@ -78,6 +78,11 @@ call submode#map(       'schlepp', 'x', 'r', 'l', '<plug>(schlepp_right)')
 " the submode,  then `UU` will  be processed (from Visual  mode: we also  have a
 " custom mapping in visual mode; x_UU).
 
+" FIXME:
+" Try to make Esc quit the schlepp submode AND visual mode at the same time.
+" It's tiring to press Esc twice all the time.
+" Implement this as a feature by refactoring `vim-submode` if needed.
+
 " <  > {{{1
 
 " We lost the ability to change the level of indentation on the line.

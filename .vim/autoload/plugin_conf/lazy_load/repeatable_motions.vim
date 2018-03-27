@@ -109,8 +109,8 @@ fu! s:get_jump_height(is_fwd) abort
     let lnums = filter([lnum1, lnum2], {i,v -> v > 0})
 
     return a:is_fwd
-    \?     ?   min(lnums) - line('.')
-    \:         line('.') - max(lnums)
+    \    ?     min(lnums) - line('.')
+    \    :     line('.') - max(lnums)
 endfu
 
 " ]h  ]r  ]u      move to next path/ref/url {{{2
