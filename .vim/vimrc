@@ -3168,6 +3168,19 @@ nno  <c-g><c-g>  <c-g>
 nno  <silent>  <c-p>  :<c-u>tabprevious<cr>
 nno  <silent>  <c-n>  :<c-u>tabnext<cr>
 
+" C-z    {{{4
+
+" Sometimes, when I  hit C-z by accident, it makes  Vim quit unproperly (crash?)
+" and leaves swap files, which is annoying:
+"
+"         • maybe we wanted to put Vim in the background, to use the shell
+"         • now we need to remove the swap files before reloading the session
+
+" The purpose  of these mappings  is to decrease the  frequence of this  kind of
+" accident.
+nno  <c-z><esc>  <nop>
+nno  <c-z><c-z>  <c-z>
+
 " M-m                 matchadd / matchdelete search pattern {{{4
 
 fu! s:where_are_my_matches() abort
@@ -3272,6 +3285,11 @@ nno  <silent> ':   o<cr>NOTE:<esc>
 
 nno  ""  "+
 xno  ""  "+
+
+" { }                 move by paragraphs {{{3
+
+nno  <silent>  {  :<c-u>call search('\v(^\s*$<bar>%^)\_s*\zs\S', 'bW')<cr>zv
+nno  <silent>  }  :<c-u>call search('\v\S+.*\ze\n\s*$', 'W')<cr>zv
 
 " c*                  change word under cursor {{{3
 
@@ -6363,7 +6381,7 @@ endfu
 "     :h tips.txt
 "
 " 103 -
-" Try to implement a `:Tr` command to restore the trash.
+" Try to implement a `:Trr` (TRash Restore) command to restore the trash.
 "
 " 104 -
 " Document the fact that when a backtick  expansion causes an issue, you can see
@@ -6372,24 +6390,16 @@ endfu
 "     :set verbose=4 | cmd
 "     OR
 "     :4verb cmd
-
-
-
-" Sometimes, when I  hit C-z by accident, it makes  Vim quit unproperly (crash?)
-" and leaves swap files, which is annoying:
 "
-"         • maybe we wanted to put Vim in the background, to use the shell
-"         • now we need to remove the swap files before reloading the session
-"
-" The purpose  of these mappings  is to decrease the  frequence of this  kind of
-" accident.
-nno  <c-z><esc>  <nop>
-nno  <c-z><c-z>  <c-z>
+" 105 -
+" study ~/Dropbox/vim_plugins/fastfold.vim
 
 
 
 " sessions:
-" tag → cwd → unix → column (break this one down, then go back to keyboard, then terminal)
+" config → tag → cwd → unix → keyboard
+"
+" Once finished, get back to studying the terminal and latex.
 
 
 
@@ -6406,11 +6416,6 @@ nno  <c-z><c-z>  <c-z>
 " fu! Func_to_test()
 "      echom 'hello'
 " endfu
-
-
-
-nno  <silent>  {  :<c-u>call search('\v(^\s*$<bar>%^)\_s*\zs\S', 'bW')<cr>zv
-nno  <silent>  }  :<c-u>call search('\v\S+.*\ze\n\s*$', 'W')<cr>zv
 
 
 
@@ -6662,7 +6667,8 @@ nmap  Q  gq
 
 " don't use `<space>g`, I press it by accident too often
 nno  <silent>  <space>G  :<c-u>let g:my_goyo_without_syntax_hl = 1
-                         \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+                         \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')
+                         \<bar> norm coz<cr>
 
 nno  <silent>  <space><c-g>  :<c-u>let g:my_goyo_without_syntax_hl = 0
                              \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>

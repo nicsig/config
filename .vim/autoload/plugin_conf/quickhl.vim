@@ -75,8 +75,8 @@ nmap  <unique>  +hn  <plug>(quickhl-manual-clear)
 " cleaN all highlights
 nmap  <unique>  +hN  <plug>(quickhl-manual-reset)
 
-" highlight word under cursor Dynamically
-nmap  <unique>  +hd  <plug>(quickhl-cword-toggle)
+" highlight Word under cursor dynamically
+nmap  <unique>  +hw  <plug>(quickhl-cword-toggle)
 
 " FIXME: Utterly broken:{{{
 "

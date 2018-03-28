@@ -250,7 +250,8 @@ alias tl='trash-list'
 
 alias tp='trash-put'
 
-alias trash-restore='rlwrap restore-trash'
+# TRash Restore
+alias trr='rlwrap restore-trash'
 
 # others {{{2
 

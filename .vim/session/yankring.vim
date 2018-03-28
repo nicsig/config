@@ -7,15 +7,20 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +46 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
-badd +54 ~/Desktop/qfedit.vim
+badd +1 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
+badd +1 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 argglobal
 silent! argdel *
-set stal=2
-edit ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+edit ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -25,40 +30,41 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-46
+let s:l = 5 - ((3 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
+normal! 0
+wincmd w
+argglobal
+if bufexists('~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim') | buffer ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim | else | edit ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+1
 normal! zo
-let s:l = 64 - ((63 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-64
+1
 normal! 0
-tabedit ~/Desktop/qfedit.vim
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=1
-setlocal fdn=20
-setlocal fen
-let s:l = 54 - ((53 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-54
-normal! 0
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
-set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOAacFIsW
+set winheight=1 winwidth=1 shortmess=filnxtToOAacFIsW
 set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
