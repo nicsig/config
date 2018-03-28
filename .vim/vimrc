@@ -110,7 +110,7 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim' | PlugCfg fzf
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'junegunn/limelight.vim', { 'frozen': 1 }
+Plug 'junegunn/limelight.vim', { 'frozen': 1 } | PlugCfg limelight
 Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
@@ -624,6 +624,10 @@ set foldlevelstart=0
 
 " do NOT open folds when jumping with "(", "{", "[[", "[{", etc.
 set foldopen-=block
+
+" Close a fold even if it doesn't contain any line.
+" Useful in our faq notes.
+set foldminlines=0
 
 " formatting {{{2 
 "
@@ -6368,6 +6372,19 @@ endfu
 "     :set verbose=4 | cmd
 "     OR
 "     :4verb cmd
+
+
+
+" Sometimes, when I  hit C-z by accident, it makes  Vim quit unproperly (crash?)
+" and leaves swap files, which is annoying:
+"
+"         • maybe we wanted to put Vim in the background, to use the shell
+"         • now we need to remove the swap files before reloading the session
+"
+" The purpose  of these mappings  is to decrease the  frequence of this  kind of
+" accident.
+nno  <c-z><esc>  <nop>
+nno  <c-z><c-z>  <c-z>
 
 
 

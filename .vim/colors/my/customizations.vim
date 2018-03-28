@@ -189,9 +189,13 @@ endtry
 " QuickFixLine {{{2
 
 " hide the current line in a qf window (the cursor and the cursor line should be enough)
-hi! link QuickFixLine Normal
+" hi! link QuickFixLine Search
 " │
 " └─ :h E414
+
+" Update:
+" Commented, because now I  find that seeing the current entry  is nice when you
+" move quickly in a qf buffer.
 
 " SpecialKey {{{2
 
