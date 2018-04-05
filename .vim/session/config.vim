@@ -7,10 +7,12 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +7 ~/Dropbox/wiki/vim/config.md
+badd +0 ~/.vim/vimrc
+badd +0 ~/Dropbox/wiki/latex/README/latex.md
 argglobal
 silent! argdel *
-edit ~/Dropbox/wiki/vim/config.md
+set stal=2
+edit ~/Dropbox/wiki/latex/README/latex.md
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
@@ -23,13 +25,36 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 7 - ((6 * winheight(0) + 15) / 31)
+573
+normal! zo
+let s:l = 575 - ((78 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-7
+575
 normal! 0
-tabnext 1
+tabedit ~/.vim/vimrc
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 6405 - ((14 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+6405
+normal! 0
+tabnext 2
+set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
 endif
