@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +19 ~/.vim/plugged/vim-cwd/plugin/cwd.vim
-badd +1 ~/.vim/plugged/vim-session/plugin/session.vim
+badd +330 ~/.vim/plugged/vim-session/plugin/session.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -25,11 +25,13 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 19 - ((14 * winheight(0) + 15) / 30)
+31
+normal! zo
+let s:l = 84 - ((26 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-19
+84
 normal! 0
 tabedit ~/.vim/plugged/vim-session/plugin/session.vim
 set splitbelow splitright
@@ -48,13 +50,13 @@ setlocal fen
 normal! zo
 238
 normal! zo
-let s:l = 330 - ((10 * winheight(0) + 15) / 30)
+let s:l = 331 - ((12 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-330
+331
 normal! 0
-tabnext 2
+tabnext 1
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf

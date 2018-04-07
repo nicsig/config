@@ -7,12 +7,12 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +0 ~/.vim/vimrc
-badd +0 ~/Dropbox/wiki/latex/README/latex.md
+badd +1885 ~/.vim/autoload/myfuncs.vim
+badd +166 ~/Dropbox/wiki/vim/config.md
 argglobal
 silent! argdel *
 set stal=2
-edit ~/Dropbox/wiki/latex/README/latex.md
+edit ~/Dropbox/wiki/vim/config.md
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
@@ -25,20 +25,21 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-573
+43
 normal! zo
-let s:l = 575 - ((78 * winheight(0) + 15) / 31)
+let s:l = 43 - ((41 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-575
+43
 normal! 0
-tabedit ~/.vim/vimrc
+lcd ~/.vim/plugged/vim-brackets
+tabedit ~/.vim/autoload/myfuncs.vim
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
-setlocal fdm=manual
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -46,13 +47,15 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 6405 - ((14 * winheight(0) + 15) / 30)
+1217
+normal! zo
+let s:l = 1224 - ((3 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-6405
+1224
 normal! 0
+lcd ~/.vim/plugged/vim-brackets
 tabnext 2
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')

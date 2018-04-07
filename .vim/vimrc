@@ -120,7 +120,7 @@ Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
 Plug 'tpope/vim-rhubarb'
-Plug 'airblade/vim-cwd'
+Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak' | PlugCfg sneak
@@ -777,11 +777,32 @@ set listchars=tab:▸\ ,eol:¬,precedes:«,extends:»,nbsp:∅
 
 " includeexpr (gf) {{{2
 
-" If gf fails to open the file whose path is under cursor, make it retry with
-" the path after the equal sign.
-" Useful because sometimes, we have something like: set option=path, and Vim
-" tries to open 'option=path' instead of 'path'.
-set includeexpr=substitute(v:fname,'.*=','','')
+fu! s:snr()
+    return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+endfu
+
+let &inex = s:snr().'inex()'
+
+fu! s:inex() abort
+    let line = getline('.')
+
+    " Why?{{{
+    "
+    " If gf  fails to open the  file whose path  is under cursor, make  it retry
+    " with the path after the equal sign.
+    "
+    " Useful because sometimes, we have something like:
+    "
+    "         set option=path
+    "
+    " And Vim tries to open 'option=path' instead of 'path'.
+    "}}}
+    if line =~# '='
+        return substitute(v:fname, '.*=', '', '')
+    endif
+
+    return v:fname
+endfu
 
 " indentation {{{2
 
@@ -1243,6 +1264,10 @@ augroup END
 " Finish implementing proper backup.
 " Read files in `backup` session.
 "
+" And read this:
+"
+"         https://www.zachpfeffer.com/single-post/Practice-Recovering-a-File-in-Vim
+"
 " TODO:
 " Read this:
 " https://vi.stackexchange.com/a/53/13370
@@ -1537,45 +1562,55 @@ set virtualedit=block
 
 " wildignore(case) {{{2
 
-" Un fichier qui matche l'un des patterns stockés par l'option 'wildignore'
-" / 'wig' sera ignoré lorsqu'un glob sera développé ou qu'un nom de fichier /
-" dossier sera complété.
-" Tout type de fichier qui ne peut pas ou ne devrait pas être édité par Vim
-" (binaires, archives, fichiers d'échanges, objets git…) devrait être inclus
-" dans 'wig'.
+" Why?{{{
 "
-" 'wig' influence le comportement des fonctions expand(), glob() et
-" globpath() à moins de leur passer un argument pour la désactiver
-" temporairement.
-
-
-set wig+=*.bak,*.swo,*.swp,*~
-set wig+=*.mp3,*.png
-set wig+=*.kdb
-
-" don't suggest me to edit undo files when I use tab completion
-"        ┌─ `*` can match any string/path (including as many `/` as you want,
-"        │                                 but not a dot)
-"        │
-set wig+=*.vim*/tmp/undo/*
-set wig+=*.vim*/tmp/undo/*.*
-set wig+=*.vim*/tmp/undo/*.*.*
-"                         │
-"                         └─ `*` can't match a dot, and the path of an
-"                             undofile often contains 1 or 2 dots
-
-" A file in a `.git/` subdirectory.
-"     set wildignore+=*/.git/**/*
+" Some files can't be edited by Vim. Or they shouldn't.
+" We never want to see them:
 "
-" Commented because, supposedly, it could lead to bugs with fugitive.vim:
+"         • in a dirvish listing
+"         • on the command-line after a tab completion
+"         • in the output of `expand()`, `glob()`, `globpat()`
+"}}}
+if has('vim_starting')
+    " vim temporary files
+    set wig+=*.bak,*.swo,*.swp,*~
+
+    " latex temporary files
+    set wig+=*.aux,*.fls,*.fdb_latexmk
+
+    " password databases
+    set wig+=*.kdb,*.kdbx
+
+    " media files (music, pictures, ...)
+    set wig+=*.mp3,*.png
+
+    " undo files
+    "
+    "                          ┌─ `*` can match any string/path
+    "                          │  (including as many `/` as you want, but not a dot)
+    "                          │
+    let &wig .= ','.&undodir.'/*'
+    let &wig .= ','.&undodir.'/*.*'
+    let &wig .= ','.&undodir.'/*.*.*,'
+    "                          │
+    "                          └─ `*` can't match a dot, and the path of an
+    "                              undofile often contains 1 or 2 dots
+
+    set wig+=*.gz,*.rar,*.tar.*,*.zip
+
+    " A file in a `.git/` subdirectory.
+    "
+    "     set wildignore+=*/.git/**/*
+    "
+    " Commented because, supposedly, it could lead to bugs with fugitive.vim:
+    "
+    "     https://www.reddit.com/r/vim/comments/626no2/vim_without_nerd_tree_or_ctrlp/dfkbm97/
+endif
+
+" Tab completion should be case-insensitive.
+" If we type `:e bar Tab`, and a file `Bar` exists, we should get:
 "
-"     https://www.reddit.com/r/vim/comments/626no2/vim_without_nerd_tree_or_ctrlp/dfkbm97/
-
-set wig+=*.tar.*,*.rar,*.zip
-
-" On veut que la complétion des noms de fichiers / dossiers via les globs
-" * / ** ne soient pas sensible à la casse.
-" Si on cherche bar, on pourra trouver Bar.
+"         :e Bar
 set wildignorecase
 
 " wildmenu  wildchar(m) {{{2
@@ -2124,52 +2159,6 @@ fu! s:vimrc_edit() abort
     endif
 endfu
 
-" ef  EF                        look for file                      {{{4
-
-" Define `find_file()` which installs 2 mappings for a given cmd:
-"
-"         • one to search from the working directory (lowercase)
-"         • one to search from the directory of the current buffer (uppercase)
-
-fu! s:find_file(lhs, cmd) abort
-    exe 'nno  <space>'.toupper(a:lhs[0].a:lhs[1]).'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
-    " TODO:
-    " `:drop`  is  special compared  to  `:find`  &friends, because  it  doesn't
-    " complete the path with values from &path.
-    " For the moment,  we complete the path  with `**`, but we  should tweak the
-    " code so that it tries to complete with all paths in &path.
-    if a:cmd is# 'dr'
-        exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' **/*'
-    else
-        exe 'nno  <space>'.a:lhs.                 '  :<c-u>'.a:cmd.' *'
-    endif
-
-    " Sometimes, I think I hit `SPC Et` instead of `SPC ET`.
-    " If `SPC Et` isn't a mapping, the `t` command is executed:
-    " annoying. To make sure it doesn't happen, we also define the following
-    " mappings in case we've released shift too early.
-    exe 'nno  <space>'.toupper(a:lhs[0]).a:lhs[1].'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
-    " We may miss shift on the 1st key, instead of the 2nd.
-    exe 'nno  <space>'.a:lhs[0].toupper(a:lhs[1]).'  :<c-u>'.a:cmd.' <c-r>=expand("%:p:h")."/**/*"<cr>'
-endfu
-
-" Install a bunch of mappings
-call s:find_file('ef', 'fin')
-call s:find_file('es', 'sf')
-call s:find_file('ev', 'vert sf')
-call s:find_file('et', 'tabf')
-call s:find_file('ew', 'dr')
-"                  │
-"                  └─ window
-"
-"                     if the file is already displayed in a window,
-"                     `:drop` gives the focus to it
-"
-"                     otherwise, `:drop` opens the file in the current window
-"
-"                     Alternative:
-"                     fzf-vim provides `:FzWindows`
-
 " f                             fuzzy search {{{4
 
 " Mnemonic:
@@ -2201,6 +2190,8 @@ fu! s:fuzzy_mappings() abort
     for [l:char, cmd] in items(fuzzy_mappings)
         exe 'nno  <space>f'.l:char.'  :<c-u>Fz'.cmd.'<cr>'
     endfor
+
+    nno  <silent>  <space>fF  :<c-u>FZF $HOME<cr>
 endfu
 
 call s:fuzzy_mappings()
@@ -2985,13 +2976,13 @@ endfu
 nno  <silent>  -s  :<c-u>UltiSnipsEdit<cr>
 nno  <silent>  -S  :<c-u>call myfuncs#show_me_snippets()<cr>
 
-" -t               TOC {{{4
+" -T               TOC {{{4
 
 " Source:
 " https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
 
 " In Neovim, they use `gO`. Should we do the same?
-nno  <silent>  -t  :<c-u>call myfuncs#tab_toc()<cr>
+nno  <silent>  -T  :<c-u>call myfuncs#tab_toc()<cr>
 
 " -U               show unicode table {{{4
 
@@ -6245,12 +6236,13 @@ endfu
 " 92 -
 " Play with (or document):
 "
-"        • $VIMRUNTIME/colors/tools/check_colors.vim
+"        • $HOME/.vim/tools/colors/check_colors.vim
 "        • 'user_data' entry in completion item
 "        • CmdlineChanged
 "        • DirChanged
 "        • ExitPre
 "        • TextChangedP
+"        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
 "        • `getcwd(-1)` return the global directory
 "        • `trim()`
 "
@@ -6262,10 +6254,10 @@ endfu
 "
 " Instead do this:
 "
-"     let changelist = get(getchanglist('%'), 0, [])
-"     let b:my_change_position = get(getchanglist('%'), 1, -1)
+"     let changelist = get(getchangelist('%'), 0, [])
+"     let b:my_change_position = get(getchangelist('%'), 1, -1)
 "
-" Requires the  new `getchanglist()` function,  which atm is not  implemented in
+" Requires the  new `getchangelist()` function,  which atm is not  implemented in
 " Neovim. Wait for Neovim to catch up.
 "
 " 94 -
@@ -6393,6 +6385,17 @@ endfu
 "
 " 105 -
 " study ~/Dropbox/vim_plugins/fastfold.vim
+"
+" 106 -
+" We don't use `setl noma ro` in `vim-freekeys` neither in `vim-unix` (:Tree).
+" Because it would raise an error if we execute a command twice:
+"
+"         :Tree
+"         :Tree
+"
+" Should we remove `setl noma ro` everywhere?
+" Check whether it cause any issue. Determine when it is really useful.
+
 
 
 
@@ -6400,10 +6403,6 @@ endfu
 " config → tag → cwd → unix → keyboard
 "
 " Once finished, get back to studying the terminal and latex.
-
-
-
-" config push
 
 
 

@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +122 ~/Desktop/preview.md
+badd +110 ~/Desktop/preview.md
 argglobal
 silent! argdel *
 set stal=2
@@ -31,15 +31,18 @@ setlocal fde=fold#md#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
-setlocal fml=1
+setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 110 - ((109 * winheight(0) + 13) / 26)
+31
+normal! zo
+let s:l = 40 - ((39 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-110
-normal! 0
+40
+normal! 09|
+lcd ~/.vim/plugged/vim-brackets
 wincmd w
 argglobal
 if bufexists('/usr/local/share/vim/vim80/doc/tagsrch.txt') | buffer /usr/local/share/vim/vim80/doc/tagsrch.txt | else | edit /usr/local/share/vim/vim80/doc/tagsrch.txt | endif
@@ -48,7 +51,7 @@ setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
-setlocal fml=1
+setlocal fml=0
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
@@ -58,6 +61,7 @@ exe s:l
 normal! zt
 475
 normal! 014|
+lcd ~/.vim/plugged/vim-brackets
 wincmd w
 argglobal
 if bufexists('/usr/local/share/vim/vim80/doc/options.txt') | buffer /usr/local/share/vim/vim80/doc/options.txt | else | edit /usr/local/share/vim/vim80/doc/options.txt | endif
@@ -66,7 +70,7 @@ setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
-setlocal fml=1
+setlocal fml=0
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
@@ -76,6 +80,7 @@ exe s:l
 normal! zt
 284
 normal! 08|
+lcd ~/.vim/plugged/vim-brackets
 wincmd w
 exe '1resize ' . ((&lines * 26 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
@@ -90,7 +95,7 @@ setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
-setlocal fml=1
+setlocal fml=0
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
@@ -100,6 +105,7 @@ exe s:l
 normal! zt
 243
 normal! 025|
+lcd ~/.vim/plugged/vim-brackets
 tabedit /usr/local/share/vim/vim80/doc/options.txt
 set splitbelow splitright
 wincmd t
@@ -110,7 +116,7 @@ setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
-setlocal fml=1
+setlocal fml=0
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
@@ -120,6 +126,7 @@ exe s:l
 normal! zt
 367
 normal! 0
+lcd ~/.vim/plugged/vim-brackets
 tabnext 1
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
