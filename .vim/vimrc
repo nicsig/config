@@ -1582,7 +1582,7 @@ if has('vim_starting')
     set wig+=*.kdb,*.kdbx
 
     " media files (music, pictures, ...)
-    set wig+=*.mp3,*.png
+    set wig+=*.mp3,*.gif,*.png
 
     " undo files
     "
@@ -3922,11 +3922,6 @@ com! -bar -complete=file -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1
 
 com! -bar -range=% -nargs=? -complete=file Cloc call myfuncs#cloc(<line1>,<line2>,<q-args>)
 
-" CountPatterns {{{2
-
-com! -range=% -nargs=+ -complete=custom,myfuncs#patterns_favorite CountPatterns
-\|                      call myfuncs#patterns_count(<line1>, <line2>, <f-args>)
-
 " Doc    {{{2
 
 " Usage:
@@ -3968,14 +3963,16 @@ fu! s:diff_orig() abort
     setl cole=0
 
     vnew
-    setl bh=wipe nobl bt=nofile noswf
+
+    setl bh=wipe bt=nofile nobl noswf nowrap
     sil 0r #
     $d_
+    setl noma ro
+
     diffthis
     sil file Original\ File
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     let &ft = getbufvar('#', '&ft')
-    setl noma ro
 
     let s:tmp_partial = function('s:diff_orig_restore_settings', [cole_save])
     augroup diff_orig_restore_settings
@@ -4154,10 +4151,6 @@ com! -bar -nargs=1 PI call myfuncs#plugin_install(<q-args>)
 "         → display all global variables containing the keyword `ulti`
 
 com! -bar -nargs=1 PluginGlobalVariables call myfuncs#plugin_global_variables(<q-args>)
-
-" PS    Plugin Symbols {{{2
-
-com! -bar PS call myfuncs#plugin_symbols()
 
 " PU    update Vim plugins {{{2
 
@@ -5602,7 +5595,7 @@ endfu
                     "}}}
                     " Still, syntax highlighting would work better.
                     " Less hack, no timer.
-                    au CmdlineLeave : call timer_start(5, {-> execute("sil! exe 'au! my_ltag ' | sil! aug! my_ltag")})
+                    au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag ' | aug! my_ltag", 'silent!')})
                     au FileType qf call s:ltag(2) | exe 'au! my_ltag ' | aug! my_ltag
                 augroup END
                 return ':ltag / | lw'.repeat("\<left>", 5)
@@ -6387,14 +6380,16 @@ endfu
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
 " 106 -
-" We don't use `setl noma ro` in `vim-freekeys` neither in `vim-unix` (:Tree).
-" Because it would raise an error if we execute a command twice:
 "
-"         :Tree
-"         :Tree
+"     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" Should we remove `setl noma ro` everywhere?
-" Check whether it cause any issue. Determine when it is really useful.
+" Visit all matches. Bring consistency in the  way we create a temporary buffer,
+" including how we set the geometry of the window.
+" Also look at our snippet.
+"
+" Also, finish reviewing this:
+"
+"     :vim /setl.*\%(noma\|nomodifiable\)/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 
 
 

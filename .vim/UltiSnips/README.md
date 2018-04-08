@@ -117,7 +117,7 @@ What's the difference between:
 last  visual selection. It  is NOT  a tabstop:  by default,  UltiSnips does  not
 select it, and therefore does not position the cursor somewhere near it.
 
-OTOH, `$0` is a TABSTOP. And as all tabstops, it can have a placeholder.  We can
+OTOH, `$0` IS a tabstop. And as all tabstops, it can have a placeholder.  We can
 use this  property to select  the contents of `${VISUAL}`  by writing it  as the
 placeholder of `$0`. Or any other tabstop.
 

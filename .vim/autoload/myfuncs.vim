@@ -1214,79 +1214,6 @@ fu! s:open_gx_get_url() abort
     return url
 endfu
 
-fu! myfuncs#patterns_count(line1, line2, ...) abort "{{{1
-    let view = winsaveview()
-    let counts = repeat([0], a:0)
-
-    " Why do we copy a:000?
-    "
-    " When we will paste the patterns in the scratch buffer,
-    " we will need to put a `c-a` character after each one of them.
-    " Why?
-    " To allow the `column` shell utility to properly format/align the counts.
-    "
-    " It means we  need to make `a:000`  mutate, which is not  possible.  So, we
-    " make a copy.
-
-    let patterns = copy(a:000)
-
-    for i in range(0, a:0 - 1)
-        call cursor(a:line1, 1)
-        let matchline = search(patterns[i], 'cW', a:line2)
-        while matchline && counts[i] <= 9999
-            let counts[i] += 1
-            let matchline  = search(patterns[i], 'W', a:line2)
-        endwhile
-    endfor
-
-    vnew | exe 'vert resize '.(&columns/3)
-    setl bh=wipe nobl bt=nofile ro noswf
-
-    " Why do escape the double quotes?
-    " Because, when we use :put ={expr}, we need to escape the double quotes
-    " (and the pipe), otherwise they terminate the command prematurely.
-
-    " put the patterns
-    call map(patterns, { i,v -> v."\<c-a>" })
-    "                             │
-    "                             └─ add a literal C-a to be used as a delimiter by `column`;
-    "                                we don't want to align around spaces, because `column` would
-    "                                consider all of them, while we want it to only consider the 1st
-    "                                one on a line
-    "                                with a single C-a on each line, we can be sure `column` will only
-    "                                consider the first occurrence of the delimiter
-    sil 0put =patterns
-    " put the counts right below
-    sil exe a:0.'put =counts'
-
-    " join each count with the corresponding pattern
-    "
-    "                               ┌ range of lines containing the patterns
-    "                            ┌──┤
-    sil! exe printf('keepj keepp 1,%sg/^/%sm.|-j!', a:0, a:0+1)
-    "                                    └──┤
-    "                                       └ take the first line below the patterns (first count)
-    "                                         and move it below the line processed by `:g`;
-    "                                         it contains a pattern, so we're moving a count below
-    "                                         the corresponding pattern
-    sil! $d_
-
-    " align columns around the `c-a`
-    " no need to remove `c-a`, `column` will do it automatically
-    exe "sil! %!column -s '\<c-a>' -t"
-    setl noma
-
-    if !bufexists('Counts') | sil file Counts | endif
-    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    exe winnr('#').'windo call winrestview(view)'
-endfu
-
-fu! myfuncs#patterns_favorite(arglead, _c, _p) abort
-    " We could put inside the following list some patterns that we often use
-    let pat = ['']
-    return join(pat, "\n")
-endfu
-
 fu! myfuncs#plugin_install(url) abort "{{{1
     let pattern     =  '\vhttps?://github.com/(.{-})/(.*)/?'
     let replacement = 'Plug ''\1/\2'''
@@ -1345,95 +1272,6 @@ fu! myfuncs#plugin_global_variables(keyword) abort "{{{1
     endfor
 
     echo msg
-endfu
-
-fu! myfuncs#plugin_symbols() abort "{{{1
-    let functions = s:get_matches('\v^\s*fu%[nction]!\s.*')
-    let mappings  = s:get_matches('\v^\s*%(n|i|v|x|o|c)?%(%(nore)?map|no)>.*')
-    let commands  = s:get_matches('\v^\s*com%[mand]!\s.*')
-
-    " We build the dictionary `sizes` to store the number of lines of each function.
-    " The keys are the names of the functions, the values are the numbers of lines.
-    let sizes = {}
-    let view  = winsaveview()
-    for function in functions
-        let startline       = search(function, 'c')
-        let indent          = matchstr(getline('.'), '^\s*')
-        let sizes[function] = search(indent.'endf\%[unction]$', 'W') - startline - 1
-    endfor
-    call winrestview(view)
-
-    vnew
-    setl bt=nofile bh=wipe nobl nowrap
-    if !bufexists('Plugin Symbols') | sil file Plugin\ Symbols | endif
-
-    " We paste each key-value pair of `sizes`.
-    "
-    " Each pair is returned in a list of 2 items (thanks to items()).
-    " Each time we paste a pair, we reverse it and join the function name and
-    " its length, with a control character ^A in the middle.
-    "
-    " Why do we reverse each pair ?
-    " So that the number comes first on a line, and we can sort them with `sort n`.
-    "
-    " Why do we join them ?
-    " So that the sorting affects the numbers and the names at the same time.
-    " Otherwise we would just sort the numbers.
-    " Why ^A in the middle ?
-    " So that we know where the number ends and where the function name begins.
-    " With this info, we can break a line containing a number and a function
-    " name on 2 lines again (with a substitution).
-    for item in items(sizes)
-        sil! put =join(reverse(item), \"\<c-a>\")
-    endfor
-    sort n
-    sil %s/\v(\d+)%u0001(.*)/\2\r    \1/e
-
-    " Hide the keywords `function!`, `abort` and `range` with conceal feature.
-    " Why not deleting them?
-    " Because when we hit Enter on a function name, our mapping looks for the
-    " contents of the current line.
-    " If `function!`, `abort` and `range` are missing, the cursor may be
-    " positioned on a line where the function is called, whereas we want to go
-    " to its definition.
-    let pat = '\v^\s*fu%[nction]!\s+|%(\s+%(abort|range)){1,2}|\s+"\{\{\{\d+$'
-    call qf#set_matches('myfuncs:plugin_symbols', 'Conceal', pat)
-    call qf#create_matches()
-
-    sil! 0put =['FUNCTIONS']
-    sil! $put =['', 'MAPPINGS', ''] + mappings
-    sil! $put =['', 'COMMANDS', ''] + commands
-    g/^\v%(FUNCTIONS|COMMANDS|MAPPINGS)$/center
-    setl noma ro
-    nno  <buffer><nowait><silent>  <cr>  :<c-u>call <SID>plugin_symbols_clickable_toc()<cr>
-    nno  <buffer><nowait><silent>  q     :<c-u>close<cr>
-endfu
-
-fu! s:plugin_symbols_clickable_toc() abort
-    let line = getline('.')
-    if line =~# '^\v\s*%(FUNCTIONS|COMMANDS|MAPPINGS|\d+)?\s*$'
-        return
-    endif
-    wincmd p
-    call search(line, 'c')
-    norm! zv
-endfu
-
-fu! s:get_matches(pattern)
-    let guard     = 0
-    let list      = []
-    let view      = winsaveview()
-    call cursor(1, 1)
-    let matchline = search(a:pattern, 'cW')
-
-    while matchline && guard <= 1000
-        let guard    += 1
-        let list     += [matchstr(getline('.'), '\%' . col('.') . 'c' . a:pattern)]
-        let matchline = search(a:pattern, 'W')
-    endwhile
-
-    call winrestview(view)
-    return list
 endfu
 
 fu! myfuncs#populate_list(list, cmd) abort "{{{1
@@ -1705,18 +1543,17 @@ fu! myfuncs#show_me_snippets() abort "{{{1
     if empty(g:current_ulti_dict)
         return
     endif
-    new | exe 'resize '.(&columns/3)
-    setl bh=wipe bt=nofile nobl nowrap noswf
 
-    if !bufexists('snip cheat') | sil file snip\ cheat | endif
+    let tempfile = tempname().'/snip cheat'
+    exe 'lefta '.(&columns/3).'vnew '.tempfile
+    setl bh=wipe bt=nofile nobl noswf nowrap
 
     sil 0put =map(sort(deepcopy(keys(g:current_ulti_dict))), { i,v -> v.' : '.g:current_ulti_dict[v] })
     sil $d_
-    sil %EasyAlign 1 : { 'left_margin': '',  'right_margin': ' ' }
+    sil %EasyAlign 1 : { 'left_margin': '', 'right_margin': ' ' }
     sil %s/:/
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    setl noma ro
     call matchadd('Identifier', '^\S\+\ze\s*', 0, -1)
 endfu
 
@@ -1941,21 +1778,6 @@ fu! myfuncs#trans(first_time, ...) abort
     call remove(s:trans_chunks, 0)
 endfu
 
-fu! s:trans_buffer(cmd) abort
-    let view = winsaveview()
-
-    belowright 10split
-    setl bh=wipe bt=nofile
-    setl nobl noma noswf nowrap ro
-    if !bufexists('translation') | sil file translation | else | return -1 | endif
-
-    exe winnr('#').'windo call winrestview(view)'
-    nno  <buffer><nowait><silent>  <c-c>  :<c-u>call myfuncs#trans_stop()<cr>
-    let bufnum = bufnr('%')
-    wincmd p
-    return bufnum
-endfu
-
 fu! myfuncs#trans_cycle() abort
     let s:trans_target = { 'fr' : 'en', 'en' : 'fr' }[get(s:, 'trans_target', 'fr')]
     let s:trans_source = { 'fr' : 'en', 'en' : 'fr' }[get(s:, 'trans_source', 'en')]
@@ -2075,7 +1897,7 @@ fu! myfuncs#webpage_read(url) abort "{{{1
     "                         `lynx` won't break long lines of code
     "}}}
     sil! exe 'read !w3m -cols 100 '.shellescape(a:url, 1)
-    setl bh=wipe nobl bt=nofile noswf nowrap
+    setl bh=wipe bt=nofile nobl noswf nowrap
 endfu
 
 fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
@@ -2137,15 +1959,15 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     endif
 
     " put the result in a vertical viewport
-    vnew
-    setl bh=wipe nobl bt=nofile noswf
+    let tempfile = tempname().'/WordFrequency'
+    exe 'lefta '.(&columns/3).'vnew '.tempfile
+    setl bh=wipe bt=nofile nobl noswf nowrap
 
     " for item in items(freq)
     for item in flags.weighted ? weighted_freq : items(freq)
         call append('$', join(item))
     endfor
 
-    if !bufexists('WordFrequency') | sil file WordFrequency | endif
     " format output into aligned columns
     " We don't need to delete the first empty line, `column` doesn't return it.
     " Probably because there's nothing to align in it.
@@ -2155,7 +1977,6 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     exe 'vert res '.(max(map(getline(1, '$'), { i,v -> strchars(v) }))+4)
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    setl noma ro
     exe winnr('#').'windo call winrestview(view)'
 endfu
 

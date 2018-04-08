@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1885 ~/.vim/autoload/myfuncs.vim
 badd +166 ~/Dropbox/wiki/vim/config.md
+badd +41 ~/.vim/plugged/vim-unix/autoload/unix/tree.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -25,16 +25,15 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-43
+166
 normal! zo
-let s:l = 43 - ((41 * winheight(0) + 15) / 30)
+let s:l = 166 - ((50 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-43
+166
 normal! 0
-lcd ~/.vim/plugged/vim-brackets
-tabedit ~/.vim/autoload/myfuncs.vim
+tabedit ~/.vim/plugged/vim-unix/autoload/unix/tree.vim
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
@@ -47,15 +46,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-1217
-normal! zo
-let s:l = 1224 - ((3 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1224
+1
 normal! 0
-lcd ~/.vim/plugged/vim-brackets
 tabnext 2
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')

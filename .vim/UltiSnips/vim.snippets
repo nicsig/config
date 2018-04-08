@@ -217,7 +217,7 @@ post_expand "trim_ws(snip)"
 snippet fu "function definition" bmA
 fu! $1`!p
 snip.rv = complete(t[1], ['s:func', 'Func', vim.eval("snippets#get_autoload_funcname()")])
-`($3) abort
+`($2) abort
 	${0:${VISUAL}}
 endfu
 endsnippet
@@ -440,18 +440,56 @@ endsnippet
 
 # sidebar {{{1
 
+# How to decide what to choose between `:lefta` and `:to`?{{{
+#
+# If the information is specific to the current buffer, choose `:lefta`.
+# Otherwise, choose `:to`.
+#}}}
+# Why invoking `tempname()`?{{{
+#
+# 1. To get a unique buffer name.
+#
+#	 Otherwise, if we re-invoke our code twice, we could get an issue.
+#	 For example, we wouldn't be able to use the same buffer name.
+#	 Besides, if the buffer is non-modifiable, `:put` will fail.
+#
+# 2. To avoid saving the buffer in a file in the working directory by accident.
+#    It shouldn't happen because of `bt=nofile`, but better be safe.
+#}}}
+# Why don't you execute `:setl noma ro` at the end?{{{
+#
+# Generally, you don't want to.
+# `dirvish` doesn't do it, for example.
+# It's good to be able to edit information.
+#
+# However, you DO need to make a buffer non-modifiable when:
+#
+#	  • its only purpose is to be read
+#
+#	  • it's tied to a file
+#
+#	  • it can't be reproduced
+#
+#	    if you edit a help file, by default, you can't undo the change
+#	    after restarting Vim;
+#
+# Those are sufficient conditions, but not necessary.
+# For example, `qf` buffers are not tied to  any file, and yet they are made non
+# modifiable.
+# This is probably due to the qfl data structure. You shouldn't be able to change
+# a qf buffer, because it could introduce a discrepancy with the qfl.
+#}}}
 snippet sidebar "sidebar" bm
+let tempfile = tempname().'/${1:buffer name}'
+exe '$2`!p
+snip.rv = complete(t[2], ['lefta', 'to'])
+` '.(&columns/3).'vnew '.tempfile
+setl bh=wipe bt=nofile nobl noswf nowrap
 
-vnew | exe 'vert resize '.(&columns/3)
-setl bh=wipe bt=nofile nobl nowrap noswf
-
-if !bufexists('${1:buffer name}') | sil file ${1/ /\\ /g} | endif
-
-sil 0put =${2:put your text}
+sil 0put =${3:put your text}
 sil $d_
 
 nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-
 $0
 endsnippet
 
