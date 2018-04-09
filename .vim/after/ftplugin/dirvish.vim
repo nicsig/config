@@ -26,6 +26,46 @@ xno  <buffer><nowait><silent>  <c-t>  :call dirvish#open('tabedit', 1)<cr>
 
 nno  <buffer><nowait><silent>  <c-v><c-v>  :<c-u>call dirvish#open('vsplit', 1)<cr>
 
+" gh {{{2
+"
+" By default, when we go up in the tree, the cursor is positioned on the
+" directory which contained the directory where we came from.
+" And, when we go down, it's positioned on the entry where we were the very
+" first time we visited the current directory.
+"
+" This makes it possible to traverse the hierarchy in a direction (up/down),
+" and come back where we were easily.
+"
+" For example, if we go in type `-`, we will open Dirvish in the directory
+" containing this file.
+" From there, we could smash `h` (go up) until we reach the root of the
+" filesystem.
+" During our journey, we could make a pause and move the cursor on any entry
+" inside a directory (`j`, `k`), before continuing going up.
+" Then, to get back exactly where we were at the beginning, all we would have
+" to do is smash `l` (go down).
+"
+" However, it seems using `gh` to toggle the dot-prefixed entries breaks those
+" features. Be aware of that pb. If it should become too annoying, try and
+" find a solution by reading this:
+"
+"         https://github.com/justinmk/vim-dirvish/issues/58
+"         https://github.com/justinmk/vim-dirvish/issues/45
+"
+" Or, simply hit `u` to show the dot-prefixed entries.
+" `u` doesn't seem to break anything.
+" However, `R` (to hide them again) does.
+" Summary:
+"     • `u`          does NOT  break those features
+"     • `R` and `gh`      DOES "
+
+" Map `gh` to toggle dot-prefixed entries.
+nno  <buffer><nowait><silent>  gh  :<c-u>call my_dirvish#toggle_dot_entries()<cr>
+
+" TODO:
+" dirvish has introduced `g:dirvish_mode`. Use it to sort the entries, and maybe
+" to toggle hidden files. It would simplify our code.
+
 " h    l {{{2
 
 nmap  <buffer><nowait><silent>  h  <plug>(my_dirvish_update)<plug>(dirvish_up)
@@ -85,46 +125,6 @@ nno  <buffer><nowait><silent>  R  :<c-u>call my_dirvish#reload()<cr>
 xmap  <buffer>         x                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
 xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 2')[0]
 
-" zh {{{2
-"
-" By default, when we go up in the tree, the cursor is positioned on the
-" directory which contained the directory where we came from.
-" And, when we go down, it's positioned on the entry where we were the very
-" first time we visited the current directory.
-"
-" This makes it possible to traverse the hierarchy in a direction (up/down),
-" and come back where we were easily.
-"
-" For example, if we go in type `-`, we will open Dirvish in the directory
-" containing this file.
-" From there, we could smash `h` (go up) until we reach the root of the
-" filesystem.
-" During our journey, we could make a pause and move the cursor on any entry
-" inside a directory (`j`, `k`), before continuing going up.
-" Then, to get back exactly where we were at the beginning, all we would have
-" to do is smash `l` (go down).
-"
-" However, it seems using `zh` to toggle the dot-prefixed entries breaks those
-" features. Be aware of that pb. If it should become too annoying, try and
-" find a solution by reading this:
-"
-"         https://github.com/justinmk/vim-dirvish/issues/58
-"         https://github.com/justinmk/vim-dirvish/issues/45
-"
-" Or, simply hit `u` to show the dot-prefixed entries.
-" `u` doesn't seem to break anything.
-" However, `R` (to hide them again) does.
-" Summary:
-"     • `u`          does NOT  break those features
-"     • `R` and `zh`      DOES "
-
-" Map `zh` to toggle dot-prefixed entries.
-nno  <buffer><nowait><silent>  zh  :<c-u>call my_dirvish#toggle_dot_entries()<cr>
-
-" TODO:
-" dirvish has introduced `g:dirvish_mode`. Use it to sort the entries, and maybe
-" to toggle hidden files. It would simplify our code.
-
 " Sort and hide dot-prefixed files/directories {{{1
 
 " make sure  that `b:dirvish` exists,  because it  doesn't when we  use this
@@ -168,6 +168,6 @@ let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \|  exe 'nunmap <buffer> coP'
                     \|  exe 'nunmap <buffer> h'
                     \|  exe 'nunmap <buffer> l'
-                    \|  exe 'nunmap <buffer> zh'
+                    \|  exe 'nunmap <buffer> gh'
                     \|  exe 'xunmap <buffer> x'
                     \  "

@@ -1887,7 +1887,7 @@ fu! s:vim_parent() abort "{{{1
 endfu
 
 fu! myfuncs#webpage_read(url) abort "{{{1
-    let tempfile = tempname()
+    let tempfile = tempname().'/webpage'
     exe 'tabe '.tempfile
     " Alternative shell command:{{{
     "
@@ -1897,7 +1897,7 @@ fu! myfuncs#webpage_read(url) abort "{{{1
     "                         `lynx` won't break long lines of code
     "}}}
     sil! exe 'read !w3m -cols 100 '.shellescape(a:url, 1)
-    setl bh=wipe bt=nofile nobl noswf nowrap
+    setl bt=nofile nobl noswf nowrap
 endfu
 
 fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1

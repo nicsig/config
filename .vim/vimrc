@@ -811,8 +811,11 @@ set autoindent
 set expandtab
 
 
-" Don't change 'ts'. It will mess the alignment in help files, where tabs are
-" used with a width of 8 cells. Besides, 'ts' is NOT used when 'expandtab' is set.
+" Why don't we set 'ts'?{{{
+"
+" It would mess the alignment in help files, where tabs are used with a width of
+" 8 cells. Besides, 'ts' is NOT used when 'expandtab' is set.
+"}}}
 
 
 " When we hit:
@@ -2892,9 +2895,10 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : "\u220
 "     • unable to expand `~`
 "     • relative to the working directory
 
-" -p               show filepath {{{4
+" -p  -P           show filePath / :pwd {{{4
 
 nno  -p  :<c-u>echohl Title <bar> echo expand('%:p') <bar> echohl NONE <cr>
+nno  -P  :<c-u>pwd<cr>
 
 " -q               faq {{{4
 
@@ -3962,15 +3966,17 @@ fu! s:diff_orig() abort
     let cole_save = &l:cole
     setl cole=0
 
-    vnew
+    let tempfile = tempname().'/Original File'
+    exe 'vnew '.tempfile
+    setl bt=nofile nobl noswf nowrap
 
-    setl bh=wipe bt=nofile nobl noswf nowrap
     sil 0r #
     $d_
     setl noma ro
 
+    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
+
     diffthis
-    sil file Original\ File
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     let &ft = getbufvar('#', '&ft')
 
@@ -6390,12 +6396,36 @@ endfu
 " Also, finish reviewing this:
 "
 "     :vim /setl.*\%(noma\|nomodifiable\)/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
+"
+" 107 -
+" https://www.reddit.com/r/vim/comments/8asgjj/topnotch_vim_markdown_live_previews_with_no/
+" https://github.com/joeyespo/grip (unfortunately, requires an internet connection)
+"
+" 108 -
+" Look at ~/Dropbox/wiki/vim/plugin.md and search for the `vim-sandwich` section.
+" I wrote  some custom  exercises where  the answer  is concealed,  and visually
+" indicated by `↔`.
+" But after  pressing `coc` twice to  see/hide an answer, the  visual indicators
+" are concealed too.
+" In a markdown buffer, `coc` should make 'cole' toggle between `0` and `2`, not
+" `0` and `3`.
+"
+" Also, this concept of concealing answers is neat; try to use it more often.
+" It could be useful when the problem for  which you need to write a question is
+" difficult to summarize in one line.
+" In this case, you could write a generic question followed by a ↕ character.
+" The latter would mean:
+"
+"         “you can safely open the fold,
+"          you won't be immediately spoiled,
+"          there will be an exercise which will make the question clearer,
+"          and the answer is concealed”
 
 
 
 
 " sessions:
-" config → tag → cwd → unix → keyboard
+" package → config → tag → cwd → unix → keyboard
 "
 " Once finished, get back to studying the terminal and latex.
 

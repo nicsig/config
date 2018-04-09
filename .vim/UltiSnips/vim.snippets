@@ -479,14 +479,20 @@ endsnippet
 # This is probably due to the qfl data structure. You shouldn't be able to change
 # a qf buffer, because it could introduce a discrepancy with the qfl.
 #}}}
+# When should I use `bh=wipe`?{{{
+#
+# If the  buffer may  contain links  on which  you could  press `gf`,  don't use
+# `bh=wipe`.  It would prevent you from getting the buffer back with `C-^`.
+# Otherwise, you can use it.
+#}}}
 snippet sidebar "sidebar" bm
 let tempfile = tempname().'/${1:buffer name}'
 exe '$2`!p
 snip.rv = complete(t[2], ['lefta', 'to'])
 ` '.(&columns/3).'vnew '.tempfile
-setl bh=wipe bt=nofile nobl noswf nowrap
+setl ${3:bh=wipe }bt=nofile nobl noswf nowrap
 
-sil 0put =${3:put your text}
+sil 0put =${4:put your text}
 sil $d_
 
 nno  <buffer><nowait><silent>  q  :<c-u>close<cr>

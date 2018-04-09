@@ -39,6 +39,26 @@ a vim file). At least, it seems so.
 Make some tests. Document the results.
 It may be a bug. Report it.
 
+
+
+Document this:
+
+Test if Vim is compiled with python version 2.x:
+
+    :echo has('python')
+
+The python version Vim is linked against can be found with:
+
+    :py import sys; print(sys.version)
+
+Test if Vim is compiled with python version 3.x:
+
+    :echo has('python3')
+
+The python version Vim is linked against can be found with:
+
+    :py3 import sys; print(sys.version)
+
 # Misc
 
 When  you  write some  python  code  (function/interpolation),  you can  add  an
