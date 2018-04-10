@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# elvis: reddit_vim		-- Search Vim subreddit (www.reddit.com/vim/)
+. surfraw || exit 1
+
+w3_usage_hook () {
+    cat <<EOF
+Usage: $w3_argv0 [options] [search words]...
+Description:
+  Search Vim subreddit (www.reddit.com) for posts on the Vim editor
+EOF
+    w3_global_usage
+}
+
+w3_config
+w3_parse_args "$@"
+if test -z "$w3_args"; then
+    w3_browse_url "https://www.reddit.com/r/vim/"
+else
+    escaped_args=`w3_url_of_arg $w3_args`
+    w3_browse_url "https://www.reddit.com/r/vim/search?q=${escaped_args}&restrict_sr=on"
+fi
