@@ -1458,14 +1458,18 @@ fu! myfuncs#search_internal_variables() abort "{{{1
     call winrestview(view)
 endfu
 
-fu! myfuncs#search_todo() abort "{{{1
+fu! myfuncs#search_todo(where) abort "{{{1
     try
-        sil exe 'lvim /\CFIX'.'ME\|TO'.'DO/j %'
+        sil noa exe 'lvim /\CFIX'.'ME\|TO'.'DO/j '.(a:where is# 'buffer' ? '%' : './**/*')
         sil! call lg#motion#repeatable#make#set_last_used(']l', {'bwd': ',', 'fwd': ';'})
     catch
-        echo 'no TO'.'DO or FIX'.'ME'
+        echom 'no TO'.'DO or FIX'.'ME'
         return
     endtry
+
+    " Because we've prefixed `:lvim` with `:noa`, our autocmd which opens a qf window
+    " hasn't kicked in. We must manually open it.
+    lwindow
 
     "                                              ┌ Tweak the text of each entry when there's a line
     "                                              │ with just `todo` or `fixme`;
@@ -1486,7 +1490,8 @@ endfu
 fu! s:search_todo_text(dict) abort
     let dict = a:dict
     " if the text only contains `fixme` or `todo`
-    if dict.text =~? '\v\c%(fixme|todo):?\s*%(\{\{'.'\{)?\s*$'
+    if dict.text =~# '\v\c%(fixme|todo):?\s*%(\{\{'.'\{)?\s*$'
+        let bufnr = dict.bufnr
         " get the text of the next line, which is not empty:
         "
         "     ^\s*$
@@ -1494,15 +1499,21 @@ fu! s:search_todo_text(dict) abort
         " … and which doesn't contain only the comment character:
         "
         "     ^\s*#\s*$    (example in a bash buffer)
-        let pat = '^\s*\V'.escape(get(split(getbufvar('#', '&l:cms', ''),
+        let pat = '^\s*\V'.escape(get(split(getbufvar(bufnr, '&l:cms', ''),
         \                                   '%s'),
         \                             0, ''),
         \                         '\')
         \                 .'\v\s*$|^\s*$'
-        let dict.text = get(filter(
-        \                          getbufline(bufnr('#'), dict.lnum + 1, dict.lnum + 3),
-        \                          { i,v -> v !~ pat }
-        \                  ), 0, '')
+
+        " Why using `readfile()` instead of `getbufline()`?{{{
+        "
+        " `getbufline()` works only if the buffer is listed.
+        " If the buffer is NOT listed, it returns an empty list.
+        " There's no guarantee that all buffers in which a fixme/todo is present
+        " is currently listed.
+        "}}}
+        let lines = readfile(bufname(bufnr), 0, dict.lnum + 4)[-4:]
+        let dict.text = get(filter(lines, { i,v -> v !~ pat }), 0, '')
     endif
     return dict
 endfu
@@ -2063,7 +2074,7 @@ fu! myfuncs#xor_lines(bang) abort range "{{{1
 
     " Give the result
     if !empty(pattern)
-        exe 'lvim /'.pattern.'/g %'
+        noa exe 'lvim /'.pattern.'/g %'
         let w:xl_match = matchadd('SpellBad', pattern, -1)
     else
         echohl WarningMsg

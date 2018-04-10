@@ -2620,9 +2620,10 @@ fu! s:gqq() abort
     sil! call repeat#set("\<plug>(my_gqq)", v:count1)
 endfu
 
-" gT          search todo/fixme (Tags) {{{4
+" gt  gT      search todo/fixme (Tags) {{{4
 
-nno  <silent>  gT  :<c-u>call myfuncs#search_todo()<cr>
+nno  <silent>  gt  :<c-u>call myfuncs#search_todo('buffer')<cr>
+nno  <silent>  gT  :<c-u>call myfuncs#search_todo('project')<cr>
 
 " gx          open url {{{4
 
@@ -3173,8 +3174,9 @@ nno  <silent>  <c-n>  :<c-u>tabnext<cr>
 
 " The purpose  of these mappings  is to decrease the  frequence of this  kind of
 " accident.
-nno  <c-z><esc>  <nop>
-nno  <c-z><c-z>  <c-z>
+nno  <c-z>            <nop>
+nno  <c-z><c-z>       <nop>
+nno  <c-z><c-z><c-z>  <c-z>
 
 " M-m                 matchadd / matchdelete search pattern {{{4
 
@@ -5587,7 +5589,7 @@ endfu
 " Create a mapping to populate command-line with `:ltag /`, then open the
 " location window. Ex:
 "
-        nno  <expr>  gt  <sid>ltag(1)
+        nno  <expr>  <c-g>t  <sid>ltag(1)
         fu! s:ltag(step) abort
             if a:step ==# 1
                 augroup my_ltag
@@ -6243,6 +6245,7 @@ endfu
 "        • TextChangedP
 "        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
 "        • `getcwd(-1)` return the global directory
+"        • `term_setansicolors()`, `term_getansicolors()`, `g:term_ansi_colors`
 "        • `trim()`
 "
 " 93 -
@@ -6420,7 +6423,6 @@ endfu
 "          you won't be immediately spoiled,
 "          there will be an exercise which will make the question clearer,
 "          and the answer is concealed”
-
 
 
 
