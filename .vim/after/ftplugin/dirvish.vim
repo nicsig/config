@@ -1,3 +1,18 @@
+" FIXME:{{{
+"
+" MWE:
+"     $ cat /tmp/vimrc
+"         set rtp^=~/.vim/plugged/vim-dirvish
+"         set rtp+=~/.vim/plugged/vim-dirvish/after
+"         set wig+=*/.git/**/*
+"
+"     $ vim -Nu /tmp/vimrc
+"         :e ~/.vim/plugged/vim-dirvish
+"             → `.git/` is displayed              ✘ (it shouldn't because of our 'wig' value)
+"         R
+"             → `.git/` is not displayed anymore  ✔
+"}}}
+
 " Mappings {{{1
 " [oP  ]oP  coP {{{2
 
@@ -80,11 +95,6 @@ nmap  <buffer><nowait><silent>  l  <cr>
 "      q
 "          →  closes the current window and tabpage (✘)
 
-" R {{{2
-
-" To "toggle" this, just press `R` to reload.
-nno  <buffer><nowait><silent>  R  :<c-u>call my_dirvish#reload()<cr>
-
 " x {{{2
 
 xmap  <buffer>         x                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
@@ -103,7 +113,6 @@ let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \|  exe 'nunmap <buffer> <c-t>'
                     \|  exe 'xunmap <buffer> <c-t>'
                     \|  exe 'nunmap <buffer> <c-v><c-v>'
-                    \|  exe 'nunmap <buffer> R'
                     \|  exe 'nunmap <buffer> [oP'
                     \|  exe 'nunmap <buffer> ]oP'
                     \|  exe 'nunmap <buffer> coP'

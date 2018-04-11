@@ -1572,20 +1572,28 @@ set virtualedit=block
 "
 "         • in a dirvish listing
 "         • on the command-line after a tab completion
-"         • in the output of `expand()`, `glob()`, `globpat()`
+"         • in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 if has('vim_starting')
     " vim temporary files
     set wig+=*.bak,*.swo,*.swp,*~
 
     " latex temporary files
-    set wig+=*.aux,*.fls,*.fdb_latexmk
+    set wig+=*.aux,*.fdb_latexmk,*.fls,*/auxiliary/*,*/build/*
 
     " password databases
     set wig+=*.kdb,*.kdbx
 
     " media files (music, pictures, ...)
-    set wig+=*.mp3,*.gif,*.png
+    set wig+=*.gif,*.jpeg,*.jpg,*.mp3,*.mp4,*.pdf,*.png
+
+    " python objects/cache
+    set wig+=*.pyc,*/__pycache__/*
+    " Why not `*/__pycache__/**/*` ?{{{
+    "
+    " No need to. The depth of a python cache is 1.
+    " See the contents of `~/.vim/pythonx/__pycache__/`.
+    "}}}
 
     " undo files
     "
@@ -1601,13 +1609,24 @@ if has('vim_starting')
 
     set wig+=*.gz,*.rar,*.tar.*,*.zip
 
+    set wig+=tags
+
     " A file in a `.git/` subdirectory.
+    set wig+=*/.git/**/*
+    " Why not `*/.git/*`?{{{
     "
-    "     set wildignore+=*/.git/**/*
+    " It would fail to match the files in the subdirectories of `.git/`.
+    "}}}
+    " Why not `**/.git/**/*`?{{{
     "
-    " Commented because, supposedly, it could lead to bugs with fugitive.vim:
+    " No need to. Probably because the  pattern is automatically anchored to the
+    " end of the files.
+    "}}}
+    " If this setting causes an issue, read this:{{{
     "
     "     https://www.reddit.com/r/vim/comments/626no2/vim_without_nerd_tree_or_ctrlp/dfkbm97/
+    "     https://github.com/tpope/vim-fugitive/issues/121#issuecomment-38720847
+    "}}}
 endif
 
 " Tab completion should be case-insensitive.
@@ -5625,9 +5644,9 @@ endfu
         endfu
 "
 " Also:
-" What's the difference between `<space>ft` (fzf.vim) and `:tj /`?
-" It seems the latter is more accurate, gives less useless suggestions.
-" Can we configure fzf.vim so that it gives more relevant suggestions?
+" Play with `:tj / C-d`.
+"
+" It seems that `<space>ft` (fzf.vim) is identical to `:tj /`.
 "
 " 37 -
 " In our notes we wrote that the best way to reload ftplugins was:
@@ -6326,44 +6345,6 @@ endfu
 " We would benefit from moving all of them in a separate plugin.
 "
 " 101 -
-" > I added my home directory to the path in my vim config
-"
-"         It is a bad idea in general  because 'path' is used all over the place
-"         for many  features. By adding your  $HOME to path you  are essentially
-"         telling Vim to  search across thousands of  irrelevant directories for
-"         no  good reason. The  more specific  and precise  'path' is,  the more
-"         useful it is.
-"
-" > I  start vim  from home,  because  I open  lots  of files  from there,  very
-" > often. I don't want multiple instances of vim everywhere open from different
-" > directories, that sounds like a nightmare.
-"
-"         By doing that you get:
-"
-"             • a meaningless and useless working directory
-"
-"             • huge filenames
-"
-"             • useless path/filename completion
-"
-"             • registers filled with irrelevant data
-"
-"             • lots of buffers unrelated to the task at hand
-"
-"             • an artificial need for "fast" plugins you wouldn't have if you
-"               used Vim normally
-"
-"             • etc.
-"
-" Bottom_line:
-" When  you start  working  on a  project,  use  a plugin,  or  some config,  to
-" automatically configure `:pwd` with a relevant path.
-"
-" Also,  don't mix  two projects  in  the same  session. Otherwise, you'll  need
-" `:lcd`, which I don't like (because you're never quite sure what's the working
-" directory).
-"
-" 102 -
 " Read:
 "
 "     :h channel.txt
@@ -6377,10 +6358,10 @@ endfu
 "     :h recover.txt
 "     :h tips.txt
 "
-" 103 -
+" 102 -
 " Try to implement a `:Trr` (TRash Restore) command to restore the trash.
 "
-" 104 -
+" 103 -
 " Document the fact that when a backtick  expansion causes an issue, you can see
 " which shell command was executed by increasing the verbosity level to 4:
 "
@@ -6388,10 +6369,10 @@ endfu
 "     OR
 "     :4verb cmd
 "
-" 105 -
+" 104 -
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
-" 106 -
+" 105 -
 "
 "     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
@@ -6403,11 +6384,11 @@ endfu
 "
 "     :vim /setl.*\%(noma\|nomodifiable\)/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 107 -
+" 106 -
 " https://www.reddit.com/r/vim/comments/8asgjj/topnotch_vim_markdown_live_previews_with_no/
 " https://github.com/joeyespo/grip (unfortunately, requires an internet connection)
 "
-" 108 -
+" 107 -
 " Look at ~/Dropbox/wiki/vim/plugin.md and search for the `vim-sandwich` section.
 " I wrote  some custom  exercises where  the answer  is concealed,  and visually
 " indicated by `↔`.
@@ -6427,7 +6408,7 @@ endfu
 "          there will be an exercise which will make the question clearer,
 "          and the answer is concealed”
 "
-" 109 -
+" 108 -
 " `vim-plug`, `vim-lg...` (:ListRepeatableMotions -vv), `vim-unix` (:Tree),
 " they should all use the same keys to cycle between entries.
 " C-n/C-p, or J/K, or sth else.
