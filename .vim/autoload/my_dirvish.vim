@@ -3,7 +3,18 @@ if exists('g:autoloaded_my_dirvish')
 endif
 let g:autoloaded_my_dirvish = 1
 
-let s:hide_dot_entries = 1
+" Why not hiding by default?{{{
+"
+" If you hide dot entries, when you go up the tree from a hidden directory, your
+" position in the  directory above won't be the hidden  directory where you come
+" from.
+"
+" This matters if you want to get back where you were easily.
+" Indeed, now you need to toggle the visibility of hidden entries, and find back
+" your old  directory, instead of just  pressing the key to  enter the directory
+" under the cursor.
+"}}}
+let s:hide_dot_entries = 0
 
 fu! s:do_i_preview() abort "{{{1
     if get(b:dirvish, 'last_preview', 0) != line('.')
@@ -44,9 +55,17 @@ fu! s:preview() abort "{{{1
 endfu
 
 fu! my_dirvish#sort_and_maybe_hide() abort "{{{1
+    let pat = substitute(glob2regpat(&wig), ',', '\\|', 'g')
+    "                      ┌ remove the `$` anchor at the end,
+    "                      │ we're going to re-add it, but outside the non-capturing group
+    "               ┌──────┤
+    let pat = '\%('.pat[:-2].'\)$'
+    sil! exe 'keepj keepp g:'.pat.':d_'
+
     if s:hide_dot_entries
         sil! noa keepj keepp g:\v/\.[^\/]+/?$:d_
     endif
+
     sort :^.*[\/]:
 endfu
 
