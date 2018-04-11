@@ -23,6 +23,21 @@ fu! s:do_i_preview() abort "{{{1
     endif
 endfu
 
+fu! my_dirvish#format_entries() abort "{{{1
+    let pat = substitute(glob2regpat(&wig), ',', '\\|', 'g')
+    "                      ┌ remove the `$` anchor at the end,
+    "                      │ we're going to re-add it, but outside the non-capturing group
+    "               ┌──────┤
+    let pat = '\%('.pat[:-2].'\)$'
+    sil! exe 'keepj keepp g:'.pat.':d_'
+
+    if s:hide_dot_entries
+        sil! noa keepj keepp g:\v/\.[^\/]+/?$:d_
+    endif
+
+    sort :^.*[\/]:
+endfu
+
 fu! my_dirvish#install_auto_preview() abort "{{{1
     augroup my_dirvish_auto_preview
         au!
@@ -52,21 +67,6 @@ fu! s:preview() abort "{{{1
             noa wincmd p
         endif
     endif
-endfu
-
-fu! my_dirvish#sort_and_maybe_hide() abort "{{{1
-    let pat = substitute(glob2regpat(&wig), ',', '\\|', 'g')
-    "                      ┌ remove the `$` anchor at the end,
-    "                      │ we're going to re-add it, but outside the non-capturing group
-    "               ┌──────┤
-    let pat = '\%('.pat[:-2].'\)$'
-    sil! exe 'keepj keepp g:'.pat.':d_'
-
-    if s:hide_dot_entries
-        sil! noa keepj keepp g:\v/\.[^\/]+/?$:d_
-    endif
-
-    sort :^.*[\/]:
 endfu
 
 fu! my_dirvish#toggle_auto_preview(enable) abort "{{{1

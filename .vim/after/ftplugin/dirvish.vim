@@ -90,9 +90,9 @@ nno  <buffer><nowait><silent>  R  :<c-u>call my_dirvish#reload()<cr>
 xmap  <buffer>         x                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
 xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 2')[0]
 
-" Sort entries, and (maybe) hide the dot-prefixed ones {{{1
+" g:dirvish_mode {{{1
 
-let g:dirvish_mode = ':call my_dirvish#sort_and_maybe_hide()'
+let g:dirvish_mode = ':call my_dirvish#format_entries()'
 
 " Teardown {{{1
 
