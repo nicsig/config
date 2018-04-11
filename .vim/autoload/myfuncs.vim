@@ -414,7 +414,7 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         let tempdir = substitute(tempname(), '\v.*/\zs.{-}', '', '')
         call system('git clone '.shellescape(url).' '.tempdir)
         let files = glob(tempdir.'/*', 0, 1)
-        call map(files, { i,v -> substitute(v, '^\V'.tempdir.'/', '', '') })
+        call map(files, { i,v -> substitute(v, '^\C\V'.tempdir.'/', '', '') })
         call filter(files, { i,v -> v !~# '\v\c_?footer$' })
 
         mark x
@@ -1086,7 +1086,7 @@ fu! myfuncs#op_yank_matches(type) abort
 
         let cmd = s:yank_where_match ? 'g' : 'v'
         let pat = s:yank_comments
-              \ ?     '^\s*\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
+              \ ?     '^\s*\C\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
               \ :     @/
 
         exe mods.' '.range.cmd.'/'.pat.'/y Z'
@@ -1260,7 +1260,7 @@ fu! myfuncs#plugin_install(url) abort "{{{1
 endfu
 
 fu! myfuncs#plugin_global_variables(keyword) abort "{{{1
-    let condition = 'v:key =~ ''\V''.escape('''.a:keyword.''', ''\'') && v:key !~ ''\(loaded\|did_plugin_\)'''
+    let condition = 'v:key =~ ''\C\V''.escape('''.a:keyword.''', ''\'') && v:key !~ ''\(loaded\|did_plugin_\)'''
     let options   = items(filter(deepcopy(g:), condition))
 
     let msg = ''
@@ -1499,11 +1499,11 @@ fu! s:search_todo_text(dict) abort
         " … and which doesn't contain only the comment character:
         "
         "     ^\s*#\s*$    (example in a bash buffer)
-        let pat = '^\s*\V'.escape(get(split(getbufvar(bufnr, '&l:cms', ''),
-        \                                   '%s'),
-        \                             0, ''),
-        \                         '\')
-        \                 .'\v\s*$|^\s*$'
+        let pat = '^\s*\C\V'.escape(get(split(getbufvar(bufnr, '&l:cms', ''),
+        \                                     '%s'),
+        \                               0, ''),
+        \                           '\')
+        \                   .'\v\s*$|^\s*$'
 
         " Why using `readfile()` instead of `getbufline()`?{{{
         "

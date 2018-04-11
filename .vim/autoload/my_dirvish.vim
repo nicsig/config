@@ -44,23 +44,7 @@ fu! s:preview() abort "{{{1
 endfu
 
 fu! s:restore_position(line) abort "{{{1
-    " FIXME: really needed?
-    "     v
-    call cursor(1,1)
     let pat = '\C\V\^'.escape(a:line, '\').'\$'
-    "           ^
-    "           FIXME:
-    "           We need it (xmind/ vs XMind/ in home/), why?
-    "           Update:
-    "           Because `search()` uses 'ic'.
-    "
-    "           Should we do the same everywhere?
-    "               :vim /\C\\V/gj ...
-    "           Update:
-    "           I think so, at least every time we use `search()`.
-    "           But, I would say all the time.
-    "           'ic' is probably used in other contexts.
-    "           Be consistent, use `\C` all the time if you want an exact match.
     call search(pat)
 endfu
 
@@ -99,7 +83,8 @@ fu! my_dirvish#sort_and_hide() abort "{{{1
     " Useful if we re-enter the directory afterwards.
     augroup my_dirvish_save_position
         au! * <buffer>
-        au BufWinLeave <buffer> let b:dirvish.line = s:save_position()
+        au BufWinLeave <buffer> let b:dirvish = get(b:, 'dirvish', {})
+        \ |                     let b:dirvish.line = s:save_position()
     augroup END
 
     if s:hide_dot_entries
