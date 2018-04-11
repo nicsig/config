@@ -12,19 +12,6 @@ fu! s:do_i_preview() abort "{{{1
     endif
 endfu
 
-fu! s:get_future_line() abort "{{{1
-    " grab current line; necessary to restore position later
-    let line = getline('.')
-    " if the  current line matches a  hidden file/directory, and we're  going to
-    " hide dot  entries, we won't  be able to  restore the position;  instead we
-    " will restore  the position using the  previous line which is  NOT a hidden
-    " entry
-    if line =~# '.*/\..\{-}/\?$' && s:hide_dot_entries
-        let line = getline(search('.*/[^.][^/]\{-}/\?$', 'bnW'))
-    endif
-    return line
-endfu
-
 fu! my_dirvish#install_auto_preview() abort "{{{1
     augroup my_dirvish_auto_preview
         au!
@@ -77,6 +64,19 @@ fu! s:restore_position(line) abort "{{{1
     call search(pat)
 endfu
 
+fu! s:save_position() abort "{{{1
+    " grab current line; necessary to restore position later
+    let line = getline('.')
+    " if the  current line matches a  hidden file/directory, and we're  going to
+    " hide dot  entries, we won't  be able to  restore the position;  instead we
+    " will restore  the position using the  previous line which is  NOT a hidden
+    " entry
+    if line =~# '.*/\.[^/]\+/\?$' && s:hide_dot_entries
+        let line = getline(search('.*/[^.][^/]\{-}/\?$', 'bnW'))
+    endif
+    return line
+endfu
+
 fu! my_dirvish#sort_and_hide() abort "{{{1
     " make sure  that `b:dirvish` exists,  because it  doesn't when we  use this
     " command:
@@ -84,14 +84,22 @@ fu! my_dirvish#sort_and_hide() abort "{{{1
     "     $ git ls-files | vim +'setf dirvish' -
     let b:dirvish = get(b:, 'dirvish', {})
 
+    " We're going to save the cursor position right after.
+    " But if we've already visited this directory, the saving will overwrite the
+    " old position. So, we need to restore the old position, now, before we save
+    " it (again).
+    if has_key(b:dirvish, 'line')
+        call s:restore_position(b:dirvish.line)
+    endif
+
     " Save current position before (maybe) hiding dot entries.
-    let b:dirvish.line = s:get_future_line()
+    let b:dirvish.line = s:save_position()
 
     " Also, save the position when we go up the tree.
     " Useful if we re-enter the directory afterwards.
-    augroup my_dirvish_get_future_line
+    augroup my_dirvish_save_position
         au! * <buffer>
-        au BufWinEnter <buffer> let b:dirvish.line = s:get_future_line()
+        au BufWinLeave <buffer> let b:dirvish.line = s:save_position()
     augroup END
 
     if s:hide_dot_entries
@@ -126,8 +134,6 @@ endfu
 
 fu! my_dirvish#toggle_dot_entries() abort "{{{1
     let s:hide_dot_entries = !s:hide_dot_entries
-    let line = s:get_future_line()
     Dirvish %
-    call s:restore_position(line)
 endfu
 
