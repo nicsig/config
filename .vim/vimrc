@@ -2933,6 +2933,7 @@ fu! s:faq() abort
     for win in win_in_this_tab
         if bufname(get(win, 'bufnr', -1)) is# faq_file
             exe win.winnr.'close'
+            exe "norm 1\<space>G"
             sil norm ]oz
             return ''
         endif
@@ -2947,6 +2948,8 @@ fu! s:faq() abort
         echo 'a window displaying  '.faq_file.'  already exists'
         return ''
     endif
+
+    exe "norm 1\<space>G"
 
     exe 'sp '.faq_file
     sil norm [oP

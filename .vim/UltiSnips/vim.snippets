@@ -481,8 +481,9 @@ endsnippet
 #}}}
 # When should I use `bh=wipe`?{{{
 #
-# If the  buffer may  contain links  on which  you could  press `gf`,  don't use
-# `bh=wipe`.  It would prevent you from getting the buffer back with `C-^`.
+# If the buffer is interactive and you open  a new buffer by accident (`gf` on a
+# link, `l` in tree viewer), don't use `bh=wipe`.
+# It would prevent you from getting the buffer back with `C-^`.
 # Otherwise, you can use it.
 #}}}
 snippet sidebar "sidebar" bm
