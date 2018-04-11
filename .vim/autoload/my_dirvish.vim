@@ -1,8 +1,28 @@
+if exists('g:autoloaded_my_dirvish')
+    finish
+endif
+let g:autoloaded_my_dirvish = 1
+
+let s:hide_dot_entries = 1
+
 fu! s:do_i_preview() abort "{{{1
     if get(b:dirvish, 'last_preview', 0) != line('.')
         let b:dirvish['last_preview'] = line('.')
         call s:preview()
     endif
+endfu
+
+fu! s:get_future_line() abort "{{{1
+    " grab current line; necessary to restore position later
+    let line = getline('.')
+    " if the  current line matches a  hidden file/directory, and we're  going to
+    " hide dot  entries, we won't  be able to  restore the position;  instead we
+    " will restore  the position using the  previous line which is  NOT a hidden
+    " entry
+    if line =~# '.*/\..\{-}/\?$' && s:hide_dot_entries
+        let line = getline(search('.*/[^.][^/]\{-}/\?$', 'bnW'))
+    endif
+    return line
 endfu
 
 fu! my_dirvish#install_auto_preview() abort "{{{1
@@ -36,10 +56,59 @@ fu! s:preview() abort "{{{1
     endif
 endfu
 
-fu! my_dirvish#reload() abort "{{{1
-    let search_line = getline('.')
-    Dirvish %
-    sil! call search('\V\^' . escape(search_line, '\') . '\$', 'cw')
+fu! s:restore_position(line) abort "{{{1
+    " FIXME: really needed?
+    "     v
+    call cursor(1,1)
+    let pat = '\C\V\^'.escape(a:line, '\').'\$'
+    "           ^
+    "           FIXME:
+    "           We need it (xmind/ vs XMind/ in home/), why?
+    "           Update:
+    "           Because `search()` uses 'ic'.
+    "
+    "           Should we do the same everywhere?
+    "               :vim /\C\\V/gj ...
+    "           Update:
+    "           I think so, at least every time we use `search()`.
+    "           But, I would say all the time.
+    "           'ic' is probably used in other contexts.
+    "           Be consistent, use `\C` all the time if you want an exact match.
+    call search(pat)
+endfu
+
+fu! my_dirvish#sort_and_hide() abort "{{{1
+    " make sure  that `b:dirvish` exists,  because it  doesn't when we  use this
+    " command:
+    "
+    "     $ git ls-files | vim +'setf dirvish' -
+    let b:dirvish = get(b:, 'dirvish', {})
+
+    " Save current position before (maybe) hiding dot entries.
+    let b:dirvish.line = s:get_future_line()
+
+    " Also, save the position when we go up the tree.
+    " Useful if we re-enter the directory afterwards.
+    augroup my_dirvish_get_future_line
+        au! * <buffer>
+        au BufWinEnter <buffer> let b:dirvish.line = s:get_future_line()
+    augroup END
+
+    if s:hide_dot_entries
+        sil! noa keepj keepp g:\v/\.[^\/]+/?$:d_
+    endif
+
+    " sort directories at the top
+    sort r /[^/]$/
+    " find first file
+    let found_first_file = search('[^/]$', 'cW')
+    if found_first_file
+        " sort all the files
+        .,$sort
+    endif
+
+    " restore position
+    call s:restore_position(b:dirvish.line)
 endfu
 
 fu! my_dirvish#toggle_auto_preview(enable) abort "{{{1
@@ -56,21 +125,9 @@ fu! my_dirvish#toggle_auto_preview(enable) abort "{{{1
 endfu
 
 fu! my_dirvish#toggle_dot_entries() abort "{{{1
-    let b:hide_dot_entries = !get(b:, 'hide_dot_entries', 1)
-    if b:hide_dot_entries
-        " We delete the lines beginning with a dot, followed by anything different
-        " than a (back)slash, followed optionally by a slash.
-        sil! keepp g:\v/\.[^\/]+/?$:d
-        " We try to go back where we were before the deletion.
-        " Why the :try?
-        " If we were on a hidden file/directory, `:norm! `` ` will fail, because
-        " it will be unable to bring us back where we were (deleted line).
-        try
-            norm! ``
-        catch
-            return lg#catch_error()
-        endtry
-    else
-        norm R
-    endif
+    let s:hide_dot_entries = !s:hide_dot_entries
+    let line = s:get_future_line()
+    Dirvish %
+    call s:restore_position(line)
 endfu
+

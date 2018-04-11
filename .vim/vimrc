@@ -6423,6 +6423,18 @@ endfu
 "          you won't be immediately spoiled,
 "          there will be an exercise which will make the question clearer,
 "          and the answer is concealed”
+"
+" 109 -
+" `vim-plug`, `vim-lg...` (:ListRepeatableMotions -vv), `vim-unix` (:Tree),
+" they should all use the same keys to cycle between entries.
+" C-n/C-p, or J/K, or sth else.
+"
+" Currently, we use J/K everywhere, except in `vim-plug` (C-j/C-k).
+"
+" If we  choose C-n/C-p, it conflicts  with tabpage navigation (choose  sth else
+" for tabpage navigation?).
+"
+" If we choose J/K, it conflicts with scrolling in preview window.
 
 
 

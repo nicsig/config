@@ -125,33 +125,9 @@ nno  <buffer><nowait><silent>  R  :<c-u>call my_dirvish#reload()<cr>
 xmap  <buffer>         x                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
 xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 2')[0]
 
-" Sort and hide dot-prefixed files/directories {{{1
+" Sort entries, and (maybe) hide the dot-prefixed ones {{{1
 
-" make sure  that `b:dirvish` exists,  because it  doesn't when we  use this
-" command:
-"
-"     git ls-files | vim +'setf dirvish' -
-let b:dirvish = get(b:, 'dirvish', {})
-
-" Save current position before hiding dot-prefixed entries.
-let b:dirvish['line'] = getline('.')
-
-" Hide them.
-if get(b:, 'hide_dot_entries', 1)
-    sil keepp g:\v/\.[^\/]+/?$:d_
-endif
-
-" sort directories at the top
-sort r /[^/]$/
-" find first file
-let first_file = search('[^/]$', 'cW')
-if first_file
-    " sort all the files
-    .,$sort
-endif
-
-" Restore the position.
-call search('\V\^'.escape(b:dirvish['line'],'\').'\$', 'cw')
+call my_dirvish#sort_and_hide()
 
 " Teardown {{{1
 
@@ -171,3 +147,4 @@ let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \|  exe 'nunmap <buffer> gh'
                     \|  exe 'xunmap <buffer> x'
                     \  "
+
