@@ -1324,24 +1324,6 @@ endfu
 " nno  <silent>  <plug>(myfuncs_repeat_undo_line)  :<c-u>exe myfuncs#repeat_wrap('U')<cr>
 " nno  <silent>  <plug>(myfuncs_repeat_redo)       :<c-u>exe myfuncs#repeat_wrap("\<Lt>C-R>")<cr>
 
-" retab {{{1
-
-" Why do we need an :execute command in the 2nd case (spaces → tabs)?
-" To ask for the evaluation of &ts before the substitution command is built.
-" Why don't we need to put &ts outside of the string in the replacement part?
-" Because it's inside an expression (\=), so Vim already knows it has to
-" evaluate it, as well as len(submatch(0)).
-
-fu! myfuncs#retab(line1, line2, bang) abort
-    let view = winsaveview()
-    if !a:bang
-        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:^\t\+:\=repeat(" ", &ts * len(submatch(0))):e'
-    else
-        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:\v^( {'.&ts.'})+:\=repeat("\t", len(submatch(0))/&ts):e'
-    endif
-    call winrestview(view)
-endfu
-
 fu! myfuncs#search_internal_variables() abort "{{{1
     let view = winsaveview()
 

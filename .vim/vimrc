@@ -4320,7 +4320,17 @@ com! -bar -range=% RemoveTabs call myfuncs#remove_tabs(<line1>,<line2>)
 " Mnemonic: we use spaces as the default way to indent, so it makes sense to
 " to use a bang only for the less useful conversion: spaces → tabs
 
-com! -bar -bang -range=% Retab call myfuncs#retab(<line1>,<line2>, <bang>0)
+com! -bar -bang -range=% Retab call s:retab(<line1>,<line2>, <bang>0)
+
+fu! s:retab(line1, line2, bang) abort
+    let view = winsaveview()
+    if !a:bang
+        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:^\t\+:\=repeat(" ", &ts * len(submatch(0))):e'
+    else
+        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:\v^( {'.&ts.'})+:\=repeat("\t", len(submatch(0))/&ts):e'
+    endif
+    call winrestview(view)
+endfu
 
 " ReverseEveryNLines {{{2
 
@@ -6030,27 +6040,12 @@ endfu
 " window.
 "
 " 70 -
-" We've lost time debugging dirvish, because the issue was not in vimrc
-" but in filetype plugin. How to avoid it in the future?
-"
-" Update:
-" You should find a succession of commands loading more and more files.
-" Example:
-"
-"     vim -Nu NONE
-"     vim -Nu NORC
-"     vim -Nu /tmp/vimrc (with only filetype plugin indent on)
-"     vim
-"
-" To improve
-"
-" 71 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
 " A function implementing some abstract logic can be wrongly affected by the current
 " buffer settings ('isk' for example). Should we track this issue everywhere in our code?
 " Is this issue an argument in favor of delegating logic to external process / lua?
 "
-" 72 -
+" 71 -
 " Check that whenever we use `wincmd p` we get to the right window.
 " Maybe we should use this instead:
 "
@@ -6058,40 +6053,40 @@ endfu
 "     …
 "     call win_gotoid(id)
 "
-" 73 -
+" 72 -
 " Read all of this:
 "     https://neovim.io/news/archive/
 "
-" 74 -
+" 73 -
 " Read this:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 75 -
+" 74 -
 " Read this (OOP in VimL):
 " https://github.com/LucHermitte/lh-vim-lib/blob/master/doc/OO.md
 "
-" 76 -
+" 75 -
 " Replace `:silent!` with `:silent` whenever possible.
 " There may be errors to fix which we are missing because they are silent.
 " Also, if you wonder whether a plugin/(auto)command/function is working
 " as expected, and has no silent errors, use `:Verbose` to increase
 " the verbosity level.
 "
-" 77 -
+" 76 -
 " use syntax hl in `vim-qf` instead of complex mechanism using matches
 " also, in `vim-qf`, fix the fixme in the autocmd `my_qf`
 "
-" 78 -
+" 77 -
 " add syntax hl in TOC menu, and make content more relevant in help TOC
 "
-" 79 -
+" 78 -
 " The TOC  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " qf#open()). We could  compute the longest line,  and set the width  of the TOC
 " window dynamically.
 "
-" 80 -
+" 79 -
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     cmdline#reset_did_transform(
@@ -6108,12 +6103,12 @@ endfu
 " Also, make  sure they  are self-contained. They must  not call  functions from
 " one of our other plugins. If they do, move the latter inside `vim-lg-lib` too.
 "
-" 81 -
+" 80 -
 " implement a search ring, and install mappings to cycle through it
 " useful to search for an old pattern without having to do `/ Up …`
 " (; and ,  would be more comfy)
 "
-" 82 -
+" 81 -
 " When you create a loclist, replace the  old one if its title is `Breakdown` or
 " `FIX_ME & TO_DO`.
 " Also, maybe create a mapping to show  the stack of location lists, and another
@@ -6126,7 +6121,7 @@ endfu
 " it parsed, or any information sufficient to know that there's no need to
 " recreate a qfl.
 "
-" 83 -
+" 82 -
 "     SPC fr    (:FzHistory)
 "     Escape
 "     :tabnew
@@ -6134,7 +6129,7 @@ endfu
 " A new tab page is correctly opened, but the focus stay in the same window,
 " and the fzf buffer is replaced with the last visited buffer.
 "
-" 84 -
+" 83 -
 " Create a submode to insert numbers more easily.
 " Ex:
 "
@@ -6178,7 +6173,7 @@ endfu
 "         return ''
 "     endfu
 "
-" 85 -
+" 84 -
 " Create a mapping to dump in the buffer information printed by a mapping
 " prefixed with `-`. Example: `-a`, `-p`
 "
@@ -6198,7 +6193,7 @@ endfu
 "  -f
 "  -p
 "
-" 86 -
+" 85 -
 "
 "     $ vim
 "     :e /tmp/file
@@ -6217,7 +6212,7 @@ endfu
 " But this begs the question. How to deal with an error prompting us
 " with a question? How to catch it properly?
 "
-" 87 -
+" 86 -
 " Write your own colorscheme.
 " Take inspiration from seoul.
 " There should be a dark and light version, with different level of lightness.
@@ -6233,7 +6228,7 @@ endfu
 "
 " https://speakerdeck.com/cocopon/creating-your-lovely-color-scheme
 "
-" 88 -
+" 87 -
 "
 " Add sth like this  for Neovim; it could make neovim  faster (especially if you
 " use UltiSnips):
@@ -6262,10 +6257,10 @@ endfu
 " https://github.com/neovim/neovim/issues/5702
 " https://github.com/neovim/neovim/issues/7063
 "
-" 89 -
+" 88 -
 " :h quickref
 "
-" 90 -
+" 89 -
 " Play with (or document):
 "
 "        • $HOME/.vim/tools/colors/check_colors.vim
@@ -6280,7 +6275,7 @@ endfu
 "        • `term_setsize()`
 "        • `trim()`
 "
-" 91 -
+" 90 -
 " In `vim-window`, don't do this:
 "
 "     let changelist = split(execute('changes'), '\n')
@@ -6294,7 +6289,7 @@ endfu
 " Requires the  new `getchangelist()` function,  which atm is not  implemented in
 " Neovim. Wait for Neovim to catch up.
 "
-" 92 -
+" 91 -
 " `vim-save`  is  really   small. Move  it  in  vimrc,  or   in  another  plugin
 " (vim-toggle-settings).
 "
@@ -6302,22 +6297,22 @@ endfu
 " could  be useful  in  a future  one. Useless in  Neovim,  because it's  always
 " enabled there.
 "
-" 93 -
+" 92 -
 " Sometimes, some text which should be displayed in italics is not.
 " Reloading the buffer solves the issue.
 " But where does it come from?
 "
-" 94 -
+" 93 -
 " Prevent vim-session from checking swap files.
 " Annoying when a session crashed, and we can't restore a session.
 "
-" 95 -
+" 94 -
 " In  Neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
 " current Neovim instance. But what about Vim?
 "
 "     https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 "
-" 96 -
+" 95 -
 " Load an awk buffer, and press `1zs` on a comment:
 "
 "     awkComment     xxx match /#.*/  contains=@Spell,awkTodo
@@ -6336,7 +6331,7 @@ endfu
 "
 "         :vim /syn.*concealends/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 97 -
+" 96 -
 " We have an issue with mappings which contain C-j (and C-m?) and which are made
 " repeatable. For an example, look at `Z C-j`.
 " It doesn't work the first time it's invoked. But it works fine when you repeat
@@ -6349,12 +6344,12 @@ endfu
 " We could tweak the code to protect such a special character with `<lt>`.
 " But then we would need to translate `<c-j>` manually.
 "
-" 98 -
+" 97 -
 " All our mappings dealing with formatting (gq, gqq, gqic, SPC p, SPC P)
 " are becoming too complex for this vimrc.
 " We would benefit from moving all of them in a separate plugin.
 "
-" 99 -
+" 98 -
 " Read:
 "
 "     :h channel.txt
@@ -6371,10 +6366,10 @@ endfu
 "     :h recover.txt
 "     :h tips.txt
 "
-" 100 -
+" 99 -
 " Try to implement a `:Trr` (TRash Restore) command to restore the trash.
 "
-" 101 -
+" 100 -
 " Document the fact that when a backtick  expansion causes an issue, you can see
 " which shell command was executed by increasing the verbosity level to 4:
 "
@@ -6382,10 +6377,10 @@ endfu
 "     OR
 "     :4verb cmd
 "
-" 102 -
+" 101 -
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
-" 103 -
+" 102 -
 "
 "     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
@@ -6397,11 +6392,11 @@ endfu
 "
 "     :vim /setl.*\%(noma\|nomodifiable\)/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 104 -
+" 103 -
 " https://www.reddit.com/r/vim/comments/8asgjj/topnotch_vim_markdown_live_previews_with_no/
 " https://github.com/joeyespo/grip (unfortunately, requires an internet connection)
 "
-" 105 -
+" 104 -
 " Look at ~/Dropbox/wiki/vim/plugin.md and search for the `vim-sandwich` section.
 " I wrote  some custom  exercises where  the answer  is concealed,  and visually
 " indicated by `↔`.
@@ -6421,7 +6416,7 @@ endfu
 "          there will be an exercise which will make the question clearer,
 "          and the answer is concealed”
 "
-" 106 -
+" 105 -
 " `vim-plug`, `vim-lg...` (:ListRepeatableMotions -vv), `vim-unix` (:Tree),
 " they should all use the same keys to cycle between entries.
 " C-n/C-p, or J/K, or sth else.
@@ -6433,7 +6428,7 @@ endfu
 "
 " If we choose J/K, it conflicts with scrolling in preview window.
 "
-" 107 -
+" 106 -
 " Implement `:FoldSortBySize`
 " Make it local to a markdown buffer.
 
@@ -6445,16 +6440,37 @@ fu! s:fold_sort_by_size(lnum1,lnum2) abort
         return 'echoerr "the first line is not a fold title"'
     endif
 
-    let lnum = search('^#\{'.lvl.'}', 'W', a:lnum2)
-    let folds = [{'foldstart': a:lnum1, 'foldend': lnum - 1, 'size': lnum - a:lnum1}]
+    let &l:fen = 0
+    norm! $
+    let pat = '\n\%(#\{1,'.lvl.'}\%(#\)\@!\)'
+    let lnum = search(pat, 'W', a:lnum2)
+    let folds = [{'foldstart': a:lnum1, 'foldend': lnum, 'size': lnum - a:lnum1 + 1}]
     while lnum > 0
-        let folds += [{ '' : line('.')-line(???) }]
+        let pos = getcurpos()
+
         if len(folds) > 1
-            " foo
+            let size = folds[-1].size
+            let foldstart = folds[-1].foldstart
+            let foldend = folds[-1].foldend
+
+            let i = 0
+            for f in folds
+                if f.size > size
+                    exe foldstart.','.foldend.'m ' . f.foldstart
+                    let cur_fold = remove(folds, -1)
+                    call insert(folds, cur_fold, i)
+                    break
+                endif
+                let i += 1
+            endfor
+            call setpos('.', pos)
         endif
-        let lnum = search('^#\{'.lvl.'}', 'W', a:lnum2)
-        let folds = [{'foldstart': a:lnum1, 'foldend': lnum, 'size': lnum - a:lnum1}]
+
+        let lnum = search(pat, 'W', a:lnum2)
+        let folds += [{'foldstart': pos[1]+1, 'foldend': lnum, 'size': lnum - pos[1]}]
     endwhile
+    let &l:fen = 1
+    return ''
 endfu
 
 
