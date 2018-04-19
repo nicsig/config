@@ -306,103 +306,6 @@ fu! myfuncs#box_destroy() abort
     sil! call repeat#set("\<plug>(myfuncs_box_destroy)")
 endfu
 
-fu! myfuncs#cloc(lnum1,lnum2,path) abort "{{{1
-    if !empty(a:path)
-        if a:path =~# '^http'
-            let tempdir = tempname()
-            let git_output = system('git clone '.a:path.' '.tempdir)
-            let to_scan = tempdir
-        else
-            let to_scan = a:path
-        endif
-    else
-        let file    = tempname()
-        let to_scan = file.'.'.(empty(expand('%:e')) ? &ft : expand('%:e'))
-        let lines   = getline(a:lnum1, a:lnum2)
-        call writefile(lines, to_scan)
-
-        " In a string, it seems that `.` can match anything including a newline.
-        " Like `\_.`.
-
-        " Warning: there seems to be a limit on the size of the shell's standard input.{{{
-        "
-        " We could use this code instead:
-        "
-        "     let lines = shellescape(join(getline(a:lnum1,a:lnum2), "\n"))
-        "     echo system('echo '.lines.' | cloc --stdin-name=foo.'.&ft.' -')
-        "
-        " But because of the previous limit:
-        "
-        "     http://stackoverflow.com/a/19355351
-        "
-        " … the command would error out when send too much text.
-        " The error would like like this:
-        "
-        "     E484: Can't open file /tmp/user/1000/vsgRgDU/97
-        "
-        " Currently, on my system, it seems to error out somewhere above 120KB.
-        " In a file, to go the 120 000th byte, use the normal `go` command and hit
-        " `120000go`. Or the Ex version:
-        "
-        "     :120000go
-        "}}}
-    endif
-
-    " remove the header
-    let output_cloc = matchstr(system('cloc '.to_scan), '\zs-\+.*')
-
-    " Why do store the output in a variable, and echo it at the very end of
-    " the function? Why don't we echo it directly?
-    " Because, if the output is longer than the screen, and Vim uses its pager
-    " to display it, and if we don't go down the output but cancel/exit, it
-    " seems the rest of the code wouldn't be executed. We would have no
-    " `g:cloc_results` variable.
-    " We delay the display of the output to the very end of the function, to
-    " be sure the code generating `g:cloc_results` is processed.
-
-    let to_display = output_cloc
-
-    " the 1st `split()` splits the string into a list, each item being a line
-    " `filter()`        removes the lines which don't contain numbers
-    " `map()`           replaces the lines with (sub)lists, each item being a number
-    "                   (number of blank lines, lines of code, comments, files)
-
-    " We ask `map()` to split all the lines in the output of `$ cloc`
-    " using the pattern `\s\{2,}\ze\d`.
-    " Why `\s\{2,}` and not simply `\s\+`?
-    "
-    " Because there are some programming languages which contain a number in
-    " their name.
-    " For example, in the source code of `$ cloc`, we find `Fortran 77` and
-    " `Fortran 99`. With `\s\+`, we would split in the middle of the language.
-    " With `\s\{2,}`, it shouldn't occur, unless some weird languages use
-    " more than 2 consecutive spaces in their name…
-
-    let output_cloc = map(filter(split(output_cloc, '\n'),
-    \                            { i,v -> v =~# '\d\+' }),
-    \                     { i,v -> split(v, '\s\{2,}\ze\d') })
-
-    let g:cloc_results = {}
-    let keys           = ['files', 'blank', 'comment', 'code']
-
-    for values_on_line in output_cloc
-        " `i`    is going to index the `keys` list
-        " `dict` is going to store a dictionary containing the numbers
-        "        of lines for a given language
-        let i    = 0
-        let dict = {}
-
-        for value in values_on_line[1:]
-            let dict[keys[i]] = eval(value)
-            let i += 1
-        endfor
-
-        let g:cloc_results[values_on_line[0]] = dict
-    endfor
-
-    echo to_display
-endfu
-
 fu! myfuncs#dump_wiki(url) abort "{{{1
     if a:url[:3] isnot# 'http'
         return
@@ -873,6 +776,8 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
 endfu
 
 fu! s:op_grep_get_qfl(pat) abort
+    " TODO:
+    " Instead of filtering, couldn't we redirect errors in `/dev/null` ?
     return filter(systemlist(&grepprg.' '.shellescape(a:pat)), {i,v -> v !~# '^ERR: Skipping'})
 endfu
 
@@ -1462,9 +1367,11 @@ fu! myfuncs#search_todo(where) abort "{{{1
     try
         sil noa exe 'lvim /\CFIX'.'ME\|TO'.'DO/j '.(a:where is# 'buffer' ? '%' : './**/*')
         sil! call lg#motion#repeatable#make#set_last_used(']l', {'bwd': ',', 'fwd': ';'})
-    catch
+    catch /^Vim\%((\a\+)\)\?:E480/
         echom 'no TO'.'DO or FIX'.'ME'
         return
+    catch
+        return lg#catch_error()
     endtry
 
     " Because we've prefixed `:lvim` with `:noa`, our autocmd which opens a qf window

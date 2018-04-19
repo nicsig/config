@@ -416,7 +416,7 @@ Python code invoked from a `context` statement can use the variables:
 
             … is available in the `snip.context` variable inside the snippet.
 
-                                               NOTE:
+                                     NOTE:
 
             By  moving the  python expression  into  a named  function inside  a
             module, and  by importing  the latter  from a  global block,  we can
@@ -445,7 +445,7 @@ Python code invoked from a `context` statement can use the variables:
             previous snippet.
 
 
-                                               NOTE:
+                                     NOTE:
 
             How can you be sure that the snippet will be expanded only while a tabstop
             is currently selected in another snippet?
@@ -455,7 +455,7 @@ Python code invoked from a `context` statement can use the variables:
             selected in another snippet.
 
 
-                                               NOTE:
+                                     NOTE:
 
             For this to work, you need to choose a single-character tab_trigger.
             Also, the expression `snip.last_placeholder`  is not precise enough.
@@ -473,7 +473,7 @@ Python code invoked from a `context` statement can use the variables:
                             only if the previous line begins with the keyword `for`
 
 
-                                               NOTE:
+                                     NOTE:
 
             By default, the `snip` object has no `current_text` property.
             And yet this code works and refers to `snip.context.current_text`.
@@ -490,7 +490,7 @@ Python code invoked from a `context` statement can use the variables:
                     snip.context.current_text = snip.last_placeholder.current_text
 
 
-                                               NOTE:
+                                     NOTE:
 
             More generally, a single-character tab_trigger combined with the options `Ae` allows you
             to include a snippet inside a snippet.

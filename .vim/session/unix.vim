@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +362 ~/.vim/plugged/vim-unix/autoload/unix.vim
-badd +1 ~/.vim/plugged/vim-unix/plugin/unix.vim
+badd +11 ~/.vim/plugged/vim-unix/plugin/unix.vim
+badd +284 ~/.vim/plugged/vim-unix/autoload/unix.vim
 argglobal
 silent! argdel *
 edit ~/.vim/plugged/vim-unix/plugin/unix.vim
@@ -30,9 +30,9 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-47
+46
 normal! zo
-let s:l = 13 - ((5 * winheight(0) + 0) / 1)
+let s:l = 13 - ((9 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -49,14 +49,14 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-361
+271
 normal! zo
-let s:l = 361 - ((304 * winheight(0) + 14) / 29)
+let s:l = 43 - ((37 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-361
-normal! 031|
+43
+normal! 0
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)

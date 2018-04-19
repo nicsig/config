@@ -1,3 +1,9 @@
+Don't forget you can:
+
+        • navigate in the jumplist with C-o and C-i
+        • open the index with Tab
+        • collapse/expand all entries in the index with H/L
+
 # Mapppings
 
 You can install mappings in 3 modes:

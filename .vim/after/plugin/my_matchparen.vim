@@ -22,7 +22,7 @@ if exists('g:loaded_matchparen')
     augroup END
 
 else
-    noautocmd DoMatchParen
+    noa DoMatchParen
     au! default_cursor_moved
     aug! default_cursor_moved
 endif

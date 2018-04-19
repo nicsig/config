@@ -319,7 +319,7 @@ endfu
 call lg#motion#repeatable#make#all({
 \        'mode':    'n',
 \        'buffer':  0,
-\        'axis':    {'bwd': 'z,', 'fwd': 'z;'},
+\        'axis':    {'bwd': ',', 'fwd': ';'},
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '-e',  'fwd': '-e'},
@@ -330,7 +330,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'axis':   {'bwd': 'z,', 'fwd': 'z;'},
+\        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': 'Z<c-h>',  'fwd': 'Z<c-l>' },
@@ -417,7 +417,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'axis':   {'bwd': 'co,', 'fwd': 'co;', 'mode': 'n'},
+\        'axis':   {'bwd': ',', 'fwd': ';', 'mode': 'n'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     { 'bwd': '[oB',  'fwd': ']oB' },

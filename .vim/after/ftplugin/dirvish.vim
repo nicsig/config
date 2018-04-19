@@ -14,19 +14,15 @@
 "}}}
 
 " Mappings {{{1
-" [oP  ]oP  coP {{{2
+" C-n  C-p {{{2
 
 " Dirvish installs the mappings `C-n` and `C-p` to preview the contents
 " of the previous/next file or directory.
 " It's redundant with `coP`, and it clashes with our own `C-n` and `C-p`
 " to move across tabpages.
+
 sil nunmap  <buffer>  <c-n>
 sil nunmap  <buffer>  <c-p>
-
-nno  <buffer><nowait><silent>  [oP  :<c-u>call my_dirvish#toggle_auto_preview(1)<cr>
-nno  <buffer><nowait><silent>  ]oP  :<c-u>call my_dirvish#toggle_auto_preview(0)<cr>
-nno  <buffer><nowait><silent>  coP  :<c-u>call my_dirvish#toggle_auto_preview(
-\                                                  !exists('#my_dirvish_auto_preview'))<cr>
 
 " c-s {{{2
 
@@ -40,6 +36,13 @@ xno  <buffer><nowait><silent>  <c-t>  :call dirvish#open('tabedit', 1)<cr>
 " c-v c-v {{{2
 
 nno  <buffer><nowait><silent>  <c-v><c-v>  :<c-u>call dirvish#open('vsplit', 1)<cr>
+
+" [oP  ]oP  coP {{{2
+
+nno  <buffer><nowait><silent>  [oP  :<c-u>call my_dirvish#toggle_auto_preview(1)<cr>
+nno  <buffer><nowait><silent>  ]oP  :<c-u>call my_dirvish#toggle_auto_preview(0)<cr>
+nno  <buffer><nowait><silent>  coP  :<c-u>call my_dirvish#toggle_auto_preview(
+\                                                  !exists('#my_dirvish_auto_preview'))<cr>
 
 " gh {{{2
 

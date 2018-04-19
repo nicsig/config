@@ -14,8 +14,9 @@
 sil! call operator#sandwich#set('delete', 'all', 'highlight', 0)
 
 sil! let g:sandwich#recipes =  deepcopy(g:sandwich#default_recipes)
-\                             + [ {'buns': ['“', '”'], 'input': ['u"'] } ]
-\                             + [ {'buns': ['‘', '’'], 'input': ["u'"] } ]
+\                             + [ {'buns': ['↣ ', ' ↢'], 'input': ['->'] } ]
+\                             + [ {'buns': ['“', '”'],   'input': ['u"'] } ]
+\                             + [ {'buns': ['‘', '’'],   'input': ["u'"] } ]
 "                                            │
 "                                            └ used in man pages (ex: `man tmux`, search for ‘=’)
 

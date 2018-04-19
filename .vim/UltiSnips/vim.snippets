@@ -534,13 +534,11 @@ endsnippet
 snippet try "try ... catch statement" bm
 try
 	${1:${VISUAL}}
-
-${4:catch ${2:/^Vim\%((\a\+)\)\?:E123/}
-	${3:echohl ErrorMsg
+${5:catch${2: /^Vim\%((\a\+)\)\?:E${3:123}/}
+	${4:echohl ErrorMsg
 	echo v:exception
-	echohl NONE}}
-
-finally
+	echohl NONE}
+}finally
 	$0
 endtry
 endsnippet

@@ -246,6 +246,8 @@ alias tlmgr_gui='nohup tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/
 
 # trash {{{2
 
+alias te='trash-empty'
+
 alias tl='trash-list'
 
 alias tp='trash-put'
