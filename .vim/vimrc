@@ -2271,7 +2271,7 @@ omap  m       <plug>(fzf-maps-o)
 " nno <space>B :vert sbuffer *
 " nno <space>B :<c-u>sbuffer *
 
-" p                             gqip {{{4
+" P                             gqip {{{4
 
 "                                              ┌─ don't write:
 "                                              │
@@ -2279,20 +2279,20 @@ omap  m       <plug>(fzf-maps-o)
 "                                              │
 "                                              │  because `:nno` doesn't translate `<plug>`.
 "                                              │
-nno  <silent>  <space>p  mz:<c-u>exe "sil norm \<plug>(my_gq)ip"
+nno  <silent>  <space>P  mz:<c-u>exe "sil norm \<plug>(my_gq)ip"
                          \<bar> sil update
                          \<bar> sil! norm! `z<cr>
 
-" P  C-p                        split long paragraph {{{4
+" p  C-p                        split long paragraph {{{4
 
-nmap           <space>P                         <plug>(split-paragraph-compact)
+nmap           <space>p                         <plug>(split-paragraph-compact)
 nno  <silent>  <plug>(split-paragraph-compact)  :<c-u>call <sid>split_paragraph(1, 'n')<cr>
 
 nmap           <space><c-p>             <plug>(split-paragraph)
 nno  <silent>  <plug>(split-paragraph)  :<c-u>call <sid>split_paragraph(0, 'n')<cr>
 
-xmap <silent>  <space>P      :<c-u>call <sid>split_paragraph(1, 'x')<cr>
-nmap <silent>  <space><c-p>  :<c-u>call <sid>split_paragraph(0, 'x')<cr>
+xmap <silent>  <space>p      :<c-u>call <sid>split_paragraph(1, 'x')<cr>
+xmap <silent>  <space><c-p>  :<c-u>call <sid>split_paragraph(0, 'x')<cr>
 
 fu! s:split_paragraph(compact, mode) abort
     let [firstline, lastline] = a:mode is# 'n'
@@ -2309,13 +2309,19 @@ fu! s:split_paragraph(compact, mode) abort
         return
     endif
 
+    let pos = getcurpos()
+
     " get the address of the first line
     let lnum1 = firstline ==# 1 && getline(1) =~# '\S'
     \ ?             1
     \ :             firstline + 1
 
+    " Replace soft hyphens which we sometimes copy from a pdf.
+    " They are annoying because they mess up the display of nearby characters.
+    sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\%u00ad/-/ge'
+
     " join all the lines in a single one
-    exe 'keepj '.lnum1.','.lnum2.'j'
+    sil exe 'keepj '.lnum1.','.lnum2.'j'
 
     " break the line down according to the punctuation
     let pat = '[.!?]\zs\%(\s\+\|$\)\|:\zs\s*$'
@@ -2324,7 +2330,7 @@ fu! s:split_paragraph(compact, mode) abort
 
     " 2 empty lines have been added (one where we are right now, and the one above);
     " remove them
-    -,d_
+    sil -,d_
 
     " format with `$ par`
     sil exe printf('keepj keepp %d,%dg/\S/norm gqq', lnum1, line('.'))
@@ -2333,6 +2339,10 @@ fu! s:split_paragraph(compact, mode) abort
     if a:compact
         sil exe printf('keepj keepp %d,%dg/^$/d_', lnum1, line('.'))
     endif
+
+    sil update
+
+    call setpos('.', pos)
 
     " make the mapping repeatable
     if a:mode is# 'n'
@@ -2861,11 +2871,6 @@ fu! s:repeatable_spell_commands(cmd) abort
     call repeat#set(cmd_to_repeat)
     return a:cmd
 endfu
-
-" zv  zV {{{4
-
-nno  zv  zMzvzz
-nno  zV  zv
 
 " |                   (prefix) {{{3
 " |C  |F     open html file in firefox/chrome {{{4
@@ -3536,10 +3541,14 @@ xno  <silent>  k  gk
 xno  <silent>  ^  g^
 xno  <silent>  0  g0
 
-" H  L                collapse/expand all folds {{{3
+" H  L  M             collapse/expand folds {{{3
 
+" collapse all
 nno  H  zMzz
+" expand all
 nno  L  zRzz
+" expand just enough to see where we are
+nno  M  zMzvzz
 
 " J        gJ         join without moving {{{3
 
@@ -5937,6 +5946,16 @@ endfu
 " 62 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
+" Also, debug this:
+"
+"         let a = Func(b)
+"         call Func(b)
+"         " press sdf on `Func()` in both cases,
+"         " it should be removed, but it's not
+"
+" However, this works as expected:
+"
+"         let ab = Func(ab)
 "
 " 63 -
 " Create a command in vim-debug, to automatically profile a plugin.
@@ -6091,6 +6110,7 @@ endfu
 "
 "     cmdline#reset_did_transform(
 "     comment#object(
+"     fold#md#sort_by_size(
 "     fold#md#stacked(
 "     fold#md#toggle_fde(
 "     fold#text(
@@ -6427,64 +6447,20 @@ endfu
 " for tabpage navigation?).
 "
 " If we choose J/K, it conflicts with scrolling in preview window.
+
+
+
+" sessions to finish:
 "
-" 106 -
-" Implement `:FoldSortBySize`
-" Make it local to a markdown buffer.
-
-com! -range=%  FoldSortBySize  exe s:fold_sort_by_size(<line1>,<line2>)
-
-fu! s:fold_sort_by_size(lnum1,lnum2) abort
-    let lvl = strlen(matchstr(getline(a:lnum1), '^#*'))
-    if lvl ==# 0
-        return 'echoerr "the first line is not a fold title"'
-    endif
-
-    let &l:fen = 0
-    norm! $
-    let pat = '\n\%(#\{1,'.lvl.'}\%(#\)\@!\)'
-    let lnum = search(pat, 'W', a:lnum2)
-    let folds = [{'foldstart': a:lnum1, 'foldend': lnum, 'size': lnum - a:lnum1 + 1}]
-    while lnum > 0
-        let pos = getcurpos()
-
-        if len(folds) > 1
-            let size = folds[-1].size
-            let foldstart = folds[-1].foldstart
-            let foldend = folds[-1].foldend
-
-            let i = 0
-            for f in folds
-                if f.size > size
-                    exe foldstart.','.foldend.'m ' . f.foldstart
-                    let cur_fold = remove(folds, -1)
-                    call insert(folds, cur_fold, i)
-                    break
-                endif
-                let i += 1
-            endfor
-            call setpos('.', pos)
-        endif
-
-        let lnum = search(pat, 'W', a:lnum2)
-        let folds += [{'foldstart': pos[1]+1, 'foldend': lnum, 'size': lnum - pos[1]}]
-    endwhile
-    let &l:fen = 1
-    return ''
-endfu
-
-
-" sessions:
-"
-"         1. try
-"         2. async
-"         3. unix
-"         4. tree
-"         5. breakdown
-"         6. package
-"         7. config
-"         8. tag
-"         9. cwd
+"         01. try
+"         02. async
+"         03. unix
+"         04. tree
+"         05. breakdown
+"         06. package
+"         07. config
+"         08. tag
+"         09. cwd
 "         10. unix
 "         11. keyboard
 "

@@ -70,7 +70,7 @@ fu! myfuncs#block_select_box() abort "{{{1
         let guard += 1
     endwhile
 
-    if guard ==# 99
+    if guard == 99
         call winrestview(view)
         return
     endif
@@ -461,7 +461,7 @@ endfu
 fu! myfuncs#join_blocks(first_reverse) abort "{{{1
     let [ line1, line2 ] = [ line("'<"), line("'>") ]
 
-    if (line2 - line1 + 1) % 2 ==# 1
+    if (line2 - line1 + 1) % 2 == 1
         echohl ErrorMsg
         echo ' Total number of lines must be even'
         echohl None
@@ -530,7 +530,7 @@ endfu
 
 fu! myfuncs#long_listing_split() abort "{{{1
     let line = getline('.')
-    if stridx(line, ',') ==# -1
+    if stridx(line, ',') == -1
         return
     endif
 
@@ -552,7 +552,7 @@ fu! myfuncs#long_object_split() abort
 
     " If the line doesn't contain a list ([]), a dictionary ({}), don't do anything.
 
-    if match(line, '\[.*\]\|{.*}') ==# -1
+    if match(line, '\[.*\]\|{.*}') == -1
         return
     endif
 
@@ -847,8 +847,8 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " build condition to check if we're replacing the current line
 
         let replace_current_line =     line("'[") ==# line("']")
-        \                          &&  col("'[") ==# 1
-        \                          && (col("']") ==# col('$')-1 || col('$') ==# 1)
+        \                          &&  col("'[") == 1
+        \                          && (col("']") ==# col('$')-1 || col('$') == 1)
 
         " If we copy a line containing leading whitespace, and try to replace
         " another line like this: `0dr$`
