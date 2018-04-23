@@ -2316,6 +2316,10 @@ fu! s:split_paragraph(compact, mode) abort
     \ ?             1
     \ :             firstline + 1
 
+    if getline(lnum1) =~# &l:flp && a:mode is# 'n'
+        return feedkeys("\<plug>(my_gq)ip", 'i')
+    endif
+
     " Replace soft hyphens which we sometimes copy from a pdf.
     " They are annoying because they mess up the display of nearby characters.
     sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\%u00ad/-/ge'
@@ -2994,13 +2998,13 @@ nno  -P  :<c-u>pwd<cr>
 nno  <silent>  -q  :<c-u>exe <sid>faq()<cr>
 
 fu! s:faq() abort
-    if stridx(expand('%:p'), '/wiki/') ==# -1 && expand('%:p') isnot# $XDG_RUNTIME_DIR.'/faq'
+    if stridx(expand('%:p'), '/wiki/') ==# -1 && expand('%:p') isnot# $XDG_RUNTIME_VIM.'/faq'
         return 'echo "you''re not in a wiki"'
     endif
 
     let this_tab = tabpagenr()
     let win_in_this_tab = filter(getwininfo(), {i,v -> v.tabnr ==# this_tab})
-    let faq_file = $XDG_RUNTIME_DIR.'/faq'
+    let faq_file = $XDG_RUNTIME_VIM.'/faq'
 
     for win in win_in_this_tab
         if bufname(get(win, 'bufnr', -1)) is# faq_file
@@ -3354,7 +3358,7 @@ endfu
 
 " ':                  NOTE: {{{3
 
-nno  <silent> ':   o<cr>NOTE:<esc>
+nno  <silent> ':   o<cr>NOTE:<c-c>
                   \:center <bar> call append(line('.') - 1, '')<cr>
                   \o<cr>0<c-d><tab><tab><tab>
 
@@ -5090,7 +5094,7 @@ fu! s:setup_vim_terminal() abort
     " Not Vim. We do it in this function.
     setl nowrap
     call s:setup_neovim_terminal()
-    exe 'nno  <buffer><nowait><silent>  p  i<c-e>'.&termkey.'""'
+    exe 'nno  <buffer><nowait><silent>  p  i<c-e>'.&termwinkey.'""'
 endfu
 
 fu! s:setup_neovim_terminal() abort
@@ -5961,7 +5965,7 @@ endfu
 " Create a command in vim-debug, to automatically profile a plugin.
 " It would create a temporary script with the commands:
 "
-"         profile start $XDG_RUNTIME_DIR/vim_profile_plugin.log
+"         profile start $XDG_RUNTIME_VIM/vim_profile_plugin.log
 "         prof! file ~/.vim/plugged/{plugin-name}/**/*.vim
 "         unlet! g:loaded_{guard-name}
 "         so file1.vim
@@ -6447,22 +6451,68 @@ endfu
 " for tabpage navigation?).
 "
 " If we choose J/K, it conflicts with scrolling in preview window.
+"
+" 106 -
+" We should save the last 10 or so messages we wrote in a git commit message.
+" Basically, we should have a history.
+" And it should be persistent (i.e. survive a reboot).
+"
+" 107 -
+" Create tags in our markdown notes:
+"         https://stackoverflow.com/q/25742396
+"
+" It  could  solve  the  issue  of creating  reliable  links  between  different
+" locations inside a wiki.
+" Indeed, with  regular links (filepaths),  if we rename  a file, or  change its
+" location, we need to refactor all links towards the latter.
+" With tags,  we would just  need to re-generate the  tags file with  an autocmd
+" listening to `BufWritePost` or sth like that.
+"
+" The goal  would be to  have tags, like  in help files,  on which we  can press
+" `C-]` to automatically jump to an arbitrary location inside the wiki.
+" This would also allow us to leverage all built-in commands/functions dedicated
+" to tags.
+
+if !isdirectory($XDG_RUNTIME_DIR.'/vim')
+    call mkdir($XDG_RUNTIME_DIR.'/vim', 'p', '0700')
+endif
+let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
+
+
+
+" augroup my_dirvish_mappings
+"     au! * <buffer>
+"     au FileType dirvish call s:my_dirvish_mappings()
+" augroup END
+
+" fu! s:my_dirvish_mappings() abort
+"     let key = '!m'
+"     if !has('unix')
+"         " drwxr-xr-x 2 jean jean 4,0K Apr 20 23:58 /home/jean/.vim/session/
+"         nno  <buffer><nowait><silent>  !m  :<c-u>echo expand('`ls -lhd '.getline('.').'`')<cr>
+"     else
+"         " Thu 19 Apr 2018 11:39:12 PM CEST
+"         nno  <buffer><nowait><silent>  !m  :<c-u>echo strftime('%c', getftime(getline('.')))<cr>
+"     endif
+" endfu
 
 
 
 " sessions to finish:
 "
-"         01. try
-"         02. async
-"         03. unix
-"         04. tree
-"         05. breakdown
-"         06. package
-"         07. config
-"         08. tag
-"         09. cwd
-"         10. unix
-"         11. keyboard
+"         01. profiling
+"         02. debug
+"         03. try
+"         04. async
+"         05. unix
+"         06. tree
+"         07. breakdown
+"         08. package
+"         09. config
+"         10. tag
+"         11. cwd
+"         12. unix
+"         13. keyboard
 "
 " Once finished, get back to studying the terminal and latex.
 

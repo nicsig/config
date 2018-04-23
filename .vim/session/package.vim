@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +22 ~/Dropbox/wiki/vim/package_rtp.md
+badd +151 ~/Dropbox/wiki/vim/package_rtp.md
 argglobal
 silent! argdel *
 edit ~/Dropbox/wiki/vim/package_rtp.md
@@ -23,12 +23,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 22 - ((21 * winheight(0) + 15) / 31)
+let s:l = 8 - ((7 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-22
-normal! 0
+8
+normal! 014|
 tabnext 1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
@@ -41,6 +41,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad

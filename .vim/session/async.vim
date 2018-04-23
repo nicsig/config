@@ -9,7 +9,7 @@ endif
 set shortmess=aoO
 badd +1 ~/Dropbox/wiki/vim/async.md
 badd +8 ~/.vim/plugged/asyncmake/plugin/asyncmake.vim
-badd +91 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
+badd +1 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
 argglobal
 silent! argdel *
 edit ~/Dropbox/wiki/vim/async.md
@@ -92,6 +92,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad

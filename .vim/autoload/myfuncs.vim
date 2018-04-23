@@ -291,14 +291,14 @@ fu! myfuncs#box_destroy() abort
     " trim whitespace
     sil! exe range.'TW'
     " remove empty lines
-    sil! exe range.'g/^\s*$/d_'
+    sil! exe range.'-g/^\s*$/d_'
 
     " Move the paragraph one line up, and one character left.
     " Why?
     " Because when we  create and destroy a box, the  contents doesn't come back
     " where it was, it goes down one line, and right one character.
     exe (lnum1-1)."put =''"
-    sil '{,'}s/^.//e
+    sil .+,'}-s/^.//e
 
     " position the cursor on the upper left corner of the paragraph
     exe 'norm! '.lnum1.'Gj_'
@@ -318,19 +318,22 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         call system('git clone '.shellescape(url).' '.tempdir)
         let files = glob(tempdir.'/*', 0, 1)
         call map(files, { i,v -> substitute(v, '^\C\V'.tempdir.'/', '', '') })
-        call filter(files, { i,v -> v !~# '\v\c_?footer$' })
+        call filter(files, { i,v -> v !~# '\v\c_?footer%(.md)?$' })
 
         mark x
         for file in files
             sil put =file
         endfor
+        put =''
         mark y
 
-        sil 'x+,'ys/^/# /
-        sil 'x+,'yg/^/exe 'keepalt r '.tempdir.'/'.getline('.')[2:]
-        sil keepj keepp 'x+,'yg/^=\+\s*$/d_ | -s/^/## /
-        sil keepj keepp 'x+,'yg/^-\+\s*$/d_ | -s/^/### /
-        sil 'x+,'ys/\v^#.{-}\n\zs\s*\n\ze##//
+        sil keepj keepp 'x+,'y-s/^/# /
+        sil keepj keepp 'x+,'y-g/^./exe 'keepalt r '.tempdir.'/'.getline('.')[2:]
+        sil keepj keepp 'x+,'y-g/^=\+\s*$/d_ | -s/^/## /
+        sil keepj keepp 'x+,'y-g/^-\+\s*$/d_ | -s/^/### /
+        sil keepj keepp 'x+,'y-s/\v^#.{-}\n\zs\s*\n\ze##//
+
+        sil keepj keepp 'x+,'y-g/^#\%(#\)\@!/-put ='#'
         sil update
 
     catch
@@ -1054,7 +1057,7 @@ fu! myfuncs#open_gx(in_term) abort "{{{1
             "     split-window
             "     respawn-pane
             "     set-remain-on-exit
-            sil call system('tmux split-window -c '.$XDG_RUNTIME_DIR)
+            sil call system('tmux split-window -c '.$XDG_RUNTIME_VIM')
             " maximize the pane
             sil call system('tmux resize-pane -Z')
             " start `w3m`
@@ -1480,7 +1483,7 @@ fu! myfuncs#tmux_current_command() abort
 
     if !exists('s:pane_id')
         let s:pane_id = systemlist(
-        \                           'tmux split-window -c $XDG_RUNTIME_DIR -d -p 25 -PF "#D"'
+        \                           'tmux split-window -c $XDG_RUNTIME_VIM -d -p 25 -PF "#D"'
         \                         )[0]
     endif
 

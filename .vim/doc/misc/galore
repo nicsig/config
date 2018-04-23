@@ -375,9 +375,10 @@ Disable audible and visual bells
 
 Quickly jump to header or source file
 
-   This technique can probably be applied  to many filetypes. It sets file marks
-   (see :h marks) when leaving a source  or header file, so you can quickly jump
-   back to the last accessed one by using 'C or 'H (see :h 'A).
+   This technique can probably be applied to many filetypes.
+   It sets file  marks (see :h marks)  when leaving a source or  header file, so
+   you can quickly jump back to the last  accessed one by using 'C or 'H (see :h
+   'A).
 
         autocmd BufLeave *.{c,cpp} mark C
         autocmd BufLeave *.h       mark H
@@ -397,24 +398,31 @@ Debugging
 General tips
 
    If you encounter a strange behaviour, try reproducing it like this:
-vim -u NONE -N
 
-   This will start Vim without vimrc (thus default settings) and in nocompatible mode (which makes it use Vim defaults instead of vi defaults). (See :h --noplugin for other combinations of what to load at start.)
+        vim -u NONE -N
 
-   Plugins often introduce new/changed/faulty behaviour. E.g. if it happens on saving, check :verb au BufWritePost to get a list of potential culprits.
+   This will start Vim without vimrc (thus default settings) and in nocompatible
+   mode (which makes it use Vim defaults instead of vi defaults).
+   See :h --noplugin for other combinations of what to load at start.
+
+   Plugins often introduce new/changed/faulty behaviour.
+   E.g. if it  happens on saving, check  :verb au BufWritePost to get  a list of
+   potential culprits.
 
 Profiling startup time
 
    Vim startup feels slow? Time to crunch some numbers:
-vim --startuptime /tmp/startup.log +q && vim /tmp/startup.log
 
-   The first column is the most important as it shows the elapsed absolute time. If there is a big jump in time between two lines, the second line is either a very big file or a file with faulty VimL code that is worth investigating.
+        vim --startuptime /tmp/startup.log +q && vim /tmp/startup.log
+
+   The first column is the most important as it shows the elapsed absolute time.
+   If there is a big jump in time between two lines, the second line is either a
+   very big file or a file with faulty VimL code that is worth investigating.
 
 Profiling at runtime
 
-   Required [219]feature: +profile
-
-   Vim provides a built-in capability for profiling at runtime and is a great way to find slow code in your environment.
+   Vim provides  a built-in capability for  profiling at runtime and  is a great
+   way to find slow code in your environment.
 
    The :profile command takes a bunch of sub-commands for specifying what to profile.
 
@@ -426,9 +434,13 @@ Profiling at runtime
         <do something in Vim>
         <quit Vim>
 
-   Vim keeps the profiling information in memory and only writes it out to the logfile on exit. (Neovim has fixed this using :profile dump).
+   Vim keeps the profiling  information in memory and only writes  it out to the
+   logfile on exit.
+   Neovim has fixed this using :profile dump.
 
-   Have a look at /tmp/profile.log. All code that was executed during profiling will be shown. Every line, how often it was executed and how much time it took.
+   Have a look at /tmp/profile.log.
+   All code that was executed during profiling will be shown.
+   Every line, how often it was executed and how much time it took.
 
    Most of the time that will be plugin code the user isn't familiar with, but if you're investigating a certain issue, jump to the bottom of the log. Here are two different sections FUNCTIONS SORTED ON TOTAL TIME and FUNCTIONS SORTED ON SELF TIME that are worth gold. On a quick glance you can see, if a certain function is taking too long.
 
@@ -507,14 +519,18 @@ Debugging Vim scripts
 
 Debugging syntax files
 
-   Syntax files are often the cause for slowdowns due to wrong and/or complex regular expressions. If the +profile [222]feature is compiled in, Vim provides the super useful :syntime command.
+   Syntax files  are often the cause  for slowdowns due to  wrong and/or complex
+   regular expressions.
+   Vim provides the  super useful :syntime command.
 
         :syntime on
         " hit <c-l> a few times to redraw the window which causes the syntax rules to get applied again
         :syntime off
         :syntime report
 
-   The output contains important metrics. E.g. you can see which regexp takes too long and should be optimized or which regexps are used all the time but never even match.
+   The output contains important metrics.
+   E.g. you can see which regexp takes too long and should be optimized or which
+   regexps are used all the time but never even match.
 
    See :h :syntime.
 
