@@ -1,6 +1,6 @@
 fu! snippets#get_autoload_funcname() abort "{{{1
-    return expand('%:p') =~# 'autoload'
-       \ ?     substitute(matchstr(expand('%:p'), 'autoload/\zs.*\ze.vim'), '/', '#', 'g').'#'
+    return expand('%:p') =~# 'autoload\|plugin'
+       \ ?     substitute(matchstr(expand('%:p'), '\%(autoload\|plugin\)/\zs.*\ze.vim'), '/', '#', 'g').'#'
        \ :     ''
 endfu
 

@@ -7,15 +7,16 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +142 ~/.vim/vimrc
+badd +0 /tmp/pl.pl
 argglobal
 silent! argdel *
-edit ~/.vim/vimrc
+edit /tmp/pl.pl
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
-setlocal fdm=marker
+arglocal
+silent! argdel *
+setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -23,28 +24,26 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-27
-normal! zo
-80
-normal! zo
-let s:l = 2276 - ((2107 * winheight(0) + 15) / 31)
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 4) / 9)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2276
-normal! 01|
+1
+normal! 0
 tabnext 1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOAacFIsW
+set winheight=1 winwidth=20 shortmess=filnxtToO
 set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad

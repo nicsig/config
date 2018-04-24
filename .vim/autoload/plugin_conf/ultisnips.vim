@@ -133,7 +133,7 @@ let g:UltiSnipsEditSplit = 'horizontal'
 
 " This has also the benefit of increasing the performance, because UltiSnips
 " won't search the rtp.
-let g:UltiSnipsSnippetDirectories = [ $HOME.'/.vim/UltiSnips', $HOME.'/.vim/plugged/snippets' ]
+let g:UltiSnipsSnippetDirectories = [ $HOME.'/.vim/UltiSnips' ]
 
 " Prevent UltiSnips from looking for SnipMate snippets (sub-directories of the rtp
 " ending with `snippets/`).

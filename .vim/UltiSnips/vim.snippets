@@ -168,9 +168,27 @@ endsnippet
 
 # com {{{1
 
+# FIXME:{{{
+# We need  to add  a tabstop, iff,  the user chooses  the public  function right
+# after the 4th tabstop.
+# We have the same issue in the `fu` snippet.
+#
+# Also, why does  the cursor jump when  we insert a comma right  after the third
+# tabstop?
+# Study the issue from these examples:
+# ✔
+#	  foo $1`!p snip.rv = complete(t[1], ['a', 'b', 'c'])` bar
+# ✘
+#	  foo ${1:bar$2`!p snip.rv = complete(t[2], ['a', 'b', 'c'])` baz}
+#}}}
 snippet com "command" bm
-com! ${1:MyCmd} ${2:call s:my_function()}
-$0
+com! ${1:-bar }${2:-complete=custom$3`!p
+snip.rv = complete(t[3], [',', 'list,'])
+`$4`!p
+snip.rv = complete(t[4], ['s:func', vim.eval("snippets#get_autoload_funcname()")])
+` }${5:-nargs=$6`!p
+snip.rv = complete(t[6], ['0', '1', '*', '?', '+'])
+` } ${7:Cmd}  ${8:call ${9:s:func()}}
 endsnippet
 
 # doautocmd User {{{1

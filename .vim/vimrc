@@ -319,8 +319,32 @@ endif
 
 " ENVIRONMENT "{{{2
 
+" TODO: We should probably remove this assignment.{{{
+"
+" To create RELIABLE links inside a wiki, we should use tags:
+"
+"         https://stackoverflow.com/q/25742396
+"
+" Indeed, with  regular links (filepaths),  if we rename  a file, or  change its
+" location, we need to refactor all links towards the latter.
+" With tags,  we would just  need to re-generate the  tags file with  an autocmd
+" listening to `BufWritePost` or sth like that.
+"
+" The goal  would be to  have tags, like  in help files,  on which we  can press
+" `C-]` to automatically jump to an arbitrary location inside the wiki.
+" This would also allow us to leverage all built-in commands/functions dedicated
+" to tags.
+"}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
 let $MY_WIKI = $HOME.'/Dropbox/wiki'
+
+if !isdirectory($XDG_RUNTIME_DIR.'/vim')
+    call mkdir($XDG_RUNTIME_DIR.'/vim', 'p', '0700')
+endif
+let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
+" For more info about `$XDG_RUNTIME_DIR`:
+"
+"         https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
 
 " backspace {{{2
 
@@ -6456,27 +6480,6 @@ endfu
 " We should save the last 10 or so messages we wrote in a git commit message.
 " Basically, we should have a history.
 " And it should be persistent (i.e. survive a reboot).
-"
-" 107 -
-" Create tags in our markdown notes:
-"         https://stackoverflow.com/q/25742396
-"
-" It  could  solve  the  issue  of creating  reliable  links  between  different
-" locations inside a wiki.
-" Indeed, with  regular links (filepaths),  if we rename  a file, or  change its
-" location, we need to refactor all links towards the latter.
-" With tags,  we would just  need to re-generate the  tags file with  an autocmd
-" listening to `BufWritePost` or sth like that.
-"
-" The goal  would be to  have tags, like  in help files,  on which we  can press
-" `C-]` to automatically jump to an arbitrary location inside the wiki.
-" This would also allow us to leverage all built-in commands/functions dedicated
-" to tags.
-
-if !isdirectory($XDG_RUNTIME_DIR.'/vim')
-    call mkdir($XDG_RUNTIME_DIR.'/vim', 'p', '0700')
-endif
-let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
 
 
 
@@ -6742,32 +6745,39 @@ if has('vim_starting')
     \     ]
 endif
 
-com! -bar -nargs=+ ProfilePlugin call s:profile_plugin(<f-args>)
+com! -bar -nargs=+ Prof call s:prof(<f-args>)
 
-fu! s:profile_plugin(...) abort
-    " TODO:
-    " Eliminate the need for providing the guard.
-    " We should unlet it automatically.
-    " Study vim-scriptease.
-    if a:0 !=# 2
-        return 'echoerr "Provide the names of the plugin, and of its guard"'
-    endif
-
+fu! s:prof(...) abort
+    " FIXME:
+    " Do we need to remove the guard?
+    " Is `:prof` affected by a guard?
+    " It doesn't seem so, but check.
     try
-        profile start $XDG_RUNTIME_DIR/plugin_profiling_report
-        let [ plugin_name, guard_name ] = a:000
+        " FIXME:
+        " If  Vim had  the  subcommand  `dump` (like  Neovim),  we  could use  a
+        " temporary  file,  and  display  it  in  a  preview  window  (like  for
+        " `:Verbose`).
+        "
+        " Would it be a good idea?
+        " When is  it better  to use `$XDG_RUNTIME_DIR`  instead of  `/tmp` (via
+        " `tempname()`)?
+        "
+        " Should we ask `dump` as a feature request?
+        " If you do, ask about `stop` too.
+        " No matter what, document these subcommands.
+        profile start $XDG_RUNTIME_VIM/profile.log
+        let plugin_name = a:1
         exe 'prof! file ~/.vim/plugged/'.plugin_name.'/**/*.vim'
-        exe 'unlet! '.guard_name
         call writefile(map(filter(glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1),
         \                         { i,v -> v !~# '/t\%[est]/' }),
         \                  { i,v -> 'so '.v }),
-        \              $XDG_RUNTIME_DIR.'/plugin_profiling_report')
-        sil! so $XDG_RUNTIME_DIR/plugin_profiling_report
+        \              $XDG_RUNTIME_VIM.'/profile.log')
+        sil! so $XDG_RUNTIME_VIM/profile.log
 
     catch
         return lg#catch_error()
     endtry
-    echo 'Recreate the issue, restart Vim, and have a look at '.$XDG_RUNTIME_DIR.'/plugin_profiling_report'
+    echo 'Recreate the issue, restart Vim, and have a look at '.$XDG_RUNTIME_VIM.'/profile.log'
 endfu
 
 
