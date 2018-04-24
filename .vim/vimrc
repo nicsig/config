@@ -2326,15 +2326,6 @@ fu! s:split_paragraph(compact, mode) abort
     " get the address of the last line of the paragraph/selection
     let lnum2 = lastline + (a:mode is# 'n' ? (lastline ==# line('$') ? 0 : -1) : 0)
 
-    " The last character of the paragraph needs to be a valid punctuation ending
-    " for a sentence. Otherwise, our function could wrongly delete some lines.
-    if getline(lnum2) =~# '\s*[^.!?:]$'
-        echo 'last char is not a valid punctuation ending for a sentence'
-        return
-    endif
-
-    let pos = getcurpos()
-
     " get the address of the first line
     let lnum1 = firstline ==# 1 && getline(1) =~# '\S'
     \ ?             1
@@ -2342,6 +2333,15 @@ fu! s:split_paragraph(compact, mode) abort
 
     if getline(lnum1) =~# &l:flp && a:mode is# 'n'
         return feedkeys("\<plug>(my_gq)ip", 'i')
+    endif
+
+    let pos = getcurpos()
+
+    " The last character of the paragraph needs to be a valid punctuation ending
+    " for a sentence. Otherwise, our function could wrongly delete some lines.
+    if getline(lnum2) =~# '\s*[^.!?:]$'
+        echo 'last char is not a valid punctuation ending for a sentence'
+        return
     endif
 
     " Replace soft hyphens which we sometimes copy from a pdf.
@@ -5560,11 +5560,17 @@ endfu
 " https://github.com/neovim/neovim/issues/1496
 "
 " 31 -
-" When we try to paste a Tmux buffer, the indentation is increasingly wrong.
-" The cause seems to be 'autoindent'/'ai' which should be temporarily
-" disabled (and maybe temporarily enable 'paste'?).
-" Anyway, the best solution is the `tbone` plugin which provides the commands
+" When we try to paste a Tmux buffer from insert mode (M-SPC P), the indentation
+" is increasingly wrong.
+" The cause seems  to be 'autoindent'/'ai' which should  be temporarily disabled
+" (and maybe temporarily enable 'paste'?).
+"
+" Anyway, the  best solution is the  `tbone` plugin which provides  the commands
 " `:Tput` and `:Tyank`, and gives a direct access to the Tmux buffers.
+" Although, `:Tput` isn't always accessible from a Vim instance (think UltiSnips
+" docker) ...
+"
+" In `~/.tmux.conf`, we should rebind `pfx P` to temporarily disable 'ai'.
 "
 " Edit:
 " I've  removed   'autoindent'  from   vimrc. It  shouldn't   be  necessary. The
@@ -5577,6 +5583,15 @@ endfu
 "
 " Edit3:
 " I've restore 'ai'; let's see what happens.
+"
+" Update:
+" Document the fact that the tmux buffers are especially useful when you work in
+" a Vim which wasn't compiled with the clipboard support (no `+` register).
+"
+" Think docker UltiSnips:
+"
+"     https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#running-using-docker
+"     https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
 "
 " 32 -
 "
@@ -6260,6 +6275,28 @@ endfu
 " But this begs the question. How to deal with an error prompting us
 " with a question? How to catch it properly?
 "
+" Update:
+" We have the same issue in `~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim`
+"
+"         if tabpagenr('$') ==# 1 && winnr('$') ==# 1
+"             qall!
+"                 ^
+"                 We have to add a bang, to avoid an error message,
+"                 when we press `SPC q` to leave a Vim instance
+"                 with only one window and one unnamed and modified buffer.
+"                 (although maybe we should use `:qall` without bang, and press
+"                 `SPC Q`)
+"
+"                 If we wanted to use `:qall`, and catch a possible error:
+"
+"                     try
+"                         qall
+"                     catch
+"                         return lg#catch_error()
+"                     endtry
+"
+"                 We wouldn't see the error message (until we press Enter?).
+"
 " 86 -
 " Write your own colorscheme.
 " Take inspiration from seoul.
@@ -6503,19 +6540,20 @@ endfu
 
 " sessions to finish:
 "
-"         01. profiling
-"         02. debug
-"         03. try
-"         04. async
-"         05. unix
-"         06. tree
-"         07. breakdown
-"         08. package
-"         09. config
-"         10. tag
-"         11. cwd
-"         12. unix
-"         13. keyboard
+"         01. ultisnips
+"         02. profiling
+"         03. debug
+"         04. try
+"         05. async
+"         06. unix
+"         07. tree
+"         08. breakdown
+"         09. package
+"         10. config
+"         11. tag
+"         12. cwd
+"         13. unix
+"         14. keyboard
 "
 " Once finished, get back to studying the terminal and latex.
 

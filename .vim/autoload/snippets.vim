@@ -12,3 +12,12 @@ fu! snippets#get_lg_tag_number() abort "{{{1
        \ :     matchstr(lines[0], '^\s*\*lg-lib-\zs\d\+\ze\*\s*$')
 endfu
 
+fu! snippets#remove_tabs_in_global_blocks() abort "{{{1
+    let pos = getcurpos()
+    let start = '1/^\Cglobal !p$/'
+    let end = '/^\Cendglobal$/'
+    let substitution = 's/^\t\+/\=repeat(" ", len(submatch(0)) * &l:sw)/'
+    sil! exe 'keepj keepp '.start.';'.end.'g/^/'.substitution
+    call setpos('.', pos)
+endfu
+

@@ -225,8 +225,8 @@ endsnippet
 # with a `#` sign.
 # Why `post_expand`?{{{
 #
-# When the visual selection contains an empty line, and our snippet inserts
-# the `VISUAL` token, UltiSnips inserts 4 spaces on the line.
+# When the visual selection contains an  empty line, and our snippet inserts the
+# `${VISUAL}` placeholder, UltiSnips inserts 4 spaces on the line.
 # We need to trim it. The `m` option doesn't work.
 # So, we use a python function invoked via a `post_expand` statement.
 #}}}
@@ -428,7 +428,7 @@ endsnippet
 
 # qf_title {{{1
 
-snippet qf_title "set the title of the qf window"
+snippet qf_title "set the title of the qf window" bm
 call setqflist([], 'a', {'title': '${1:my title}'})
 $0
 endsnippet

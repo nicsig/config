@@ -1,3 +1,10 @@
+" Autocmds {{{1
+
+augroup format_snippets
+    au! * <buffer>
+    au BufWritePost <buffer> call snippets#remove_tabs_in_global_blocks()
+augroup END
+
 " Mappings {{{1
 
 nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
@@ -27,5 +34,7 @@ let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ ."
                     \   setl cocu< cole< et< fdm< fdt< isk< sw< ts<
                     \|  exe 'au!  my_snippets * <buffer>'
+                    \|  exe 'au!  format_snippets * <buffer>'
                     \|  exe 'nunmap <buffer> q'
                     \  "
+

@@ -1,3 +1,25 @@
+snippet pr "print debug" b
+`!p
+prefix = t[1] + ": %q\\n' "
+prefix = "{}:{}: {}".format(
+    #                                          ┌ FIXME: Does it mean that snip.buffer has a name attribute?
+    #                                          │
+    os.path.basename(vim.current.window.buffer.name),
+    str(vim.current.window.cursor[0]),
+    prefix
+)
+`printf 'XXXXXX `!p snip.rv = prefix`$1 >&2
+endsnippet
+
+post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
+snippet pd "Description" b
+pr$1 >${2:/tmp/debug}
+endsnippet
+
+
+
+
+
 # #! {{{1
 
 snippet #! "bash shebang" bm
@@ -68,7 +90,7 @@ endsnippet
 
 # for {{{1
 
-snippet for "for ... in ... done"
+snippet for "for ... in ... done" bm
 for ${1:i} in ${2:words}; do
 	${0:#statements}
 done

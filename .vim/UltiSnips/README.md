@@ -1,242 +1,149 @@
-Read these PRs:
+##
+##
+##
+# Snippets
+## What's an anonymous snippet?
 
-    pre/post-expand and post-jump actions
+A snippet  whose body  is defined inside  a function, and  doesn't have  any tab
+trigger.
 
-            https://github.com/SirVer/ultisnips/pull/507
+## How to expand an anonymous snippet?
 
-    Autotrigger
+Use the `snip.expand_anon()` method:
 
-            https://github.com/SirVer/ultisnips/pull/539
+        snip.expand_anon(my_snippet)
+                         │
+                         └ variable in which you've saved the body of our anonymous snippet
 
-And this issue:
+## How to create an alias `bar` for the snippet `foo`?
 
-    Markdown table snippet breaks on various dimensions
+        snippet foo "" bm
+        hello world
+        endsnippet
 
-            https://github.com/SirVer/ultisnips/issues/877
+        post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\", \"in\")')"
+        snippet bar "" bm
+        foo
+        endsnippet
 
+## How to create the aliases `foobar`, `foobaz`, and `fooqux` for the snippet `foo`?
 
+        snippet "foo(bar|baz|qux)" "" r
+        hello world
+        endsnippet
 
-Watch all gifs from `vim-pythonx` and `vim-snippets`.
-Re-read all your snippets (fix/improve).
-Re-read this file.
-Understand 3 advanced examples:
-
-        https://github.com/SirVer/ultisnips/tree/master/doc/examples/autojump-if-empty
-        https://github.com/SirVer/ultisnips/tree/master/doc/examples/snippets-aliasing
-        https://github.com/SirVer/ultisnips/tree/master/doc/examples/tabstop-generation
-
-Move our notes about ultisnips in cheat/ here.
-Read documentation.
-
-
-The following events:
-
-    UltiSnipsEnterFirstSnippet
-    UltiSnipsExitLastSnippet
-
-… are NOT fired when the snippet  is automatically expanded (like with `fu` in
-a vim file). At least, it seems so.
-Make some tests. Document the results.
-It may be a bug. Report it.
-
-
-
-Document this:
-
-Test if Vim is compiled with python version 2.x:
-
-    :echo has('python')
-
-The python version Vim is linked against can be found with:
-
-    :py import sys; print(sys.version)
-
-Test if Vim is compiled with python version 3.x:
-
-    :echo has('python3')
-
-The python version Vim is linked against can be found with:
-
-    :py3 import sys; print(sys.version)
-
-# Misc
-
-When  you  write some  python  code  (function/interpolation),  you can  add  an
-arbitrary key  to `snip`, but it  will be removed as  soon as the code  has been
-processed.
-
-OTOH, `snip` persists during the whole  expansion of a snippet.
-Some of its keys are also persistent: `context` is one of them.
-So, if you assign some data to the `context` key of `snip`, in some python code,
-it will be accessible to the next one.
-
-You can use this to pass arbitrary information from a statement to another.
-
-Finally, if you create a new variable:
-
-        • in a python function, it will be local to the function:
-
-            NOT accessible to the next processed function
-
-        • in a python interpolation, it will be local to the snippet:
-
-            ACCESSIBLE to the next interpolation
-
----
-
-The way to refer to the last visually selected text is inconsistent:
-
-    snip.visual_text       (context)
-    snip.visual_content    (pre_expand)
-    snip.v.text            (interpolation)
-    │    │ │
-    │    │ └ attribute
-    │    └ property
-    └ object
-
-Same thing for the last visual mode:
-
-    snip.visual_mode    (context)
-    snip.v.mode         (interpolation)
-
----
-
-Don't confuse the method `re.match()` with the object `match`.
-
-`re.match()` allows you to compare a string with a regex.
-`match` is automatically created by UltiSnips when you use the `r` option to
-create a snippet whose tab_trigger is a regex.
-
-It contains the match and all captured groups resulting from the comparison
-between the regex of the tab_trigger and the text which was in front of the
-cursor when Tab was pressed.
-
----
-
-To retrieve a capturing group, use the `group()` method:
-
-        match.group(123)
-        snip.context.group(123)
-
-                123th  captured group,  in the  regex matched  against the  text
-                before the cursor; the regex being used in:
-
-                • the tab_trigger       (with the `r` option)
-                • the expression field  (with the `e` option)
-
----
-
-What's the difference between:
-
-        $0
-          ${VISUAL}
-        $0${VISUAL}
-       ${0:${VISUAL}}
-
-`${VISUAL}` is only a PLACEHOLDER automatically  replaced by the contents of the
-last  visual selection. It  is NOT  a tabstop:  by default,  UltiSnips does  not
-select it, and therefore does not position the cursor somewhere near it.
-
-OTOH, `$0` IS a tabstop. And as all tabstops, it can have a placeholder.  We can
-use this  property to select  the contents of `${VISUAL}`  by writing it  as the
-placeholder of `$0`. Or any other tabstop.
-
----
-
-NEVER use a use Vim command to modify the buffer. UltiSnips would not be able
-to track changes in buffer from actions. It would raise an error.
-Instead, modify a line of the buffer via `snip.buffer`.
-
----
-
-You can't use a line continuation in a VimL interpolation.
-
----
-
-Inside a snippet, you can invoke a python function in 2 ways:
-
-    • as a simple routine:                          `!p           func()`
-    • for its output to be inserted in the buffer:  `!p snip.rv = func()`
-
----
-
-There's no need to invoke a Vim function with `vim.command()`.
-Use `vim.eval()` instead. It's less verbose:
-
-        vim.command('call Func()')
-        vim.eval('Func()')
-
-`vim.command()` should be reserved to Ex commands (!= `:call`):
-
-        vim.command('12,34delete')
-
----
-
-The python modules:
-
-    • os
-    • random
-    • re
-    • string
-    • vim
-
-… are pre-imported within the scope of the snippet code.  Other modules can be
-imported using the python 'import' command:
-
-    `!p
-    import uuid
-    …
-    `
-
-# Predefined Variables / Methods
-
-Besides  an in-snippet  interpolation, there  are 4  other statements  which can
-invoke python code:
+#
+# Statements
+## What are the four statements which can invoke python code (besides an in-snippet interpolation)?
 
         • context
         • pre_expand
         • post_expand
         • post_jump
 
+## When is the python code invoked by a `pre_expand` statement executed?
+
+Right after the trigger condition is matched, but before the snippet is actually
+expanded.
+
+## When is the python code invoked by a `post_expand` statement executed?
+
+Right after the snippet is expanded and the interpolations have been applied for
+the first time, but before you jump on the first placeholder.
+
+## When is the python code invoked by a `post_jump` statement executed?
+
+Right after you jump to the next/prev placeholder.
+
+## Can I modify the buffer from a `pre_expand` statement without the cursor position being wrong after the expansion?
+
+Yes, you can.
+
+From `pre_expand`:
+
+        Snippet expansion position will be automatically adjusted.
+
+#
+# Variables
+## How to read/modify the lines of the current buffer in a python function/expression?
+
+Use the `snip.buffer` variable.
+
+It's an alias for `vim.current.window.buffer`.
+
+## How to refer to the last visually-selected text (in context/pre_expand statement, interpolation, in-snippet)?
+
+        ┌───────────────┬─────────────────────┐
+        │ context       │ snip.visual_text    │
+        ├───────────────┼─────────────────────┤
+        │ pre_expand    │ snip.visual_content │
+        ├───────────────┼─────────────────────┤
+        │ interpolation │ snip.v.text         │
+        ├───────────────┼─────────────────────┤
+        │ in-snippet    │ ${VISUAL}           │
+        └───────────────┴─────────────────────┘
+
+## How to refer to the last visual mode?
+
+        ┌───────────────┬──────────────────┐
+        │ context       │ snip.visual_mode │
+        ├───────────────┼──────────────────┤
+        │ interpolation │ snip.v.mode      │
+        └───────────────┴──────────────────┘
+
+## What are the three variables which can be used in a `post_jump` statement?
+
+        ┌─────────────────────────────────┬─────────────────────────────────────────┐
+        │ snip.jump_direction             │ 1: forwards, -1: backwards              │
+        ├─────────────────────────────────┼─────────────────────────────────────────┤
+        │ snip.tabstop                    │ number of tabstop jumped unto           │
+        ├─────────────────────────────────┼─────────────────────────────────────────┤
+        │ snip.tabstops                   │ list of tabstops objects                │
+        └─────────────────────────────────┴─────────────────────────────────────────┘
+
+## What are the three properties of the `snip.tabstops` variable?
+
+        ┌─────────────────────────────────┬─────────────────────────────────────────┐
+        │ snip.tabstops[123].current_text │ text inside the 123th tabstop           │
+        ├─────────────────────────────────┼─────────────────────────────────────────┤
+        │ snip.tabstops[123].start        │ (line, column) of its starting position │
+        ├─────────────────────────────────┼─────────────────────────────────────────┤
+        │ snip.tabstops[123].end          │ (line, column) of its ending position   │
+        └─────────────────────────────────┴─────────────────────────────────────────┘
+
+## From which statement(s)/interpolation can I use `snip.snippet_start` and `snip.snippet_end`?
+
+Only from a `post_expand` and `post_jump` statement.
+
+You can use them from an interpolation, but they don't give the expected result:
+they seem to give the position of the tab_trigger.
+
+##
+# Methods
+## What does `snip.cursor.set(12,34)` do?
+
+It positions the cursor on the 12th line and the 34th column.
+
+## From which statement(s)/interpolation can I use `snip.cursor.set(12,34)`?
+
+Only from a `pre_expand` or `post_jump` statement.
+
+If the code needs to modify the line where the trigger was matched, then it will
+have to invoke `snip.cursor.set(x,y)` with the desired cursor position.
+
+And, in that case, UltiSnips will not remove the tab_trigger: the code should do
+it itself.
+
+##
+#
+#
+# Predefined Variables / Methods
 ## Universal
-
-    snip.buffer    (alias for `vim.current.window.buffer`)
-
-            Lines of current buffer.
-            Allows to modify the buffer.
-
-            When used from `pre_expand`:
-
-            Snippet expansion position will be automatically adjusted.
-            IOW, don't worry about your cursor being on the wrong line because
-            you added some text before the snippet.
-
 
     snip.window    (interpolation ✘)    (alias for `vim.current.window`)
 
           FIXME:
           What's its purpose?
-
-
-    snip.snippet_start
-    snip.snippet_end
-
-            ┌───────────────┬───┐
-            │ context       │ ✘ │
-            ├───────────────┼───┤
-            │ pre_expand    │ ✘ │
-            ├───────────────┼───┤
-            │ interpolation │ ✘ │
-            ├───────────────┼───┤
-            │ post_expand   │ ✔ │
-            ├───────────────┼───┤
-            │ post_jump     │ ✔ │
-            └───────────────┴───┘
-
-            Warning:
-
-            You can  use them  from an  interpolation, but  they don't  give the
-            expected result: they seem to give the position of the tab_trigger.
 
 
     snip.line      (interpolation ✘)
@@ -259,9 +166,10 @@ invoke python code:
                                           indexed from 1;
                                           suitable to be assigned to `vim.current.window.cursor`
 
-                    It seems to be useful, for example, when you capture the position of the cursor
-                    in a function with `snip.cursor`, then you want to restore it in another function
-                    via `vim.current.window.cursor`:
+                    It seems  to be  useful, for example,  when you  capture the
+                    position  of the  cursor in  a function  with `snip.cursor`,
+                    then  you  want  to  restore  it  in  another  function  via
+                    `vim.current.window.cursor`:
 
                     https://github.com/reconquest/snippets/blob/b5d86da79604e7d341d26de1f3366b3f1373f7c5/python.snippets#L49
 
@@ -285,7 +193,8 @@ invoke python code:
     snip.context
 
             Result of context condition.
-            You can (ab)use this property to pass an arbitrary information from
+
+            You can (ab)use this variable  to pass an arbitrary information from
             a statement to another:
 
                     https://github.com/reconquest/snippets/blob/b5d86da79604e7d341d26de1f3366b3f1373f7c5/python.snippets#L33-L38
@@ -295,30 +204,27 @@ invoke python code:
             To do so, they move it inside a dictionary:
 
                     • one of its value is the original `snip.context`
-                    • one is `snip.cursor`
-                    • one is `snip.visual_content`
-                    • one is an arbitrary info stored
+                    • another          is `snip.cursor`
+                    • another          is `snip.visual_content`
+                    • another          is an arbitrary info
 
             They then use `post_jump` to analyze this enriched `snip.context`.
 
-
-    snip.expand_anon(my_snippet)    (not in an interpolation)
-
-            Allows to expand the anonymous snippet whose body is stored in `my_snippet`.
-
 ## context
 
-By default, a snippet is used to expand the text before the cursor only if it's
+By default, a snippet is used to expand  the text before the cursor only if it's
 matched by the tab_trigger (keyword, regex).
-And a tab_trigger can be expanded with only 1 snippet.
+And a tab_trigger can be expanded with only one snippet.
 
 You  can  give more  “intelligence”  to  a  snippet  and work  around  those
 limitations, by passing it the `e` option.
 
 It will allow you to:
 
-    • make the snippet take into consideration more than just the text before the cursor
-    • expand a tab_trigger with more than 1 snippet
+        • make the snippet take into consideration more than just the text
+          before the cursor
+
+        • expand a tab_trigger with more than 1 snippet
 
 To do so, the snippet should be defined using one of those syntaxes:
 
@@ -419,7 +325,7 @@ Python code invoked from a `context` statement can use the variables:
                                      NOTE:
 
             By  moving the  python expression  into  a named  function inside  a
-            module, and  by importing  the latter  from a  global block,  we can
+            module, and  by importing the  latter from  a global block,  you can
             re-use the expression in other snippets in the same file.
 
 
@@ -572,48 +478,6 @@ Python code invoked from a `context` statement can use the variables:
             These rules allow you to expand a tab_trigger in as many ways as you
             want, depending on the contents of the buffer.
 
-## pre_expand
-
-Python code invoked from a `pre_expand` statement is invoked right after trigger
-condition was  matched, but before snippet  actually expanded.  It can  use this
-variable:
-
-        • snip.visual_content
-
-          Text that was selected before snippet expansion (similar to $VISUAL placeholder).
-          It's the only statement from which we can refer to this variable.
-
-If the code needs to modify the line where the trigger was matched, then it will
-have to invoke `snip.cursor.set(x,y)` with the desired cursor position.
-And, in that case, UltiSnips will not remove the tab_trigger: the code should do
-it itself.
-
-## post_expand
-
-Python  code invoked  from  a  `post_expand` statement  is  invoked right  after
-snippet was  expanded and  interpolations was  applied for  the first  time, but
-before jump on the first placeholder.
-
-No special variable/method.
-
-## post_jump
-
-Python code invoked from a `post_jump`  statement is invoked right after jump to
-the next/prev placeholder. It can use these variables:
-
-        ┌─────────────────────────────────┬─────────────────────────────────────────┐
-        │ snip.jump_direction             │ 1: forwards, -1: backwards              │
-        ├─────────────────────────────────┼─────────────────────────────────────────┤
-        │ snip.tabstop                    │ number of tabstop jumped unto           │
-        ├─────────────────────────────────┼─────────────────────────────────────────┤
-        │ snip.tabstops                   │ list of tabstops objects                │
-        ├─────────────────────────────────┼─────────────────────────────────────────┤
-        │ snip.tabstops[123].current_text │ text inside the 123th tabstop           │
-        ├─────────────────────────────────┼─────────────────────────────────────────┤
-        │ snip.tabstops[123].start        │ (line, column) of its starting position │
-        │ snip.tabstops[123].end          │ (line, column) of its ending position   │
-        └─────────────────────────────────┴─────────────────────────────────────────┘
-
 ## interpolation
 
 An interpolation may be applied several times, because of dependencies between
@@ -622,17 +486,19 @@ The 1st time, it's applied after `pre_expand` but before `post_expand`.
 
 In a python interpolation, you can use the variables:
 
-   ┌───────────────┬────────────────────────────────────────────────────────────────┐
-   │ snip.basename │ current filename, with extension removed                       │
-   ├───────────────┼────────────────────────────────────────────────────────────────┤
-   │ snip.fn       │ current filename                                               │
-   ├───────────────┼────────────────────────────────────────────────────────────────┤
-   │ snip.ft       │ current filetype                                               │
-   ├───────────────┼────────────────────────────────────────────────────────────────┤
-   │ path          │ complete path to the current file                              │
-   ├───────────────┼────────────────────────────────────────────────────────────────┤
-   │ t             │ The values of the placeholders, t[1] is the text of ${1}, etc. │
-   └───────────────┴────────────────────────────────────────────────────────────────┘
+        ┌───────────────┬──────────────────────────────────────────┐
+        │ snip.basename │ current filename, with extension removed │
+        ├───────────────┼──────────────────────────────────────────┤
+        │ snip.fn       │ current filename                         │
+        ├───────────────┼──────────────────────────────────────────┤
+        │ snip.ft       │ current filetype                         │
+        ├───────────────┼──────────────────────────────────────────┤
+        │ path          │ complete path to the current file        │
+        ├───────────────┼──────────────────────────────────────────┤
+        │ t             │ The values of the placeholders:          │
+        │               │                                          │
+        │               │         t[1] is the text of ${1}, etc.   │
+        └───────────────┴──────────────────────────────────────────┘
 
 The 'snip' object provides a few methods:
 
@@ -780,4 +646,971 @@ The 'snip' object provides some properties as well:
 
                     • snip.v.mode   v  V  ^V
                     • snip.v.text   text that was selected
+
+#
+# Misc
+
+When  you  write some  python  code  (function/interpolation),  you can  add  an
+arbitrary key  to `snip`, but it  will be removed as  soon as the code  has been
+processed.
+
+OTOH, `snip` persists during the whole  expansion of a snippet.
+Some of its keys are also persistent: `context` is one of them.
+So, if you assign some data to the `context` key of `snip`, in some python code,
+it will be accessible to the next one.
+
+You can use this to pass arbitrary information from a statement to another.
+
+Finally, if you create a new variable:
+
+        • in a python function, it will be local to the function:
+
+            NOT accessible to the next processed function
+
+        • in a python interpolation, it will be local to the snippet:
+
+            ACCESSIBLE to the next interpolation
+
+---
+
+Don't confuse the method `re.match()` with the object `match`.
+
+`re.match()` allows you to compare a string with a regex.
+`match` is automatically created by UltiSnips when you use the `r` option to
+create a snippet whose tab_trigger is a regex.
+
+It contains the match and all captured groups resulting from the comparison
+between the regex of the tab_trigger and the text which was in front of the
+cursor when Tab was pressed.
+
+---
+
+To retrieve a capturing group, use the `group()` method:
+
+        match.group(123)
+        snip.context.group(123)
+
+                123th  captured group,  in the  regex matched  against the  text
+                before the cursor; the regex being used in:
+
+                • the tab_trigger       (with the `r` option)
+                • the expression field  (with the `e` option)
+
+---
+
+What's the difference between:
+
+        $0
+          ${VISUAL}
+        $0${VISUAL}
+       ${0:${VISUAL}}
+
+`${VISUAL}` is only a PLACEHOLDER automatically  replaced by the contents of the
+last  visual selection. It  is NOT  a tabstop:  by default,  UltiSnips does  not
+select it, and therefore does not position the cursor somewhere near it.
+
+OTOH, `$0` IS a tabstop.
+And as all tabstops, it can have a placeholder.
+You can leverage this to select the contents of `${VISUAL}` by writing it as the
+placeholder of `$0`.
+Or any other tabstop.
+
+---
+
+NEVER use a use Vim command to modify the buffer. UltiSnips would not be able
+to track changes in buffer from actions. It would raise an error.
+Instead, modify a line of the buffer via `snip.buffer`.
+
+---
+
+You can't use a line continuation in a VimL interpolation.
+
+---
+
+Inside a snippet, you can invoke a python function in 2 ways:
+
+    • as a simple routine:                          `!p           func()`
+    • for its output to be inserted in the buffer:  `!p snip.rv = func()`
+
+---
+
+There's no need to invoke a Vim function with `vim.command()`.
+Use `vim.eval()` instead. It's less verbose:
+
+        vim.command('call Func()')
+        vim.eval('Func()')
+
+`vim.command()` should be reserved to Ex commands (!= `:call`):
+
+        vim.command('12,34delete')
+
+---
+
+The python modules:
+
+    • os
+    • random
+    • re
+    • string
+    • vim
+
+… are pre-imported within the scope of the snippet code.  Other modules can be
+imported using the python 'import' command:
+
+    `!p
+    import uuid
+    …
+    `
+
+#
+# Issues
+## Why do my python functions sometimes fail when I define them in a global block?
+
+In a snippet file, our custom `snippets` filetype plugin resets `'expandtab'`:
+
+        ~/.vim/after/ftplugin/snippets.vim
+
+We do this because:
+
+        1. Tabs  have a  special  meaning  for UltiSnips  (“increase  the level
+           of indentation of the line“)
+
+        2. we sometimes  forget to  insert a  Tab inside  a snippet  when it's
+           needed
+
+So whenever you press `Tab` to increase  the indentation of a line, you insert a
+literal `Tab` character.
+This is what  we want in a  snippet (snippet...endsnippet), but not  in a python
+function (global...endglobal), because python expects 4 spaces.
+
+So your issue is probably due to the indentation of the lines inside your functions.
+
+To fix this, execute `:RemoveTabs` on the global block, or export your functions
+in a custom python module. For example:
+
+        ~/.vim/pythonx/snippet_helpers.py
+
+#
+#
+#
+## Interpolation
+
+    `date`
+    `!v strftime('%c')`
+    `!p python code`
+
+            Interpolation d'une commande shell ou d'une expression Vim.
+
+            Les backticks encadrent la commande / expression interpolée.
+            `!v` indique que ce qui suit est une expression Vim.
+            `!p` "                           du code python.
+
+
+    snippet wpm "average speed" b
+    I typed ${1:750} words in ${2:30} minutes; my speed is `!p
+    snip.rv = float(t[1]) / float(t[2])
+    ` words per minute
+    endsnippet
+
+            Si on écrit un bloc de code python, après le `!p`, on peut chaque écrire chaque instruction
+            sur une ligne dédiée, pour + de lisibilité.
+
+            De plus, UltiSnips configure automatiquement certains objets et variables python, valables
+            au sein du bloc de code:
+
+                    • snip.rv    = variable 'return value'; sa valeur sera interpolée au sein du document
+
+                    • t          = liste dont les éléments contiennent le texte inséré dans les
+                                   différents tabstops; ex:    t[1] = $1, t[2] = $2
+
+            Ici, `float()` est une fonction python, et non Vim.
+
+
+                                               NOTE:
+
+            Quelle différence entre `!p` et `#!/usr/bin/python`?
+            Qd une interpolation débute par un shebang, la sortie du script est insérée dans le buffer.
+            Mais `!p` est différent. Avec `!p`, UltiSnips ignore la sortie de l'expression python qu'on
+            écrit. Il ne fait que l'évaluer. Pour insérer sa sortie dans le buffer, il faut l'affecter
+            à `snip.rv`.
+
+
+                                               NOTE:
+
+            Si on modifie la valeur d'un tabstop en mode normal via la commande `r`, l'interpolation
+            est mise à jour. Ça peut donner l'impression de travailler avec un tableur (pgm manipulant
+            des feuilles de calcul).
+
+## Substitution
+
+On peut réinsérer automatiquement un tabstop où l'on veut, on parle de “mirroring“.
+On peut également effectuer une substitution au sein du tabstop miroir.
+
+
+    snippet fmatter
+    ---
+    title: ${1:my placeholder}
+    ---
+    # $1
+    $0
+    endsnippet
+
+            Le 1er tabstop ($1) est répété 2 fois.
+            Cela implique que lorsqu'on lui donne une valeur, le même texte est inséré automatiquement
+            une 2e fois, là où se trouve sa 2e occurrence (ici:    `# $1`).
+
+            On dit que le tabstop est “mirrored“ (reflété).
+
+
+    snippet t "A simple HTML tag" bm
+    <${1:div}>
+    </${1/(\w+).*/$1/}>
+    endsnippet
+
+            On applique une transformation sur le miroir.
+            Il s'agit de la substitution:    :s/(\w+).*/$1/
+
+            Le  $1 au  sein de  la substitution  ne correspond  pas au  1er tabstop,  mais à  la 1e
+            sous-expression capturée  dans le pattern  (\w+). L'expression régulière  est gérée
+            par python et non par Vim.
+
+
+                                               NOTE:
+
+            La chaîne  de remplacement peut  contenir des variables  `$i`, qui font  référence au
+            sous-expressions  capturées dans  le pattern.  Ici, `$1`  fait référence  au 1er  mot
+            capturé dans le 1er tabstop.
+
+            `$0` est spéciale: elle fait référence à l'ensemble du match (équivaut à `&` ou `\0` dans Vim).
+
+
+    snippet cond
+    ${1:some_text}
+    ${1/(a)|.*/(?1:foo:bar)/}
+    endsnippet
+
+            Le miroir subit une substitution conditionnelle, qui:
+
+                    1. cherche et capture le pattern `a`:
+
+                    2. pour le remplacer par:    (?1:foo:bar)
+
+            Ça signifie que si le texte inséré dans  le tabstop d'origine commence par un `a`, il
+            sera  remplacé  par `foo`  dans  le  miroir,  autrement  il sera  totalement  (`|.*`)
+            remplacé par `bar`.
+
+
+            Section de l'aide pertinente:  :h Ultisnips-replacement-string
+
+
+                                               NOTE:
+
+            Le token `?1` permet de tester si le groupe 1 a capturé qch ou pas.
+            Le token `()` permet de demander à Ultisnips de traiter le remplacement comme
+            une expression à évaluer. Similaire à `\=` pour la commande `:s` dans Vim.
+
+
+    ${1/(a)|(b)|.*/(?1:foo)(?2:bar)/}
+
+            Ici, la substitution:
+
+                    1. cherche le pattern:       (a)|(b)|.*
+                       en capturant `a` ou `b` si le caractère est trouvé
+
+                    2. pour le remplacer par:    (?1:foo)(?2:bar)
+
+            Ce qui signifie que si le texte inséré dans le tabstop d'origine commence par un:
+
+                    • `a`, le miroir commencera par `foo`
+                    • `b`, "                        `bar`
+                    • ni `a`, ni `b`, le miroir sera vide
+
+
+                                               NOTE:
+
+            On remarque au passage qu'il semble que python ajoute automatiquement l'ancre `^` au début
+            du pattern.
+
+                                               NOTE:
+
+            On pourrait omettre  la dernière branche `|.*`; le code  fonctionnerait pratiquement à
+            l'identique. À ceci près que le texte inséré dans le tabstop d'origine ne serait pas
+            supprimé dans le miroir lorsqu'il ne commence pas par `a` ou `b`.
+
+
+    ${1/(a)|(b)|.*/(?1:foo:bar)(?2:baz:qux)/}
+
+            Si le texte inséré dans le tabstop d'origine commence par un:
+
+                    • `a`, le miroir commencera par `fooqux`
+                    • `b`, "                        `barbaz`
+                    • ni `a`, ni `b`, le miroir commencera par `barqux`
+
+            Illustre  qu'un miroir  peut  être aussi  intelligent qu'on  veut;  i.e. être  capable
+            d'effectuer autant de substitutions que nécessaire, et choisir la bonne en fonction
+            d'une caractéristique du tabstop d'origine.
+
+## Configuration
+
+    :echo has('python')
+    :echo has('python3')
+
+            Tester si Vim a été compilé avec python 2.x ou 3.x
+
+
+    :py  import sys; print(sys.version)
+    :py3 import sys; print(sys.version)
+
+            Déterminer la version de l'interpréteur python 2.x / 3.x contre laquelle Vim a été compilé.
+
+
+   let g:UltiSnipsUsePythonVersion = 2
+   let g:UltiSnipsUsePythonVersion = 3
+
+            Demander à Vim d'utiliser python 2.x ou 3.x
+
+            Cette configuration est généralement inutile, car UltiSnips devrait détecter automatiquement
+            quelle version de l'interpréteur python a été compilé dans Vim.
+            Toutefois, ça peut être nécessaire si cette détection échoue.
+
+
+UltiSnips permet de développer un tab trigger en snippet.
+
+
+Qd UltiSnips doit développer un tab trigger et qu'il cherche le fichier dans lequel il est défini,
+il regarde dans un certain nb de dossiers.
+
+Ces derniers sont définis par les variables `g:UltiSnipsSnippetDir` et `g:UltiSnipsSnippetDirectories`.
+Quelle différence entre les 2 ?
+
+La 1e variable:
+
+        • N'est pas définie par défaut
+
+        • Attend comme valeur une chaîne contenant un chemin absolu vers un dossier.
+          Le dernier composant du chemin ne doit pas être 'snippets'.
+          En effet, qd UltiSnips entre dans un dossier portant le nom 'snippets', il considère
+          que les fichiers qui s'y trouvent utilisent le format SnipMate (différent du format UltiSnips).
+
+        • Est utile pour configurer le chemin vers notre dossier de snippets privé.
+          Ex:
+
+                let g:UltiSnipsSnippetDir = '~/.vim/UltiSnips/'
+
+        • Est le 1er dossier dans lequel UltiSnips cherche le fichier de snippets à éditer
+          qd on tape :USE
+
+
+La 2e variable:
+
+        • Vaut ['UltiSnips'] par défaut.
+
+        • Attend comme valeur une liste de chemins relatifs ou absolus.
+          Si le chemin est relatif, UltiSnips cherchera à compléter le chemin via tous les dossiers
+          du &rtp.
+
+        • Est utile pour pouvoir utiliser immédiatement des snippets tiers, tq:
+
+                https://github.com/honza/vim-snippets
+
+        • Si on lui affecte un seul élément correspondant à un chemin absolu, alors UltiSnips ne
+          cherchera pas de snippets dans `&rtp` ce qui peut améliorer les performances.
+
+
+À l'intérieur de ces dossiers, le nom d'un fichier de snippets doit suivre un certain schéma parmi
+plusieurs possibles. Tous dépendent du type de fichiers courant.
+Pex, si le buffer courant est de type vim, UltiSnips cherchera dans un fichier nommé:
+
+        • vim.snippets
+
+        • vim_foo.snippets
+        • vim/foo
+        • vim/foo.snippets
+
+        • all.snippets
+        • all/foo.snippets
+
+UltiSnips considère `all` comme une sorte de type de fichiers universel.
+`all.snippets` est utile pour définir des snippets indépendant du type de fichiers,
+comme pex l'insertion d'une date.
+
+
+    :UltiSnipsEdit
+    :USE (custom)
+
+            Édite le fichier de snippets correspondant au type de fichier du buffer courant.
+
+            Dans un 1er temps, UltiSnips cherche dans le dossier `g:UltiSnipsSnippetDir`, puis
+            s'il ne trouve rien, il cherche dans les dossiers `g:UltiSnipsSnippetDirectories`.
+
+
+   :UltiSnipsAddFiletypes rails.ruby
+                          │     │
+                          │     └── … doit provoquer l'activation des snippets ruby
+                          └── l'activation des snippets rails …
+
+            Demande à ce que les snippets ruby soient chargés qd on édite un buffer rails.
+
+            À taper dans un buffer rails, ou à écrire dans un filetype plugin rails.
+            On pourrait également taper/écrire:
+
+                    :UltiSnipsAddFiletypes ruby.programming
+
+            L'ordre de priorité des snippets (en cas de conflit) serait alors:
+
+                    rails > ruby > programming > all
+
+
+    ┌────────────────────────────────┬───────────────────┬─────────────────┬─────────────────────────────────┐
+    │ variable                       │ valeur par défaut │ valeur actuelle │ effet                           │
+    ├────────────────────────────────┼───────────────────┼─────────────────┼─────────────────────────────────┤
+    │ g:UltiSnipsExpandTrigger       │ Tab               │                 │ développer un tab trigger       │
+    │                                │                   │                 │                                 │
+    │ g:UltiSnipsListSnippets        │ C-Tab             │ C-Tab           │ lister les snippets disponibles │
+    │                                │                   │                 │                                 │
+    │ g:UltiSnipsJumpForwardTrigger  │ C-j               │ S-F18           │ sauter vers le prochain tabstop │
+    │                                │                   │                 │                                 │
+    │ g:UltiSnipsJumpBackwardTrigger │ C-k               │ S-F19           │ "              précédent "      │
+    └────────────────────────────────┴───────────────────┴─────────────────┴─────────────────────────────────┘
+
+
+                                               NOTE:
+
+            Il faut configurer ces variables avant l'appel de fin à une fonction du plugin manager.
+            Pour vim-plug, il s'agit de la ligne:
+
+                    call plug#end()
+
+
+                                               NOTE:
+
+            Les mappings de saut (C-j et C-k par défaut) ne sont installés que pendant le développement
+            d'un snippet, et détruits immédiatement après pour ne pas interférer avec des mappings utilisateurs.
+
+
+    UltiSnips#JumpForwards()
+    UltiSnips#JumpBackwards()
+
+    UltiSnips#ExpandSnippet()
+    UltiSnips#ExpandSnippetOrJump()
+
+            Il s'agit  de 4 fonctions  publics dont on  peut se servir  pour des
+            configurations avancées.
+
+            Les  2 premières  fonctions  servent  à sauter  vers  le prochain  /
+            précédent tabstop.
+            Les 2 dernières demandent le développement d'un tab trigger.
+
+
+                                               NOTE:
+
+            Quelle différence entre les 2 fonctions de développement ?
+
+            ┌───────────────────────┬──────────────────────────────────────────────────────────┐
+            │ ExpandSnippetOrJump() │ à utiliser si on a choisi la même touche pour développer │
+            │                       │ et sauver vers l'avant:                                  │
+            │                       │                                                          │
+            │                       │ g:UltiSnipsExpandTrigger = g:UltiSnipsJumpForwardTrigger │
+            ├───────────────────────┼──────────────────────────────────────────────────────────┤
+            │ ExpandSnippet()       │ à utiliser si on a choisi des touches différentes        │
+            └───────────────────────┴──────────────────────────────────────────────────────────┘
+
+
+                                               NOTE:
+
+            Si on a choisi la même touche pour développer et sauter vers l'avant, pex Tab,
+            UltiSnips installe 2 mappings globaux:
+
+                    i  <Tab>       * <C-R>=UltiSnips#ExpandSnippetOrJump()<cr>
+                    s  <Tab>       * <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>
+
+            … et 2 mappings locaux au buffer:
+
+                    i  <S-Tab>     *@<C-R>=UltiSnips#JumpBackwards()<cr>
+                    s  <S-Tab>     *@<Esc>:call UltiSnips#JumpBackwards()<cr>
+
+            Les locaux sont installés dès qu'un tab trigger est développé, et supprimés dès que
+            le développement est terminé (:h UltiSnips-triggers):
+
+                    UltiSnips will only map the jump triggers while a snippet is
+                    active to interfere as little as possible with other mappings.
+
+
+                                               NOTE:
+
+            Ces 4 fonctions produisent un code de retour chacun stocké dans une variable globale,
+            dont la valeur code un succès ou un échec:
+
+                    g:ulti_expand_res            0: fail, 1: success
+                    g:ulti_expand_or_jump_res    0: fail, 1: expand, 2: jump
+                    g:ulti_jump_forwards_res     0: fail, 1: success
+                    g:ulti_jump_backwards_res    0: fail, 1: success
+
+## Syntaxe basique
+
+Dans un fichier où des snippets sont définis, on peut faire commencer une ligne par un mot-clé pour
+exécuter une directive. Parmi ces mots-clés, on trouve:
+
+            • extends
+            • priority
+            • clearsnippets
+            • snippet
+            • endsnippet
+
+            • context
+            • pre_expand
+            • post_expand
+            • post_jump
+
+
+    extends perl, ruby
+
+            UltiSnips active tous les snippets liés aux types de fichiers dont le nom suit.
+            Pex ici:    perl, ruby
+
+            On peut utiliser autant de directives `extends` qu'on veut, et les placer où on veut.
+
+
+    priority 42
+
+            Les snippets définis après cette ligne ont une priorité de 42.
+            Sans cette directive, par défaut, les snippets ont une priorité de 0.
+
+            En cas de conflit, càd si un tab trigger est utilisé dans 2 snippets différents,
+            celui ayant la plus haute priorité gagne.
+
+
+    snippet tab_trigger "description" options
+
+            Syntaxe de base pour déclarer un snippet.
+            La description et les options sont optionnelles.
+
+
+                                               NOTE:
+
+            Si le tab trigger contient un espace, il faut l'encadrer avec un caractère qui n'apparaît
+            pas en son sein, comme des guillemets. Ex:
+
+                    snippet "tab trigger"
+
+            Si on veut en plus qu'il contienne des guillemets, on peut utiliser le point d'exclamation:
+
+                    snippet !"tab trigger"!
+
+            Qd plusieurs snippets ont le même tab trigger et la même priorité, UltiSnips affiche
+            la liste des snippets possibles, chacun avec leur description.
+            C'est à ce moment-là que la description est utile. Elle permet à l'utilisateur de choisir
+            le bon.
+
+            Exception:
+            En cas de conflit entre 2 snippets, l'un d'eux utilisant l'option `e` mais pas l'autre,
+            celui qui utilise `e` a automatiquement la priorité.
+            Ça permet de définir un snippet “fallback” qd la condition testée par l'expression
+            du snippet utilisant `e` échoue.
+
+
+                                               NOTE:
+
+            Pour augmenter le niveau d'indentation d'une ligne au sein du snippet, il faut la préfixer
+            avec un caractère littéral. Qd le snippet sera développé, le caractère tab sera inséra
+            littéralement ou remplacé par des espaces suivant la valeur de 'expandtab'.
+
+            Dans un snippet, on peut voir le caractère tab comme l'appui sur la touche tab.
+
+
+                                               NOTE:
+
+            ┌────────┬──────────────────────────────────────────────────────────────────────┐
+            │ option │ signification                                                        │
+            ├────────┼──────────────────────────────────────────────────────────────────────┤
+            │ b      │ beginning of line                                                    │
+            │        │                                                                      │
+            │        │ ne développer le tab trigger que s'il se trouve au début d'une ligne │
+            ├────────┼──────────────────────────────────────────────────────────────────────┤
+            │ e      │ expression                                                           │
+            │        │                                                                      │
+            │        │ le snippet n'est développé que si l'expression est vraie             │
+            ├────────┼──────────────────────────────────────────────────────────────────────┤
+            │ i      │ in-word                                                              │
+            │        │                                                                      │
+            │        │ autoriser le développement du snippet, même si le tab trigger        │
+            │        │ est au milieu d'un mot                                               │
+            │        │                                                                      │
+            │        │ par défaut, un snippet n'est développé que si le tab trigger         │
+            │        │ est en début de ligne ou précédé de whitespace                       │
+            ├────────┼──────────────────────────────────────────────────────────────────────┤
+            │ m      │ trim                                                                 │
+            │        │                                                                      │
+            │        │ les trailing whitespace de toutes les lignes du snippet              │
+            ├────────┼──────────────────────────────────────────────────────────────────────┤
+            │ r      │ regex                                                                │
+            │        │                                                                      │
+            │        │ interpréter le tab trigger comme une regex python                    │
+            └────────┴──────────────────────────────────────────────────────────────────────┘
+
+            Pour des infos concernant les options dispo:
+
+                    :h UltiSnips-snippet-options
+
+
+    snippet tab_trigger
+    \`texte entouré de backticks\`
+    endsnippet
+
+            Le caractère backtick ayant un sens spécial  pour UltiSnips, si on veut en insérer un
+            littéralement dans un snippet, il faut l'échapper.
+
+
+    snippet fmatter
+    ---
+    title: $1
+    date: $2
+    tags: $3
+    ---
+    $0
+    endsnippet
+
+            $1, $2, $3 et $0 correspondent à des tabstops.
+
+            On peut naviguer entre les tabstops via les raccourcis définis par:
+
+                    g:UltiSnipsJumpForwardTrigger
+            et
+                    g:UltiSnipsJumpBackwardTrigger
+
+            Le tabstop $0 est spécial, car qd on arrive sur lui, UltiSnips considère que le développement
+            du tab trigger et l'édition du snippet sont terminés.
+            Déplacer le curseur en-dehors du snippet termine également son développement.
+
+            Dès lors, on ne peut plus naviguer entre les autres tabstops.
+
+            Tant qu'on reste au-sein du snippet, les raccourcis fonctionnent en mode insertion et sélection.
+
+
+    title: ${1:my placeholder}
+
+            On définit un placeholder pour le tabstop:
+
+                    $1    →    ${1:my placeholder}
+
+            Ici il s'agit d'une simple chaîne de caractères, mais on pourrait aussi utiliser:
+
+                    • une interpolation d'une commande shell/VimL/python… entre des backticks. Ex:
+
+                            ${1:`date`}
+
+                    • autre tabstop
+
+            Qd notre curseur est positionné sur un tabstop doté d'un placeholder, ce dernier
+            est sélectionné visuellement, et on se trouve en mode 'select'.
+            Ainsi, n'importe quel caractère tapé remplace automatiquement le placeholder,
+            et on peut continuer à insérer des caractères ensuite, car on est alors en mode 'insertion'.
+
+
+    snippet a
+    <a href="$1"${2: class="${3:link}"}>
+        $0
+    </a>
+    endsnippet
+
+            Le 2e placeholder:
+
+                    class="…"
+
+            … contient lui-même un tabstop:
+
+                    ${3:link}
+
+            Imbriquer 2 tabstops permet d'exprimer une relation de dépendance entre eux:
+            l'un est une partie de l'autre.
+
+            Ici, si  on supprime l'attribut,  la valeur est  automatiquement supprimée. Ce  qui est
+            souhaitable, car  on ne pourrait  pas avoir un attribut  (`class`) HTML sans  valeur, ni
+            l'inverse, une valeur sans attribut.
+
+
+                                               NOTE:
+
+            Le placeholder `link` du 3e tabstop est important.
+            Sans lui, si on supprime le 2e tabstop, le 3e n'est pas automatiquement supprimé.
+            Plus généralement, un tabstop est automatiquement supprimé ssi:
+
+                • il est inclus dans le placeholder d'un autre tabstop
+                • il est suivi d'un texte qcq à l'intérieur du placeholder
+
+                    snippet a
+                    foo ${1:bar $2}($3)
+                    endsnippet
+
+                        a Tab
+                            →  foo bar()
+                                   └─┤
+                                     └ sélectionné
+
+                        C-h
+                            → foo |()
+                                  ^
+                                  curseur
+
+                        Tab
+                            → foo |()
+                                  ✘ le 2e tabstop n'a pas été automatiquement supprimé
+                                    raison pour laquelle le curseur reste sur place
+
+                    snippet a
+                    foo ${1:bar $2 baz}($3)
+                    endsnippet
+
+                        a Tab
+                            →  foo bar()
+                            →  foo bar  baz()
+                                   └──────┤
+                                          └ sélectionné
+
+                        C-h
+                            → foo |()
+                                  ^
+                                  curseur
+
+                        Tab
+                            → foo (|)
+                                   ✔
+
+
+    snippet date
+    ${2:${1:`date +%d`}.`date +%m`}.`date +%Y`
+    endsnippet
+
+            Autre exemple, où un placeholder contient lui-même un tabstop.
+
+            Décomposition de l'imbrication:
+
+                    ${2:${1:`date +%d`}.`date +%m`}
+                        │   │          │
+                        │   │          └── ce n'est pas un opérateur de concaténation (juste un point)
+                        │   └── début du placeholder du 1er tabstop:    `date +%d`
+                        └── début du placeholder du 2e tabstop:         ${1:…}.`date +%m`
+
+            Cette déclaration exprime que le jour dépend du mois.
+            Ainsi, si on supprime le mois, le jour sera lui-aussi automatiquement supprimé.
+
+            On aurait pu aussi écrire:
+
+                    ${1:`date +%d`}.${2:`date +%m`}
+
+            … mais dans ce cas, il n'y a plus de relations de dépendance.
+
+
+    snippet "chap?t?e?r?" "Latex chapter" r
+    chapter
+    \section{chapter}
+       $0
+    \end{chapter}
+    endsnippet
+
+            Dans cet exemple, le tab trigger prend la forme d'une expression régulière python:
+
+                    "chap?t?e?r?"
+
+            Une  expression régulière  doit être  encadrée avec  des quotes,  ou n'importe  quel
+            caractère absent de l'expression.
+
+            Ici, elle équivaut à `\vcha%[pter]>`.
+            On peut donc développer plusieurs tab triggers ayant un même préfixe en un même snippet.
+
+            Si le snippet contient du code python, celui-ci peut accéder au texte matché par la regex
+            via la variable locale `python`.
+
+
+    snippet if "test" bm
+    if ${1:condition}
+        ${0:${VISUAL:MyCmd}}
+    endif
+    endsnippet
+
+            Ce snippet permet d'entourer une commande Ex, avec un bloc `if`.
+
+            Pour ce faire, il faut:
+
+                    1. sélectionner la commande Ex
+
+                    2. appuyer sur Tab pour qu'UltiSnips capture la sélection
+                       et nous fasse passer en mode insertion
+
+                    3. insérer `if` et ré-appuyer sur Tab pour développer ce snippet
+
+            Le snippet utilise le placeholder spécial `${VISUAL}`.
+            Ce dernier est donné en valeur par défaut au tabstop final 0.
+
+            Il reçoit lui-même en valeur par défaut `MyCmd`.
+            Ainsi qd on appuiera sur Tab, `${VISUAL}` sera développé en:
+
+                    • `MyCmd` depuis le mode insertion
+                    • la dernière sélection visuelle depuis le mode visuel
+
+
+                                               NOTE:
+
+            Sans valeur par  défaut, le placeholder fonctionne  toujours même qd
+            on appuie sur  Tab en mode insertion: il est  alors développé en une
+            chaîne vide.
+
+            Les accolades au sein du placeholder sont obligatoires.
+            En  leur absence,  UltiSnips  interpréterait  `${VISUAL}` comme  une
+            simple chaîne littérale.
+
+
+                                               NOTE:
+
+            Si  on  veut  apporter  une modification  à  la  dernière  sélection
+            visuelle, il faut  passer par une interpolation  python, et utiliser
+            `snip.v.text` au lieu de `${VISUAL}`.
+
+            Par exemple, pour  supprimer le 1er caractère  `x` qu'elle contient,
+            on écrira:
+
+                    `!p snip.rv = snip.v.text.strip('x')`
+
+#
+#
+#
+# TODO
+
+Read these PRs:
+
+    pre/post-expand and post-jump actions
+
+            https://github.com/SirVer/ultisnips/pull/507
+
+    Autotrigger
+
+            https://github.com/SirVer/ultisnips/pull/539
+
+And this issue:
+
+    Markdown table snippet breaks on various dimensions
+
+            https://github.com/SirVer/ultisnips/issues/877
+
+And this one:
+
+            https://vi.stackexchange.com/questions/11240/ultisnips-optional-line
+
+---
+
+Watch all gifs from `vim-pythonx` and `vim-snippets`.
+Re-read all your snippets (fix/improve).
+Re-read this file.
+Understand 3 advanced examples:
+
+        https://github.com/SirVer/ultisnips/tree/master/doc/examples/autojump-if-empty
+        https://github.com/SirVer/ultisnips/tree/master/doc/examples/snippets-aliasing
+        https://github.com/SirVer/ultisnips/tree/master/doc/examples/tabstop-generation
+
+Read documentation.
+
+
+The following events:
+
+    UltiSnipsEnterFirstSnippet
+    UltiSnipsExitLastSnippet
+
+... are NOT fired  when the snippet is  automatically expanded (like with  `fu` in a
+vim file).
+At least, it seems so.
+Make some tests.
+Document the results.
+It may be a bug.
+Report it.
+
+---
+
+Document this:
+
+Test if Vim is compiled with python version 2.x:
+
+    :echo has('python')
+
+The python version Vim is linked against can be found with:
+
+    :py import sys; print(sys.version)
+
+Test if Vim is compiled with python version 3.x:
+
+    :echo has('python3')
+
+The python version Vim is linked against can be found with:
+
+    :py3 import sys; print(sys.version)
+
+---
+
+https://github.com/SirVer/ultisnips/tree/master/doc/examples/autojump-if-empty
+
+        Autojump from tabstop when it's empty
+
+https://github.com/SirVer/ultisnips/tree/master/doc/examples/snippets-aliasing
+
+        Aliases for snippets
+
+https://github.com/SirVer/ultisnips/tree/master/doc/examples/tabstop-generation
+
+        Dynamic tabstop generation
+
+https://github.com/reconquest/vim-pythonx/ (1163 sloc, after removing `tests` and all `__init__.py` files)
+https://github.com/reconquest/vim-pythonx/issues/11
+
+        Python library
+
+https://github.com/reconquest/snippets
+
+        Snippets
+
+https://github.com/SirVer/ultisnips/pull/507
+
+        PR: pre/post-expand and post-jump actions
+
+https://github.com/seletskiy/dotfiles/blob/8e04f6a47fa1509be96094e5c8923f4b49b22775/.vim/UltiSnips/go.snippets#L11-23
+
+        Interesting snippet.
+
+                “It   covers  all   three   cases   using  one   single-character
+                trigger. You don't need to remember three different snippets.”
+
+http://vi.stackexchange.com/a/10536/6960
+
+        How can I use several triggers for the same snippet?
+
+---
+
+Create   snippets  for   `context`,  `pre_expand`,   `post_expand`,  `post_jump`
+statements and for interpolations.
+Your goal  should be to  teach them everything  you know about  those statements
+(which variables/methods can be used).
+This way, no more: “what the fuck was  the name of the variable to refer to last
+visual text”?
+
+---
+
+Document the `w` option.
+Answer the question:
+
+> By default,  a tab trigger is  only expanded if it's  a whole word, so  what >
+> difference does `w` make?
+
+Answer:
+By default, the tab trigger must be preceded by a whitespace.
+With `w`, any character outside `'isk'` will do.
+
+---
+
+Every  time  you've  noted  that  something doesn't  work  in  an  interpolation
+(inaccessible variable, method), check whether  you can bypass the limitation by
+creating a simple helper function.
+That's what is done here:
+
+        https://github.com/SirVer/ultisnips/blob/master/doc/examples/snippets-aliasing/README.md
+
+... to access `vim.current.window.buffer` and `vim.current.window.cursor` inside
+an interpolation.
 
