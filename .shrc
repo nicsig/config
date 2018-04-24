@@ -64,6 +64,11 @@ alias lss='ls++ --psf'
 # Mnemonic:    t for Time
 alias lst='ls++ --ptsf'
 alias mountc='grc mount'
+# Warning:{{{
+#
+# This alias shadows the `nb` binary installed by the `nanoblogger` package.
+#}}}
+alias nb='newsboat'
 alias prof_zsh='repeat 10 time zsh -i -c exit'
 alias reload_conky='killall -SIGUSR1 conky'
 alias reload_xres='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'

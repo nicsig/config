@@ -16,12 +16,8 @@ map                f  toggle_fullscreen
 map  [fullscreen]  f  toggle_fullscreen
 
 # open a link in the browser
-map                gx  follow
-map  [fullscreen]  gx  follow
-
-# display the full url of a link in zathura
-map                gX  display_link
-map  [fullscreen]  gX  display_link
+map                F  follow
+map  [fullscreen]  F  follow
 
 # reload document (reduces memory consumption a little)
 map                r  reload
