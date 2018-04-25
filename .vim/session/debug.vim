@@ -7,9 +7,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +11 ~/Dropbox/wiki/vim/debug.md
-badd +193 ~/.vim/plugged/vim-debug/autoload/debug.vim
 badd +1 ~/.vim/plugged/vim-debug/plugin/debug.vim
+badd +193 ~/.vim/plugged/vim-debug/autoload/debug.vim
+badd +1 ~/Dropbox/wiki/vim/debug.md
 argglobal
 silent! argdel *
 set stal=2
@@ -22,7 +22,7 @@ wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 arglocal
 silent! argdel *
 setlocal fdm=marker
@@ -33,7 +33,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 45 - ((41 * winheight(0) + 0) / 1)
+let s:l = 45 - ((32 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -51,7 +51,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 193 - ((72 * winheight(0) + 14) / 29)
+let s:l = 193 - ((70 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -59,7 +59,7 @@ normal! zt
 normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabedit ~/Dropbox/wiki/vim/debug.md
 set splitbelow splitright
 wincmd t
@@ -74,11 +74,13 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+770
+normal! zo
+let s:l = 788 - ((9 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+788
 normal! 0
 tabnext 2
 set stal=1

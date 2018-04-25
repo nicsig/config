@@ -1,22 +1,54 @@
-snippet pr "print debug" b
-`!p
-prefix = t[1] + ": %q\\n' "
-prefix = "{}:{}: {}".format(
-    #                                          ┌ FIXME: Does it mean that snip.buffer has a name attribute?
-    #                                          │
-    os.path.basename(vim.current.window.buffer.name),
-    str(vim.current.window.cursor[0]),
-    prefix
+# To document:
+#
+#         `vim.current.window.cursor[0]` can be used to access the line number.
+#         Is it equivalent to `snip.line`, or is there an offset?
+#
+#         You can expand a snippet from another one, programmatically.
+#         To do so, you need a `post_expand` statement, or a `post_jump` one.
+#
+#         `post_expand`  works only  if the  first  tabstop is  right after  the
+#         tab_trigger of the second snippet.
+#
+#         `post_jump` works  on the  condition that the  first tabstop  is right
+#         after the tab_trigger  of the second snippet, and you  test the number
+#         of the tabstop before trying to expand the snippet:
+#
+#                 post_jump "if snip.tabstop == 1: vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
+#                            ├──────────────────┘
+#                            └ check we're on the first tabstop,
+#                              because we've positioned the tab_trigger
+#                              right before
+#
+#         You could position the tab_trigger of the second snippet before any
+#         tabstop, not just the first one, but then its expansion wouldn't be
+#         completely automatic. You would have to jump to it.
+#         There's no need for that with the first tabstop, because UltiSnips
+#         automatically jumps to the first tabstop after expanding a snippet.
+#
+snippet pr "print debug"
+printf 'XXXXXX `!p
+snip.rv = "{}:{}: {}".format(
+	os.path.basename(vim.current.window.buffer.name),
+	str(vim.current.window.cursor[0]),
+	t[1] + ": %q\\n' "
 )
-`printf 'XXXXXX `!p snip.rv = prefix`$1 >&2
+`$1 >&2
+endsnippet
+
+# post_jump "if snip.tabstop == 2: vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
+post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
+snippet pd "Description" b
+>${2:/tmp/debug} pr$1
+endsnippet
+
+snippet foo ""
+hello
 endsnippet
 
 post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
-snippet pd "Description" b
-pr$1 >${2:/tmp/debug}
+snippet bar ""
+foo$1 world
 endsnippet
-
-
 
 
 
@@ -66,7 +98,7 @@ endsnippet
 snippet elvi "Template to create a custom elvi for surfraw" bm
 #!/bin/sh
 #
-# elvis: ${1:name of the site}		-- Search ${2:what} using $1 (${3:url of the main page})
+# elvis: ${1:name of the site} 	-- Search ${2:what} using $1 (${3:url of the main page})
 . surfraw || exit 1
 
 w3_usage_hook () {

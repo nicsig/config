@@ -14,7 +14,6 @@
 sil! call operator#sandwich#set('delete', 'all', 'highlight', 0)
 
 sil! let g:sandwich#recipes =  deepcopy(g:sandwich#default_recipes)
-\                             + [ {'buns': ['↣ ', ' ↢'], 'input': ['->'] } ]
 \                             + [ {'buns': ['“', '”'],   'input': ['u"'] } ]
 \                             + [ {'buns': ['‘', '’'],   'input': ["u'"] } ]
 "                                            │

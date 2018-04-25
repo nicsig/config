@@ -2348,6 +2348,11 @@ fu! s:split_paragraph(compact, mode) abort
     " They are annoying because they mess up the display of nearby characters.
     sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\%u00ad/-/ge'
 
+    " In a markdown file, we could have a leading `>` in front of quoted lines.
+    " The next `:j` won't remove them. We need to do it manually, and keep only
+    " the first one.
+    sil exe 'keepj '.(lnum1+1).','.lnum2.'s/^>//e'
+
     " join all the lines in a single one
     sil exe 'keepj '.lnum1.','.lnum2.'j'
 
@@ -6484,13 +6489,9 @@ endfu
 " 104 -
 " Look at ~/Dropbox/wiki/vim/plugin.md and search for the `vim-sandwich` section.
 " I wrote  some custom  exercises where  the answer  is concealed,  and visually
-" indicated by `↔`.
-" But after  pressing `coc` twice to  see/hide an answer, the  visual indicators
-" are concealed too.
-" In a markdown buffer, `coc` should make 'cole' toggle between `0` and `2`, not
-" `0` and `3`.
+" indicated ↣ like that ↢.
 "
-" Also, this concept of concealing answers is neat; try to use it more often.
+" This concept of concealing answers is neat; try to use it more often.
 " It could be useful when the problem for  which you need to write a question is
 " difficult to summarize in one line.
 " In this case, you could write a generic question followed by a ↔ character.
@@ -6517,6 +6518,42 @@ endfu
 " We should save the last 10 or so messages we wrote in a git commit message.
 " Basically, we should have a history.
 " And it should be persistent (i.e. survive a reboot).
+"
+" 107 -
+" In ~/Dropbox/wiki/vim/vimL.md, look for the pattern `funcref()`.
+" There are 2 codes side-by-side.
+" They are separated with `┊` characters.
+" If you press `+sip` on the code, only the one on the left is sourced.
+"
+" This is neat.
+" Try to develop this mechanism.
+" For example, we could have a mapping which toggles which part is sourced,
+" the one on the left or the one on the right.
+"
+" Also, when we  source the code on the  right, in a line ending with  `┊ "`, we
+" could make `vim-source` replace the double quote  with the code on the left of
+" `┊`.
+"
+"
+" 108 -
+" Feature requests:
+"
+"      • a function to detect we're recording a macro
+"
+"        (we could use it to disable our  `q` mappings in buffers where a local
+"        mapping  has  been  installed  to  close the  window  easily,  when  a
+"        recording is running, so that we can press `q` to end the recording)
+"
+"      • a function to detect the pager is active, to customize the mappings
+"        interacting with the pager
+"
+"        Would it be enough?
+"
+"      • :prof dump and :prof stop
+"         https://github.com/neovim/neovim/pull/2427
+"
+"      • being able to customize `C-k` when a dictionary completion is active
+"        (same thing for other completions: C-t, C-d, C-l, ...)
 
 
 

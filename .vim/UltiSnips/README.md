@@ -1,6 +1,14 @@
-##
-##
-##
+You can name some data that you pass as an argument to a python function
+that you invoke:
+
+                         ┌ name `1` into `jump_pos`
+                         │
+        def expand(snip, jump_pos=1):
+          if snip.tabstop != jump_pos:
+              return
+
+This is useful to improve the readability.
+
 # Snippets
 ## What's an anonymous snippet?
 
@@ -9,13 +17,16 @@ trigger.
 
 ## How to expand an anonymous snippet?
 
-Use the `snip.expand_anon()` method:
+Invoke the `snip.expand_anon()` method:
 
         snip.expand_anon(my_snippet)
                          │
                          └ variable in which you've saved the body of our anonymous snippet
 
 ## How to create an alias `bar` for the snippet `foo`?
+
+Make  `bar` insert  `foo`, and  use a  `post_expand` statement  to automatically
+invoke `UltiSnips#ExpandSnippet()`.
 
         snippet foo "" bm
         hello world
@@ -30,6 +41,30 @@ Use the `snip.expand_anon()` method:
 
         snippet "foo(bar|baz|qux)" "" r
         hello world
+        endsnippet
+
+#
+# Interpolation
+## What's the scope of a variable in a python interpolation?
+
+The whole snippet.
+
+## Can I pass a variable from a python interpolation block to another?
+
+Yes.
+
+        snippet foo "" bm
+        `!p var = 'hello'`
+        `!p snip.rv = var`
+        endsnippet
+
+---
+
+Note that the order matters, so you can't write that:
+
+        snippet foo "" bm
+        `!p snip.rv = var`
+        `!p var = 'hello'`
         endsnippet
 
 #
@@ -48,12 +83,33 @@ expanded.
 
 ## When is the python code invoked by a `post_expand` statement executed?
 
-Right after the snippet is expanded and the interpolations have been applied for
-the first time, but before you jump on the first placeholder.
+Right after  the snippet is expanded,  the interpolations have been  applied for
+the first time, and the cursor has jumped to the first tabstop.
+
+---
+
+How do you know `post_expand` occurs after the jump to the first tabstop?
+
+        snippet foo ""
+        hello
+        endsnippet
+
+        post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
+        snippet bar ""
+        foo$1 world
+        endsnippet
+
+Insert `bar`, then press `Tab`: it's automatically expanded into “hello world”.
+This shows that:
+
+          UltiSnips has expanded `foo` into `hello`
+        → UltiSnips has invoked `ExpandSnippet()` after `foo`
+        → UltiSnips has invoked `ExpandSnippet()` after the jump to the first tabstop
+        → UltiSnips has processed `post_expand` after the jump to the first tabstop
 
 ## When is the python code invoked by a `post_jump` statement executed?
 
-Right after you jump to the next/prev placeholder.
+Right after you jump to the next/prev tabstop.
 
 ## Can I modify the buffer from a `pre_expand` statement without the cursor position being wrong after the expansion?
 
@@ -69,7 +125,20 @@ From `pre_expand`:
 
 Use the `snip.buffer` variable.
 
-It's an alias for `vim.current.window.buffer`.
+It's an alias for `vim.current.window.buffer` and `vim.current.buffer`.
+Both seem to be the same object.
+
+## How to get the full path to the current buffer, without VimL (3 answers)?
+
+        snip.buffer.name
+        vim.current.buffer.name
+        vim.current.window.buffer.name
+
+## How to get the name of the current buffer, without VimL?
+
+        os.path.basename(snip.buffer.name)
+        os.path.basename(vim.current.buffer.name)
+        os.path.basename(vim.current.window.buffer.name)
 
 ## How to refer to the last visually-selected text (in context/pre_expand statement, interpolation, in-snippet)?
 
@@ -134,11 +203,49 @@ have to invoke `snip.cursor.set(x,y)` with the desired cursor position.
 And, in that case, UltiSnips will not remove the tab_trigger: the code should do
 it itself.
 
+#
+# Python
+## What's a python equivalent of `printf('%s %s, 'one', 'two')`?
+
+        '{} {}'.format('one', 'two')
+
+## How to improve the readibility of the next code?
+
+        def func():
+            ...
+            if var = 42
+
+
+Like this:
+
+↣
+      def func():
+            ...
+            ┌ “description”: name which conveys the meaning of `42` inside this function
+            │
+            desc = 42
+            if var = desc
+↢
+
+
+Or shorter:
+
+↣
+        def func(desc = 42):
+            ...
+            if var = desc
+↢
+
 ##
 #
 #
 # Predefined Variables / Methods
 ## Universal
+
+    vim.current.buffer
+    vim.current.window.buffer
+    vim.current.window.cursor
+
 
     snip.window    (interpolation ✘)    (alias for `vim.current.window`)
 
@@ -180,7 +287,8 @@ it itself.
                                                NOTE:
 
             None of the variables / methods exist in an interpolation.
-            However, you can still use `vim.current.window.cursor` instead of `snip.cursor`.
+            However, you  can still  use `vim.current.window.cursor`  instead of
+            `snip.cursor`.
 
 
                                                NOTE:
@@ -391,15 +499,15 @@ Python code invoked from a `context` statement can use the variables:
 
                     snip.context = snip.last_placeholder
 
-            … which means:
+            ... which means:
 
                     snip.context.current_text = snip.last_placeholder.current_text
 
 
                                      NOTE:
 
-            More generally, a single-character tab_trigger combined with the options `Ae` allows you
-            to include a snippet inside a snippet.
+            More  generally, a  single-character tab_trigger  combined with  the
+            options `Ae` allows you to include a snippet inside a snippet.
 
             And the inner snippet can itself contain tabstops:
 
@@ -595,7 +703,7 @@ The 'snip' object provides some properties as well:
             or
                     if not snip.c
 
-            … makes sure that the interpolation is only done once.
+            ... makes sure that the interpolation is only done once.
             You can read this last statement as:
 
                     “if the tabstop has not yet a current value”
@@ -812,11 +920,12 @@ in a custom python module. For example:
     ` words per minute
     endsnippet
 
-            Si on écrit un bloc de code python, après le `!p`, on peut chaque écrire chaque instruction
-            sur une ligne dédiée, pour + de lisibilité.
+            Si  on  écrit  un bloc  de  code  python,  après  le `!p`,  on  peut
+            chaque écrire  chaque instruction  sur une ligne  dédiée, pour  + de
+            lisibilité.
 
-            De plus, UltiSnips configure automatiquement certains objets et variables python, valables
-            au sein du bloc de code:
+            De  plus, UltiSnips  configure  automatiquement  certains objets  et
+            variables python, valables au sein du bloc de code:
 
                     • snip.rv    = variable 'return value'; sa valeur sera interpolée au sein du document
 
@@ -829,17 +938,22 @@ in a custom python module. For example:
                                                NOTE:
 
             Quelle différence entre `!p` et `#!/usr/bin/python`?
-            Qd une interpolation débute par un shebang, la sortie du script est insérée dans le buffer.
-            Mais `!p` est différent. Avec `!p`, UltiSnips ignore la sortie de l'expression python qu'on
-            écrit. Il ne fait que l'évaluer. Pour insérer sa sortie dans le buffer, il faut l'affecter
-            à `snip.rv`.
+            Qd une interpolation débute par un  shebang, la sortie du script est
+            insérée dans le buffer.
+            Mais `!p` est différent.
+            Avec `!p`, UltiSnips  ignore la sortie de  l'expression python qu'on
+            écrit.
+            Il ne fait que l'évaluer.
+            Pour  insérer  sa  sortie  dans  le buffer,  il  faut  l'affecter  à
+            `snip.rv`.
 
 
                                                NOTE:
 
-            Si on modifie la valeur d'un tabstop en mode normal via la commande `r`, l'interpolation
-            est mise à jour. Ça peut donner l'impression de travailler avec un tableur (pgm manipulant
-            des feuilles de calcul).
+            Si on modifie la valeur d'un  tabstop en mode normal via la commande
+            `r`, l'interpolation est mise à jour.
+            Ça  peut donner  l'impression  de travailler  avec  un tableur  (pgm
+            manipulant des feuilles de calcul).
 
 ## Substitution
 
@@ -1545,18 +1659,6 @@ The python version Vim is linked against can be found with:
 
 ---
 
-https://github.com/SirVer/ultisnips/tree/master/doc/examples/autojump-if-empty
-
-        Autojump from tabstop when it's empty
-
-https://github.com/SirVer/ultisnips/tree/master/doc/examples/snippets-aliasing
-
-        Aliases for snippets
-
-https://github.com/SirVer/ultisnips/tree/master/doc/examples/tabstop-generation
-
-        Dynamic tabstop generation
-
 https://github.com/reconquest/vim-pythonx/ (1163 sloc, after removing `tests` and all `__init__.py` files)
 https://github.com/reconquest/vim-pythonx/issues/11
 
@@ -1577,10 +1679,6 @@ https://github.com/seletskiy/dotfiles/blob/8e04f6a47fa1509be96094e5c8923f4b49b22
                 “It   covers  all   three   cases   using  one   single-character
                 trigger. You don't need to remember three different snippets.”
 
-http://vi.stackexchange.com/a/10536/6960
-
-        How can I use several triggers for the same snippet?
-
 ---
 
 Create   snippets  for   `context`,  `pre_expand`,   `post_expand`,  `post_jump`
@@ -1595,7 +1693,7 @@ visual text”?
 Document the `w` option.
 Answer the question:
 
-> By default,  a tab trigger is  only expanded if it's  a whole word, so  what >
+> By default,  a tab  trigger is  only expanded if  it's a  whole word,  so what
 > difference does `w` make?
 
 Answer:
@@ -1614,3 +1712,6 @@ That's what is done here:
 ... to access `vim.current.window.buffer` and `vim.current.window.cursor` inside
 an interpolation.
 
+Update:
+In  fact, there's  no  need  of a  helper  function, `vim.current.window`  works
+directly from an interpolation.
