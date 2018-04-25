@@ -1,8 +1,88 @@
+# UltiSnips#Anon()
+
+This function can expand an anonymous snippet.
+Its signature is:
+
+        UltiSnips#Anon(value, [trigger, description, options])
+
+If you  pass a trigger  and options as arguments,  the snippet will  be expanded
+only if the word before the cursor matches the trigger, and if the options allow
+the expansion.
+The description  is not  used, since  the snippet  is discarded  as soon  as the
+snippet is  expanded, but  is probably  necessary to pass  the options  in third
+position.
+
+Usage example:
+
+        ino <silent>  !!  !!<c-r>=UltiSnips#Anon('hello $1 world $2', '!!')<cr>
+
+This expands the snippet whenever two bangs are typed.
+
+# UltiSnips#SnippetsInCurrentScope()
+
+`UltiSnips#SnippetsInCurrentScope()` returns a Vim  dictionary with the snippets
+whose trigger:
+
+        • matches the current word, if the function was passed no argument
+        • anything,                 if the function was passed the argument 1
+
+If you need all snippets information for the current buffer, you can simply pass
+1  (which means  all) as  first  argument of  this  function, and  use a  global
+variable `g:current_ulti_dict_info` to get the result (see example below).
+
+This  function does  not add  any new  functionality to  ultisnips directly  but
+allows third party plugins to integrate the current available snippets.
+For  example, all  completion plugins  that  integrate with  UltiSnips use  this
+function.
+
+Usage example:
+
+        fu! Expand_possible_shorter_snippet()
+            "only one candidate...
+            if len(UltiSnips#SnippetsInCurrentScope()) == 1
+                let curr_key = keys(UltiSnips#SnippetsInCurrentScope())[0]
+                norm! diw
+                exe 'norm! a'.curr_key.' '
+                return 1
+            endif
+            return 0
+        endfu
+        ino <silent>  <c-l>  <c-r>=Expand_possible_shorter_snippet() == 0 ? '' : UltiSnips#ExpandSnippet()<cr>
+
+This  code  installs  a  `C-l`   mapping  which  completes  a  possible  partial
+tab_trigger, and automatically expands it.
+
+---
+
+One last example:
+
+        fu! GetAllSnippets()
+            call UltiSnips#SnippetsInCurrentScope(1)
+            let list = []
+            for [key, info] in items(g:current_ulti_dict_info)
+                let parts = split(info.location, ':')
+                call add(list, {
+                \ 'key':         key,
+                \ 'path':        parts[0],
+                \ 'linenr':      parts[1],
+                \ 'description': info.description,
+                \ })
+            endfor
+            return list
+        endfu
+
+Here,  we define  a custom  function to  extract all  snippets available  in the
+current buffer.
+
+#
+#
+#
 # Snippets
 ## What's an anonymous snippet?
 
-A snippet  whose body  is defined inside  a function, and  doesn't have  any tab
-trigger.
+A snippet  whose body is  defined outside a  snippet file (python  function, Vim
+mapping, ...), expanded and immediately discarded (i.e.
+not added to the global list of snippets).
 
 ## How to expand an anonymous snippet?
 
@@ -14,8 +94,8 @@ Invoke the `snip.expand_anon()` method:
 
 ## How to create an alias `bar` for the snippet `foo`?
 
-Make  `bar` insert  `foo`, and  use a  `post_expand` statement  to automatically
-invoke `UltiSnips#ExpandSnippet()`.
+Create a  snippet `bar` which  inserts the text  `foo`, and use  a `post_expand`
+statement to automatically invoke `UltiSnips#ExpandSnippet()`.
 
         snippet foo "" bm
         hello world
@@ -26,31 +106,93 @@ invoke `UltiSnips#ExpandSnippet()`.
         foo
         endsnippet
 
-## How to expand a snippet from another one?
+---
 
-Yes:
+Note that you could also use a `post_jump` statement:
 
-                       ┌ don't add `b`:
-                       │
-                       │     `foo` will be used after the end of the line
-                       │     in the next snippet
-                       │
-        snippet foo "" m
-        beautiful
-        endsnippet
-
-        post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
+        post_jump "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\", \"in\")')"
         snippet bar "" bm
-        hello foo$1 world
+        foo
         endsnippet
-
-            →    bar + Tab  =  hello beautiful world
 
 ## How to create the aliases `foobar`, `foobaz`, and `fooqux` for the snippet `foo`?
 
         snippet "foo(bar|baz|qux)" "" r
         hello world
         endsnippet
+
+## How to expand a snippet from another one, programmatically?
+
+Use the same technique as for creating an alias.
+With one caveat:
+don't  give   the  `b`  option   to  the   second  snippet  (the   one  expanded
+programmatically), unless you know for sure  that its tab_trigger will always be
+at the beginning of a line, even inside other snippets.
+
+                       ┌ don't add `b`:
+                       │
+                       │     `foo` will be used AFTER the beginning of the line
+                       │     in the next snippet
+                       │
+        snippet foo "" m
+        beautiful
+        endsnippet
+
+        post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\", \"in\")')"
+        snippet bar "" bm
+        hello foo$1 world
+        endsnippet
+
+            →    bar + Tab  =  hello beautiful world
+
+---
+
+Note that if  use a `post_jump` statement,  you'll need to check  the tabstop to
+avoid triggering an undesired expansion whenever you jump to a tabstop:
+
+        snippet foo "" m
+        beautiful
+        endsnippet
+
+        post_jump "if snip.tabstop == 1: vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\", \"in\")')"
+        snippet bar "" bm
+        hello foo$1 world$2
+        endsnippet
+
+Even then,  it's better to use  a `post_expand` statement, because  you may jump
+several times  to the tabstop whose  purpose is to expand  another snippet, and,
+while the first time it will do  what you want, there could be another undesired
+expansion the next time:
+
+        snippet foo "" m
+        beautiful foo
+        endsnippet
+
+        post_jump "if snip.tabstop == 1: vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\", \"in\")')"
+        snippet bar "" bm
+        hello foo$1 world$2
+        endsnippet
+
+## How to create a new snippet programmatically?
+
+Use `UltiSnips#AddSnippetWithPriority()`.
+
+The signature of this function is:
+
+        UltiSnips#AddSnippetWithPriority(trigger, value, description, options, filetype, priority)
+
+Example:
+
+        call UltiSnips#AddSnippetWithPriority('foo', "hello\nworld", 'test', 'bm', 'all', 1)
+
+## When should I use an autotriggered snippet vs an anonymous snippet?
+
+If  you   need  some  advanced   features  (like  `context`   and  `post_expand`
+statements),  and if  you  care  about readability,  then  use an  autotriggered
+snippet.
+
+If you  don't need the snippet  permanently, only in a  particular circumstance,
+then use an anonymous snippet.
 
 #
 # Interpolation
@@ -860,32 +1002,6 @@ imported using the python 'import' command:
 
 #
 # Issues
-## Why do my python functions sometimes fail when I define them in a global block?
-
-In a snippet file, our custom `snippets` filetype plugin resets `'expandtab'`:
-
-        ~/.vim/after/ftplugin/snippets.vim
-
-We do this because:
-
-        1. Tabs  have a  special  meaning  for UltiSnips  (“increase  the level
-           of indentation of the line“)
-
-        2. we sometimes  forget to  insert a  Tab inside  a snippet  when it's
-           needed
-
-So whenever you press `Tab` to increase  the indentation of a line, you insert a
-literal `Tab` character.
-This is what  we want in a  snippet (snippet...endsnippet), but not  in a python
-function (global...endglobal), because python expects 4 spaces.
-
-So your issue is probably due to the indentation of the lines inside your functions.
-
-To fix this, execute `:RemoveTabs` on the global block, or export your functions
-in a custom python module. For example:
-
-        ~/.vim/pythonx/snippet_helpers.py
-
 #
 #
 #
@@ -1703,3 +1819,33 @@ an interpolation.
 Update:
 In  fact, there's  no  need  of a  helper  function, `vim.current.window`  works
 directly from an interpolation.
+
+---
+
+Add sth like this  for Neovim; it could make neovim  faster (especially if you
+use UltiSnips):
+
+    let g:loaded_python_provider = 1
+    let g:python_host_skip_check=1
+    let g:python_host_prog = '/usr/bin/python'
+    let g:python3_host_skip_check=1
+    let g:python3_host_prog = '/usr/bin/python3'
+
+Also, disable automatic expansion of snippets with this:
+
+    augroup ultisnips_no_auto_expansion
+        au!
+        au VimEnter * au! UltiSnips_AutoTrigger
+    augroup END
+
+It has a significant impact in Neovim.
+MWE:
+
+    1000i some text
+        → several seconds with the autocmd
+          1 or 2 without
+
+Also, read this:
+https://github.com/neovim/neovim/issues/5702
+https://github.com/neovim/neovim/issues/7063
+

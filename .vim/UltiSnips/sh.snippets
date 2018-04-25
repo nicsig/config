@@ -3,9 +3,6 @@
 #         `vim.current.window.cursor[0]` can be used to access the line number.
 #         Is it equivalent to `snip.line`, or is there an offset?
 #
-#         You can expand a snippet from another one, programmatically.
-#         To do so, you need a `post_expand` statement, or a `post_jump` one.
-#
 #         `post_expand`  works only  if the  first  tabstop is  right after  the
 #         tab_trigger of the second snippet.
 #
@@ -41,13 +38,15 @@ snippet pd "Description" b
 pr$1 >${2:/tmp/debug}
 endsnippet
 
-snippet foo ""
-hello
+
+
+snippet foo "" m
+beautiful foo
 endsnippet
 
-post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
-snippet bar ""
-foo$1 world
+post_jump "if snip.tabstop == 1: vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\", \"in\")')"
+snippet bar "" bm
+hello foo$1 world$2
 endsnippet
 
 

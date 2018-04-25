@@ -6319,38 +6319,9 @@ endfu
 " https://speakerdeck.com/cocopon/creating-your-lovely-color-scheme
 "
 " 87 -
-"
-" Add sth like this  for Neovim; it could make neovim  faster (especially if you
-" use UltiSnips):
-"
-"     let g:loaded_python_provider = 1
-"     let g:python_host_skip_check=1
-"     let g:python_host_prog = '/usr/bin/python'
-"     let g:python3_host_skip_check=1
-"     let g:python3_host_prog = '/usr/bin/python3'
-"
-" Also, disable automatic expansion of snippets with this:
-"
-"     augroup ultisnips_no_auto_expansion
-"         au!
-"         au VimEnter * au! UltiSnips_AutoTrigger
-"     augroup END
-"
-" It has a significant impact in Neovim.
-" MWE:
-"
-"     1000i some text
-"         → several seconds with the autocmd
-"           1 or 2 without
-"
-" Also, read this:
-" https://github.com/neovim/neovim/issues/5702
-" https://github.com/neovim/neovim/issues/7063
-"
-" 88 -
 " :h quickref
 "
-" 89 -
+" 88 -
 " Play with (or document):
 "
 "        • $HOME/.vim/tools/colors/check_colors.vim
@@ -6365,7 +6336,7 @@ endfu
 "        • `term_setsize()`
 "        • `trim()`
 "
-" 90 -
+" 89 -
 " In `vim-window`, don't do this:
 "
 "     let changelist = split(execute('changes'), '\n')
@@ -6379,7 +6350,7 @@ endfu
 " Requires the  new `getchangelist()` function,  which atm is not  implemented in
 " Neovim. Wait for Neovim to catch up.
 "
-" 91 -
+" 90 -
 " `vim-save`  is  really   small. Move  it  in  vimrc,  or   in  another  plugin
 " (vim-toggle-settings).
 "
@@ -6387,22 +6358,22 @@ endfu
 " could  be useful  in  a future  one. Useless in  Neovim,  because it's  always
 " enabled there.
 "
-" 92 -
+" 91 -
 " Sometimes, some text which should be displayed in italics is not.
 " Reloading the buffer solves the issue.
 " But where does it come from?
 "
-" 93 -
+" 92 -
 " Prevent vim-session from checking swap files.
 " Annoying when a session crashed, and we can't restore a session.
 "
-" 94 -
+" 93 -
 " In  Neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
 " current Neovim instance. But what about Vim?
 "
 "     https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 "
-" 95 -
+" 94 -
 " Load an awk buffer, and press `1zs` on a comment:
 "
 "     awkComment     xxx match /#.*/  contains=@Spell,awkTodo
@@ -6421,7 +6392,7 @@ endfu
 "
 "         :vim /syn.*concealends/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 96 -
+" 95 -
 " We have an issue with mappings which contain C-j (and C-m?) and which are made
 " repeatable. For an example, look at `Z C-j`.
 " It doesn't work the first time it's invoked. But it works fine when you repeat
@@ -6434,12 +6405,12 @@ endfu
 " We could tweak the code to protect such a special character with `<lt>`.
 " But then we would need to translate `<c-j>` manually.
 "
-" 97 -
+" 96 -
 " All our mappings dealing with formatting (gq, gqq, gqic, SPC p, SPC P)
 " are becoming too complex for this vimrc.
 " We would benefit from moving all of them in a separate plugin.
 "
-" 98 -
+" 97 -
 " Read:
 "
 "     :h channel.txt
@@ -6456,10 +6427,10 @@ endfu
 "     :h recover.txt
 "     :h tips.txt
 "
-" 99 -
+" 98 -
 " Try to implement a `:Trr` (TRash Restore) command to restore the trash.
 "
-" 100 -
+" 99 -
 " Document the fact that when a backtick  expansion causes an issue, you can see
 " which shell command was executed by increasing the verbosity level to 4:
 "
@@ -6467,10 +6438,10 @@ endfu
 "     OR
 "     :4verb cmd
 "
-" 101 -
+" 100 -
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
-" 102 -
+" 101 -
 "
 "     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
@@ -6482,11 +6453,11 @@ endfu
 "
 "     :vim /setl.*\%(noma\|nomodifiable\)/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 103 -
+" 102 -
 " https://www.reddit.com/r/vim/comments/8asgjj/topnotch_vim_markdown_live_previews_with_no/
 " https://github.com/joeyespo/grip (unfortunately, requires an internet connection)
 "
-" 104 -
+" 103 -
 " Look at ~/Dropbox/wiki/vim/plugin.md and search for the `vim-sandwich` section.
 " I wrote  some custom  exercises where  the answer  is concealed,  and visually
 " indicated ↣ like that ↢.
@@ -6502,7 +6473,7 @@ endfu
 "          there will be an exercise which will make the question clearer,
 "          and the answer is concealed”
 "
-" 105 -
+" 104 -
 " `vim-plug`, `vim-lg...` (:ListRepeatableMotions -vv), `vim-unix` (:Tree),
 " they should all use the same keys to cycle between entries.
 " C-n/C-p, or J/K, or sth else.
@@ -6514,12 +6485,12 @@ endfu
 "
 " If we choose J/K, it conflicts with scrolling in preview window.
 "
-" 106 -
+" 105 -
 " We should save the last 10 or so messages we wrote in a git commit message.
 " Basically, we should have a history.
 " And it should be persistent (i.e. survive a reboot).
 "
-" 107 -
+" 106 -
 " In ~/Dropbox/wiki/vim/vimL.md, look for the pattern `funcref()`.
 " There are 2 codes side-by-side.
 " They are separated with `┊` characters.
@@ -6535,7 +6506,7 @@ endfu
 " `┊`.
 "
 "
-" 108 -
+" 107 -
 " Feature requests:
 "
 "      • a function to detect we're recording a macro

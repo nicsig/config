@@ -7,15 +7,15 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +2349 ~/.vim/vimrc
+badd +116 ~/Desktop/md.md
 badd +2 ~/.vim/UltiSnips/vim.snippets
-badd +7 /tmp/sh.sh
+badd +5 /tmp/sh.sh
 badd +1 ~/.vim/UltiSnips/markdown.snippets
 badd +20 ~/.vim/pythonx/snippet_helpers.py
-badd +41 ~/.vim/UltiSnips/sh.snippets
-badd +29 ~/.vim/UltiSnips/README.md
+badd +44 ~/.vim/UltiSnips/sh.snippets
+badd +27 ~/.vim/UltiSnips/README.md
 badd +40 ~/.vim/UltiSnips/help.snippets
-badd +116 ~/Desktop/md.md
+badd +8 ~/.vim/plugged/vim-completion/autoload/completion/ultisnips.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -164,11 +164,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 7 - ((6 * winheight(0) + 0) / 1)
+let s:l = 5 - ((4 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-7
+5
 normal! 03|
 wincmd w
 arglocal
@@ -182,15 +182,37 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 45 - ((16 * winheight(0) + 14) / 28)
+let s:l = 43 - ((3 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-45
+43
 normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabedit ~/.vim/plugged/vim-completion/autoload/completion/ultisnips.vim
+set splitbelow splitright
+wincmd t
+set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+arglocal
+silent! argdel *
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+3
+normal! zo
+let s:l = 8 - ((7 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+8
+normal! 0
 tabedit ~/.vim/UltiSnips/README.md
 set splitbelow splitright
 wincmd t
@@ -205,38 +227,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-29
-normal! zo
-let s:l = 32 - ((3 * winheight(0) + 15) / 30)
+let s:l = 1005 - ((116 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-32
+1005
 normal! 0
-tabedit ~/.vim/vimrc
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-arglocal
-silent! argdel *
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-4006
-normal! zo
-5192
-normal! zo
-let s:l = 6582 - ((8 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-6582
-normal! 017|
 tabnext 5
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
