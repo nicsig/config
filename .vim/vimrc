@@ -2346,7 +2346,7 @@ fu! s:split_paragraph(compact, mode) abort
 
     " Replace soft hyphens which we sometimes copy from a pdf.
     " They are annoying because they mess up the display of nearby characters.
-    sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\%u00ad/-/ge'
+    sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\u00ad/-/ge'
 
     " In a markdown file, we could have a leading `>` in front of quoted lines.
     " The next `:j` won't remove them. We need to do it manually, and keep only
@@ -2546,7 +2546,7 @@ fu! s:my_gq(type) abort
         let cml = get(split(&l:cms, '%s'), 0, '')
         let cml = '\%(\V'.escape(cml, '\').'\m\)\?'
         let has_a_list_header = getline(lnum1) =~# &l:flp
-        let has_diagram = getline(lnum1) =~# '^'.cml.'\s*[\u2502\u250c]'
+        let has_diagram = getline(lnum1) =~# '^'.cml.'\s*[│┌]'
 
         if has_a_list_header
             sil exe 'norm! '.lnum1.'Ggw'.lnum2.'G'
@@ -2588,8 +2588,8 @@ fu! s:my_gq(type) abort
             " For more info,  on how `par` use the quote  characters, search for
             " “quote” in the `Details` section of our notes on `par`.
             "}}}
-            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs\\%%u250c/%s/e", lnum1, lnum2, cml, '||')
-            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs\\%%u2502/%s/e", lnum1, lnum2, cml, '|')
+            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs┌/%s/e', lnum1, lnum2, cml, '||')
+            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs│/%s/e', lnum1, lnum2, cml, '|')
 
             " format the lines in the diagram
             sil exe 'norm! '.lnum1.'Ggq'.lnum2.'G'
@@ -2609,10 +2609,10 @@ fu! s:my_gq(type) abort
             " You must process the substitutions from the one replacing the most
             " bars, to the one replacing the least ones.
             "}}}
-            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs||/\u250c/e", lnum1, lnum2, cml)
-            sil exe printf("keepj keepp %d,%ds/^%s\\s*\\zs|/\u2502 /e", lnum1, lnum2, cml)
-            "                                                     │
-            "                                                     └ leave it!
+            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs||/┌/e', lnum1, lnum2, cml)
+            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs|/│ /e', lnum1, lnum2, cml)
+            "                                              │
+            "                                              └ leave it!
 
             " TODO:
             " Add support for └ (and maybe ┘ ┐).
@@ -2653,9 +2653,9 @@ fu! s:format_comment() abort
     let cur_line = line('.')
     norm! mz
     " select the current comment
-    call comment#object(1, '\|[\u2518\u2514\u2510\u250c\u2502\u2500]\|^\s*"\s*\S\+:')
-    "                         │                                       │
-    "                         │                                       └─ and ignore a title (vimCommentTitle)
+    call comment#object(1, '\|[┘└┐┌│─]\|^\s*"\s*\S\+:')
+    "                         │         │
+    "                         │         └─ and ignore a title (vimCommentTitle)
     "                         └─ but ignore lines in a diagram
     " TODO:
     " This is an ugly hack.
@@ -2990,7 +2990,7 @@ nno  <silent>  -c  :<c-u>call myfuncs#tab_toc()<cr>
 
 " -f               show filetype {{{4
 
-nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : "\u2205") <bar> echohl NONE <cr>
+nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : '∅') <bar> echohl NONE <cr>
 
 " full path current file
 "
@@ -6742,7 +6742,7 @@ endfu
 " nno cd :<c-u>call <sid>append_error_sign()<cr>
 " fu! s:append_error_sign() abort
 "     let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
-"     call append(line('.'), cml.repeat(' ', virtcol('.')-1-strchars(cml, 1))."^\u2718")
+"     call append(line('.'), cml.repeat(' ', virtcol('.')-1-strchars(cml, 1)).'^✘')
 " endfu
 
 

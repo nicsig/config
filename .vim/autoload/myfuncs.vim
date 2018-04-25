@@ -211,7 +211,7 @@ fu! myfuncs#box_create() abort
     let last_line  = line("'}") - 2
     for i in range(first_line, last_line)
         for j in col_pos
-            exe 'norm! '.i.'G'.j."|r\u2502"
+            exe 'norm! '.i.'G'.j.'|r│'
         endfor
     endfor
 
@@ -226,19 +226,19 @@ fu! s:box_create_border(where, col_pos) abort
         " duplicate first line in the box
         norm! '{+yyP
         " replace all characters with `─`
-        exe "norm! v$r\u2500"
+        exe 'norm! v$r─'
         " draw corners
-        exe 'norm! '.col_pos[0]."|r\u250c".col_pos[-1]."|r\u2510"
+        exe 'norm! '.col_pos[0].'|r┌'.col_pos[-1].'|r┐'
     else
         " duplicate the `┌────┐` border below the box
         t'}-
         " draw corners
-        exe 'norm! '.col_pos[0]."|r\u2514".col_pos[-1]."|r\u2518"
+        exe 'norm! '.col_pos[0].'|r└'.col_pos[-1].'|r┘'
     endif
 
     " draw the '┬' or '┴' characters:
     for pos in col_pos[1:-2]
-        exe 'norm! '.pos.'|r'.(a:where is# 'top' ? "\u252c" : "\u2534")
+        exe 'norm! '.pos.'|r'.(a:where is# 'top' ? '┬' : '┴')
     endfor
 endfu
 
@@ -249,7 +249,7 @@ fu! s:box_create_separations() abort
     "
     " … useful to make our table more readable.
     norm! '{++yyp
-    keepj keepp sil! s/[^\u2502\u253c]/ /g
+    keepj keepp sil! s/[^│┼]/ /g
 
     " Delete it in the `s` (s for space) register, so that it's stored inside
     " default register and we can paste it wherever we want.
@@ -262,9 +262,9 @@ fu! s:box_create_separations() abort
     " … and store it inside `x` register.
     " So that we can paste it wherever we want.
     let @x = getline(line("'{")+1)
-    let @x = substitute(@x, '\S', "\u251c", '')
-    let @x = substitute(@x, '.*\zs\S', "\u2524", '')
-    let @x = substitute(@x, "\u252c", "\u253c", 'g')
+    let @x = substitute(@x, '\S', '├', '')
+    let @x = substitute(@x, '.*\zs\S', '┤', '')
+    let @x = substitute(@x, '┬', '┼', 'g')
 
     " Make the contents of the register linewise, so we don't need to hit
     " `"x]p`, but simply `"xp`.
@@ -275,12 +275,12 @@ fu! myfuncs#box_destroy() abort
     let [lnum1, lnum2] = [line("'{"), line("'}")]
     let range = lnum1.','.lnum2
     " remove box (except pretty bars: │)
-    sil exe range.'s/[\u2500\u2534\u252c\u251c\u2524\u253c\u2514\u2518\u2510\u250c]//ge'
+    sil exe range.'s/[─┴┬├┤┼└┘┐┌]//ge'
 
     " replace pretty bars with regular bars
     " necessary, because we will need them to align the contents of the
     " paragraph later
-    sil exe range.'s/\%u2502/|/ge'
+    sil exe range.'s/│/|/ge'
 
     " remove the bars at the beginning and at the end of the lines
     " we don't want them, because they would mess up the creation of a box
@@ -1104,7 +1104,7 @@ fu! s:open_gx_get_url() abort
             let url = substitute(url, '\v.{-}\ze%(http|ftp|www)', '', '')
 
             " remove everything after the first `⟩`, `>`, `)`, `]`, `}`
-            let url = substitute(url, '\v.{-}\zs%(%u27e9|\>|\)|\]|\}).*', '', '')
+            let url = substitute(url, '\v.{-}\zs[⟩>)\]}].*', '', '')
 
             " remove everything after the last `"`
             let url = substitute(url, '\v".*', '', '')
@@ -1684,7 +1684,7 @@ endfu
 fu! myfuncs#trans_cycle() abort
     let s:trans_target = { 'fr' : 'en', 'en' : 'fr' }[get(s:, 'trans_target', 'fr')]
     let s:trans_source = { 'fr' : 'en', 'en' : 'fr' }[get(s:, 'trans_source', 'en')]
-    echo '[trans] '.s:trans_source." \u2192 ".s:trans_target
+    echo '[trans] '.s:trans_source.' → '.s:trans_target
 endfu
 
 fu! s:trans_grab_visual() abort

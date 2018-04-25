@@ -38,7 +38,7 @@ endsnippet
 # post_jump "if snip.tabstop == 2: vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
 post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
 snippet pd "Description" b
->${2:/tmp/debug} pr$1
+pr$1 >${2:/tmp/debug}
 endsnippet
 
 snippet foo ""

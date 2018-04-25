@@ -1,14 +1,3 @@
-You can name some data that you pass as an argument to a python function
-that you invoke:
-
-                         ┌ name `1` into `jump_pos`
-                         │
-        def expand(snip, jump_pos=1):
-          if snip.tabstop != jump_pos:
-              return
-
-This is useful to improve the readability.
-
 # Snippets
 ## What's an anonymous snippet?
 
@@ -36,6 +25,26 @@ invoke `UltiSnips#ExpandSnippet()`.
         snippet bar "" bm
         foo
         endsnippet
+
+## How to expand a snippet from another one?
+
+Yes:
+
+                       ┌ don't add `b`:
+                       │
+                       │     `foo` will be used after the end of the line
+                       │     in the next snippet
+                       │
+        snippet foo "" m
+        beautiful
+        endsnippet
+
+        post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
+        snippet bar "" bm
+        hello foo$1 world
+        endsnippet
+
+            →    bar + Tab  =  hello beautiful world
 
 ## How to create the aliases `foobar`, `foobaz`, and `fooqux` for the snippet `foo`?
 
@@ -85,27 +94,6 @@ expanded.
 
 Right after  the snippet is expanded,  the interpolations have been  applied for
 the first time, and the cursor has jumped to the first tabstop.
-
----
-
-How do you know `post_expand` occurs after the jump to the first tabstop?
-
-        snippet foo ""
-        hello
-        endsnippet
-
-        post_expand "vim.eval('feedkeys(\"\<c-r>=UltiSnips#ExpandSnippet()\<cr>\")')"
-        snippet bar ""
-        foo$1 world
-        endsnippet
-
-Insert `bar`, then press `Tab`: it's automatically expanded into “hello world”.
-This shows that:
-
-          UltiSnips has expanded `foo` into `hello`
-        → UltiSnips has invoked `ExpandSnippet()` after `foo`
-        → UltiSnips has invoked `ExpandSnippet()` after the jump to the first tabstop
-        → UltiSnips has processed `post_expand` after the jump to the first tabstop
 
 ## When is the python code invoked by a `post_jump` statement executed?
 
@@ -209,7 +197,7 @@ it itself.
 
         '{} {}'.format('one', 'two')
 
-## How to improve the readibility of the next code?
+## How to improve the readability of the next code (and avoid the “magic number” effect)?
 
         def func():
             ...
