@@ -1995,7 +1995,7 @@ ino  <silent>  <c-s>  <esc>:sil update<cr>
 " We   also   add   the   hyphen    character   (useful   for   something   like
 " `ins-completion-menu`).
 
-ino  <c-x><c-]>  <c-r>=myfuncs#keyword_custom(':-')<cr><c-x><c-]>
+ino  <silent>  <c-x><c-]>  <c-r>=myfuncs#keyword_custom(':-'.(&ft is# 'vim' ? '<' : ''))<cr><c-x><c-]>
 
 " C-k     dictionary {{{4
 

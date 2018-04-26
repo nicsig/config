@@ -1,24 +1,46 @@
-# UltiSnips#Anon()
+## What's the first argument expected  by `complete()`?
 
-This function can expand an anonymous snippet.
-Its signature is:
+The weight of the text up to the word you want to complete + 1.
 
-        UltiSnips#Anon(value, [trigger, description, options])
+Why +1?
+I don't know.
+But here's what `:h complete()` says:
 
-If you  pass a trigger  and options as arguments,  the snippet will  be expanded
-only if the word before the cursor matches the trigger, and if the options allow
-the expansion.
-The description  is not  used, since  the snippet  is discarded  as soon  as the
-snippet is  expanded, but  is probably  necessary to pass  the options  in third
-position.
+> Use col('.') for an empty string.
+> "col('.') - 1" will replace one character by a match.
+
+
+
+Also, remember that `col('.')`  is not exactly the weight of the  text up to the
+cursor: it adds `1` (probably because `0` reserved for an error).
+
+
+
+## How to get a list of the snippets whose tab_trigger is matched by the word before the cursor?
+
+Use `UltiSnips#SnippetsInCurrentScope()`.
+
+It will give you a dictionary whose:
+
+        • keys  are the  tab_triggers of  the  snippets available  in the
+          current buffer, and which are matched by the word before the cursor
+
+        • values are the description of the snippets
 
 Usage example:
 
-        ino <silent>  !!  !!<c-r>=UltiSnips#Anon('hello $1 world $2', '!!')<cr>
+        ino  <silent>  <c-x><c-x>  <c-r>=<sid>complete_snippets()<cr>
+        fu! s:complete_snippets() abort
+            let word = len(strpart(getline('.'), 0, col('.')-1))
+            call complete(
+            \             col('.') - len(word),
+            \             keys(UltiSnips#SnippetsInCurrentScope()))
+            return ''
+        endfu
 
-This expands the snippet whenever two bangs are typed.
+        \             len(matchstr(getline('.'), '^.*\ze\<.\{-1,}\%'.col('.').'c'))+1,
 
-# UltiSnips#SnippetsInCurrentScope()
+
 
 `UltiSnips#SnippetsInCurrentScope()` returns a Vim  dictionary with the snippets
 whose trigger:
@@ -26,14 +48,30 @@ whose trigger:
         • matches the current word, if the function was passed no argument
         • anything,                 if the function was passed the argument 1
 
+What's the output of the function without argument?
+
+What's the output of the function with `1` as argument?
+The same as without argument, except the restriction “the word before the cursor
+must match the tab_trigger” is removed. IOW, all snippets are listed.
+
+Example of value:
+
+        { 'qnd':        'Quick aNd Dirty settings',
+        \ 'bug_report': 'filing bug report for (Neo)Vim',
+        \ 'spoiler':    'hide long code'}
+
+        {'qnd': 'Quick aNd Dirty settings', 'bug_report': 'filing bug report for (Neo)Vim', 'spoiler': 'hide long code'}
+
+##
+# UltiSnips#SnippetsInCurrentScope()
+
 If you need all snippets information for the current buffer, you can simply pass
 1  (which means  all) as  first  argument of  this  function, and  use a  global
 variable `g:current_ulti_dict_info` to get the result (see example below).
 
 This  function does  not add  any new  functionality to  ultisnips directly  but
 allows third party plugins to integrate the current available snippets.
-For  example, all  completion plugins  that  integrate with  UltiSnips use  this
-function.
+For example, all completion plugins that integrate UltiSnips use this function.
 
 Usage example:
 
@@ -78,20 +116,6 @@ current buffer.
 #
 #
 # Snippets
-## What's an anonymous snippet?
-
-A snippet  whose body is  defined outside a  snippet file (python  function, Vim
-mapping, ...), expanded and immediately discarded (i.e.
-not added to the global list of snippets).
-
-## How to expand an anonymous snippet?
-
-Invoke the `snip.expand_anon()` method:
-
-        snip.expand_anon(my_snippet)
-                         │
-                         └ variable in which you've saved the body of our anonymous snippet
-
 ## How to create an alias `bar` for the snippet `foo`?
 
 Create a  snippet `bar` which  inserts the text  `foo`, and use  a `post_expand`
@@ -184,6 +208,42 @@ The signature of this function is:
 Example:
 
         call UltiSnips#AddSnippetWithPriority('foo', "hello\nworld", 'test', 'bm', 'all', 1)
+
+## What's an anonymous snippet?
+
+A snippet  whose body is  defined outside a  snippet file (python  function, Vim
+mapping, ...), expanded and immediately discarded (i.e.
+not added to the global list of snippets).
+
+## How to expand an anonymous snippet in VimL?
+
+Invoke `UltiSnips#Anon()`.
+
+This function can expand an anonymous snippet.
+Its signature is:
+
+        UltiSnips#Anon(value, [trigger, description, options])
+
+If you  pass a trigger  and options as arguments,  the snippet will  be expanded
+only if the word before the cursor matches the trigger, and if the options allow
+the expansion.
+The description  is not  used, since  the snippet  is discarded  as soon  as the
+snippet is  expanded, but  is probably  necessary to pass  the options  in third
+position.
+
+Usage example:
+
+        ino <silent>  !!  !!<c-r>=UltiSnips#Anon('hello $1 world $2', '!!')<cr>
+
+This expands the snippet whenever two bangs are typed.
+
+## How to expand an anonymous snippet in python?
+
+Invoke the `snip.expand_anon()` method:
+
+        snip.expand_anon(my_snippet)
+                         │
+                         └ variable in which you've saved the body of our anonymous snippet
 
 ## When should I use an autotriggered snippet vs an anonymous snippet?
 
@@ -668,10 +728,11 @@ Python code invoked from a `context` statement can use the variables:
                     →
                     baz qux bar
 
-                                  ┌ go to 2nd inner tabstop (Tab),
-                                  │ then come back (S-Tab),
-                                  │ and expand a 3rd inner snippet (+)
-                        ┌─────────┤
+                        ┌ go to 2nd inner tabstop (Tab),
+                        │ then come back (S-Tab),
+                        │ and expand a 3rd inner snippet (+)
+                        │
+                        ├─────────┐
                     baz Tab S-Tab + qux bar
                     →
                     baz qux qux bar
@@ -886,7 +947,181 @@ The 'snip' object provides some properties as well:
                     • snip.v.text   text that was selected
 
 #
-# Misc
+#
+#
+## Interpolation
+
+    `date`
+    `!v strftime('%c')`
+    `!p python code`
+
+            Interpolation d'une commande shell ou d'une expression Vim.
+
+            Les backticks encadrent la commande / expression interpolée.
+            `!v` indique que ce qui suit est une expression Vim.
+            `!p` "                           du code python.
+
+
+    snippet wpm "average speed" b
+    I typed ${1:750} words in ${2:30} minutes; my speed is `!p
+    snip.rv = float(t[1]) / float(t[2])
+    ` words per minute
+    endsnippet
+
+            Si  on  écrit  un bloc  de  code  python,  après  le `!p`,  on  peut
+            chaque écrire  chaque instruction  sur une ligne  dédiée, pour  + de
+            lisibilité.
+
+            De  plus, UltiSnips  configure  automatiquement  certains objets  et
+            variables python, valables au sein du bloc de code:
+
+                    • snip.rv    = variable 'return value';
+                                   sa valeur sera interpolée au sein du document
+
+                    • t          = liste dont les éléments contiennent le texte
+                                   inséré dans les différents tabstops;
+                                   ex:    t[1] = $1, t[2] = $2
+
+            Ici, `float()` est une fonction python, et non Vim.
+
+
+                                               NOTE:
+
+            Quelle différence entre `!p` et `#!/usr/bin/python`?
+            Qd une interpolation débute par un  shebang, la sortie du script est
+            insérée dans le buffer.
+            Mais `!p` est différent.
+            Avec `!p`, UltiSnips  ignore la sortie de  l'expression python qu'on
+            écrit.
+            Il ne fait que l'évaluer.
+            Pour  insérer  sa  sortie  dans  le buffer,  il  faut  l'affecter  à
+            `snip.rv`.
+
+
+                                               NOTE:
+
+            Si on modifie la valeur d'un  tabstop en mode normal via la commande
+            `r`, l'interpolation est mise à jour.
+            Ça  peut donner  l'impression  de travailler  avec  un tableur  (pgm
+            manipulant des feuilles de calcul).
+
+## Substitution
+
+On  peut  réinsérer  automatiquement  un  tabstop où  l'on  veut,  on  parle  de
+“mirroring“.
+On peut également effectuer une substitution au sein du tabstop miroir.
+
+
+    snippet fmatter
+    ---
+    title: ${1:my placeholder}
+    ---
+    # $1
+    $0
+    endsnippet
+
+            Le 1er tabstop ($1) est répété 2 fois.
+            Cela implique que lorsqu'on lui donne  une valeur, le même texte est
+            inséré automatiquement une 2e fois, là où se trouve sa 2e occurrence
+            (ici: `# $1`).
+
+            On dit que le tabstop est “mirrored“ (reflété).
+
+
+    snippet t "A simple HTML tag" bm
+    <${1:div}>
+    </${1/(\w+).*/$1/}>
+    endsnippet
+
+            On applique une transformation sur le miroir.
+            Il s'agit de la substitution:    :s/(\w+).*/$1/
+
+            Le $1 au  sein de la substitution ne correspond  pas au 1er tabstop,
+            mais à la 1e sous-expression capturée dans le pattern (\w+).
+            L'expression régulière est gérée par python et non par Vim.
+
+
+                                               NOTE:
+
+            La chaîne de remplacement peut contenir des variables `$i`, qui font
+            référence au sous-expressions capturées dans le pattern.
+            Ici, `$1` fait référence au 1er mot capturé dans le 1er tabstop.
+
+            `$0` est spéciale: elle fait référence à l'ensemble du match (équivaut à `&` ou `\0` dans Vim).
+
+
+    snippet cond
+    ${1:some_text}
+    ${1/(a)|.*/(?1:foo:bar)/}
+    endsnippet
+
+            Le miroir subit une substitution conditionnelle, qui:
+
+                    1. cherche et capture le pattern `a`:
+
+                    2. pour le remplacer par:    (?1:foo:bar)
+
+            Ça  signifie  que si  le  texte  inséré  dans le  tabstop  d'origine
+            commence par  un `a`,  il sera  remplacé par  `foo` dans  le miroir,
+            autrement il sera totalement (`|.*`) remplacé par `bar`.
+
+
+            Section de l'aide pertinente:  :h Ultisnips-replacement-string
+
+
+                                               NOTE:
+
+            Le token `?1` permet de tester si le groupe 1 a capturé qch ou pas.
+            Le  token  `()`  permet  de  demander  à  Ultisnips  de  traiter  le
+            remplacement comme une expression à évaluer.
+            Similaire à `\=` pour la commande `:s` dans Vim.
+
+
+    ${1/(a)|(b)|.*/(?1:foo)(?2:bar)/}
+
+            Ici, la substitution:
+
+                    1. cherche le pattern:       (a)|(b)|.*
+                       en capturant `a` ou `b` si le caractère est trouvé
+
+                    2. pour le remplacer par:    (?1:foo)(?2:bar)
+
+            Ce qui  signifie que si  le texte  inséré dans le  tabstop d'origine
+            commence par un:
+
+                    • `a`, le miroir commencera par `foo`
+                    • `b`, "                        `bar`
+                    • ni `a`, ni `b`, le miroir sera vide
+
+
+                                               NOTE:
+
+            On   remarque   au   passage   qu'il  semble   que   python   ajoute
+            automatiquement l'ancre `^` au début du pattern.
+
+                                               NOTE:
+
+            On   pourrait   omettre  la   dernière   branche   `|.*`;  le   code
+            fonctionnerait pratiquement à l'identique.
+            À ceci près que le texte  inséré dans le tabstop d'origine ne serait
+            pas supprimé  dans le miroir  lorsqu'il ne  commence pas par  `a` ou
+            `b`.
+
+
+    ${1/(a)|(b)|.*/(?1:foo:bar)(?2:baz:qux)/}
+
+            Si le texte inséré dans le tabstop d'origine commence par un:
+
+                    • `a`, le miroir commencera par `fooqux`
+                    • `b`, "                        `barbaz`
+                    • ni `a`, ni `b`, le miroir commencera par `barqux`
+
+            Illustre qu'un miroir peut être aussi intelligent qu'on veut; i.e.
+            être capable d'effectuer autant  de substitutions que nécessaire, et
+            choisir  la  bonne  en  fonction d'une  caractéristique  du  tabstop
+            d'origine.
+
+## Misc
 
 When  you  write some  python  code  (function/interpolation),  you can  add  an
 arbitrary key  to `snip`, but it  will be removed as  soon as the code  has been
@@ -992,181 +1227,13 @@ The python modules:
     • string
     • vim
 
-… are pre-imported within the scope of the snippet code.  Other modules can be
-imported using the python 'import' command:
+... are pre-imported within the scope of the snippet code.
+Other modules can be imported using the python 'import' command:
 
     `!p
     import uuid
-    …
+    ...
     `
-
-#
-# Issues
-#
-#
-#
-## Interpolation
-
-    `date`
-    `!v strftime('%c')`
-    `!p python code`
-
-            Interpolation d'une commande shell ou d'une expression Vim.
-
-            Les backticks encadrent la commande / expression interpolée.
-            `!v` indique que ce qui suit est une expression Vim.
-            `!p` "                           du code python.
-
-
-    snippet wpm "average speed" b
-    I typed ${1:750} words in ${2:30} minutes; my speed is `!p
-    snip.rv = float(t[1]) / float(t[2])
-    ` words per minute
-    endsnippet
-
-            Si  on  écrit  un bloc  de  code  python,  après  le `!p`,  on  peut
-            chaque écrire  chaque instruction  sur une ligne  dédiée, pour  + de
-            lisibilité.
-
-            De  plus, UltiSnips  configure  automatiquement  certains objets  et
-            variables python, valables au sein du bloc de code:
-
-                    • snip.rv    = variable 'return value'; sa valeur sera interpolée au sein du document
-
-                    • t          = liste dont les éléments contiennent le texte inséré dans les
-                                   différents tabstops; ex:    t[1] = $1, t[2] = $2
-
-            Ici, `float()` est une fonction python, et non Vim.
-
-
-                                               NOTE:
-
-            Quelle différence entre `!p` et `#!/usr/bin/python`?
-            Qd une interpolation débute par un  shebang, la sortie du script est
-            insérée dans le buffer.
-            Mais `!p` est différent.
-            Avec `!p`, UltiSnips  ignore la sortie de  l'expression python qu'on
-            écrit.
-            Il ne fait que l'évaluer.
-            Pour  insérer  sa  sortie  dans  le buffer,  il  faut  l'affecter  à
-            `snip.rv`.
-
-
-                                               NOTE:
-
-            Si on modifie la valeur d'un  tabstop en mode normal via la commande
-            `r`, l'interpolation est mise à jour.
-            Ça  peut donner  l'impression  de travailler  avec  un tableur  (pgm
-            manipulant des feuilles de calcul).
-
-## Substitution
-
-On peut réinsérer automatiquement un tabstop où l'on veut, on parle de “mirroring“.
-On peut également effectuer une substitution au sein du tabstop miroir.
-
-
-    snippet fmatter
-    ---
-    title: ${1:my placeholder}
-    ---
-    # $1
-    $0
-    endsnippet
-
-            Le 1er tabstop ($1) est répété 2 fois.
-            Cela implique que lorsqu'on lui donne une valeur, le même texte est inséré automatiquement
-            une 2e fois, là où se trouve sa 2e occurrence (ici:    `# $1`).
-
-            On dit que le tabstop est “mirrored“ (reflété).
-
-
-    snippet t "A simple HTML tag" bm
-    <${1:div}>
-    </${1/(\w+).*/$1/}>
-    endsnippet
-
-            On applique une transformation sur le miroir.
-            Il s'agit de la substitution:    :s/(\w+).*/$1/
-
-            Le  $1 au  sein de  la substitution  ne correspond  pas au  1er tabstop,  mais à  la 1e
-            sous-expression capturée  dans le pattern  (\w+). L'expression régulière  est gérée
-            par python et non par Vim.
-
-
-                                               NOTE:
-
-            La chaîne  de remplacement peut  contenir des variables  `$i`, qui font  référence au
-            sous-expressions  capturées dans  le pattern.  Ici, `$1`  fait référence  au 1er  mot
-            capturé dans le 1er tabstop.
-
-            `$0` est spéciale: elle fait référence à l'ensemble du match (équivaut à `&` ou `\0` dans Vim).
-
-
-    snippet cond
-    ${1:some_text}
-    ${1/(a)|.*/(?1:foo:bar)/}
-    endsnippet
-
-            Le miroir subit une substitution conditionnelle, qui:
-
-                    1. cherche et capture le pattern `a`:
-
-                    2. pour le remplacer par:    (?1:foo:bar)
-
-            Ça signifie que si le texte inséré dans  le tabstop d'origine commence par un `a`, il
-            sera  remplacé  par `foo`  dans  le  miroir,  autrement  il sera  totalement  (`|.*`)
-            remplacé par `bar`.
-
-
-            Section de l'aide pertinente:  :h Ultisnips-replacement-string
-
-
-                                               NOTE:
-
-            Le token `?1` permet de tester si le groupe 1 a capturé qch ou pas.
-            Le token `()` permet de demander à Ultisnips de traiter le remplacement comme
-            une expression à évaluer. Similaire à `\=` pour la commande `:s` dans Vim.
-
-
-    ${1/(a)|(b)|.*/(?1:foo)(?2:bar)/}
-
-            Ici, la substitution:
-
-                    1. cherche le pattern:       (a)|(b)|.*
-                       en capturant `a` ou `b` si le caractère est trouvé
-
-                    2. pour le remplacer par:    (?1:foo)(?2:bar)
-
-            Ce qui signifie que si le texte inséré dans le tabstop d'origine commence par un:
-
-                    • `a`, le miroir commencera par `foo`
-                    • `b`, "                        `bar`
-                    • ni `a`, ni `b`, le miroir sera vide
-
-
-                                               NOTE:
-
-            On remarque au passage qu'il semble que python ajoute automatiquement l'ancre `^` au début
-            du pattern.
-
-                                               NOTE:
-
-            On pourrait omettre  la dernière branche `|.*`; le code  fonctionnerait pratiquement à
-            l'identique. À ceci près que le texte inséré dans le tabstop d'origine ne serait pas
-            supprimé dans le miroir lorsqu'il ne commence pas par `a` ou `b`.
-
-
-    ${1/(a)|(b)|.*/(?1:foo:bar)(?2:baz:qux)/}
-
-            Si le texte inséré dans le tabstop d'origine commence par un:
-
-                    • `a`, le miroir commencera par `fooqux`
-                    • `b`, "                        `barbaz`
-                    • ni `a`, ni `b`, le miroir commencera par `barqux`
-
-            Illustre  qu'un miroir  peut  être aussi  intelligent qu'on  veut;  i.e. être  capable
-            d'effectuer autant de substitutions que nécessaire, et choisir la bonne en fonction
-            d'une caractéristique du tabstop d'origine.
 
 ## Configuration
 
@@ -1386,7 +1453,8 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
             UltiSnips active tous les snippets liés aux types de fichiers dont le nom suit.
             Pex ici:    perl, ruby
 
-            On peut utiliser autant de directives `extends` qu'on veut, et les placer où on veut.
+            On peut utiliser  autant de directives `extends` qu'on  veut, et les
+            placer où on veut.
 
 
     priority 42
@@ -1394,8 +1462,8 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
             Les snippets définis après cette ligne ont une priorité de 42.
             Sans cette directive, par défaut, les snippets ont une priorité de 0.
 
-            En cas de conflit, càd si un tab trigger est utilisé dans 2 snippets différents,
-            celui ayant la plus haute priorité gagne.
+            En cas de conflit, càd si un tab trigger est utilisé dans 2 snippets
+            différents, celui ayant la plus haute priorité gagne.
 
 
     snippet tab_trigger "description" options
@@ -1406,32 +1474,38 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
 
                                                NOTE:
 
-            Si le tab trigger contient un espace, il faut l'encadrer avec un caractère qui n'apparaît
-            pas en son sein, comme des guillemets. Ex:
+            Si le  tab trigger contient  un espace,  il faut l'encadrer  avec un
+            caractère qui n'apparaît pas en son sein, comme des guillemets.
+            Ex:
 
                     snippet "tab trigger"
 
-            Si on veut en plus qu'il contienne des guillemets, on peut utiliser le point d'exclamation:
+            Si on veut en plus qu'il  contienne des guillemets, on peut utiliser
+            le point d'exclamation:
 
                     snippet !"tab trigger"!
 
-            Qd plusieurs snippets ont le même tab trigger et la même priorité, UltiSnips affiche
-            la liste des snippets possibles, chacun avec leur description.
-            C'est à ce moment-là que la description est utile. Elle permet à l'utilisateur de choisir
-            le bon.
+            Qd plusieurs snippets  ont le même tab trigger et  la même priorité,
+            UltiSnips affiche la liste des  snippets possibles, chacun avec leur
+            description.
+            C'est à ce moment-là que la description est utile.
+            Elle permet à l'utilisateur de choisir le bon.
 
             Exception:
-            En cas de conflit entre 2 snippets, l'un d'eux utilisant l'option `e` mais pas l'autre,
-            celui qui utilise `e` a automatiquement la priorité.
-            Ça permet de définir un snippet “fallback” qd la condition testée par l'expression
-            du snippet utilisant `e` échoue.
+            En cas  de conflit entre  2 snippets, l'un d'eux  utilisant l'option
+            `e` mais  pas l'autre,  celui qui utilise  `e` a  automatiquement la
+            priorité.
+            Ça permet  de définir un  snippet “fallback” qd la  condition testée
+            par l'expression du snippet utilisant `e` échoue.
 
 
                                                NOTE:
 
-            Pour augmenter le niveau d'indentation d'une ligne au sein du snippet, il faut la préfixer
-            avec un caractère littéral. Qd le snippet sera développé, le caractère tab sera inséra
-            littéralement ou remplacé par des espaces suivant la valeur de 'expandtab'.
+            Pour  augmenter  le niveau  d'indentation  d'une  ligne au  sein  du
+            snippet, il faut la préfixer avec un caractère littéral.
+            Qd  le  snippet  sera  développé,   le  caractère  tab  sera  inséra
+            littéralement  ou remplacé  par  des espaces  suivant  la valeur  de
+            'expandtab'.
 
             Dans un snippet, on peut voir le caractère tab comme l'appui sur la touche tab.
 
@@ -1475,8 +1549,9 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
     \`texte entouré de backticks\`
     endsnippet
 
-            Le caractère backtick ayant un sens spécial  pour UltiSnips, si on veut en insérer un
-            littéralement dans un snippet, il faut l'échapper.
+            Le  caractère backtick  ayant  un sens  spécial  pour UltiSnips,  si
+            on  veut  en insérer  un  littéralement  dans  un snippet,  il  faut
+            l'échapper.
 
 
     snippet fmatter
@@ -1496,13 +1571,16 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
             et
                     g:UltiSnipsJumpBackwardTrigger
 
-            Le tabstop $0 est spécial, car qd on arrive sur lui, UltiSnips considère que le développement
-            du tab trigger et l'édition du snippet sont terminés.
-            Déplacer le curseur en-dehors du snippet termine également son développement.
+            Le  tabstop $0  est spécial,  car qd  on arrive  sur lui,  UltiSnips
+            considère  que  le développement  du  tab  trigger et  l'édition  du
+            snippet sont terminés.
+            Déplacer  le  curseur en-dehors  du  snippet  termine également  son
+            développement.
 
             Dès lors, on ne peut plus naviguer entre les autres tabstops.
 
-            Tant qu'on reste au-sein du snippet, les raccourcis fonctionnent en mode insertion et sélection.
+            Tant qu'on reste au-sein du  snippet, les raccourcis fonctionnent en
+            mode insertion et sélection.
 
 
     title: ${1:my placeholder}
@@ -1511,7 +1589,8 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
 
                     $1    →    ${1:my placeholder}
 
-            Ici il s'agit d'une simple chaîne de caractères, mais on pourrait aussi utiliser:
+            Ici il  s'agit d'une simple  chaîne de caractères, mais  on pourrait
+            aussi utiliser:
 
                     • une interpolation d'une commande shell/VimL/python… entre des backticks. Ex:
 
@@ -1519,10 +1598,12 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
 
                     • autre tabstop
 
-            Qd notre curseur est positionné sur un tabstop doté d'un placeholder, ce dernier
-            est sélectionné visuellement, et on se trouve en mode 'select'.
-            Ainsi, n'importe quel caractère tapé remplace automatiquement le placeholder,
-            et on peut continuer à insérer des caractères ensuite, car on est alors en mode 'insertion'.
+            Qd  notre   curseur  est  positionné   sur  un  tabstop   doté  d'un
+            placeholder,  ce  dernier est  sélectionné  visuellement,  et on  se
+            trouve en mode 'select'.
+            Ainsi,  n'importe quel  caractère tapé  remplace automatiquement  le
+            placeholder, et on peut continuer  à insérer des caractères ensuite,
+            car on est alors en mode 'insertion'.
 
 
     snippet a
@@ -1539,18 +1620,20 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
 
                     ${3:link}
 
-            Imbriquer 2 tabstops permet d'exprimer une relation de dépendance entre eux:
-            l'un est une partie de l'autre.
+            Imbriquer 2  tabstops permet  d'exprimer une relation  de dépendance
+            entre eux: l'un est une partie de l'autre.
 
-            Ici, si  on supprime l'attribut,  la valeur est  automatiquement supprimée. Ce  qui est
-            souhaitable, car  on ne pourrait  pas avoir un attribut  (`class`) HTML sans  valeur, ni
-            l'inverse, une valeur sans attribut.
+            Ici,  si  on  supprime  l'attribut, la  valeur  est  automatiquement
+            supprimée.
+            Ce qui  est souhaitable, car  on ne  pourrait pas avoir  un attribut
+            (`class`) HTML sans valeur, ni l'inverse, une valeur sans attribut.
 
 
                                                NOTE:
 
             Le placeholder `link` du 3e tabstop est important.
-            Sans lui, si on supprime le 2e tabstop, le 3e n'est pas automatiquement supprimé.
+            Sans  lui,  si   on  supprime  le  2e  tabstop,  le   3e  n'est  pas
+            automatiquement supprimé.
             Plus généralement, un tabstop est automatiquement supprimé ssi:
 
                 • il est inclus dans le placeholder d'un autre tabstop
@@ -1689,6 +1772,10 @@ exécuter une directive. Parmi ces mots-clés, on trouve:
 
                     `!p snip.rv = snip.v.text.strip('x')`
 
+#
+#
+#
+# Issues
 #
 #
 #

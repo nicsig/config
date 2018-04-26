@@ -507,19 +507,18 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
 endfu
 
 fu! myfuncs#keyword_custom(chars) abort "{{{1
-    "   ┌─ the restoration will be done from an autocmd
-    "   │  and an autocmd runs in the context of the script where it was installed
-    "   │
-    let s:isk_save = &l:isk
+    if !exists('b:isk_save')
+        let b:isk_save = &l:isk
+    endif
 
     try
         for char in split(a:chars, '\zs')
             exe 'setl isk+='.char2nr(char)
         endfor
         augroup keyword_custom
-            au!
-            au CompleteDone <buffer> let &l:isk = s:isk_save
-                                  \| unlet! s:isk_save
+            au! * <buffer>
+            au CompleteDone <buffer> let &l:isk = get(b:, 'isk_save', &l:isk)
+                                  \| unlet! b:isk_save
                                   \| exe 'au! keyword_custom'
                                   \| aug! keyword_custom
         augroup END
