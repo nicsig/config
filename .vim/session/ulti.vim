@@ -7,7 +7,6 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +518 ~/.vim/autoload/myfuncs.vim
 badd +2 ~/.vim/UltiSnips/vim.snippets
 badd +116 ~/Desktop/md.md
 badd +1 /tmp/sh.sh
@@ -17,9 +16,8 @@ badd +44 ~/.vim/UltiSnips/sh.snippets
 badd +65 ~/.vim/UltiSnips/README.md
 badd +40 ~/.vim/UltiSnips/help.snippets
 badd +58 ~/Dropbox/wiki/vim/complete.md
-badd +86 ~/.vim/plugged/vim-completion/plugin/completion.vim
-badd +316 ~/.vim/plugged/vim-completion/autoload/completion.vim
-badd +0 ~/.vim/plugged/vim-completion/.git/COMMIT_EDITMSG
+badd +1 ~/.vim/plugged/vim-completion/autoload/completion.vim
+badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -71,7 +69,7 @@ setlocal fen
 normal! zo
 31
 normal! zo
-let s:l = 40 - ((3 * winheight(0) + 0) / 1)
+let s:l = 40 - ((39 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -121,7 +119,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 116 - ((13 * winheight(0) + 0) / 1)
+let s:l = 116 - ((26 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -229,13 +227,15 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 58 - ((57 * winheight(0) + 15) / 30)
+25
+normal! zo
+let s:l = 83 - ((7 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-58
-normal! 0
-tabedit ~/.vim/autoload/myfuncs.vim
+83
+normal! 02|
+tabedit ~/.vim/plugged/vim-completion/autoload/completion.vim
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
@@ -249,74 +249,18 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-509
-normal! zo
-let s:l = 516 - ((403 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-516
-normal! 05|
-tabedit ~/.vim/plugged/vim-completion/plugin/completion.vim
+1
+normal! 02|
+tabedit ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 15 + 16) / 33)
-exe '3resize ' . ((&lines * 12 + 16) / 33)
 arglocal
 silent! argdel *
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-63
-normal! zo
-73
-normal! zo
-74
-normal! zo
-let s:l = 85 - ((3 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-85
-normal! 016|
-wincmd w
-arglocal
-silent! argdel *
-if bufexists('~/.vim/plugged/vim-completion/autoload/completion.vim') | buffer ~/.vim/plugged/vim-completion/autoload/completion.vim | else | edit ~/.vim/plugged/vim-completion/autoload/completion.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-74
-normal! zo
-let s:l = 316 - ((28 * winheight(0) + 7) / 15)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-316
-normal! 058|
-wincmd w
-arglocal
-silent! argdel *
-if bufexists('~/.vim/plugged/vim-completion/.git/COMMIT_EDITMSG') | buffer ~/.vim/plugged/vim-completion/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-completion/.git/COMMIT_EDITMSG | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -326,17 +270,12 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 6) / 12)
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-wincmd w
-3wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 15 + 16) / 33)
-exe '3resize ' . ((&lines * 12 + 16) / 33)
 tabnext 7
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')

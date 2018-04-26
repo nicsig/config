@@ -1746,20 +1746,6 @@ vno  <c-z>  <nop>
 " We can still use C-p though.
 ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
 
-" We still hit other keys by accident, which break the workflow.
-" Probably `C-i` (undistinguished from `Tab`), and sth like `C-c C-f`.
-" The latter makes us leave insert mode, then move the cursor one screen
-" forward. Very annoying.
-" We can't disable `C-i`, it would disable `Tab` and we use it to complete
-" text.
-" However, we can disable `C-c C-f`.
-" As well as `C-c C-b`, `C-c C-d`, `C-c C-u` for good measure.
-
-" ino <c-c><c-b> <nop>
-" ino <c-c><c-f> <nop>
-" ino <c-c><c-u> <nop>
-" ino <c-c><c-d> <nop>
-
 " I often hit `do` and `dp` by accident, when in fact I only wanted to hit
 " `o` or `p`.
 " Anyway, `do` and `dp` are only useful in a buffer which is in diff mode.
@@ -1937,10 +1923,6 @@ endfu
 
 ino  <expr>  <c-m>  <sid>c_m()
 
-" C-p             fix sPelling error {{{3
-
-ino  <expr><silent>  <c-p>  pumvisible() ? '<c-p>' : myfuncs#fix_spell()
-
 " C-q             exit completion menu {{{3
 
 " Because  of a  mapping in  `vim-readline`, we've  lost the  ability to  exit a
@@ -1980,122 +1962,6 @@ endfu
 " Alternative:
 "     imap  <c-s>  <esc><c-s>
 ino  <silent>  <c-s>  <esc>:sil update<cr>
-
-" C-x             completions {{{3
-" C-]     tag {{{4
-
-" When a tag  contains a colon (e.g. global variable  `g:netrw`), the completion
-" function tries to complete only up until the colon (netrw).
-"
-" In  the  same  way  we  try  to  fix  the  problem  of  multi  words  synonyms
-" ('thesaurus'), by temporarily adding the colon  character (58) to the value of
-" 'iskeyword'  when  C-x C-]  is  hit,  and then  removing  it  as soon  as  the
-" completion is done.
-"
-" We   also   add   the   hyphen    character   (useful   for   something   like
-" `ins-completion-menu`).
-
-ino  <silent>  <c-x><c-]>  <c-r>=myfuncs#keyword_custom(':-'.(&ft is# 'vim' ? '<' : ''))<cr><c-x><c-]>
-
-" C-k     dictionary {{{4
-
-ino  <c-x><c-k>  <c-r>=<sid>set_dict()<cr><c-x><c-k>
-
-fu! s:set_dict() abort
-    exe 'setl dict='.(&l:spelllang is# 'en' ? '/usr/share/dict/words' : '/usr/share/dict/french')
-    return ''
-endfu
-
-" Previously, we used this code:
-"
-"     ino <c-x><c-k> <c-o>:exe 'setl dict=' .
-"                       \ (&l:spelllang is# 'en' ?
-"                       \ '/usr/share/dict/words' :
-"                       \ '/usr/share/dict/french')<cr><c-x><c-k>
-"
-" But it caused a bug. Here's how to reproduce it.
-" 1. Write a column of `0`'s in a buffer:
-"     0
-"     0
-"
-" 2. Hit `C-v j A`, to insert some text after the column.
-" 3. Hit `a Tab`, to insert the character `a` then try to complete this text.
-"
-" The result is that the rhs of the `C-x C-k` mapping is inserted into the
-" buffer. The reason for this seems to be that `i_C-o` doesn't work as usual
-" when we entered insert mode from visual block mode. See our notes for more
-" detail on the subject (look for: ’i_C-o’).
-"
-" Moral of the story:
-" Don't use `i_C-o` in a mapping.
-"
-" Update:
-" It should be fixed by patch `8.0.0282`:
-"         https://github.com/vim/vim/commit/0b5c93a7f266cd8c90ea27bdaf9f7214a95d64d7
-
-" C-s     function signature {{{4
-
-" Usage:
-"
-"         1. call matchadd(
-"         2. press `C-x C-s`
-"         3. call matchadd({group}, {pattern} [, {priority} [, {id} [, {dict}]]])
-
-ino  <expr><silent>  <c-x><c-s>  <sid>complete_signature()
-
-fu! s:complete_signature() abort
-    let func_name = matchstr(getline('.'), '\<\w\+\ze()\?\%'.col('.').'c')
-    if empty(func_name)
-        return ''
-    endif
-
-    let signature = get(filter(readfile($VIMRUNTIME.'/doc/eval.txt'),
-    \                          {i,v -> v =~ '^'.func_name.'('}),
-    \                   0, '')
-    " needed, for example, for `deepcopy()`
-    let signature = matchstr(signature, '.\{-})')
-    if empty(signature)
-        return ''
-    endif
-
-    let new_line = substitute(getline('.'), func_name.'\%[()]', signature, '')
-    call timer_start(0, {-> setline(line('.'), new_line)})
-    return ''
-endfu
-
-" C-t     synonym {{{4
-
-" Pb:
-" If a synonym contains several words (e.g. important → of vital importance),
-" the completion function considers each of them as a distinct synonym.
-" Thus, if a synonym contains 3 words, the function populates the popup
-" menu with 3 entries.
-
-" Solution:
-"         http://stackoverflow.com/a/21132116
-"
-" Create a  wrapper around  C-x C-t  to temporarily include  the space  and dash
-" characters in 'isk'. We'll  remove them as soon as the  completion is done (or
-" cancelled).
-" It doesn't seem to affect the completed text, only the synonyms.
-" Even with a space in 'isk', the completion function only tries to complete
-" the last word before the cursor.
-
-ino  <silent>  <c-x><c-t>  <c-r>=myfuncs#keyword_custom(' -')<cr><c-x><c-t>
-
-" C-z             easy C-x C-p {{{3
-
-ino  <expr><silent>  <c-z>  <sid>easy_c_x_c_p()
-
-fu! s:easy_c_x_c_p() abort
-    let cot_save = &cot
-    set cot-=noinsert
-    call timer_start(0, {-> execute('let &cot = '.string(cot_save))})
-    return "\<c-x>\<c-p>"
-endfu
-
-" Inspiration:
-" https://www.reddit.com/r/vim/comments/78h4pr/plugins_andor_keybindings_you_couldnt_live_without/dou7z5n/
 
 " M-a  M-e {{{3
 
@@ -5340,7 +5206,7 @@ endfu
 " https://github.com/zeis/kokoi
 "
 " 12 -
-" In `mycompletion`, we have to choose between 2 problems.
+" In `vim-completion`, we have to choose between 2 problems.
 " Either we add `noselect` inside 'cot' and we break undo sequence.
 " Or we don't, but then, when we complete a word, if there're several
 " candidates and we insert a character to reduce their nr, the popup menu closes.
