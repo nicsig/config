@@ -2190,7 +2190,11 @@ fu! s:split_paragraph(compact, mode) abort
     \ :     [line("'<"), line("'>")]
 
     " get the address of the last line of the paragraph/selection
-    let lnum2 = lastline + (a:mode is# 'n' ? (lastline ==# line('$') ? 0 : -1) : 0)
+    if a:mode is# 'n' && getline(lastline) =~# '^\s*$'
+        let lnum2 = lastline - 1
+    else
+        let lnum2 = lastline
+    endif
 
     " get the address of the first line
     let lnum1 = firstline ==# 1 && getline(1) =~# '\S'
@@ -2210,43 +2214,51 @@ fu! s:split_paragraph(compact, mode) abort
         return
     endif
 
-    " Replace soft hyphens which we sometimes copy from a pdf.
-    " They are annoying because they mess up the display of nearby characters.
-    sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\u00ad/-/ge'
+    try
+        " Replace soft hyphens which we sometimes copy from a pdf.
+        " They are annoying because they mess up the display of nearby characters.
+        sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\u00ad/-/ge'
 
-    " In a markdown file, we could have a leading `>` in front of quoted lines.
-    " The next `:j` won't remove them. We need to do it manually, and keep only
-    " the first one.
-    sil exe 'keepj '.(lnum1+1).','.lnum2.'s/^>//e'
+        " In a markdown file, we could have a leading `>` in front of quoted lines.
+        " The next `:j` won't remove them. We need to do it manually, and keep only
+        " the first one.
+        sil exe 'keepj '.(lnum1+(lnum1 < lnum2 ? 1 : 0)).','.lnum2.'s/^>//e'
 
-    " join all the lines in a single one
-    sil exe 'keepj '.lnum1.','.lnum2.'j'
+        " join all the lines in a single one
+        sil exe 'keepj '.lnum1.','.lnum2.'j'
 
-    " break the line down according to the punctuation
-    let pat = '[.!?]\zs\%(\s\+\|$\)\|:\zs\s*$'
-    let indent = matchstr(getline(lnum1), '^\s*')
-    sil exe printf("keepj keepp s/%s/\\=%s/g", pat, string("\n\n".indent))
+        " break the line down according to the punctuation
+        let pat = '[.!?]\zs\%(\s\+\ze\u\|$\)\|:\zs\s*$'
+        let indent = matchstr(getline(lnum1), '^\s*')
+        sil exe printf('keepj keepp s/%s/\=%s/ge', pat, string("\n\n".indent))
 
-    " 2 empty lines have been added (one where we are right now, and the one above);
-    " remove them
-    sil -,d_
+        " 2 empty lines have been added (one where we are right now, and the one above);
+        " remove them
+        " Why using a global command?{{{
+        "
+        " To be sure we're deleting empty lines.
+        "}}}
+        sil keepj keepp -,g/^\s*$/d_
 
-    " format with `$ par`
-    sil exe printf('keepj keepp %d,%dg/\S/norm gqq', lnum1, line('.'))
+        " format with `$ par`
+        sil exe printf('keepj keepp %d,%dg/\S/norm gqq', lnum1, line('.'))
 
-    " remove empty lines
-    if a:compact
-        sil exe printf('keepj keepp %d,%dg/^$/d_', lnum1, line('.'))
-    endif
+        " remove empty lines
+        if a:compact
+            sil exe printf('keepj keepp %d,%dg/^$/d_', lnum1, line('.'))
+        endif
 
-    sil update
+        sil update
 
-    call setpos('.', pos)
+        call setpos('.', pos)
 
-    " make the mapping repeatable
-    if a:mode is# 'n'
-        sil! call repeat#set("\<plug>(split-paragraph".(a:compact ? '-compact)' : ')'))
-    endif
+        " make the mapping repeatable
+        if a:mode is# 'n'
+            sil! call repeat#set("\<plug>(split-paragraph".(a:compact ? '-compact)' : ')'))
+        endif
+    catch
+        return lg#catch_error()
+    endtry
 endfu
 
 " s                             saiw {{{4
@@ -3810,13 +3822,13 @@ xno  <expr>  g<c-x>  <sid>niceblock('g C-x')
 
 " d y         preserve last deleted/yanked visual selected text through registers {{{3
 
-" when we delete sth in visual mode to move it somewhere else, if we delete
-" sth else before pasting it, we lose it (well technically it's still
-" accessible from a numbered register, but if we delete several things, we
-" have to execute `:reg` to see where it is now)
+" When we delete sth in visual mode to  move it somewhere else, if we delete sth
+" else before  pasting it, we  lose it  (well technically it's  still accessible
+" from a numbered register, but if we  delete several things, we have to execute
+" `:reg` to see where it is now).
 
-" with this mapping, we can always access the last text we deleted in visual
-" mode, from the `v` register
+" With this  mapping, we can  always access the last  text we deleted  in visual
+" mode, from the `v` register.
 xno  <expr><silent>  d  'd'.timer_start(0, {-> execute('let @v=@"')})[-1]
 
 " same thing when we yank
@@ -6462,7 +6474,7 @@ fu! s:quick_and_dirty_settings() abort
     call cursor(1,1)
     let end = search('^QnD_END$')
     if !end
-        norm! g`.
+        sil! norm! g`.
     endif
 
     let settings = getline(2, end - 1)
@@ -6473,7 +6485,7 @@ fu! s:quick_and_dirty_settings() abort
         au BufWinEnter <buffer> exe 'so '.b:quick_and_dirty_settings
     augroup END
 
-    norm! g`.
+    sil! norm! g`.
 endfu
 
 
@@ -6525,7 +6537,8 @@ fu! s:save_last_qfl() abort
         endif
         return
     endif
-    call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
+    " call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
+    call map(qfl, {i,v -> extend(v, {'filename': fnamemodify(bufname(v.bufnr), ':p')})})
     call map(qfl, {i,v -> remove(v, 'bufnr') ? v : v})
     let g:MY_LAST_QFL = {'qfl': qfl, 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
 endfu

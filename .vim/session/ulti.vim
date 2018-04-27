@@ -7,17 +7,17 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +2 ~/.vim/UltiSnips/vim.snippets
-badd +116 ~/Desktop/md.md
+badd +310 ~/Dropbox/wiki/vim/complete.md
+badd +5 ~/.vim/plugged/vim-completion/autoload/completion.vim
+badd +1086 ~/Dropbox/wiki/vim/qf.md
+badd +1 ~/.vim/UltiSnips/vim.snippets
+badd +1 ~/Desktop/md.md
 badd +1 /tmp/sh.sh
 badd +1 ~/.vim/UltiSnips/markdown.snippets
 badd +20 ~/.vim/pythonx/snippet_helpers.py
 badd +44 ~/.vim/UltiSnips/sh.snippets
-badd +65 ~/.vim/UltiSnips/README.md
+badd +142 ~/.vim/UltiSnips/README.md
 badd +40 ~/.vim/UltiSnips/help.snippets
-badd +58 ~/Dropbox/wiki/vim/complete.md
-badd +1 ~/.vim/plugged/vim-completion/autoload/completion.vim
-badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
 argglobal
 silent! argdel *
 set stal=2
@@ -119,7 +119,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 116 - ((26 * winheight(0) + 0) / 1)
+let s:l = 116 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -207,34 +207,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 142 - ((141 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+142
 normal! 0
-tabedit ~/Dropbox/wiki/vim/complete.md
-set splitbelow splitright
-wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-arglocal
-silent! argdel *
-setlocal fdm=expr
-setlocal fde=fold#md#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-25
-normal! zo
-let s:l = 83 - ((7 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-83
-normal! 02|
 tabedit ~/.vim/plugged/vim-completion/autoload/completion.vim
 set splitbelow splitright
 wincmd t
@@ -254,29 +232,60 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
-normal! 02|
-tabedit ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+normal! 0
+tabedit ~/Dropbox/wiki/vim/complete.md
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 arglocal
 silent! argdel *
-setlocal fdm=manual
-setlocal fde=0
+setlocal fdm=expr
+setlocal fde=fold#md#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+297
+normal! zo
+let s:l = 308 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+308
 normal! 0
-tabnext 7
+wincmd w
+arglocal
+silent! argdel *
+if bufexists('~/Dropbox/wiki/vim/qf.md') | buffer ~/Dropbox/wiki/vim/qf.md | else | edit ~/Dropbox/wiki/vim/qf.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+1049
+normal! zo
+let s:l = 1096 - ((21 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1096
+normal! 0
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext 6
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf

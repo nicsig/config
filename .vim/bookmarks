@@ -13,3 +13,4 @@ U:$HOME/Dropbox/wiki/urxvt.md
 V:$HOME/Dropbox/wiki/vim/
 W:$HOME/Dropbox/wiki/warez.md
 X:$HOME/.Xresources
+Z:$HOME/.vim/plugged/vim-completion/plugin/completion.vim
