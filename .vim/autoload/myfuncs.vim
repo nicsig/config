@@ -1111,11 +1111,13 @@ endfu
 fu! myfuncs#populate_list(list, cmd) abort "{{{1
     if a:list is# 'quickfix'
         " The output of the shell command passed to `:PQ` must be recognized by Vim.
-        " It must match a value in 'grepformat'.
+        " It must match a value in 'efm'.
         " Example:
         "         :PQ find /etc -name '*.conf'                    ✘
         "         :PQ grep -IRn foobar ~/.vim | grep -v backup    ✔
-        cgetexpr systemlist(a:cmd)
+        " cgetexpr systemlist(a:cmd)
+        call system(a:cmd.' >/tmp/my_cfile')
+        cgetfile /tmp/my_cfile
 
         call setqflist([], 'a', { 'title': a:cmd })
 
@@ -1124,7 +1126,7 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
         \                        { i,v -> filereadable(v) }),
         \                    { i,v -> fnameescape(v) }))
         " enable item indicator in the statusline
-        let g:my_stl_list_position = 1
+        let g:my_stl_list_position = 2
     endif
     return ''
 endfu

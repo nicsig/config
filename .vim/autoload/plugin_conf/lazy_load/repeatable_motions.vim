@@ -32,7 +32,7 @@ endif
 nno  <unique>  g;  g,zv
 nno  <unique>  g,  g;zv
 
-" gj  gk      vertical jump {{{2
+" gj  gk         vertical jump {{{2
 
 noremap  <expr><silent><unique>  gk  <sid>vertical_jump_rhs(0)
 noremap  <expr><silent><unique>  gj  <sid>vertical_jump_rhs(1)
@@ -113,7 +113,7 @@ fu! s:get_jump_height(is_fwd) abort
     \    :     line('.') - max(lnums)
 endfu
 
-" ]h  ]r  ]u      move to next path/ref/url {{{2
+" ]h  ]r  ]u     move to next path/ref/url {{{2
 
 " Why not `]H`?{{{
 "
@@ -155,6 +155,20 @@ noremap  <expr>  <silent><unique>  [u  lg#motion#regex#rhs('url', 0)
 noremap  <expr>  <silent><unique>  ]u  lg#motion#regex#rhs('url', 1)
 noremap  <expr>  <silent><unique>  [U  lg#motion#regex#rhs('concealed_url', 0)
 noremap  <expr>  <silent><unique>  ]U  lg#motion#regex#rhs('concealed_url', 1)
+
+" <t  >t         move tab pages {{{2
+
+nno  <silent>  <t  :<c-u>call <sid>move_tabpage('-1')<cr>
+nno  <silent>  >t  :<c-u>call <sid>move_tabpage('+1')<cr>
+
+fu! s:move_tabpage(where) abort
+    try
+        exe 'tabmove '.a:where
+    catch /^Vim\%((\a\+)\)\?:E474/
+    catch
+        return lg#catch_error()
+    endtry
+endfu
 
 " Make `fx` motion, &friends, repeatable {{{1
 
@@ -326,7 +340,7 @@ call lg#motion#repeatable#make#all({
 \                   ]
 \ })
 
-" resize window
+" resize window / move tabpage
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
@@ -335,6 +349,7 @@ call lg#motion#repeatable#make#all({
 \        'motions': [
 \                     { 'bwd': 'Z<c-h>',  'fwd': 'Z<c-l>' },
 \                     { 'bwd': 'Z<c-k>',  'fwd': 'Z<c-j>' },
+\                     { 'bwd': '<t'    ,  'fwd': '>t' },
 \                   ]
 \ })
 

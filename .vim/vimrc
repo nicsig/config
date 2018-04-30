@@ -152,6 +152,7 @@ Plug 'lacygoill/vim-interactive-lists'
 Plug 'lacygoill/vim-lg-lib'
 Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
+Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-python'
 Plug 'lacygoill/vim-qf'
 Plug 'lacygoill/vim-readline'
@@ -654,86 +655,6 @@ set foldopen-=block
 " Useful in our faq notes.
 set foldminlines=0
 
-" formatting {{{2 
-"
-" `par` is an external formatting program, more powerful than Vim's internal
-" formatting function. The latter has several drawbacks:
-"
-"     • it uses a greedy algorithm, which makes it fill a line as much as it
-"       can, without caring about the discrepancies between the lengths of
-"       several lines in a paragraph
-"
-"     • it doesn't handle well multi-line comments, (like /* */)
-"
-" So, when hitting `gq`, we want `par` to be invoked.
-
-" By default, `par` reads the environment  variable `PARINIT` to set some of its
-" options.  Its current value is set in `~/.shrc` like this:
-"
-"         rTbgqR B=.,?_A_a Q=_s>|
-
-set formatprg=par\ -w80rjeq
-"                   │  ││││
-"                   │  │││└── handle nested quotations, often found in the
-"                   │  │││    plain text version of an email
-"                   │  │││
-"                   │  ││└── delete (expel) superfluous lines from the output
-"                   │  ││
-"                   │  │└── justify the output so that all lines (except the last)
-"                   │  │    have the same length, by inserting spaces between words
-"                   │  │
-"                   │  └── fill empty comment lines with spaces (e.g.: /*    */)
-"                   │
-"                   └── no line bigger than 80 characters in the output paragraph
-
-
-" 'formatoptions' / 'fo' handles the automatic formatting of text.
-"
-" I  don't   use  them,  but  the   `c`  and  `t`  flags   control  whether  Vim
-" auto-wrap  Comments (using  textwidth,  inserting the  current comment  leader
-" automatically), and Text (using textwidth).
-
-
-" if:
-"     1. we're in normal mode, on a line longer than `&l:tw`
-"     2. we switch to insert mode
-"     3. we insert something at the end
-"
-" … don't break the line automatically
-set fo=l
-
-" When  joining  lines, don't  insert  a  space  before  or after  a  multi-byte
-" character.  Overrules the 'B' flag.
-"
-"         foo‐    →    foo- bar    ✘
-"         bar
-"
-"         foo‐    →    foo-bar     ✔
-"         bar
-set fo+=M
-
-"       ┌─ insert comment leader after hitting o O in normal mode, from a commented line
-"       │┌─ same thing when we hit Enter in insert mode
-"       ││
-set fo+=or
-
-"       ┌─ don't break a line after a one-letter word
-"       │┌─ where it makes sense, remove a comment leader when joining lines
-"       ││
-set fo+=1jnq
-"         ││
-"         │└─ allow formatting of comments with "gq"
-"         └─ when formatting text, use 'flp' to recognize numbered lists
-
-if has('vim_starting')
-    augroup my_default_local_formatoptions
-        au!
-        " We've configured the global value of 'fo'.
-        " Do the same for its local value in ANY filetype.
-        au FileType * let &l:fo = &g:fo
-    augroup END
-endif
-
 " :grep {{{2
 
 " --vimgrep =
@@ -752,7 +673,7 @@ endif
 "                 │
 "                 │                                    ┌─ print column number
 "                 │                                    │
-set grepprg=ag\ --nogroup\ --nocolor\ --ignore-case\ --column\ --vimgrep\ -f\ --ignore\ mthesaur.txt
+set grepprg=ag\ --nogroup\ --nocolor\ --ignore-case\ --column\ --vimgrep\ -f
 "                                                                │         │
 "               when several matches are found on the same line, ┘         │
 "               report each of them in a dedicated entry                   │
@@ -766,6 +687,14 @@ set grepprg=ag\ --nogroup\ --nocolor\ --ignore-case\ --column\ --vimgrep\ -f\ --
 "     If `pat` is in `link`, which is a symlink pointing to the real file
 "     outside the current directory, ag won't find it, unless we tell it to
 "     follow symlinks.
+"
+" How to ignore a file?{{{
+"
+" Use the `--ignore` option.
+" Example:
+"
+"         ag...\ --ignore\ mthesaur.txt
+"}}}
 
 " Define how the output of ag must be parsed:
 "
@@ -780,7 +709,7 @@ set grepformat=%f:%l:%c:%m,%f:%l:%m
 
 " hidden {{{2
 
-" Hide buffers when they are abandoned
+" Hide a buffer when it's abandoned (instead of unloading it)
 
 set hidden
 
@@ -2161,106 +2090,6 @@ omap  m       <plug>(fzf-maps-o)
 " nno <space>B :vert sbuffer *
 " nno <space>B :<c-u>sbuffer *
 
-" P                             gqip {{{4
-
-"                                              ┌─ don't write:
-"                                              │
-"                                              │      'sil norm <plug>(my_gq)ip'
-"                                              │
-"                                              │  because `:nno` doesn't translate `<plug>`.
-"                                              │
-nno  <silent>  <space>P  mz:<c-u>exe "sil norm \<plug>(my_gq)ip"
-                         \<bar> sil update
-                         \<bar> sil! norm! `z<cr>
-
-" p  C-p                        split long paragraph {{{4
-
-nmap           <space>p                         <plug>(split-paragraph-compact)
-nno  <silent>  <plug>(split-paragraph-compact)  :<c-u>call <sid>split_paragraph(1, 'n')<cr>
-
-nmap           <space><c-p>             <plug>(split-paragraph)
-nno  <silent>  <plug>(split-paragraph)  :<c-u>call <sid>split_paragraph(0, 'n')<cr>
-
-xmap <silent>  <space>p      :<c-u>call <sid>split_paragraph(1, 'x')<cr>
-xmap <silent>  <space><c-p>  :<c-u>call <sid>split_paragraph(0, 'x')<cr>
-
-fu! s:split_paragraph(compact, mode) abort
-    let [firstline, lastline] = a:mode is# 'n'
-    \ ?     [line("'{"), line("'}")]
-    \ :     [line("'<"), line("'>")]
-
-    " get the address of the last line of the paragraph/selection
-    if a:mode is# 'n' && getline(lastline) =~# '^\s*$'
-        let lnum2 = lastline - 1
-    else
-        let lnum2 = lastline
-    endif
-
-    " get the address of the first line
-    let lnum1 = firstline ==# 1 && getline(1) =~# '\S'
-    \ ?             1
-    \ :             firstline + 1
-
-    if getline(lnum1) =~# &l:flp && a:mode is# 'n'
-        return feedkeys("\<plug>(my_gq)ip", 'i')
-    endif
-
-    let pos = getcurpos()
-
-    " The last character of the paragraph needs to be a valid punctuation ending
-    " for a sentence. Otherwise, our function could wrongly delete some lines.
-    if getline(lnum2) =~# '\s*[^.!?:]$'
-        echo 'last char is not a valid punctuation ending for a sentence'
-        return
-    endif
-
-    try
-        " Replace soft hyphens which we sometimes copy from a pdf.
-        " They are annoying because they mess up the display of nearby characters.
-        sil exe 'keepj keepp '.lnum1.','.lnum2.'s/\u00ad/-/ge'
-
-        " In a markdown file, we could have a leading `>` in front of quoted lines.
-        " The next `:j` won't remove them. We need to do it manually, and keep only
-        " the first one.
-        sil exe 'keepj '.(lnum1+(lnum1 < lnum2 ? 1 : 0)).','.lnum2.'s/^>//e'
-
-        " join all the lines in a single one
-        sil exe 'keepj '.lnum1.','.lnum2.'j'
-
-        " break the line down according to the punctuation
-        let pat = '[.!?]\zs\%(\s\+\ze\u\|$\)\|:\zs\s*$'
-        let indent = matchstr(getline(lnum1), '^\s*')
-        sil exe printf('keepj keepp s/%s/\=%s/ge', pat, string("\n\n".indent))
-
-        " 2 empty lines have been added (one where we are right now, and the one above);
-        " remove them
-        " Why using a global command?{{{
-        "
-        " To be sure we're deleting empty lines.
-        "}}}
-        sil keepj keepp -,g/^\s*$/d_
-
-        " format with `$ par`
-        sil exe printf('keepj keepp %d,%dg/\S/norm gqq', lnum1, line('.'))
-
-        " remove empty lines
-        if a:compact
-            sil exe printf('keepj keepp %d,%dg/^$/d_', lnum1, line('.'))
-        endif
-
-        sil update
-
-        call setpos('.', pos)
-
-        " make the mapping repeatable
-        if a:mode is# 'n'
-            sil! call repeat#set("\<plug>(split-paragraph".(a:compact ? '-compact)' : ')'))
-        endif
-    catch
-        return lg#catch_error()
-    endtry
-endfu
-
 " s                             saiw {{{4
 
 nmap  <space>s  saiw
@@ -2387,217 +2216,6 @@ nno  <silent>  goT  :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
 "               ┌───┤
 nno  <expr>  gQ ":\e".execute('ToggleEditingCommands 0', 'silent!').'gQ'
 
-" gq {{{4
-
-" The default `gq` invokes `par` which doesn't recognize bullet lists.
-" OTOH, `gw` recognizes them thanks to 'flp'.
-" We create a wrapper around `gq`, which checks whether the 1st line of the text
-" object  has a  list  header. If  it does,  the  wrapper  should execute  `gw`,
-" otherwise `gq`.
-
-" Why do we create `<plug>` mappings?{{{
-"
-" We have 3 mappings which currently invoke the default `gq`:
-"
-"         • gqic
-"         • gqq
-"         • <space>p
-"
-" We want them to invoke our custom wrapper, and `<plug>` mappings are easier to use.
-"}}}
-nmap            gq             <plug>(my_gq)
-nno   <silent>  <plug>(my_gq)  :<c-u>set opfunc=<sid>my_gq<cr>g@
-
-xmap            gq             <plug>(my_gq)
-xno   <silent>  <plug>(my_gq)  :<c-u>call <sid>my_gq('vis')<cr>
-
-fu! s:my_gq(type) abort
-    let ai_save = &l:ai
-    try
-        " 'ai' needs to be set so that `gw` can properly indent the formatted lines.
-        setl ai
-
-        let [ lnum1, lnum2 ] = a:type is# 'vis'
-                           \ ?     [ line("'<"), line("'>") ]
-                           \ :     [ line("'["), line("']") ]
-
-        let cml = get(split(&l:cms, '%s'), 0, '')
-        let cml = '\%(\V'.escape(cml, '\').'\m\)\?'
-        let has_a_list_header = getline(lnum1) =~# &l:flp
-        let has_diagram = getline(lnum1) =~# '^'.cml.'\s*[│┌]'
-
-        if has_a_list_header
-            sil exe 'norm! '.lnum1.'Ggw'.lnum2.'G'
-
-        elseif has_diagram
-
-            " replace │ with |, and ┌ with ||
-            " Why?{{{
-            "
-            " We want to use the `par` utility to format a paragraph whose lines
-            " begin with │ and ┌, in case it's a diagram.
-            "
-            " If  we  could  include  │  and   ┌  in  the  Q  option  of  `par`,
-            " there  would be  no  need for  a  replacement. But including  them
-            " doesn't work. Maybe because `par`  doesn't fully support multibyte
-            " characters.
-            "
-            " As a  workaround, we  temporarily replace │  and ┌  with different
-            " number of bars.
-            "
-            " Then, we format the diagram.
-            "
-            " Then, we restore the unicode characters.
-            "}}}
-            " Why does it work?{{{
-            "
-            " From the perspective of the `par`  utility, the bar character is a
-            " quote character,  because we've included  it in its Q  option, via
-            " `$PARINIT`:
-            "
-            "         export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
-            "                                          │    │
-            "                                          │    └ bar
-            "                                          │
-            "                                          └ quote characters
-            "
-            " It means that we can format a paragraph whose lines begin with bars.
-            "
-            " For more info,  on how `par` use the quote  characters, search for
-            " “quote” in the `Details` section of our notes on `par`.
-            "}}}
-            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs┌/%s/e', lnum1, lnum2, cml, '||')
-            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs│/%s/e', lnum1, lnum2, cml, '|')
-
-            " format the lines in the diagram
-            sil exe 'norm! '.lnum1.'Ggq'.lnum2.'G'
-
-            " Update the last line of the formatted text.
-            " Why?{{{
-            "
-            " `gq` could have increased the number of lines, or reduced it.
-            " There's no  guarantee that  `lnum2` still matches  the end  of the
-            " original text.
-            "}}}
-            let lnum2 = line("']")
-
-            " restore │ and ┌
-            " Warning:{{{
-            "
-            " You must process the substitutions from the one replacing the most
-            " bars, to the one replacing the least ones.
-            "}}}
-            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs||/┌/e', lnum1, lnum2, cml)
-            sil exe printf('keepj keepp %d,%ds/^%s\s*\zs|/│ /e', lnum1, lnum2, cml)
-            "                                              │
-            "                                              └ leave it!
-
-            " TODO:
-            " Add support for └ (and maybe ┘ ┐).
-            "
-            " There should  be no  need to  replace all  of them  with different
-            " number of bars. Because there can be only  1 corner at a time in a
-            " diagram. We could temporarily replace any of them with two bars.
-
-        else
-            sil exe 'norm! '.lnum1.'Ggq'.lnum2.'G'
-        endif
-    catch
-        return lg#catch_error()
-    finally
-        let &l:ai = ai_save
-        " For some reason, if we're editing a help file, and use `gq`, Vim makes
-        " the buffer noreadonly back.
-        " MWE:
-        "     :h
-        "     coH
-        "     :norm! gqq
-        if &ft is# 'help' && &l:ro
-            setl noro
-        endif
-    endtry
-endfu
-
-" gqs         remove excessive spaces  {{{4
-
-nno  <silent>  gqs  :<c-u>s/\s\{2,}/ /gc<cr>
-
-" gqic        format comment {{{4
-
-nmap            gqic                       <plug>(my_format_comment)
-nno   <silent>  <plug>(my_format_comment)  :<c-u>call <sid>format_comment()<cr>
-
-fu! s:format_comment() abort
-    let cur_line = line('.')
-    norm! mz
-    " select the current comment
-    call comment#object(1, '\|[┘└┐┌│─]\|^\s*"\s*\S\+:')
-    "                         │         │
-    "                         │         └─ and ignore a title (vimCommentTitle)
-    "                         └─ but ignore lines in a diagram
-    " TODO:
-    " This is an ugly hack.
-    " It's not needed anymore.
-    "
-    " Look  at how  we dealt  with lines  containing multibyte  characters (such
-    " as│), in `s:my_gq()`.
-    "
-    " Hint: in  the configuration  of `$  par`, we (ab)use  the notion  of quote
-    " characters.
-    "
-    " Once you've removed this hack.
-    " Simplify  the  code in  `vim-comment`,  by  removing the  second  optional
-    " argument passed to `comment#object()`.
-
-    exe "norm! \e"
-    "           │
-    "           └─ the '< '> marks are not set until we get back to normal mode
-
-    " format the comment
-    if line("'<") ==# line("'>") || cur_line < line("'<") || cur_line > line("'>")
-        return
-    else
-        exe "norm gv\<plug>(my_gq)"
-    endif
-
-    sil! norm! `z
-    sil! call repeat#set("\<plug>(my_format_comment)", v:count1)
-endfu
-
-" gqq {{{4
-
-" When we hit `gqq`  on a commented line, and `par` breaks the  line in 2 lines,
-" the 2nd  line is not commented. We  want it to  be commented, and `par`  to be
-" reinvoked on the 2 lines.
-
-nmap           gqq              <plug>(my_gqq)
-nno  <silent>  <plug>(my_gqq)  :<c-u>call <sid>gqq()<cr>
-
-fu! s:gqq() abort
-    norm! mz
-
-    let was_commented = !empty(&l:cms)
-    \                   ?    stridx(getline('.'), split(&l:cms, '%s')[0]) !=# -1
-    \                   :    0
-    let orig = line('.')
-
-    " format current line
-    exe "sil norm \<plug>(my_gq)_"
-
-    " if the line was commented, and has been split into several new lines (i.e.
-    " the current line address has changed)
-    if was_commented && line('.') !=# orig
-        let range = orig+1.','.line('.')
-        " then comment the lines between the new lines
-        exe range.'CommentToggle'
-        " and format them
-        exe "sil norm \<plug>(my_gq)".(line('.')-orig).'k'
-    endif
-
-    sil! norm! `z
-    sil! call repeat#set("\<plug>(my_gqq)", v:count1)
-endfu
-
 " gt  gT      search todo/fixme (Tags) {{{4
 
 nno  <silent>  gt  :<c-u>call myfuncs#search_todo('buffer')<cr>
@@ -2643,11 +2261,6 @@ fu! s:add_to_loclist(populate) abort
     call setloclist(0, s:my_marks, 'r')
     call setloclist(0, [], 'a', {'title': 'My marks'})
 endfu
-
-" m,  m;         move tab pages {{{4
-
-nno  <silent>  m,  :tabmove -1<cr>
-nno  <silent>  m;  :tabmove +1<cr>
 
 " U                   (prefix) {{{3
 
@@ -3781,11 +3394,6 @@ fu! s:niceblock(key) abort
     \   'gI'   : {'v': "\<c-v>0I", 'V': "\<c-v>0o$I", "\<c-v>": '0I'},
     \   '>'    : {'v': "\<c-v>>",  'V': "0\<c-v>>",   "\<c-v>": '>'},
     \   '<'    : {'v': "\<c-v><",  'V': "0\<c-v><",   "\<c-v>": '<'},
-    \
-    \   'C-a'  : {'v': "\<c-v>".v:count1."\<c-a>",  'V': v:count1."\<c-a>",  "\<c-v>": v:count1."\<c-a>"},
-    \   'C-x'  : {'v': "\<c-v>".v:count1."\<c-x>",  'V': v:count1."\<c-x>",  "\<c-v>": v:count1."\<c-x>"},
-    \   'g C-a': {'v': "\<c-v>".v:count1."g\<c-a>", 'V': v:count1."g\<c-a>", "\<c-v>": v:count1."g\<c-a>"},
-    \   'g C-x': {'v': "\<c-v>".v:count1."g\<c-x>", 'V': v:count1."g\<c-x>", "\<c-v>": v:count1."g\<c-x>"},
     \ }
 
     return niceblock_keys[a:key][mode()]
@@ -3814,11 +3422,6 @@ xno  <expr>  A   <sid>niceblock('A')
 
 xno  <expr>  >  <sid>niceblock('>')
 xno  <expr>  <  <sid>niceblock('<')
-
-xno  <expr>  <c-a>   <sid>niceblock('C-a')
-xno  <expr>  <c-x>   <sid>niceblock('C-x')
-xno  <expr>  g<c-a>  <sid>niceblock('g C-a')
-xno  <expr>  g<c-x>  <sid>niceblock('g C-x')
 
 " d y         preserve last deleted/yanked visual selected text through registers {{{3
 
@@ -3894,15 +3497,15 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 " files using the external shell program defined by the option 'grepprg'.
 " At the moment, it's `$ ag`.
 " Usage:
-"         CGrep pattern
+"         CGrep pat
 "
 " Don't type:
-"         CGrep pattern .
-"                       │
-"                       └─ ✘ current directory
-"                            our command would include ` .` inside the pattern
-"                            literally (because of `shellescape() which quotes
-"                            the whole argument`)
+"         CGrep pat .
+"                   │
+"                   └─ ✘ current directory
+"                        our  command  would include  `  .`  inside the  pattern
+"                        literally (because  of `shellescape() which  quotes the
+"                        whole argument`)
 
 com! -bar -complete=file -nargs=+  CGrep  call myfuncs#op_grep('Ex', <q-args>, 0)
 com! -bar -complete=file -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
@@ -4101,29 +3704,29 @@ com! -bar -bang -nargs=1 JoinBlocks
 com! -bar -range=% OnlySelection call myfuncs#only_selection(<line1>,<line2>)
 
 " PA    PQ    populate arglist / qfl with shell command {{{2
-"
+
 " Usage:
 "         :PA find /etc -name '*.conf'
 "         :PQ grep -IRn foobar ~/.vim | grep -v backup
 
-" We already have `:Grep`, so why `:PQ`?{{{
+" We already have `:CGrep`, so why `:PQ`?{{{
 "
-" `:Grep` (and `|g`) relies on the value of 'grepprg'.
+" `:CGrep` (and `|g`) relies on the value of resp. 'efm' / 'grepprg'.
 " `:PQ` gives us more control on the grep program.
 " For example, it allows us to pass the argument `-w` to `$ ag`:
 "
-"        ┌────────────────┬──────────────────────────────────────┐
-"        │ :Grep      foo │ search any `foo` using   'grepprg'   │
-"        ├────────────────┼──────────────────────────────────────┤
-"        │ :PQ ag     foo │ search any `foo` using   `ag`        │
-"        ├────────────────┼──────────────────────────────────────┤
-"        │ :PQ ag -w  foo │ search a whole word `foo` using `ag` │
-"        └────────────────┴──────────────────────────────────────┘
+"        ┌────────────────┬────────────────────────────────────────┐
+"        │ :CGrep     pat │ search any `pat` using   'grepprg'     │
+"        ├────────────────┼────────────────────────────────────────┤
+"        │ :PQ ag     pat │ search any `pat` using   `$ ag`        │
+"        ├────────────────┼────────────────────────────────────────┤
+"        │ :PQ ag -w  pat │ search a whole word `pat` using `$ ag` │
+"        └────────────────┴────────────────────────────────────────┘
 "                 -w --word-regexp
 "                        Only match whole words.
 "}}}
 com! -bar -nargs=1 PA exe myfuncs#populate_list('arglist',  <q-args>)
-com! -bar -nargs=1 PQ exe myfuncs#populate_list('quickfix', <q-args>)
+com!      -nargs=1 PQ exe myfuncs#populate_list('quickfix', <q-args>)
 
 " PI    Plugin Install {{{2
 
@@ -4400,7 +4003,8 @@ com! -bar -bang -range XorLines <line1>,<line2>call myfuncs#xor_lines(<bang>0)
 
 augroup my_cmdline_window
     au!
-    au CmdWinEnter * nno  <buffer><nowait><silent>  q      :q<cr>
+    au CmdWinEnter * nno  <buffer><nowait><silent>  q      :<c-u>q<cr>
+    au CmdWinEnter * nno  <buffer><nowait><silent>  ZZ     <cr>
     au CmdWinEnter * nno  <buffer><nowait><expr>    <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
     " By default,  C-c is useful to  quit the command-line window,  and populate
     " the command-line with the command which was being edited in the window.
@@ -5872,6 +5476,7 @@ endfu
 " 62 -
 " debug vim-sandwich (:profile, source everything)
 " also, try to configure the plugin so that `sdb` can delete a pair of backticks
+"
 " Also, debug this:
 "
 "         let a = Func(b)
@@ -5882,6 +5487,16 @@ endfu
 " However, this works as expected:
 "
 "         let ab = Func(ab)
+"
+" Also, debug this:
+"
+" Write the following line in a markdown buffer:
+"
+"         “hello world”
+"               ^
+"               move your cursor here;
+"               press `yisu"` to yank the text inside the quotes
+"               doesn't work; it should
 "
 " 63 -
 " Create a command in vim-debug, to automatically profile a plugin.
@@ -6284,11 +5899,6 @@ endfu
 " But then we would need to translate `<c-j>` manually.
 "
 " 96 -
-" All our mappings dealing with formatting (gq, gqq, gqic, SPC p, SPC P)
-" are becoming too complex for this vimrc.
-" We would benefit from moving all of them in a separate plugin.
-"
-" 97 -
 " Read:
 "
 "     :h channel.txt
@@ -6305,10 +5915,10 @@ endfu
 "     :h recover.txt
 "     :h tips.txt
 "
-" 98 -
+" 97 -
 " Try to implement a `:Trr` (TRash Restore) command to restore the trash.
 "
-" 99 -
+" 98 -
 " Document the fact that when a backtick  expansion causes an issue, you can see
 " which shell command was executed by increasing the verbosity level to 4:
 "
@@ -6316,10 +5926,10 @@ endfu
 "     OR
 "     :4verb cmd
 "
-" 100 -
+" 99 -
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
-" 101 -
+" 100 -
 "
 "     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
@@ -6331,11 +5941,11 @@ endfu
 "
 "     :vim /setl.*\%(noma\|nomodifiable\)/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
-" 102 -
+" 101 -
 " https://www.reddit.com/r/vim/comments/8asgjj/topnotch_vim_markdown_live_previews_with_no/
 " https://github.com/joeyespo/grip (unfortunately, requires an internet connection)
 "
-" 103 -
+" 102 -
 " Look at ~/Dropbox/wiki/vim/plugin.md and search for the `vim-sandwich` section.
 " I wrote  some custom  exercises where  the answer  is concealed,  and visually
 " indicated ↣ like that ↢.
@@ -6351,7 +5961,7 @@ endfu
 "          there will be an exercise which will make the question clearer,
 "          and the answer is concealed”
 "
-" 104 -
+" 103 -
 " `vim-plug`, `vim-lg...` (:ListRepeatableMotions -vv), `vim-unix` (:Tree),
 " they should all use the same keys to cycle between entries.
 " C-n/C-p, or J/K, or sth else.
@@ -6363,12 +5973,12 @@ endfu
 "
 " If we choose J/K, it conflicts with scrolling in preview window.
 "
-" 105 -
+" 104 -
 " We should save the last 10 or so messages we wrote in a git commit message.
 " Basically, we should have a history.
 " And it should be persistent (i.e. survive a reboot).
 "
-" 106 -
+" 105 -
 " In ~/Dropbox/wiki/vim/vimL.md, look for the pattern `funcref()`.
 " There are 2 codes side-by-side.
 " They are separated with `┊` characters.
@@ -6384,7 +5994,7 @@ endfu
 " `┊`.
 "
 "
-" 107 -
+" 106 -
 " Feature requests:
 "
 "      • a function to detect we're recording a macro
@@ -6403,6 +6013,35 @@ endfu
 "
 "      • being able to customize `C-k` when a dictionary completion is active
 "        (same thing for other completions: C-t, C-d, C-l, ...)
+"
+" 107 -
+" If we press  C-g by accident on  the command-line, and we move  forward in the
+" cycle, we should be able to undo and recover the previous command with C-_.
+"
+" Also, we should have multiple tabstops (not just one).
+" Useful for a command like:
+"
+"         noa vim //gj `find . -type f -cmin -60` | cw
+"                 ^                           ^
+"                 tabstop 1                   tabstop 2
+"
+" 108 -
+" To document.
+" If Neovim is unable to suggest suggestions to fix spelling errors,
+" start it like this:
+"
+"         $ nvim -Nu NORC
+"
+" Write a word with a spelling error:
+"
+"         helzo
+"
+" Then execute `:set spell`.
+" It should make Neovim download some missing files (I don't know where).
+" For more info:
+"
+"     https://github.com/neovim/neovim/issues/7694
+"     https://github.com/neovim/neovim/issues/7189
 
 
 
@@ -6426,20 +6065,25 @@ endfu
 
 " sessions to finish:
 "
-"         01. ultisnips
-"         02. profiling
-"         03. debug
-"         04. try
-"         05. async
-"         06. unix
-"         07. tree
-"         08. breakdown
-"         09. package
-"         10. config
-"         11. tag
-"         12. cwd
-"         13. unix
-"         14. keyboard
+"         01. arglist (how to move a window to another tab efficiently?; improve our arglist mappings)
+"         02. config
+"         03. paragraph (refactor the code of the plugin)
+"         04. qf_issue (finish the last two questions)
+"         05. session_issue (read the first Todos)
+"         06. completion
+"         07. ultisnips
+"         08. profiling
+"         09. debug
+"         10. try
+"         11. async
+"         12. unix
+"         13. tree
+"         14. breakdown
+"         15. package
+"         16. tag
+"         17. cwd
+"         18. unix
+"         19. keyboard
 "
 " Once finished, get back to studying the terminal and latex.
 
@@ -6530,14 +6174,31 @@ augroup save_last_qfl
 augroup END
 
 fu! s:save_last_qfl() abort
-    let qfl = getqflist()
-    if empty(qfl)
-        if exists('g:MY_LAST_QFL')
-            unlet g:MY_LAST_QFL
+    let counter = 0
+    "                ┌ the size of the qf stack is limited to 10
+    "                │
+    while counter <= 10
+        let qfl = getqflist()
+        if empty(qfl)
+            if exists('g:MY_LAST_QFL')
+                unlet g:MY_LAST_QFL
+            endif
+            return
+        elseif get(getqflist({'title': 1}), 'title', '') =~# '^\s*:hub\s\+push\s*$'
+            if get(getqflist({'nr': 0}), 'nr', 0) > 1
+                col
+            else
+                return
+            endif
         endif
-        return
-    endif
-    " call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
+        let counter += 1
+    endwhile
+
+    " I keep this line commented, because it's interesting to study it.
+    " It's maybe because  of it, that sometimes,  we had entries in  a qfl which
+    " didn't match any existing file.
+    "
+    "         call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
     call map(qfl, {i,v -> extend(v, {'filename': fnamemodify(bufname(v.bufnr), ':p')})})
     call map(qfl, {i,v -> remove(v, 'bufnr') ? v : v})
     let g:MY_LAST_QFL = {'qfl': qfl, 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
@@ -6706,8 +6367,6 @@ fu! s:prof(...) abort
 endfu
 
 
-
-nmap  Q  gq
 
 
 

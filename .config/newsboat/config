@@ -55,4 +55,4 @@ bind-key l open
 
 # Options
 
-browser w3m
+browser firefox

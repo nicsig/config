@@ -60,8 +60,8 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -71,7 +71,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -88,16 +88,16 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 151 - ((8 * winheight(0) + 14) / 28)
+let s:l = 151 - ((8 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 151
 normal! 0
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 1
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+tabnext 3
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
@@ -110,6 +110,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad

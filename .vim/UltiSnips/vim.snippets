@@ -345,7 +345,11 @@ endsnippet
 # map {{{1
 
 snippet map "prototype mapping" bm
-nno  `!v expand('%:p:h:t') is# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent>'`  ${1:cd}  :<c-u>call ${2:Func}()<cr>
+nno  `!v
+expand('%:p:h:t') is# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent>'
+`  ${1:cd}  :<c-u>call $2`!p
+snip.rv = complete(t[2], ['<sid>func', 'Func'])
+`()<cr>
 endsnippet
 
 # map_ft {{{1

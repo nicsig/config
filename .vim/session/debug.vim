@@ -9,7 +9,7 @@ endif
 set shortmess=aoO
 badd +1 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +193 ~/.vim/plugged/vim-debug/autoload/debug.vim
-badd +1 ~/Dropbox/wiki/vim/debug.md
+badd +788 ~/Dropbox/wiki/vim/debug.md
 argglobal
 silent! argdel *
 set stal=2
@@ -33,7 +33,7 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 45 - ((32 * winheight(0) + 0) / 1)
+let s:l = 45 - ((41 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
