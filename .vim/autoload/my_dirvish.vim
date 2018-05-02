@@ -72,16 +72,19 @@ endfu
 fu! my_dirvish#show_metadata(mode) abort "{{{1
     if a:mode is# 'auto'
         if !exists('#dirvish_show_metadata')
+            " Install an autocmd to automatically show the metadata for the file
+            " under the cursor.
             call s:auto_metadata()
+            " Re-install it every time we enter a new directory.
             augroup dirvish_show_metadata_and_persist
                 au!
                 au FileType dirvish call s:auto_metadata()
             augroup END
         else
             unlet! b:my_dirvish_last_line
-            sil! au! dirvish_show_metadata
+            sil! au!  dirvish_show_metadata
             sil! aug! dirvish_show_metadata
-            sil! au! dirvish_show_metadata_and_persist
+            sil! au!  dirvish_show_metadata_and_persist
             sil! aug! dirvish_show_metadata_and_persist
             return
         endif
@@ -122,12 +125,12 @@ fu! my_dirvish#show_metadata(mode) abort "{{{1
     "     :echo getftype(file)
     "     :echo strftime('%c', getftime(file))
     "}}}
-    let metadata = expand('`ls -lhd --time-style=long-iso '.string(file).'`')
+    let metadata = expand('`ls -lhd --time-style=long-iso '.shellescape(file).'`')
     "                                                       │
     "                                                       └ in case the file contains a space
     "                                                         or other weird characters
     let metadata = substitute(metadata, '\V'.escape(file, '\'), '', '')
-    " Flush any delayed screen updates before printing the metadata
+    " Flush any delayed screen updates before printing the metadata.
     " See :h :echo-redraw
     redraw
     echon metadata
