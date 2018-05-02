@@ -72,17 +72,17 @@ endfu
 fu! my_dirvish#show_metadata(mode) abort "{{{1
     if a:mode is# 'auto'
         if !exists('#dirvish_show_metadata')
-            augroup dirvish_show_metadata
-                au! * <buffer>
-                au CursorMoved <buffer> if get(b:, 'my_dirvish_last_line', 0) !=# line('.')
-                \ |                         let b:my_dirvish_last_line = line('.')
-                \ |                         call my_dirvish#show_metadata('manual')
-                \ |                     endif
+            call s:auto_metadata()
+            augroup dirvish_show_metadata_and_persist
+                au!
+                au FileType dirvish call s:auto_metadata()
             augroup END
         else
             unlet! b:my_dirvish_last_line
             sil! au! dirvish_show_metadata
             sil! aug! dirvish_show_metadata
+            sil! au! dirvish_show_metadata_and_persist
+            sil! aug! dirvish_show_metadata_and_persist
             return
         endif
     endif
@@ -122,8 +122,14 @@ fu! my_dirvish#show_metadata(mode) abort "{{{1
     "     :echo getftype(file)
     "     :echo strftime('%c', getftime(file))
     "}}}
-    let metadata = expand('`ls -lhd --time-style=long-iso '.file.'`')
+    let metadata = expand('`ls -lhd --time-style=long-iso '.string(file).'`')
+    "                                                       │
+    "                                                       └ in case the file contains a space
+    "                                                         or other weird characters
     let metadata = substitute(metadata, '\V'.escape(file, '\'), '', '')
+    " Flush any delayed screen updates before printing the metadata
+    " See :h :echo-redraw
+    redraw
     echon metadata
 
     let ftype = getftype(file)
@@ -132,6 +138,16 @@ fu! my_dirvish#show_metadata(mode) abort "{{{1
         echon ' '.ftype
         echohl NONE
     endif
+endfu
+
+fu! s:auto_metadata() abort "{{{1
+    augroup dirvish_show_metadata
+        au! * <buffer>
+        au CursorMoved <buffer> if get(b:, 'my_dirvish_last_line', 0) !=# line('.')
+        \ |                         let b:my_dirvish_last_line = line('.')
+        \ |                         call my_dirvish#show_metadata('manual')
+        \ |                     endif
+    augroup END
 endfu
 
 fu! my_dirvish#toggle_auto_preview(enable) abort "{{{1
