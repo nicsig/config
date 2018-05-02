@@ -117,7 +117,9 @@ let g:dirvish_mode = ':call my_dirvish#format_entries()'
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   exe 'nunmap <buffer> <c-s>'
+                    \   unlet! b:my_dirvish_last_line
+                    \ | exe 'sil! au! dirvish_show_metadata'
+                    \ | exe 'nunmap <buffer> <c-s>'
                     \ | exe 'nunmap <buffer> <c-t>'
                     \ | exe 'xunmap <buffer> <c-t>'
                     \ | exe 'nunmap <buffer> <c-v><c-v>'
