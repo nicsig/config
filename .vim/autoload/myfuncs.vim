@@ -603,24 +603,6 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             norm! gvy
         endif
 
-        " Old Code:{{{
-        "
-        " It was necessary in the past, because we used `:grep`.
-        " But now we use `:cgetexpr`, for which this code doesn't work:
-        " we use `filter()` instead. I keep it for educational purpose.
-        "
-        "
-        " By default, the output of `:grep` includes errors (“permission denied“).
-        " It's because of 'shellpipe' / 'sp', whose default value is `2>&1| tee`.
-        "
-        " When we're looking for a pattern in files, these errors are noise: remove them.
-        " We do so by temporarily tweaking 'sp':
-        "
-        "         2>&1| tee  →  |tee
-        "
-        " let &l:sp = '| tee'
-        "}}}
-
         if a:type is# 'Ex'
             let [ pat, is_loclist ] = [ a:1, a:2 ]
 
@@ -654,7 +636,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                          on shell's               on Vim's
             "                          command-line             command-line
             "     ┌───────────────────┬──────────┬─────────────┬────────────┐
-            "     │      @" →         │  foo;ls  │  that's     │  foo%bar   │
+            "     │         @"        │  foo;ls  │  that's     │  foo%bar   │
             "     ├───────────────────┼──────────┼─────────────┼────────────┤
             "     │ fnameescape(@")   │  foo;ls  │  that\'s    │  foo\%bar  │
             "     ├───────────────────┼──────────┼─────────────┼────────────┤
@@ -705,9 +687,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
 endfu
 
 fu! s:op_grep_get_qfl(pat) abort
-    " TODO:
-    " Instead of filtering, couldn't we redirect errors in `/dev/null` ?
-    return filter(systemlist(&grepprg.' '.shellescape(a:pat)), {i,v -> v !~# '^ERR: Skipping'})
+    return systemlist(&grepprg.' '.shellescape(a:pat).' 2>/dev/null')
 endfu
 
 fu! myfuncs#op_incremental_yank(type) abort "{{{2

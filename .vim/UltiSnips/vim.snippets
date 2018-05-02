@@ -571,8 +571,8 @@ snippet undo_inde "undo indent settings" bm
 " teardown {{ {1
 
 let b:undo_indent =         get(b:, 'undo_indent', '')
-\                   .(empty(get(b:, 'undo_indent', '')) ? '' : '|')
-\                   .'setl ${1:indk}<'
+                  \ .(empty(get(b:, 'undo_indent', '')) ? '' : '|')
+                  \ .'setl ${1:indk}<'
 $0
 endsnippet
 
@@ -584,15 +584,15 @@ snippet undo_ft "undo ftplugin settings" bm
 " teardown {{ {1
 
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
-\                     .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-\                     ."${1:
-\                          setl ${2:option}<}${3:
-\                        | unlet! b:${4:variable}}${5:
-\                        | exe 'au! ${6:group_name} * <buffer>'}${7:
-\                        | exe '${8:n}unmap <buffer> ${9:lhs}'}${10:
-\                        | exe '${11:c}una   <buffer> ${12:lhs}'}${13:
-\                        | delc ${14:Cmd}}
-\                      "
+                    \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+                    \ ."${1:
+                    \      setl ${2:option}<}${3:
+                    \    | unlet! b:${4:variable}}${5:
+                    \    | exe 'au! ${6:group_name} * <buffer>'}${7:
+                    \    | exe '${8:n}unmap <buffer> ${9:lhs}'}${10:
+                    \    | exe '${11:c}una   <buffer> ${12:lhs}'}${13:
+                    \    | delc ${14:Cmd}}
+                    \  "
 $0
 endsnippet
 

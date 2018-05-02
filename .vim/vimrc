@@ -85,8 +85,8 @@ call plug#begin('~/.vim/plugged')
 
 com! -bar -nargs=1 PlugCfg
 \        if has('vim_starting')
-\|           so $HOME/.vim/autoload/plugin_conf/<args>.vim
-\|       endif
+\ |          so $HOME/.vim/autoload/plugin_conf/<args>.vim
+\ |      endif
 
 " TO_STUDY:
 Plug 'lacygoill/vim-graph'
@@ -116,6 +116,7 @@ Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
+" required to get some functionality in `vim-quickhl`
 Plug 'kana/vim-operator-user/', { 'frozen': 1 }
 Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
@@ -187,10 +188,10 @@ delc PlugCfg
 augroup lazy_load_plugins
     au!
     au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
-    \|                                                 runtime! autoload/plugin_conf/lazy_load/*.vim', '')
+    \ |                                                runtime! autoload/plugin_conf/lazy_load/*.vim', '')
     \                                    })
-    \|            exe 'au! lazy_load_plugins'
-    \|            aug! lazy_load_plugins
+    \ |           exe 'au! lazy_load_plugins'
+    \ |           aug! lazy_load_plugins
 augroup END
 call plug#end()
 
@@ -870,6 +871,23 @@ set kp=:help
 "
 " Example:    C-g j    (scroll-window; vim-submode)
 "}}}
+" Why do you check whether we're in gVim?{{{
+"
+" In gVim,  if you set 'lz'  and 'showcmd', then when  you press `j` and  `k` in
+" normal mode, you see `gj` and `gk` being spammed on the command-line.
+" I don't like that, and it could have a bad impact on performance.
+"
+" TODO:
+" Why does  resetting 'lz' in  the terminal does  NOT make `gj`  being displayed
+" when I press `j`?
+" And why does setting 'lz' in gVim DOES make `gj` being displayed when I press `j`?
+" MWE:
+"
+"     nno  j  gj
+"     nno  k  gk
+"     set lazyredraw
+"     set showcmd
+"}}}
 " TODO: Is 'lazyredraw' broken in Neovim?{{{
 "
 " In the past, I think it caused the  index message after a search to be weirdly
@@ -879,7 +897,9 @@ set kp=:help
 "
 " Revisit this when the PR is merged.
 "}}}
-set lazyredraw
+if !has('gui_running')
+    set lazyredraw
+endif
 
 " match (showmatch / matchtime) {{{2
 
@@ -1211,7 +1231,7 @@ augroup tags_vimrc
     au BufReadPost $HOME/.vim/vimrc setl tags=$HOME/.vim/autoload/tags
     " update the tags file whenever we write `myfuncs.vim`
     exe 'au BufWritePost '.resolve($HOME.'/.vim/autoload/myfuncs.vim')
-    \.  ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
+    \ . ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
 augroup END
 
 " temporary files:  undo, swap, backup {{{2
@@ -1915,8 +1935,8 @@ fu! s:indent_before_backslash() abort
     let prev_indent            = matchstr(getline(line('.')-1), '^\s*\\')
     let next_indent            = matchstr(getline(line('.')+1), '^\s*\\')
 
-    if  has_text_before_cursor
-    \|| empty(prev_indent) && empty(next_indent)
+    if   has_text_before_cursor
+    \ || empty(prev_indent) && empty(next_indent)
         return '\'
     endif
 
@@ -2265,31 +2285,20 @@ endfu
 " U                   (prefix) {{{3
 
 " go to previous save
-nno  <silent>  UU  :<c-u>call <sid>undo_until_prev_save()<cr>
+" TODO:
+" Previously, we used `UU`, but I suspect we pressed it by accident too often.
+" So, now, we use `U C-o` (C-o like to move in the jumplist).
+" For convenience, maybe install a submode, so that we can repeat the mapping,
+" simply by pressing `C-o`.
+nno  <silent>  U<c-o>  :<c-u>ea 1f<cr>
 " we use `M-u u` to upcase a visual selection, so don't worry about shadowing `U`
-xno  UU  :<c-u>call <sid>undo_until_prev_save()<cr>
+xno  U<c-o>  :<c-u>ea 1f<cr>
 
 " go to next save
-nno  <silent>  UY  :<c-u>later   1f<cr>
+nno  <silent>  U<c-i>  :<c-u>later 1f<cr>
 
 " go to most recent version of the file
-nno  <silent>  UR  :<c-u>exe 'undo '.undotree().seq_last<cr>
-
-fu! s:undo_until_prev_save() abort
-    try
-        for what in [ 'region', 'line' ]
-            if exists('w:my_moved_'.what)
-                call matchdelete(w:my_moved_{what})
-                exe 'unlet! w:my_moved_'.what
-                exe 'au! my_moved_'.what
-                exe 'aug! my_moved_'.what
-            endif
-        endfor
-        earlier 1f
-    catch
-        return lg#catch_error()
-    endtry
-endfu
+nno  <silent>  U<c-r>  :<c-u>exe 'undo '.undotree().seq_last<cr>
 
 " fugitive
 nno  <silent>  Up  :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
@@ -2993,11 +3002,11 @@ endfu
 " maybe we could get rid of `myfuncs#set_reg()` and use `repeat#setreg()` instead.
 
 nno  <silent>  dr  :<c-u>call myfuncs#set_reg(v:register)
-                   \<bar>set opfunc=myfuncs#op_replace_without_yank<cr>g@
+                  \ <bar>set opfunc=myfuncs#op_replace_without_yank<cr>g@
 
 nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
-                    \<bar>set opfunc=myfuncs#op_replace_without_yank
-                    \<bar>exe 'norm! '.v:count1.'g@_'<cr>
+                   \ <bar>set opfunc=myfuncs#op_replace_without_yank
+                   \ <bar>exe 'norm! '.v:count1.'g@_'<cr>
 
 " j  k  ^  0  $       gj  gk  … {{{3
 
@@ -3116,29 +3125,29 @@ xno  <expr>  Y  '$"'.v:register.'y'
 
 " comments
 nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
-                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  myc  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
-                    \<bar> call myfuncs#op_yank_matches('vis')<cr>
+                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " Code
 "                      don't yank where a commented line is found ┐
 "                                                                 │
 nno  <silent>  yC   :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
-                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  myC  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
-                    \<bar> call myfuncs#op_yank_matches('vis')<cr>
+                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " lines matching last search
 nno  <silent>  ym   :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
-                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  mym  :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
-                    \<bar> call myfuncs#op_yank_matches('vis')<cr>
+                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " lines which do NOT match last search
 nno  <silent>  yM   :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
-                    \<bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
-                    \<bar> call myfuncs#op_yank_matches('vis')<cr>
+                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " OBJECTS {{{2
 " i% {{{3
@@ -3507,8 +3516,8 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 "                        literally (because  of `shellescape() which  quotes the
 "                        whole argument`)
 
-com! -bar -complete=file -nargs=+  CGrep  call myfuncs#op_grep('Ex', <q-args>, 0)
-com! -bar -complete=file -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
+com!  -nargs=+  CGrep  call myfuncs#op_grep('Ex', <q-args>, 0)
+com!  -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
 
 " Doc    {{{2
 
@@ -3568,7 +3577,7 @@ fu! s:diff_orig() abort
     augroup diff_orig_restore_settings
         au! * <buffer>
         au BufWipeOut <buffer> sil call save#toggle_auto(1)
-        \|                     call timer_start(0, s:tmp_partial)
+        \ |                    call timer_start(0, s:tmp_partial)
     augroup END
 
     exe winnr('#').'windo diffthis'
@@ -3687,9 +3696,9 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " purpose.
 
 com! -bar -bang -nargs=1 JoinBlocks
-\|                                  let &l:fen = 0
-\|                                  exe "keepp .,.+<args>-1g/^/''+<args>m.|-j<bang>"
-\|                                  let &l:fen = 1
+\ |                                 let &l:fen = 0
+\ |                                 exe "keepp .,.+<args>-1g/^/''+<args>m.|-j<bang>"
+\ |                                 let &l:fen = 1
 
 " OnlySelection {{{2
 
@@ -3711,7 +3720,12 @@ com! -bar -range=% OnlySelection call myfuncs#only_selection(<line1>,<line2>)
 
 " We already have `:CGrep`, so why `:PQ`?{{{
 "
-" `:CGrep` (and `|g`) relies on the value of resp. 'efm' / 'grepprg'.
+"                                                                 ┌ TODO: sure? To confirm.
+"                                                                 │
+"                                                                 │ I think so, because we use `:cgetexpr`,
+"                                                                 │ and not `:grep`.
+"                                                                 │
+" `:CGrep` (and `|g`) relies on the value of 'grepprg' (and 'efm' !!).
 " `:PQ` gives us more control on the grep program.
 " For example, it allows us to pass the argument `-w` to `$ ag`:
 "
@@ -4545,7 +4559,7 @@ augroup source_files
     "}}}
     au BufWritePost ~/.Xresources call system('xrdb ~/.Xresources')
     exe 'au BufWritePost $MYVIMRC,'.resolve($HOME.'/.vim/autoload/myfuncs.vim')
-    \.  ' nested exe "source ".expand("<afile>")'
+    \ . ' nested exe "source ".expand("<afile>")'
 augroup END
 
 " Standard Input {{{2
@@ -4595,8 +4609,8 @@ augroup my_terminal
         au TermOpen * call s:setup_neovim_terminal()
     else
         au BufWinEnter * if &bt is# 'terminal'
-                      \|     call s:setup_vim_terminal()
-                      \| endif
+                     \ |     call s:setup_vim_terminal()
+                     \ | endif
     endif
 augroup END
 
@@ -4662,9 +4676,9 @@ fu! s:trailing_whitespace(create_match) abort
         call matchdelete(w:my_trailing_whitespace)
         unlet w:my_trailing_whitespace
 
-    elseif a:create_match
-       \&& !exists('w:my_trailing_whitespace')
-       \&& index(s:NO_TRAILING_WHITESPACE_FT, &ft) ==# -1
+    elseif  a:create_match
+       \ && !exists('w:my_trailing_whitespace')
+       \ && index(s:NO_TRAILING_WHITESPACE_FT, &ft) ==# -1
         "                                                            ┌ non breaking space (C-k NS)
         "                                                        ┌───┤
         let w:my_trailing_whitespace = matchadd('Error', '\%(\s\|\%ua0\)\+$', -1)
@@ -5820,6 +5834,7 @@ endfu
 "        • $HOME/.vim/tools/colors/check_colors.vim
 "        • 'user_data' entry in completion item
 "        • CmdlineChanged
+"        • ColorSchemePre
 "        • DirChanged
 "        • ExitPre
 "        • TextChangedP
@@ -6042,24 +6057,164 @@ endfu
 "
 "     https://github.com/neovim/neovim/issues/7694
 "     https://github.com/neovim/neovim/issues/7189
-
-
-
-" augroup my_dirvish_mappings
-"     au! * <buffer>
-"     au FileType dirvish call s:my_dirvish_mappings()
-" augroup END
-
-" fu! s:my_dirvish_mappings() abort
-"     let key = '!m'
-"     if !has('unix')
-"         " drwxr-xr-x 2 jean jean 4,0K Apr 20 23:58 /home/jean/.vim/session/
-"         nno  <buffer><nowait><silent>  !m  :<c-u>echo expand('`ls -lhd '.getline('.').'`')<cr>
-"     else
-"         " Thu 19 Apr 2018 11:39:12 PM CEST
-"         nno  <buffer><nowait><silent>  !m  :<c-u>echo strftime('%c', getftime(getline('.')))<cr>
-"     endif
-" endfu
+"
+" Also, for debugging purpose, try `:spellinfo`.
+"
+" 109 -
+" According to:
+"
+"     https://github.com/vim/vim/pull/2322
+"
+" We should be able to filter: `:let`, `:hi`, `:ju`, `:{c|l}list` and `:set`.
+" I can't:
+"         :filter /wont_find_me/ let
+"                 → should display nothing, but displays everything
+"
+"         :filter /wont_find_me/ hi
+"                 → should display nothing, but displays everything
+"
+"         ...
+"
+" Update:
+" This is because the PR has not been merged.
+"
+"
+" Maybe we could install a wrapper command  (:Filter) which would do the job for
+" the commands which are not supported.
+" See `:h  :index`, and  search for  all the commands  which could  benefit from
+" `:filter`:
+"
+"         :args
+"         :autocmd
+"         :autogroup
+"         :changes
+"         :clist (:llist)
+"         :function
+"         :ilist (:dlist, :isearch?, :dsearch?)
+"         :highlight
+"         :history
+"         :let
+"         :marks
+"         :reg
+"         :set
+"         :tags
+"
+" Also, create a complete cycle (C-g f).
+"
+" 110 -
+"
+"     :vim /^>\|^\%u00a0/gj ~/Dropbox/wiki/**/*.md
+"
+" In our notes, we sometimes use `>` or a non-breaking space at the beginning of
+" a line to quote some text, or apply some style.
+" Check whether everything works as expected.
+" Also, we shouldn't need to insert a non-breaking space, it's a hack.
+" Find another way to get the same result.
+"
+" 111 -
+"
+" In   `vim-qf`,  maybe   we  could   reduce  the   number  of   invocations  to
+" `s:setqflist()`:
+"
+"         call s:setqflist(list, action)
+"         call s:setqflist([], 'a', {'title': 'hello'})
+"         →
+"         call s:setqflist([], action, {'items': list, 'title': 'hello'})
+"
+" In fact,  maybe we could  simplify the code  much more, because  using 'items'
+" doesn't alter the title. So, maybe there's no need to save/restore the latter:
+"
+"         call s:setqflist([], action, {'items': list})
+"
+" Issue:
+" Neovim doesn't support the 'items' key.
+" Besides, right now, we use 'items' in `qf#toggle_full_filepath()`.
+"
+" Also:
+" https://github.com/neovim/neovim/issues/3764
+" Comment on this issue.
+" Leave a link to our faq explaining how to use 'module' to change the display.
+"
+" 112 -
+" How to filter  a custom text-object without the command-line NOT being redrawn?
+" MWE:
+"         !iE SPC
+"         ![m SPC
+"         ...
+"
+" We could try sth like this:
+"
+"         ono  <silent>  iE  :<c-u>exe 'norm ViE'.(v:operator is# '!' ? '<space>' : '')<cr>
+"
+" But, why does the issue occur with `![m`, but not with `![z`?
+"
+" Update:
+" It probably has sth to do with these functions:
+"
+"     • fold#motion_go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
+"     • lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
+"
+" Update:
+" It has to do with the `<silent>` argument in the mapping.
+" We need it in all modes except in operator-pending mode.
+" Alternatively, we could include at the end of `lg#motion#regex#go()`:
+"
+"         exe 'norm! '.line('.').'G'
+"
+" It would not make the cursor move, but it would make the command-line redrawn.
+" MWE:
+"
+"         map  <silent>  ]g  :call search('pat')<cr>
+"             !]g → command-line NOT redrawn
+"
+"         map  <silent>  ]g  :call search('pat') <bar> exe 'norm! '.line('.').'G'<cr>
+"             !]g → command-line redrawn
+"
+" It seems `vim-textobj-user` doesn't suffer from this issue:
+"
+"         " unmap pre-existing `o_iE` mapping
+"         call textobj#user#plugin('entire_buffer', {
+"         \   'code': {
+"         \     'pattern': ['\%^.', '.\%$'],
+"         \     'select-a': 'aE',
+"         \     'select-i': 'iE',
+"         \   },
+"         \ })
+"
+" You  should  try   to  better  understand  this  issue   when  you  assimilate
+" `vim-textobj-user`, and  fix it every  time you defined  a text object  in the
+" past.
+"
+" 113 -
+" Document `$ paste` as a filter:
+"
+"         https://vi.stackexchange.com/a/16096/17270
+"
+" Also, make some cleaning in our mappings:
+"
+"         • x_gJ      join lines
+"         • x_gC-j    join lines without inserting/removing spaces
+"         • x_mJ      join two blocks
+"         • x_mC-j    join two blocks in reverse order
+"
+" Are they consistent?
+" Could we make them easier to remember?
+"
+" 114 -
+"     $ nvim
+"     :call setqflist([], ' ', {'items': []})
+"         → crash
+"
+" Submit bug report.
+" Determine wich qfl keys are really supported by Neovim.
+" Compare to what the documentation says.
+" Are they usable in `getqflist()` as well as `setqflist()`?
+" Or only in one of them?
+"
+" 115 -
+" Implement a mapping/command to extract the lines which are present in a block,
+" but not in the other.
+" `:InAButNotInB` is too cumbersome.
 
 
 
@@ -6167,7 +6322,7 @@ endfu
 
 
 
-augroup save_last_qfl
+augroup save_and_restore_last_qfl
     au!
     au VimLeavePre * call s:save_last_qfl()
     au VimEnter    * call s:restore_last_qfl()
@@ -6194,11 +6349,15 @@ fu! s:save_last_qfl() abort
         let counter += 1
     endwhile
 
-    " I keep this line commented, because it's interesting to study it.
-    " It's maybe because  of it, that sometimes,  we had entries in  a qfl which
-    " didn't match any existing file.
+    " TODO:
+    " Find a MWE showing how `fnamemodify()` is necessary.
+    " Why `fnamemodify()`?{{{
+    "
+    " I think  that without,  sometimes, we  had entries in  a qfl  which didn't
+    " match any existing file:
     "
     "         call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
+    "}}}
     call map(qfl, {i,v -> extend(v, {'filename': fnamemodify(bufname(v.bufnr), ':p')})})
     call map(qfl, {i,v -> remove(v, 'bufnr') ? v : v})
     let g:MY_LAST_QFL = {'qfl': qfl, 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
@@ -6207,36 +6366,25 @@ endfu
 fu! s:restore_last_qfl() abort
     " Why check the value of 'errorfile'?{{{
     "
-    " Suppose we start Vim like this:
+    " To bail out in case we start Vim with the `-q` argument.
+    "
+    " Suppose we start Vim with one of these commands:
     "
     "     $ vim -q <(!!)
+    "     $ cmd | -q /dev/stdin
+    "     $ vim -q /path/to/some/file
     "
-    " To populate the qfl with the output of the last shell command.
-    " When we'll execute `:copen`, I want to see the result IMMEDIATELY.
-    " I don't want to have to execute `:colder`.
+    " If we restore the last qfl of  the last Vim instance, then, when executing
+    " `:copen`, we  will see  the latter,  instead of the  one which  we've just
+    " populated from the shell.
     "
-    " Otherwise, we may lose time wondering why we're seeing an irrelevant qfl.
+    " This is probably not what we want.
+    " We probably want to see the qfl populated from the shell.
+    " We could see the latter by executing `:colder`, but we may still lose time
+    " wondering why we're seeing an irrelevant qfl.
     "}}}
-    " Which values could it have?{{{
-    "
-    " By default, &errorfile = 'errors.err'.
-    " Except when we start Vim with the `-q` option.
-    " In this case, it's:
-    "
-    "         • '/dev/stdin'    if we read a file
-    "
-    "                 cmd       | vim -q /dev/stdin
-    "                 cmd >file | vim -q file
-    "
-    "         • '/proc/self/fd/123'    if we read the output of a process substitution
-    "
-    "                 vim -q <(shell cmd)
-    "
-    " So,  inspecting the  value of  this option  is a  good way  of determining
-    " whether we can restore an old qfl.
-    "}}}
-    if  &errorfile isnot# 'errors.err'
-    \|| empty(get(get(g:, 'MY_LAST_QFL', {}), 'qfl', []))
+    if   &errorfile isnot# 'errors.err'
+    \ || empty(get(get(g:, 'MY_LAST_QFL', {}), 'qfl', []))
         return
     endif
 
@@ -6250,11 +6398,17 @@ endfu
 
 
 
-" nno cd :<c-u>call <sid>append_error_sign()<cr>
-" fu! s:append_error_sign() abort
-"     let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
-"     call append(line('.'), cml.repeat(' ', virtcol('.')-1-strchars(cml, 1)).'^✘')
-" endfu
+" DO NOT REMOVE (still interesting).
+"
+"     nno cd :<c-u>call <sid>append_error_sign()<cr>
+"     fu! s:append_error_sign() abort
+"         let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
+"         call append(line('.'), cml.repeat(' ', virtcol('.')-1-strchars(cml, 1)).'^✘')
+"     endfu
+"
+" However, you should improve the code so that you can press the mapping several
+" times on  the same line,  and all  markers would be  aligned on the  same line
+" below.
 
 
 
@@ -6376,11 +6530,11 @@ endfu
 
 " don't use `<space>g`, I press it by accident too often
 nno  <silent>  <space>G  :<c-u>let g:my_goyo_without_syntax_hl = 1
-                         \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')
-                         \<bar> norm coz<cr>
+                        \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')
+                        \ <bar> norm coz<cr>
 
 nno  <silent>  <space><c-g>  :<c-u>let g:my_goyo_without_syntax_hl = 0
-                             \<bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+                            \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
 
 fu! s:goyo_enter() abort
     sil !tmux set status off

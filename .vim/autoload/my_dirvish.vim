@@ -69,6 +69,71 @@ fu! s:preview() abort "{{{1
     endif
 endfu
 
+fu! my_dirvish#show_metadata(mode) abort "{{{1
+    if a:mode is# 'auto'
+        if !exists('#dirvish_show_metadata')
+            augroup dirvish_show_metadata
+                au! * <buffer>
+                au CursorMoved <buffer> if get(b:, 'my_dirvish_last_line', 0) !=# line('.')
+                \ |                         let b:my_dirvish_last_line = line('.')
+                \ |                         call my_dirvish#show_metadata('manual')
+                \ |                     endif
+            augroup END
+        else
+            unlet! b:my_dirvish_last_line
+            sil! au! dirvish_show_metadata
+            sil! aug! dirvish_show_metadata
+            return
+        endif
+    endif
+
+    let file = getline('.')
+    " Why?{{{
+    "
+    " MWE:
+    "     $ cd /tmp
+    "     $ ln -s tmux-1000 test
+    "
+    "     $ ls -ld test/
+    "         → drwx------ 2 user user 4096 May  2 09:54 test/
+    "         ✘
+    "
+    "     $ ls -ld test
+    "         → lrwxrwxrwx 1 user user 9 May  2 17:37 test -> tmux-1000
+    "         ✔
+    "
+    " If:
+    "     • a symlink points to a directory
+    "     • you give it to `$ ls -ld`
+    "     • you append a slash to the symlink
+    "
+    " `$ ls`  will print  the info  about the target  directory, instead  of the
+    " symlink itself.
+    " This is not what we want.
+    " We want the info about the symlink.
+    " So, we remove any possible slash at the end.
+    "}}}
+    let file = substitute(file, '/$', '', '')
+    " Is there another way (than `$ ls`) to get the metadata of a file?{{{
+    "
+    " Yes:
+    "     :echo getfperm(file)
+    "     :echo getfsize(file)
+    "     :echo getftype(file)
+    "     :echo strftime('%c', getftime(file))
+    "}}}
+    let metadata = expand('`ls -lhd --time-style=long-iso '.file.'`')
+    let metadata = substitute(metadata, '\V'.escape(file, '\'), '', '')
+    echon metadata
+
+    let ftype = getftype(file)
+    if ftype !~# '^\Cfile$\|^dir$'
+        echohl WarningMsg
+        echon ' '.ftype
+        echohl NONE
+    endif
+endfu
+
 fu! my_dirvish#toggle_auto_preview(enable) abort "{{{1
     if a:enable && !exists('#my_dirvish_auto_preview')
         call my_dirvish#install_auto_preview()

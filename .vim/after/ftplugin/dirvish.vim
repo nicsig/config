@@ -103,6 +103,11 @@ nmap  <buffer><nowait><silent>  l  <cr>
 xmap  <buffer>         x                               <plug>(my_dirvish_show_arg_pos)<plug>(dirvish_arg)
 xno   <buffer><expr>  <plug>(my_dirvish_show_arg_pos)  execute('let g:my_stl_list_position = 2')[0]
 
+" !m {{{2
+
+nno  <buffer><nowait><silent>  !m  :<c-u>call my_dirvish#show_metadata('manual')<cr>
+nno  <buffer><nowait><silent>  !M  :<c-u>call my_dirvish#show_metadata('auto')<cr>
+
 " g:dirvish_mode {{{1
 
 let g:dirvish_mode = ':call my_dirvish#format_entries()'
@@ -113,15 +118,17 @@ let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
                     \   exe 'nunmap <buffer> <c-s>'
-                    \|  exe 'nunmap <buffer> <c-t>'
-                    \|  exe 'xunmap <buffer> <c-t>'
-                    \|  exe 'nunmap <buffer> <c-v><c-v>'
-                    \|  exe 'nunmap <buffer> [oP'
-                    \|  exe 'nunmap <buffer> ]oP'
-                    \|  exe 'nunmap <buffer> coP'
-                    \|  exe 'nunmap <buffer> h'
-                    \|  exe 'nunmap <buffer> l'
-                    \|  exe 'nunmap <buffer> gh'
-                    \|  exe 'xunmap <buffer> x'
+                    \ | exe 'nunmap <buffer> <c-t>'
+                    \ | exe 'xunmap <buffer> <c-t>'
+                    \ | exe 'nunmap <buffer> <c-v><c-v>'
+                    \ | exe 'nunmap <buffer> [oP'
+                    \ | exe 'nunmap <buffer> ]oP'
+                    \ | exe 'nunmap <buffer> coP'
+                    \ | exe 'nunmap <buffer> h'
+                    \ | exe 'nunmap <buffer> l'
+                    \ | exe 'nunmap <buffer> gh'
+                    \ | exe 'nunmap <buffer> !m'
+                    \ | exe 'nunmap <buffer> !M'
+                    \ | exe 'xunmap <buffer> x'
                     \  "
 

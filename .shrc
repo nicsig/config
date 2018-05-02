@@ -34,8 +34,11 @@
 alias check_glob='printf "%s\n"'
 alias checki='sudo rlwrap checkinstall -y'
 alias df=dfc
+# https://unix.stackexchange.com/a/299922/287634
+alias fix='reset; stty sane; tput rs1; clear; echo -e "\033c"'
+#                                 │
+#                                 └ FIXME: What's this capability?
 alias fxk='~/bin/keyboard.sh'
-alias fxt='echo -e "\033c"'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'
 alias gsearch='git log --all --source -p -S'
 alias l=ls++
@@ -68,7 +71,8 @@ alias mountc='grc mount'
 #
 # This alias shadows the `nb` binary installed by the `nanoblogger` package.
 #}}}
-alias nb='newsboat'
+alias nb='newsboat -q'
+alias nvim='~/GitRepos/neovim/nvim.appimage'
 alias prof_zsh='repeat 10 time zsh -i -c exit'
 alias reload_conky='killall -SIGUSR1 conky'
 alias reload_xres='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'

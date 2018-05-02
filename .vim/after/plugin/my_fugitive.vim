@@ -10,7 +10,7 @@ fu! s:glog_conceal(step) abort
         augroup my_glog_conceal
             au!
             au QuickFixCmdPost * call s:glog_conceal(1)
-            \|                   exe 'au! my_glog_conceal' | aug! my_glog_conceal
+                             \ | exe 'au! my_glog_conceal' | aug! my_glog_conceal
         augroup END
     else
         call qf#set_matches('my_fugitive:glog_conceal', 'Conceal', 'location')

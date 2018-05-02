@@ -11,11 +11,11 @@
 augroup my_notes
     au!
     au BufWinEnter <buffer> if expand('%:p') =~# $HOME.'/.vim/doc/misc/\%(notes\|galore\)'
-                         \|     setl fdm=expr
-                         \|     let &l:fdt = s:snr().'fold_text()'
-                         \|     let &l:fde = s:snr().'fold_expr()'
-                         \|     sil exe 'norm coH'
-                         \| endif
+                        \ |     setl fdm=expr
+                        \ |     let &l:fdt = s:snr().'fold_text()'
+                        \ |     let &l:fde = s:snr().'fold_expr()'
+                        \ |     sil exe 'norm coH'
+                        \ | endif
 augroup END
 
 fu! s:fold_expr() abort "{{{1
