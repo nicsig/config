@@ -1,0 +1,13 @@
+[user]
+	name = lacygoill
+	email = lacygoill@lacygoill.me
+[core]
+	editor = vim
+	excludesfile = /home/jean/.cvsignore
+[merge]
+	tool = vimdiff
+; Get rid of annoying  message when we push a branch  without providing any name
+; (`$ git push`).
+;     https://stackoverflow.com/a/13148313/9690698
+[push]
+	default = simple

@@ -391,6 +391,8 @@ call lg#motion#repeatable#make#all({
 \        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
+\                     { 'bwd': '<l'    ,  'fwd': '>l'     },
+\                     { 'bwd': '<q'    ,  'fwd': '>q'     },
 \                     { 'bwd': '[<c-l>',  'fwd': ']<c-l>' },
 \                     { 'bwd': '[<c-q>',  'fwd': ']<c-q>' },
 \                     { 'bwd': '[a'    ,  'fwd': ']a'     },
