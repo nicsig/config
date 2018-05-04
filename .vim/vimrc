@@ -104,6 +104,7 @@ Plug 'tpope/vim-abolish', { 'frozen': 1 }
 Plug 'yegappan/asyncmake', { 'frozen': 1 }
 Plug 'lacygoill/vim-debug'
 Plug 'justinmk/vim-dirvish'
+Plug 'lacygoill/vim-mirvish'
 Plug 'junegunn/vim-easy-align'
 Plug 'tommcdo/vim-exchange' | PlugCfg exchange
 Plug 'tpope/vim-fugitive'
@@ -146,6 +147,7 @@ Plug 'lacygoill/vim-conf'
 Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-fold'
 Plug 'lacygoill/vim-freekeys'
+Plug 'lacygoill/vim-gitcommit'
 Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
 Plug 'lacygoill/vim-iabbrev'
@@ -162,6 +164,7 @@ Plug 'lacygoill/vim-save'
 Plug 'lacygoill/vim-search'
 Plug 'lacygoill/vim-session'
 Plug 'lacygoill/vim-sh'
+Plug 'lacygoill/vim-snippets'
 Plug 'lacygoill/vim-source'
 Plug 'lacygoill/vim-stacktrace'
 Plug 'lacygoill/vim-statusline'
@@ -5374,8 +5377,8 @@ endfu
 " Look for all  the instances where we've  used a timer and where  we could have
 " used a simple `:redraw`. Replace the timer if it makes sense.
 "
-" Note that in  ~/.vim/autoload/my_dirvish.vim, in `my_dirvish#show_metadata()`,
-" we MUST use a `:redraw`, not a timer.
+" Note that in `mirvish`, in `mirvish#show_metadata()`, we MUST use a `:redraw`,
+" not a timer.
 " Otherwise,  the  first  part  of  the  message  is  correctly  displayed  (via
 " `:echon`), but not the second one.
 " This seems to indicate that a timer is not always the best solution to display
@@ -6234,6 +6237,45 @@ endfu
 " It should not.
 " If we close and re-open the qf window (or just execute `:copen` right from the
 " qf window), it disappears.
+"
+" The issue seems to come from `w:quickfix_title`, not from the title itself:
+"
+"     echo w:quickfix_title
+"         → '::...' ✘
+"
+"     echo getqflist({'title':0})
+"         → ':...' ✔
+"
+" 115 -
+" If I press `x` several times on a file in a dirvish buffer,
+" the file is added several times in the arglist: it should not.
+" Update:
+" This issue is specific to `$ shell_cmd | vim +'setf dirvish' -`
+"
+"
+" The mappings:
+"
+"     <Plug>(dirvish_quit)
+"     <Plug>(dirvish_arg)
+"
+" ... should not be defined in `autoload/` but in `plugin/`.
+" Otherwise, `x` and `q` don't work when you start Vim like this:
+"
+"     git ls-files | vim +'setf dirvish' -
+"
+"
+" There's no `b:undo_ftplugin`: there should be.
+"
+"
+" Use `CmdlineLeave` instead of remapping `/` and `?`.
+" This way the anchor at the end is never visible (noise, distracting).
+" Hide it behind an option for a PR.
+"
+" 116 -
+" Install  a  mapping  to  increase/decrease  'fdl', in  a  markdown  buffer  in
+" “nesting” mode.
+" We would use it to quickly see the titles up to an arbitrary depth.
+" Useful to get an overview of the contents of the notes of an arbitrary precision.
 
 
 
@@ -6377,8 +6419,9 @@ fu! s:save_last_qfl() abort
     "
     "         call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
     "}}}
-    call map(qfl, {i,v -> extend(v, {'filename': fnamemodify(bufname(v.bufnr), ':p')})})
-    call map(qfl, {i,v -> remove(v, 'bufnr') ? v : v})
+    call map(qfl,
+    \        {i,v -> extend(v,
+    \                       {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
     let g:MY_LAST_QFL = {'qfl': qfl, 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
 endfu
 
