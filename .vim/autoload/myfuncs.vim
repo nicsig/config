@@ -297,8 +297,8 @@ fu! myfuncs#box_destroy() abort
     " Why?
     " Because when we  create and destroy a box, the  contents doesn't come back
     " where it was, it goes down one line, and right one character.
-    exe (lnum1-1)."put =''"
-    sil .+,'}-s/^.//e
+    call append(lnum1-1, [''])
+    sil exe (lnum1+1).",'}-s/^.//e"
 
     " position the cursor on the upper left corner of the paragraph
     exe 'norm! '.lnum1.'Gj_'
@@ -463,11 +463,13 @@ fu! myfuncs#long_listing_split() abort "{{{1
         return
     endif
 
-    let view          = winsaveview()
-    let object_indent = repeat(' ', match(line, '\S'))
+    let view = winsaveview()
+    " We use `strdisplaywidth()` because the indentation could contain tabs.
+    let indent_lvl = strdisplaywidth(matchstr(line, '.\{-}\ze\S'))
+    let indent_txt = repeat(' ', indent_lvl)
 
-    sil keepj keepp s/\v\ze\S/- /e
-    sil keepj keepp s/\v\s*,\s*%(et\s*)?|\s*<et>\s*/\="\n".object_indent.'- '/ge
+    sil keepj keepp s/\v\ze\S/• /e
+    sil keepj keepp s/\v\s*,\s*%(et\s*)?|\s*<et>\s*/\="\n".indent_txt.'• '/ge
 
     call winrestview(view)
     sil! call repeat#set("\<plug>(myfuncs_long_listing_split)")
@@ -849,7 +851,7 @@ endfu
 fu! myfuncs#align_with_end(offset) abort
 
     " l:text_length is the length of text to align on the current line
-    let l:text_length      = strchars(matchstr(getline('.'), '\S.*$'))
+    let l:text_length = strchars(matchstr(getline('.'), '\S.*$'))
 
     " l:neighbour_length is the length of the previous/next line
     let l:neighbour_length = strchars(getline(line(".") + a:offset))
@@ -1316,37 +1318,6 @@ fu! s:search_todo_text(dict) abort
         let dict.text = get(filter(lines, { i,v -> v !~ pat }), 0, '')
     endif
     return dict
-endfu
-
-fu! myfuncs#set_indent(indent) abort range "{{{1
-
-    " When a function is called and a range is explicitly passed to it, the cursor
-    " is automatically positioned before the first character of a:firstline.
-    " So, we don't need to write:    call cursor(a:firstline, 1)
-
-    " Initiate a loop. Each iteration processes a block of lines.
-    " A block ends when we find a line which doesn't begin with at least 5 spaces.
-    " The loop continues as long as there's a next line to process, and it's
-    " before a:lastline.
-    "
-    " We use the 'c' flag because we could already be on a line to process.
-    " When we'll come back here for the 2nd iteration, even though the 'c'
-    " flag is there, and the current line will begin with at least 5 spaces
-    " (since it was the last line to be processed during 1st iteration),
-    " search() won't find the current line, because the cursor will be at the
-    " end of the spaces, not at the beginning of the line.
-    " search() will find the next line to process as expected.
-    while search('^\s\{5}', 'cW') && line('.') <= a:lastline
-
-        let offset                  = a:indent - strlen(matchstr(getline('.'), '^\s*'))
-        let last_line_current_block = search('^\v(\s{5}|$)@!', 'nW') - 1
-        let last_line_to_process    = min([last_line_current_block, a:lastline])
-
-        exe 'keepj keepp .,'.last_line_to_process.'s/^\s\+/\=repeat(" ", strlen(submatch(0)) + '.offset.')/'
-
-    endwhile
-
-    call cursor(a:firstline, 1)
 endfu
 
 fu! myfuncs#show_me_snippets() abort "{{{1

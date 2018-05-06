@@ -2137,19 +2137,6 @@ nno  <silent>  [j  :<c-u>exe 'left ' . indent(line('.')+1)<cr>
 nno  <silent>  ]k  :<c-u>call myfuncs#align_with_end(-1)<cr>
 nno  <silent>  ]j  :<c-u>call myfuncs#align_with_end(1)<cr>
 
-" ]\    ]- {{{4
-
-" long object = dictionary or list
-
-nmap            ]\                                 <plug>(myfuncs_long_object_split)
-nno   <silent>  <plug>(myfuncs_long_object_split)  :<c-u>call myfuncs#long_object_split()<cr>
-
-nmap            [\                                <plug>(myfuncs_long_object_join)
-nno   <silent>  <plug>(myfuncs_long_object_join)  :<c-u>call myfuncs#long_object_join()<cr>
-
-nmap            ]-                                  <plug>(myfuncs_long_listing_split)
-nno   <silent>  <plug>(myfuncs_long_listing_split)  :<c-u>call myfuncs#long_listing_split()<cr>
-
 " \                   (prefix) {{{3
 " \b            select current box {{{4
 
@@ -2610,6 +2597,19 @@ endfu
 nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
 " +                   (prefix) {{{3
+" +>    +\      split listing or long object {{{4
+
+" long object = dictionary or list
+
+nmap            +>                                  <plug>(myfuncs_long_listing_split)
+nno   <silent>  <plug>(myfuncs_long_listing_split)  :<c-u>call myfuncs#long_listing_split()<cr>
+
+nmap            +\                                 <plug>(myfuncs_long_object_split)
+nno   <silent>  <plug>(myfuncs_long_object_split)  :<c-u>call myfuncs#long_object_split()<cr>
+
+nmap            +\                                <plug>(myfuncs_long_object_join)
+nno   <silent>  <plug>(myfuncs_long_object_join)  :<c-u>call myfuncs#long_object_join()<cr>
+
 " +t            trim whitespace {{{4
 
 nno  <silent>  +t   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
@@ -3908,10 +3908,6 @@ endfu
 " Maybe we could just memorize those 5 variable names, and eliminate the command.
 
 com! -bar SearchInternalVariables call myfuncs#search_internal_variables()
-
-" SetIndent {{{2
-
-com! -bar -nargs=1 -range SetIndent <line1>,<line2>call myfuncs#set_indent(<args>)
 
 " ShowLongLines {{{2
 
@@ -6201,6 +6197,9 @@ endfu
 "         → crash
 "
 " Submit bug report.
+" 'lines' was added to {what} in Neovim in this commit:
+"     https://github.com/neovim/neovim/commit/d0c4bd23f78ee00943725ea77a63f2a223dba66b
+"
 " Determine wich qfl keys are really supported by Neovim.
 " Compare to what the documentation says.
 " Are they usable in `getqflist()` as well as `setqflist()`?
@@ -6276,6 +6275,78 @@ endfu
 " “nesting” mode.
 " We would use it to quickly see the titles up to an arbitrary depth.
 " Useful to get an overview of the contents of the notes of an arbitrary precision.
+"
+" 117 -
+" Create mappings to promote/demote a selection of folds.
+"
+" Create a mapping  to echo the number  of folds which have the  same level than
+" the current one, and which belong to the same parent.
+" Or maybe we should use the fold titles to sometimes contain this information?
+"
+"         nno  <silent>  cd  :<c-u>call Func()<cr>
+"
+"         fu! Func() abort
+"             let pat = '^#\+\ze\s\+\S'
+"             let start = search(pat, 'bcW')
+"             let lvl = len(matchstr(getline(start), pat))
+"             call search('^#\{'.(lvl-1).'}#\@!', 'bcW')
+"             " let cnt = 0
+"             " while cnt != 1
+"             " endwhile
+"             " echo cnt
+"         endfu
+"
+" 118 -
+"
+" Open a tree buffer, then press `--`.
+"
+"     dirvish: invalid directory: '/tmp/vu4nPGy/1/tree_viewer::/home/jean'
+"
+" We've made the same error in other places:
+"
+"     noa vim /tempname().'\//gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
+"
+" Update:
+" The missing directory should have been created.
+" It probably has not because `BufWritePre`  (which is listened to by an autocmd
+" in the group `make_missing_dir`) has not been fired.
+"
+" Update:
+" Actually, maybe it's a  good thing: it prevents us from  losing the buffer too
+" easily. Indeed, we often do `setl bh=wipe`.
+" Thus, after pressing `--` or `C-^`, the buffer would be wiped.
+"
+" When should we do:
+"
+"         • `bh=wipe` ?
+"         • emit `BufWritePre` ?
+"
+" 119 -
+" Don't use `put =` too often.
+" Prefer `setline()` or `append()` (the 2nd argument can be a list of lines).
+" Plugin authors seem to prefer the latters.
+"
+" Note that  `setline()` behaves like `append()`  when you try to  paste several
+" lines from the last  line of the buffer; i.e. it creates  new lines instead of
+" replacing existing ones.
+" With one EXCEPTION: it doesn't add an empty line at the end.
+" And that is a benefit over `:put` and `append()`:
+"
+"       :new
+"       :call setline(1, ['foo', 'bar', 'baz'])
+"
+" vs:
+"       :new
+"       :put =['foo', 'bar', 'baz']
+"       $d_
+"
+" Other_Benefits:
+"     • Doesn't pollute the expression register.
+"     • No need to escape double quotes.
+"     • silent by default (no need of `:silent` contrary to `:put`)
+"     • the cursor doesn't move
+"
+"     noa vim /\<put\s\+=/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 
 
 
@@ -6592,8 +6663,8 @@ endfu
 
 " don't use `<space>g`, I press it by accident too often
 nno  <silent>  <space>G  :<c-u>let g:my_goyo_without_syntax_hl = 1
-                        \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')
-                        \ <bar> norm coz<cr>
+                        \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+                        " \ <bar> norm coz<cr>
 
 nno  <silent>  <space><c-g>  :<c-u>let g:my_goyo_without_syntax_hl = 0
                             \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>

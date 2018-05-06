@@ -391,8 +391,6 @@ call lg#motion#repeatable#make#all({
 \        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
-\                     { 'bwd': '<l'    ,  'fwd': '>l'     },
-\                     { 'bwd': '<q'    ,  'fwd': '>q'     },
 \                     { 'bwd': '[<c-l>',  'fwd': ']<c-l>' },
 \                     { 'bwd': '[<c-q>',  'fwd': ']<c-q>' },
 \                     { 'bwd': '[a'    ,  'fwd': ']a'     },
@@ -401,6 +399,17 @@ call lg#motion#repeatable#make#all({
 \                     { 'bwd': '[l'    ,  'fwd': ']l'     },
 \                     { 'bwd': '[q'    ,  'fwd': ']q'     },
 \                     { 'bwd': '[t'    ,  'fwd': ']t'     },
+\                   ]
+\ })
+
+call lg#motion#repeatable#make#all({
+\        'mode':   'n',
+\        'buffer': 0,
+\        'axis':   {'bwd': 'z,', 'fwd': 'z;'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'motions': [
+\                     { 'bwd': '<l'    ,  'fwd': '>l'     },
+\                     { 'bwd': '<q'    ,  'fwd': '>q'     },
 \                   ]
 \ })
 

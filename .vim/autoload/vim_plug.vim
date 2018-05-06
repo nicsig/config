@@ -18,17 +18,6 @@ fu! vim_plug#move_between_commits(is_fwd) abort "{{{1
     " finish its work.
     "}}}
     norm o
-
-    " Why?{{{
-    "
-    " We have an autocmd in `vim-window` which sets the height of a window.
-    " It should set the height of the preview window to `&l:pvh` lines, but
-    " for some reason, it sets it to only 1.
-    " So, we need to manually set its height.
-    "}}}
-    noa wincmd P
-    exe 'resize '.&l:pvh
-    noa wincmd p
 endfu
 
 fu! vim_plug#show_documentation() abort "{{{1

@@ -72,7 +72,6 @@ alias mountc='grc mount'
 # This alias shadows the `nb` binary installed by the `nanoblogger` package.
 #}}}
 alias nb='newsboat -q'
-alias nvim='~/GitRepos/neovim/nvim.appimage'
 alias prof_zsh='repeat 10 time zsh -i -c exit'
 alias reload_conky='killall -SIGUSR1 conky'
 alias reload_xres='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
