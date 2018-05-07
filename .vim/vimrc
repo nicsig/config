@@ -6085,7 +6085,7 @@ endfu
 "
 " Open a tree buffer, then press `--`.
 "
-"     dirvish: invalid directory: '/tmp/vu4nPGy/1/tree_viewer::/home/jean'
+"     dirvish: invalid directory: '/tmp/vu4nPGy/1/tree_viewer::/home/user'
 "
 " We've made the same error in other places:
 "
@@ -6155,10 +6155,10 @@ endfu
 " when the qf window is open.
 
 
-nno  <silent>  <space>ec  :<c-u>call Func()<cr>
-fu! Func() abort
+nno  <silent>  <space>ec  :<c-u>call <sid>reminder_space_ec()<cr>
+fu! s:reminder_space_ec() abort
     echohl WarningMsg
-    echo 'Press <c-g>ee (3 times to make it stick faster)'
+    echo 'Press C-g ee    [3 times to make it stick faster]'
     echohl NONE
 endfu
 

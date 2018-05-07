@@ -11,14 +11,14 @@
 # privileges:
 #
 #     cmd                  ✘
-#     su -l jean -c 'cmd'  ✔
+#     su -l user -c 'cmd'  ✔
 #
-# The `-l jean` allows us to execute `cmd` in the same environment as ours.
+# The `-l user` allows us to execute `cmd` in the same environment as ours.
 # It could be useful, for example, if `cmd` contains a command which is in our
 # `$PATH`, but not in root's `$PATH`.
 #
 # Pb:
-# `su -l jean` starts a new login shell, which will source this file (`~/.zprofile`).
+# `su -l user` starts a new login shell, which will source this file (`~/.zprofile`).
 # It won't cause any issue in the console, but it will in the GUI environment.
 # }}}
 if [[ -z $DISPLAY ]]; then
