@@ -344,6 +344,9 @@ endsnippet
 
 # map {{{1
 
+# TODO:
+# We should add `<unique>`, but maybe only for non-plug mappings?
+# And only in a plugin file (not in vimrc or temp file)?
 snippet map "prototype mapping" bm
 nno  `!v
 expand('%:p:h:t') is# 'ftplugin' ? '<buffer><nowait><silent>' : '<silent>'
@@ -394,11 +397,11 @@ com! -bar -range ${3:MyCom} call ${2/<(sid|SID)>/s:/}('Ex', <line1>, <line2>)
 
 fu! ${2/<(sid|SID)>/s:/}(type, ...) abort
 	let cb_save  = &cb
-	let sel_save = &selection
+	let sel_save = &sel
 	let reg_save = [ '"', getreg('"'), getregtype('"') ]
 	try
 		set cb-=unnamed cb-=unnamedplus
-		set selection=inclusive
+		set sel=inclusive
 
 		if a:type is# 'char'
 			${4:sil norm! \`[v\`]y}

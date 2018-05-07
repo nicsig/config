@@ -407,7 +407,7 @@ fu! myfuncs#in_A_not_in_B(...) abort "{{{1
     call map(output, {i,v -> {'text': v}})
     call setloclist(0, output)
     call setloclist(0, [], 'a', {'title': 'in  '.fileA.'  but not in  '.fileB})
-    doautocmd <nomodeline> QuickFixCmdPost lopen
+    do <nomodeline> QuickFixCmdPost lopen
     call qf#set_matches('myfuncs#in_A_not_in_B', 'Conceal', 'double_bar')
     call qf#create_matches()
 endfu
@@ -1271,7 +1271,10 @@ fu! myfuncs#search_todo(where) abort "{{{1
 
     " Because we've prefixed `:lvim` with `:noa`, our autocmd which opens a qf window
     " hasn't kicked in. We must manually open it.
-    lwindow
+    do <nomodeline> QuickFixCmdPost lwindow
+    if &bt isnot# 'quickfix'
+        return
+    endif
 
     "                                              ┌ Tweak the text of each entry when there's a line
     "                                              │ with just `todo` or `fixme`;
@@ -1478,8 +1481,8 @@ fu! myfuncs#tab_toc() abort "{{{1
     " The width of the current window is going to be reduced by the TOC window.
     " Long lines may be wrapped. I don't like wrapped lines.
     setl nowrap
-    doautocmd <nomodeline> QuickFixCmdPost lgrep
 
+    do <nomodeline> QuickFixCmdPost lwindow
     if &bt isnot# 'quickfix'
         return
     endif
