@@ -10,7 +10,7 @@ set shortmess=aoO
 badd +8 ~/Dropbox/wiki/vim/command.md
 badd +1 ~/Desktop/foo
 badd +38 ~/Desktop/file
-badd +11 ~/.vim/plugged/vim-unix/plugin/unix.vim
+badd +1 ~/.vim/plugged/vim-unix/plugin/unix.vim
 badd +20 ~/Desktop/vim.vim
 badd +34 ~/.vim/plugged/vim-unix/autoload/unix/cloc.vim
 badd +1 /tmp/test/foo
@@ -41,7 +41,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 11 - ((1 * winheight(0) + 0) / 1)
+let s:l = 11 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -60,7 +60,7 @@ setlocal fdn=20
 setlocal fen
 33
 normal! zo
-let s:l = 43 - ((6 * winheight(0) + 0) / 1)
+let s:l = 43 - ((42 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -82,9 +82,8 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 34
-normal! 068|
+normal! 0
 wincmd w
-3wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
@@ -125,13 +124,14 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 20 - ((19 * winheight(0) + 14) / 28)
+let s:l = 17 - ((12 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-20
-normal! 09|
+17
+normal! 010|
 wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabedit ~/Dropbox/wiki/vim/command.md
@@ -142,8 +142,8 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#stacked()
@@ -153,14 +153,14 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-1234
+1113
 normal! zo
-let s:l = 8 - ((3 * winheight(0) + 0) / 1)
+let s:l = 8 - ((7 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 8
-normal! 071|
+normal! 0
 wincmd w
 argglobal
 if bufexists('~/Desktop/file') | buffer ~/Desktop/file | else | edit ~/Desktop/file | endif
@@ -173,15 +173,15 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 38 - ((24 * winheight(0) + 14) / 28)
+let s:l = 50 - ((27 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-38
-normal! 0
+50
+normal! 044|
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 tabedit /tmp/test/foo
 set splitbelow splitright
 wincmd t
@@ -202,7 +202,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabnext 1
+tabnext 2
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
@@ -215,6 +215,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad

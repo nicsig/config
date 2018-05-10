@@ -1669,6 +1669,26 @@ set cpo+=n
 set whichwrap+=h,l
 
 " MAPPINGS {{{1
+" NEW {{{2
+
+fu! s:remember_new_mappings(some_lhs) abort
+    for lhs in a:some_lhs
+        exe 'nno  <silent>  '.lhs[0].'  :<c-u>call <sid>reminder_new_mapping('.string(lhs[1]).')<cr>'
+    endfor
+endfu
+
+fu! s:reminder_new_mapping(new_lhs) abort
+    echohl WarningMsg
+    echo 'Press '.a:new_lhs.'    [3 times to make it stick faster]'
+    echohl NONE
+endfu
+
+call s:remember_new_mappings([
+\            ['-e', '!e'],
+\            ['<space>ec', 'C-g ee'],
+\            ['g?', '!m'],
+\          ])
+
 " DISABLED {{{2
 
 fu! s:cancel_prefix(prefixes) abort
@@ -2477,7 +2497,7 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : '∅')
 
 " -p  -P           show filePath / :pwd {{{4
 
-nno  -p  :<c-u>echohl Title <bar> echo expand('%:p') <bar> echohl NONE <cr>
+nno  -p  :<c-u>echohl Title <bar> echo &bt is# 'quickfix' ? w:quickfix_title : expand('%:p') <bar> echohl NONE <cr>
 nno  -P  :<c-u>pwd<cr>
 
 " -q               faq {{{4
@@ -2613,21 +2633,6 @@ fu! s:clear_z() abort
     sil! put
     sil! undo
     echo 'z register: cleared'
-endfu
-
-" !                   (prefix) {{{3
-" !e            wref (wordreference) {{{4
-
-nno  <silent>  !e  :<c-u>call <sid>wref()<cr>
-
-fu! s:wref() abort
-    call feedkeys(':sil !sr wref ', 'int')
-    augroup wref_translate_english
-        au!
-        au CmdlineLeave * call timer_start(0, {-> execute('redraw!')})
-        \ |               exe 'au! wref_translate_english'
-        \ |               aug! wref_translate_english
-    augroup END
 endfu
 
 " CR / Tab / Shift / Control / Meta {{{3
@@ -5829,6 +5834,10 @@ endfu
 "      • being able to customize `C-k` when a dictionary completion is active
 "        (same thing for other completions: C-t, C-d, C-l, ...)
 "
+"      • a function to get the owner/group of a file
+"
+"      • adding an option to `getfsize()` to get a human readable result
+"
 " 102 -
 " If we press  C-g by accident on  the command-line, and we move  forward in the
 " cycle, we should be able to undo and recover the previous command with C-_.
@@ -5839,6 +5848,23 @@ endfu
 "         noa vim //gj `find . -type f -cmin -60` | cw
 "                 ^                           ^
 "                 tabstop 1                   tabstop 2
+"
+" Also:
+"
+"     C-g f
+"         → :Verb filter // map
+"         ✔
+"
+"     insert `foo`
+"         → :Verb filter /foo/ map
+"         ✔
+"
+"     C-g
+"         → :noa vim //gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
+"         ✘
+"         We should get the next command in the origina (!= default) cycle:
+"
+"                 :Verb filter // ab
 "
 " 103 -
 " To document.
@@ -6002,41 +6028,6 @@ endfu
 " `:InAButNotInB` is too cumbersome.
 "
 " 110 -
-" MWE:
-"     $ cat /tmp/vimrc
-"
-"         fu! Replace_qfl() abort
-"             call setqflist([], 'r',
-"             \              {'items': [{ 'filename': $VIMRUNTIME.'/filetype.vim',
-"             \                           'lnum': 1,
-"             \                           'valid': 1 }]})
-"         endfu
-"
-"         nno  <silent>  cd  :<c-u>call Replace_qfl()<cr>
-"
-"         let &stl = "%{exists('w:quickfix_title') ? w:quickfix_title : ''}"
-"
-"     $ vim -Nu /tmp/vimrc
-"     :vim /pattern/ $VIMRUNTIME/**/*.vim | cw
-"     cd
-"         → ::vim /pattern/ $VIMRUNTIME/**/*.vim
-"           ^
-"           ✘
-"
-" A second colon is added in front of the title of the qfl.
-" It should not.
-" If we close and re-open the qf window (or just execute `:copen` right from the
-" qf window), it disappears.
-"
-" The issue seems to come from `w:quickfix_title`, not from the title itself:
-"
-"     echo w:quickfix_title
-"         → '::...' ✘
-"
-"     echo getqflist({'title':0})
-"         → ':...' ✔
-"
-" 111 -
 "
 "     $ shell_cmd | vim +'setf dirvish' -
 "
@@ -6054,14 +6045,22 @@ endfu
 " Use `CmdlineLeave` instead of remapping `/` and `?`.
 " This way the anchor at the end is never visible (noise, distracting).
 " Hide it behind an option for a PR.
+" Update:
+" Two issues:
 "
-" 112 -
+"         0 - you can't prevent the initial search (the one without `\ze`)
+"
+"         1 - you can't make the autocmd local to a buffer;
+"             You can only inspect `get(b:, 'current_syntax', '')` and compare it to 'dirvish'
+"             but the autocmd will still be global.
+"
+" 111 -
 " Install  a  mapping  to  increase/decrease  'fdl', in  a  markdown  buffer  in
 " “nesting” mode.
 " We would use it to quickly see the titles up to an arbitrary depth.
 " Useful to get an overview of the contents of the notes of an arbitrary precision.
 "
-" 113 -
+" 112 -
 " Create mappings to promote/demote a selection of folds.
 "
 " Create a mapping  to echo the number  of folds which have the  same level than
@@ -6081,11 +6080,11 @@ endfu
 "             " echo cnt
 "         endfu
 "
-" 114 -
+" 113 -
 "
 " Open a tree buffer, then press `--`.
 "
-"     dirvish: invalid directory: '/tmp/vu4nPGy/1/tree_viewer::/home/user'
+"     dirvish: invalid directory: '/tmp/vu4nPGy/1/tree_explorer::/home/user'
 "
 " We've made the same error in other places:
 "
@@ -6106,7 +6105,7 @@ endfu
 "         • `bh=wipe` ?
 "         • emit `BufWritePre` ?
 "
-" 115 -
+" 114 -
 " Don't use `put =` too often.
 " Prefer `setline()` or `append()` (the 2nd argument can be a list of lines).
 " Plugin authors seem to prefer the latters.
@@ -6133,7 +6132,7 @@ endfu
 "
 "     noa vim /\<put\s\+=/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 "
-" 116 -
+" 115 -
 " We should remove `coP` mapping in `vim-help`.
 " It's not consistent with how we use the preview window in other plugins.
 " Instead, install these mappings:
@@ -6142,25 +6141,80 @@ endfu
 "       • } preview next tag
 "       • { preview previous tag
 "
-" 117 -
+" 116 -
 " Should we enable 'ttyfast'? Should be useless with current terminal, but could
 " be useful  in a  future one. Useless  in Neovim,  because it's  always enabled
 " there.
 "
+" 117 -
+" Sometimes, when we  move in the qfl while  the qf window is open  we don't see
+" where we are in the qfl.
+" Why doesn't Vim  echo anything on the  command line, like it does  when the qf
+" window is closed?
+" If you  can't make Vim echo  anything, enable the indicator  in the statusline
+" even when the qf window is open.
+"
 " 118 -
-" When we move in the qfl while the qf window we don't see where we are in the qfl.
-" Why doesn't Vim echo anything on the command line, like it does when the qf window
-" is closed?
-" If you can't make Vim echo anything, enable the indicator in the statusline even
-" when the qf window is open.
+" When you create a temp buffer to display some info (like freekeys), and you want
+" it to be reloadable, do NOT populate it directly from the function called by a
+" mapping.
+" It should be populated from an autocmd (maybe listening to BufNewFile).
+" If the autocmd needs some additional info, make it inspect the name of the buffer,
+" and use the latter to pass the info.
+" Look at what we did with `:Tree` for inspiration.
+"
+" 119 -
+" Implement a command to display all info about timers.
+"
+" With syntax highlighting, additional info, mappings, ...
+"
+" If the callback is a lambda expression, show its definition (fu {'<lambda>123'}).
+" Highlight the  returned value without the  `return` keyword (to get  the right
+" search pattern).
+" Or better, create and dump the right search pattern:
+"
+"         ->\s*expr
+"
+" 120 -
+" Document the fact  that `v:count` is not reset until  the timeout has elapsed,
+" or we've left normal mode.
+" Not understanding  that can  lead to issues. See  our comment  in `vim-window`
+" inside `s:restore_change_position()`.
+"
+" 121 -
+"
+" Try to remove as many `virtcol()` as possible everywhere.
+" Same thing for `\%v`.
+" They are not as reliable as we thought.
+" They are influenced by some options ('wrap', 'linebreak', ...).
+"
+" Although, I  guess it's ok  to use  them when you're  sure your lines  are NOT
+" wrapped.
+"
+" 122 -
+" Every time we populate a qfl from a script, we should save the command we used
+" with the 'context' qf property.
+" We could use it  to refresh a qfl, using a custom  mapping which would inspect
+" the value of 'context'.
+" The mapping would re-execute the command and  replace the old qfl with the new
+" one.
 
 
-nno  <silent>  <space>ec  :<c-u>call <sid>reminder_space_ec()<cr>
-fu! s:reminder_space_ec() abort
-    echohl WarningMsg
-    echo 'Press C-g ee    [3 times to make it stick faster]'
-    echohl NONE
+
+nno  <silent>  !t  :<c-u>call <sid>timer_info()<cr>
+fu! s:timer_info() abort
+    let info = timer_info()
+    if empty(info)
+        echo 'No timer is currently running'
+        return
+    endif
+    put =info
 endfu
+
+" augroup dump_timer_info
+"     au!
+"     au BufNewFile /tmp/*/timer_info call s:timer_info_populate(expand('<amatch>'))
+" augroup END
 
 
 

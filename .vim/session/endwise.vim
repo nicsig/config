@@ -33,12 +33,12 @@ normal! zo
 normal! zo
 151
 normal! zo
-let s:l = 97 - ((18 * winheight(0) + 15) / 31)
+let s:l = 98 - ((15 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-97
-normal! 0
+98
+normal! 016|
 lcd ~/
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
