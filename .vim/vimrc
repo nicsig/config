@@ -6228,6 +6228,7 @@ endfu
 "     • syntax highlighting
 "     • filetype detection
 "     • automatic population (persistent after `:e`)
+"     • proper path/name
 "
 " Update:
 " I think we should never install C-s, C-v, C-t mappings.
@@ -6255,11 +6256,6 @@ endfu
 " We would need to  change the signature of the function we  call to install the
 " cycle, to have a way to let it  know that we want all candidates dumped on the
 " command-line at once and a form of completion.
-"
-" 127 -
-" Is filetype.vim better suited than ftdetect/ for our needs most of the time?
-"
-"     Find! ~/.vim -ipath ${HOME}'/.vim/*/ftdetect/*'
 
 
 
