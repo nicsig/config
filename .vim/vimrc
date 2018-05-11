@@ -104,7 +104,8 @@ Plug 'tpope/vim-abolish', { 'frozen': 1 }
 Plug 'yegappan/asyncmake', { 'frozen': 1 }
 Plug 'lacygoill/vim-debug'
 Plug 'justinmk/vim-dirvish'
-Plug 'lacygoill/vim-mirvish'
+Plug 'lacygoill/vim-fex'
+Plug 'lacygoill/vim-fex'
 Plug 'junegunn/vim-easy-align'
 Plug 'tommcdo/vim-exchange' | PlugCfg exchange
 Plug 'tpope/vim-fugitive'
@@ -1552,6 +1553,9 @@ set virtualedit=block
 "         • in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 if has('vim_starting')
+    " lock files (example: ~/.gksu.lock)
+    set wig+=*.lock
+
     " vim temporary files
     set wig+=*.bak,*.swo,*.swp,*~
 
@@ -1687,6 +1691,7 @@ call s:remember_new_mappings([
 \            ['-e', '!e'],
 \            ['<space>ec', 'C-g ee'],
 \            ['g?', '!m'],
+\            ['zs', '!s'],
 \          ])
 
 " DISABLED {{{2
@@ -5135,7 +5140,7 @@ endfu
 " The double invocation of `scroll_preview_mappings()` is neat.
 " We don't create 2 functions, only 1.
 " Find where we should have done that. Look for functions containing the keyword
-" `maybe` or `later`.
+" `maybe` or `later` (or look for aug\%[roup]!).
 "
 " 46 -
 " Are there places where we should have used:
@@ -5912,7 +5917,7 @@ endfu
 "
 "         :args
 "         :autocmd
-"         :autogroup
+"         :augroup
 "         :changes
 "         :clist (:llist)
 "         :function
@@ -6100,6 +6105,9 @@ endfu
 " easily. Indeed, we often do `setl bh=wipe`.
 " Thus, after pressing `--` or `C-^`, the buffer would be wiped.
 "
+" Also, it doesn't make sense to view the contents of the current directory.
+" From a buffer associated to no file, there's no current directory.
+"
 " When should we do:
 "
 "         • `bh=wipe` ?
@@ -6125,10 +6133,12 @@ endfu
 "       $d_
 "
 " Other_Benefits:
-"     • Doesn't pollute the expression register.
-"     • No need to escape double quotes.
+"
+"     • doesn't pollute the expression register
+"     • no need to escape double quotes
 "     • silent by default (no need of `:silent` contrary to `:put`)
 "     • the cursor doesn't move
+"     • current position is not added to the jumplist (no need of `:keepj`)
 "
 "     noa vim /\<put\s\+=/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 "
@@ -6155,6 +6165,48 @@ endfu
 " even when the qf window is open.
 "
 " 118 -
+" Try to remove as many `virtcol()` as possible everywhere.
+" Same thing for `\%v`.
+" They don't mean what we thought.
+" If `virtcol('.')` evaluates to `123`, it doesn't mean:
+"
+"     the next character is the 123th on the line
+"
+" but:
+"
+"     the next character occupies the 123th column on the line
+"
+" `virtcol()` and `\%v` are influenced by some options ('wrap', 'linebreak', ...).
+"
+" Although, I  guess it's ok  to use  them when you're  sure your lines  are NOT
+" wrapped.
+"
+" 119 -
+" Every time we populate a qfl from a script, we should save the command we used
+" with the 'context' qf property.
+" We could use it  to refresh a qfl, using a custom  mapping which would inspect
+" the value of 'context'.
+" The mapping would re-execute the command and  replace the old qfl with the new
+" one.
+"
+" 120 -
+" Document the fact that, when executing  `:norm` with a timer, `v:count` is not
+" reset until the timeout has elapsed, or we've left normal mode.
+" Not understanding  that can  lead to issues. See  our comment  in `vim-window`
+" inside `s:restore_change_position()`.
+"
+" In  particular, it  means  that whenever  you execute  a  timer, ask  yourself
+" whether it  may execute a `:norm`  command, and if  it does, try to  make sure
+" `v:count` is reset.
+" We would need to find a `:norm` command which sets `v:count` to 1 or 0, without
+" interfering in our activity, because `v:count` is not writable...
+"
+"     call timer_start(0, {-> execute('norm! 99l') + execute('norm! y') + execute('let g:cnt = copy(v:count)')})
+"                                                                   │
+"                                                                   └ reset `v:count`
+"
+" 121 -
+"
 " When you create a temp buffer to display some info (like freekeys), and you want
 " it to be reloadable, do NOT populate it directly from the function called by a
 " mapping.
@@ -6163,7 +6215,11 @@ endfu
 " and use the latter to pass the info.
 " Look at what we did with `:Tree` for inspiration.
 "
-" 119 -
+" 122 -
+"
+" Remove `\v` (very magic in regex) everywhere.
+"
+" 123 -
 " Implement a command to display all info about timers.
 "
 " With syntax highlighting, additional info, mappings, ...
@@ -6175,41 +6231,31 @@ endfu
 "
 "         ->\s*expr
 "
-" 120 -
-" Document the fact  that `v:count` is not reset until  the timeout has elapsed,
-" or we've left normal mode.
-" Not understanding  that can  lead to issues. See  our comment  in `vim-window`
-" inside `s:restore_change_position()`.
+" 124 -
+" Try to avoid `:s`, prefer `setline()` and `substitute()`.
 "
-" 121 -
+"     noa vim /keep[jp]/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 "
-" Try to remove as many `virtcol()` as possible everywhere.
-" Same thing for `\%v`.
-" They are not as reliable as we thought.
-" They are influenced by some options ('wrap', 'linebreak', ...).
+" 125 -
+" Develop an infrastructure to automatically handle a temp buffer:
 "
-" Although, I  guess it's ok  to use  them when you're  sure your lines  are NOT
-" wrapped.
+"     • layout
+"     • local settings mappings
+"     • syntax highlighting
+"     • filetype detection
+"     • automatic population (persistent after `:e`)
 "
-" 122 -
-" Every time we populate a qfl from a script, we should save the command we used
-" with the 'context' qf property.
-" We could use it  to refresh a qfl, using a custom  mapping which would inspect
-" the value of 'context'.
-" The mapping would re-execute the command and  replace the old qfl with the new
-" one.
+" 126 -
+" finish implementing `!t` (timer info)
+"
+" 127 -
+" maybe extract cycles from `vim-cmdline` (if there's enough code);
+" it would make the maintenance easier (for debugging and adding new features)
+"
+" 128 -
+" Is filetype.vim better suited than ftdetect/ for our needs most of the time?
 
 
-
-nno  <silent>  !t  :<c-u>call <sid>timer_info()<cr>
-fu! s:timer_info() abort
-    let info = timer_info()
-    if empty(info)
-        echo 'No timer is currently running'
-        return
-    endif
-    put =info
-endfu
 
 " augroup dump_timer_info
 "     au!
