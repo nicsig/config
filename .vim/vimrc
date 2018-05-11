@@ -6190,22 +6190,6 @@ endfu
 " one.
 "
 " 120 -
-" Document the fact that, when executing  `:norm` with a timer, `v:count` is not
-" reset until the timeout has elapsed, or we've left normal mode.
-" Not understanding  that can  lead to issues. See  our comment  in `vim-window`
-" inside `s:restore_change_position()`.
-"
-" In  particular, it  means  that whenever  you execute  a  timer, ask  yourself
-" whether it  may execute a `:norm`  command, and if  it does, try to  make sure
-" `v:count` is reset.
-" We would need to find a `:norm` command which sets `v:count` to 1 or 0, without
-" interfering in our activity, because `v:count` is not writable...
-"
-"     call timer_start(0, {-> execute('norm! 99l') + execute('norm! y') + execute('let g:cnt = copy(v:count)')})
-"                                                                   │
-"                                                                   └ reset `v:count`
-"
-" 121 -
 "
 " When you create a temp buffer to display some info (like freekeys), and you want
 " it to be reloadable, do NOT populate it directly from the function called by a
@@ -6215,11 +6199,11 @@ endfu
 " and use the latter to pass the info.
 " Look at what we did with `:Tree` for inspiration.
 "
-" 122 -
+" 121 -
 "
 " Remove `\v` (very magic in regex) everywhere.
 "
-" 123 -
+" 122 -
 " Implement a command to display all info about timers.
 "
 " With syntax highlighting, additional info, mappings, ...
@@ -6231,36 +6215,51 @@ endfu
 "
 "         ->\s*expr
 "
-" 124 -
+" 123 -
 " Try to avoid `:s`, prefer `setline()` and `substitute()`.
 "
 "     noa vim /keep[jp]/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 "
-" 125 -
+" 124 -
 " Develop an infrastructure to automatically handle a temp buffer:
 "
 "     • layout
-"     • local settings mappings
+"     • local settings & mappings (find consistent ones: C-s, C-v, C-t  vs  gf, Zf, Zgf, ...)
 "     • syntax highlighting
 "     • filetype detection
 "     • automatic population (persistent after `:e`)
 "
-" 126 -
+" Update:
+" I think we should never install C-s, C-v, C-t mappings.
+" It will weaken our memory of gf, Zf, Zgf.
+" You should rely on default commands as much as possible.
+" They work everywhere, and there is  probably more to discover/integrate in our
+" workflow.
+"
+" 125 -
 " finish implementing `!t` (timer info)
 "
-" 127 -
+" 126 -
 " maybe extract cycles from `vim-cmdline` (if there's enough code);
 " it would make the maintenance easier (for debugging and adding new features)
 "
-" 128 -
+" Also, try to use `textchangedi` to implement sth similar to `complete()` in
+" ultisnips. It would be useful when there're too many similar commands in a cycle:
+"
+"     :Verb filter // [map|ab|%#|com|old|chi|mess|scr|ls]
+"     :Verb filter // m[ap|ess]
+"     :Verb filter // mess
+"
+" Here we would install a temporary autocmd when we enter the cycle which would
+" inspect the end of the command-line.
+" We would need to  change the signature of the function we  call to install the
+" cycle, to have a way to let it  know that we want all candidates dumped on the
+" command-line at once and a form of completion.
+"
+" 127 -
 " Is filetype.vim better suited than ftdetect/ for our needs most of the time?
-
-
-
-" augroup dump_timer_info
-"     au!
-"     au BufNewFile /tmp/*/timer_info call s:timer_info_populate(expand('<amatch>'))
-" augroup END
+"
+"     Find! ~/.vim -ipath ${HOME}'/.vim/*/ftdetect/*'
 
 
 
