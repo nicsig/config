@@ -2951,6 +2951,7 @@ On s'en est servi dans:
 
 ... pour masquer les caractères de masquage.
 Parler aussi du nom de groupe syntaxique spécial `ALL` (`:h syn-contains`).
+Parler aussi de `:h synconcealed()`.
 
 
 

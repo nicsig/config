@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +46 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+badd +64 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
 badd +54 ~/Desktop/qfedit.vim
 argglobal
 silent! argdel *
@@ -52,7 +52,7 @@ exe s:l
 normal! zt
 54
 normal! 0
-tabnext 1
+tabnext 2
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
@@ -65,6 +65,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad

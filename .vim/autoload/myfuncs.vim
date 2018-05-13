@@ -438,17 +438,9 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
 
         sil exe mods.range_second_block."s/^/\<c-a>/e"
         sil exe mods.range_first_block .'g/^/'.(end_first_block + 1).'m.|-j'
+        return
 
-        "              ┌─ align around the 1st occurrence of the delimiter
-        "              │
-        "              │        ┌─ the delimiter is a literal c-a
-        "              │  ┌─────┤
-        sil *EasyAlign 1 /\%u0001/ { 'left_margin': '',  'right_margin': ' ' }
-        "                                           │                     │
-        "                                           │                     └─ add a space after
-        "                                           │
-        "                                           └─ don't add anything before the delimiters
-        sil exe mods."*s/\<c-a>//e"
+        sil exe "*!column -s '\<c-a>' -t"
 
     catch
         return lg#catch_error()
@@ -1323,7 +1315,7 @@ fu! s:search_todo_text(dict) abort
     return dict
 endfu
 
-fu! myfuncs#show_me_snippets() abort "{{{1
+fu! myfuncs#snip_cheat() abort "{{{1
     call UltiSnips#SnippetsInCurrentScope(1)
     if empty(g:current_ulti_dict)
         return
@@ -1334,12 +1326,12 @@ fu! myfuncs#show_me_snippets() abort "{{{1
     setl bh=wipe bt=nofile nobl noswf nowrap
 
     sil 0put =map(sort(deepcopy(keys(g:current_ulti_dict))), { i,v -> v.' : '.g:current_ulti_dict[v] })
-    sil $d_
-    sil %EasyAlign 1 : { 'left_margin': '', 'right_margin': ' ' }
-    sil %s/:/
+    sil %!column -s: -t
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     call matchadd('Identifier', '^\S\+\ze\s*', 0, -1)
+    let &l:pvw = 1
+    wincmd p
 endfu
 
 " tmux_{current|last}_command {{{1

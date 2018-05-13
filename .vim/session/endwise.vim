@@ -23,17 +23,11 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-37
-normal! zo
-76
-normal! zo
 90
 normal! zo
 91
 normal! zo
-151
-normal! zo
-let s:l = 98 - ((15 * winheight(0) + 15) / 31)
+let s:l = 98 - ((61 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
