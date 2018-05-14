@@ -1,7 +1,6 @@
 " Why using this file instead of `ftdetect/`?{{{
 "
-" But instead, we use this file, because it's sourced BEFORE
-" $VIMRUNTIME/filetype.vim .
+" Because it's sourced BEFORE $VIMRUNTIME/filetype.vim .
 " Our autocmds  will match first,  and because  the other autocmds  use `:setf`,
 " they won't re-set 'filetype'.
 "

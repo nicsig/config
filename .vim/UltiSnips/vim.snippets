@@ -477,7 +477,7 @@ endsnippet
 #
 #	 Otherwise, if we re-invoke our code twice, we could get an issue.
 #	 For example, we wouldn't be able to use the same buffer name.
-#	 Besides, if the buffer is non-modifiable, `:put` will fail.
+#	 Besides, if the buffer is non-modifiable, `setline()` will fail.
 #
 # 2. To avoid saving the buffer in a file in the working directory by accident.
 #    It shouldn't happen because of `bt=nofile`, but better be safe.
@@ -507,20 +507,21 @@ endsnippet
 #}}}
 # When should I use `bh=wipe`?{{{
 #
-# If the buffer is interactive and you open  a new buffer by accident (`gf` on a
-# link, `l` in tree viewer), don't use `bh=wipe`.
-# It would prevent you from getting the buffer back with `C-^`.
-# Otherwise, you can use it.
+# If the buffer is interactive and you  can easily open a new buffer by accident
+# (example: `gf` on a link), don't use `bh=wipe`.
+# It would prevent you from getting the buffer back if you press `C-^` or `--`.
+#
+# Otherwise, I would recommend using it  only if the buffer contains no valuable
+# info.
 #}}}
-snippet sidebar "sidebar" bm
+snippet sidebar "" bm
 let tempfile = tempname().'/${1:buffer name}'
 exe '$2`!p
 snip.rv = complete(t[2], ['lefta', 'to'])
 ` '.(&columns/3).'vnew '.tempfile
 setl ${3:bh=wipe }bt=nofile nobl noswf nowrap
 
-sil 0put =${4:put your text}
-sil $d_
+call setline(1, ${4:put your text})
 
 nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
 $0

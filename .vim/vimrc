@@ -1848,17 +1848,15 @@ cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\?\s*:\?', '', '')<cr>
 "│
 "└─ compacted whitespace
 
-ino  <expr><silent>  <c-g><c-h>  <sid>compact_whitespace()
+ino  <silent>  <c-g><c-h>  <c-r>=<sid>compact_whitespace()<cr>
 
 fu! s:compact_whitespace() abort
     if empty(&l:cms)
         return ''
     endif
     let cml = matchstr(split(&l:cms, '%s')[0], '\S*')
-    call timer_start(0, {->
-    \                      setline('.',
-    \                              substitute(getline('.'), '\s*'.cml.'\zs\s\+', ' ', ''))
-    \                   })
+    call setline('.',
+    \            substitute(getline('.'), '\s*'.cml.'\zs\s\+', ' ', ''))
     return ''
 endfu
 
@@ -5675,8 +5673,9 @@ endfu
 " 85 -
 " Play with (or document):
 "
-"        • $HOME/.vim/tools/colors/check_colors.vim
+"        • $VIMRUNTIME/colors/tools/check_colors.vim
 "        • 'user_data' entry in completion item
+"        • :unl[et] ${env-name} (:h :unlet-$)
 "        • CmdlineChanged
 "        • ColorSchemePre
 "        • DirChanged
@@ -5780,22 +5779,10 @@ endfu
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
 " 96 -
-"
-"     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
-"
-" Visit all matches. Bring consistency in the  way we create a temporary buffer,
-" including how we set the geometry of the window.
-" Also look at our snippet.
-"
-" Also, finish reviewing this:
-"
-"     :vim /setl.*\%(noma\|nomodifiable\)/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
-"
-" 97 -
 " https://www.reddit.com/r/vim/comments/8asgjj/topnotch_vim_markdown_live_previews_with_no/
 " https://github.com/joeyespo/grip (unfortunately, requires an internet connection)
 "
-" 98 -
+" 97 -
 " Look at ~/Dropbox/wiki/vim/plugin.md and search for the `vim-sandwich` section.
 " I wrote  some custom  exercises where  the answer  is concealed,  and visually
 " indicated ↣ like that ↢.
@@ -5811,12 +5798,12 @@ endfu
 "          there will be an exercise which will make the question clearer,
 "          and the answer is concealed”
 "
-" 99 -
+" 98 -
 " We should save the last 10 or so messages we wrote in a git commit message.
 " Basically, we should have a history.
 " And it should be persistent (i.e. survive a reboot).
 "
-" 100 -
+" 99 -
 " In ~/Dropbox/wiki/vim/vimL.md, look for the pattern `funcref()`.
 " There are 2 codes side-by-side.
 " They are separated with `┊` characters.
@@ -5832,7 +5819,7 @@ endfu
 " `┊`.
 "
 "
-" 101 -
+" 100 -
 " Feature requests:
 "
 "      • a function to detect we're recording a macro
@@ -5856,7 +5843,7 @@ endfu
 "
 "      • adding an option to `getfsize()` to get a human readable result
 "
-" 102 -
+" 101 -
 " If we press  C-g by accident on  the command-line, and we move  forward in the
 " cycle, we should be able to undo and recover the previous command with C-_.
 "
@@ -5884,7 +5871,7 @@ endfu
 "
 "                 :Verb filter // ab
 "
-" 103 -
+" 102 -
 " To document.
 " If Neovim is unable to suggest suggestions to fix spelling errors,
 " start it like this:
@@ -5904,7 +5891,7 @@ endfu
 "
 " Also, for debugging purpose, try `:spellinfo`.
 "
-" 104 -
+" 103 -
 " According to:
 "
 "     https://github.com/vim/vim/pull/2322
@@ -5945,7 +5932,7 @@ endfu
 "
 " Also, create a complete cycle (C-g f).
 "
-" 105 -
+" 104 -
 "
 "     :vim /^>\|^\%u00a0/gj ~/Dropbox/wiki/**/*.md
 "
@@ -5955,7 +5942,7 @@ endfu
 " Also, we shouldn't need to insert a non-breaking space, it's a hack.
 " Find another way to get the same result.
 "
-" 106 -
+" 105 -
 "
 " In   `vim-qf`,  maybe   we  could   reduce  the   number  of   invocations  to
 " `s:setqflist()`:
@@ -5975,7 +5962,7 @@ endfu
 " Comment on this issue.
 " Leave a link to our faq explaining how to use 'module' to change the display.
 "
-" 107 -
+" 106 -
 " How to filter  a custom text-object without the command-line NOT being redrawn?
 " MWE:
 "         !iE SPC
@@ -6025,7 +6012,7 @@ endfu
 " `vim-textobj-user`, and  fix it every  time you defined  a text object  in the
 " past.
 "
-" 108 -
+" 107 -
 " Document `$ paste` as a filter:
 "
 "         https://vi.stackexchange.com/a/16096/17270
@@ -6040,12 +6027,12 @@ endfu
 " Are they consistent?
 " Could we make them easier to remember?
 "
-" 109 -
+" 108 -
 " Implement a mapping/command to extract the lines which are present in a block,
 " but not in the other.
 " `:InAButNotInB` is too cumbersome.
 "
-" 110 -
+" 109 -
 "
 "     $ shell_cmd | vim +'setf dirvish' -
 "
@@ -6066,19 +6053,19 @@ endfu
 " Update:
 " Two issues:
 "
-"         0 - you can't prevent the initial search (the one without `\ze`)
+"         -1 - you can't prevent the initial search (the one without `\ze`)
 "
-"         1 - you can't make the autocmd local to a buffer;
+"         0 - you can't make the autocmd local to a buffer;
 "             You can only inspect `get(b:, 'current_syntax', '')` and compare it to 'dirvish'
 "             but the autocmd will still be global.
 "
-" 111 -
+" 110 -
 " Install  a  mapping  to  increase/decrease  'fdl', in  a  markdown  buffer  in
 " “nesting” mode.
 " We would use it to quickly see the titles up to an arbitrary depth.
 " Useful to get an overview of the contents of the notes of an arbitrary precision.
 "
-" 112 -
+" 111 -
 " Create mappings to promote/demote a selection of folds.
 "
 " Create a mapping  to echo the number  of folds which have the  same level than
@@ -6098,7 +6085,7 @@ endfu
 "             " echo cnt
 "         endfu
 "
-" 113 -
+" 112 -
 " Don't use `put =` too often.
 " Prefer `setline()` or `append()` (the 2nd argument can be a list of lines).
 " Plugin authors seem to prefer the latters.
@@ -6127,7 +6114,7 @@ endfu
 "
 "     noa vim /\<put\s\+=/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 "
-" 114 -
+" 113 -
 " We should remove `coP` mapping in `vim-help`.
 " It's not consistent with how we use the preview window in other plugins.
 " Instead, install these mappings:
@@ -6136,11 +6123,11 @@ endfu
 "       • } preview next tag
 "       • { preview previous tag
 "
-" 115 -
+" 114 -
 " Should we enable  'ttyfast'? It's useless with current terminal,  but could be
 " useful in a future one. Useless in Neovim, because it's always enabled there.
 "
-" 116 -
+" 115 -
 " Sometimes, when we  move in the qfl while  the qf window is open  we don't see
 " where we are in the qfl.
 " Why doesn't Vim  echo anything on the  command line, like it does  when the qf
@@ -6155,7 +6142,7 @@ endfu
 "         noa vim /pattern/j $VIMRUNTIME/**/*.vim | cw
 "             → no indicator in the statusline because of `:noa`
 "
-" 117 -
+" 116 -
 " Try to remove as many `virtcol()` as possible everywhere.
 " Same thing for `\%v`.
 " They don't mean what we thought.
@@ -6172,7 +6159,7 @@ endfu
 " Although, I  guess it's ok  to use  them when you're  sure your lines  are NOT
 " wrapped.
 "
-" 118 -
+" 117 -
 " Every time we populate a qfl from a script, we should save the command we used
 " with the 'context' qf property.
 " We could use it  to refresh a qfl, using a custom  mapping which would inspect
@@ -6180,27 +6167,28 @@ endfu
 " The mapping would re-execute the command and  replace the old qfl with the new
 " one.
 "
-" 119 -
+" 118 -
 "
 " Remove `\v` (very magic in regex) everywhere.
 "
-" 120 -
+" 119 -
 " Try to avoid `:s`, prefer `setline()` and `substitute()`.
 "
 "     noa vim /keep[jp]/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 "
-" 121 -
+" 120 -
 " Develop an infrastructure/doctrine to quickly handle a temp special buffer:
 "
 "     • layout
 "
-"     • local settings & mappings (find consistent ones: C-s, C-v, C-t  vs  gf, Zf, Zgf, ...)
+"     • local settings & mappings
 "       think about using {, }, (, ), and maybe [[, ]]
 "
 "     • syntax highlighting
 "     • filetype detection
 "     • automatic population (persistent after `:e`)
 "     • proper path/name
+"     • handle multiple invocations (there should be always only 1 (updated) window)
 "
 " If you want the buffer to be  reloadable, do NOT populate it directly from the
 " function called by a mapping.
@@ -6216,13 +6204,6 @@ endfu
 "     let &l:pvw = 1
 "
 " Update:
-" I think we should never install C-s, C-v, C-t mappings.
-" It will weaken our memory of gf, gF, Zf, ZF, Zgf, ZgF.
-" You should rely on default commands as much as possible.
-" They work everywhere, and there is  probably more to discover/integrate in our
-" workflow.
-"
-" Update:
 "
 " Open a tree buffer, then press `--`.
 "
@@ -6234,17 +6215,11 @@ endfu
 "
 " Should we emit `BufWritePre`? Does it make sense considering we set `bt=nofile`?
 "
-" Update:
 " The missing directory should have been created.
 " It probably has not because `BufWritePre`  (which is listened to by an autocmd
 " in the group `make_missing_dir`) has not been fired.
 "
-" Update:
-" Actually, maybe it's a  good thing: it prevents us from  losing the buffer too
-" easily. Indeed, we often do `setl bh=wipe`.
-" Thus, after pressing `--` or `C-^`, the buffer would be wiped.
-"
-" Also, it doesn't make sense to view the contents of the current directory.
+" It doesn't make sense to view the contents of the current directory.
 " From a buffer associated to no file, there's no current directory.
 "
 " Update:
@@ -6253,7 +6228,15 @@ endfu
 " probably do it in a set of snippets/templates/...
 " Also, maybe you should use `vim-projectionist` to enforce a doctrine.
 "
-" 122 -
+" Update:
+"
+"     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
+"
+" Visit all matches. Bring consistency in the  way we create a temporary buffer,
+" including how we set the geometry of the window.
+" Also look at our snippet.
+"
+" 121 -
 " maybe extract cycles from `vim-cmdline` (if there's enough code);
 " it would make the maintenance easier (for debugging and adding new features)
 "
@@ -6270,7 +6253,7 @@ endfu
 " cycle, to have a way to let it  know that we want all candidates dumped on the
 " command-line at once and a form of completion.
 "
-" 123 -
+" 122 -
 " gF, C-w F, C-w gF should also be able to parse a column number.
 " It would be useful in the qf window.
 " See here for inspiration:
@@ -6281,16 +6264,15 @@ endfu
 " the keys pressed, and start a timer which would execute `:norm` to position
 " the cursor on the right column, if a column has been detected after the path.
 "
-" 124 -
+" See also this:
+"
+"     https://github.com/kana/vim-gf-user/blob/master/doc/gf-user.txt
+"
+" 123 -
 " finish implementing `!t` (timer info)
 "
 " Add syntax highlighting, additional info, mappings, ...
-"
-" Highlight the  returned value without the  `return` keyword (to get  the right
-" search pattern).
-" Or better, create and dump the right search pattern:
-"
-"         ->\s*expr
+" Also, create a mapping to interactively (un)pause/stop a timer.
 "
 " Also, do the same for matches (`getmatches()` + `matcharg()`).
 " Use `! C-m` for the lhs of the mapping?
@@ -6311,7 +6293,7 @@ endfu
 " The 'lnum'  and 'windows' key in  the output of getbufinfo(...)[...]  are very
 " interesting.
 "
-" 125 -
+" 124 -
 " Check which mappings could be supercharged using `v:count`:
 "
 "     nno  <silent>  cd  :<c-u>call Func(v:count)<cr>
@@ -6324,7 +6306,7 @@ endfu
 " Basically,  any  mapping which  calls  an  Ex  command accepting  a  numerical
 " argument, or a bang, could be passed the latter via `v:count`.
 "
-" 126 -
+" 125 -
 " Currently, `:FreeKeys` ignores free sequences beginning with `m`, `'` and `@`.
 " This is because it thinks it would introduce a timeout with some of our custom
 " mappings.
@@ -6340,6 +6322,16 @@ endfu
 " How to handle the issue?
 " Either  tweak the  code  of `vim-freekeys`,  or take  the  habit of  executing
 " `:FreeKeys -nomapcheck` (we've added a `-K` mapping for that).
+"
+" 126 -
+" https://github.com/ardagnir/athame
+" https://github.com/ardagnir/athame/issues/52
+"
+"         Full vim for your shell (bash, zsh, gdb, python, etc)
+"
+" Could be used to expand UltiSnips snippets in the shell.
+
+
 
 
 

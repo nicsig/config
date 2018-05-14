@@ -927,7 +927,6 @@ endfu
 
 fu! myfuncs#open_gx(in_term) abort "{{{1
     let url = s:open_gx_get_url()
-    let g:url = deepcopy(url)
 
     if empty(url)
         return
@@ -1323,7 +1322,7 @@ fu! myfuncs#snip_cheat() abort "{{{1
 
     let tempfile = tempname().'/snip cheat'
     exe 'lefta '.(&columns/3).'vnew '.tempfile
-    setl bh=wipe bt=nofile nobl noswf nowrap
+    setl bt=nofile nobl noswf nowrap
 
     sil 0put =map(sort(deepcopy(keys(g:current_ulti_dict))), { i,v -> v.' : '.g:current_ulti_dict[v] })
     sil %!column -s: -t
@@ -1673,7 +1672,7 @@ fu! myfuncs#webpage_read(url) abort "{{{1
     "                         └─ high nr to be sure that
     "                         `lynx` won't break long lines of code
     "}}}
-    sil! exe 'read !w3m -cols 100 '.shellescape(a:url, 1)
+    sil! exe 'r !w3m -cols 100 '.shellescape(a:url, 1)
     setl bt=nofile nobl noswf nowrap
 endfu
 
@@ -1738,7 +1737,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     " put the result in a vertical viewport
     let tempfile = tempname().'/WordFrequency'
     exe 'lefta '.(&columns/3).'vnew '.tempfile
-    setl bh=wipe bt=nofile nobl noswf nowrap
+    setl bt=nofile nobl noswf nowrap
 
     " for item in items(freq)
     for item in flags.weighted ? weighted_freq : items(freq)
