@@ -25,3 +25,16 @@ Current layout:
         │   ├── ./zsh-completions/zsh-completions-howto.org
         │   └── ./zsh-completions/zsh-completions.plugin.zsh
         └── ./README.md
+
+TODO:
+
+From our `.zshrc`, find  a way to clone the plugins if  they're missing, like we
+do in `.vim/vimrc` with `vim-plug`.
+Atm, we use the following plugins:
+
+        • zaw
+        • zsh-interactive-cd
+        • zsh-syntax-highlighting
+        • zsh-completions
+
+They're not versioned here.

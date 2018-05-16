@@ -287,7 +287,8 @@ def my_index(a_list, pattern): #{{{1
 def plugin_guard(snip): #{{{1
     path_to_file = vim.current.buffer.name
     path_to_dir = os.path.dirname(path_to_file)
-    filename = os.path.splitext(os.path.basename(path_to_file))[0]
+    # get the name of the current file without its extension (`splitext()`)
+    basename = os.path.splitext(os.path.basename(path_to_file))[0]
 
     finish = '\n' + vim.eval("repeat(' ', &l:sw)") + 'finish'
     # What's the alternative to the `try` statement?{{{
@@ -330,7 +331,7 @@ def plugin_guard(snip): #{{{1
 
     elif '/plugin' in path_to_dir:
         anon_snip_body = ("if exists('${2:g:loaded_${1:"
-            + filename
+            + basename
             + "}}')"
             + finish
             + '\nendif'

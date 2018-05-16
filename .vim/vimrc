@@ -2580,7 +2580,7 @@ fu! s:edit_readme() abort
     let pat = '\c/'.kwd.'\%(\..\{-}\)\?$'
     let readmes = filter(files, {i,v -> v =~# pat})
     let readme = get(readmes, 0, '')
-    if filereadable(readme)
+    if filereadable(readme) || isdirectory(readme)
         exe 'sp '.readme
         1
     endif
