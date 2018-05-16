@@ -1,0 +1,32 @@
+# How to restart `xbindkeys`?{{{
+#
+#     $ killall xbindkeys
+#     $ xbindkeys -f "${HOME}"/.config/xbindkeysrc &
+# }}}
+
+"dmenu_run -b -fn Monospace-20:normal -l 10"
+  Control+Alt+j
+
+"${HOME}/bin/run-or-raise.sh urxvt"
+  Mod4+j
+
+"${HOME}/bin/run-or-raise.sh firefox"
+  Mod4+n
+
+"xfce4-settings-manager"
+  Mod4+s
+
+"${HOME}/bin/vim-anywhere.sh"
+  Mod4+v
+
+"xfce4-screenshooter -w"
+  Alt+Print
+
+"xfce4-screenshooter -f"
+  Print
+
+"xfce4-popup-whiskermenu"
+  Alt+F1
+
+"exo-open --launch FileManager"
+  Mod4+f
