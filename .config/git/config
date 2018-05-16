@@ -1,0 +1,38 @@
+[color]
+	diff = auto
+	status = auto
+	branch = auto
+[commit]
+	template = ~/.config/git/message.txt
+[core]
+        editor = env not_called_by_me=1 vim
+        ; Why not using `~/.config/git/gitignore_global`?{{{
+        ;
+        ;     > I'll teach you how to ignore tags globally:
+        ;
+        ;     $ git config --global core.excludesfile '~/.cvsignore'
+        ;     $ echo tags >> ~/.cvsignore
+        ;
+        ;     > While any filename will work, I've chosen to follow the ancient
+        ;     > tradition of .cvsignore because utilities like rsync use it, too.
+        ;     > Clever, huh?
+        ;
+        ; Source:
+        ;
+        ;     https://github.com/tpope/vim-pathogen
+        ;}}}
+	excludesfile = ~/.config/git/.cvsignore
+[credential]
+	helper = cache --timeout=14400
+[help]
+	autocorrect = 10
+[merge]
+	tool = vimdiff
+; Get rid of annoying  message when we push a branch  without providing any name
+; (`$ git push`).
+;     https://stackoverflow.com/a/13148313/9690698
+[push]
+	default = simple
+[user]
+	name = lacygoill
+	email = lacygoill@lacygoill.me
