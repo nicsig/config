@@ -21,7 +21,7 @@
         ;
         ;     https://github.com/tpope/vim-pathogen
         ;}}}
-	excludesfile = ~/.config/git/.cvsignore
+	excludesfile = ~/.cvsignore
 [credential]
 	helper = cache --timeout=14400
 [help]
