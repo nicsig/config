@@ -1,0 +1,3 @@
+#compdef srr
+
+_arguments '1:elvis:_files -W /usr/lib/surfraw/' && return 0

@@ -1,0 +1,7 @@
+#compdef ccheat
+
+# https://github.com/chrisallenlane/cheat/blob/master/cheat/autocompletion/cheat.zsh
+
+declare -a cheats
+cheats=$(cheat -l | cut -d' ' -f1)
+_arguments "1:cheats:(${cheats})" && return 0

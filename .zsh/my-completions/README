@@ -1,0 +1,7 @@
+This folder contains our custom completion functions.
+
+We use them to get suggestions when hitting Tab after various shell commands,
+such as `vc` or `sr`.
+
+The file containing the code of the completion function for the `foo` command,
+must be named `_foo`.

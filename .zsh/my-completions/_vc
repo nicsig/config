@@ -1,0 +1,5 @@
+#compdef vc
+
+# https://unix.stackexchange.com/a/366565/232487
+# https://github.com/chrisallenlane/cheat/blob/master/cheat/autocompletion/cheat.zsh
+_arguments '1:cheatsheets:_files -W ~/.cheat' && return 0
