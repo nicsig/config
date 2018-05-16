@@ -333,14 +333,6 @@ From a context statement, you could also use:
 
         snip.buffer.name
 
-## How to get the name of the current file, without VimL?
-
-        os.path.basename(vim.current.buffer.name)
-
-## How to get the name of the directory of the current file, without VimL?
-
-        os.path.basename(os.path.dirname(vim.current.buffer.name))
-
 ## How to refer to the last visually-selected text (in context/pre_expand statement, interpolation, in-snippet)?
 
         ┌───────────────┬─────────────────────┐
@@ -436,6 +428,29 @@ Or shorter:
             ...
             if var = desc
 ↢
+
+## How to get the name of the current file?
+
+        os.path.basename(vim.current.buffer.name)
+
+## How to get the name of the current file, without its extension?
+
+        os.path.splitext(os.path.basename(vim.current.buffer.name))[0]
+
+`splitext()` splits at the last dot, and returns a list with two items:
+
+        >>> os.path.splitext('foo.bar')
+        ('foo', '.bar')
+
+        >>> os.path.splitext('foo.bar.baz')
+        ('foo.bar', '.baz')
+
+So if your filename contains several dots, only the extension after the last dot
+will be removed.
+
+## How to get the name of the directory of the current file?
+
+        os.path.basename(os.path.dirname(vim.current.buffer.name))
 
 ##
 #
