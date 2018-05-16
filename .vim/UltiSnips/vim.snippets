@@ -257,50 +257,10 @@ endsnippet
 #	  • -complete=custom        Vim filters the candidates automatically
 #	  • -complete=customlist    Vim doesn't
 
-# guard {{{1
-
-# snippet guard "script reload guard" bm
-# 	if exists('${1:did_`vim_snippets#Filename()`}') || &cp${2: || version < 700}
-# 		finish
-# 	endif
-# 	let $1 = 1${0}
-# endsnippet
-
 # gd {{{1
 
+pre_expand "plugin_guard(snip)"
 snippet gd "plugin guard" Abm
-if exists('${2:g:`!v
-	expand('%:p') =~# '/autoload/' ? 'auto' : ''
-`loaded_${1:`!v
-	expand('%:p') =~# '/autoload/' ? substitute(matchstr(expand('%:p'), 'autoload/\zs.*\ze\.vim'), '/', '#', 'g') : expand('%:t:r')
-`}}')
-	finish
-endif
-let $2 = 1
-$0
-endsnippet
-
-# gd_ft {{{1
-
-snippet gd_ft "filetype plugin guard" Abm
-if exists('b:did_ftplugin')
-	finish
-endif
-let b:did_ftplugin = 1
-
-$0
-endsnippet
-
-# gd_syn {{{1
-
-snippet gd_syn "guard for syntax file" Abm
-if exists('b:current_syntax')
-	finish
-endif
-
-$0
-
-let b:current_syntax = '$1'
 endsnippet
 
 # if {{{1
@@ -466,11 +426,6 @@ endsnippet
 
 # sidebar {{{1
 
-# How to decide what to choose between `:lefta` and `:to`?{{{
-#
-# If the information is specific to the current buffer, choose `:lefta`.
-# Otherwise, choose `:to`.
-#}}}
 # Why invoking `tempname()`?{{{
 #
 # 1. To get a unique buffer name.
@@ -505,21 +460,12 @@ endsnippet
 # This is probably due to the qfl data structure. You shouldn't be able to change
 # a qf buffer, because it could introduce a discrepancy with the qfl.
 #}}}
-# When should I use `bh=wipe`?{{{
-#
-# If the buffer is interactive and you  can easily open a new buffer by accident
-# (example: `gf` on a link), don't use `bh=wipe`.
-# It would prevent you from getting the buffer back if you press `C-^` or `--`.
-#
-# Otherwise, I would recommend using it  only if the buffer contains no valuable
-# info.
-#}}}
 snippet sidebar "" bm
 let tempfile = tempname().'/${1:buffer name}'
 exe '$2`!p
-snip.rv = complete(t[2], ['lefta', 'to'])
+snip.rv = complete(t[2], ['leftabove', 'topleft'])
 ` '.(&columns/3).'vnew '.tempfile
-setl ${3:bh=wipe }bt=nofile nobl noswf nowrap
+setl bh=delete bt=nofile nobl noswf nowrap
 
 call setline(1, ${4:put your text})
 
@@ -663,12 +609,12 @@ while $1
 endwhile
 endsnippet
 
-# win_loc_op {{{1
+# window local options {{{1
 
-snippet win_loc_op "autocmd to set window local options" bm
-augroup my_${1:filetype}_window_local_options
+snippet wlo "autocmd to set window local options" Abm
+augroup my_${1:filetype}
 	au! * <buffer>
-	au BufWinEnter  <buffer>  ${2:setl fdm=marker}
+	au BufWinEnter  <buffer>  setl ${2:fdm=marker}
 	$0
 augroup END
 endsnippet

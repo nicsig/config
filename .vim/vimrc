@@ -6177,7 +6177,7 @@ endfu
 "     noa vim /keep[jp]/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
 "
 " 120 -
-" Develop an infrastructure/doctrine to quickly handle a temp special buffer:
+" Develop a design to quickly handle a temp special buffer:
 "
 "     • layout
 "
@@ -6223,10 +6223,10 @@ endfu
 " From a buffer associated to no file, there's no current directory.
 "
 " Update:
-" Once we've come up with a doctrine, formalize it somewhere.
+" Once we've come up with a design, formalize it somewhere.
 " Atm, maybe you should  do it in our notes; however, in  the future, you should
 " probably do it in a set of snippets/templates/...
-" Also, maybe you should use `vim-projectionist` to enforce a doctrine.
+" Also, maybe you should use `vim-projectionist` to enforce a design.
 "
 " Update:
 "
@@ -6330,6 +6330,23 @@ endfu
 "         Full vim for your shell (bash, zsh, gdb, python, etc)
 "
 " Could be used to expand UltiSnips snippets in the shell.
+"
+" 127 -
+" Add an indicator in the statusline to show that the buffer is a `fugitive://` one.
+"
+" 128 -
+" In dirvish/fex, maybe  we should use `--`  and `++` instead of `h`  and `l` to
+" move in the hierarchy.
+" Issue:
+" It would break consistency with `ranger`.
+" We would need to rebind these ranger mappings (found by pressing `?` then `k`):
+"
+"     h move left=1
+"     l move right=1
+"
+" 129 -
+" Extract the code dedicated to templates from `vim-unix`.
+" Make it able to evaluate VimL (i.e. dynamic templates).
 
 
 

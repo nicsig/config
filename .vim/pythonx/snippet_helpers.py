@@ -8,8 +8,9 @@
 # The `-*-` prefix/suffix are not necessary, unless you use Emacs.
 #}}}
 
-import re
-import vim
+# We import  the same modules  that UltiSnips  automatically import in  a python
+# interpolation.
+import os, random, re, string, vim
 
 # TODO:
 # understand all the new functions
@@ -198,6 +199,7 @@ def create_table(snip): #{{{1
     # erase current line
     snip.buffer[snip.line] = ''
 
+    anon_snip_table = '$1'
     # expand anonymous snippet
     snip.expand_anon(anon_snip_table)
 
@@ -281,6 +283,86 @@ def my_index(a_list, pattern): #{{{1
         if pat.search(s):
             return i
     return -1
+
+def plugin_guard(snip): #{{{1
+    path_to_file = vim.current.buffer.name
+    path_to_dir = os.path.dirname(path_to_file)
+    filename = os.path.splitext(os.path.basename(path_to_file))[0]
+
+    finish = '\n' + vim.eval("repeat(' ', &l:sw)") + 'finish'
+    # What's the alternative to the `try` statement?{{{
+    # An expression using a ternary operator `a if condition else b`:
+    #
+    #     ┌ Match
+    #     │
+    #     m = re.search('autoload/(.*)\.vim', path_to_file)
+    #     relative_path = m.group(1) if m else ''
+    #                                   │
+    #                                   └ will evaluate to False if there's no match
+    #}}}
+    # Why using the `try` statement is better?{{{
+    #
+    # EAFP: it's Easier to Ask for Forgiveness than Permission.
+    # https://docs.python.org/3/glossary.html#term-eafp
+    #}}}
+    try:
+        relative_path = re.search('autoload/(.*)\.vim', path_to_file).group(1)
+    except AttributeError:
+        relative_path = ''
+
+    # Why the slash before 'autoload'?{{{
+    #
+    # It can be useful to avoid an ambiguity.
+    # For example between `ftplugin` and `plugin`.
+    #}}}
+    # Why not a slash after 'autoload'?{{{
+    #
+    # `dirname()` has removed the ending slash from the path.
+    #}}}
+    if '/autoload' in path_to_dir:
+        anon_snip_body = ("if exists('${2:g:autoloaded_${1:"
+            + relative_path.replace('/', '#')
+            + "}}')"
+            + finish
+            + '\nendif'
+            + '\nlet $2 = 1'
+            + '\n$0')
+
+    elif '/plugin' in path_to_dir:
+        anon_snip_body = ("if exists('${2:g:loaded_${1:"
+            + filename
+            + "}}')"
+            + finish
+            + '\nendif'
+            + '\nlet $2 = 1'
+            + '\n$0')
+
+    elif '/ftplugin' in path_to_dir:
+        anon_snip_body = ("if exists('b:did_ftplugin')"
+            + finish
+            + '\nendif'
+            + '\nlet b:did_ftplugin = 1'
+            + '\n\n$0')
+
+    elif '/syntax' in path_to_dir:
+        anon_snip_body = ("if exists('b:current_syntax')"
+            + finish
+            + '\nendif'
+            + '\n\n$0'
+            + "\n\nlet b:current_syntax = '$1'")
+
+    else:
+        # Why `preserve()`?{{{
+        #
+        # If we're not  in a known type  of plugin, the tab  trigger (here 'gd')
+        # should not be expanded.
+        # But without `preserve()`, it would be automatically removed.
+        #}}}
+        snip.cursor.preserve()
+        return
+
+    snip.buffer[snip.line] = ''
+    snip.expand_anon(anon_snip_body)
 
 def trim_ws(snip): #{{{1
     # no need  to use the  `^` anchor, because  we're going to  invoke `match()`

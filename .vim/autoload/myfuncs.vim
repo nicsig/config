@@ -1322,7 +1322,7 @@ fu! myfuncs#snip_cheat() abort "{{{1
 
     let tempfile = tempname().'/snip cheat'
     exe 'lefta '.(&columns/3).'vnew '.tempfile
-    setl bt=nofile nobl noswf nowrap
+    setl bh=delete bt=nofile nobl noswf nowrap
 
     sil 0put =map(sort(deepcopy(keys(g:current_ulti_dict))), { i,v -> v.' : '.g:current_ulti_dict[v] })
     sil %!column -s: -t
@@ -1485,6 +1485,10 @@ fu! myfuncs#tab_toc() abort "{{{1
 endfu
 
 " trans {{{1
+
+" Update:
+" Have a look at this plugin:
+"     https://github.com/echuraev/translate-shell.vim
 
 " TODO:
 " add `| C-t` mapping, to replay last text
@@ -1737,7 +1741,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     " put the result in a vertical viewport
     let tempfile = tempname().'/WordFrequency'
     exe 'lefta '.(&columns/3).'vnew '.tempfile
-    setl bt=nofile nobl noswf nowrap
+    setl bh=delete bt=nofile nobl noswf nowrap
 
     " for item in items(freq)
     for item in flags.weighted ? weighted_freq : items(freq)

@@ -1,20 +1,23 @@
+Document the error complaining about the cursor.
+Include a MWE.
+Explain one solution is to invoke one of these:
+
+        snip.cursor.set(i, 0)
+        snip.cursor.preserve()
+
+Look for  the pattern  `preserve(` in `~/.vim/pythonx/snippet_helpers.py`  for a
+usage example.
+
 ## What's the first argument expected  by `complete()`?
 
 The weight of the text up to the word you want to complete + 1.
 
 Why +1?
-I don't know.
-But here's what `:h complete()` says:
+Probably because `0` reserved for an error.
+From `:h complete()`:
 
 > Use col('.') for an empty string.
 > "col('.') - 1" will replace one character by a match.
-
-
-
-Also, remember that `col('.')`  is not exactly the weight of the  text up to the
-cursor: it adds `1` (probably because `0` reserved for an error).
-
-
 
 ## How to get a list of the snippets whose tab_trigger is matched by the word before the cursor?
 
@@ -318,17 +321,25 @@ Use the `snip.buffer` variable.
 It's an alias for `vim.current.window.buffer` and `vim.current.buffer`.
 Both seem to be the same object.
 
-## How to get the full path to the current buffer, without VimL (3 answers)?
+## How to get the full path to the current file, without VimL?
 
-        snip.buffer.name
         vim.current.buffer.name
+
+It's an alias for:
+
         vim.current.window.buffer.name
 
-## How to get the name of the current buffer, without VimL?
+From a context statement, you could also use:
 
-        os.path.basename(snip.buffer.name)
+        snip.buffer.name
+
+## How to get the name of the current file, without VimL?
+
         os.path.basename(vim.current.buffer.name)
-        os.path.basename(vim.current.window.buffer.name)
+
+## How to get the name of the directory of the current file, without VimL?
+
+        os.path.basename(os.path.dirname(vim.current.buffer.name))
 
 ## How to refer to the last visually-selected text (in context/pre_expand statement, interpolation, in-snippet)?
 
@@ -1190,8 +1201,9 @@ Or any other tabstop.
 
 ---
 
-NEVER use a use Vim command to modify the buffer. UltiSnips would not be able
-to track changes in buffer from actions. It would raise an error.
+NEVER use a use Vim command to modify the buffer.
+UltiSnips would not be able to track changes in buffer from actions.
+It would raise an error.
 Instead, modify a line of the buffer via `snip.buffer`.
 
 ---
@@ -1219,7 +1231,7 @@ Use `vim.eval()` instead. It's less verbose:
 
 ---
 
-The python modules:
+In a python interpolation, the modules:
 
     • os
     • random
@@ -1227,13 +1239,16 @@ The python modules:
     • string
     • vim
 
-... are pre-imported within the scope of the snippet code.
+... are pre-imported.
 Other modules can be imported using the python 'import' command:
 
     `!p
     import uuid
     ...
     `
+
+They are NOT automatically imported in your custom modules `~/.vim/pythonx/*.py`.
+You must do it yourself.
 
 ## Configuration
 
