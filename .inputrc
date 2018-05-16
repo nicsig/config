@@ -1,1 +1,101 @@
-Dropbox/conf/inputrc
+# TODO:
+# Learn all readline key bindings:
+#     http://www.catonmat.net/download/readline-emacs-editing-mode-cheat-sheet.pdf
+#
+# If some of them don't work, rebind them to key sequences recognized by the terminal.
+# Find a way to replicate the same functionalities provided by `readline` in `zle`.
+
+
+# When a program  using the readline library  starts up, this file  is read, and
+# the  key bindings  and  variables are  set.  For more  information  on how  to
+# configure this file: man 3 readline
+
+
+# read commands/bindings from `/etc/inputrc`,
+# useful to enable motion with `C-left` and `C-right`
+$include /etc/inputrc
+
+# Options # {{{
+
+# when we type a closing parentheses, don't make the cursor jump to the opening one
+set blink-matching-paren off
+
+# Prevent multi-line pasted text in bash from being automatically executed.
+# Only supported in readline v7/bash 4.4.
+set enable-bracketed-paste on
+
+# complete filenames case insensitively when hitting Tab
+set completion-ignore-case on
+
+# don't echo a character corresponding to a signal generated from the keyboard
+# e.g.: ^C
+set echo-control-characters off
+
+# expand tilde in a filepath when we hit Tab
+set expand-tilde on
+
+# menu completion displays the common prefix of the list of possible completions
+# before cycling through the list
+set menu-complete-display-prefix on
+
+# }}}
+$if mode=emacs
+# Functions# {{{
+
+# bind C-w to delete a word (by default it deletes a WORD)
+# We prefer word as it's more granular and allows to delete only a node in a long path,
+# instead of the whole path (ex: ls a/b/c/d).
+# Before defining the binding, we need to unset a terminal option,
+# otherwise it will be impossible to unbind the function unix-word-rubout
+# and replace it with backward-kill-word
+# Source: http://shallowsky.com/blog/linux/bash-word-erase.html
+set bind-tty-special-chars Off
+"\C-w": backward-kill-word
+
+# bind M-DEL to delete a WORD (by default it deletes a word)
+"\e\C-?": unix-word-rubout
+
+# Tab / S-Tab: cycle between candidates in a completion menu
+#
+# no double quotes around the name of the TAB key
+# otherwise the key binding doesn't work
+TAB: menu-complete
+# the keyname `S-TAB` isn't recognized
+# but on my machine `S-TAB` produces the keycodes:  Esc [ Z
+# we can use the keycodes instead
+"\e[Z": menu-complete-backward
+
+# M-p / M-n
+"\ep": history-search-backward
+"\en": history-search-forward
+
+# }}}
+# Macros # {{{
+
+# C-x C-q = quote current word or previous one if we're on a whitespace
+"\C-x\C-q": "\eb\"\ef\""
+#             │  │ │  │
+#             │  │ │  └── insert closing quote
+#             │  │ └── go to end of word
+#             │  └── insert opening quote
+#             └── go back to beginning of word
+
+# M-: = insert most recent file/directory
+#
+# \\\' put single quotes around the name to protect a space if the file/directory name contains one
+#
+# \e\C-e = expand the previous command:    $(ls ...)
+# Warning, it will expand everything on the command line (including aliases definition),
+# which can be a problem
+#
+#                 ┌─ sort by access date (newest first)
+#                 │  ┌─ one item per line only
+#                 │  │
+"\e:": "\\\'$(ls -t -1 -d */ | head -n 1)\\\' \e\C-e"
+#                      └───┤                  └────┤
+#                          │                       └ expand all command substitutions
+#                          └──────────────────────── list directories (because of the slash),
+#                                                    and only their names, not their contents (because of `-d`)
+
+# }}}
+$endif
