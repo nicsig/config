@@ -797,6 +797,21 @@ zle -N quote-big-word
 #       widget.
 bindkey '^Q' quote-big-word
 
+# C-r C-h    fzf-history-widget {{{3
+
+# The default key binding to search in the history of commands is `C-r`.
+# Remove it, and re-bind the function to `C-r C-h`.
+bindkey -r '^R'
+# Why?{{{
+#
+# On Vim's command-line, we can't use `C-r`, nor `C-r C-r`.
+# So, we use `C-r C-h`.
+# To stay consistent, we do the same in the shell.
+#
+# Besides, we can now use `C-r` as a prefix for various key bindings.
+#}}}
+bindkey '^R^H' fzf-history-widget
+
 # C-u        backward-kill-line {{{3
 
 # By default, C-u deletes the whole line (kill-whole-line).

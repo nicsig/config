@@ -215,6 +215,28 @@ shopt -s histverify
 # inside various programs (python, rlwrap) …
 bind '" ": magic-space'
 
+# C-r C-h  {{{3
+
+# The default key binding to search in the history of commands is `C-r`.
+# Remove it, and re-bind the function to `C-r C-h`.
+bind -r "\C-r"
+# Why?{{{
+#
+# On Vim's command-line, we can't use `C-r`, nor `C-r C-r`.
+# So, we use `C-r C-h`.
+# To stay consistent, we do the same in the shell.
+#
+# Besides, we can now use `C-r` as a prefix for various key bindings.
+#}}}
+# How did you find the original {rhs} in this key binding?{{{
+#
+# Start a bash shell without removing the `C-r` key binding,
+# and execute:
+#     $ bind -s | vipe
+#     /fzf
+#}}}
+bind '"\C-r\C-h": " \C-e\C-u\C-y\ey\C-u`__fzf_history__`\e\C-e\er\e^"'
+
 # C-x C-f/F    character-search {{{3
 
 bind '"\C-x\C-f":  character-search'

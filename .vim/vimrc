@@ -120,6 +120,7 @@ Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
 " required to get some functionality in `vim-quickhl`
 Plug 'kana/vim-operator-user/', { 'frozen': 1 }
+Plug 'soywod/vim-phonetics'
 Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
@@ -187,16 +188,32 @@ Plug 'chrisbra/unicode.vim'
 
 delc PlugCfg
 
-" Some plugins, or their configuration, take too much time to source during startup.
-" We delay their loading
-augroup lazy_load_plugins
-    au!
-    au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
-    \ |                                                runtime! autoload/plugin_conf/lazy_load/*.vim', '')
-    \                                    })
-    \ |           exe 'au! lazy_load_plugins'
-    \ |           aug! lazy_load_plugins
-augroup END
+if has('vim_starting')
+    " Some plugins, or their configuration, take too much time to source during startup.
+    " We delay their loading.
+    augroup lazy_load_plugins
+        au!
+        " Do NOT use a simple timer:{{{
+        "
+        "     au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
+        "     \ |                                                runtime! autoload/plugin_conf/lazy_load/*.vim', '')
+        "     \                                    })
+        "
+        " It could cause  issues, for example, if you enter  insert mode quickly
+        " (i.e. before the callback), and some  custom code of yours rely on the
+        " lazy-loaded plugins to have been sourced already.
+        "
+        " If  you still  have issues  because  you execute  some normal  command
+        " before the  lazy-loaded plugins  have been sourced,  maybe try  to add
+        " another event to the autocmd.
+        "}}}
+        au CursorHold,InsertEnter,CmdlineEnter * runtime autoload/toggle_settings.vim
+        \ |                                      runtime! autoload/plugin_conf/lazy_load/*.vim
+        \ |           exe 'au! lazy_load_plugins'
+        \ |           aug! lazy_load_plugins
+    augroup END
+endif
+
 call plug#end()
 
 " OPTIONS_2 {{{1
@@ -1821,8 +1838,107 @@ let mapleader = "\<s-f13>"
 let maplocalleader = "\<s-f14>"
 
 " COMMAND LINE {{{2
+" Tab    S-Tab    C-q {{{3
+
+" By default,  when you search  for a  pattern, C-g and  C-t allow you  to cycle
+" through all the matches, without leaving the command-line.
+" We remap these commands to Tab and S-Tab on the search command-line.
+
+" Also, on the Ex command-line (:), Tab can expand wildcards.
+" But sometimes there are  too many suggestions, and we want to  get back to the
+" command-line prior to the expansion, and refine the wildcards.
+" We use  our Tab mapping  to save the command-line  prior to an  expansion, and
+" install a C-q mapping to restore it.
+
+cno  <expr>  <tab>    <sid>c_tab(1)
+cno  <expr>  <s-tab>  <sid>c_tab(0)
+cno          <c-q>    <c-\>e<sid>restore_cmdline_after_expansion()<cr>
+
+augroup my_cmdline_tab
+    au!
+    au CmdlineLeave : unlet! s:cmdline_before_expansion
+augroup END
+
+fu! s:c_tab(is_fwd) abort
+    if getcmdtype() =~# '[?/]'
+        return empty(getcmdline())
+           \ ?     "\<up>"
+           \ :     a:is_fwd ? "\<c-g>" : "\<c-t>"
+    else
+        if a:is_fwd
+            return s:save_cmdline_before_expansion()
+        endif
+        let flags = 'in'.(!wildmenumode() ? 't' : '')
+        "                                    │
+        "           handle key as if typed,  ┘
+        "           otherwise it's  handled as if  coming from a  mapping, which
+        "           matters when we  try to open the wildmenu,  or cycle through
+        "           its entries
+
+        " Why use `feedkeys()`?{{{
+        "
+        " If we used this mapping:
+        "         cno <expr>  <s-tab>  getcmdtype() =~ '[?/]' ? '<c-t>' : '<s-tab>'
+        "
+        " When we would hit <s-tab> on the command-line (:) (outside the wildmenu),
+        " it would insert the 7 characters '<s-tab>', literally.
+        " That's not what `S-Tab` does by default. It should simply open the wildmenu
+        " and select its last entry.
+        " We need `S-Tab` to be treated as if it wasn't coming from a mapping.
+        " We need to pass the `t` flag to `feedkeys()`.
+        "}}}
+        " Why not pass the `t` flag unconditionally?{{{
+        "
+        " It breaks the  replay of a macro during which  we've pressed `Tab`
+        " or `S-Tab` on the command line.
+        " MWE:
+        "         qqq
+        "         qq : Tab Tab CR    (should execute `:#`)
+        "         q
+        "
+        "         :nunmap @
+        "         @q
+        "             → should print the current line; does not
+        "}}}
+        call feedkeys("\<s-tab>", flags)
+        return ''
+    endif
+endfu
+
+fu! s:save_cmdline_before_expansion() abort
+    if wildmenumode()
+        return "\<tab>"
+    endif
+    let cmdline = getcmdline()
+    call timer_start(0, {-> s:save_if_wildmenu_is_active(cmdline)})
+    return "\<tab>"
+endfu
+
+fu! s:save_if_wildmenu_is_active(cmdline) abort
+    if wildmenumode()
+        let s:cmdline_before_expansion = a:cmdline
+    endif
+endfu
+
+fu! s:restore_cmdline_after_expansion() abort
+    if !exists('s:cmdline_before_expansion')
+        return getcmdline()
+    endif
+    redraw
+    call timer_start(0, {-> execute('unlet! s:cmdline_before_expansion')})
+    return get(s:, 'cmdline_before_expansion', getcmdline())
+endfu
+
 " C-r C-h       fuzzy search history {{{3
 
+" Why not C-r C-r?{{{
+"
+" Already taken (:h c^r^r).
+"}}}
+" Why not C-r C-r C-r ?{{{
+"
+" Would cause a timeout when we press C-r C-r to insert a register literally.
+"}}}
 cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHistory:<cr>'
 
 " C-r C-l       insert current line {{{3
@@ -2669,61 +2785,6 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
 "                                 which would move the cursor 42 lines below the
 "                                 current one
 
-" Tab    S-Tab {{{4
-
-" command-line mode
-
-" By default, when you search for a pattern, <c-g> and <c-t> allow you to cycle
-" through all the matches, without leaving the command-line.
-" We remap them to <tab> and <s-tab>.
-
-cno  <expr>  <tab>    <sid>c_tab(1)
-cno  <expr>  <s-tab>  <sid>c_tab(0)
-
-fu! s:c_tab(is_fwd) abort
-    if getcmdtype() =~# '[?/]'
-        return empty(getcmdline())
-           \ ?     "\<up>"
-           \ :     a:is_fwd ? "\<c-g>" : "\<c-t>"
-    else
-        let l:key = a:is_fwd ? "\<tab>" : "\<s-tab>"
-        let flags = 'in'.(!wildmenumode() && !a:is_fwd ? 't' : '')
-        "                                                 │
-        "                        handle key as if typed,  ┘
-        "                        otherwise  it's handled  as if  coming from  a
-        "                        mapping, which matters when we try to open the
-        "                        wildmenu, or cycle through its entries
-
-        " Why use `feedkeys()`?{{{
-        "
-        " If we used this mapping:
-        "         cno <expr>  <s-tab>  getcmdtype() =~ '[?/]' ? '<c-t>' : '<s-tab>'
-        "
-        " When we would hit <s-tab> on the command-line (:) (outside the wildmenu),
-        " it would insert the 7 characters '<s-tab>', literally.
-        " That's not what `S-Tab` does by default. It should simply open the wildmenu
-        " and select its last entry.
-        " We need `S-Tab` to be treated as if it wasn't coming from a mapping.
-        " We need to pass the `t` flag to `feedkeys()`.
-        "}}}
-        " Why not pass the `t` flag unconditionally?{{{
-        "
-        " It breaks the  replay of a macro during which  we've pressed `Tab`
-        " or `S-Tab` on the command line.
-        " MWE:
-        "         qqq
-        "         qq : Tab Tab CR    (should execute `:#`)
-        "         q
-        "
-        "         :nunmap @
-        "         @q
-        "             → should print the current line; does not
-        "}}}
-        call feedkeys(l:key, flags)
-        return ''
-    endif
-endfu
-
 " S-→    C-↑ …        modified arrow keys {{{4
 
 " A terminal emulator gives its name to the programs through the shell
@@ -2777,7 +2838,20 @@ nno  <c-g><c-g>  <c-g>
 " C-np                move across tab pages {{{4
 
 nno  <silent>  <c-p>  :<c-u>tabprevious<cr>
-nno  <silent>  <c-n>  :<c-u>exe 'tabnext '    .(v:count ? v:count : '')<cr>
+nno  <silent>  <c-n>  :<c-u>call <sid>move_across_tabpages(v:count)<cr>
+
+fu! s:move_across_tabpages(cnt) abort
+    " If the  mapping received a count,  move the current window  to the tabpage
+    " whose number matches this count.
+    if a:cnt
+        let bufnr = bufnr('%')
+        close!
+        exe 'tabnext '.min([a:cnt, tabpagenr('$')])
+        exe 'sb '.bufnr
+    else
+        tabnext
+    endif
+endfu
 
 " C-z    {{{4
 
@@ -5450,6 +5524,26 @@ endfu
 " Edit:
 " I think  we should use  `:noa` whenever we TEMPORARILY  change the focus  to a
 " window.
+" Also, you should try to avoid changing the focused window as much as possible.
+" Especially from an autocmd (can lead to hard-to-debug issues).
+" If you have to,  then restore not only the currently  focused window, but also
+" the previous one (so that `winnr('#')` and `wincmd p` are still reliable).
+"
+" Update:
+" Maybe we should install a custom `:Windo` command, and use it like so:
+"
+"     :123Windo {cmd}
+"
+" `:Windo` would try to cancel undesired effects.
+" For example, it would restore the identity of the previous window.
+" We would install it in `vim-lg`.
+"
+" Update:
+" Use `lg#window#has_neighbor(dir,...)` as much as possible.
+"
+" It supports an optional argument standing for  the number of a window, so that
+" we can  test the presence of  a window relative  to any window in  the current
+" tabpage (not just the current one).
 "
 " 67 -
 " In `vim-stacktrace`, in the function `main()`, we've discovered a new kind of issue.
@@ -6347,14 +6441,47 @@ endfu
 " 129 -
 " Extract the code dedicated to templates from `vim-unix`.
 " Make it able to evaluate VimL (i.e. dynamic templates).
-
-
+"
+" 130 -
+" Rethink the following mappings:
+"
+"     • gt, gT (could be better used to move the current tabpage, instead of >t, <t)
+"           but what would we use to populate the location list with to_do's and fix_me's?
+"
+"     • ZJ (could be used to join a window to a tabpage, instead of C-n; symmetry with ZT)
+"
+" 131 -
+" In python files, we  can use multi-line comments with a  pair of triple double
+" quotes.
+" But they aren't properly concealed in a fold title, nor in the unfolded buffer.
+"
+" Also, should we use them more often?
+" Review the comments in `~/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py:442`.
+"
+" Also, finish restructuring our notes in `vim-snippets`. Too many scattered files.
+"
+" 132 -
+"     $ vim /tmp/ftplugin/vim.vim
+"
+" Insert the word `undo`, in less than 1s:
+"
+"     Error detected while processing function lg#motion#repeatable#make#all[59]..lg#map#restore[29]..<SNR>139_restore:
+"     line   16:
+"     E492: Not an editor command: noxnoremap    <buffer>  <expr>    <nowait>  <silent> [M <SNR>116_move('[M')
+"                                  ^^^
+"                                  ??? where does it come from
+"
+" QFL:
+"     || E492: Not an editor command: noxnoremap    <buffer>  <expr>    <nowait>  <silent> [M <SNR>116_move('[M')
+"     .vim/plugged/vim-lg-lib/autoload/lg/map.vim|60| 0. <SNR>139_restore[16]
+"     .vim/plugged/vim-lg-lib/autoload/lg/map.vim|30| 1. lg#map#restore[29]
+"     .vim/plugged/vim-lg-lib/autoload/lg/motion/repeatable/make.vim|547| 2. lg#motion#repeatable#make#all[59]
 
 
 
 " sessions to finish:
 "
-"         01. arglist (how to move a window to another tab efficiently?; improve our arglist mappings)
+"         01. arglist (improve our arglist mappings)
 "         02. config
 "         03. paragraph (refactor the code of the plugin)
 "         04. qf_issue (finish the last two questions)
