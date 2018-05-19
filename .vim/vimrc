@@ -159,7 +159,10 @@ Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
 Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-python'
-Plug 'lacygoill/vim-qf'
+" `win_screenpos()`
+if !has('nvim')
+    Plug 'lacygoill/vim-qf'
+endif
 Plug 'lacygoill/vim-readline'
 Plug 'lacygoill/vim-reorder'
 Plug 'lacygoill/vim-save'
@@ -177,7 +180,10 @@ Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-selection-ring'
 Plug 'lervag/vimtex' | PlugCfg vimtex
 Plug 'lacygoill/vim-latex'
-Plug 'lacygoill/vim-window'
+" `win_screenpos()` has not yet been implemented in Neovim.
+if !has('nvim')
+    Plug 'lacygoill/vim-window'
+endif
 
 " DGAF:
 Plug 'mattn/emmet-vim', { 'for' : ['html', 'css'] } | PlugCfg emmet
@@ -2581,8 +2587,8 @@ nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
 
 " |x  |X     Tmux run last / current command {{{4
 
-nno  <nowait><silent>  <bar>x  :<c-u>call myfuncs#tmux_last_command()<cr>
-nno  <nowait><silent>  <bar>X  :<c-u>call myfuncs#tmux_current_command()<cr>
+nno  <silent>  <bar>x  :<c-u>call myfuncs#tmux_last_command()<cr>
+nno  <silent>  <bar>X  :<c-u>call myfuncs#tmux_current_command(getline('.'))<cr>
 
 " -                   (prefix) {{{3
 " -a  -8           ascii / bytes info {{{4
@@ -2621,8 +2627,37 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : '∅')
 
 " -p  -P           show filePath / :pwd {{{4
 
-nno  -p  :<c-u>echohl Title <bar> echo &bt is# 'quickfix' ? w:quickfix_title : expand('%:p') <bar> echohl NONE <cr>
+nno  -p  :<c-u>call <sid>print_full_path()<cr>
 nno  -P  :<c-u>pwd<cr>
+
+fu! s:print_full_path() abort
+    echohl Title
+
+    if expand('%:p') is# ''
+        echo '[No Name]'
+
+    elseif &bt is# 'quickfix'
+        echo w:quickfix_title
+    else
+        let fname = expand('%:p')
+        if fname[0] is# '/' || fname =~# '^\l\+://'
+            echo fname
+        else
+            " Why is adding the current working directory sometimes necessary?{{{
+            "
+            " If you edit a new buffer whose path is relative (to the working
+            " directory), `expand('%:p')` will return a relative path:
+            "
+            "     :cd /tmp
+            "     :e foo/bar
+            "     :echo expand('%:p')
+            "}}}
+            echo getcwd().'/'.fname
+        endif
+    endif
+
+    echohl NONE
+endfu
 
 " -q               faq {{{4
 
@@ -6426,9 +6461,6 @@ endfu
 " Could be used to expand UltiSnips snippets in the shell.
 "
 " 127 -
-" Add an indicator in the statusline to show that the buffer is a `fugitive://` one.
-"
-" 128 -
 " In dirvish/fex, maybe  we should use `--`  and `++` instead of `h`  and `l` to
 " move in the hierarchy.
 " Issue:
@@ -6438,11 +6470,11 @@ endfu
 "     h move left=1
 "     l move right=1
 "
-" 129 -
+" 128 -
 " Extract the code dedicated to templates from `vim-unix`.
 " Make it able to evaluate VimL (i.e. dynamic templates).
 "
-" 130 -
+" 129 -
 " Rethink the following mappings:
 "
 "     • gt, gT (could be better used to move the current tabpage, instead of >t, <t)
@@ -6450,7 +6482,7 @@ endfu
 "
 "     • ZJ (could be used to join a window to a tabpage, instead of C-n; symmetry with ZT)
 "
-" 131 -
+" 130 -
 " In python files, we  can use multi-line comments with a  pair of triple double
 " quotes.
 " But they aren't properly concealed in a fold title, nor in the unfolded buffer.
@@ -6460,22 +6492,46 @@ endfu
 "
 " Also, finish restructuring our notes in `vim-snippets`. Too many scattered files.
 "
+" Read:
+" https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments
+" https://jeffknupp.com/blog/2016/12/09/how-python-linters-will-save-your-large-python-project/
+"
+" https://pylint.readthedocs.io/en/latest/
+" https://pycodestyle.readthedocs.io/en/latest/
+" http://www.pydocstyle.org/en/latest/
+"
+" Learn how to configure, use, integrate the following linters:
+"
+"     • pylint
+"     • pycodestyle
+"     • pydocstyle
+"
+" This command populates a default config file for `pylint`:
+"
+"     $ pylint --generate-rcfile >>~/.pylintrc
+"
+" 131 -
+"     :vert term ++cols=20
+"
+" Wrong terminal height (big command-line).
+"
 " 132 -
-"     $ vim /tmp/ftplugin/vim.vim
+" When Vim is  running, the terminal is  in “raw” mode: it sends  a character as
+" soon as it receives one.
 "
-" Insert the word `undo`, in less than 1s:
+" But when  you execute a shell  command (via `:!` or  `system()`), the terminal
+" switches to “cooked” mode: it buffers the received characters until a CR.
 "
-"     Error detected while processing function lg#motion#repeatable#make#all[59]..lg#map#restore[29]..<SNR>139_restore:
-"     line   16:
-"     E492: Not an editor command: noxnoremap    <buffer>  <expr>    <nowait>  <silent> [M <SNR>116_move('[M')
-"                                  ^^^
-"                                  ??? where does it come from
+" This allows the terminal to implement some rudimentary line-editing functions.
+" But when the terminal is in cooked  mode, some stray characters may be left on
+" the screen, forcing you to `:redraw`.
 "
-" QFL:
-"     || E492: Not an editor command: noxnoremap    <buffer>  <expr>    <nowait>  <silent> [M <SNR>116_move('[M')
-"     .vim/plugged/vim-lg-lib/autoload/lg/map.vim|60| 0. <SNR>139_restore[16]
-"     .vim/plugged/vim-lg-lib/autoload/lg/map.vim|30| 1. lg#map#restore[29]
-"     .vim/plugged/vim-lg-lib/autoload/lg/motion/repeatable/make.vim|547| 2. lg#motion#repeatable#make#all[59]
+" Should we invoke `system()` with `:silent` systematically?
+"
+"     :silent let f = system('ls *.vim')
+"     :silent call system(...)
+"
+" See `:h system()`, and look for `silent`.
 
 
 

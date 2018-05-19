@@ -242,6 +242,10 @@ alias gp='rlwrap -H /dev/null git push'
 # Git Restore Last Commit
 alias grlc='git reset --hard $(git rev-parse HEAD)'
 
+# py {{{2
+
+alias py='/usr/local/bin/python3.6'
+
 # surfraw {{{2
 
 alias sr='sr -browser=xdg-open'

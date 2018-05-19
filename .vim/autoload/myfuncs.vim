@@ -1335,11 +1335,16 @@ endfu
 
 " tmux_{current|last}_command {{{1
 
-fu! myfuncs#tmux_current_command() abort
+fu! myfuncs#tmux_current_command(cmd, ...) abort
+    if !exists('$TMUX')
+        echo 'requires Tmux'
+        return
+    endif
+
     if exists('s:pane_id')
-        " When we  close the tmux  pane, `s:pane_id`  is not deleted  therefore, the
-        " next time we invoke the function,  it won't split the window, thinking the
-        " pane is still there.
+        " If  we close  the tmux  pane manually,  `s:pane_id` won't  be deleted,
+        " therefore the  next time we  invoke the  function, it won't  split the
+        " window, thinking the pane is still there.
         " We must make sure it's still open before going further.
         "                                                           ┌ eliminate trailing newline
         "                                                       ┌───┤
@@ -1349,6 +1354,7 @@ fu! myfuncs#tmux_current_command() abort
         "                                               └─ format the output according to the following string
         let is_pane_still_open = index(open_panes, s:pane_id) >= 0
         if !is_pane_still_open
+            " the pane should be closed, but better be safe
             sil call system('tmux kill-pane -t %'.s:pane_id)
             unlet! s:pane_id
         endif
@@ -1356,24 +1362,41 @@ fu! myfuncs#tmux_current_command() abort
 
     if !exists('s:pane_id')
         let s:pane_id = systemlist(
-        \                           'tmux split-window -c $XDG_RUNTIME_VIM -d -p 25 -PF "#D"'
+        \                           'tmux split-window -c '.(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
         \                         )[0]
     endif
 
-    " The `-d`  in `tmux  split-window …`  means “do  NOT give  focus“, so
-    " don't try to use `tmux last-pane`, there's no last pane.
-    call system('tmux send-keys -t '.s:pane_id.' '.escape(getline('.'), ' |').' Enter;')
+    " TODO:
+    " Better comment these commands.
+    " See the function `s:fixstr()` in `vim-tmuxify` for an explanation.
+    "
+    " Extract this function inside a dedicated plugin.
+    "
+    " Improve the reliability of the code by merging this PR:
+    "
+    "     https://github.com/jebaum/vim-tmuxify/pull/28
+    let cmd = substitute(a:cmd, '\t', ' ', 'g')
+    let cmd = substitute(cmd, '\\\s\+$', '\', '')
+    let cmd = cmd[-1:] is# ';' ? cmd[:-2].'\;' : cmd
+
+    " `-l` disables key name lookup.
+    " So, if the command contains `C-m`, tmux will send it literally to the shell.
+    " Without `-l`, it would be translated into a CR.
+    call system(    'tmux send-keys -t '.s:pane_id.' -l '.shellescape(cmd)
+            \ . ' && tmux send-keys -t '.s:pane_id.' C-m')
+    " The `-d`  in `tmux split-window ...`  means “do NOT give  focus“, so don't
+    " try to use `tmux last-pane`, there's no last pane.
 endfu
 
 fu! myfuncs#tmux_last_command() abort
-    update
+    sil! update
 
     let cmds = [
     \            'last-pane',
     \            'send-keys C-l Up Enter',
     \            'last-pane',
     \          ]
-    call system(join(map(cmds, { i,v -> 'tmux '.v.';' })))
+    sil call system(join(map(cmds, { i,v -> 'tmux '.v.';' })))
 endfu
 
 " tmux-navigator {{{1

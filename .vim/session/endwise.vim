@@ -6,34 +6,32 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +100 ~/Dropbox/vim_plugins/endwise.vim
+badd +1 /tmp/file
 argglobal
 silent! argdel *
-edit ~/Dropbox/vim_plugins/endwise.vim
+edit /tmp/file
 set splitbelow splitright
+set nosplitbelow
+set nosplitright
 wincmd t
 set winminheight=1 winminwidth=1 winheight=1 winwidth=1
 arglocal
 silent! argdel *
-setlocal fdm=marker
+setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
-setlocal fml=1
+setlocal fml=0
 setlocal fdn=20
 setlocal fen
-90
-normal! zo
-91
-normal! zo
-let s:l = 98 - ((61 * winheight(0) + 15) / 31)
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-98
-normal! 016|
-lcd ~/
+1
+normal! 0
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
