@@ -3,6 +3,7 @@
 ! It  would  reduce the  memory  footprint  when  we  temporarily open  2  urxvt
 ! terminals.
 
+
 ! TODO:
 ! Read all of this:
 ! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.7.pod

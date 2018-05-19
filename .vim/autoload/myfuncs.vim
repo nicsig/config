@@ -1362,8 +1362,8 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
 
     if !exists('s:pane_id')
         let s:pane_id = systemlist(
-        \                           'tmux split-window -c '.(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
-        \                         )[0]
+        \       'tmux split-window -c '.shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
+        \ )[0]
     endif
 
     " TODO:
@@ -1382,8 +1382,20 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
     " `-l` disables key name lookup.
     " So, if the command contains `C-m`, tmux will send it literally to the shell.
     " Without `-l`, it would be translated into a CR.
-    call system(    'tmux send-keys -t '.s:pane_id.' -l '.shellescape(cmd)
-            \ . ' && tmux send-keys -t '.s:pane_id.' C-m')
+    let pane_current_path = systemlist("tmux list-panes -F '#{pane_current_path}__::__#D'")
+    call filter(pane_current_path, {i,v -> stridx(v, s:pane_id) >= 0})
+    let pane_current_path = substitute(get(pane_current_path, 0, ''), '__::__.\{-}$', '', '')
+
+    " Make sure the working directory of the pane matches the one we want.
+    if a:0 && (a:1 isnot# pane_current_path)
+        let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape('cd '.shellescape(a:1))
+                   \ . ' && tmux send-keys -t '.s:pane_id.' C-m'
+        call system(tmux_cmd)
+    endif
+
+    let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape(cmd)
+               \ . ' && tmux send-keys -t '.s:pane_id.' C-m'
+    call system(tmux_cmd)
     " The `-d`  in `tmux split-window ...`  means “do NOT give  focus“, so don't
     " try to use `tmux last-pane`, there's no last pane.
 endfu

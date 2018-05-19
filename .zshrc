@@ -759,6 +759,12 @@ vc() {
 }
 
 # Key Bindings {{{1
+# Delete {{{2
+
+# The delete key doesn't work in `zsh`.
+# Fix it.
+bindkey  '\e[3~'  delete-char
+
 # S-Tab {{{2
 
 # use S-Tab to cycle backward during a completion
