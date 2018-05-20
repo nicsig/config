@@ -1,15 +1,12 @@
-" Mappings "{{{1
-
-if exists(':EmmetInstall') ==# 2
-    EmmetInstall
-endif
-
 " Options "{{{1
 
 setl fp=js-beautify\ --css
 
 " When hitting K, search for the word under the cursor in a search engine.
 setl kp=:DD
+
+" google style guide
+setl sw=2
 
 " Variables {{{1
 
@@ -28,7 +25,7 @@ let b:mc_chain = [
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   setl fp< kp<
+                    \   setl fp< kp< sw<
                     \ | unlet! b:mc_chain
                     \  "
 

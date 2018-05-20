@@ -119,7 +119,6 @@ Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
 " required to get some functionality in `vim-quickhl`
 Plug 'kana/vim-operator-user/', { 'frozen': 1 }
-Plug 'soywod/vim-phonetics'
 Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
@@ -185,7 +184,7 @@ if !has('nvim')
 endif
 
 " DGAF:
-Plug 'mattn/emmet-vim', { 'for' : ['html', 'css', 'markdown'] } | PlugCfg emmet
+Plug 'mattn/emmet-vim' | PlugCfg emmet
 Plug 'machakann/vim-sandwich' | PlugCfg sandwich
 Plug 'keith/tmux.vim'
 Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree
@@ -3029,12 +3028,6 @@ fu! s:fix_macro() abort
     let c = nr2char(c)
     return printf("q:ilet @%s = \<c-r>\<c-r>=string(@%s)\r\e0f'", c, c)
 endfu
-
-" ':                  NOTE: {{{3
-
-nno  <silent> ':   o<cr>NOTE:<c-c>
-                  \:center <bar> call append(line('.') - 1, '')<cr>
-                  \o<cr>0<c-d><tab><tab><tab>
 
 " ""                  easier access to system register  {{{3
 

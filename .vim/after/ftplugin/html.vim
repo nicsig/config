@@ -1,16 +1,3 @@
-" Commands {{{1
-
-" Currently, we  source our html ftplugin  in a markdown buffer,  because that's
-" what tpope does.
-" He does this, probably because html is valid inside markdown.
-" But, it causes an issue for the next command `:EmmetInstall`.
-" It won't exist, until we have read at least one html file.
-" So, check `:EmmetInstall` exists before trying to execute it.
-if exists(':EmmetInstall') == 2
-    " Create Emmet mappings to current buffer.
-    EmmetInstall
-endif
-
 " Options {{{1
 
 " If you have issues with indentation, read:
@@ -49,10 +36,14 @@ setl kp=:DD
 " from the its argument (word under cursor).
 "}}}
 
+" google style guide
+setl sw=2
+
 " Teardown {{{1
 
 let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   setl fp< kp<
+                    \   setl fp< kp< sw<
                     \  "
+

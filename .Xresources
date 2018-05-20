@@ -162,7 +162,7 @@ Xft.lcdfilter:  lcddefault
 !
 ! URxvt.matcher.rend.0: Uline Bold fg5
 !
-! URxvt.colorUL: #4682B4
+! URxvt.colorUL: #4682b4
 
 
 
@@ -286,26 +286,26 @@ directColor: true
 !
 ! special
 ! output of commands
-*.foreground:   #373B41
+*.foreground:   #373b41
 
 ! terminal background
 ! value taken from `bespin` light palette
-*.background:   #DBD6D1
+*.background:   #dbd6d1
 
 ! If you change the color here, make sure to also change it in:
 !
 !         ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
 !
 ! … in `s:colorscheme()`.
-*.cursorColor:  #373B41
+*.cursorColor:  #373b41
 
 ! black
-*.color0:  #1D1F21
+*.color0:  #1d1f21
 *.color8:  #969896
 
 ! red
-*.color1:  #CC342B
-*.color9:  #CC342B
+*.color1:  #cc342b
+*.color9:  #cc342b
 
 ! green
 *.color2:   #198844
@@ -313,21 +313,21 @@ directColor: true
 
 ! yellow
 ! Taken from:    ~/.vim/plugged/seoul256.vim/urxvt/seoul256-light
-*.color3:   #AF8760
-*.color11:  #D8865F
+*.color3:   #af8760
+*.color11:  #d8865f
 
 ! blue
-*.color4:   #3971ED
-*.color12:  #3971ED
+*.color4:   #3971ed
+*.color12:  #3971ed
 
 ! magenta
-*.color5:   #A36AC7
-*.color13:  #A36AC7
+*.color5:   #a36ac7
+*.color13:  #a36ac7
 
 ! cyan
-*.color6:   #3971ED
-*.color14:  #3971ED
+*.color6:   #3971ed
+*.color14:  #3971ed
 
 ! white
-*.color7:   #C5C8C6
-*.color15:  #FFFFFF
+*.color7:   #c5c8c6
+*.color15:  #ffffff
