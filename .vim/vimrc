@@ -79,14 +79,13 @@ let g:plug_shallow = 0
 
 " vim-plug:  usage  {{{2
 
+if has('vim_starting')
+
 " Plugins must be declared after this line.
 " They will be downloaded inside `~/.vim/plugged/`.
 call plug#begin('~/.vim/plugged')
 
-com! -bar -nargs=1 PlugCfg
-\        if has('vim_starting')
-\ |          so $HOME/.vim/autoload/plugin_conf/<args>.vim
-\ |      endif
+com! -bar -nargs=1  PlugCfg  so $HOME/.vim/plugin_conf/<args>.vim
 
 " TO_STUDY:
 Plug 'lacygoill/vim-graph'
@@ -186,7 +185,7 @@ if !has('nvim')
 endif
 
 " DGAF:
-Plug 'mattn/emmet-vim', { 'for' : ['html', 'css'] } | PlugCfg emmet
+Plug 'mattn/emmet-vim', { 'for' : ['html', 'css', 'markdown'] } | PlugCfg emmet
 Plug 'machakann/vim-sandwich' | PlugCfg sandwich
 Plug 'keith/tmux.vim'
 Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree
@@ -194,33 +193,32 @@ Plug 'chrisbra/unicode.vim'
 
 delc PlugCfg
 
-if has('vim_starting')
-    " Some plugins, or their configuration, take too much time to source during startup.
-    " We delay their loading.
-    augroup lazy_load_plugins
-        au!
-        " Do NOT use a simple timer:{{{
-        "
-        "     au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
-        "     \ |                                                runtime! autoload/plugin_conf/lazy_load/*.vim', '')
-        "     \                                    })
-        "
-        " It could cause  issues, for example, if you enter  insert mode quickly
-        " (i.e. before the callback), and some  custom code of yours rely on the
-        " lazy-loaded plugins to have been sourced already.
-        "
-        " If  you still  have issues  because  you execute  some normal  command
-        " before the  lazy-loaded plugins  have been sourced,  maybe try  to add
-        " another event to the autocmd.
-        "}}}
-        au CursorHold,InsertEnter,CmdlineEnter * runtime autoload/toggle_settings.vim
-        \ |                                      runtime! autoload/plugin_conf/lazy_load/*.vim
-        \ |           exe 'au! lazy_load_plugins'
-        \ |           aug! lazy_load_plugins
-    augroup END
-endif
+" Some plugins, or their configuration, take too much time to source during startup.
+" We delay their loading.
+augroup lazy_load_plugins
+    au!
+    " Do NOT use a simple timer:{{{
+    "
+    "     au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
+    "     \ |                                                runtime! plugin_conf/lazy_load/*.vim', '')
+    "     \                                    })
+    "
+    " It could cause  issues, for example, if you enter  insert mode quickly
+    " (i.e. before the callback), and some  custom code of yours rely on the
+    " lazy-loaded plugins to have been sourced already.
+    "
+    " If  you still  have issues  because  you execute  some normal  command
+    " before the  lazy-loaded plugins  have been sourced,  maybe try  to add
+    " another event to the autocmd.
+    "}}}
+    au CursorHold,InsertEnter,CmdlineEnter * runtime autoload/toggle_settings.vim
+    \ |                                      runtime! plugin_conf/lazy_load/*.vim
+    \ |           exe 'au! lazy_load_plugins'
+    \ |           aug! lazy_load_plugins
+augroup END
 
 call plug#end()
+endif
 
 " OPTIONS_2 {{{1
 " ENCODING {{{2
@@ -2335,6 +2333,44 @@ xmap  ga  <plug>(EasyAlign)
 
 " Start interactive EasyAlign for a motion/text object (e.g. gaip)
 nmap  ga  <plug>(EasyAlign)
+
+" gf          & friends, in vimrc {{{4
+
+" Purpose:
+" When we're on a line enabling a plugin, and we configure it with our `PlugCfg`
+" custom command, it's convenient to be able to edit the config file by pressing
+" `ZF`.
+" So, we make `gf` & friends smarter.
+
+augroup vimrc_mappings
+    au!
+    au BufReadPost $MYVIMRC  call s:install_vimrc_mappings()
+augroup END
+
+fu! s:install_vimrc_mappings() abort
+    nno  <buffer><nowait><silent>  gf       :<c-u>call <sid>try_to_edit_plugin_config('gf')<cr>
+    nno  <buffer><nowait><silent>  gF       :<c-u>call <sid>try_to_edit_plugin_config('gF')<cr>
+    nno  <buffer><nowait><silent>  <c-w>f   :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>f")<cr>
+    nno  <buffer><nowait><silent>  <c-w>F   :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>F")<cr>
+    nno  <buffer><nowait><silent>  <c-w>gf  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gf")<cr>
+    nno  <buffer><nowait><silent>  <c-w>gF  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gF")<cr>
+endfu
+
+fu! s:try_to_edit_plugin_config(cmd) abort
+    let plugin = matchstr(getline('.'), '\C.*\<PlugCfg\s\+\zs.\{-}$')
+    if empty(plugin)
+        try
+            exe 'norm! '.a:cmd
+        catch
+            echohl ErrorMsg
+            echo v:exception
+            echohl NONE
+        endtry
+    else
+        let split = a:cmd[0] is# 'g' ? 'edit' : a:cmd[1] is# 'g' ? 'tabedit' : 'split'
+        exe split.' '.$HOME.'/.vim/plugin_conf/'.plugin.'.vim'
+    endif
+endfu
 
 " go {{{4
 

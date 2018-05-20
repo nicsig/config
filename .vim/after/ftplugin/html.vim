@@ -1,16 +1,14 @@
 " Commands {{{1
 
-" Currently, we source our html ftplugin in a markdown buffer, because that's
-" what tpope does. He does this, probably because html is valid inside
-" markdown. But, this cause an issue for the next command `:EmmetInstall`. It
-" won't exist, until we have read at least one html file.
+" Currently, we  source our html ftplugin  in a markdown buffer,  because that's
+" what tpope does.
+" He does this, probably because html is valid inside markdown.
+" But, it causes an issue for the next command `:EmmetInstall`.
+" It won't exist, until we have read at least one html file.
 " So, check `:EmmetInstall` exists before trying to execute it.
 if exists(':EmmetInstall') == 2
+    " Create Emmet mappings to current buffer.
     EmmetInstall
-    " Install the mapping for expanding emmet abbreviations.
-    "
-    " Create Emmet mappings to current buffer and, if set |g:user_emmet_complete_tag|,
-    " change |'omnifunc'| option to emmet#completeTag()
 endif
 
 " Options {{{1
