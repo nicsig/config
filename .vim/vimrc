@@ -79,6 +79,20 @@ let g:plug_shallow = 0
 
 " vim-plug:  usage  {{{2
 
+" Why this check?{{{
+"
+" We shouldn't reload  the interface of all our plugins  every time we re-source
+" the vimrc.
+" If a plugin is missing a guard, this could have unexpected effects.
+"}}}
+" Is there a drawback?{{{
+"
+" Yes.
+"
+" If you remove  the `Plug` line of  a plugin, `:PlugClean` will  not remove its
+" files, because `vim-plug` won't be informed.
+" You need to restart Vim.
+"}}}
 if has('vim_starting')
 
 " Plugins must be declared after this line.
@@ -2353,6 +2367,9 @@ fu! s:install_vimrc_mappings() abort
     nno  <buffer><nowait><silent>  <c-w>F   :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>F")<cr>
     nno  <buffer><nowait><silent>  <c-w>gf  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gf")<cr>
     nno  <buffer><nowait><silent>  <c-w>gF  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gF")<cr>
+
+    nmap <buffer><nowait>          <c-w>GF  <c-w>gF
+    nmap <buffer>                  Z        <c-w>
 endfu
 
 fu! s:try_to_edit_plugin_config(cmd) abort
@@ -2367,7 +2384,17 @@ fu! s:try_to_edit_plugin_config(cmd) abort
         endtry
     else
         let split = a:cmd[0] is# 'g' ? 'edit' : a:cmd[1] is# 'g' ? 'tabedit' : 'split'
-        exe split.' '.$HOME.'/.vim/plugin_conf/'.plugin.'.vim'
+        let files = [$HOME.'/.vim/plugin_conf/'.plugin.'.vim']
+        let files += [$HOME.'/.vim/plugin_conf/lazy_load/'.plugin.'.vim']
+        if !filereadable(files[0])
+            echo string(files[0]).'  is not readable'
+            return
+        endif
+        exe split.' '.files[0]
+
+        if filereadable(files[1])
+            exe 'sp '.files[1]
+        endif
     endif
 endfu
 
@@ -5412,7 +5439,6 @@ endfu
 "
 " 58 -
 " study vim-sandwich
-" implement surrounding with → ← (for easier conceal)
 "
 " Also, document this:
 "

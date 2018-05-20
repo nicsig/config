@@ -10,17 +10,35 @@ let g:user_emmet_mode = 'iv'
 let g:user_emmet_leader_key = '<c-g>'
 
 " https://github.com/mattn/emmet-vim/issues/378#issuecomment-329839244
-" Warning:
-" Sometimes it's useful.
-" Sometimes it's annoying:
+"
+" Issue1: Sometimes it's annoying:{{{
 "
 "     • write a url and press `C-g a`
 "     • expand this abbreviation:    #page>div.logo+ul#navigation>li*5>a{Item $}
+"}}}
+" Issue2: It can break `C-g N` (jump to previous point).{{{
+" The issue is in this function:
+"
+"     emmet#lang#html#moveNextPrev()
+"
+" From this file:
+"     $HOME/.vim/plugged/emmet-vim/autoload/emmet/lang/html.vim:887
+"
+" The pattern is right, but sometimes, it needs to be searched twice
+" instead of once.
+"
+"}}}
 let g:user_emmet_settings = {
 \       'html': {
 \           'block_all_childless' : 1,
 \       },
 \ }
+
+" For more options see:
+"     ~/.vim/plugged/emmet-vim/autoload/emmet.vim:999
+"
+" The keys of the first level are names of filetypes.
+" The keys of the second level are names of abbreviations, snippets and options.
 
 " Mappings {{{1
 
@@ -54,8 +72,10 @@ fu! s:emmet_set_mappings() abort
     imap  <buffer><nowait><silent>  <c-g>,      <plug>(emmet-expand-abbr)
     imap  <buffer><nowait><silent>  <c-g>;      <plug>(emmet-expand-word)
     imap  <buffer><nowait><silent>  <c-g><c-u>  <plug>(emmet-update-tag)
-    imap  <buffer><nowait><silent>  <c-g>d      <plug>(emmet-balance-tag-inward)
-    imap  <buffer><nowait><silent>  <c-g>D      <plug>(emmet-balance-tag-outward)
+    " mnemonics: `s` for select
+    imap  <buffer><nowait><silent>  <c-g>s      <plug>(emmet-balance-tag-inward)
+    imap  <buffer><nowait><silent>  <c-g>S      <plug>(emmet-balance-tag-outword)
+    "                                                                        ^ necessary typo
     imap  <buffer><nowait><silent>  <c-g>n      <plug>(emmet-move-next)
     imap  <buffer><nowait><silent>  <c-g>N      <plug>(emmet-move-prev)
     imap  <buffer><nowait><silent>  <c-g>i      <plug>(emmet-image-size)
@@ -64,14 +84,12 @@ fu! s:emmet_set_mappings() abort
     imap  <buffer><nowait><silent>  <c-g><c-k>  <plug>(emmet-remove-tag)
     imap  <buffer><nowait><silent>  <c-g>a      <plug>(emmet-anchorize-url)
     imap  <buffer><nowait><silent>  <c-g>A      <plug>(emmet-anchorize-summary)
-    imap  <buffer><nowait><silent>  <c-g><c-m>  <plug>(emmet-merge-lines)
-    imap  <buffer><nowait><silent>  <c-g>p      <plug>(emmet-code-pretty)
 
     xmap  <buffer><nowait><silent>  <c-g>,      <plug>(emmet-expand-abbr)
     xmap  <buffer><nowait><silent>  <c-g>;      <plug>(emmet-expand-word)
     xmap  <buffer><nowait><silent>  <c-g><c-u>  <plug>(emmet-update-tag)
-    xmap  <buffer><nowait><silent>  <c-g>d      <plug>(emmet-balance-tag-inward)
-    xmap  <buffer><nowait><silent>  <c-g>D      <plug>(emmet-balance-tag-outward)
+    xmap  <buffer><nowait><silent>  <c-g>s      <plug>(emmet-balance-tag-inward)
+    xmap  <buffer><nowait><silent>  <c-g>S      <plug>(emmet-balance-tag-outword)
     xmap  <buffer><nowait><silent>  <c-g>n      <plug>(emmet-move-next)
     xmap  <buffer><nowait><silent>  <c-g>N      <plug>(emmet-move-prev)
     xmap  <buffer><nowait><silent>  <c-g>i      <plug>(emmet-image-size)
@@ -80,13 +98,14 @@ fu! s:emmet_set_mappings() abort
     xmap  <buffer><nowait><silent>  <c-g><c-k>  <plug>(emmet-remove-tag)
     xmap  <buffer><nowait><silent>  <c-g>a      <plug>(emmet-anchorize-url)
     xmap  <buffer><nowait><silent>  <c-g>A      <plug>(emmet-anchorize-summary)
+
+    " These 2 mappings are specific to visual mode.
     xmap  <buffer><nowait><silent>  <c-g><c-m>  <plug>(emmet-merge-lines)
     xmap  <buffer><nowait><silent>  <c-g>p      <plug>(emmet-code-pretty)
 
     " Now, you also need to install the `<plug>` mappings.
     EmmetInstall
-
-    " Would this work if we lazy-loaded emmet?{{{
+    " Would this work if I lazy-loaded emmet?{{{
     "
     " No.
     "
