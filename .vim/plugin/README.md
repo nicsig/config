@@ -1,8 +1,22 @@
-See also `~/.vim/plugin/after/README.md`.
+# Which files can I use to configure my plugins?
 
+    ~/.vim/plugin/README.md
+    ~/.vim/after/plugin/README.md
+    ~/.vim/autoload/slow_call/README.md
+
+##
 # When should I use this directory instead of `~/.vim/after/plugin/`?
 
 When you absolutely need to prevent the plugin from installing some interface.
+
+# Can I use this directory to disable some keys?
+
+No.
+
+Use `~/.vim/after/plugin/nop.vim`.
+
+The `after/` directory is more reliable.
+See the comment at the top of `nop.vim` for an explanation.
 
 # Why must I put the config of UltiSnips in this directory instead of `~/.vim/after/plugin/`?
 
@@ -26,12 +40,13 @@ So, it will use it to install the mappings.
 And the  key we've chosen  is purposefully  NOT `Tab`, so  when `vim-completion`
 will be sourced, there'll be no conflict.
 
-# Can I use this directory to disable some keys?
+# Why must I put the config of fzf.vim in this directory instead of `~/.vim/after/plugin/`?
 
-No.
+We want all the commands installed by the plugin to be prefixed by `Fz`:
 
-Use `~/.vim/after/plugin/nop.vim`.
+        let g:fzf_command_prefix = 'Fz'
 
-The `after/` directory is more reliable.
-See the comment at the top of `nop.vim` for an explanation.
+`fzf.vim` needs to be informed of our prefix when its interface is sourced.
+`after/plugin/` would be  too late, and thus `fzf.vim` would  install all of its
+commands ignoring our prefix.
 

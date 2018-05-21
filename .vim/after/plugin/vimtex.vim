@@ -70,7 +70,7 @@ let g:vimtex_imaps_leader = '~'
 " Never open the qf window automatically.
 " Why?{{{
 "
-" It can quickly become annoying when you have a minor error you can't fixed.
+" It can quickly become annoying when you have a minor error you can't fix.
 " Every time you update the file with continuous compilations, the qf window
 " will be re-opened.
 "}}}
@@ -79,7 +79,7 @@ let g:vimtex_imaps_leader = '~'
 "     $ cat /tmp/vimrc
 "
 "         set rtp^=~/.vim/plugged/vimtex/
-"         so $HOME/.vim/autoload/plugin_conf/vimtex.vim
+"         so $HOME/.vim/after/plugin/vimtex.vim
 "         filetype plugin indent on
 "
 "     $ cat /tmp/file.tex

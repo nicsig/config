@@ -116,7 +116,6 @@ Plug 'yegappan/asyncmake', { 'frozen': 1 }
 Plug 'lacygoill/vim-debug'
 Plug 'justinmk/vim-dirvish'
 Plug 'lacygoill/vim-fex'
-Plug 'lacygoill/vim-fex'
 Plug 'junegunn/vim-easy-align'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-fugitive'
@@ -202,28 +201,28 @@ Plug 'keith/tmux.vim'
 Plug 'mbbill/undotree', { 'on': 'UndotreeShow' }
 Plug 'chrisbra/unicode.vim'
 
-" Some plugins, or their configuration, take too much time to source during startup.
-" We delay their loading.
-augroup lazy_load_plugin_conf
+" Some functions installing an interface are  too slow to be called during Vim's
+" startup. We delay them.
+augroup delay_slow_call
     au!
     " Do NOT use a simple timer:{{{
     "
     "     au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
-    "     \ |                                                runtime! autoload/plugin_conf/*.vim', '')
+    "     \ |                                                runtime! autoload/slow_call/*.vim', '')
     "     \                                    })
     "
-    " It could cause  issues, for example, if you enter  insert mode quickly
-    " (i.e. before the callback), and some  custom code of yours rely on the
-    " lazy-loaded plugins to have been sourced already.
+    " It could cause issues, for example, if you enter insert mode quickly (i.e.
+    " before  the  callback),  and  some  custom  code  of  yours  rely  on  the
+    " lazy-loaded interface.
     "
-    " If  you still  have issues  because  you execute  some normal  command
-    " before the  lazy-loaded plugins  have been sourced,  maybe try  to add
-    " another event to the autocmd.
+    " If you  still have issues because  you execute some normal  command before
+    " the lazy-loaded  interface has  been installed, maybe  try to  add another
+    " event to the autocmd.
     "}}}
     au CursorHold,InsertEnter,CmdlineEnter * runtime autoload/toggle_settings.vim
-    \ |                                      runtime! autoload/plugin_conf/*.vim
-    \ |           exe 'au! lazy_load_plugin_conf'
-    \ |           aug! lazy_load_plugin_conf
+    \ |                                      runtime! autoload/slow_call/*.vim
+    \ |           exe 'au! delay_slow_call'
+    \ |           aug! delay_slow_call
 augroup END
 
 call plug#end()
@@ -2342,7 +2341,9 @@ fu! s:install_vimrc_mappings() abort
 endfu
 
 fu! s:try_to_edit_plugin_config(cmd) abort
-    let plugin = matchstr(getline('.'), '\C.*\<PlugCfg\s\+\zs.\{-}$')
+    let pat = '\C^\s*\<Plug\s\+''.\{-}/\%(vim-\)\=\zs.\{-}\ze\%([.-]vim\)\='''
+    let plugin = matchstr(getline('.'), pat)
+
     if empty(plugin)
         try
             exe 'norm! '.a:cmd
@@ -2353,17 +2354,20 @@ fu! s:try_to_edit_plugin_config(cmd) abort
         endtry
     else
         let split = a:cmd[0] is# 'g' ? 'edit' : a:cmd[1] is# 'g' ? 'tabedit' : 'split'
-        let files = [$HOME.'/.vim/plugin_conf/'.plugin.'.vim']
-        let files += [$HOME.'/.vim/plugin_conf/lazy_load/'.plugin.'.vim']
-        if !filereadable(files[0])
-            echo string(files[0]).'  is not readable'
+        let files =  [$HOME.'/.vim/plugin/'.plugin.'.vim']
+        let files += [$HOME.'/.vim/after/plugin/'.plugin.'.vim']
+        let files += [$HOME.'/.vim/autoload/plugin_conf/'.plugin.'.vim']
+        call filter(files, {i,v -> filereadable(v)})
+        if empty(files)
+            echo 'There''s no config file for '.string(plugin)
             return
         endif
-        exe split.' '.files[0]
 
-        if filereadable(files[1])
-            exe 'sp '.files[1]
-        endif
+        let a_file_is_opened = 0
+        for f in files
+            exe (a_file_is_opened ? 'sp ' : split).f
+            let a_file_is_opened = 1
+        endfor
     endif
 endfu
 
@@ -6542,23 +6546,6 @@ endfu
 "     :silent call system(...)
 "
 " See `:h system()`, and look for `silent`.
-"
-" 133 -
-" Fix `ZF` (gf and friends).
-" They should be smarter when we're on a plugin line.
-
-
-
-
-" nnoremap  cd  :call Func()<cr>
-" function! Func()
-"     call system('kill -USR1 $(ps -p $(ps -p $$ -o ppid=) -o ppid=)')
-"     qa!
-" endfunction
-" finish
-
-
-
 
 
 

@@ -24,6 +24,12 @@
 " Bottom_line:
 " We should disable a key after all plugins have been sourced.
 " It's more reliable.
+"
+" Update:
+" This issue has been fixed:
+"     https://github.com/vim/vim/commit/f88a5bc10232cc3fac92dba4e8455f4c14311f8e
+"
+" Still, the patch may not be merged in Neovim for a long time.
 "}}}
 
 " Various keys used as a prefix {{{1

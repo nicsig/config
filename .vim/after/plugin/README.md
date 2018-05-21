@@ -1,5 +1,3 @@
-See also `~/.vim/plugin/README.md`.
-
 # Warning: ANY file in this directory will be automatically sourced. Even if it's inside a subdirectory.
 
     $ cat ~/.vim/plugin/foo/bar/baz.vim
@@ -9,14 +7,28 @@ See also `~/.vim/plugin/README.md`.
     :echo loaded
         → 1
 
+# Which files can I use to configure my plugins?
+
+    ~/.vim/plugin/README.md
+    ~/.vim/after/plugin/README.md
+    ~/.vim/autoload/slow_call/README.md
+
 ##
 # Purpose
 ## What's the purpose of this directory?
 
-Some third-party plugins need to be customized after they have been sourced.
+You can use it to:
 
-Write these customizations inside dedicated files in this directory.
-That's what the documentation for `Abolish.vim` recommends.
+        • customize third-party plugins after they have been sourced
+
+              You could also use `~/.vim/plugin/`.
+
+        • directly execute some interface of the plugin
+
+              For this, you HAVE TO use `after/plugin/`, to be sure
+              the interface has been installed.
+
+              Btw, that's what the documentation for `Abolish.vim` recommends.
 
 ## What's the purpose of `tidy_tab_completion.vim`?
 
@@ -123,4 +135,15 @@ you want to have the last word on some mappings.
 If you  use `<unique>`  in one  of your  mapping, and  a third-party  plugin has
 already installed another mapping using the same key, your mapping will fail and
 raise an error.
+
+## Must I avoid a conflict between a filename here, and a filename in a third-party plugin?
+
+No.
+
+For example, if you have the files:
+
+        ~/.vim/after/plugin/abolish.vim
+        ~/.vim/plugged/vim-abolish/plugin/abolish.vim
+
+Even though they have the same name, they will be both sourced.
 
