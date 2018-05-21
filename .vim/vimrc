@@ -99,8 +99,6 @@ if has('vim_starting')
 " They will be downloaded inside `~/.vim/plugged/`.
 call plug#begin('~/.vim/plugged')
 
-com! -bar -nargs=1  PlugCfg  so $HOME/.vim/plugin_conf/<args>.vim
-
 " TO_STUDY:
 Plug 'lacygoill/vim-graph'
 " FIXME: {{{
@@ -120,13 +118,13 @@ Plug 'justinmk/vim-dirvish'
 Plug 'lacygoill/vim-fex'
 Plug 'lacygoill/vim-fex'
 Plug 'junegunn/vim-easy-align'
-Plug 'tommcdo/vim-exchange' | PlugCfg exchange
+Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim' | PlugCfg fzf
+Plug 'junegunn/fzf.vim'
 Plug 'junegunn/goyo.vim', { 'frozen': 1 }
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'junegunn/limelight.vim', { 'frozen': 1 } | PlugCfg limelight
+Plug 'junegunn/limelight.vim', { 'frozen': 1 }
 Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
@@ -134,17 +132,17 @@ Plug 'lacygoill/vim-matchit'
 " required to get some functionality in `vim-quickhl`
 Plug 'kana/vim-operator-user/', { 'frozen': 1 }
 Plug 'lacygoill/potion'
-Plug 't9md/vim-quickhl', { 'frozen': 1} | PlugCfg quickhl
+Plug 't9md/vim-quickhl', { 'frozen': 1}
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
 Plug 'junegunn/seoul256.vim'
-Plug 'justinmk/vim-sneak' | PlugCfg sneak
+Plug 'justinmk/vim-sneak'
 Plug 'tpope/vim-speeddating'
 Plug 'kana/vim-submode', { 'frozen': 1 }
 Plug 'jebaum/vim-tmuxify', { 'frozen': 1 }
-Plug 'SirVer/ultisnips' | PlugCfg ultisnips
+Plug 'SirVer/ultisnips'
 Plug 'lacygoill/vim-unix'
 
 " DONE:
@@ -190,7 +188,7 @@ Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-selection-ring'
-Plug 'lervag/vimtex' | PlugCfg vimtex
+Plug 'lervag/vimtex'
 Plug 'lacygoill/vim-latex'
 " `win_screenpos()` has not yet been implemented in Neovim.
 if !has('nvim')
@@ -198,22 +196,20 @@ if !has('nvim')
 endif
 
 " DGAF:
-Plug 'mattn/emmet-vim' | PlugCfg emmet
-Plug 'machakann/vim-sandwich' | PlugCfg sandwich
+Plug 'mattn/emmet-vim'
+Plug 'machakann/vim-sandwich'
 Plug 'keith/tmux.vim'
-Plug 'mbbill/undotree', { 'on': 'UndotreeShow' } | PlugCfg undotree
+Plug 'mbbill/undotree', { 'on': 'UndotreeShow' }
 Plug 'chrisbra/unicode.vim'
-
-delc PlugCfg
 
 " Some plugins, or their configuration, take too much time to source during startup.
 " We delay their loading.
-augroup lazy_load_plugins
+augroup lazy_load_plugin_conf
     au!
     " Do NOT use a simple timer:{{{
     "
     "     au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
-    "     \ |                                                runtime! plugin_conf/lazy_load/*.vim', '')
+    "     \ |                                                runtime! autoload/plugin_conf/*.vim', '')
     "     \                                    })
     "
     " It could cause  issues, for example, if you enter  insert mode quickly
@@ -225,9 +221,9 @@ augroup lazy_load_plugins
     " another event to the autocmd.
     "}}}
     au CursorHold,InsertEnter,CmdlineEnter * runtime autoload/toggle_settings.vim
-    \ |                                      runtime! plugin_conf/lazy_load/*.vim
-    \ |           exe 'au! lazy_load_plugins'
-    \ |           aug! lazy_load_plugins
+    \ |                                      runtime! autoload/plugin_conf/*.vim
+    \ |           exe 'au! lazy_load_plugin_conf'
+    \ |           aug! lazy_load_plugin_conf
 augroup END
 
 call plug#end()
@@ -1733,58 +1729,6 @@ call s:remember_new_mappings([
 \            ['zs', '!s'],
 \          ])
 
-" DISABLED {{{2
-
-fu! s:cancel_prefix(prefixes) abort
-    for pfx in a:prefixes
-        " We may press a prefix by accident, then want to cancel.
-        " Without these mappings,  if the prefix is  bound to a default  command in Vim,
-        " the latter would be executed. Example `U`.
-        exe 'nno  '.pfx.'<esc>  <esc>'
-        exe 'xno  '.pfx.'<esc>  <esc>'
-
-        " Also, we may let the timeout elapse. In this case, the key should have
-        " no effect.
-        exe 'nno  '.pfx.'  <nop>'
-        exe 'xno  '.pfx.'  <nop>'
-    endfor
-endfu
-call s:cancel_prefix(['U', '<bar>', '+', '-'])
-
-" Disable C-z (suspension / iconize) in operator-pending, visual, and select mode
-ono  <c-z>  <nop>
-vno  <c-z>  <nop>
-
-" Disable keyword completion
-" Why?
-" When I want to move the cursor backward with C-b, I suspect I hit C-n
-" by accident instead. Very annoying (slow popup menu; breaks workflow).
-" We can still use C-p though.
-ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
-
-" I often hit `do` and `dp` by accident, when in fact I only wanted to hit
-" `o` or `p`.
-" Anyway, `do` and `dp` are only useful in a buffer which is in diff mode.
-
-nno  <expr>  do  &l:diff ? 'do' : ''
-nno  <expr>  dp  &l:diff ? 'dp' : ''
-
-" When we cancel `go` with Escape, Vim moves the cursor to the top of the
-" buffer (1st byte, see `:h go`). Annoying.
-nno  go<esc>  <nop>
-
-nno  s<esc>  <nop>
-nno  S<esc>  <nop>
-
-nno  sS  <nop>
-nno  Ss  <nop>
-xno  sS  <nop>
-xno  Ss  <nop>
-
-" I think I often press `Uu` by accident.
-" When that happens, Vim undo our edits, which I don't want.
-nno  Uu  <nop>
-
 " FREE {{{2
 
 " A key can be used as a prefix iff one of these conditions is true:
@@ -1803,9 +1747,13 @@ nno  Uu  <nop>
 " bring inconsistencies.
 
 
-" When you  find a  new prefix,  if it has  a default  meaning, disable  the key
-" sequence pfx + esc, in normal mode, and visual mode.
-" Pass it to the `s:cancel_prefix()` function.
+" When you find a new prefix, if it has a default meaning, disable it:
+"
+"         nno <pfx> <nop>
+"
+" Do NOT do it here from the vimrc.
+" Do it from `~/.vim/after/plugin/disable.vim`: it's more reliable.
+" See the first comment there for an explanation.
 
 
 "    • C-g could be used as a prefix in normal mode
@@ -1971,7 +1919,7 @@ cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\?\s*:\?', '', '')<cr>
 " C-g             (prefix) {{{3
 " C-h {{{4
 "
-" Sometimes, we want to do this:
+" Sometimes, we want to do this:{{{
 "
 "        ┌ exceeding amount of whitespace
 " ┌──────┤
@@ -1980,16 +1928,38 @@ cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\?\s*:\?', '', '')<cr>
 " some text
 "│
 "└─ compacted whitespace
+"}}}
+" Also, sometimes we want to do this:{{{
+"
+"       ┌ exceeding amount of whitespace
+" ┌─────┤
+"        " some text
+"     ↓
+" " some text
+" │
+" └─ compacted whitespace
+"}}}
 
+" This  mapping  tries  to  perform  both edits,  depending  on  the  amount  of
+" whitespace between the comment leader and the rest of the text.
 ino  <silent>  <c-g><c-h>  <c-r>=<sid>compact_whitespace()<cr>
 
 fu! s:compact_whitespace() abort
     if empty(&l:cms)
         return ''
     endif
-    let cml = matchstr(split(&l:cms, '%s')[0], '\S*')
+    let cml = '\V'.matchstr(split(&l:cms, '%s')[0], '\S*').'\m'
+
+    if getline('.') =~# cml.'\s\s' && &ft isnot# 'markdown'
+        let pat = '\s*'.cml.'\zs\s\+'
+        let rep = ' '
+    else
+        let pat = '^\s*\ze\S'
+        let rep = ''
+    endif
+
     call setline('.',
-    \            substitute(getline('.'), '\s*'.cml.'\zs\s\+', ' ', ''))
+    \            substitute(getline('.'), pat, rep, ''))
     return ''
 endfu
 
@@ -2350,10 +2320,9 @@ nmap  ga  <plug>(EasyAlign)
 " gf          & friends, in vimrc {{{4
 
 " Purpose:
-" When we're on a line enabling a plugin, and we configure it with our `PlugCfg`
-" custom command, it's convenient to be able to edit the config file by pressing
-" `ZF`.
-" So, we make `gf` & friends smarter.
+" When we're on a line enabling a plugin, it's convenient to be able to edit its
+" configuration files by pressing `ZF`.
+" So, we try to make `gf` & friends smarter.
 
 augroup vimrc_mappings
     au!
@@ -2949,20 +2918,6 @@ fu! s:move_across_tabpages(cnt) abort
         tabnext
     endif
 endfu
-
-" C-z    {{{4
-
-" Sometimes, when I  hit C-z by accident, it makes  Vim quit unproperly (crash?)
-" and leaves swap files, which is annoying:
-"
-"         • maybe we wanted to put Vim in the background, to use the shell
-"         • now we need to remove the swap files before reloading the session
-
-" The purpose  of these mappings  is to decrease the  frequence of this  kind of
-" accident.
-nno  <c-z>            <nop>
-nno  <c-z><c-z>       <nop>
-nno  <c-z><c-z><c-z>  <c-z>
 
 " M-m                 matchadd / matchdelete search pattern {{{4
 
@@ -6272,7 +6227,7 @@ endfu
 " 112 -
 " Don't use `put =` too often.
 " Prefer `setline()` or `append()` (the 2nd argument can be a list of lines).
-" Plugin authors seem to prefer the latters.
+" Plugin authors seem to prefer the latter.
 "
 " Note that  `setline()` behaves like `append()`  when you try to  paste several
 " lines from the last  line of the buffer; i.e. it creates  new lines instead of
@@ -6587,6 +6542,23 @@ endfu
 "     :silent call system(...)
 "
 " See `:h system()`, and look for `silent`.
+"
+" 133 -
+" Fix `ZF` (gf and friends).
+" They should be smarter when we're on a plugin line.
+
+
+
+
+" nnoremap  cd  :call Func()<cr>
+" function! Func()
+"     call system('kill -USR1 $(ps -p $(ps -p $$ -o ppid=) -o ppid=)')
+"     qa!
+" endfunction
+" finish
+
+
+
 
 
 

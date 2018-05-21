@@ -93,9 +93,36 @@ catch_signal_usr1() {
   # session
   clear
   # re-start Vim
+
   # FIXME:
-  # if we quit Neovim, `nv` should restart Neovim, not Vim
-  nv
+  # If we quit Neovim, we should restart Neovim, not Vim.
+
+  # FIXME:
+  # If we start Vim with `nv`, then suspend it, then restart it, we can't resume
+  # the session by executing `$ fg`.
+  # The issue doesn't come from the code inside `nv()`, it just comes from the function
+  # itself. MWE:
+  #
+  #   func() {
+  #     vim
+  #   }
+  #
+  #   $ func
+  #   SPC R
+  #   :stop
+  #   $ fg ✘
+
+  # Warning: Don't use `nv`.{{{
+  #
+  # 1. It's useless.
+  #
+  # 2. It doesn't seem to cause any issue  right now, BUT, if you start Vim with
+  #    `nv`, then restart  it, then suspend it, from the  shell, you'll see that
+  #    your Vim process is still running (`ps -efH | grep vim`).
+  #    However, you won't  be able to move it to  the foreground (`fg`), because
+  #    for some reason, there're no jobs.
+  # }}}
+  vim
 }
 trap catch_signal_usr1 USR1
 
@@ -809,6 +836,14 @@ mountp() { #{{{2
 
 # nv {{{2
 
+# FIXME:
+# After we start Vim  with `nv`, then reload it (SPC R),  then suspend it (C-z),
+# when we are in the shell, there're no jobs, so `fg` doesn't work.
+# But the Vim process is still running ($ ps -efH | grep vim).
+#
+#     https://unix.stackexchange.com/q/445051/289772
+
+
 #    ┌─ use parentheses instead of curly braces, to create a subshell in which
 #    │  we can safely change `IFS` without affecting current shell.
 #    │
@@ -938,7 +973,6 @@ nv() (
     vim -w /tmp/.vimkeys --servername VIM "$@"
   fi
 )
-
 
 palette(){ #{{{2
   local i

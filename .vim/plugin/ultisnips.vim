@@ -116,7 +116,7 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-F17>'
 "
 " Because, we purposefully gave an invalid value to `g:UltiSnipsExpandTrigger`.
 "}}}
-xno  <unique><silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
+xno  <silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
 " When we execute `:UltiSnipsEditSplit`, we want to open the snippet file in
 " an horizontal split.
