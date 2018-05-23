@@ -129,7 +129,7 @@ Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
 " required to get some functionality in `vim-quickhl`
-Plug 'kana/vim-operator-user/', { 'frozen': 1 }
+Plug 'kana/vim-operator-user', { 'frozen': 1 }
 Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', { 'frozen': 1}
 Plug 'tpope/vim-repeat', { 'frozen': 1 }
@@ -203,6 +203,13 @@ Plug 'chrisbra/unicode.vim'
 
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup. We delay them.
+fu! s:delay_slow_call() abort
+    runtime autoload/toggle_settings.vim
+    runtime! autoload/slow_call/*.vim
+    exe 'au! delay_slow_call'
+    aug! delay_slow_call
+endfu
+
 augroup delay_slow_call
     au!
     " Do NOT use a simple timer:{{{
@@ -219,10 +226,10 @@ augroup delay_slow_call
     " the lazy-loaded  interface has  been installed, maybe  try to  add another
     " event to the autocmd.
     "}}}
-    au CursorHold,InsertEnter,CmdlineEnter * runtime autoload/toggle_settings.vim
-    \ |                                      runtime! autoload/slow_call/*.vim
-    \ |           exe 'au! delay_slow_call'
-    \ |           aug! delay_slow_call
+    au CursorHold,InsertEnter  *  call s:delay_slow_call()
+    " Do NOT call the function when we enter debug mode (>).
+    " It could raise spurious errors when we debug Vim (`$ vim -D`).
+    au CmdlineEnter  :,/,\?,@  call s:delay_slow_call()
 augroup END
 
 call plug#end()
@@ -1723,7 +1730,6 @@ endfu
 
 call s:remember_new_mappings([
 \            ['-e', '!e'],
-\            ['<space>ec', 'C-g ee'],
 \            ['g?', '!m'],
 \            ['zs', '!s'],
 \          ])
@@ -2356,7 +2362,7 @@ fu! s:try_to_edit_plugin_config(cmd) abort
         let split = a:cmd[0] is# 'g' ? 'edit' : a:cmd[1] is# 'g' ? 'tabedit' : 'split'
         let files =  [$HOME.'/.vim/plugin/'.plugin.'.vim']
         let files += [$HOME.'/.vim/after/plugin/'.plugin.'.vim']
-        let files += [$HOME.'/.vim/autoload/plugin_conf/'.plugin.'.vim']
+        let files += [$HOME.'/.vim/autoload/slow_call/'.plugin.'.vim']
         call filter(files, {i,v -> filereadable(v)})
         if empty(files)
             echo 'There''s no config file for '.string(plugin)
@@ -2412,6 +2418,9 @@ nno  <silent>  gx  :<c-u>call myfuncs#open_gx(0)<cr>
 
 " Also, install a `gX` mapping opening the url under the cursor in `w3m` inside
 " a Tmux pane.
+" Idea:
+" We  could  use  `gx`  for  the  two mappings,  and  make  the  function  react
+" differently depending on `v:count`.
 nno  <silent>  gX  :<c-u>call myfuncs#open_gx(1)<cr>
 
 " m                   (prefix) {{{3
@@ -3477,10 +3486,14 @@ xno  <c-s>  <esc>:keepj keepp *g/\%V/#<left><left>
 
 " /           search only in visual selection {{{3
 
-xno  /   <esc>/\%V
-
-" restore original slash
-xno  g/  /
+xno  <expr>  /  <sid>visual_slash()
+fu! s:visual_slash() abort
+    if line("'<") ==# line("'>")
+        return '/'
+    else
+        return "\e/\\%V"
+    endif
+endfu
 
 " .    @ {{{3
 
@@ -5826,6 +5839,7 @@ endfu
 "        • TextChangedP
 "        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
 "        • `getcwd(-1)` return the global directory
+"        • `reg_recording()` + `reg_executing()`
 "        • `term_setansicolors()`, `term_getansicolors()`, `g:term_ansi_colors`
 "        • `term_setsize()`
 "        • `trim()`
@@ -5964,12 +5978,6 @@ endfu
 "
 " 100 -
 " Feature requests:
-"
-"      • a function to detect we're recording a macro
-"
-"        (we could use it to disable our  `q` mappings in buffers where a local
-"        mapping  has  been  installed  to  close the  window  easily,  when  a
-"        recording is running, so that we can press `q` to end the recording)
 "
 "      • a function to detect the pager is active, to customize the mappings
 "        interacting with the pager
@@ -6546,6 +6554,61 @@ endfu
 "     :silent call system(...)
 "
 " See `:h system()`, and look for `silent`.
+"
+" 133 -
+" Sometimes, when we  indent a block of code, the  original relative indentation
+" between the lines gets lost. Ex:
+" abc
+"    def
+" ^^^
+" the issue occurs only when the indentation is not a multiple of 'sw'
+"
+" Copy these lines in a vim file.
+" Press `>ip`:
+"
+"     abc
+"     def
+"
+" The indentation of `def` should be greater than the one of `abc`.
+" The issue disappears if we indent from visual mode.
+" Maybe because of a custom mapping which fixes the issue.
+" Find a way to fix the issue in normal mode too.
+" Maybe install a wrapper around the normal command `>` to force Vim
+" to pass in visual mode.
+"
+" Also, when we indent some block of code, and it contains an empty line,
+" we don't want Vim to add spaces on it.
+"
+" Update:
+" Maybe this behavior is good, as it tries to fix a wrong indentation...
+"
+" 134 -
+" Once neovim has `reg_recording()`, use it in all `q` mappings:
+"
+"     noa vim /nno.*\<q\>/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
+"
+" So that we can end a recording without closing the window.
+"
+" 135 -
+" We should use more abbreviations.
+" Review the triggers:
+"
+"     • are they well chosen?
+"     • should you remove some of them?
+"     • should you add more?
+"
+"         use `:WordFrequency`, but if you find a frequent word (like 'result'),
+"         it doesn't necessarily mean you should create an abbreviation just for
+"         it;
+"
+"         maybe it's frequently  used in a group of words  (like 'as a result');
+"         look for it  in your file, and  see in which context  it's used before
+"         creating the abbreviation
+"
+" Maybe eliminate french.
+" Move the functions in a dedicated file.
+" Implement  a   `-A`  mapping   showing  the   available  abbreviations   in  a
+" sidebar/cheatsheet. Show only the less well known at any given time.
 
 
 

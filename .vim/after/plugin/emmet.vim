@@ -45,6 +45,14 @@ let g:user_emmet_settings = {
 augroup my_emmet
     au!
     au FileType css,html  call s:emmet_set_mappings()
+    " We  enable the  emmet  mappings in  the notes  we  take about  web-related
+    " technologies (html, css, emmet, ...).
+    " TODO:
+    " However, maybe we could enable them to all markdown files...
+    "
+    "     au FileType css,html,markdown  call s:emmet_set_mappings()
+    "                          ^^^^^^^^
+    au BufReadPost,BufNewFile  */wiki/web/*.md  call s:emmet_set_mappings()
 augroup END
 
 fu! s:emmet_set_mappings() abort

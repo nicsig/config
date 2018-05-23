@@ -380,13 +380,6 @@ alias -s {md,markdown,txt,html,css}=vim
 alias -s odt=libreoffice
 alias -s pdf=zathura
 
-# Environment Variables {{{1
-
-# commands whose combined user and system execution times (measured in seconds)
-# are greater than this value have timing statistics printed for them
-# the report can be formatted with `TIMEFMT` (man zshparam)
-export REPORTTIME=15
-
 # Functions {{{1
 ccheat() { #{{{2
   emulate -LR zsh
@@ -541,6 +534,220 @@ nstring() { #{{{2
 
 }
 
+nv() { #{{{2
+#    │
+#    └ You want to prevent the  change of `IFS` from affecting the current shell?
+#      Ok. Then, use `local IFS`.
+#      Do NOT use parentheses to surround the  body of the function and create a
+#      subshell. It could cause an issue when we suspend then restart Vim.
+#           https://unix.stackexchange.com/a/445192/289772
+
+  # check whether a Vim server is running
+  #
+  #                             ┌─ Why do we look for a server whose name is VIM?
+  #                             │  By default, when we execute:
+  #                             │          vim --remote file
+  #                             │
+  #                             │  … without `--servername`, Vim tries to open `file` in a Vim server
+  #                             │  whose name is VIM.
+  #                             │  So, we'll use this name for our default server.
+  #                             │  This way, we won't have to specify the name of the server later.
+  #                             │
+  if vim --serverlist | grep -q VIM; then
+  #                           │
+  #                           └─ be quiet (no output); if you find sth, just return 0
+
+    # From now on, assume a VIM server is running.
+
+    # If no argument was given, just start a new Vim session.
+    if [[ $# -eq 0 ]]; then
+      vim
+
+    # If the 1st argumennt is `-b`, we want to edit binary files.
+    elif [[ $1 == -b ]]; then
+      # Get rid of `-b` before send the rest of the arguments to the server, by
+      # shifting the arguments to the right.
+      shift 1
+      # Make sure that the shell uses a space, and only a space, to separate
+      # 2 consecutive arguments, when it will expand the special parameter `$*`.
+      local IFS=' '
+
+      # send the filenames to the server
+      vim --remote "$@"
+      # For each buffer in the arglist:
+      #
+      #         enable the 'binary' option.
+      #         Among other things, il will prevent Vim from doing any kind of
+      #         conversion, which could damage the files.
+      #
+      #         set the filetype to `xxd` (to have syntax highlighting)
+      vim --remote-send ":argdo setl binary ft=xxd<cr>"
+      # filter the contents of the binary buffer through `xxd`
+      vim --remote-send ":argdo %!xxd<cr><cr>"
+
+    # If the 1st argument is `-d`, we want to compare files.
+    elif [[ $1 == -d ]]; then
+      shift 1
+      local IFS=' '
+      # open a new tabpage
+      vim --remote-send ":tabnew<cr>"
+      # send the files to the server
+      vim --remote "$@"
+      # display the buffers of the arglist in a dedicated vertical split
+      vim --remote-send ":argdo vsplit<cr>:q<cr>"
+      # execute `:diffthis` in each window
+      vim --remote-send ":windo diffthis<cr>"
+
+    # If the 1st argument is `-o`, we want to open each file in a dedicated horizontal split
+    elif [[ $1 == -o ]]; then
+
+      shift 1
+      local IFS=' '
+
+      vim --remote "$@"
+      vim --remote-send ":argdo split<cr>:q<cr><cr>"
+      #                                  └────┤
+      #                                       └ close last window, because the last file
+      #                                         is displayed twice, in 2 windows
+
+    # If the 1st argument is `-O`, we want to open each file in a dedicated vertical split
+    elif [[ $1 == -O ]]; then
+      shift 1
+      local IFS=' '
+      vim --remote "$@"
+      vim --remote-send ":argdo vsplit<cr>:q<cr><cr>"
+
+    # If the 1st argument is `-p`, we want to open each file in a dedicated tabpage.
+    elif [[ $1 == -p ]]; then
+      shift 1
+      local IFS=' '
+      vim --remote "$@"
+      vim --remote-send ":argdo tabedit<cr>:q<cr>"
+
+    # If the 1st argument is `-q`, we want to populate the qfl with the output
+    # of a shell command. The syntax should be:
+    #
+    #               ┌─ Use single quotes to prevent the current shell from expanding a glob.
+    #               │  The glob is for the Vim function `system()`, which will send it back
+    #               │  to another shell later.
+    #               │
+    #         nv -q 'grep -Rn foo *'
+    #
+    # This syntax is NOT possible with Vim:
+    #
+    #         vim -q grep -Rn foo *       ✘
+    #
+    # With Vim, you should type:
+    #
+    #         vim -q <(grep -Rn foo *)    ✔
+
+    elif [[ $1 == -q ]]; then
+
+      shift 1
+      local IFS=' '
+
+      #                                 ┌─ Why not $@?
+      #                                 │  $@ would be expanded into:
+      #                                 │
+      #                                 │      '$1' '$2' …
+      #                                 │
+      #                                 │  … but `system()` expects a single string.
+      #                                 │
+      vim --remote-send ":cexpr system('$*')<cr>"
+
+
+    # If no option was used, -[bdoOpq], we just want to send files to the server.
+    else
+      vim --remote "$@"
+    fi
+
+  # Finally, if `grep` didn't find any VIM server earlier, start one.
+  else
+    vim -w /tmp/.vimkeys --servername VIM "$@"
+  fi
+}
+
+# Set a trap for when we send the signal `USR1` from our Vim mapping `SPC R`.
+trap catch_signal_usr1 USR1
+# Function invoked by our trap.
+catch_signal_usr1() {
+  # reset a trap for next time
+  trap catch_signal_usr1 USR1
+  # useful to get rid of error messages which were displayed during last Vim
+  # session
+  clear
+  # Why don't you restart Vim directly from the trap?{{{
+  #
+  # If we restart Vim, then suspend it, we can't resume it by executing `$ fg`.
+  # The issue doesn't come from the code inside `nv()`, it comes from the trap.
+  # MWE:
+  #
+  #   func() {
+  #     vim
+  #   }
+  #
+  #   $ func
+  #   SPC R
+  #   :stop
+  #   $ fg ✘
+  #
+  # https://unix.stackexchange.com/a/445192/289772
+  #
+  # So, instead, we'll restart Vim from a hook
+  #}}}
+  # Set the flag with `1` to let zsh know that it should automatically restart
+  # Vim the next time we're at the prompt.
+  # restarting_vim=1
+  nv
+}
+
+# Set an empty flag.
+# We'll test it to determine whether Vim is being restarted.
+# restarting_vim=
+# What's this function?{{{
+#
+# Any function whose  name is `precmd` or inside  the array `$precmd_functions`.
+# is special.
+# It's automatically executed by zsh before every new prompt.
+#
+# Note that a prompt which is redrawn, for example, when a notification about an
+# exiting job is displayed, is NOT a new prompt.
+# So `precmd()` is not executed in this case.
+#
+# For more info: `$ man zshmisc`
+#                  SPECIAL FUNCTIONS
+#                  Hook Functions
+#}}}
+# Why do you use it?{{{
+#
+# To restart  Vim automatically, when we're  at the shell prompt  after pressing
+# `SPC R` from Vim.
+#}}}
+restart_vim() {
+  if [[ -n $restarting_vim ]]; then
+    # reset the flag
+    # restarting_vim=
+    # FIXME: If we quit Neovim, we should restart Neovim, not Vim.
+    # FIXME: Vim IS restarted the first time, but NOT the next times.{{{
+    #
+    # The issue is  not with the trap,  nor with the flag, because  if I execute
+    # any command  (ex: `$ ls`),  causing a new prompt  to be displayed,  Vim is
+    # restarted.
+    # Besides,  if we  add some  command after  `nv` (ex:  `echo 'hello'`),  the
+    # message is correctly displayed even when Vim is not restarted, which means
+    # that this `if` block is always correctly processed.
+    #
+    # For some reason, `nv` is ignored.
+    # Replacing `nv` with `vim` doesn't fix the issue.
+    #}}}
+    # Warning: don't use `vim`.{{{
+    #
+    # It wouldn't restart a Vim server.
+    #}}}
+    nv
+  fi
+}
+
 ppa_what_have_you() { #{{{2
   # FIXME:
   # create a completion function which would suggest files in /var/lib/apt/lists/
@@ -604,10 +811,28 @@ vc() {
   cd ~/.cheat; vim "$1"; cd - >/dev/null;
 }
 
+# Variables {{{1
+# WARNING: Make sure this `Variables` section is always after `Functions`.{{{
+#
+# Because  if  you  refer  to  a  function in  the  value  of  a  variable  (ex:
+# `precmd_functions`), and it doesn't exist yet, it may raise an error.
+#}}}
+
+# commands whose combined user and system execution times (measured in seconds)
+# are greater than this value have timing statistics printed for them
+# the report can be formatted with `TIMEFMT` (man zshparam)
+export REPORTTIME=15
+
+# It doesn't seem necessary to export the variable.
+# `precmd_functions` is a variable specific to the zsh shell.
+# No subprocess could understand it.
+#     https://stackoverflow.com/a/1158231/9780968
+# precmd_functions=(restart_vim)
+
 # Key Bindings {{{1
 # Delete {{{2
 
-# The delete key doesn't work in `zsh`.
+# The delete key doesn't work in zsh.
 # Fix it.
 bindkey  '\e[3~'  delete-char
 
@@ -707,8 +932,8 @@ reread_zshrc() {
   emulate -LR zsh
 # FIXME:
 # The redirections in the following command, and all the explanation shouldn't
-# be need in the next release of `zsh`. Remove the redirections and the
-# comments after updating `zsh`?
+# be need in the next release of zsh. Remove the redirections and the
+# comments after updating zsh?
 #     https://github.com/zsh-users/zsh/commit/4d007e269d1892e45e44ff92b6b9a1a205ff64d5#diff-c47c7c7383225ab55ff591cb59c41e6b
 #
 #                      ┌ redirect stdin from /dev/null
@@ -723,7 +948,7 @@ reread_zshrc() {
 # They prevent  the `stty`  and `dircolors` commands,  sourced in  `~/.shrc`, to
 # complain.
 #
-# `zsh` closes the stdin of a `zle` widget to avoid the commands it executes to
+# zsh closes the stdin of a `zle` widget to avoid the commands it executes to
 # interfere with user input. So, initially, the stdin of `reread_zshrc()` is
 # closed. Because of this, the next command won't have the terminal as its
 # stdin. Instead, its stdin will be the first file it opens.
@@ -737,7 +962,7 @@ reread_zshrc() {
 #         dircolors: /home/user/.dircolors: Bad file descriptor
 #
 # For the `stty` command, the problem is simpler. `stty` expects an input, but
-# `zsh` has closed the terminal. The error message is similar:
+# zsh has closed the terminal. The error message is similar:
 #         stty: 'standard input': Bad file descriptor
 #
 # TODO:
@@ -819,7 +1044,7 @@ fancy-ctrl-z () {
   #     vimdiff <(setopt) <(emulate -R zsh; setopt)
   #
   # `emulate -L` makes the new values local to the current function, which
-  # prevents the changes to affect the current interactive `zsh` session.
+  # prevents the changes to affect the current interactive zsh session.
   #
   # Here, we don't need this command, however it can be a good habit to include it.
   # https://unix.stackexchange.com/a/372866/232487
@@ -854,7 +1079,7 @@ zle -N fancy-ctrl-z
 # This  key  binding  won't prevent  us  to  put  a  foreground process  in  the
 # background. When  we hit  `C-z` while  a process  is in  the foreground,  it's
 # probably the terminal driver which intercepts the keystroke and sends a signal
-# to the process to  pause it. In other words, `C-z` should  reach `zsh` only if
+# to the process to  pause it. In other words, `C-z` should  reach zsh only if
 # no process has the control of the terminal.
 bindkey '^Z' fancy-ctrl-z
 
@@ -1171,7 +1396,7 @@ abbrev-expand() {
   #                                  for more info:    man zshexpn, filename generation
   #
   #                                  NOTE:
-  #                                  contrary to most regex engines, for `zsh`,
+  #                                  contrary to most regex engines, for zsh,
   #                                  `*` is not a quantifier:
   #                                  in a classical regex, it would match the pattern `.*`
 
@@ -1191,7 +1416,7 @@ abbrev-expand() {
     # we want the cursor to be right after the `$` sign in:
     #     awk '{ print $ }'
     #
-    # but `zsh` inserts a space before the cursor, no matter the value we give
+    # but zsh inserts a space before the cursor, no matter the value we give
     # to `CURSOR`. How to avoid this?
     # CURSOR=$(($#LBUFFER))
     # NOTE:

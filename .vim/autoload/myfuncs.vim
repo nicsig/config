@@ -461,7 +461,7 @@ fu! myfuncs#long_listing_split() abort "{{{1
     let indent_txt = repeat(' ', indent_lvl)
 
     sil keepj keepp s/\v\ze\S/• /e
-    sil keepj keepp s/\v\s*,\s*%(et\s*)?|\s*<et>\s*/\="\n".indent_txt.'• '/ge
+    sil keepj keepp s/\v\s*,\s*%(et\s+)?|\s*<et>\s*/\="\n".indent_txt.'• '/ge
 
     call winrestview(view)
     sil! call repeat#set("\<plug>(myfuncs_long_listing_split)")
@@ -987,7 +987,7 @@ fu! s:open_gx_get_url() abort
         \ : getline(search('^- .*:$', 'bn'))[2:-2]
         let uri  = get(get(g:plugs, name, {}), 'uri', '')
         if uri !~ 'github.com'
-            return
+            return ''
         endif
         let repo = matchstr(uri, '[^:/]*/'.name)
         let url  = empty(sha) ? 'https://github.com/'.repo
@@ -1006,19 +1006,35 @@ fu! s:open_gx_get_url() abort
             let url = substitute(url, '\v.{-}\zs[⟩>)\]}].*', '', '')
 
             " remove everything after the last `"`
-            let url = substitute(url, '\v".*', '', '')
+            return substitute(url, '\v".*', '', '')
 
-        elseif url !~# '\.pdf$'
-            " [text](path_to_local_file)
-            let cursor_not_before = '%(%'.col('.').'c|%(%'.col('.').'c.*)@<!)'
-            let cursor_not_after = '%(.*%'.col('.').'c)@!'
-            let pat = '\v'.cursor_not_before.'\[.{-}\]\(\zs.{-}\ze\)'.cursor_not_after
-
+        else
+            " [text][ref]
+            " [text](link)
+            let pat  = '\[\=.*\%'.col('.').'c.*\]\&\[.\{-}\]'
+            let pat .= '\%((.\{-})\|\[.\{-}\]\)'
             let url = matchstr(getline('.'), pat)
+
+            " [text][ref]
+            if url =~# '^\[.\{-}\]\[.\{-}\]'
+                let url = matchstr(url, '^\[.\{-}\]\zs\[.\{-}\]$')
+                let url = filter(getline(line('.'), '$'), {i,v -> v =~# '\c\V'.url.':'})
+                let url = matchstr(get(url, 0, ''), '\[.\{-}\]:\s*\zs.*')
+                return substitute(url, '\s*".\{-}"\s*$', '', '')
+
+            " [text](link)
+            " [text](path_to_local_file)
+            elseif url =~# '^\[.\{-}\](.\{-})'
+                let url = matchstr(url, '^\[.\{-}\](\zs.*\ze)$')
+                let url = substitute(url, '\s*".\{-}"\s*$', '', '')
+                return url =~# '\.pdf$'
+                \ ?        ''
+                \ :        url
+            else
+                return ''
+            endif
         endif
     endif
-
-    return url
 endfu
 
 fu! myfuncs#plugin_install(url) abort "{{{1

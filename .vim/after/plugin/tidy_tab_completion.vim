@@ -69,8 +69,3 @@ com! -nargs=+  LogiPat  echomsg LogiPat(<q-args>)
 " It pollutes tab completion on the command-line.
 sil! delc MANPAGER
 
-" TOhtml {{{1
-
-" I never use it.
-sil! delc TOhtml
-
