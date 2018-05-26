@@ -990,7 +990,7 @@ fu! s:open_gx_get_url() abort
             return ''
         endif
         let repo = matchstr(uri, '[^:/]*/'.name)
-        let url  = empty(sha) ? 'https://github.com/'.repo
+        return empty(sha) ? 'https://github.com/'.repo
         \ : printf('https://github.com/%s/commit/%s', repo, sha)
 
     else

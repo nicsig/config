@@ -2308,7 +2308,7 @@ fu! s:break_line() abort
         if !empty(bufname('%')) && fnamemodify(bufname('%'), ':p') isnot# $MYVIMRC
             sil update
         endif
-        sil call repeat#set("\<plug>(my_break_line)")
+        sil! call repeat#set("\<plug>(my_break_line)")
     catch
         return lg#catch_error()
     endtry
@@ -3337,10 +3337,10 @@ xno  <silent>  i%  <esc>:call <sid>select_percent_object()<cr>
 ono  <silent>  i%  :norm vi%<cr>
 
 fu! s:select_percent_object() abort
-    let pos = getpos('.')
+    let pos = getcurpos()
     " search for a closing/opening symbol
     norm! %
-    if getpos('.') ==# pos
+    if getcurpos() ==# pos
         return
     endif
     " save closing/opening symbol
@@ -6612,11 +6612,54 @@ endfu
 
 
 
+" Purpose:
+" Convert inline link ([text](url))to reference link ([text][ref]).
+"
+"  make it local to markdown
+com! -bar -range=% LinkInline2Ref  call s:link_inline_2_ref()
+fu! s:link_inline_2_ref() abort
+    let view = winsaveview()
+    call cursor(1,1)
+
+    let guard = 0
+    let links = []
+    let pat = '\[\_.\{-}\]\zs(\_.\{-})'
+    while search(pat, 'W') && guard <= 100
+        let lnum1 = line('.')
+        let lnum2 = search('(\_.\{-})\zs', 'W')
+        let lines = getline(lnum1,lnum2)
+        let text = join(lines, "\n")
+        let link = substitute(matchstr(text, pat), '[() \t\n]', '', 'g')
+        let links += [link]
+        let new_text = substitute(text, pat, '[1]', '')
+        if lnum2 > lnum1
+            sil! exe lnum1.','.(lnum2-1).'d_'
+        endif
+        call setline(lnum1, new_lines)
+        " TODO:
+        " We need to format the new text with `gq`.
+        " But we must not break a link.
+        " In a  link, we should  replace `[` with  `C-b`, `]` with  `C-d`, `SPC`
+        " with `C-e`.
+        " Then we should format, and finally replace the control characters.
+        " This should not be done from here.
+        " Here, we should only invoke `gq`.
+        " Edit `vim-par`.
+        "
+        " Also, print a message if the guard reaches `100`.
+        let guard += 1
+    endwhile
+
+    call winrestview(view)
+endfu
+
+
+
 " sessions to finish:
 "
 "         01. arglist (improve our arglist mappings)
 "         02. config
-"         03. paragraph (refactor the code of the plugin)
+"         03. paragraph (master `$ par`)
 "         04. qf_issue (finish the last two questions)
 "         05. session_issue (read the first Todos)
 "         06. completion
