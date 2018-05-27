@@ -307,6 +307,30 @@ fu! myfuncs#box_destroy() abort
 endfu
 
 fu! myfuncs#dump_wiki(url) abort "{{{1
+    " TODO: Regarding triple backticks.{{{
+    "
+    " Look at this page:
+    "
+    "     https://github.com/ranger/ranger/wiki/Keybindings
+    "
+    " Some lines of code are surrounded by triple backticks:
+    "
+    "     ```map X chain shell vim -p ~/.config/ranger/rc.conf %rangerdir/config/rc.conf;
+    "        source ~/.config/ranger/rc.conf```
+    "
+    " It's an error.
+    " They should be surrounded by simple backticks.
+    " AFAIK, triple backticks are for fenced code blocks.
+    " For inline code, a single backtick is enough.
+    "
+    " More  importantly, these  wrong  triple backticks  are  recognized as  the
+    " beginning of a fenced code block by our markdown syntax plugin.
+    " As a result, the syntax of all the following lines will be wrong.
+    "
+    " After dumping a wiki in a buffer, give a warning about that.
+    " Give the recommendation to manually inspect the syntax highlighting at the
+    " end of the buffer.
+    "}}}
     if a:url[:3] isnot# 'http'
         return
     endif
@@ -923,118 +947,6 @@ fu! myfuncs#op_yank_matches(type) abort
         let &cb  = cb_save
         call call('setreg', reg_save)
     endtry
-endfu
-
-fu! myfuncs#open_gx(in_term) abort "{{{1
-    let url = s:open_gx_get_url()
-
-    if empty(url)
-        return
-    endif
-
-    if match(url, '\v^%(https?|ftp|www)') ==# -1
-        " expand a possible tilde in the path to a local file
-        let url = expand(url)
-        if !filereadable(url)
-            return
-        endif
-        let ext = fnamemodify(url, ':e')
-        let cmd = get({'pdf': 'zathura'}, ext, 'xdg-open')
-        call system(cmd.' '.url.' &')
-    else
-        if a:in_term
-            " We could pass the shell command we want to execute directly to
-            " `tmux split-window`, but the pane would be closed immediately.
-            " Because by default, tmux closes a window/pane whose shell command
-            " has completed:
-            "         When the shell command completes, the window closes.
-            "         See the remain-on-exit option to change this behaviour.
-            "
-            " For more info, see `man tmux`, and search:
-            "
-            "     new-window
-            "     split-window
-            "     respawn-pane
-            "     set-remain-on-exit
-            sil call system('tmux split-window -c '.$XDG_RUNTIME_VIM')
-            " maximize the pane
-            sil call system('tmux resize-pane -Z')
-            " start `w3m`
-            sil call system('tmux send-keys web \ '.shellescape(url).' Enter')
-            "                                    │
-            "                                    └─ without the backslash, `tmux` would think
-            "                                    it's a space to separate the arguments of the
-            "                                    `send-keys` command; therefore, it would remove it
-            "                                    and type:
-            "                                                weburl
-            "                                    instead of:
-            "                                                web url
-            "
-            "                                    The backslash is there to tell it's a semantic space.
-        else
-            exe 'sil !xdg-open '.shellescape(url, 1)
-            redraw!
-        endif
-    endif
-endfu
-
-fu! s:open_gx_get_url() abort
-    " https://github.com/junegunn/vim-plug/wiki/extra
-    if &ft is# 'vim-plug'
-        let line = getline('.')
-        let sha  = matchstr(line, '^  \X*\zs\x\{7}\ze ')
-        let name = empty(sha) ? matchstr(line, '^[-x+] \zs[^:]\+\ze:')
-        \ : getline(search('^- .*:$', 'bn'))[2:-2]
-        let uri  = get(get(g:plugs, name, {}), 'uri', '')
-        if uri !~ 'github.com'
-            return ''
-        endif
-        let repo = matchstr(uri, '[^:/]*/'.name)
-        return empty(sha) ? 'https://github.com/'.repo
-        \ : printf('https://github.com/%s/commit/%s', repo, sha)
-
-    else
-        let url = expand('<cWORD>')
-        if url =~# 'http\|ftp\|www'
-            " Which characters make a URL invalid?
-            " https://stackoverflow.com/a/13500078
-
-            " remove everything before the first `http`, `ftp` or `www`
-            let url = substitute(url, '\v.{-}\ze%(http|ftp|www)', '', '')
-
-            " remove everything after the first `⟩`, `>`, `)`, `]`, `}`
-            let url = substitute(url, '\v.{-}\zs[⟩>)\]}].*', '', '')
-
-            " remove everything after the last `"`
-            return substitute(url, '\v".*', '', '')
-
-        else
-            " [text][ref]
-            " [text](link)
-            let pat  = '\[\=.*\%'.col('.').'c.*\]\&\[.\{-}\]'
-            let pat .= '\%((.\{-})\|\[.\{-}\]\)'
-            let url = matchstr(getline('.'), pat)
-
-            " [text][ref]
-            if url =~# '^\[.\{-}\]\[.\{-}\]'
-                let url = matchstr(url, '^\[.\{-}\]\zs\[.\{-}\]$')
-                let url = filter(getline(line('.'), '$'), {i,v -> v =~# '\c\V'.url.':'})
-                let url = matchstr(get(url, 0, ''), '\[.\{-}\]:\s*\zs.*')
-                return substitute(url, '\s*".\{-}"\s*$', '', '')
-
-            " [text](link)
-            " [text](path_to_local_file)
-            elseif url =~# '^\[.\{-}\](.\{-})'
-                let url = matchstr(url, '^\[.\{-}\](\zs.*\ze)$')
-                let url = substitute(url, '\s*".\{-}"\s*$', '', '')
-                return url =~# '\.pdf$'
-                \ ?        ''
-                \ :        url
-            else
-                return ''
-            endif
-        endif
-    endif
 endfu
 
 fu! myfuncs#plugin_install(url) abort "{{{1

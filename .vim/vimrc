@@ -111,36 +111,36 @@ Plug 'lacygoill/vim-graph'
 " I've fixed the bug by renaming `Func` into `l:Func` inside the `s:send()`
 " function of the abolish plugin.
 "}}}
-Plug 'tpope/vim-abolish', { 'frozen': 1 }
-Plug 'yegappan/asyncmake', { 'frozen': 1 }
+Plug 'tpope/vim-abolish', {'frozen': 1}
+Plug 'yegappan/asyncmake', {'frozen': 1}
 Plug 'lacygoill/vim-debug'
 Plug 'justinmk/vim-dirvish'
 Plug 'lacygoill/vim-fex'
 Plug 'junegunn/vim-easy-align'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-fugitive'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all'}
 Plug 'junegunn/fzf.vim'
-Plug 'junegunn/goyo.vim', { 'frozen': 1 }
-Plug 'ludovicchabant/vim-gutentags'
-Plug 'junegunn/limelight.vim', { 'frozen': 1 }
+Plug 'junegunn/goyo.vim', {'frozen': 1}
+Plug 'ludovicchabant/vim-gutentags', {'frozen': 1}
+Plug 'junegunn/limelight.vim', {'frozen': 1}
 Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
 " required to get some functionality in `vim-quickhl`
-Plug 'kana/vim-operator-user', { 'frozen': 1 }
+Plug 'kana/vim-operator-user', {'frozen': 1}
 Plug 'lacygoill/potion'
-Plug 't9md/vim-quickhl', { 'frozen': 1}
-Plug 'tpope/vim-repeat', { 'frozen': 1 }
+Plug 't9md/vim-quickhl', {'frozen': 1}
+Plug 'tpope/vim-repeat', {'frozen': 1}
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-cwd'
-Plug 'lacygoill/vim-schlepp', { 'frozen': 1 }
+Plug 'lacygoill/vim-schlepp', {'frozen': 1}
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'tpope/vim-speeddating'
-Plug 'kana/vim-submode', { 'frozen': 1 }
-Plug 'jebaum/vim-tmuxify', { 'frozen': 1 }
+Plug 'kana/vim-submode', {'frozen': 1}
+Plug 'jebaum/vim-tmuxify', {'frozen': 1}
 Plug 'SirVer/ultisnips'
 Plug 'lacygoill/vim-unix'
 
@@ -159,6 +159,7 @@ Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-fold'
 Plug 'lacygoill/vim-freekeys'
 Plug 'lacygoill/vim-gitcommit'
+Plug 'lacygoill/vim-gx'
 Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
 Plug 'lacygoill/vim-iabbrev'
@@ -2405,23 +2406,6 @@ nno  <expr>  gQ ":\e".execute('ToggleEditingCommands 0', 'silent!').'gQ'
 
 nno  <silent>  gt  :<c-u>call myfuncs#search_todo('buffer')<cr>
 nno  <silent>  gT  :<c-u>call myfuncs#search_todo('project')<cr>
-
-" gx          open url {{{4
-
-" The default `gx` command, installed by the netrw plugin, doesn't open a link
-" correctly when it's inside a man page.
-" Ex:  :Man zsh  →  http://sourceforge.net/projects/zsh/
-
-" So, I implement my own solution.
-
-nno  <silent>  gx  :<c-u>call myfuncs#open_gx(0)<cr>
-
-" Also, install a `gX` mapping opening the url under the cursor in `w3m` inside
-" a Tmux pane.
-" Idea:
-" We  could  use  `gx`  for  the  two mappings,  and  make  the  function  react
-" differently depending on `v:count`.
-nno  <silent>  gX  :<c-u>call myfuncs#open_gx(1)<cr>
 
 " m                   (prefix) {{{3
 " m/  m?         put current location in loclist {{{4
@@ -6419,6 +6403,12 @@ endfu
 "
 "     https://github.com/kana/vim-gf-user/blob/master/doc/gf-user.txt
 "
+" Also, they should be able to parse a reference link in a markdown buffer:
+"
+"     [description][123]
+"     ...
+"     [123]: link
+"
 " 123 -
 " finish implementing `!t` (timer info)
 "
@@ -6609,49 +6599,6 @@ endfu
 " Move the functions in a dedicated file.
 " Implement  a   `-A`  mapping   showing  the   available  abbreviations   in  a
 " sidebar/cheatsheet. Show only the less well known at any given time.
-
-
-
-" Purpose:
-" Convert inline link ([text](url))to reference link ([text][ref]).
-"
-"  make it local to markdown
-com! -bar -range=% LinkInline2Ref  call s:link_inline_2_ref()
-fu! s:link_inline_2_ref() abort
-    let view = winsaveview()
-    call cursor(1,1)
-
-    let guard = 0
-    let links = []
-    let pat = '\[\_.\{-}\]\zs(\_.\{-})'
-    while search(pat, 'W') && guard <= 100
-        let lnum1 = line('.')
-        let lnum2 = search('(\_.\{-})\zs', 'W')
-        let lines = getline(lnum1,lnum2)
-        let text = join(lines, "\n")
-        let link = substitute(matchstr(text, pat), '[() \t\n]', '', 'g')
-        let links += [link]
-        let new_text = substitute(text, pat, '[1]', '')
-        if lnum2 > lnum1
-            sil! exe lnum1.','.(lnum2-1).'d_'
-        endif
-        call setline(lnum1, new_lines)
-        " TODO:
-        " We need to format the new text with `gq`.
-        " But we must not break a link.
-        " In a  link, we should  replace `[` with  `C-b`, `]` with  `C-d`, `SPC`
-        " with `C-e`.
-        " Then we should format, and finally replace the control characters.
-        " This should not be done from here.
-        " Here, we should only invoke `gq`.
-        " Edit `vim-par`.
-        "
-        " Also, print a message if the guard reaches `100`.
-        let guard += 1
-    endwhile
-
-    call winrestview(view)
-endfu
 
 
 
