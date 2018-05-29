@@ -1,13 +1,14 @@
-# Which files can I use to configure my plugins?
+# Which directories can I use to configure my plugins?
 
-    ~/.vim/plugin/README.md
-    ~/.vim/after/plugin/README.md
-    ~/.vim/autoload/slow_call/README.md
+        ~/.vim/plugin/
+        ~/.vim/after/plugin/
+        ~/.vim/autoload/slow_call/
 
 # What's the purpose of this directory?
 
-You can use it to delay the call to functions installing some interface, because
-they are too slow to be processed during Vim's startup, like:
+You can use it to delay the call to functions installing some interface, if they
+are too slow to be processed during Vim's startup.
+For example:
 
         • lg#motion#repeatable#make#all()
         • operator#sandwich#set()
@@ -22,7 +23,7 @@ For example, if you have the file:
 
         ~/.vim/plugged/vim-dirvish/autoload/dirvish.vim
 
-You can't have this file:
+Then, you can't have this file:
 
         ~/.vim/autoload/dirvish.vim
 
@@ -47,7 +48,7 @@ As a result, all the original autoloaded dirvish functions will never be sourced
 
 Yes.
 
-If the path to  your file, relative to `autoload/` does not  match any path used
+If the path to your file, relative  to `autoload/`, does not match any path used
 in the name of an autoloaded function, then there's no issue.
 For example, you can have these files:
 

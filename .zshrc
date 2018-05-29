@@ -982,9 +982,9 @@ bindkey '^X^R' reread_zshrc
 #
 #                       ┌─ preserve some variables in current environment
 #                       │
-bindkey -s '^X^S' 'sudo -E PATH=$PATH bash -c "!!"^M'
-#                         │
-#                         └─ make sure `PATH` is preserved, in case `-E` didn't
+bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
+#                               │
+#                               └─ make sure `PATH` is preserved, in case `-E` didn't
 #
 # Alternative:
 #     bindkey -s '^Xs' 'sudo !!^M'

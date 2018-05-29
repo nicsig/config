@@ -1,8 +1,8 @@
-# Which files can I use to configure my plugins?
+# Which directories can I use to configure my plugins?
 
-    ~/.vim/plugin/README.md
-    ~/.vim/after/plugin/README.md
-    ~/.vim/autoload/slow_call/README.md
+        ~/.vim/plugin/
+        ~/.vim/after/plugin/
+        ~/.vim/autoload/slow_call/
 
 ##
 # When should I use this directory instead of `~/.vim/after/plugin/`?
