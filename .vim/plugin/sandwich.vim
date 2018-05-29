@@ -43,21 +43,11 @@ fu! s:set_default_recipes() abort
                          "                │
                          "                └ used in man pages (ex: `man tmux`)
 
+    " TODO:
+    " Instead of removing some problematic  recipes, we should add recipes which
+    " we know not to cause any issue.
+    " IOW, a whitelist is more reliable than a blacklist.
     let problematic_recipes = [
-    \ { 'noremap':     0,
-    \ 'expr_filter': ['operator#sandwich#kind() is# "replace"'],
-    \ 'kind':        ['replace', 'textobj'],
-    \ 'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
-    \ 'input':       ['t'],
-    \ 'synchro':     1 },
-    \
-    \ {'noremap':    0,
-    \ 'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
-    \ 'kind':        ['replace', 'query'],
-    \ 'external':    ["\<plug>(textobj-sandwich-tag-i)", "\<plug>(textobj-sandwich-tag-a)"],
-    \ 'input':       ['T'],
-    \ 'synchro':     1},
-    \
     \ {'noremap':    0,
     \ 'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
     \ 'kind':        ['replace', 'textobj'],
