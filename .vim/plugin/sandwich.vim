@@ -1,11 +1,4 @@
-" We need to remove an item from `g:sandwich#default_recipes`:{{{
-"
-"         { 'noremap':     0,
-"         \ 'expr_filter': ['operator#sandwich#kind() is# "replace"'],
-"         \ 'kind':        ['replace', 'textobj'],
-"         \ 'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
-"         \ 'input':       ['t'],
-"         \ 'synchro':     1 }
+" We need to remove some recipes.{{{
 "
 " Otherwise,  sometimes, when  we press  `srb` from  normal mode,  or `sr`  from
 " visual mode, Vim doesn't respond anymore  for several seconds, and it consumes
@@ -25,7 +18,7 @@
 "                 v1at
 "                     → E65: Illegal back reference
 "}}}
-" Removing this item may make us lose the tag object.{{{
+" Removing these recipes may make us lose the tag object.{{{
 "
 " We could:
 "
@@ -35,30 +28,48 @@
 "                 If it can't, when `E65` occurs, the plugin should stop and show it to us.
 "                 Why doesn't that happen?
 "
-"         • try and tweak the definition of this recipe
+"         • try and tweak the definition of these recipes
 "
-"         • let the recipe in, and disable the problematic operators:
+"         • let the recipes in, and disable the problematic operators:
 "
 "                 nno srb <nop>
 "                 xno sr  <nop>
 "}}}
 
-fu! s:fix_sandwich_recipes() abort
-    let item = { 'noremap':     0,
+fu! s:set_default_recipes() abort
+    let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
+                         \ + [ {'buns': ['“', '”'],   'input': ['u"'] } ]
+                         \ + [ {'buns': ['‘', '’'],   'input': ["u'"] } ]
+                         "                │
+                         "                └ used in man pages (ex: `man tmux`)
+
+    let problematic_recipes = [
+    \ { 'noremap':     0,
     \ 'expr_filter': ['operator#sandwich#kind() is# "replace"'],
     \ 'kind':        ['replace', 'textobj'],
     \ 'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
     \ 'input':       ['t'],
-    \ 'synchro':     1 }
+    \ 'synchro':     1 },
+    \
+    \ {'noremap':    0,
+    \ 'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
+    \ 'kind':        ['replace', 'query'],
+    \ 'external':    ["\<plug>(textobj-sandwich-tag-i)", "\<plug>(textobj-sandwich-tag-a)"],
+    \ 'input':       ['T'],
+    \ 'synchro':     1},
+    \
+    \ {'noremap':    0,
+    \ 'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
+    \ 'kind':        ['replace', 'textobj'],
+    \ 'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
+    \ 'input':       ['t'],
+    \ 'synchro':     1},
+    \ ]
 
-    let idx = index(g:sandwich#default_recipes, item)
-    let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
-    call remove(g:sandwich#recipes, idx)
+    for recipe in problematic_recipes
+        let idx = index(g:sandwich#recipes, recipe)
+        call remove(g:sandwich#recipes, idx)
+    endfor
 endfu
-call s:fix_sandwich_recipes()
-
-let g:sandwich#recipes += [ {'buns': ['“', '”'],   'input': ['u"'] } ]
-\                       + [ {'buns': ['‘', '’'],   'input': ["u'"] } ]
-"                                      │
-"                                      └ used in man pages (ex: `man tmux`)
+call s:set_default_recipes()
 
