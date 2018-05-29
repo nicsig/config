@@ -1,3 +1,88 @@
+# ???
+
+Document this:
+
+    saio(
+    surround column text-object with parentheses
+    (works even if the lines have different lengths)
+
+# ???
+
+Read this (taken from vim-surround note), and try to reimplement it:
+
+    Au moment d'encadrer un text-object, on peut également interroger
+    l'utilisateur via un prompt pour lui permettre d'insérer une chaîne de
+    caractères arbitraire:
+
+            let g:surround_108 = "\1Enter sth: \1 \r \1\1"
+
+    `\r` permet de se référer au texte à remplacer (un peu comme & dans une
+    substitution).
+    Le prompt sera peuplé avec ’Enter sth: ’, et la chaîne saisie sera insérée
+    entre chaque paire consécutive de `\1 … \1`.
+    On ne peut pas se référer plusieurs fois au texte d'origine.
+    IOW, on ne peut pas utiliser plusieurs fois `\r`.
+    Le 1er sera bien remplacé par le text-object d'origine. Mais les autres
+    seront traduits en CR littéraux.
+    Il est nécessaire d'utiliser des doubles quotes.
+    On peut utiliser jusqu'à 7 input différents:
+
+            let g:surround_108 = "\1Enter sth: \1 \r \2And sth else: \2"
+
+    Ajouter des exemples …
+    https://stackoverflow.com/a/47401509/8243465
+
+
+
+    Furthermore, one can specify a regular expression substitution to apply.
+
+          let g:surround_108 = "\\begin{\1environment: \1}\r\\end{\1\r}.*\r\1}"
+          let g:surround_108 = "\1Enter sth: \1 \r \1\r}.*\r\1"
+
+    This will remove anything after the first } in the input when the text is
+    placed within the \end{} slot.  The first \r marks where the pattern begins,
+    and the second where the replacement text begins.
+
+    Les 2 derniers `\r` sont équivalents à `\zs` et `\ze`.
+    Tout ce qui se situe entre eux est supprimé.
+
+    Here's a second  example for creating an HTML <div>.  The substitution prompts
+    for an id, but only adds id="" if it is non-blank.
+
+          let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
+
+# ???
+
+Try to configure the plugin so that `sdb` can delete a pair of backticks.
+
+# ???
+
+Debug this:
+
+        let a = Func(b)
+        call Func(b)
+        " press sdf on `Func()` in both cases,
+        " it should be removed, but it's not
+
+However, this works as expected:
+
+        let ab = Func(ab)
+
+# ???
+
+Debug this:
+
+Write the following line in a markdown buffer:
+
+        “hello world”
+              ^
+              move your cursor here;
+              press `yisu"` to yank the text inside the quotes
+              doesn't work; it should
+
+##
+##
+##
 # sandwich
 
 Ce plugin est décomposé en 2 parties:
@@ -126,6 +211,22 @@ textobj-sandwich fournit 4 objets:
                       b|ar
                     " baz
 
+            Update:
+            This is because of this recipe inside `g:sandwich#default_recipes`:
+
+                    { 'buns': ['"', '"']
+                    \ 'quoteescape': 1,
+                    \ 'expand_range': 0,
+                    \ 'nesting': 0,
+                    \ 'linewise': 0,
+                    \ 'match_syntax': 1 }
+
+            If you assign the value `1` to the `linewise` key, everything works.
+            But I don't know whether that's a good idea to change the default.
+            Let's learn more about this key before doing anything...
+
+##
+##
 ##
 # What are the key sequences to which the following operators/objects are mapped?   (2 answers each time)
 ## the operator adding surroundings
