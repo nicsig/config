@@ -30,14 +30,52 @@
 "
 "         • try and tweak the definition of these recipes
 "
+"           IMHO, it's the best solution.
+"           We should have a minimum of global recipes.
+"           And add relevant recipes for some filetypes via `b:sandwich_recipes`.
+"           For example, a tag recipe is not very useful in a vim file.
+"           But it's certainly useful in an html file.
+"
+"           Bottom_line:
+"
+"               - Better understand how to define/customize a recipe.
+"               - Define a minimum of recipes.
+"               - Make them relevant to the current filetype.
+"
 "         • let the recipes in, and disable the problematic operators:
 "
 "                 nno srb <nop>
 "                 xno sr  <nop>
 "}}}
 
-fu! s:set_default_recipes() abort
-    let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
+fu! s:set_recipes() abort
+    " Don't we need `deepcopy()`?{{{
+    "
+    " If we executed this simple assignment:
+    "
+    "     let g:sandwich#recipes = g:sandwich#default_recipes
+    "
+    " ... then, yes, `deepcopy()` would probably be needed.
+    " Because, `g:sandwich#recipes` and `g:sandwich#default_recipes` would share
+    " the same reference.
+    " So, when we  would try to modify  the first one, we would  also modify the
+    " second one, which is not possible because it's locked.
+    "
+    " However, the  rhs of our  assignment not a  simple variable name,  it's an
+    " expression using the `+` operator.
+    " Thus,  Vim has  to create  a  new reference  to  store the  result of  the
+    " expression
+    "}}}
+    " Why `get()`?{{{
+    "
+    " Without `get()`:
+    "       $ vim -Nu NORC
+    "         Error detected while processing function <SNR>2_set_recipes:
+    "         line   21:
+    "         E121: Undefined variable: g:sandwich#default_recipes
+    "         E15: Invalid expression: g:sandwich#default_recipes + ...
+    "}}}
+    let g:sandwich#recipes = get(g:, 'sandwich#default_recipes', [])
                          \ + [ {'buns': ['“', '”'],   'input': ['u"'] } ]
                          \ + [ {'buns': ['‘', '’'],   'input': ["u'"] } ]
                          "                │
@@ -61,5 +99,5 @@ fu! s:set_default_recipes() abort
         call remove(g:sandwich#recipes, idx)
     endfor
 endfu
-call s:set_default_recipes()
+call s:set_recipes()
 
