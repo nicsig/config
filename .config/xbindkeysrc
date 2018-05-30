@@ -5,7 +5,7 @@
 # }}}
 
 "dmenu_run -b -fn Monospace-20:normal -l 10"
-  Alt+Control+m
+  Control+Alt+m
 
 "${HOME}/bin/run-or-raise.sh urxvt"
   Mod4+j

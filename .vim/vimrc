@@ -800,6 +800,14 @@ fu! s:inex() abort
     "}}}
     if line =~# '='
         return substitute(v:fname, '.*=', '', '')
+    else
+        " The path could contain an environment variable:
+        let path = '\C\%($\u\+\|"$\u\+"\|${\u\+}\|"${\u\+}"\)'.v:fname
+        if line =~# path
+            let path = matchstr(line, path)
+            let env = matchstr(path, '\u\+')
+            return substitute(path, '"\=${\='.env.'}\="\=', eval('$'.env), '')
+        endif
     endif
 
     return v:fname
@@ -6541,6 +6549,32 @@ endfu
 " Move the functions in a dedicated file.
 " Implement  a   `-A`  mapping   showing  the   available  abbreviations   in  a
 " sidebar/cheatsheet. Show only the less well known at any given time.
+"
+" 134 -
+" https://github.com/ToxicFrog/Ligaturizer
+" https://www.reddit.com/r/urxvt/comments/728naa/does_anyone_know_how_to_enable_ligatures/
+" https://www.reddit.com/r/vim/comments/8n41zb/how_did_she_do_this_vim/dzsmlt4/
+"
+" To test `DejaVu Sans Mono` with ligature support, dl this file:
+"     https://github.com/ToxicFrog/Ligaturizer/blob/master/output-fonts/LigaDejaVuSansMono.ttf
+"
+" Then:
+"
+"     $ cd Downloads/
+"     $ sudo cp LigaDejaVuSansMono.ttf /usr/share/fonts/truetype/dejavu
+"
+" Then, you'll need to configure your terminal emulator so that it uses this font.
+" Its name is:
+"
+"     Liga DejaVu Sans Mono
+"
+" You can find all your fonts with:
+"
+"     $ fc-list V
+"
+" Read_this:
+"     https://github.com/tonsky/FiraCode
+"     https://github.com/kovidgoyal/kitty
 
 
 

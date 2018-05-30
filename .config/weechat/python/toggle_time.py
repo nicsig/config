@@ -14,7 +14,7 @@
 #
 #     /key bind meta-t /toggle_time %H:%M:%S
 #}}}
-# Do you use it?{{{
+# Do you use this script?{{{
 #
 # No.
 # We've a simpler alternative:
