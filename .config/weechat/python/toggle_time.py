@@ -1,9 +1,34 @@
 # coding=utf-8
 # Usage:{{{
 #
-# bind a key with your format, for example:
+# Load the script manually:
+#
+#     /script load toggle_time.py
+#
+# Or automatically:
+#
+#     $ cd ~/.config/weechat/python/autoload/
+#     $ ln -s ../toggle_time.py
+#
+# Then, bind a key with your format, for example:
 #
 #     /key bind meta-t /toggle_time %H:%M:%S
+#}}}
+# Do you use it?{{{
+#
+# No.
+# We've a simpler alternative:
+#
+#     /trigger add cmd_toggle_time command toggle_time
+#     /trigger set cmd_toggle_time command /mute /set weechat.look.buffer_time_format "${if:${weechat.look.buffer_time_format}==?${tg_argv1}:}"
+#
+# Source:
+#
+#     https://github.com/weechat/weechat/wiki/Triggers#toggle-time-display-on-buffer-like-toggle_timepy
+#}}}
+# Why do you keep it?{{{
+#
+# Educational purpose.
 #}}}
 
 import weechat
