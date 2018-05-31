@@ -1,3 +1,7 @@
+if !exists('g:loaded_quickhl')
+    finish
+endif
+
 " FIXME:
 " We have no way to expand a match.
 "

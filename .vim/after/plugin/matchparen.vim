@@ -1,3 +1,7 @@
+if !exists(':DoMatchParen') != 2
+    finish
+endif
+
 " The current script will be sourced when Vim starts.
 " It will disable the `matchparen` plugin.
 " But we also source it in a mapping to toggle the plugin.

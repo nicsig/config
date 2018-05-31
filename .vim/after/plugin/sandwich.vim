@@ -1,3 +1,7 @@
+if !exists('g:loaded_sandwich')
+    finish
+endif
+
 " We need to remove some recipes.{{{
 "
 " Otherwise,  sometimes, when  we press  `srb` from  normal mode,  or `sr`  from
@@ -49,6 +53,26 @@
 "}}}
 
 fu! s:set_recipes() abort
+    " Why this check?{{{
+    "
+    "       $ vim -Nu NORC
+    "         Error detected while processing function <SNR>2_set_recipes:
+    "         line   21:
+    "         E121: Undefined variable: g:sandwich#default_recipes
+    "         E15: Invalid expression: g:sandwich#default_recipes + ...
+    "}}}
+    " Ok, but why don't you use `get()`?{{{
+    "
+    " For some reason, when `get(g:, 'sandwich#default_recipes', [])` is evaluated
+    " from this file, we get `[]`.
+    "
+    " Besides, if this variable doesn't exist, it probably means that the plugin
+    " is not loaded, so we shouldn't do anything.
+    "}}}
+    if !exists('g:sandwich#default_recipes')
+        return
+    endif
+
     " Don't we need `deepcopy()`?{{{
     "
     " If we executed this simple assignment:
@@ -66,16 +90,7 @@ fu! s:set_recipes() abort
     " Thus,  Vim has  to create  a  new reference  to  store the  result of  the
     " expression
     "}}}
-    " Why `get()`?{{{
-    "
-    " Without `get()`:
-    "       $ vim -Nu NORC
-    "         Error detected while processing function <SNR>2_set_recipes:
-    "         line   21:
-    "         E121: Undefined variable: g:sandwich#default_recipes
-    "         E15: Invalid expression: g:sandwich#default_recipes + ...
-    "}}}
-    let g:sandwich#recipes = get(g:, 'sandwich#default_recipes', [])
+    let g:sandwich#recipes = g:sandwich#default_recipes
                          \ + [ {'buns': ['“', '”'],   'input': ['u"'] } ]
                          \ + [ {'buns': ['‘', '’'],   'input': ["u'"] } ]
                          "                │

@@ -1,3 +1,25 @@
+" Why must I put the config of UltiSnips in this directory instead of `~/.vim/after/plugin/`?{{{
+"
+" If you configure UltiSnips from  `~/.vim/after/plugin/`, when the interface of
+" UltiSnips  will be  sourced, it  won't see  you've chosen  a key  to expand  a
+" snippet.
+"
+" So, it will use `Tab` and install some mappings.
+" In `vim-completion`,  we also install some  mappings using the `Tab`  key, and
+" using the `<unique>` argument.
+"
+" They will conflict with the UltiSnips mappings.
+"
+" OTOH, if you  configure UltiSnips from this directory, when  UltiSnips will be
+" sourced, it will see you've chosen a key to expand a snippet:
+"
+"         let g:UltiSnipsExpandTrigger = '<S-F15>'
+"
+" So, it will use it to install the mappings.
+" And the key  we've chosen is purposefully NOT `Tab`,  so when `vim-completion`
+" will be sourced, there'll be no conflict.
+"}}}
+
 " Why S-F15..17 ? {{{
 
 " Currently we've decided to assign `S-F15`, `S-F16`, `S-F17` (garbage keys) to

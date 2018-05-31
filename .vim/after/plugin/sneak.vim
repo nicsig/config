@@ -1,3 +1,7 @@
+if !exists('g:loaded_sneak_plugin')
+    finish
+endif
+
 " Variables {{{1
 
 " Repeat via `;` or `,` always goes forwards or backwards respectively,

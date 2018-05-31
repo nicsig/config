@@ -1,3 +1,7 @@
+if !exists('g:loaded_fugitive')
+    finish
+endif
+
 " conceal path in qf window after executing `:Glog`
 
 augroup my_fugitive

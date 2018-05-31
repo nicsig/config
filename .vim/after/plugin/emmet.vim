@@ -1,3 +1,7 @@
+if !exists('g:loaded_emmet_vim')
+    finish
+endif
+
 " Options {{{1
 
 " We don't want global mappings. We prefer buffer-local ones.

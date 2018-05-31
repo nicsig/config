@@ -1190,6 +1190,11 @@ bindkey '\e^E' expand-aliases
 #        └─ C-M-e
 
 # MENUSELECT {{{2
+# Warning: I've disabled all key bindings using a printable character.{{{
+#
+# It's annoying  to type a  key expecting a character  to be inserted,  while in
+# reality it's going to select another entry in the completion menu.
+#}}}
 
 # to install the next key bindings, we need to load the `complist` module
 # otherwise the `menuselect` keymap won't exist
@@ -1201,13 +1206,13 @@ zmodload zsh/complist
 # `zmodload -L` prints the same list in the form of a series of zmodload commands
 
 # use vi-like keys in menu completion
-bindkey -M menuselect 'h' backward-char
+# bindkey -M menuselect 'h' backward-char
 #        │
 #        └─ selects the `menuselect` keymap
 #
 #           `bindkey -l` lists all the keymap names
 #            for more info: man zshzle
-bindkey -M menuselect 'l' forward-char
+# bindkey -M menuselect 'l' forward-char
 # Do NOT write this:
 #         bindkey -M menuselect '^J' down-line-or-history
 #
@@ -1215,24 +1220,24 @@ bindkey -M menuselect 'l' forward-char
 # The latter doesn't seem able to  distinguish `C-m` from `C-j`. At least when a
 # completion menu is  opened. Because of that, when we would  hit Enter/C-m, Vim
 # would move the cursor down, instead of selecting the current entry.
-bindkey -M menuselect 'j' down-line-or-history
+# bindkey -M menuselect 'j' down-line-or-history
 bindkey -M menuselect '^J' down-line-or-history
-bindkey -M menuselect 'k' up-line-or-history
+# bindkey -M menuselect 'k' up-line-or-history
 bindkey -M menuselect '^K' up-line-or-history
 
-bindkey -M menuselect 'b' backward-char
-bindkey -M menuselect 'B' backward-char
-bindkey -M menuselect 'e' forward-char
-bindkey -M menuselect 'E' forward-char
-bindkey -M menuselect 'w' forward-char
-bindkey -M menuselect 'W' forward-char
+# bindkey -M menuselect 'b' backward-char
+# bindkey -M menuselect 'B' backward-char
+# bindkey -M menuselect 'e' forward-char
+# bindkey -M menuselect 'E' forward-char
+# bindkey -M menuselect 'w' forward-char
+# bindkey -M menuselect 'W' forward-char
 
-bindkey -M menuselect '^' beginning-of-line
-bindkey -M menuselect '_' beginning-of-line
-bindkey -M menuselect '$' end-of-line
+# bindkey -M menuselect '^' beginning-of-line
+# bindkey -M menuselect '_' beginning-of-line
+# bindkey -M menuselect '$' end-of-line
 
-bindkey -M menuselect 'gg' beginning-of-history
-bindkey -M menuselect 'G'  end-of-history
+# bindkey -M menuselect 'gg' beginning-of-history
+# bindkey -M menuselect 'G'  end-of-history
 
 # TODO: How to repeat a zle function?{{{
 #
