@@ -102,6 +102,29 @@ If you don't like this, you could:
 This way, they would only be sourced from the vimrc.
 Not when you start Vim with a minimum of customizations.
 
+## Should I put a guard in those files?
+
+If you can, yes.
+
+If we  temporarily disable a  plugin in our  vimrc, its configuration  should be
+disabled too, to not interfere.
+
+Note that these  guards don't replace the previous solutions  (including the one
+relying on `--noplugin`):
+
+        - for some files, you can't write a guard.
+
+          For example:
+
+              • nop.vim
+              • tidy_tab_completion
+              • undotree.vim
+              • vimtex.vim
+
+        - you still have files in `~/.vim/plugin`, and you can't put a guard in
+          those (because, when  they're sourced, you don't know  yet whether the
+          plugin you're setting up will be sourced).
+
 ##
 # Misc
 ## Can I use this directory to lazy-load the config of a plugin?
