@@ -124,29 +124,49 @@ hi! link VertSplit Normal
 " Also, we set the color of the background of `User2` as the same as the
 " foreground color of `Todo`, so that the modified flag clearly stands out.
 
-call colorscheme#set_custom_hg()
-" Why?{{{
+" Why the delay?{{{
+"
+" gVim encounters some errors when trying to set up too early some of our custom
+" HGs (~/.vim/colors/my/customizations.vim):
+"
+"     E417: missing argument: guifg=
+"     E254: Cannot allocate color 95
+"     E254: Cannot allocate color 187
+"
+" The  issue seems  to be  that  the HGs  whose  attributes we  need to  inspect
+" ('StatusLine',  'TabLine',   ...),  are  not  (correctly)   defined  yet  when
+" `~/.color/my/customizations` is sourced by gVim.
+"}}}
+if has('gui_running') && has('vim_starting')
+    augroup delay_colorscheme_when_gvim_starts
+        au!
+        au VimEnter * call colorscheme#set_custom_hg()
+    augroup END
+else
+    call colorscheme#set_custom_hg()
+endif
+
+" What's the issue fixed by this function?{{{
 "
 "     $ cat /tmp/md.md
 "     hello *world*
 "
 "     $ vim /tmp/md.md
+"     $ ]ol (change lightness)
 "
-" `world` is not in italic (✘).
+" `world` is not in italic anymore (✘).
+"}}}
+" Where does the issue come from?{{{
 "
-" The issue comes from the `htmlitalic` HG which is cleared.
-" This wouldn't happen if we didn't  delay the sourcing of the colorscheme until
-" VimEnter.
-" But delaying the colorscheme presents too many benefits.
-" Besides, even if we didn't delay it, the issue would still occur every time
-" we change the version of the colorscheme (light vs dark, lightness).
-"
-" If  you reload  the buffer,  or execute  `:do syntax`,  the issue  disappears,
-" because the HG is re-installed.
-"
-" The HG was cleared because of `:hi clear`:
+" The `htmlitalic` HG is sometimes cleared, because of `:hi clear`:
 "
 "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+"}}}
+" How to fix it manually?{{{
+"
+" Reload the buffer where a HG has been cleared, or execute `:do syntax`.
+"}}}
+" Why do you use a function?{{{
 "
 " There're probably other HGs  which suffer from the same issue,  so we create a
 " function whose purpose will be to restore as many as possible.

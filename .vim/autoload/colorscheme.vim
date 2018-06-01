@@ -1,5 +1,10 @@
+fu! colorscheme#save_last_version() abort "{{{1
+    let line = 'let g:my_last_colorscheme = '.get(g:, 'seoul256_current_bg', 253)
+    call writefile([line], $HOME.'/.vim/colors/my/last_version.vim')
+endfu
+
 fu! colorscheme#set() abort "{{{1
-    let seoul_256_background = get(g:, 'MY_LAST_COLORSCHEME', 253)
+    let seoul_256_background = get(g:, 'my_last_colorscheme', 253)
 
     if seoul_256_background >= 233 && seoul_256_background <= 239
         let g:seoul256_background = seoul_256_background

@@ -531,47 +531,67 @@ set backspace=indent,eol,start
 
 augroup my_colorscheme
     au!
-
-    " We delay the loading of the colorscheme until VimEnter.{{{
-    " This solves 3 issues:
-    "
-    "         • gVim encounters some errors when trying to set up too early
-    "           some of our custom HGs (~/.vim/colors/my/customizations.vim)
-    "
-    "               E417: missing argument: guifg=
-    "               E254: Cannot allocate color 95
-    "               E254: Cannot allocate color 187
-    "
-    "           The issue  seems to be that  the HGs whose attributes  we need to
-    "           inspect  ('StatusLine',  'TabLine',  ...),  are  not  (correctly)
-    "           defined yet when `~/.color/my/customizations` is sourced by gVim.
-    "
-    "
-    "         • loading the colorscheme directly from vimrc would mean
-    "           that every time we write it, the colorscheme would be reloaded,
-    "           which would make us lose syntax highlighting in a `freekeys` buffer
-    "
-    "           this could be solved with a guard though (if has('vim_starting'))
-    "           but it shows that `VimEnter` is a good choice
-    "
-    "         • we want to memorize somewhere the last colorscheme we used
-    "           (atm it's an ANSI code: 233 … 239, 252 … 256)
-    "
-    "           We can either use an arbitrary file or viminfo.
-    "           An arbitrary file is cumbersome, so we prefer viminfo.
-    "           However, when the vimrc is read, the viminfo hasn't been read yet
-    "           (:h startup), so we must delay the loading of the colorscheme
-    "           until VimEnter.
-"}}}
-    au VimEnter * nested call colorscheme#set()
-    "             │
-    "             └─ the autocmds need to nest, so that when we set the colorscheme,
-    "                `ColorScheme` is fired, and our customizations are sourced
-
     au ColorScheme * runtime colors/my/customizations.vim
 
-    au VimLeavePre * let g:MY_LAST_COLORSCHEME = get(g:, 'seoul256_current_bg', 253)
+    " What's the purpose of this call?{{{
+    "
+    " We want to memorize somewhere the  last version of the colorscheme we used
+    " (atm it's expressed by an ANSI code: 233 … 239, 252 … 256).
+    "}}}
+    " Is there an alternative?{{{
+    "
+    " Yes.
+    " We could use viminfo.
+    "
+    " Note that  when the vimrc  is read, the viminfo  hasn't been read  yet (:h
+    " startup),  so if  you decide  to  use viminfo,  you'll have  to delay  the
+    " loading of the colorscheme until VimEnter:
+    "
+    "      au VimEnter * nested call s:set_colorscheme()
+    "                  │
+    "                  └─ the autocmds need to nest, so that when we set the colorscheme,
+    "                     `ColorScheme` is fired, and our customizations are sourced
+    "
+    " Also, you'll need to use a variable name in uppercase.
+    "}}}
+    " Why don't you use the alternative?{{{
+    "
+    " The  alternative requires that  we delay  the sourcing of  the colorscheme
+    " until VimEnter. Besides, the colorscheme executes `:hi clear` which removes
+    " any custom HG we may have defined.
+    "
+    " So, if we delay the colorscheme, we must redefine all our custom HGs.
+    "
+    " But, I can't know in advance all the custom HGs currently defined.
+    " It depends on the files which have been read during Vim startup.
+    "
+    " For example, if  we start Vim to  read a markdown file,  the htmlItalic HG
+    " will have been installed to apply the italic style on the text between two
+    " asterisks. We need to avoid clearing it right after Vim has been started.
+    "}}}
+    au VimLeavePre * call colorscheme#save_last_version()
 augroup END
+
+" Why the guard?{{{
+"
+"     • there's no point reloading the colorscheme every time we source our
+"       vimrc
+"
+"     • without a guard, every time we write the vimrc, the colorscheme would
+"       be reloaded, which would make us lose syntax highlighting in
+"       a `freekeys` buffer, because of `:hi clear`:
+"
+"               ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+"}}}
+if has('vim_starting')
+    " try to restore the exact version of the last colorscheme used
+    let s:file = $HOME.'/.vim/colors/my/last_version.vim'
+    if filereadable(s:file)
+        exe 'so '.s:file
+        unlet! s:file
+    endif
+    call colorscheme#set()
+endif
 
 " cmd  mode  ruler{{{2
 
@@ -1183,6 +1203,17 @@ set synmaxcol=250
 "             └─ weight in bytes
 "                any character prefixed by a string heavier than that
 "                will NOT be syntax highlighted
+
+" t_ut {{{2
+
+" We don't really need this atm.
+" It's only useful if you start Vim inside `xterm-kitty` (and outside tmux).
+if &term =~# '-256color$\|^xterm-kitty$' && has('vim_starting')
+  " Disable Background Color  Erase (BCE) so that color  schemes render properly
+  " when inside 256-color tmux and GNU screen.
+  " See: http://snk.tuxfamily.org/log/vim-256color-bce.html
+  set t_ut=
+endif
 
 " tags {{{2
 

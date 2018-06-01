@@ -53,26 +53,6 @@ endif
 "}}}
 
 fu! s:set_recipes() abort
-    " Why this check?{{{
-    "
-    "       $ vim -Nu NORC
-    "         Error detected while processing function <SNR>2_set_recipes:
-    "         line   21:
-    "         E121: Undefined variable: g:sandwich#default_recipes
-    "         E15: Invalid expression: g:sandwich#default_recipes + ...
-    "}}}
-    " Ok, but why don't you use `get()`?{{{
-    "
-    " For some reason, when `get(g:, 'sandwich#default_recipes', [])` is evaluated
-    " from this file, we get `[]`.
-    "
-    " Besides, if this variable doesn't exist, it probably means that the plugin
-    " is not loaded, so we shouldn't do anything.
-    "}}}
-    if !exists('g:sandwich#default_recipes')
-        return
-    endif
-
     " Don't we need `deepcopy()`?{{{
     "
     " If we executed this simple assignment:

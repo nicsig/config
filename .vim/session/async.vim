@@ -23,9 +23,9 @@ wincmd w
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 32)
+exe '2resize ' . ((&lines * 1 + 16) / 32)
+exe '3resize ' . ((&lines * 26 + 16) / 32)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#stacked()
@@ -35,7 +35,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 9 - ((8 * winheight(0) + 0) / 1)
+let s:l = 9 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -52,7 +52,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 8 - ((7 * winheight(0) + 0) / 1)
+let s:l = 8 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -69,7 +69,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -77,9 +77,9 @@ normal! zt
 normal! 0
 wincmd w
 3wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 32)
+exe '2resize ' . ((&lines * 1 + 16) / 32)
+exe '3resize ' . ((&lines * 26 + 16) / 32)
 tabnext 1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')
   silent exe 'bwipe ' . s:wipebuf
