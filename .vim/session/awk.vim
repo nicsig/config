@@ -18,7 +18,8 @@ edit ~/Dropbox/wiki/awk/awk.md
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
+arglocal
+silent! argdel *
 setlocal fdm=expr
 setlocal fde=fold#md#stacked()
 setlocal fmr={{{,}}}
@@ -27,7 +28,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 6) / 13)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -37,7 +38,8 @@ tabedit ~/Dropbox/wiki/awk/practice/histogram.awk
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-argglobal
+arglocal
+silent! argdel *
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -46,7 +48,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 6) / 13)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -60,9 +62,10 @@ split
 wincmd w
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-argglobal
+exe '1resize ' . ((&lines * 11 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
+arglocal
+silent! argdel *
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -71,14 +74,15 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 wincmd w
-argglobal
+arglocal
+silent! argdel *
 if bufexists('/usr/share/vim/vim80/syntax/awk.vim') | buffer /usr/share/vim/vim80/syntax/awk.vim | else | edit /usr/share/vim/vim80/syntax/awk.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -88,15 +92,16 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 151 - ((8 * winheight(0) + 0) / 1)
+let s:l = 151 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 151
 normal! 0
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+2wincmd w
+exe '1resize ' . ((&lines * 11 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 tabnext 3
 set stal=1
 if exists('s:wipebuf') && s:wipebuf != bufnr('%')

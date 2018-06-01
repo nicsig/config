@@ -1,164 +1,3 @@
-" Define the functions at the top; they're called later.
-" Functions {{{1
-fu! s:set_backticks_hg() abort "{{{2
-    let attributes = {
-    \                  'fg'      : 0,
-    \                  'bg'      : 0,
-    \                  'bold'    : 0,
-    \                  'reverse' : 0,
-    \ }
-
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Comment')), k)})
-
-    let cmd = has('gui_running')
-          \ ?     'hi Backticks gui=bold guifg=%s'
-          \ : &tgc
-          \ ?     'hi Backticks term=bold cterm=bold guifg=%s'
-          \ :     'hi Backticks term=bold cterm=bold ctermfg=%s'
-
-    exe printf(cmd, attributes.fg)
-endfu
-
-fu! s:set_tabline_hg() abort "{{{2
-    " the purpose of this function is to remove the underline value from the HG
-    " TabLine
-
-    let attributes = {
-    \                  'fg'      : 0,
-    \                  'bg'      : 0,
-    \                  'bold'    : 0,
-    \                  'reverse' : 0,
-    \ }
-
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
-
-    let cmd = has('gui_running')
-          \ ?     'hi TabLine gui=none guifg=%s'
-          \ : &tgc
-          \ ?     'hi TabLine term=none cterm=none guifg=%s'
-          \ :     'hi TabLine term=none cterm=none ctermfg=%s'
-
-    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
-    " Tabline doesn't have any value in gui. In this case, executing the command
-    " will fail.
-    if attributes.fg is# ''
-        return
-    endif
-    exe printf(cmd, attributes.fg)
-endfu
-
-fu! s:set_user_hg() abort "{{{2
-    " `ctermfg`, `ctermbg`, `guifg`, `guibg` are not attributes of the HG
-    " `StatusLine`. They are arguments for the `:hi` command.
-    " They allow us to set the real attributes (`fg` and `bg`) for Vim in
-    " terminal or in GUI.
-    let attributes = {
-    \                  'fg'      : 0,
-    \                  'bg'      : 0,
-    \                  'bold'    : 0,
-    \                  'reverse' : 0,
-    \ }
-
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
-
-    if has('gui_running')
-        " When 'termguicolors' is set, you set up:
-        "
-        "     • the style  of a HG with the argument  `cterm`   , not `gui`
-        "     • the colors of a HG with the arguments `gui[fb]g`, not `cterm[fb]g`
-        "
-        " IOW, 'tgc' has an effect on how you set up the COLORS of a HG, but not
-        " its STYLE.
-        let cmd1 = 'hi User1  gui=%s  guifg=%s  guibg=%s'
-        let cmd2 = 'hi User2  gui=%s  guifg=%s  guibg=%s'
-
-    elseif &tgc
-        let cmd1 = 'hi User1  cterm=%s  guifg=%s  guibg=%s'
-        let cmd2 = 'hi User2  cterm=%s  guifg=%s  guibg=%s'
-
-    else
-        let cmd1 = 'hi User1  cterm=%s ctermfg=%s ctermbg=%s'
-        let cmd2 = 'hi User2  cterm=%s ctermfg=%s ctermbg=%s'
-        "                                       │
-        "                                       └ yes, you could use `%d`
-        "                                         but you couldn't use `%d` for `guifg`
-        "                                         nor `%x`
-        "                                         nor `%X`
-        "                                         only `%s`
-        "                                         so, we use `%s` everywhere
-    endif
-
-    " For some  colorschemes (default, darkblue,  …), some values used  in the
-    " command which is  going to be executed may be  empty. If that happens, the
-    " command will fail:
-    "
-    "         Error detected while processing function <SNR>18_set_user_hg:
-    "         E421: Color name or number not recognized: ctermfg= ctermbg=
-    if attributes.fg is# '' || attributes.bg is# ''
-        return
-    endif
-
-    let style1 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? '' : 'reverse')
-    if style1 is# '' | return | endif
-
-    exe printf(cmd1, style1, attributes.fg, attributes.bg)
-
-    let style2 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? 'reverse' : '')
-    if style2 is# '' | return | endif
-
-    let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
-    exe printf(cmd2, style2, todo_fg, attributes.bg)
-endfu
-
-" Custom HGs {{{1
-
-" We're going to define 2 HGs: User1 and User2.
-" We use them in the status line to customize the appearance of:
-"
-"     • the filename
-"     • the modified flag
-"
-" We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
-" except for one: `reverse` (boolean flag).
-"
-" `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
-" Also, we set the color of the background of `User2` as the same as the
-" foreground color of `Todo`, so that the modified flag clearly stands out.
-
-" OLD CODE:{{{
-" We  don't need  this code  anymore, because  we don't  source the  colorscheme
-" directly from the vimrc anymore, but from an autocmd listening to VimEnter.
-" But I keep it commented in case it's useful again in the future.
-"
-"
-" gVim starts slowly when we invoke one of the functions in this script, because
-" of some errors:
-"
-"       E254: Cannot allocate color 95
-"       E254: Cannot allocate color 187
-"
-" Indeed, for example, the value of:
-"
-"         synIDattr(hlID('StatusLine'), 'fg')
-"
-" … will be  a decimal number. Which is  good for the terminal,  but wrong for
-" gVim. So, we slightly delay the 1st sourcing of this file, for gVim.
-"
-"         if has('gui_running') && has('vim_starting')
-"             augroup gvim_delay_customize_colorscheme
-"                 au!
-"                 au VimEnter * exe 'so '.expand('<sfile>:p')
-"                            \| exe 'au! gvim_delay_customize_colorscheme'
-"                            \|      aug! gvim_delay_customize_colorscheme
-"             augroup END
-"             finish
-"         endif
-"}}}
-
-call s:set_user_hg()
-call s:set_backticks_hg()
-call s:set_tabline_hg()
-
 " Existing HGs {{{1
 " Completion menu {{{2
 
@@ -270,3 +109,46 @@ hi! link VertSplit Normal
 " It's deprecated in Neovim.
 " It feels useless, since we don't need this option to configure any HG.
 "}}}
+" Custom HGs {{{1
+
+" We're going to define 2 HGs: User1 and User2.
+" We use them in the status line to customize the appearance of:
+"
+"     • the filename
+"     • the modified flag
+"
+" We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
+" except for one: `reverse` (boolean flag).
+"
+" `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
+" Also, we set the color of the background of `User2` as the same as the
+" foreground color of `Todo`, so that the modified flag clearly stands out.
+
+call colorscheme#set_custom_hg()
+" Why?{{{
+"
+"     $ cat /tmp/md.md
+"     hello *world*
+"
+"     $ vim /tmp/md.md
+"
+" `world` is not in italic (✘).
+"
+" The issue comes from the `htmlitalic` HG which is cleared.
+" This wouldn't happen if we didn't  delay the sourcing of the colorscheme until
+" VimEnter.
+" But delaying the colorscheme presents too many benefits.
+" Besides, even if we didn't delay it, the issue would still occur every time
+" we change the version of the colorscheme (light vs dark, lightness).
+"
+" If  you reload  the buffer,  or execute  `:do syntax`,  the issue  disappears,
+" because the HG is re-installed.
+"
+" The HG was cleared because of `:hi clear`:
+"
+"     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+"
+" There're probably other HGs  which suffer from the same issue,  so we create a
+" function whose purpose will be to restore as many as possible.
+"}}}
+call colorscheme#restore_cleared_hg()

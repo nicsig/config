@@ -1,4 +1,4 @@
-if !exists(':DoMatchParen') != 2
+if exists(':DoMatchParen') != 2
     finish
 endif
 
