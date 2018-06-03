@@ -1200,7 +1200,7 @@ fu! myfuncs#search_todo(where) abort "{{{1
     "                                              │ replace it with the text of the next non empty line instead
     "                                              │
     call setloclist(0, map(getloclist(0), { i,v -> s:search_todo_text(v) }), 'r')
-    call setloclist(0, [], 'a', { 'title': 'FIXME & TODO' })
+    call setloclist(0, [], 'a', { 'title': 'FIX'.'ME & TO'.'DO' })
 
     if &bt isnot# 'quickfix'
         return

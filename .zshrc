@@ -320,24 +320,24 @@ unset fasd_cache
 # an abbreviation needs to be followed by a space.
 
 # count lines
-alias -g CL="| wc -l"
+alias -g CL='| wc -l'
 
-alias -g L="| less"
+alias -g L='| less'
 
 # pretty print
-alias -g PP="| column -t"
+alias -g PP='| column -t'
 
 # silence!
 #                    ┌───── redirect output to /dev/null
 #                    │    ┌ same thing for errors
 #           ┌────────┤ ┌──┤
-alias -g S=">/dev/null 2>&1 &"
+alias -g S='>/dev/null 2>&1 &'
 #                           │
 #                           └─ execute in background
 
-alias -g V="| vipe >/dev/null"
-#                  │
-#                  └─ don't write on the terminal, the Vim buffer is enough
+alias -g V='2>&1 | vipe >/dev/null'
+#                       │
+#                       └─ don't write on the terminal, the Vim buffer is enough
 
 # regular {{{2
 

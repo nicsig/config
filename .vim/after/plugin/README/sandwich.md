@@ -92,9 +92,6 @@ they're included in the set of registered surroundings.
 It works in visual mode if the ends  of the selected region are identical, or if
 they're included in the set of registered surroundings.
 
-
-        [bar(foo)baz]   --->   bar(foo)baz
-
 ##
 # Objects
 ## What are the four objects provided by the plugin?
@@ -179,7 +176,7 @@ More generally, every time you have  to provide a surrounding character to `sa`,
 # Issues
 ## I can't test the existence of `g:sandwich#default_recipes` from `~/.vim/after/plugin/sandwich.vim`!
 
-Of course, it's an AUTOLOADED variable.
+It's an AUTOLOADED variable.
 It doesn't exist until you ask for its value:
 
         echom exists('g:sandwich#default_recipes')
@@ -191,12 +188,14 @@ It doesn't exist until you ask for its value:
         echom g:sandwich#default_recipes
             → [ ... ] ✔
 
-When you ask for  its value, Vim will look in  all `autoload/` subdirectories of
-the rtp, for  a file named `sandwich`  (because that's the path  before the last
-number sign #), and then for the variable itself.
+When you  ask for  its value,  Vim will  look in  all `plugin/`  and `autoload/`
+subdirectories of the rtp, for a  file named `sandwich` (because that's the path
+before the last number sign #), and then for the variable itself.
 
-As a workaround, to be reasonably sure that the variable can exist, you can test
-whether the plugin has been sourced:
+---
+
+As a  workaround, to be  reasonably sure that the  variable can be  defined, you
+could test whether the plugin has been sourced:
 
         if !exists('g:loaded_sandwich')
             finish

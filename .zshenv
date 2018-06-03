@@ -1,4 +1,5 @@
-# NOTE: We could change the location of our `zsh` config files:{{{
+# We could change the location of our `zsh` config files:{{{
+#
 #     export ZDOTDIR=~/.config/zsh
 #
 # However, I'm afraid that some of them will be hard to move:
@@ -9,7 +10,7 @@
 #
 # So, for the moment, I keep all of them in `$HOME`.
 # }}}
-# NOTE: What's the benefit of using this file over `zshrc` or `zprofile`?{{{
+# What's the benefit of using this file over `zshrc` or `zprofile`?{{{
 #
 # Those are only sourced if the shell has the right type.
 # `zshenv` is always sourced, no matter the type of the shell:
@@ -19,12 +20,12 @@
 # to repeat them in both `zshrc` and `zprofile`.
 # Maybe sth like `EDITOR`, `PAGER`, `PATH`, `ZDOTDIR` …
 # }}}
-# NOTE: Which commands should we include in this file?{{{
+# Which commands should we include in this file?{{{
 #
 # Probably, only `export` commands and maybe `.` (to source a `*profile` file
 # for example).
 # }}}
-# NOTE: Are there some dangers using it?{{{
+# Are there some dangers using it?{{{
 #
 # Yes, we must make sure it doesn't export environment variables which have
 # already been set. Otherwise, it could lead to problems, if we append/prepend
