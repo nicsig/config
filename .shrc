@@ -306,7 +306,7 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
 
-alias maj='[[ -n $TMUX ]] && tmux rename-window maj; sudo aptitude update && sudo aptitude safe-upgrade && majyt'
+alias maj='[[ -n $TMUX ]] && tmux rename-window maj; sudo aptitude update && sudo aptitude safe-upgrade && majyt && cd ~/GitRepos/ranger/ && git pull && cd -'
 # https://rg3.github.io/youtube-dl/download.html
 alias majyt='sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && sudo chmod a+rx /usr/local/bin/youtube-dl'
 
@@ -553,36 +553,36 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                                 not sure about the others
 
 # Functions {{{1
-# aunpack {{{2
+# unpack {{{2
 
 # This custom shell function extracts an archive using the `atool` command.
 # Then, it cd's into the directory where the contents of the archive was
 # extracted. The code is taken from `:Man atool`.
 
-aunpack() {
-  TMP=$(mktemp /tmp/aunpack.XXXXXXXXXX)
-  #     │                   │
-  #     │                   └── template for the filename, the `X` will be
-  #     │                       randomly replaced with characters matched
-  #     │                       by the regex `[0-9a-zA-Z]`
+unpack() {
+  TMP=$(mktemp /tmp/unpack.XXXXXXXXXX)
+  #     │                  │
+  #     │                  └── template for the filename, the `X` will be
+  #     │                      randomly replaced with characters matched
+  #     │                      by the regex `[0-9a-zA-Z]`
   #     └── create a temporary file and store its path into `TMP`
 
-  atool -x --save-outdir=$TMP "$@"
+  atool -x --save-outdir="${TMP}" "$@"
   #          │
   #          └── write the name of the folder in which the files have been
   #              extracted inside the temporary file
 
   # Assign the name of the extraction folder inside to the variable `DIR`.
-  DIR="$(cat $TMP)"
-  [ -d "$DIR" -a "$DIR" != "" ] && cd "$DIR"
-  #  │         │         │          │
-  #  │         │         │          └── go into it
-  #  │         │         └── its name is not empty
-  #  │         └── and if
-  #  └── if the directory `DIR` exists
+  DIR="$(cat "${TMP}")"
+  [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
+  #   │          │           │           │
+  #   │          │           │           └── go into it
+  #   │          │           └── its name is not empty
+  #   │          └── and if
+  #   └── if the directory `DIR` exists
 
   # Delete temporary file.
-  rm $TMP
+  rm "${TMP}"
 }
 
 # Trigonometry  {{{2

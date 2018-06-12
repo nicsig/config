@@ -1225,10 +1225,12 @@ bindkey -M menuselect '^J' down-line-or-history
 # bindkey -M menuselect 'k' up-line-or-history
 bindkey -M menuselect '^K' up-line-or-history
 
+bindkey -M menuselect '^H' backward-char
 # bindkey -M menuselect 'b' backward-char
 # bindkey -M menuselect 'B' backward-char
 # bindkey -M menuselect 'e' forward-char
 # bindkey -M menuselect 'E' forward-char
+bindkey -M menuselect '^L' forward-char
 # bindkey -M menuselect 'w' forward-char
 # bindkey -M menuselect 'W' forward-char
 

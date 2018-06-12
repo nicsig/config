@@ -15,6 +15,7 @@ unsplash            https://unsplash.com/                          # pictures
 pixabay             https://pixabay.com/                           # pictures
 rtinst              https://github.com/arakasi72/rtinst/wiki/Guide # seedbox
 library_genesis     http://gen.lib.rus.ec/                         # ebooks # warez
+library_mirror      http://libgen.io/                              # ebooks # warez
 vim_subreddit       https://www.reddit.com/r/vim/                  # reddit # vim
 neovim_subreddit    https://www.reddit.com/r/neovim/               # reddit # neovim
 unix.stack.exchange https://unix.stackexchange.com/                # linux # stackexchange
@@ -43,3 +44,5 @@ openelec_faq                            http://wiki.openelec.tv/index.php?title=
 seedbox_tutorial                        http://www.torrent-invites.com/seedbox-tutorials/272986-ubuntu-14-16-debian-8-seedbox-guide-script.html # seedbox
 rmc                                     http://rmc.bfmtv.com/mediaplayer/podcast/l-after-foot/ # rmc # radio # foot
 custom_keyboard                         http://people.uleth.ca/~daniel.odonnell/Blog/custom-keyboard-in-linuxx11 # keyboard
+
+Becoming_a_dramatically_better_programmer  https://recurse.henrystanley.com/post/better/  # l2l # learn

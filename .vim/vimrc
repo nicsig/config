@@ -811,7 +811,9 @@ fu! s:inex() abort
         return substitute(v:fname, '.*=', '', '')
     else
         " The path could contain an environment variable:
-        let path = '\C\%($\u\+\|"$\u\+"\|${\u\+}\|"${\u\+}"\)'.v:fname
+        let path = '\C\%($\u\+\|"$\u\+"\|${\u\+}\|"${\u\+}"\)'.'\V'.v:fname
+        "                                                        │
+        "                                                        └ `v:fname` could contain a tilde
         if line =~# path
             let path = matchstr(line, path)
             let env = matchstr(path, '\u\+')
@@ -5793,17 +5795,20 @@ endfu
 "        • $VIMRUNTIME/colors/tools/check_colors.vim
 "        • 'user_data' entry in completion item
 "        • :unl[et] ${env-name} (:h :unlet-$)
+"        • API: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
 "        • CmdlineChanged
 "        • ColorSchemePre
 "        • DirChanged
 "        • ExitPre
 "        • TextChangedP
+"        • `appendbufline()`
 "        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
 "        • `getcwd(-1)` return the global directory
 "        • `reg_recording()` + `reg_executing()`
 "        • `term_setansicolors()`, `term_getansicolors()`, `g:term_ansi_colors`
 "        • `term_setsize()`
 "        • `trim()`
+"        • prompt-buffer
 "
 " 84 -
 " In `vim-window`, don't do this:
