@@ -6543,6 +6543,16 @@ endfu
 " move the functions in a dedicated file.
 " implement  a   `-a`  mapping   showing  the   available  abbreviations   in  a
 " sidebar/cheatsheet. show only the less well known at any given time.
+"
+" 131 -
+" Atm, `:FzFiles` doesn't search hidden files/directories.
+" Solution:
+"
+"     let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git -g ""'
+"
+" See also:
+"
+"     https://github.com/junegunn/fzf.vim/issues/226
 
 
 

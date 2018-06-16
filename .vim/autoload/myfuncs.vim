@@ -1032,11 +1032,7 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
     return ''
 endfu
 
-fu! myfuncs#remove_duplicate_lines(line1, line2, bang) abort "{{{1
-    if !a:bang
-        return 'echoer "Add a bang"'
-    endif
-
+fu! myfuncs#remove_duplicate_lines(line1, line2) abort "{{{1
     let view = winsaveview()
 
     " Iterate over the lines in the range, from the last one up to the first
