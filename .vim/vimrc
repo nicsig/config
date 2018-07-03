@@ -5794,6 +5794,7 @@ endfu
 "
 "        • $VIMRUNTIME/colors/tools/check_colors.vim
 "        • 'user_data' entry in completion item
+"        • 'varsofttabstop', 'vartabstop'
 "        • :unl[et] ${env-name} (:h :unlet-$)
 "        • API: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
 "        • CmdlineChanged
