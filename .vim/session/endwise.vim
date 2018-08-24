@@ -6,33 +6,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Dropbox/wiki/vim/design.md
 argglobal
 silent! argdel *
-edit ~/Dropbox/wiki/vim/design.md
 set splitbelow splitright
-set nosplitbelow
-set nosplitright
 wincmd t
 set winminheight=1 winminwidth=1 winheight=1 winwidth=1
-arglocal
-silent! argdel *
-setlocal fdm=expr
-setlocal fde=fold#md#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-8
-normal! zo
-let s:l = 8 - ((7 * winheight(0) + 15) / 31)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-8
-normal! 03|
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

@@ -135,6 +135,8 @@ Plug 't9md/vim-quickhl', {'frozen': 1}
 Plug 'tpope/vim-repeat', {'frozen': 1}
 Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-cwd'
+" Alternative:
+" https://github.com/t9md/vim-textmanip
 Plug 'lacygoill/vim-schlepp', {'frozen': 1}
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
@@ -169,10 +171,7 @@ Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
 Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-python'
-" `win_screenpos()`
-if !has('nvim')
-    Plug 'lacygoill/vim-qf'
-endif
+Plug 'lacygoill/vim-qf'
 Plug 'lacygoill/vim-readline'
 Plug 'lacygoill/vim-reorder'
 Plug 'lacygoill/vim-save'
@@ -190,10 +189,7 @@ Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-selection-ring'
 Plug 'lervag/vimtex'
 Plug 'lacygoill/vim-latex'
-" `win_screenpos()` has not yet been implemented in Neovim.
-if !has('nvim')
-    Plug 'lacygoill/vim-window'
-endif
+Plug 'lacygoill/vim-window'
 
 " DGAF:
 Plug 'mattn/emmet-vim'
@@ -1939,7 +1935,7 @@ cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHi
 
 " C-r C-l       insert current line {{{3
 
-cno  <c-r><c-l>  <c-r>=substitute(getline('.'), '^\s*"\?\s*:\?', '', '')<cr>
+cno  <c-r><c-l>  <c-r><c-r>=substitute(getline('.'), '^\s*"\?\s*:\?', '', '')<cr>
 
 " INSERT {{{2
 
@@ -4348,12 +4344,12 @@ augroup END
 " We want to automatically delete buffers which are empty and don't have a name.
 " So we install an autocmd listening to `BufHidden`.
 
-augroup delete_noname_buffers
+augroup wipe_noname_buffers
     au!
-    " Why delay `s:dnb_clean()`?{{{
+    " Why delay `s:wipe_noname()`?{{{
     "
     " It seems the BufHidden event occurs just before a buffer becomes hidden.
-    " Because of this, calling `s:dnb_clean()` immediately would delete all noname
+    " Because of this, calling `s:wipe_noname()` immediately would wipe all noname
     " buffers, except the most recent one we're creating by closing its last window.
     "
     " We have to wait a little bit, to be sure that the last noname buffer we've
@@ -4362,12 +4358,12 @@ augroup delete_noname_buffers
     " An alternative would be to call an intermediary function which would install
     " a fire-once autocmd listening to BufEnter (this event happens right after
     " BufHidden). At that moment, we could be sure the last hidden noname buffer
-    " is really hidden. And the autocmd would just have to call `s:dnb_clean()`.
+    " is really hidden. And the autocmd would just have to call `s:wipe_noname()`.
 "}}}
-    au BufHidden * call timer_start(0, {-> s:dnb_clean()})
+    au BufHidden * call timer_start(0, {-> s:wipe_noname()})
 augroup END
 
-fu! s:dnb_clean() abort
+fu! s:wipe_noname() abort
     " do NOT wipe any buffer while a session is loading
     "
     " When we save a session, Vim writes some commands towards the beginning of
@@ -4384,11 +4380,12 @@ fu! s:dnb_clean() abort
     endif
 
     " Source: http://stackoverflow.com/a/6561076
-    let to_wipe = filter(range(1, bufnr('$')), { i,v ->    buflisted(v)
-    \                                                   && empty(bufname(v))
-    \                                                   && empty(win_findbuf(v)) })
-    "                                                      │
-    "                                                      └─ make sure the buffer is NOT displayed in any window
+    let to_wipe = filter(range(1, bufnr('$')), { i,v ->
+    \    buflisted(v)
+    \ && empty(bufname(v))
+    \ && empty(win_findbuf(v)) })
+    "    │
+    "    └─ make sure the buffer is NOT displayed in any window
 
     if !empty(to_wipe)
         sil! exe 'bw! '.join(to_wipe, ' ')
@@ -5795,6 +5792,7 @@ endfu
 "        • $VIMRUNTIME/colors/tools/check_colors.vim
 "        • 'user_data' entry in completion item
 "        • 'varsofttabstop', 'vartabstop'
+"        • :h `matchadd()`, new `window` key in optional dictionary
 "        • :unl[et] ${env-name} (:h :unlet-$)
 "        • API: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
 "        • CmdlineChanged
@@ -5803,6 +5801,7 @@ endfu
 "        • ExitPre
 "        • TextChangedP
 "        • `appendbufline()`
+"        • `deletebufline()`
 "        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
 "        • `getcwd(-1)` return the global directory
 "        • `reg_recording()` + `reg_executing()`
@@ -6554,6 +6553,10 @@ endfu
 " See also:
 "
 "     https://github.com/junegunn/fzf.vim/issues/226
+"
+" 132 -
+" Try to make some existing mappings smarter by reacting differently
+" when we're at the more prompt (see `:h mode()`, `rm` mode).
 
 
 

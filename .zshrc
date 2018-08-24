@@ -459,6 +459,11 @@ fzf_sr() { #{{{2
   #                                           └─────────────────── remove empty lines in
   #                                                                the bookmark file
 
+fzf_clipboard() { #{{{2
+  # fuzzy find clipboard history
+  echo -n "$(greenclip print | fzf -e -i)" | xclip -selection clipboard ;
+}
+
 lrv() { #{{{2
   emulate -LR zsh
 
@@ -501,10 +506,8 @@ mcheat() { #{{{2
 
 }
 
-#  mkcd {{{2
-
-# create directory and cd into it right away
-mkcd() {
+mkcd() { #{{{2
+  # create directory and cd into it right away
   emulate -LR zsh
   mkdir "$*" && cd "$*"
 }
@@ -804,9 +807,7 @@ atan() {
   bc -l <<< "scale=3;a($1)/0.017453293"
 }
 
-# vc {{{2
-
-vc() {
+vc() { #{{{2
   emulate -LR zsh
   cd ~/.cheat; vim "$1"; cd - >/dev/null;
 }
