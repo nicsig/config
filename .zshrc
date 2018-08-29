@@ -98,22 +98,22 @@
 
 # initialize the prompt system
 #@ autoload -Uz promptinit
-#         ││
-#         ││
-#         │└── from `man zshbuiltins`:
-#         │     mark the function to be autoloaded using the zsh style,
-#         │     as if the option KSH_AUTOLOAD was unset
-#         │
-#         └── from `man zshmisc`:
-#             suppress usual alias expansion during reading
+#            ││
+#            ││
+#            │└── from `man zshbuiltins`:
+#            │     mark the function to be autoloaded using the zsh style,
+#            │     as if the option KSH_AUTOLOAD was unset
+#            │
+#            └── from `man zshmisc`:
+#                suppress usual alias expansion during reading
 #
-#                                                                               ┌─ autoload flag
-#                                                                               │
+#                                                                          ┌─ autoload flag
+#                                                                          │
 # according to `run-help autoload`,   `autoload`   is equivalent to `functions -u`
 # according to `run-help functions`,  `functions`  is equivalent to `typeset -f`
-#                                                                             │
-#                                                                             └─ refer to function
-#                                                                                rather than parameter
+#                                                                        │
+#                                                                        └─ refer to function
+#                                                                           rather than parameter
 # according to `run-help typeset`,    `typeset`    sets or displays attributes and
 #                                                  values for shell parameters
 #@ promptinit
@@ -220,8 +220,8 @@ select-word-style bash
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
 
-autoload zmv
-autoload zrecompile
+autoload -Uz zmv
+autoload -Uz zrecompile
 
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
@@ -914,7 +914,7 @@ bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 # C-x C-e         edit-command-line {{{4
 
 # edit the command line in $EDITOR with C-x C-e like in readline
-autoload edit-command-line
+autoload -Uz edit-command-line
 zle -N edit-command-line
 bindkey '^X^E' edit-command-line
 

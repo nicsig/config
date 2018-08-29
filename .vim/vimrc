@@ -6557,8 +6557,33 @@ endfu
 " 132 -
 " Try to make some existing mappings smarter by reacting differently
 " when we're at the more prompt (see `:h mode()`, `rm` mode).
+"
+" 133 -
+" Should we  remap '@' so  that when we  replay a macro  the `esc` key  is never
+" interpreted as a part of a function-like (F1, arrow, ...) key?
+"
+"         set noesckeys
+"         @macro
+"         set esckeys
+"
+" Pro:
+" it would fix this kind of issue:
+"
+"         https://vi.stackexchange.com/a/17193/17449
+"
+" Con:
+" We would need to be sure that 'esckeys' is re-enabled.
+" Also,  it would prevent  to use function-like keys  during the recording  of a
+" macro.
 
 
+
+augroup jkjmkjmjmjmkjkmjmkj
+    au!
+    au TextYankPost * if    v:event.operator is# 'y'
+    \                    && v:event.regname is# '*'
+    \ |               endif
+augroup END
 
 " sessions to finish:
 "
