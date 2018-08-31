@@ -1,17 +1,32 @@
 #compdef xt
 
-# What's this `_values` function?{{{
+# What's this `_arguments` function?{{{
 #
-#     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#functions-for-performing-complex-completions-of-single-words
+#     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#main-utility-functions-for-overall-completion
+#     $ man zshcompsys > /_arguments
+#}}}
+# What's its signature?{{{
+#
+#         n:message:action
+#
+# `n` is a number.
+# `message` some text.
+# `action` can have several forms, including this one:
+#
+#         (item1 item2 ...)
+#                One of a list of possible matches, for example:
+#
+#                       :foo:(foo bar baz)
+#}}}
+# Where did you find it?{{{
+#
+#     $ man zshcompsys > /n:message:action
 #}}}
 # How did you get this list of archive extensions?{{{
 #
 #     man atool > ARCHIVE TYPES
 #}}}
-# FIXME:{{{
-#
-# The completion function fails when a file contains the characters `[` and `]`:
-#
-#     [MG]-TV|EU|S|WARd.Tom.Clancys.Jack.Ryan.S01E01.WEB.H264-MEMENTO.tar
-#}}}
-_values 'archive files' *.{7z,7z,Z,a,ace,alz,arc,arj,bz,bz2,cab,cpio,deb,gz,jar,lha,lrz,lz,lzh,lzma,lzo,rar,rpm,rz,t7z,tZ,tar,tar.7z,tar.Z,tar.bz,tar.bz2,tar.gz,tar.lz,tar.lzo,tar.xz,tbz,tbz2,tgz,tlz,txz,tzo,war,xz,zip}
+#           ┌ describes the 1st normal argument
+#           │ ┌ message printed above the matches generated
+#           │ ├───────────┐
+_arguments '1:archive files:(*.{7z,7z,Z,a,ace,alz,arc,arj,bz,bz2,cab,cpio,deb,gz,jar,lha,lrz,lz,lzh,lzma,lzo,rar,rpm,rz,t7z,tZ,tar,tar.7z,tar.Z,tar.bz,tar.bz2,tar.gz,tar.lz,tar.lzo,tar.xz,tbz,tbz2,tgz,tlz,txz,tzo,war,xz,zip})'
