@@ -553,38 +553,6 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                                 not sure about the others
 
 # Functions {{{1
-# unpack {{{2
-
-# This custom shell function extracts an archive using the `atool` command.
-# Then, it cd's into the directory where the contents of the archive was
-# extracted. The code is taken from `:Man atool`.
-
-unpack() {
-  TMP=$(mktemp /tmp/unpack.XXXXXXXXXX)
-  #     │                  │
-  #     │                  └── template for the filename, the `X` will be
-  #     │                      randomly replaced with characters matched
-  #     │                      by the regex `[0-9a-zA-Z]`
-  #     └── create a temporary file and store its path into `TMP`
-
-  atool -x --save-outdir="${TMP}" "$@"
-  #          │
-  #          └── write the name of the folder in which the files have been
-  #              extracted inside the temporary file
-
-  # Assign the name of the extraction folder inside to the variable `DIR`.
-  DIR="$(cat "${TMP}")"
-  [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
-  #   │          │           │           │
-  #   │          │           │           └── go into it
-  #   │          │           └── its name is not empty
-  #   │          └── and if
-  #   └── if the directory `DIR` exists
-
-  # Delete temporary file.
-  rm "${TMP}"
-}
-
 # Trigonometry  {{{2
 # Trigonometric functions (input is expected in degrees).
 # For more formulas (in degrees or radians):
@@ -837,6 +805,38 @@ truecolor() { #{{{2
 
 vc() { #{{{2
   cd ~/.cheat; vim $1; cd - >/dev/null;
+}
+
+# xt {{{2
+
+# This custom shell function extracts an archive using the `atool` command.
+# Then, it cd's into the directory where the contents of the archive was
+# extracted. The code is taken from `:Man atool`.
+
+xt() {
+  TMP=$(mktemp /tmp/xt.XXXXXXXXXX)
+  #     │                  │
+  #     │                  └── template for the filename, the `X` will be
+  #     │                      randomly replaced with characters matched
+  #     │                      by the regex `[0-9a-zA-Z]`
+  #     └── create a temporary file and store its path into `TMP`
+
+  atool -x --save-outdir="${TMP}" "$@"
+  #          │
+  #          └── write the name of the folder in which the files have been
+  #              extracted inside the temporary file
+
+  # Assign the name of the extraction folder inside to the variable `DIR`.
+  DIR="$(cat "${TMP}")"
+  [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
+  #   │          │           │           │
+  #   │          │           │           └── go into it
+  #   │          │           └── its name is not empty
+  #   │          └── and if
+  #   └── if the directory `DIR` exists
+
+  # Delete temporary file.
+  rm "${TMP}"
 }
 
 # Various {{{1
