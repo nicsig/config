@@ -816,24 +816,27 @@ vc() { #{{{2
 xt() {
   TMP=$(mktemp /tmp/xt.XXXXXXXXXX)
   #     │                  │
-  #     │                  └── template for the filename, the `X` will be
-  #     │                      randomly replaced with characters matched
-  #     │                      by the regex `[0-9a-zA-Z]`
-  #     └── create a temporary file and store its path into `TMP`
+  #     │                  └ template for the filename, the `X` will be
+  #     │                    randomly replaced with characters matched
+  #     │                    by the regex `[0-9a-zA-Z]`
+  #     │
+  #     └ create a temporary file and store its path into `TMP`
 
   atool -x --save-outdir="${TMP}" "$@"
   #          │
-  #          └── write the name of the folder in which the files have been
-  #              extracted inside the temporary file
+  #          └ write the name of the folder in which the files have been
+  #            extracted inside the temporary file
 
   # Assign the name of the extraction folder inside to the variable `DIR`.
   DIR="$(cat "${TMP}")"
   [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
-  #   │          │           │           │
-  #   │          │           │           └── go into it
-  #   │          │           └── its name is not empty
-  #   │          └── and if
-  #   └── if the directory `DIR` exists
+  #  ├─────────┘    ├────────────┘       ├─────────┘
+  #  │              │                    │
+  #  │              │                    └ enter it
+  #  │              │
+  #  │              └ and if its name is not empty
+  #  │
+  #  └ if the directory `DIR` exists
 
   # Delete temporary file.
   rm "${TMP}"
