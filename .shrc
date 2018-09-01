@@ -306,7 +306,6 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
 
-alias maj='[[ -n $TMUX ]] && tmux rename-window maj; sudo aptitude update && sudo aptitude safe-upgrade && majyt && cd ~/GitRepos/ranger/ && git pull && cd -'
 # https://rg3.github.io/youtube-dl/download.html
 alias majyt='sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && sudo chmod a+rx /usr/local/bin/youtube-dl'
 
@@ -638,19 +637,18 @@ ccheat() { #{{{2
 
 # cfg-* {{{2
 
-cfg_bash() { nv ~/.bash_aliases ;}
-cfg_conky_system() { nv ~/.conky/system ;}
-cfg_conky_rings() { nv ~/.conky/system_rings.lua ;}
-cfg_conky_time() { nv ~/.conky/time ;}
-cfg_firefox() { nv ~/.mozilla/firefox/*.default/chrome/userContent.css ;}
-cfg_mpv() { nv ~/.mpv/config ;}
-cfg_mpv_shortcuts() { nv ~/.mpv/input.conf ;}
-cfg_tmux() { nv ~/.tmux.conf ;}
-cfg_vim() { nv ~/.vimrc ;}
-cfg_shell() { nv ~/.shrc ;}
-cfg_xmodmap() { nv ~/.Xmodmap ;}
-cfg_w3m() { vim ~/.w3m/config ;}
-cfg_zsh() { nv ~/.zsh_aliases ;}
+cfg_bash() { nv "${HOME}"/.bashrc ;}
+cfg_conky_system() { nv "${HOME}"/.conky/system.lua ;}
+cfg_conky_rings() { nv "${HOME}"/.conky/system_rings.lua ;}
+cfg_conky_time() { nv "${HOME}"/.conky/time.lua ;}
+cfg_firefox() { nv "${HOME}"/.mozilla/firefox/*.default/chrome/userContent.css ;}
+cfg_mpv() { nv "${HOME}"/.config/mpv/input.conf ;}
+cfg_tmux() { nv "${HOME}"/.tmux.conf ;}
+cfg_vim() { nv "${HOME}"/.vim/vimrc ;}
+cfg_shell() { nv "${HOME}"/.shrc ;}
+cfg_xmodmap() { nv "${HOME}"/.Xmodmap ;}
+cfg_w3m() { vim "${HOME}"/.w3m/config ;}
+cfg_zsh() { nv "${HOME}"/.zshrc ;}
 
 cmdfu() { #{{{2
 
@@ -708,6 +706,29 @@ lrv() { #{{{2
   locate -ir "$keywords" | vim -R --not-a-term -
 
 }
+
+maj() { #{{{2
+  # duplicate file descriptors 1 and 2
+  exec 3>&1 4>&2
+  # make sure `~/log/` exists
+  [ -d "${HOME}"/log ] || mkdir "${HOME}"/log
+  # redirect output of the function in a logfile
+  exec 1>"${HOME}"/log/maj.log 2>&1
+
+  # show us how the update goes
+  tail -f "${HOME}"/log/maj.log >&3 &
+
+  # update
+  [[ -n "${TMUX}" ]] && tmux rename-window maj
+  sudo aptitude update
+  sudo aptitude safe-upgrade
+  majyt
+  cd "${HOME}"/GitRepos/ranger/ && git pull && cd -
+  cd "${HOME}"/.zsh/zsh-completions/ && git pull && cd -
+
+  exit
+}
+
 mcheat() { #{{{2
 
   cheat "$1" | highlight -O xterm256 -S bash -s olive | less -iR
@@ -718,6 +739,7 @@ mcheat() { #{{{2
   #      mais les envoie à l'émulateur de terminal qui les interprètera pour coloriser le texte
 
 }
+
 mkcd() { #{{{2
 # create directory and cd into it right away
   mkdir "$*" && cd "$*"
