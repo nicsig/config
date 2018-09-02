@@ -329,5 +329,11 @@ directColor: true
 *.color14:  #3971ed
 
 ! white
-*.color7:   #c5c8c6
+! If you must change `color7`, choose a readable color.{{{
+!
+! It's used by `pygmentize` to color python comments in white:
+!
+!     $ pygmentize ~/bin/python/xkbmapd.py
+!}}}
+*.color7:   #ffffff
 *.color15:  #ffffff

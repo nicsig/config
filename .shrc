@@ -604,35 +604,47 @@ atan()
 ccheat() { #{{{2
   # cette fonction a pour but de coloriser la sortie de la commande cheat{{{
   # pour ce faire, on utilise la commande highlight (à installer)
-  # à laquelle on fait passer 3 arguments :
-  # -O xterm256 : formatage destiné à un terminal (il existe d'autres formats, html, ansi, bbcode...)
-  # -S bash : syntaxe bash
-  # -s olive :    thème olive (il en existe d'autres : 'highlight -w' pour en voir une liste)
-  # -O, -s, -S, -w = --out-format, --style, --syntax, --list-themes
 
   # pour ajouter à bash l'autocomplétion des arguments passés à cheat :
-  # cd /etc/bash_completion.d/ && wget https://raw.githubusercontent.com/chrisallenlane/cheat/master/cheat/autocompletion/cheat.bash
+  # cd /etc/bash_completion.d/ \
+  # && wget https://raw.githubusercontent.com/chrisallenlane/cheat/master/cheat/autocompletion/cheat.bash
 
   # autre solution utilisant pygments
-  # documentation de pygments : http://pygments.org/docs/
+  # documentation de pygments:
+  #
+  #     http://pygments.org/docs/
   #
   # pygmentize fait partie soit du paquet .deb python-pygments soit du paquet pip pygments
   #
   # on utilise pygmentize pour coloriser la sortie de la commande cheat
   # l'option -l permet de spécifier un lexer
-  # un lexer est un programme réalisant une analyse syntaxique : https://en.wikipedia.org/wiki/Lexical_analysis
+  # un lexer est un programme réalisant une analyse syntaxique:
+  #
+  #     https://en.wikipedia.org/wiki/Lexical_analysis
+
   # 'pygmentize -L' liste les différents lexers disponibles
   # le lexer bash ne produit pas la colorisation que j'attends
   # du coup pour le moment j'utilise le lexer spécifique au language C (mieux mais pas parfait)
 
-  # on peut aussi utiliser l'option -g (guess), qui laisse le soin à pygmentize de deviner le type de code qu'il est en train d'analyser
+  # on peut aussi utiliser l'option -g  (guess), qui laisse le soin à pygmentize
+  # de deviner le type de code qu'il est en train d'analyser
 
   # cheat "$1" | pygmentize -l c
 
   # Remarque : on pourrait se passer du pgm cheat :
   # cd ~/.cheat && cat <cmd> | highlight | less -iR# }}}
 
+  #            ┌ install the package `highlight` if necessary
+  #            │
   cheat "$1" | highlight -O xterm256 -S bash -s olive
+  #                       │           │       │
+  #                       │           │       └ we want the 'olive' highlighting style
+  #                       │           │         (to get the list of available styles: `highligh -w`)
+  #                       │           │
+  #                       │           └ the syntax of the input file is bash
+  #                       │
+  #                       └ output the file for a terminal
+  #                         (you can use other formats: html, latex ...)
 }
 
 # cfg-* {{{2
@@ -652,15 +664,31 @@ cfg_zsh() { nv "${HOME}"/.zshrc ;}
 
 cmdfu() { #{{{2
 
-  # Cette fonction permet de faire des recherches sur le site www.commandlinefu.com depuis le terminal.
+  # Look up keywords on `www.commandlinefu.com`.
 
-  keywords=$(echo "$@" | sed 's/ /-/g')   # on affecte à keywords les mots-clés recherchés en remplaçant les espaces par des tirets
-  encoding=$(echo -n "$@" | base64)   # on affecte à encoding l'encodage en base64 des mots-clés
-  # -n =  suppression de la newline à la fin
-  #   en effet, une newline altère légèrement le résultat de l'encodage
+  # store our keywords in the variable `keywords`, replacing spaces with dashes
+  keywords=$(echo "$@" | sed 's/ /-/g')
+  # store their base64 encoding in `encoding`
+  encoding=$(echo -n "$@" | base64)
+  #                │
+  #                └ suppress the ending newline,
+  #                  to prevent the latter from altering the encoding
+
+  #     ┌ download the webpage silently (no progress, no errors)
+  #     │
   curl -s "http://www.commandlinefu.com/commands/matching/$keywords/$encoding/sort-by-votes/plaintext"\
     | highlight -O xterm256 -S bash -s olive | less -iR
-  # Pour finir on télécharge la page web en mode silencieux (-s) pour ne pas afficher la progression ni les erreurs.
+    #                                                ││
+    #                                                │└ --RAW-CONTROL-CHARS
+    #                                                │
+    #                                                │  don't display control characters used to set colors;
+    #                                                │  send them instead to the terminal which will interpret them
+    #                                                │  to colorize the text
+    #                                                │
+    #                                                └ --ignore-case
+
+    #                                                  uppercase and lowercase in the filename
+    #                                                  are considered identical
 
 }
 
@@ -726,18 +754,10 @@ maj() { #{{{2
   cd "${HOME}"/GitRepos/ranger/ && git pull && cd -
   cd "${HOME}"/.zsh/zsh-completions/ && git pull && cd -
 
-  exit
-}
-
-mcheat() { #{{{2
-
-  cheat "$1" | highlight -O xterm256 -S bash -s olive | less -iR
-
-  # -i = --ignore-case, insensible à la casse lors de recherches
-  # -R = --RAW-CONTROL-CHARS,
-  #      nécessaire pour que less n'affiche pas les caractères de contrôle définissant les couleurs
-  #      mais les envoie à l'émulateur de terminal qui les interprètera pour coloriser le texte
-
+  # TODO:
+  # Make the function quit, otherwise the logfile will contain the output of any
+  # command we execute after `maj`.
+  # I tried `$ exit`, but it didn't work (“zsh: you have running jobs.”).
 }
 
 mkcd() { #{{{2
@@ -823,10 +843,6 @@ truecolor() { #{{{2
     printf '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
   done
   printf '\n'
-}
-
-vc() { #{{{2
-  cd ~/.cheat; vim $1; cd - >/dev/null;
 }
 
 # xt {{{2
