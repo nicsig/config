@@ -1,13 +1,4 @@
 # FIXME:
-# Stop using `rm`, directly or indirectly via `dD` in ranger.
-#
-# Instead  use  a utility  such  as  `trash-cli`, to  move  deleted  files in  a
-# temporary directory. This way, you could at least recover them until a reboot.
-# Or, move them to a non-temporary directory, and install a cron job which would
-# empty the trash every week.
-
-# FIXME:
-#
 # The plugin `zsh-syntax-highlighting` breaks the `yank-pop` widget (M-y).
 # After you paste a deleted text with  C-y, M-y allows you to rotate between the
 # last  kills. With  the  plugin,  you  can only  get  the  previous  kill,  not
@@ -17,12 +8,6 @@
 #     . ~/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 #     return
 
-
-# To restore the file to its default contents:
-#     /etc/zsh/newuser.zshrc.recommended
-#
-# This file only exists if the package was installed from the default repo.
-# Not compiled.
 
 # TODO:
 # Do we need to set the option `zle_bracketed_paste`?
@@ -79,52 +64,36 @@
 # As the name suggests, it quotes the entire line. No need to select a region.
 
 # TODO:
-# move all functions, and aliases which we want to be common to bash and zsh
-# inside `~/.shrc`
-
-# TODO:
 # check that none of our alias can shadow a future command from the repos:
 #     apt-file update
 #     apt-file -x search '/myalias$'
 
-# FIXME:
+# TODO:
 # understand: https://unix.stackexchange.com/questions/366549/how-to-deal-with-filenames-containing-a-single-quote-inside-a-zsh-completion-fun
 
 # TODO:
 # To read:
-# https://github.com/zsh-users/zsh/blob/master/Etc/completion-style-guide
-# https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org
 # https://github.com/sindresorhus/pure (≈ 550 sloc, 2 fichiers: pure.zsh, async.zsh)
 
-# initialize the prompt system
-#@ autoload -Uz promptinit
-#            ││
-#            ││
-#            │└── from `man zshbuiltins`:
-#            │     mark the function to be autoloaded using the zsh style,
-#            │     as if the option KSH_AUTOLOAD was unset
-#            │
-#            └── from `man zshmisc`:
-#                suppress usual alias expansion during reading
+# How to use one of the custom prompts available by default?{{{
 #
-#                                                                          ┌─ autoload flag
-#                                                                          │
-# according to `run-help autoload`,   `autoload`   is equivalent to `functions -u`
-# according to `run-help functions`,  `functions`  is equivalent to `typeset -f`
-#                                                                        │
-#                                                                        └─ refer to function
-#                                                                           rather than parameter
-# according to `run-help typeset`,    `typeset`    sets or displays attributes and
-#                                                  values for shell parameters
-#@ promptinit
-
+# initialize the prompt system
+#
+#     autoload -Uz promptinit
+#     promptinit
+#
 # To choose a theme, use these commands:
 #
-#     prompt -l              list available themes
-#     prompt -p              preview available themes
-#     prompt <your theme>    enable a theme
-#     prompt off             no theme
-
+#     ┌─────────────────────┬──────────────────────────┐
+#     │ prompt -l           │ list available themes    │
+#     ├─────────────────────┼──────────────────────────┤
+#     │ prompt -p           │ preview available themes │
+#     ├─────────────────────┼──────────────────────────┤
+#     │ prompt <your theme> │ enable a theme           │
+#     ├─────────────────────┼──────────────────────────┤
+#     │ prompt off          │ no theme                 │
+#     └─────────────────────┴──────────────────────────┘
+#}}}
 # ┌─ man zshparam
 # │    > PARAMETERS USED BY THE SHELL
 # │
@@ -141,10 +110,6 @@ PS1='%F{blue}%1d%f%% '
 #     PS1='%F{34}%1d%f%% '
 #     PS1=$'%{\e[34m%1d\e[m%}%% '
 
-# FIXME:
-# Change the `_sr` function so that it looks in:
-#     /usr/lib/share/elvi  +  ~/.config/surfraw/elvi/
-
 # WARNING:
 # a completion function doesn't work for an alias, only for a command
 # or a function
@@ -160,11 +125,6 @@ PS1='%F{blue}%1d%f%% '
 # database of completion functions.
 # Try to find where this database is, or better understand how all of this
 # works.
-
-# FIXME:
-# Is this line really necessary? The completion functions seem to work
-# without.
-autoload -Uz _vc _sr
 
 # `fpath` is an array (colon separated list) of directories specifying the
 # search path for function definitions.
@@ -189,6 +149,24 @@ fpath+=~/GitRepos/dasht/etc/zsh/completions/
 
 # Use modern completion system
 autoload -Uz compinit
+#         ││{{{
+#         │└── from `man zshbuiltins`:
+#         │     mark the function to be autoloaded using the zsh style,
+#         │     as if the option KSH_AUTOLOAD was unset
+#         │
+#         └── from `man zshmisc`:
+#             suppress usual alias expansion during reading
+#
+# according to `run-help autoload`,   `autoload`   is equivalent to `functions -u`
+#                                                                          │
+#                                                                          └ autoload flag
+# according to `run-help functions`,  `functions`  is equivalent to `typeset -f`
+#                                                                        │
+#                                                                        └─ refer to function
+#                                                                           rather than parameter
+#
+# according to `run-help typeset`,    `typeset`    sets or displays attributes and
+#                                                  values for shell parameters}}}
 compinit
 
 # By default, `run-help` is an alias for `man`.
@@ -279,7 +257,7 @@ bindkey -e
 # eval "$(fasd --init posix-alias zsh-hook)"        code minimaliste pour zsh (pas de complétion via tab)
 
 fasd_cache="${HOME}/.fasd-init-zsh"
-if [ "$(command -v fasd)" -nt "${fasd_cache}" -o ! -s "${fasd_cache}" ]; then
+if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
   fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install >| "${fasd_cache}"
 fi
 . "${fasd_cache}"
@@ -287,7 +265,7 @@ unset fasd_cache
 
 
 # source fzf config
-[ -f ~/.fzf.zsh ] && . ~/.fzf.zsh
+[[ -f ~/.fzf.zsh ]] && . ~/.fzf.zsh
 
 # https://github.com/zsh-users/zaw
 #
@@ -381,63 +359,86 @@ alias -s odt=libreoffice
 alias -s pdf=zathura
 
 # Functions {{{1
-ccheat() { #{{{2
-  emulate -LR zsh
-  # cette fonction a pour but de coloriser la sortie de la commande cheat{{{
-  # pour ce faire, on utilise la commande highlight (à installer)
-  # à laquelle on fait passer 3 arguments :
-  # -O xterm256 : formatage destiné à un terminal (il existe d'autres formats, html, ansi, bbcode...)
-  # -S bash : syntaxe bash
-  # -s olive :    thème olive (il en existe d'autres : 'highlight -w' pour en voir une liste)
-  # -O, -s, -S, -w = --out-format, --style, --syntax, --list-themes
-
-  # pour ajouter à bash la complétion des arguments passés à cheat :
-  # cd /etc/bash_completion.d/ && wget https://raw.githubusercontent.com/chrisallenlane/cheat/master/cheat/autocompletion/cheat.bash
-
-  # autre solution utilisant pygments
-  # documentation de pygments : http://pygments.org/docs/
-  #
-  # pygmentize fait partie soit du paquet .deb python-pygments soit du paquet pip pygments
-  #
-  # on utilise pygmentize pour coloriser la sortie de la commande cheat
-  # l'option -l permet de spécifier un lexer
-  # un lexer est un programme réalisant une analyse syntaxique : https://en.wikipedia.org/wiki/Lexical_analysis
-  # 'pygmentize -L' liste les différents lexers disponibles
-  # le lexer bash ne produit pas la colorisation que j'attends
-  # du coup pour le moment j'utilise le lexer spécifique au language C (mieux mais pas parfait)
-
-  # on peut aussi utiliser l'option -g (guess), qui laisse le soin à pygmentize de deviner le type de code qu'il est en train d'analyser
-
-  # cheat "$1" | pygmentize -l c
-
-  # Remarque : on pourrait se passer du pgm cheat :
-  # cd ~/.cheat && cat <cmd> | highlight | less -iR# }}}
-
-  cheat "$1" | highlight -O xterm256 -S bash -s olive
-}
 cmdfu() { #{{{2
   emulate -LR zsh
 
-  # Cette fonction permet de faire des recherches sur le site www.commandlinefu.com depuis le terminal.
-  # Dependency: highlight package
+  # Purpose: {{{
+  #
+  # Look up keywords on `www.commandlinefu.com`.
+  #}}}
+  # Dependencies:{{{
+  #
+  # It needs the `highlight` or `pygments` package:
+  #
+  #     $ sudo aptitude install highlight (✔)
+  # OR
+  #     $ sudo aptitude install python-pygments (✔✔)
+  # OR
+  #     $ sudo pip install pygments (✔✔✔)
+  #}}}
 
-  #                             ┌── yes, we can imbricate quotes, without escaping them
-  #                             │
+  # Where is `pygments` documentation? {{{
+  #
+  #     http://pygments.org/docs/
+  #}}}
+  # What's a lexer?{{{
+  #
+  # A program performing a lexical analysis:
+  #
+  #     https://en.wikipedia.org/wiki/Lexical_analysis#Lexer_generator
+  #}}}
+  # How to choose a lexer?{{{
+  #
+  #     $ pygmentize -l <my_lexer>
+  #}}}
+  # How to list all available lexers?{{{
+  #
+  #     $ pygmentize -L
+  #}}}
+
+  # store our keywords in the variable `keywords`, replacing spaces with dashes
   keywords="$(sed 's/ /-/g' <<< "$@")"
-  # on affecte à encoding l'encodage en base64 des mots-clés
-  # FIXME:
-  # how to get rid of `echo`?
+  # store their base64 encoding in `encoding`
+  # FIXME: how to get rid of `echo`?{{{
   # we can't use `<<<` because `base64` doesn't accept a string as its input,
   # only a file
+  #}}}
   encoding="$(echo -n "$@" | base64)"
   #                 │
-  #                 └── remove ending newline, because it alters the encoding result
+  #                 └ remove ending newline, because it alters the encoding result
 
-  # Pour finir on télécharge la page web en mode silencieux (-s) pour ne pas
-  # afficher la progression ni les erreurs.
-  curl -s "http://www.commandlinefu.com/commands/matching/$keywords/$encoding/sort-by-votes/plaintext" \
-    | highlight -O xterm256 -S bash -s bright | less -iR
-
+  # Alternative using `highlight`:{{{
+  #
+  #     curl -sL "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
+  #     | highlight -O xterm256 -S bash -s bright | less -iR
+  #                  │           │       │
+  #                  │           │       └ we want the 'olive' highlighting style
+  #                  │           │         (to get the list of available styles: `highligh -w`)
+  #                  │           │
+  #                  │           └ the syntax of the input file is bash
+  #                  │
+  #                  └ output the file for a terminal
+  #                    (you can use other formats: html, latex ...)
+  #}}}
+  #     ┌ download silently (no errors, no progression){{{
+  #     │
+  #     │┌ if the url page has changed, try the new address
+  #     ││}}}
+  curl -sL "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
+  | pygmentize -l shell \
+  | less -iR
+  #       ││{{{
+  #       │└ --RAW-CONTROL-CHARS
+  #       │
+  #       │  don't display control characters used to set colors;
+  #       │  send them instead to the terminal which will interpret them
+  #       │  to colorize the text
+  #       │
+  #       └ --ignore-case
+  #
+  #        when we search for a  pattern (`/pat`), ignore the difference between
+  #        uppercase and lowercase characters in the text
+  #}}}
 }
 
 dl_sub() { #{{{2
@@ -450,14 +451,14 @@ dl_sub() { #{{{2
 fzf_sr() { #{{{2
   emulate -LR zsh
   sr "$(sed '/^$/d' ~/.config/surfraw/bookmarks | sort -n | fzf -e)" ;}
-  #     └─────────────────────────────────────┤   └─────┤   └────┤
-  #                                           │         │        └ search the pattern input by the user
-  #                                           │         │          exactly (disable fuzzy matching)
-  #                                           │         │
-  #                                           │         └───────── sort numerically
-  #                                           │
-  #                                           └─────────────────── remove empty lines in
-  #                                                                the bookmark file
+  #     ├─────────────────────────────────────┘   ├─────┘   ├────┘
+  #     │                                         │         └ search the pattern input by the user
+  #     │                                         │           exactly (disable fuzzy matching)
+  #     │                                         │           -e` = `--exact` exact-match
+  #     │                                         │
+  #     │                                         └ sort numerically
+  #     └ remove empty lines in
+  #       the bookmark file
 
 fzf_clipboard() { #{{{2
   # fuzzy find clipboard history
@@ -491,18 +492,6 @@ lrv() { #{{{2
 
   keywords=$(echo "$@" | sed 's/ /.*/g' | sed 's:(:\\(:g'| sed 's:|:\\|:g' | sed 's:):\\):g')
   locate -ir "$keywords" | vim -R --not-a-term -
-
-}
-
-mcheat() { #{{{2
-  emulate -LR zsh
-
-  cheat "$1" | highlight -O xterm256 -S bash -s olive | less -iR
-
-  # -i = --ignore-case, insensible à la casse lors de recherches
-  # -R = --RAW-CONTROL-CHARS,
-  #      nécessaire pour que less n'affiche pas les caractères de contrôle définissant les couleurs
-  #      mais les envoie à l'émulateur de terminal qui les interprètera pour coloriser le texte
 
 }
 
@@ -602,7 +591,7 @@ nv() { #{{{2
       vim --remote-send ":windo diffthis<cr>"
 
     # If the 1st argument is `-o`, we want to open each file in a dedicated horizontal split
-    elif [[ $1 == -o ]]; then
+    elif [[ $1 == "-o" ]]; then
 
       shift 1
       local IFS=' '
@@ -727,7 +716,7 @@ catch_signal_usr1() {
 # `SPC R` from Vim.
 #}}}
 restart_vim() {
-  if [[ -n $restarting_vim ]]; then
+  if [[ -n "${restarting_vim}" ]]; then
     # reset the flag
     # restarting_vim=
     # FIXME: If we quit Neovim, we should restart Neovim, not Vim.
@@ -751,9 +740,17 @@ restart_vim() {
   fi
 }
 
+palette(){ #{{{2
+  local i
+  for i in {0..255} ; do
+    printf '\e[48;5;%dm%3d\e[0m ' "$i" "$i"
+    if (( i == 15 )) || (( i > 15 )) && (( (i-15) % 6 == 0 )); then
+      printf "\n";
+    fi
+  done
+}
+
 ppa_what_have_you() { #{{{2
-  # FIXME:
-  # create a completion function which would suggest files in /var/lib/apt/lists/
   awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$@"
 }
 
@@ -805,11 +802,6 @@ acos() {
 atan() {
   emulate -LR zsh
   bc -l <<< "scale=3;a($1)/0.017453293"
-}
-
-vc() { #{{{2
-  emulate -LR zsh
-  cd ~/.cheat; vim "$1"; cd - >/dev/null;
 }
 
 # Variables {{{1

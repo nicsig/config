@@ -1,3 +1,25 @@
+# What are  the tools  useful to  accelerate the learning  of a  new programming
+# language?
+#
+#     • snippets engine (stay focused)
+#     • linter
+#     • formatter (stay consistent; enforce styleguide)
+#     • REPL/compiler (evaluate code to check it works)
+#     • integrated documentation
+#     • ?
+
+
+
+# TODO:
+# Remove this file.
+# Merge it with `~/.zshrc`.
+# It introduces way too much confusion.
+# For example, we often define an alias/function  in one file, then a second one
+# in another file, both  having the same name, and we  don't notice the conflict
+# which makes debugging harder in case of a problem.
+# We  don't  want  to  use  bash  interactively  anyway,  so  there's  no  point
+# configuring it.
+
 # TODO:
 # It would be useful to be able to search for a pattern inside all configuration
 # files with `:vimrgrep`. Including the ones for the shell.
@@ -14,20 +36,19 @@
 #
 # Example:
 #
-#         vim -c\ q --startuptime /tmp/vim.log && tail -n1 $_
+#                                                           ┌ last argument of the previous command,
+#                                                           │ here it should be `/tmp/vim.log`
+#                                                           ├┐
+#         vim -c 'q' --startuptime /tmp/vim.log && tail -n1 $_
 #             vs
-#         vim -c\ q --startuptime >(tail -n1)
+#         vim -c 'q' --startuptime >(tail -n1)
 
 
 
+# TODO:
 # Recomment the aliases/functions we've recovered after the loss of this file.
 # Also, re-read the rest of the file. Maybe some parts need to be re-factored again.
 # Try to remember the fixme/todo.
-
-# We have defined 2 `nv()` functions. 1 in this file, the other in `~/.zshrc`.
-# Get rid of one of them. Merge the best of the 2 codes. Write the result in
-# this file.
-
 
 # Recovered Aliases:
 
@@ -81,7 +102,7 @@ alias web='WWW_HOME=duckduckgo.com w3m'
 # Recovered Functions:
 alert() {
   local icon summary
-  icon='$([ $? = 0 ] && echo terminal || echo error)'
+  icon='$([[ $? -eq 0 ]] && echo terminal || echo error)'
   summary="$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
   eval "notify-send --urgency=low -i " "${icon}" '"${summary}"'
 }
@@ -110,7 +131,7 @@ is_it_free() {
 prof_vim() {
 	TMP="$(mktemp /tmp/.profile_vim.XXXXXXXXXX)"
 	builtin cd /tmp
-	vim --cmd "prof start "${TMP}"" --cmd 'prof! file ~/.vim/vimrc' -cq
+	vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
 	vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
 	builtin cd -
 }
@@ -133,7 +154,7 @@ what_is_in_checkinstall() {
 }
 
 what_is_in_repo() {
-  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' /var/lib/apt/lists/*$1*
+  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' /var/lib/apt/lists/*"$1"*
 }
 
 # useful to check the contents of a value of an environment variable:
@@ -221,7 +242,6 @@ alias py='/usr/local/bin/python3.6'
 
 # surfraw {{{2
 
-alias sr='sr -browser=xdg-open'
 alias srr='sr ixquick'
 alias surfraw='surfraw -browser=w3m'
 
@@ -271,12 +291,12 @@ alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(t
 # Why ANY command after `subliminal` is skipped?
 dl_sub() {
   cd ~/Videos/
-  subliminal -l fr -- $1
+  subliminal -l fr -- "$1"
 }
 
 alias emacs='emacs -nw'
 
-alias fm='[[ -n $TMUX ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
+alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
 
 # `iotop` est un outil en cli qui permet de savoir quels processus accèdent
 # (lecture / écriture) au disque:
@@ -496,8 +516,8 @@ export PDFVIEWER=zathura
 # One way to be sure that we're not connected to Tmux , is to check that `$TERM`
 # is set to 'xterm'.  That's the default value set by xfce4-terminal.
 #}}}
-if [ "${TERM}" = "xterm" ]; then
-  if [ "${COLORTERM}" = "xfce4-terminal" -o -n "${KONSOLE_PROFILE_NAME}" ] ; then
+if [[ "${TERM}" == "xterm" ]]; then
+  if [[ "${COLORTERM}" == "xfce4-terminal" || -n "${KONSOLE_PROFILE_NAME}" ]]; then
   #                                           └──────────────────────────┤
   #                                                                      └ to also detect the Konsole terminal
     export TERM=xterm-256color
@@ -505,19 +525,18 @@ if [ "${TERM}" = "xterm" ]; then
 fi
 #     Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
 #
-#     if [ $TERM == "xterm" ] ; then
-#         if [ -n $COLORTERM ] ; then
-#             if [ $COLORTERM = "gnome-terminal" -o $COLORTERM = "xfce-terminal" ] ; then
+#     if [[ "${TERM}" == "xterm" ]]; then
+#         if [[ -n "${COLORTERM}" ]]; then
+#             if [[ "${COLORTERM}" == "gnome-terminal" || "${COLORTERM}" == "xfce-terminal" ]]; then
 #                 TERM=xterm-256color
-#             if
-#         elif [ -n "$VTE_VERSION" ] ; then
+#             fi
+#         elif [[ -n "${VTE_VERSION}" ]]; then
 #             TERM=xterm-256color
 #         fi
 #     fi
 #
 # Source:
 # https://github.com/romainl/Apprentice/wiki/256-colors-and-you
-#
 #}}}
 
 # XDG {{{2
@@ -601,52 +620,6 @@ atan()
   echo "scale=3;a($1)/0.017453293" | bc -l
 }
 
-ccheat() { #{{{2
-  # cette fonction a pour but de coloriser la sortie de la commande cheat{{{
-  # pour ce faire, on utilise la commande highlight (à installer)
-
-  # pour ajouter à bash l'autocomplétion des arguments passés à cheat :
-  # cd /etc/bash_completion.d/ \
-  # && wget https://raw.githubusercontent.com/chrisallenlane/cheat/master/cheat/autocompletion/cheat.bash
-
-  # autre solution utilisant pygments
-  # documentation de pygments:
-  #
-  #     http://pygments.org/docs/
-  #
-  # pygmentize fait partie soit du paquet .deb python-pygments soit du paquet pip pygments
-  #
-  # on utilise pygmentize pour coloriser la sortie de la commande cheat
-  # l'option -l permet de spécifier un lexer
-  # un lexer est un programme réalisant une analyse syntaxique:
-  #
-  #     https://en.wikipedia.org/wiki/Lexical_analysis
-
-  # 'pygmentize -L' liste les différents lexers disponibles
-  # le lexer bash ne produit pas la colorisation que j'attends
-  # du coup pour le moment j'utilise le lexer spécifique au language C (mieux mais pas parfait)
-
-  # on peut aussi utiliser l'option -g  (guess), qui laisse le soin à pygmentize
-  # de deviner le type de code qu'il est en train d'analyser
-
-  # cheat "$1" | pygmentize -l c
-
-  # Remarque : on pourrait se passer du pgm cheat :
-  # cd ~/.cheat && cat <cmd> | highlight | less -iR# }}}
-
-  #            ┌ install the package `highlight` if necessary
-  #            │
-  cheat "$1" | highlight -O xterm256 -S bash -s olive
-  #                       │           │       │
-  #                       │           │       └ we want the 'olive' highlighting style
-  #                       │           │         (to get the list of available styles: `highligh -w`)
-  #                       │           │
-  #                       │           └ the syntax of the input file is bash
-  #                       │
-  #                       └ output the file for a terminal
-  #                         (you can use other formats: html, latex ...)
-}
-
 # cfg-* {{{2
 
 cfg_bash() { nv "${HOME}"/.bashrc ;}
@@ -662,48 +635,8 @@ cfg_xmodmap() { nv "${HOME}"/.Xmodmap ;}
 cfg_w3m() { vim "${HOME}"/.w3m/config ;}
 cfg_zsh() { nv "${HOME}"/.zshrc ;}
 
-cmdfu() { #{{{2
-
-  # Look up keywords on `www.commandlinefu.com`.
-
-  # store our keywords in the variable `keywords`, replacing spaces with dashes
-  keywords=$(echo "$@" | sed 's/ /-/g')
-  # store their base64 encoding in `encoding`
-  encoding=$(echo -n "$@" | base64)
-  #                │
-  #                └ suppress the ending newline,
-  #                  to prevent the latter from altering the encoding
-
-  #     ┌ download the webpage silently (no progress, no errors)
-  #     │
-  curl -s "http://www.commandlinefu.com/commands/matching/$keywords/$encoding/sort-by-votes/plaintext"\
-    | highlight -O xterm256 -S bash -s olive | less -iR
-    #                                                ││
-    #                                                │└ --RAW-CONTROL-CHARS
-    #                                                │
-    #                                                │  don't display control characters used to set colors;
-    #                                                │  send them instead to the terminal which will interpret them
-    #                                                │  to colorize the text
-    #                                                │
-    #                                                └ --ignore-case
-
-    #                                                  uppercase and lowercase in the filename
-    #                                                  are considered identical
-
-}
-
-fzf-sr() { #{{{2
-  #                                                 ┌────────── remove empty lines
-  #                                                 │         ┌ numeric sort
-  #                                       ┌─────────┤   ┌─────┤
-  sr "$(cat ~/.config/surfraw/bookmarks | sed '/^$/d' | sort -n | fzf -e)"
-  #                                                               └────┤
-  #                                                                    └ fuzzy search
-  #                                                                      `-e` = `--exact` exact-match
-}
-
 fzf-surfraw() { #{{{2
-  surfraw "$(cat ~/.config/surfraw/bookmarks | sed '/^$/d' | sort -n | fzf -e)"
+  surfraw "$(sed '/^$/d' "${HOME}"/.config/surfraw/bookmarks | sort -n | fzf -e)"
 }
 
 lrv() { #{{{2
@@ -735,31 +668,6 @@ lrv() { #{{{2
 
 }
 
-maj() { #{{{2
-  # duplicate file descriptors 1 and 2
-  exec 3>&1 4>&2
-  # make sure `~/log/` exists
-  [ -d "${HOME}"/log ] || mkdir "${HOME}"/log
-  # redirect output of the function in a logfile
-  exec 1>"${HOME}"/log/maj.log 2>&1
-
-  # show us how the update goes
-  tail -f "${HOME}"/log/maj.log >&3 &
-
-  # update
-  [[ -n "${TMUX}" ]] && tmux rename-window maj
-  sudo aptitude update
-  sudo aptitude safe-upgrade
-  majyt
-  cd "${HOME}"/GitRepos/ranger/ && git pull && cd -
-  cd "${HOME}"/.zsh/zsh-completions/ && git pull && cd -
-
-  # TODO:
-  # Make the function quit, otherwise the logfile will contain the output of any
-  # command we execute after `maj`.
-  # I tried `$ exit`, but it didn't work (“zsh: you have running jobs.”).
-}
-
 mkcd() { #{{{2
 # create directory and cd into it right away
   mkdir "$*" && cd "$*"
@@ -785,23 +693,6 @@ mountp() { #{{{2
 # grep -o "$1" <<< "$2" | wc -l
 
 # }
-
-palette(){ #{{{2
-  local i
-  for i in {0..255} ; do
-    printf '\e[48;5;%dm%3d\e[0m ' "$i" "$i"
-    if (( i == 15 )) || (( i > 15 )) && (( (i-15) % 6 == 0 )); then
-      printf "\n";
-    fi
-  done
-}
-
-ppa_what_have_you(){ #{{{2
-  # FIXME:
-  # move this function in zsh config, to create a completion function which
-  # would suggest files in /var/lib/apt/lists/
-  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$@"
-}
 
 truecolor() { #{{{2
   local i r g b
@@ -834,24 +725,56 @@ truecolor() { #{{{2
   # By default terminals have 80 columns.
   #}}}
   for ((i = 0; i <= 79; i++)); do
-    b=$(($i*255/79))
-    g=$((2*$b))
-    r=$((255-$b))
+    b=$((i*255/79))
+    g=$((2*b))
+    r=$((255-b))
     if [[ $g -gt 255 ]]; then
-      g=$((2*255 - $g))
+      g=$((2*255 - g))
     fi
     printf '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
   done
   printf '\n'
 }
 
-# xt {{{2
+up() { #{{{2
+  # duplicate file descriptors 1 and 2
+  exec 3>&1 4>&2
+  # make sure `~/log/` exists
+  [[ -d "${HOME}"/log ]] || mkdir "${HOME}"/log
+  # redirect output of the function in a logfile
+  exec 1>"${HOME}"/log/maj.log 2>&1
 
-# This custom shell function extracts an archive using the `atool` command.
-# Then, it cd's into the directory where the contents of the archive was
-# extracted. The code is taken from `:Man atool`.
+  # show us how the update goes
+  tail -f "${HOME}"/log/maj.log >&3 &
 
-xt() {
+  # update
+  [[ -n "${TMUX}" ]] && tmux rename-window update
+  sudo aptitude update
+  sudo aptitude safe-upgrade
+
+  printf '\n----------\nyoutube-dl\n----------\n\n'
+  majyt
+  printf '\n------\nranger\n------\n\n'
+  cd "${HOME}"/GitRepos/ranger/ && git pull && cd -
+  printf '\n---------------\nzsh-completions\n---------------n\n'
+  cd "${HOME}"/.zsh/zsh-completions/ && git pull && cd -
+  printf '\n-----------------------\nzsh-syntax-highlighting\n-----------------------n\n'
+  cd "${HOME}"/.zsh/plugins/zsh-syntax-highlighting/ && git pull && cd -
+
+  # TODO:
+  # Make the function quit, otherwise the logfile will contain the output of any
+  # command we execute after `maj`.
+  # I tried `$ exit`, but it didn't work (“zsh: you have running jobs.”).
+}
+
+xt() { #{{{2
+  # Purpose:{{{
+  #
+  # Extract an archive using the `atool` command.
+  # Then,  cd  into  the  directory  where  the  contents  of  the  archive  was
+  # extracted. The code is taken from `:Man atool`.
+  #}}}
+
   TMP=$(mktemp /tmp/xt.XXXXXXXXXX)
   #     │                  │
   #     │                  └ template for the filename, the `X` will be

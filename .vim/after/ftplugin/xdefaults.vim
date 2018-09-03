@@ -15,6 +15,6 @@ augroup END
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
                     \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
                     \ ."
-                    \   setl cms< fdm<
+                    \   setl cms< cocu< cole< fdm< fdt<
                     \ | exe 'au!  my_xdefaults * <buffer>'
                     \  "

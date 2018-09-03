@@ -331,9 +331,12 @@ directColor: true
 ! white
 ! If you must change `color7`, choose a readable color.{{{
 !
-! It's used by `pygmentize` to color python comments in white:
+!     https://www.w3schools.com/colors/colors_shades.asp
+!
+! It's used by `cmus` to color its status line.
+! It's also used by `pygmentize` to color python comments in white:
 !
 !     $ pygmentize ~/bin/python/xkbmapd.py
 !}}}
-*.color7:   #ffffff
+*.color7:   #808080
 *.color15:  #ffffff

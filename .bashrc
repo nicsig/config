@@ -203,7 +203,7 @@ shopt -s histverify
 # so that they can override anything that could have been sourced before
 . "${HOME}"/.shrc
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
 
 # Key bindings {{{1
 # CTRL {{{2
