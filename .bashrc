@@ -197,13 +197,13 @@ shopt -s histverify
 
 . /usr/share/bash-completion/bash_completion
 
-. "${HOME}"/.fzf.bash
+. "${HOME}/.fzf.bash"
 
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
-. "${HOME}"/.shrc
+. "${HOME}/.shrc"
 
-[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+[[ -f ${HOME}/.fzf.bash ]] && . "${HOME}/.fzf.bash"
 
 # Key bindings {{{1
 # CTRL {{{2
@@ -258,9 +258,9 @@ bind    '"\C-x\C-r":   "\e[99i~\e[99b~"'
 # ┌─ The name of the function must have a specific length:
 # │          https://unix.stackexchange.com/q/370463/232487
 # │
-# │  yeah, I know, it's a weird bug…
+# │  yeah, I know, it's a weird bug ...
 reread() {
-  . "${HOME}"/.bashrc < /dev/null 2> /dev/null ;
+  . "${HOME}/.bashrc" </dev/null 2> /dev/null
 }
 
 # C-x C-s      reexecute-with-sudo {{{3

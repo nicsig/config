@@ -24,14 +24,6 @@ For more info:
 
     https://unix.stackexchange.com/a/2184/289772
 
----
-
-Otherwise, you may have a conflicting alias.
-That is  an alias whose  name is  identical to the  function for which  you want
-completion suggestions.
-
-Remove this alias.
-
 # Where can I get more info on how to write my own completion function?
 
         https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org

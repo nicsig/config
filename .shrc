@@ -48,7 +48,7 @@
 # TODO:
 # Recomment the aliases/functions we've recovered after the loss of this file.
 # Also, re-read the rest of the file. Maybe some parts need to be re-factored again.
-# Try to remember the fixme/todo.
+# Try to remember the fixmes/todos.
 
 # Recovered Aliases:
 
@@ -56,9 +56,6 @@ alias check_glob='printf "%s\n"'
 alias checki='sudo rlwrap checkinstall -y'
 alias df=dfc
 # https://unix.stackexchange.com/a/299922/287634
-alias fix='reset; stty sane; stty -ixon; tput rs1; clear; echo -e "\033c"'
-#                                             │
-#                                             └ FIXME: What's this capability?
 alias fxk='~/bin/keyboard.sh'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'
 alias gsearch='git log --all --source -p -S'
@@ -102,7 +99,7 @@ alias web='WWW_HOME=duckduckgo.com w3m'
 # Recovered Functions:
 alert() {
   local icon summary
-  icon='$([[ $? -eq 0 ]] && echo terminal || echo error)'
+  icon='$([[ $? -eq 0 ]] && printf "terminal\n" || printf "error\n")'
   summary="$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
   eval "notify-send --urgency=low -i " "${icon}" '"${summary}"'
 }
@@ -290,7 +287,7 @@ alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(t
 # Why can't we restore the old working directory (`cd -`)?
 # Why ANY command after `subliminal` is skipped?
 dl_sub() {
-  cd ~/Videos/
+  cd "${HOME}/Videos/"
   subliminal -l fr -- "$1"
 }
 
@@ -326,11 +323,7 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
 
-# https://rg3.github.io/youtube-dl/download.html
-alias majyt='sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && sudo chmod a+rx /usr/local/bin/youtube-dl'
-
 alias mybookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
-alias mydate='date "+Today is %x, day number %j of %Y."'
 
 # -f, --format=FORMAT
 #        Change edit format of text file.
@@ -343,14 +336,31 @@ alias mydate='date "+Today is %x, day number %j of %Y."'
 #        The default format is dual-column.
 alias qmv='qmv --format=destination-only'
 
-alias record_audio='ffmpeg -f pulse -i default -y /tmp/rec.wav'
-
-# Par défaut, quand on donne une commande à bash, il ne teste la présence d'un
-# alias que sur le 1er mot.
-# Exception : le 1er mot est un alias dont la valeur se finit par un espace.
-# Pour conserver ses alias même lorsqu'on les fait précéder d'un sudo,
-# il faut donc définir un alias pour sudo lui-même.
-# Voir ici: https://askubuntu.com/questions/22037/aliases-not-available-when-using-sudo
+# Why?{{{
+#
+# Suppose you have an alias `foo`.
+# You want to execute it with `sudo`:
+#
+#     # ✘
+#     $ sudo foo
+#
+# It won't  work because the shell  doesn't check for an alias  beyond the first
+# word.
+# The solution is given in `man bash` (/^ALIASES):
+#
+#      If  the last  character of  the alias  value is  a blank,  then the  next
+#      command word following the alias is also checked for alias expansion.
+#
+# By creating the alias  `alias sudo='sudo '`, we make sure  that when the shell
+# will  expand  the alias  `sudo`  in  `sudo foo`,  the  last  character of  the
+# expansion will be a blank.
+# This  will cause the shell  to check the next  word for an alias,  and make it
+# expand `foo`.
+#
+# See also:
+#
+#     https://askubuntu.com/a/22043/867754
+#}}}
 alias sudo='sudo '
 
 alias vb='VBoxManage'
@@ -362,24 +372,11 @@ alias watch_net='nethogs enp3s0'
 # Environment Variables {{{1
 # CDPATH {{{2
 
-export CDPATH=:$HOME:/tmp
+export CDPATH=:${HOME}:/tmp
 
 # EDITOR {{{2
 
-# We export a custom variable (`not_called_by_me`) inside the environment of any
-# Vim process which is started by another process.
-# Usually, when a process needs to start an editor (vipe, …), they look at the
-# value of `$EDITOR`.
-#
-# This could be useful, for example, in a Vim function:
-#
-#       if $not_called_by_me == 1
-#           …
-#       else
-#           …
-#       endif
-
-export EDITOR='env not_called_by_me=1 vim'
+export EDITOR='vim'
 
 # LC_TIME {{{2
 
@@ -388,12 +385,12 @@ export LC_TIME=en_US.UTF-8
 
 # LS_COLORS {{{2
 
-eval "$(dircolors ~/.dircolors)"
+eval "$(dircolors "${HOME}/.dircolors")"
 
 # INFOPATH {{{2
 
 # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
-export INFOPATH=$HOME/texlive/2017/texmf-dist/doc/info:$INFOPATH
+export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
 
 # MANPAGER / MANPATH {{{2
 
@@ -410,7 +407,7 @@ export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
 #                                  └ replace tabs with spaces
 
 # add man pages for `texlive` and `dasht`
-export MANPATH=$HOME/texlive/2017/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
+export MANPATH=$HOME/texlive/2018/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
 
 # PARINIT {{{2
 
@@ -435,14 +432,12 @@ export MANPATH=$HOME/texlive/2017/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$M
 
 # TODO:
 # Read `man par` to explain this value.
-# And  read the  whole  documentation (not  that long)  and  summarize what  you
-# understand in a file note. `par` is probably an important program to master.
 export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 
 # PATH {{{2
 
 # add the `texlive` and `dasht` binaries to our path
-export PATH=$HOME/texlive/2017/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
+export PATH=$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
 
 # PDFVIEWER {{{2
 
@@ -571,106 +566,46 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                                 not sure about the others
 
 # Functions {{{1
-# Trigonometry  {{{2
-# Trigonometric functions (input is expected in degrees).
-# For more formulas (in degrees or radians):
-# http://advantage-bash.blogspot.fr/2012/12/trignometry-calculator.html
-# TODO:
-# Check whether these formulas are always correct.
-
-sin()
-{
-  echo "scale=5;s($1*0.017453293)" | bc -l
-}
-
-cos()
-{
-  echo "scale=5;c($1*0.017453293)" | bc -l
-}
-
-tan()
-{
-  echo "scale=5;s($1*0.017453293)/c($1*0.017453293)" | bc -l
-}
-
-asin()
-{
-  if (( $(echo "$1 == 1" | bc -l) ));then
-    echo "90"
-  elif (( $(echo "$1 < 1" | bc -l) ));then
-    echo "scale=3;a(sqrt((1/(1-($1^2)))-1))/0.017453293" | bc -l
-  elif (( $(echo "$1 > 1" | bc -l) ));then
-    echo "error"
-  fi
-}
-
-acos()
-{
-  if (( $(echo "$1 == 0" | bc -l) ));then
-    echo "90"
-  elif (( $(echo "$1 <= 1" | bc -l) ));then
-    echo "scale=3;a(sqrt((1/($1^2))-1))/0.017453293" | bc -l
-  elif (( $(echo "$1 > 1" | bc -l) ));then
-    echo "error"
-  fi
-}
-
-atan()
-{
-  echo "scale=3;a($1)/0.017453293" | bc -l
-}
-
 # cfg-* {{{2
 
-cfg_bash() { nv "${HOME}"/.bashrc ;}
-cfg_conky_system() { nv "${HOME}"/.conky/system.lua ;}
-cfg_conky_rings() { nv "${HOME}"/.conky/system_rings.lua ;}
-cfg_conky_time() { nv "${HOME}"/.conky/time.lua ;}
-cfg_firefox() { nv "${HOME}"/.mozilla/firefox/*.default/chrome/userContent.css ;}
-cfg_mpv() { nv "${HOME}"/.config/mpv/input.conf ;}
-cfg_tmux() { nv "${HOME}"/.tmux.conf ;}
-cfg_vim() { nv "${HOME}"/.vim/vimrc ;}
-cfg_shell() { nv "${HOME}"/.shrc ;}
-cfg_xmodmap() { nv "${HOME}"/.Xmodmap ;}
-cfg_w3m() { vim "${HOME}"/.w3m/config ;}
-cfg_zsh() { nv "${HOME}"/.zshrc ;}
+#                                 ┌ https://stackoverflow.com/a/7507068/9780968
+#                                 │
+cfg_bash() { "${EDITOR}" "${HOME}/.bashrc" ;}
+cfg_conky_system() { "${EDITOR}" "${HOME}/.conky/system.lua" ;}
+cfg_conky_rings() { "${EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
+cfg_conky_time() { "${EDITOR}" "${HOME}/.conky/time.lua" ;}
+cfg_firefox() { "${EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
+cfg_mpv() { "${EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
+cfg_tmux() { "${EDITOR}" "${HOME}/.tmux.conf" ;}
+cfg_vim() { "${EDITOR}" "${HOME}/.vim/vimrc" ;}
+cfg_shell() { "${EDITOR}" "${HOME}/.shrc" ;}
+cfg_xmodmap() { "${EDITOR}" "${HOME}/.Xmodmap" ;}
+cfg_w3m() { "${EDITOR}" "${HOME}/.w3m/config" ;}
+cfg_zsh() { "${EDITOR}" "${HOME}/.zshrc" ;}
+
+fix() {
+  # For more info:
+  #     https://unix.stackexchange.com/q/79684/289772
+  reset
+  stty sane
+  stty -ixon
+  # What's the `rs1` capability?{{{
+  #
+  # A Reset String.
+  #
+  #     $ man -Kw rs1
+  #     $ man infocmp (/rs1)
+  #     $ man tput (/rs1)
+  #}}}
+  tput rs1
+  tput rs2
+  tput rs3
+  clear
+  printf '\ec'
+}
 
 fzf-surfraw() { #{{{2
-  surfraw "$(sed '/^$/d' "${HOME}"/.config/surfraw/bookmarks | sort -n | fzf -e)"
-}
-
-lrv() { #{{{2
-
-  # Fonction lrv (Locate with Regexp and Vim) qui permet de simplifier
-  # la syntaxe d'une recherche avec locate quand on veut utiliser une expression régulière.
-
-  # En effet si on cherche tous les fichiers contenant foo et (bar ou baz), il faut taper :
-  # locate -ir 'foo.*\(bar\|baz\)'
-
-  # Grâce à la fonction qui suit on peut se contenter de taper :  lrv 'foo (bar|baz)'
-
-  # On echo tous les arguments passés à la fonction, et on fait 4 substitutions
-  # (en affectant le résultat à la variable `keywords`) :
-
-  #     <space>   →  .*  du coup 'foo bar' devient 'foo.*bar'
-
-  #     (         →  \(
-  #     |         →  \|      plus besoin d'échapper les symboles (,| et )
-  #     )         →  \)
-
-  # Vim lit le résultat de la commande `locate` (via le dernier tiret qui redirige
-  # stdin vers le pipe précédent), en mode read-only (-R).
-  # Ceci permet d'ouvrir ensuite les fichiers trouvés via le raccourci go de vim.
-  # Le mode read-only évite d'écrire un fichier par accident (et en plus pas de .swp).
-
-  keywords=$(echo "$@" | sed 's/ /.*/g' | sed 's:(:\\(:g'| sed 's:|:\\|:g' | sed 's:):\\):g')
-  locate -ir "$keywords" | vim -R --not-a-term -
-
-}
-
-mkcd() { #{{{2
-# create directory and cd into it right away
-  mkdir "$*" && cd "$*"
+  surfraw "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
 }
 
 mountp() { #{{{2
@@ -693,115 +628,6 @@ mountp() { #{{{2
 # grep -o "$1" <<< "$2" | wc -l
 
 # }
-
-truecolor() { #{{{2
-  local i r g b
-
-  # What's `r`, `g` and `b`?{{{
-  #
-  # The quantities of red (r), green (g) and blue (b) for each color we're going to test.}}}
-  # How do we make them evolve?{{{
-  #
-  # To produce a specrum of colors,  they need to evolve in completely different
-  # ways. So, we make:
-  #
-  #     • `r` decrease from 255  (to make the specrum begin from very red)
-  #                  to     0  (to get most shades of red)
-  #
-  #     • `b` increase from   0
-  #                  to   255
-  #
-  #     • `g`    increase from 0   to 255  (but faster than blue so that we produce more various colors)
-  #       then decrease from 255 to 0    (via `if (g > 255) g = 2*255 - g;`)
-  #
-  # Summary:
-  #
-  #     r:  255 → 0
-  #     g:  0   → 255 → 0
-  #     b:  0   → 255
-  #}}}
-  # Why 79?{{{
-  #
-  # By default terminals have 80 columns.
-  #}}}
-  for ((i = 0; i <= 79; i++)); do
-    b=$((i*255/79))
-    g=$((2*b))
-    r=$((255-b))
-    if [[ $g -gt 255 ]]; then
-      g=$((2*255 - g))
-    fi
-    printf '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
-  done
-  printf '\n'
-}
-
-up() { #{{{2
-  # duplicate file descriptors 1 and 2
-  exec 3>&1 4>&2
-  # make sure `~/log/` exists
-  [[ -d "${HOME}"/log ]] || mkdir "${HOME}"/log
-  # redirect output of the function in a logfile
-  exec 1>"${HOME}"/log/maj.log 2>&1
-
-  # show us how the update goes
-  tail -f "${HOME}"/log/maj.log >&3 &
-
-  # update
-  [[ -n "${TMUX}" ]] && tmux rename-window update
-  sudo aptitude update
-  sudo aptitude safe-upgrade
-
-  printf '\n----------\nyoutube-dl\n----------\n\n'
-  majyt
-  printf '\n------\nranger\n------\n\n'
-  cd "${HOME}"/GitRepos/ranger/ && git pull && cd -
-  printf '\n---------------\nzsh-completions\n---------------n\n'
-  cd "${HOME}"/.zsh/zsh-completions/ && git pull && cd -
-  printf '\n-----------------------\nzsh-syntax-highlighting\n-----------------------n\n'
-  cd "${HOME}"/.zsh/plugins/zsh-syntax-highlighting/ && git pull && cd -
-
-  # TODO:
-  # Make the function quit, otherwise the logfile will contain the output of any
-  # command we execute after `maj`.
-  # I tried `$ exit`, but it didn't work (“zsh: you have running jobs.”).
-}
-
-xt() { #{{{2
-  # Purpose:{{{
-  #
-  # Extract an archive using the `atool` command.
-  # Then,  cd  into  the  directory  where  the  contents  of  the  archive  was
-  # extracted. The code is taken from `:Man atool`.
-  #}}}
-
-  TMP=$(mktemp /tmp/xt.XXXXXXXXXX)
-  #     │                  │
-  #     │                  └ template for the filename, the `X` will be
-  #     │                    randomly replaced with characters matched
-  #     │                    by the regex `[0-9a-zA-Z]`
-  #     │
-  #     └ create a temporary file and store its path into `TMP`
-
-  atool -x --save-outdir="${TMP}" "$@"
-  #          │
-  #          └ write the name of the folder in which the files have been
-  #            extracted inside the temporary file
-
-  # Assign the name of the extraction folder inside to the variable `DIR`.
-  DIR="$(cat "${TMP}")"
-  [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
-  #  ├─────────┘    ├────────────┘       ├─────────┘
-  #  │              │                    │
-  #  │              │                    └ enter it
-  #  │              │
-  #  │              └ and if its name is not empty
-  #  │
-  #  └ if the directory `DIR` exists
-
-  # Delete temporary file.
-  rm "${TMP}"
-}
 
 # Various {{{1
 

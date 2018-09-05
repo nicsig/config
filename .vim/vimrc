@@ -3955,9 +3955,13 @@ fu! s:plugins_update() abort
     if !isdirectory($HOME.'/.vim/tmp/snapshot')
         call mkdir($HOME.'/.vim/tmp/snapshot', 'p')
     endif
-    exe 'PlugSnapshot! '.fnameescape($HOME.'/.vim/tmp/snapshot/'.strftime('%d-%m_%H-%M').'.vim')
-    "                                                                              │
-    "                                   don't put a colon, it could be problematic ┘
+    "                                                                       ┌ put the month before the day
+    "                                                                       │ so that, in the output of `$ ls`,
+    "                                                                       │ the files are listed chronologically
+    "                                                                       │
+    exe 'PlugSnapshot! '.fnameescape($HOME.'/.vim/tmp/snapshot/'.strftime('%m-%d__%H-%M').'.vim')
+    "                                                                               │
+    "                                    don't put a colon, it could be problematic ┘
     " Why a colon is a bad idea in a filename?{{{
     "
     " 1. It's not inside  the default value of 'isf'. Which means  that Vim
@@ -6577,13 +6581,6 @@ endfu
 " macro.
 
 
-
-augroup jkjmkjmjmjmkjkmjmkj
-    au!
-    au TextYankPost * if    v:event.operator is# 'y'
-    \                    && v:event.regname is# '*'
-    \ |               endif
-augroup END
 
 " sessions to finish:
 "

@@ -1,3 +1,40 @@
+# TODO:
+# Remove `echo` everywhere:
+#
+#     noa vim /\C\<echo\>/gj /home/jean/Dropbox/conf/bin/**/*.sh
+
+# TODO:
+# Do this substitution:
+#     "${HOME}"/file
+#     →
+#     "${HOME}/file"
+
+# TODO:
+# Search for `HOME` in zshrc/bashrc.
+# Should we quote all the time?
+# Example:
+#
+#            v                            v v                                 v
+#     fpath=("${HOME}/.zsh/my-completions/" "${HOME}/.zsh/zsh-completions/src/" $fpath)
+#                                                                               ^^^^^^
+#                                                                               what about that?
+#                                                                               ${fpath}?
+#                                                                               "${fpath}"?
+# Example:
+#
+#     [[ -f "${HOME}/.fzf.zsh" ]] && . "${HOME}/.fzf.zsh"
+#           ^                ^
+#
+# Example:
+#
+#     export CDPATH=:"${HOME}":/tmp
+#                    ^       ^
+
+# TODO:
+# Improve `~/bin/ebook-downloader.sh`.
+
+
+
 # FIXME:
 # The plugin `zsh-syntax-highlighting` breaks the `yank-pop` widget (M-y).
 # After you paste a deleted text with  C-y, M-y allows you to rotate between the
@@ -37,7 +74,8 @@
 # a backup of the history on a 2nd hard drive.
 
 # TODO:
-# install a hook which would automatically `cd` into a cloned repo.
+# When we clone a git repo, it would be useful to automatically cd into it.
+# Install a hook to do that.
 # Read `man zshcontrib`, section `Manipulating Hook Functions`.
 # Also `man zshmisc`, section `SPECIAL FUNCTIONS`.
 
@@ -50,6 +88,10 @@
 #     zle-line-pre-redraw
 #            Executed  whenever  the  input  line  is  about  to be redrawn,
 #            providing an opportunity to update the region_highlight array.
+#
+# Also read this:
+#
+#     https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/regexp.md
 
 # TODO:
 # read this tuto
@@ -74,6 +116,10 @@
 # TODO:
 # To read:
 # https://github.com/sindresorhus/pure (≈ 550 sloc, 2 fichiers: pure.zsh, async.zsh)
+
+# TODO:
+# Add an indicator in the prompt, showing whether the last command succeeded.
+# ($?)
 
 # How to use one of the custom prompts available by default?{{{
 #
@@ -126,26 +172,31 @@ PS1='%F{blue}%1d%f%% '
 # Try to find where this database is, or better understand how all of this
 # works.
 
-# `fpath` is an array (colon separated list) of directories specifying the
-# search path for function definitions.
+# What's `fpath`?{{{
+#
+# An array (colon separated list) of  directories specifying the search path for
+# function definitions.
 # This path is searched when a function with the `-u` attribute is referenced.
+#}}}
+# Why do I have to set `fpath` before invoking the `compinit` function?{{{
 #
-# Any change to `fpath` after the `compinit` function has been invoked won't
-# have any effect, so `fpath` must be completely defined before `compinit`.
+# Any change to `fpath` after `compinit` has been invoked won't have any effect.
+#}}}
+# Why do I have to put my completion functions at the very beginning of `fpath`?{{{
 #
-# Add `~/.zsh/my-completions` to the FRONT of `fpath`, to override any functions
-# coming from zsh installation.
-
-#                                                       ┌ additional completion definitions
-#                                                       │ not available in a default installation
-#                                                       │ useful for virtualbox
-#                             ┌─────────────────────────┤
-fpath=(~/.zsh/my-completions/ ~/.zsh/zsh-completions/src/ $fpath)
+# To override any possible conflicting function (a default one, or coming from a
+# third-party plugin).
+#}}}
+#                                   ┌ additional completion definitions,
+#                                   │ not available in a default installation,
+#                                   │ useful for virtualbox
+#                                   ├───────────────────────────────┐
+fpath=(${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath)
 
 # Add completion for the `dasht` command:
 #
 #     https://github.com/sunaku/dasht
-fpath+=~/GitRepos/dasht/etc/zsh/completions/
+fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
 
 # Use modern completion system
 autoload -Uz compinit
@@ -193,7 +244,7 @@ select-word-style bash
 
 
 # load `cdr` function to go back to previously visited directories
-# FIXME: comment to develop by reading see `man zshcontrib`
+# FIXME: comment to develop by reading `man zshcontrib`
 # (how to use it?, how it works?)
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
@@ -222,16 +273,28 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
 
+# Necessary to be able to move in a completion menu:
+#
+#     bindkey -M menuselect '^L' forward-char
 zstyle ':completion:*' menu select
 
-# Don't move this line after the `Sourcing` section. It would reset `fzf` key
-# bindings.
+
+# enable case-insensitive search (useful for the `zaw` plugin)
+zstyle ':filter-select' case-insensitive yes
+
+# Use emacs keybindings even if our EDITOR is set to vi.
+# Warning:{{{
 #
-# Use emacs keybindings even if our EDITOR is set to vi
+# Don't move this line after the `Sourcing` section.
+# It would reset `fzf` key bindings.
+#
+# Don't move it after the `Abbreviations` section either.
+# It would break them too (maybe because it removes the space key binding?).
+#}}}
 bindkey -e
 
-# don't move sourcing after syntax highlighting
-# Sourcing {{{1
+# don't move `Plugins` after syntax highlighting
+# Plugins {{{1
 
 # Le code qui suit a pour but de sourcer un ensemble de fonctions fournies par
 # le script fasd:
@@ -265,7 +328,7 @@ unset fasd_cache
 
 
 # source fzf config
-[[ -f ~/.fzf.zsh ]] && . ~/.fzf.zsh
+[[ -f ${HOME}/.fzf.zsh ]] && . "${HOME}/.fzf.zsh"
 
 # https://github.com/zsh-users/zaw
 #
@@ -282,13 +345,23 @@ unset fasd_cache
 #     shortcut widgets
 #     key binds and styles
 #     making sources
+. "${HOME}/.zsh/plugins/zaw/zaw.zsh"
 
-. ~/.zsh/plugins/zaw/zaw.zsh
-
+# Why?{{{
+#
+# When we try to cd into a directory:
+#
+#     • the completion menu offered by this plugin is more readable
+#       than the default one (a single column instead of several)
+#
+#     • we don't have to select an entry which could be far from our current position,
+#       instead we can fuzzy search it via its name
+#}}}
+. "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
 
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
-. ~/.shrc
+. "${HOME}/.shrc"
 
 # Aliases {{{1
 # global {{{2
@@ -360,6 +433,22 @@ alias -s pdf=zathura
 
 # Functions {{{1
 cmdfu() { #{{{2
+  # What's the effect of `emulate -LR zsh`?{{{
+  #
+  # `emulate -R zsh` resets all the options to their default value, which can be
+  # checked with:
+  #               ┌─ current environment
+  #               │         ┌─ reset environment
+  #               │         │
+  #     vimdiff <(setopt) <(emulate -R zsh; setopt)
+  #
+  # `emulate -L` makes the new values local to the current function, which
+  # prevents the changes to affect the current interactive zsh session.
+  #
+  # Here, we don't need this command, however it can be a good habit to include it.
+  #
+  #     https://unix.stackexchange.com/a/372866/232487
+  #}}}
   emulate -LR zsh
 
   # Purpose: {{{
@@ -399,13 +488,29 @@ cmdfu() { #{{{2
   # store our keywords in the variable `keywords`, replacing spaces with dashes
   keywords="$(sed 's/ /-/g' <<< "$@")"
   # store their base64 encoding in `encoding`
-  # FIXME: how to get rid of `echo`?{{{
-  # we can't use `<<<` because `base64` doesn't accept a string as its input,
-  # only a file
+  # Could I replace `printf` with `<<<`?{{{
+  #
+  # No.
+  #
+  # Watch:
+  #
+  #         $ printf "hello world" | base64
+  #
+  #             → aGVsbG8gd29ybGQ= (✔)
+  #
+  #         $ base64 <<< 'hello world'
+  #         $ printf "hello world\n" | base64
+  #
+  #             → aGVsbG8gd29ybGQK (✘)
+  #
+  # We can't use `<<<` because when the shell expands a “here string”:
+  #
+  #       The result is  supplied as a single string, WITH A  NEWLINE APPENDED, to the
+  #       command on its standard input.
+  #
+  # The appended newline alters the encoding.
   #}}}
-  encoding="$(echo -n "$@" | base64)"
-  #                 │
-  #                 └ remove ending newline, because it alters the encoding result
+  encoding="$(printf "$@" | base64)"
 
   # Alternative using `highlight`:{{{
   #
@@ -443,56 +548,60 @@ cmdfu() { #{{{2
 
 dl_sub() { #{{{2
   emulate -LR zsh
-  cd ~/Videos/
+  cd "${HOME}/Videos/"
   subliminal -l fr -- "$1"
   cd -
 }
 
-fzf_sr() { #{{{2
-  emulate -LR zsh
-  sr "$(sed '/^$/d' ~/.config/surfraw/bookmarks | sort -n | fzf -e)" ;}
-  #     ├─────────────────────────────────────┘   ├─────┘   ├────┘
-  #     │                                         │         └ search the pattern input by the user
-  #     │                                         │           exactly (disable fuzzy matching)
-  #     │                                         │           -e` = `--exact` exact-match
-  #     │                                         │
-  #     │                                         └ sort numerically
-  #     └ remove empty lines in
-  #       the bookmark file
-
-fzf_clipboard() { #{{{2
-  # fuzzy find clipboard history
-  echo -n "$(greenclip print | fzf -e -i)" | xclip -selection clipboard ;
+ff_audio_record() { #{{{2
+  ffmpeg -f pulse -i default -y /tmp/rec.wav
+  printf "\nThe audio stream has been recorded into '/tmp/rec.wav'\n"
 }
 
-lrv() { #{{{2
+fzf_sr() { #{{{2
+  emulate -LR zsh
+  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
+  #     ├─────────────────────────────────────────────┘   ├─────┘   ├────┘
+  #     │                                                 │         └ search the pattern input by the user
+  #     │                                                 │           exactly (disable fuzzy matching)
+  #     │                                                 │           -e` = `--exact` exact-match
+  #     │                                                 │
+  #     │                                                 └ sort numerically
+  #     └ remove empty lines in
+  #       the bookmark file
+}
+
+fzf_clipboard() { #{{{2
   emulate -LR zsh
 
-  # Fonction lrv (Locate with Regexp and Vim) qui permet de simplifier
-  # la syntaxe d'une recherche avec locate quand on veut utiliser une expression régulière.
+  # fuzzy find clipboard history
+  printf "$(greenclip print | fzf -e -i)" | xclip -selection clipboard
+}
 
-  # En effet si on cherche tous les fichiers contenant foo et (bar ou baz), il faut taper :
-  # locate -ir 'foo.*\(bar\|baz\)'
+loc() { #{{{2
+  # Purpose:{{{
+  #
+  # Suppose you want to find all files containing `foo` and `bar` or `baz`:
+  #
+  #     $ locate -ir 'foo.*\(bar\|baz\)'
+  #
+  # With this function, the command is simpler:
+  #
+  #     $ loc 'foo (bar|baz)'
+  #}}}
 
-  # Grâce à la fonction qui suit on peut se contenter de taper :  lrv 'foo (bar|baz)'
-
-  # On echo tous les arguments passés à la fonction, et on fait 4 substitutions
-  # (en affectant le résultat à la variable `keywords`) :
-
-  #     <space>   →  .*  du coup 'foo bar' devient 'foo.*bar'
-
-  #     (         →  \(
-  #     |         →  \|      plus besoin d'échapper les symboles (,| et )
-  #     )         →  \)
-
-  # Vim lit le résultat de la commande `locate` (via le dernier tiret qui redirige
-  # stdin vers le pipe précédent), en mode read-only (-R).
-  # Ceci permet d'ouvrir ensuite les fichiers trouvés via le raccourci go de vim.
-  # Le mode read-only évite d'écrire un fichier par accident (et en plus pas de .swp).
-
-  keywords=$(echo "$@" | sed 's/ /.*/g' | sed 's:(:\\(:g'| sed 's:|:\\|:g' | sed 's:):\\):g')
-  locate -ir "$keywords" | vim -R --not-a-term -
-
+  emulate -LR zsh
+  #               ┌ 'foo bar' → 'foo.*bar'
+  #               │                         ┌ ( → \(
+  #               │                         │                ┌ | → \|
+  #               │                         │                │                 ┌ ) → \)
+  #               ├──────┐                  ├───────┐        ├───────┐         ├───────┐
+  keywords=$(sed 's/ /.*/g' <<< "$@" | sed 's:(:\\(:g'| sed 's:|:\\|:g' | sed 's:):\\):g')
+  locate -ir "${keywords}" | vim -R --not-a-term -
+  #       ││
+  #       │└ search for a basic regexp (not a literal string)
+  #       │
+  #       └ ignore the case
 }
 
 mkcd() { #{{{2
@@ -506,7 +615,6 @@ mountp() { #{{{2
 
   # mount pretty ; fonction qui espace / rend plus jolie la sortie de la commande mount
   mount | awk '{ printf "%-11s %s %-26s %s %-15s %s\n", $1, $2, $3, $4, $5, $6 }' -
-
 }
 
 nstring() { #{{{2
@@ -533,6 +641,8 @@ nv() { #{{{2
 #      Do NOT use parentheses to surround the  body of the function and create a
 #      subshell. It could cause an issue when we suspend then restart Vim.
 #           https://unix.stackexchange.com/a/445192/289772
+
+  emulate -LR zsh
 
   # check whether a Vim server is running
   #
@@ -741,67 +851,227 @@ restart_vim() {
 }
 
 palette(){ #{{{2
+  emulate -LR zsh
+
   local i
   for i in {0..255} ; do
     printf '\e[48;5;%dm%3d\e[0m ' "$i" "$i"
     if (( i == 15 )) || (( i > 15 )) && (( (i-15) % 6 == 0 )); then
-      printf "\n";
+      printf '\n'
     fi
   done
 }
 
 ppa_what_have_you() { #{{{2
+  emulate -LR zsh
   awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$@"
 }
 
-# trigonometry {{{2
-
-# Trigonometric functions (input is expected in degrees).
-# For more formulas (in degrees or radians):
-# http://advantage-bash.blogspot.fr/2012/12/trignometry-calculator.html
-# TODO:
-# Check whether these formulas are always correct.
-
-sin() {
+truecolor() { #{{{2
   emulate -LR zsh
-  bc -l <<< "scale=5;s($1*0.017453293)"
+
+  local i r g b
+
+  # What's `r`, `g` and `b`?{{{
+  #
+  # The quantities of red (r), green (g) and blue (b) for each color we're going to test.}}}
+  # How do we make them evolve?{{{
+  #
+  # To produce a specrum of colors,  they need to evolve in completely different
+  # ways. So, we make:
+  #
+  #     • `r` decrease from 255  (to make the specrum begin from very red)
+  #                  to     0  (to get most shades of red)
+  #
+  #     • `b` increase from   0
+  #                  to   255
+  #
+  #     • `g`    increase from 0   to 255  (but faster than blue so that we produce more various colors)
+  #       then decrease from 255 to 0    (via `if (g > 255) g = 2*255 - g;`)
+  #
+  # Summary:
+  #
+  #     r:  255 → 0
+  #     g:  0   → 255 → 0
+  #     b:  0   → 255
+  #}}}
+  # Why 79?{{{
+  #
+  # By default terminals have 80 columns.
+  #}}}
+  for ((i = 0; i <= 79; i++)); do
+    b=$((i*255/79))
+    g=$((2*b))
+    r=$((255-b))
+    if [[ $g -gt 255 ]]; then
+      g=$((2*255 - g))
+    fi
+    printf '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
+  done
+  printf '\n'
 }
 
-cos() {
+up() { #{{{2
   emulate -LR zsh
-  bc -l <<< "scale=5;c($1*0.017453293)"
+
+  # make sure `~/log/` exists
+  [[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
+  LOGFILE="${HOME}/log/update_system.log"
+  printf '\n-----------\n%s\n-----------\n\n' "$(date +%m-%d\ %H:%M)"
+  __update_system 2>&1 | tee -a "${LOGFILE}"
 }
 
-tan() {
+__update_system() {
   emulate -LR zsh
-  bc -l <<< "scale=5;s($1*0.017453293)/c($1*0.017453293)"
-}
 
-asin() {
-  emulate -LR zsh
-  if (( $(echo "$1 == 1" | bc -l) )) ; then
-    echo "90"
-  elif (( $(echo "$1 < 1" | bc -l) )) ; then
-  bc -l <<< "scale=3;a(sqrt((1/(1-($1^2)))-1))/0.017453293"
-  elif (( $(echo "$1 > 1" | bc -l) )) ; then
-    echo "error"
+  # update
+  sudo aptitude update
+  sudo aptitude safe-upgrade
+
+  __update_git_programs 'ranger' "${HOME}/GitRepos/ranger/"
+
+  # For more info:{{{
+  #
+  #     https://tex.stackexchange.com/a/55459/169646
+  #}}}
+  printf '\n----------------\ntexlive packages\n----------------\n\n'
+  #       ┌ https://stackoverflow.com/a/677212/9780968
+  #       ├────────┐
+  if [[ $(command -v tlmgr) ]]; then
+    tlmgr update --self --all --reinstall-forcibly-removed
+    #              │      │     │{{{
+    #              │      │     └ reinstall a package
+    #              │      │       if it was corrupted during a previous update
+    #              │      │
+    #              │      └ update all packages
+    #              │
+    #              └ update `tlmgr` itself}}}
   fi
+
+  printf '\n----------\nyoutube-dl\n----------\n\n'
+  up_yt
+
+  __update_git_programs 'zsh-completions'         "${HOME}/.zsh/zsh-completions/"
+  __update_git_programs 'zsh-interactive-cd'      "${HOME}/.zsh/plugins/zsh-interactive-cd"
+  __update_git_programs 'zsh-syntax-highlighting' "${HOME}/.zsh/plugins/zsh-interactive-cd"
+  __update_git_programs 'zaw'                     "${HOME}/.zsh/plugins/zaw"
 }
 
-acos() {
-  emulate -LR zsh
-  if (( $(echo "$1 == 0" | bc -l) )) ; then
-    echo "90"
-  elif (( $(echo "$1 <= 1" | bc -l) )) ; then
-  bc -l <<< "scale=3;a(sqrt((1/($1^2))-1))/0.017453293"
-  elif (( $(echo "$1 > 1" | bc -l) )) ; then
-    echo "error"
-  fi
+__update_git_programs() {
+  local width dashes
+  # How to get the length of a string?{{{
+  #
+  #   $ string='hello'
+  #   $ echo ${#string}
+  #
+  # Source:
+  #
+  #     https://stackoverflow.com/a/17368090/9780968
+  #}}}
+  width=${#1}
+  # How to repeat a string (like `repeat('foo', 3)`)? {{{
+  #
+  # Contrary to Vim's `printf()`, you  can give more expressions than `%s` items
+  # in the format:
+  #
+  #     " ✘
+  #     :echo printf('-%s+', 'a', 'b', 'c')
+  #
+  #         → E767: Too many arguments to printf()
+  #
+  #     # ✔
+  #     $ printf '-%s+' 'a' 'b' 'c'
+  #
+  #         → -a+-b+-c+
+  #
+  # `$ printf` repeats the format as many times as necessary.
+  # So:
+  #
+  #     $ printf '-%s' {1..5}
+  #
+  #         → -1-2-3-4-5
+  #
+  #     $ printf '%s' 3
+  #
+  #         → 3
+  #
+  #     $ printf '%.0s' 3
+  #
+  #         → ∅ (empty string, because the precision flag `.0` asks for 0 characters)
+  #
+  #     $ printf '-%.0s' {1..5}
+  #
+  #         → -----
+  #
+  # Source:
+  #
+  #     https://stackoverflow.com/a/5349842/9780968
+  #}}}
+  dashes="$(printf -- '-%.0s' $(seq 1 ${width}))"
+  #                │
+  #                └ necessary for bash, not zsh
+  # `zsh` alternative:{{{
+  #
+  #   dashes="$(printf '-%.0s' {1..${width}})"
+  #
+  # In bash, inside a brace expansion, you can't refer to a variable.
+  # So, instead of writing this:
+  #
+  #     # ✘
+  #     $ echo {1..${width}}
+  #
+  # You have to write this
+  #
+  #     # ✔
+  #     $ echo $(seq 1 ${width})
+  #}}}
+
+  printf "\n%s\n$1\n%s\n\n" "${dashes}" "${dashes}"
+  [[ -d "$2" ]] || mkdir -p "$2"
+  git -C "$2" pull
 }
 
-atan() {
+up_yt() { #{{{2
+  # https://rg3.github.io/youtube-dl/download.html
+  sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
+  sudo chmod a+rx /usr/local/bin/youtube-dl
+}
+
+xt() { #{{{2
+  # Purpose:{{{
+  #
+  # Extract an archive using the `atool` command.
+  # Then,  cd  into  the  directory  where  the  contents  of  the  archive  was
+  # extracted. The code is taken from `:Man atool`.
+  #}}}
   emulate -LR zsh
-  bc -l <<< "scale=3;a($1)/0.017453293"
+
+  TMP=$(mktemp /tmp/xt.XXXXXXXXXX)
+  #     │                  │
+  #     │                  └ template for the filename, the `X` will be
+  #     │                    randomly replaced with characters matched
+  #     │                    by the regex `[0-9a-zA-Z]`
+  #     │
+  #     └ create a temporary file and store its path into `TMP`
+
+  atool -x --save-outdir="${TMP}" "$@"
+  #          │
+  #          └ write the name of the folder in which the files have been
+  #            extracted inside the temporary file
+
+  # Assign the name of the extraction folder inside to the variable `DIR`.
+  DIR="$(cat "${TMP}")"
+  [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
+  #  ├─────────┘    ├────────────┘       ├─────────┘
+  #  │              │                    │
+  #  │              │                    └ enter it
+  #  │              │
+  #  │              └ and if its name is not empty
+  #  │
+  #  └ if the directory `DIR` exists
+
+  # Delete temporary file.
+  rm "${TMP}"
 }
 
 # Variables {{{1
@@ -831,11 +1101,69 @@ bindkey  '\e[3~'  delete-char
 
 # S-Tab {{{2
 
+# TODO: To document.
+#
+# Source:
+#
+#     https://unix.stackexchange.com/a/32426/232487
+#
+# Idea: improve the function so that it opens the completion menu,
+# this way we could cd into any directory (without `cd`, thanks to `AUTOCD`).
+function reverse-menu-complete-or-list-files() {
+  emulate -LR zsh
+  if [[ $#BUFFER == 0 ]]; then
+    BUFFER="ls "
+    CURSOR=3
+    zle list-choices
+    zle backward-kill-word
+  else
+    # FIXME: why doesn't `s-tab` cycle backward?{{{
+    #
+    # MWE:
+    #         autoload -Uz compinit
+    #         compinit
+    #         zstyle ':completion:*' menu select
+    #         function reverse-menu-complete-or-list-files() {
+    #           emulate -LR zsh
+    #           if [[ $#BUFFER == 0 ]]; then
+    #             BUFFER="ls "
+    #             CURSOR=3
+    #             zle list-choices
+    #             zle backward-kill-word
+    #           else
+    #             zle reverse-menu-complete
+    #           fi
+    #         }
+    #         zle -N reverse-menu-complete-or-list-files
+    #         bindkey '\e[Z' reverse-menu-complete-or-list-files
+    #
+    # If I replace `reverse-menu-complete` with `backward-kill-word`,
+    # `zle` deletes the previous word as expected, so why doesn't
+    # `reverse-menu-complete` work as expected?
+    #
+    # It  seems that  `reverse-menu-complete` is  unable to  detect that  a menu
+    # completion is  opened. Therefore, it  simply tries  to COMPLETE  the entry
+    # selected in the menu, instead of cycling backward.
+    #}}}
+    zle reverse-menu-complete
+  fi
+}
+
+# bind `reverse-menu-complete-or-list-files` to s-tab
+# Why is it commented?{{{
+#
+# Currently,  this key  binding breaks  the behavior  of `s-tab`  when we  cycle
+# through the candidates of a completion menu.
+#}}}
+#     zle -N reverse-menu-complete-or-list-files
+#     bindkey '\e[Z' reverse-menu-complete-or-list-files
+
 # use S-Tab to cycle backward during a completion
-# the shell doesn't seem to recognize the keysym `S-Tab`
-# but when we press `S-Tab`, the terminal receives the keycodes `escape + [ + Z`
-# so we use them in the lhs of our key binding
 bindkey '\e[Z' reverse-menu-complete
+#        ├──┘
+#        └ the shell doesn't seem to recognize the keysym `S-Tab`
+#          but when we press `S-Tab`, the terminal receives the keycodes `escape + [ + Z`
+#          so we use them in the lhs of our key binding
 
 # CTRL {{{2
 # C-SPC      set-mark-command {{{3
@@ -923,47 +1251,14 @@ bindkey '^T' transpose-chars
 
 reread_zshrc() {
   emulate -LR zsh
-# FIXME:
-# The redirections in the following command, and all the explanation shouldn't
-# be need in the next release of zsh. Remove the redirections and the
-# comments after updating zsh?
+  . "${HOME}/.zshrc" 2>/dev/null
+#                    └─────────┤{{{
+#                              └ “stty: 'standard input': Inappropriate ioctl for device”
+#
+# In case of an issue, this may help:
+#
+#     https://unix.stackexchange.com/a/370506/232487
 #     https://github.com/zsh-users/zsh/commit/4d007e269d1892e45e44ff92b6b9a1a205ff64d5#diff-c47c7c7383225ab55ff591cb59c41e6b
-#
-#                      ┌ redirect stdin from /dev/null
-#            ┌─────────┤
-  . "${HOME}"/.zshrc < /dev/null 2> /dev/null
-#                        └──────────┤
-#                                   └ redirect possible error messages to
-#                                   /dev/null
-#
-# Why those redirections?{{{
-#
-# They prevent  the `stty`  and `dircolors` commands,  sourced in  `~/.shrc`, to
-# complain.
-#
-# zsh closes the stdin of a `zle` widget to avoid the commands it executes to
-# interfere with user input. So, initially, the stdin of `reread_zshrc()` is
-# closed. Because of this, the next command won't have the terminal as its
-# stdin. Instead, its stdin will be the first file it opens.
-# The 1st file opened by `dircolors` will be `~/.dircolors`. So, the stdin of
-# `dircolors` should be `~/.dircolors`.
-#
-# Pb: as soon as `dircolors` opens `~/.dircolors`, it IS its stdin.
-# So, `dircolors` tries to make `~/.dircolors` its stdin while it has already
-# been done. It raises the error:
-#
-#         dircolors: /home/user/.dircolors: Bad file descriptor
-#
-# For the `stty` command, the problem is simpler. `stty` expects an input, but
-# zsh has closed the terminal. The error message is similar:
-#         stty: 'standard input': Bad file descriptor
-#
-# TODO:
-# I think the whole issue has been fixed in recent versions of zsh.
-# Update zsh, and if it's fixed, remove this whole comment.
-#
-# For more info:
-#         https://unix.stackexchange.com/a/370506/232487
 #}}}
 }
 zle -N reread_zshrc
@@ -973,11 +1268,11 @@ bindkey '^X^R' reread_zshrc
 #
 # re-execute last command with higher privileges
 #
-#                       ┌─ preserve some variables in current environment
+#                       ┌ preserve some variables in current environment
 #                       │
 bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
 #                               │
-#                               └─ make sure `PATH` is preserved, in case `-E` didn't
+#                               └ make sure `PATH` is preserved, in case `-E` didn't
 #
 # Alternative:
 #     bindkey -s '^Xs' 'sudo !!^M'
@@ -1029,18 +1324,6 @@ bindkey -s '^Xr' '^A^Kfor f in *; do mv \"$f\" \"${f}\";done\e7^B'
 #
 # https://unix.stackexchange.com/a/10851/232487
 fancy-ctrl-z () {
-  # `emulate -R zsh` resets all the options to their default value, which can be
-  # checked with:
-  #               ┌─ current environment
-  #               │         ┌─ reset environment
-  #               │         │
-  #     vimdiff <(setopt) <(emulate -R zsh; setopt)
-  #
-  # `emulate -L` makes the new values local to the current function, which
-  # prevents the changes to affect the current interactive zsh session.
-  #
-  # Here, we don't need this command, however it can be a good habit to include it.
-  # https://unix.stackexchange.com/a/372866/232487
   emulate -LR zsh
 
   # if the current line is empty …
@@ -1080,29 +1363,7 @@ bindkey '^Z' fancy-ctrl-z
 # M-#       pound-insert {{{3
 bindkey '\e#' pound-insert
 
-# M-e       run-help {{{3
-#
-# from `type run-help`:    run-help is an autoload shell function
-# it's an alias to `man` that will look in other places before invoking man
-#
-# by default it's bound to `M-h`, but use this key to move between tmux windows
-# so rebind it to `M-e` instead
-bindkey '\ee' run-help
-
-# M-o       previous-directory {{{3
-# cycle between current dir and old dir
-previous-directory() {
-  emulate -LR zsh
-  # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
-  # so, no need to check it's not empty
-  builtin cd -
-  # refresh the prompt so that it reflects the new working directory
-  zle reset-prompt
-}
-zle -N previous-directory
-bindkey '\eo' previous-directory
-
-# M-c/l/u   change-case {{{3
+# M-c/l/u   change-Case {{{3
 
 # zle provides several functions to modify the case of a word:
 #
@@ -1132,7 +1393,46 @@ bindkey '\euu' up-case-word
 # We could press `M-u` to enter the submode, then, for a brief period of time,
 # `c`, `l` or `u` would change the case of words.
 
-# M-Z       fuzzy-select-output {{{3
+# M-e       run-hElp {{{3
+#
+# from `type run-help`:    run-help is an autoload shell function
+# it's an alias to `man` that will look in other places before invoking man
+#
+# by default it's bound to `M-h`, but use this key to move between tmux windows
+# so rebind it to `M-e` instead
+bindkey '\ee' run-help
+
+# M-m       norMalize-command-line {{{3
+
+# TODO:
+# Explain how it works.
+# Also,   what's    the   difference   between    `normalize-command-line`   and
+# `expand-aliases`?
+# They seem to do the same thing. If that's so, then remove one of the functions
+# and key bindings.
+normalize-command-line () {
+  functions[__normalize_command_line_tmp]=$BUFFER
+  BUFFER=${${functions[__normalize_command_line_tmp]#$'\t'}//$'\n\t'/$'\n'}
+  ((CURSOR == 0 || CURSOR == $#BUFFER))
+  unset 'functions[__normalize_command_line_tmp]'
+}
+zle -N normalize-command-line
+bindkey '\em' normalize-command-line
+
+# M-o       previous-directory (Old) {{{3
+# cycle between current dir and old dir
+previous-directory() {
+  emulate -LR zsh
+  # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
+  # so, no need to check it's not empty
+  builtin cd -
+  # refresh the prompt so that it reflects the new working directory
+  zle reset-prompt
+}
+zle -N previous-directory
+bindkey '\eo' previous-directory
+
+# M-Z       fuZzy-select-output {{{3
 
 # insert an entry from the output of the previous command,
 # selecting it with fuzzy search
@@ -1353,24 +1653,20 @@ setopt MENU_COMPLETE
 setopt RM_STAR_SILENT
 
 # Abbreviations {{{1
-# DON'T MOVE ABBREVIATIONS BEFORE KEY BINDINGS
-#
-# … because in the `key bindings` section we execute `bindkey -e`
-# and it seems to break abbreviations (maybe because it removes the space key
-# binding?)
 
 # http://zshwiki.org/home/examples/zleiab
 
-#        ┌─ `abbrev` refer to an associative array parameter
+#        ┌ `abbrev` refer to an associative array parameter
 #        │
 declare -Ag abbrev
 #         │
-#         └─ don't restrict to local scope
+#         └ don't restrict to local scope
 
 abbrev=(
   # column
   "Jc"    "| awk '{ print $"
   "Jn"    "2>/dev/null"
+  "Jp"    "printf '"
   "Jt"    "| tail -20"
   "Jv"    "vim -Nu /tmp/vimrc -U NONE -i NONE --noplugin"
 )
@@ -1421,6 +1717,8 @@ abbrev-expand() {
     # CURSOR=$(($#LBUFFER))
     # NOTE:
     # by default, CURSOR=$#LBUFFER
+  elif [[ $MATCH = 'Jp' ]]; then
+    RBUFFER="\n'"
   fi
 
   # we need to insert the key we've just typed (here space), otherwise,
@@ -1457,60 +1755,17 @@ bindkey -M isearch ' ' self-insert
 # … as soon as we would type a space in a search, we would leave the latter and
 # go back to the regular command line.
 
-# Various {{{1
-
-# normalize-command-line () {
-#   functions[__normalize_command_line_tmp]=$BUFFER
-#   BUFFER=${${functions[__normalize_command_line_tmp]#$'\t'}//$'\n\t'/$'\n'}
-#   ((CURSOR == 0 || CURSOR == $#BUFFER))
-#   unset 'functions[__normalize_command_line_tmp]'
-# }
-# zle -N normalize-command-line
-# bindkey '\eo' normalize-command-line
-
-
-# TODO: fully document (and rename function?)
-# Idea: improve the function so that it opens the completion menu,
-# this way we could cd into any directory (without `cd`, thanks to `AUTOCD`).
-#
-# expand-or-complete-or-list-files
-# https://unix.stackexchange.com/a/32426/232487
-function expand-or-complete-or-list-files() {
-  emulate -LR zsh
-  if [[ $#BUFFER == 0 ]]; then
-    BUFFER="ls "
-    CURSOR=3
-    zle list-choices
-    zle backward-kill-word
-  else
-    # FIXME:
-    # why doesn't `s-tab` cycle backward?
-    zle reverse-menu-complete
-    # if I replace `reverse-menu-complete` with `backward-kill-word`,
-    # `zle` deletes the previous word as expected, so why doesn't
-    # `reverse-menu-complete` work as expected?
-    #
-    # It seems that `reverse-menu-complete` is unable to detect that a menu
-    # completion is already in progress. Therefore, it simply tries to COMPLETE
-    # the entry selected in the menu, instead of cycling backward.
-  fi
-}
-
-# bind to s-tab
-#   zle -N expand-or-complete-or-list-files
-# FIXME:
-# Currently, this binding  breaks the behavior of `s-tab` when  we cycle through
-# the candidates of a completion menu.
-#   bindkey '\e[Z' expand-or-complete-or-list-files
-
 # Syntax highlighting {{{1
 
 # customize default syntax highlighting
-# zle_highlight=(paste:fg=yellow,underline region:fg=yellow suffix:bold)
-#              │                         │                │                                   v
-#              │                         │                └── some suffix characters (Document/)
-#              │                         └── the region between the cursor and the mark       ^
-#              └── what we paste with C-S-v
+#
+#     zle_highlight=(paste:fg=yellow,underline region:fg=yellow suffix:bold)
+#                    │                         │                │                                 v
+#                    │                         │                └ some suffix characters (Document/)
+#                    │                         │                                                  ^
+#                    │                         └ the region between the cursor and the mark
+#                    │
+#                    └ what we paste with C-S-v
 
 # Source the plugin `zsh-syntax-highlighting`:
 #     https://github.com/zsh-users/zsh-syntax-highlighting
@@ -1520,7 +1775,7 @@ function expand-or-complete-or-list-files() {
 # If we source it before some custom widgets, it will still work, but won't be
 # able to properly highlight the latter.
 
-. ~/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+. "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 # Choose which highlighters we want to enable:
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
@@ -1543,13 +1798,6 @@ declare -A ZSH_HIGHLIGHT_STYLES
 # rewrite this block of lines with a `for` loop to avoid repetition,
 # and to provide future scaling if we need to apply the same style (`fg=black`)
 # to other tokens
-#
-# FIXME:
-# When completing an argument (ex: echo d Tab), the argument is white.
-# I've tried all available token, none seems to allow me to change this color to
-# black. Ask how to do it on the bug tracker of the zsh plugin.
-#
-# myvar=123
 ZSH_HIGHLIGHT_STYLES[assign]='fg=black'
 # `backtick expansion`
 ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=black'
@@ -1607,6 +1855,7 @@ ZSH_HIGHLIGHT_STYLES[bracket-level-4]='fg=green,bold'
 
 # Color in red commands beginning with some chosen pattern:
 ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
+
 # This works because we enabled the `pattern` highlighter.
 # The syntax of the assignment is:
 # ZSH_HIGHLIGHT_PATTERNS+=('shell cmd' 'style')
@@ -1628,6 +1877,6 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # For the root highlighter to work, we must write the 3 following lines in
 # /root/.zshrc (as root obviously):
 #
-#     . $HOME/GitRepos/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+#     . "$HOME/GitRepos/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 #     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main root)
 #     ZSH_HIGHLIGHT_STYLES[root]='bg=red'
