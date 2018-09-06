@@ -1,7 +1,3 @@
-if !exists('g:loaded_emmet_vim')
-    finish
-endif
-
 " Options {{{1
 
 " We don't want global mappings. We prefer buffer-local ones.
@@ -116,7 +112,11 @@ fu! s:emmet_set_mappings() abort
     xmap  <buffer><nowait><silent>  <c-g>p      <plug>(emmet-code-pretty)
 
     " Now, you also need to install the `<plug>` mappings.
-    EmmetInstall
+    if exists(':EmmetInstall') ==# 2
+    "  │
+    "  └ if we disable `emmet.vim`, the command won't exist
+        EmmetInstall
+    endif
     " Would this work if I lazy-loaded emmet?{{{
     "
     " No.

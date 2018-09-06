@@ -21,6 +21,10 @@ See the comment at the top of `nop.vim` for an explanation.
 
 # Should I put a guard in those files?
 
+    if !exists('g:some_plugin')
+        finish
+    endif
+
 No.
 
 When they're  sourced, you don't know  yet whether the plugin  you're setting up

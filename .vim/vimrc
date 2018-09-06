@@ -6579,6 +6579,20 @@ endfu
 " We would need to be sure that 'esckeys' is re-enabled.
 " Also,  it would prevent  to use function-like keys  during the recording  of a
 " macro.
+"
+" 134 -
+" I think there's  no need to escape (so that the visual  marks are set) to know
+" where the visual selection begins/ends.
+" You can use `getpos('v')`, and `line('.')`:
+"
+"         xno  <silent><expr>  <c-a>  Func()
+"         fu! Func() abort
+"             let lnums = [ getpos('v')[1], line('.')]
+"             echom 'the visual selection starts at line '.min(lnums).' and ends at line '.max(lnums)
+"         endfu
+"
+" Try to use this technique in your plugin(s) instead of escaping.
+" Unless they really need to update the visual marks.
 
 
 

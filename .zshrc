@@ -1,13 +1,16 @@
 # TODO:
 # Remove `echo` everywhere:
 #
-#     noa vim /\C\<echo\>/gj /home/jean/Dropbox/conf/bin/**/*.sh
+#     noa vim /\C\<echo\>/gj /home/jean/Dropbox/conf/bin/**/*.sh | cw
 
 # TODO:
-# Do this substitution:
-#     "${HOME}"/file
-#     →
-#     "${HOME}/file"
+# Do these substitutions:
+#
+#     ~ → ${HOME}
+#
+#     [ ... ] → [[ ... ]] (noa vim /\s\[\s/gj ~/bin/**/*.sh | cw)
+#
+#     "${HOME}"/file → "${HOME}/file"
 
 # TODO:
 # Search for `HOME` in zshrc/bashrc.
@@ -29,10 +32,6 @@
 #
 #     export CDPATH=:"${HOME}":/tmp
 #                    ^       ^
-
-# TODO:
-# Improve `~/bin/ebook-downloader.sh`.
-
 
 
 # FIXME:

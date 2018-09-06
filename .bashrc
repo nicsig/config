@@ -43,7 +43,7 @@ esac
 # Besides the `case` syntax seems more powerful.
 
 # set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+if [[ -z "${debian_chroot:-}" ]] && [[ -r /etc/debian_chroot ]]; then
   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
@@ -141,11 +141,11 @@ export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
 # cd bin share    ⇔    cd /usr/local/share/
 
 cd() {
-  if [ $# -eq 2 ]; then
+  if [[ $# -eq 2 ]]; then
     # bashism replacing the first occurrence of `$1` inside `$PWD` with `$2`
     builtin cd "${PWD/$1/$2}"
 
-  elif [ $# -eq 1 ]; then
+  elif [[ $# -eq 1 ]]; then
     builtin cd "$1"
 #   │
 #   └── force `cd` to be interpreted as a builtin;
