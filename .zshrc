@@ -1,4 +1,16 @@
 # TODO:
+# Functions which are not called interactively (e.g. used for widgets),
+# should be made private (i.e. prefixed with underscore(s)).
+
+# TODO:
+# Replace everywhere `cd -` and `-C` with `pushd` and `popd`?
+
+# TODO:
+# To document in our notes:
+#
+#     https://unix.stackexchange.com/a/88851/289772
+
+# TODO:
 # Remove `echo` everywhere:
 #
 #     noa vim /\C\<echo\>/gj /home/jean/Dropbox/conf/bin/**/*.sh | cw
@@ -32,17 +44,9 @@
 #
 #     export CDPATH=:"${HOME}":/tmp
 #                    ^       ^
-
-
-# FIXME:
-# The plugin `zsh-syntax-highlighting` breaks the `yank-pop` widget (M-y).
-# After you paste a deleted text with  C-y, M-y allows you to rotate between the
-# last  kills. With  the  plugin,  you  can only  get  the  previous  kill,  not
-# further. Reproduce:
 #
-#     bindkey -e
-#     . ~/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-#     return
+# See:
+#     https://unix.stackexchange.com/a/68748/289772
 
 
 # TODO:
@@ -281,6 +285,13 @@ zstyle ':completion:*' menu select
 # enable case-insensitive search (useful for the `zaw` plugin)
 zstyle ':filter-select' case-insensitive yes
 
+# Suggest us only video files when we tab complete `$ mpv`.
+#
+# TODO: To explain.
+# Source:
+#     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
+zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
+
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
 #
@@ -318,6 +329,11 @@ bindkey -e
 # eval "$(fasd --init auto)"                        code générique pour n'importe quel shell
 # eval "$(fasd --init posix-alias zsh-hook)"        code minimaliste pour zsh (pas de complétion via tab)
 
+if [[ ! -f ${HOME}/bin/fasd ]]; then
+  curl -sL 'https://raw.githubusercontent.com/clvv/fasd/master/fasd' -o "${HOME}/bin/fasd"
+  chmod +x "${HOME}/bin/fasd"
+fi
+
 fasd_cache="${HOME}/.fasd-init-zsh"
 if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
   fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install >| "${fasd_cache}"
@@ -344,7 +360,7 @@ unset fasd_cache
 #     shortcut widgets
 #     key binds and styles
 #     making sources
-. "${HOME}/.zsh/plugins/zaw/zaw.zsh"
+[[ -f ${HOME}/.zsh/plugins/zaw/zaw.zsh ]] && . "${HOME}/.zsh/plugins/zaw/zaw.zsh"
 
 # Why?{{{
 #
@@ -356,11 +372,12 @@ unset fasd_cache
 #     • we don't have to select an entry which could be far from our current position,
 #       instead we can fuzzy search it via its name
 #}}}
+[[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
 . "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
 
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
-. "${HOME}/.shrc"
+[[ -f ${HOME}/.shrc ]] && . "${HOME}/.shrc"
 
 # Aliases {{{1
 # global {{{2
@@ -373,6 +390,11 @@ unset fasd_cache
 alias -g CL='| wc -l'
 
 alias -g L='| less'
+
+# watch a video stream with mpv:
+#
+#     $ youtube-dl [-f best] 'url' M
+alias -g M=' -o -| mpv -'
 
 # pretty print
 alias -g PP='| column -t'
@@ -390,6 +412,19 @@ alias -g V='2>&1 | vipe >/dev/null'
 #                       └─ don't write on the terminal, the Vim buffer is enough
 
 # regular {{{2
+
+# start `mpv` in “keybindings testing mode”
+alias mpv_test_keybinding='mpv --input-test --force-window --idle'
+#                                │            │              │
+#                                │            │              └ don't quit immediately,
+#                                │            │                even though there's no file to play
+#                                │            │
+#                                │            └ create a video output window even if there is no video
+#                                │
+#                                └ when I press a key, don't execute the bound command,
+#                                instead, display the name of the key on the OSD;
+#                                useful when you're crafting a key binding
+
 
 # TODO:
 # I don't move the `fasd` aliases into `~/.shrc` because I only source its
@@ -916,16 +951,22 @@ up() { #{{{2
   # make sure `~/log/` exists
   [[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
   LOGFILE="${HOME}/log/update_system.log"
-  printf '\n-----------\n%s\n-----------\n\n' "$(date +%m-%d\ %H:%M)"
   __update_system 2>&1 | tee -a "${LOGFILE}"
 }
 
 __update_system() {
   emulate -LR zsh
 
+  printf '\n-----------\n%s\n-----------\n\n' "$(date +%m-%d\ %H:%M)"
+
   # update
   sudo aptitude update
   sudo aptitude safe-upgrade
+
+  # update `mpv` completion function
+  curl -sL 'https://raw.githubusercontent.com/mpv-player/mpv/master/TOOLS/zsh.pl' | \
+    perl - \
+    >"${HOME}/.zsh/my-completions/_mpv"
 
   __update_git_programs 'ranger' "${HOME}/GitRepos/ranger/"
 
@@ -950,13 +991,16 @@ __update_system() {
   printf '\n----------\nyoutube-dl\n----------\n\n'
   up_yt
 
+  [[ -d "${HOME}/.zsh/plugins" ]] || mkdir -p "${HOME}/.zsh/plugins"
   __update_git_programs 'zsh-completions'         "${HOME}/.zsh/zsh-completions/"
   __update_git_programs 'zsh-interactive-cd'      "${HOME}/.zsh/plugins/zsh-interactive-cd"
-  __update_git_programs 'zsh-syntax-highlighting' "${HOME}/.zsh/plugins/zsh-interactive-cd"
+  __update_git_programs 'zsh-syntax-highlighting' "${HOME}/.zsh/plugins/zsh-syntax-highlighting"
   __update_git_programs 'zaw'                     "${HOME}/.zsh/plugins/zaw"
 }
 
 __update_git_programs() {
+  emulate -LR zsh
+
   local width dashes
   # How to get the length of a string?{{{
   #
@@ -1026,14 +1070,43 @@ __update_git_programs() {
   #}}}
 
   printf "\n%s\n$1\n%s\n\n" "${dashes}" "${dashes}"
-  [[ -d "$2" ]] || mkdir -p "$2"
+
+  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zsh-completions'
+  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/changyuheng/zsh-interactive-cd'
+  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zsh-syntax-highlighting'
+  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zaw'
+
   git -C "$2" pull
 }
 
 up_yt() { #{{{2
   # https://rg3.github.io/youtube-dl/download.html
-  sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
-  sudo chmod a+rx /usr/local/bin/youtube-dl
+  curl -sL 'https://yt-dl.org/downloads/latest/youtube-dl' -o "${HOME}/bin/youtube-dl"
+  chmod a+rx "${HOME}/bin/youtube-dl"
+
+  if [[ ! -d "${HOME}/GitRepos/youtube-dl/" ]]; then
+    mkdir -p "${HOME}/GitRepos/"
+    git -C "${HOME}/GitRepos/" clone 'https://github.com/rg3/youtube-dl'
+  fi
+
+  # add current directory to the top of the directory stack
+  pushd
+  cd "${HOME}/GitRepos/youtube-dl"
+  git pull
+  # install zsh completion function
+  make youtube-dl.zsh && \
+    mv "${HOME}/GitRepos/youtube-dl/youtube-dl.zsh" "${HOME}/.zsh/my-completions/_youtube-dl.zsh"
+
+  # install manpage:
+  #     https://askubuntu.com/a/244810/867754
+  #     https://askubuntu.com/a/633924/867754
+  #     man 1 manpath
+  #     man 5 manpath
+  make youtube-dl.1 && \
+    mkdir -p "${HOME}/share/man/man1" && \
+    mv youtube-dl.1 "${HOME}/share/man/man1"
+  # remove top of the directory stack to get back where we were before updating youtube-dl
+  popd
 }
 
 xt() { #{{{2
@@ -1774,6 +1847,7 @@ bindkey -M isearch ' ' self-insert
 # If we source it before some custom widgets, it will still work, but won't be
 # able to properly highlight the latter.
 
+[[ -f ${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
 . "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 # Choose which highlighters we want to enable:

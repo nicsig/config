@@ -1304,6 +1304,8 @@ augroup tags_vimrc
     " update the tags file whenever we write `myfuncs.vim`
     exe 'au BufWritePost '.resolve($HOME.'/.vim/autoload/myfuncs.vim')
     \ . ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
+
+    au! BufWritePost .zshrc call system('source '.shellescape(expand('%:p')))
 augroup END
 
 " temporary files:  undo, swap, backup {{{2

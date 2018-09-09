@@ -48,7 +48,6 @@ augroup filetypedetect
     " We want `sh` instead.
     "}}}
     au! BufRead,BufNewFile ~/.shrc setf sh
-    au! BufRead,BufNewFile ~/.config/xbindkeysrs setf conf
 
     " Why?{{{
     "

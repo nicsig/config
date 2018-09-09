@@ -58,7 +58,7 @@ alias df=dfc
 # https://unix.stackexchange.com/a/299922/287634
 alias fxk='~/bin/keyboard.sh'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'
-alias gsearch='git log --all --source -p -S'
+alias gs='git log --all --source -p -S'
 alias l=ls++
 # ls folders only
 #
@@ -90,9 +90,9 @@ alias mountc='grc mount'
 # This alias shadows the `nb` binary installed by the `nanoblogger` package.
 #}}}
 alias nb='newsboat -q'
-alias prof_zsh='repeat 10 time zsh -i -c exit'
-alias reload_conky='killall -SIGUSR1 conky'
-alias reload_xres='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
+alias zsh_prof='repeat 10 time zsh -i -c exit'
+alias conky_reload='killall -SIGUSR1 conky'
+alias xresources_reload='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
 alias web='WWW_HOME=duckduckgo.com w3m'
 
 
@@ -125,7 +125,7 @@ is_it_free() {
 	apt-file -x search "/$1$"
 }
 
-prof_vim() {
+vim_prof() {
 	TMP="$(mktemp /tmp/.profile_vim.XXXXXXXXXX)"
 	builtin cd /tmp
 	vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
@@ -133,7 +133,7 @@ prof_vim() {
 	builtin cd -
 }
 
-startup_vim() {
+vim_startup() {
 	TMP="$(mktemp /tmp/.startup_vim.XXXXXXXXXX)"
 	builtin cd /tmp
 	vim --startuptime "${TMP}" +'q' startup_vim_file && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' +'sil 7,$!sort -k2' +'$' "${TMP}"
