@@ -49,6 +49,9 @@ augroup filetypedetect
     "}}}
     au! BufRead,BufNewFile ~/.shrc setf sh
 
+    " to get folding
+    au! BufRead,BufNewFile *.log setf markdown
+
     " Why?{{{
     "
     " Sometimes (always?), the snippet definition file for `zsh`

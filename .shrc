@@ -566,44 +566,6 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                                 not sure about the others
 
 # Functions {{{1
-# cfg-* {{{2
-
-#                                 ┌ https://stackoverflow.com/a/7507068/9780968
-#                                 │
-cfg_bash() { "${EDITOR}" "${HOME}/.bashrc" ;}
-cfg_conky_system() { "${EDITOR}" "${HOME}/.conky/system.lua" ;}
-cfg_conky_rings() { "${EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
-cfg_conky_time() { "${EDITOR}" "${HOME}/.conky/time.lua" ;}
-cfg_firefox() { "${EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
-cfg_mpv() { "${EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
-cfg_tmux() { "${EDITOR}" "${HOME}/.tmux.conf" ;}
-cfg_vim() { "${EDITOR}" "${HOME}/.vim/vimrc" ;}
-cfg_shell() { "${EDITOR}" "${HOME}/.shrc" ;}
-cfg_xmodmap() { "${EDITOR}" "${HOME}/.Xmodmap" ;}
-cfg_w3m() { "${EDITOR}" "${HOME}/.w3m/config" ;}
-cfg_zsh() { "${EDITOR}" "${HOME}/.zshrc" ;}
-
-fix() {
-  # For more info:
-  #     https://unix.stackexchange.com/q/79684/289772
-  reset
-  stty sane
-  stty -ixon
-  # What's the `rs1` capability?{{{
-  #
-  # A Reset String.
-  #
-  #     $ man -Kw rs1
-  #     $ man infocmp (/rs1)
-  #     $ man tput (/rs1)
-  #}}}
-  tput rs1
-  tput rs2
-  tput rs3
-  clear
-  printf '\ec'
-}
-
 fzf-surfraw() { #{{{2
   surfraw "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
 }

@@ -32,3 +32,12 @@ fu! s:snr() "{{{1
     return matchstr(expand('<sfile>'), '<SNR>\d\+_')
 endfu
 
+" teardown {{{1
+
+let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
+                    \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+                    \ ."
+                    \      setl fde< fdm< fdt<
+                    \    | exe 'au! my_notes * <buffer>'
+                    \  "
+

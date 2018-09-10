@@ -1,8 +1,4 @@
 # TODO:
-# Functions which are not called interactively (e.g. used for widgets),
-# should be made private (i.e. prefixed with underscore(s)).
-
-# TODO:
 # Replace everywhere `cd -` and `-C` with `pushd` and `popd`?
 
 # TODO:
@@ -383,21 +379,13 @@ unset fasd_cache
 # global {{{2
 
 # We could implement the following global aliases as abbreviations, but we won't
-# because they can only be used at the end of a command. To be expanded,
-# an abbreviation needs to be followed by a space.
+# because they can only be used at the end of a command.
+# To be expanded, an abbreviation needs to be followed by a space.
 
-# count lines
-alias -g CL='| wc -l'
+# align columns
+alias -g AC='| column -t'
 
 alias -g L='| less'
-
-# watch a video stream with mpv:
-#
-#     $ youtube-dl [-f best] 'url' M
-alias -g M=' -o -| mpv -'
-
-# pretty print
-alias -g PP='| column -t'
 
 # silence!
 #                    ┌───── redirect output to /dev/null
@@ -406,6 +394,45 @@ alias -g PP='| column -t'
 alias -g S='>/dev/null 2>&1 &'
 #                           │
 #                           └─ execute in background
+
+# watch a video STream with the local video player:
+#
+#     $ youtube-dl [-f best] 'url' ST
+alias -g ST=' -o -| mpv --cache=4096 -'
+#                         │
+#                         └ sets the size of the cache to 4096kB
+#
+# Why is a cache important?{{{
+#
+# May be useful
+# When playing files from slow media, it's necessary, but  can also have negative
+# effects, especially  with file formats  that require a  lot of seeking,  such as
+# MP4.
+#}}}
+# Is there a downside to using a cache?{{{
+#
+# Yes.
+#}}}
+# Why giving the value '4096'?{{{
+#
+# Because.
+#}}}
+# The default value of the 'cache' option is 'auto', which means that `mpv` will
+# decide depending on the media whether it must cache data.
+# Also,  `--cache=auto` implies  that  the size  of  the cache  will  be set  by
+# '--cache-default', whose default value is '75000kB'.
+# It's too much according to this:
+#
+#     https://streamlink.github.io/issues.html#issues-player-caching
+#
+# They recommend using between '1024' and '8192', so we take the middle value.
+
+# Note that half the cache size will be used to allow fast seeking back.
+# This is also the reason why a full cache is usually not reported as 100% full.
+# The cache  fill display  does not  include the  part of  the cache  reserved for
+# seeking back.
+# The actual  maximum percentage will usually  be the ratio between  readahead and
+# backbuffer sizes.
 
 alias -g V='2>&1 | vipe >/dev/null'
 #                       │
@@ -425,6 +452,7 @@ alias mpv_test_keybinding='mpv --input-test --force-window --idle'
 #                                instead, display the name of the key on the OSD;
 #                                useful when you're crafting a key binding
 
+alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
 
 # TODO:
 # I don't move the `fasd` aliases into `~/.shrc` because I only source its
@@ -466,6 +494,46 @@ alias -s odt=libreoffice
 alias -s pdf=zathura
 
 # Functions {{{1
+# cfg-* {{{2
+
+#                                                       ┌ https://stackoverflow.com/a/7507068/9780968
+#                                                       │
+cfg_autostart() { "${EDITOR}" "${HOME}/bin/autostartrc" ;}
+cfg_bash() { "${EDITOR}" "${HOME}/.bashrc" ;}
+cfg_conky_rings() { "${EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
+cfg_conky_system() { "${EDITOR}" "${HOME}/.conky/system.lua" ;}
+cfg_conky_time() { "${EDITOR}" "${HOME}/.conky/time.lua" ;}
+cfg_firefox() { "${EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
+cfg_mpv() { "${EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
+cfg_shell() { "${EDITOR}" "${HOME}/.shrc" ;}
+cfg_tmux() { "${EDITOR}" "${HOME}/.tmux.conf" ;}
+cfg_vim() { "${EDITOR}" "${HOME}/.vim/vimrc" ;}
+cfg_w3m() { "${EDITOR}" "${HOME}/.w3m/config" ;}
+cfg_xbindkeys() { "${EDITOR}" "${HOME}/.config/xbindkeysrc" ;}
+cfg_xmodmap() { "${EDITOR}" "${HOME}/.Xmodmap" ;}
+cfg_zsh() { "${EDITOR}" "${HOME}/.zshrc" ;}
+
+fix() {
+  # For more info:
+  #     https://unix.stackexchange.com/q/79684/289772
+  reset
+  stty sane
+  stty -ixon
+  # What's the `rs1` capability?{{{
+  #
+  # A Reset String.
+  #
+  #     $ man -Kw rs1
+  #     $ man infocmp (/rs1)
+  #     $ man tput (/rs1)
+  #}}}
+  tput rs1
+  tput rs2
+  tput rs3
+  clear
+  printf '\ec'
+}
+
 cmdfu() { #{{{2
   # What's the effect of `emulate -LR zsh`?{{{
   #
@@ -804,11 +872,11 @@ nv() { #{{{2
 }
 
 # Set a trap for when we send the signal `USR1` from our Vim mapping `SPC R`.
-trap catch_signal_usr1 USR1
+trap __catch_signal_usr1 USR1
 # Function invoked by our trap.
-catch_signal_usr1() {
+__catch_signal_usr1() {
   # reset a trap for next time
-  trap catch_signal_usr1 USR1
+  trap __catch_signal_usr1 USR1
   # useful to get rid of error messages which were displayed during last Vim
   # session
   clear
@@ -859,7 +927,7 @@ catch_signal_usr1() {
 # To restart  Vim automatically, when we're  at the shell prompt  after pressing
 # `SPC R` from Vim.
 #}}}
-restart_vim() {
+__restart_vim() {
   if [[ -n "${restarting_vim}" ]]; then
     # reset the flag
     # restarting_vim=
@@ -957,7 +1025,7 @@ up() { #{{{2
 __update_system() {
   emulate -LR zsh
 
-  printf '\n-----------\n%s\n-----------\n\n' "$(date +%m-%d\ %H:%M)"
+  printf '\n%s\n===========\n\n' "$(date +%m-%d\ %H:%M)"
 
   # update
   sudo aptitude update
@@ -974,7 +1042,7 @@ __update_system() {
   #
   #     https://tex.stackexchange.com/a/55459/169646
   #}}}
-  printf '\n----------------\ntexlive packages\n----------------\n\n'
+  printf '\ntexlive packages\n---\n\n'
   #       ┌ https://stackoverflow.com/a/677212/9780968
   #       ├────────┐
   if [[ $(command -v tlmgr) ]]; then
@@ -988,7 +1056,7 @@ __update_system() {
     #              └ update `tlmgr` itself}}}
   fi
 
-  printf '\n----------\nyoutube-dl\n----------\n\n'
+  printf '\nyoutube-dl\n---\n\n'
   up_yt
 
   [[ -d "${HOME}/.zsh/plugins" ]] || mkdir -p "${HOME}/.zsh/plugins"
@@ -1069,7 +1137,7 @@ __update_git_programs() {
   #     $ echo $(seq 1 ${width})
   #}}}
 
-  printf "\n%s\n$1\n%s\n\n" "${dashes}" "${dashes}"
+  printf "\n$1\n%s\n\n" "${dashes}" "${dashes}"
 
   [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zsh-completions'
   [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/changyuheng/zsh-interactive-cd'
@@ -1090,7 +1158,7 @@ up_yt() { #{{{2
   fi
 
   # add current directory to the top of the directory stack
-  pushd
+  pushd >/dev/null
   cd "${HOME}/GitRepos/youtube-dl"
   git pull
   # install zsh completion function
@@ -1106,7 +1174,7 @@ up_yt() { #{{{2
     mkdir -p "${HOME}/share/man/man1" && \
     mv youtube-dl.1 "${HOME}/share/man/man1"
   # remove top of the directory stack to get back where we were before updating youtube-dl
-  popd
+  popd >/dev/null
 }
 
 xt() { #{{{2
@@ -1162,7 +1230,7 @@ export REPORTTIME=15
 # `precmd_functions` is a variable specific to the zsh shell.
 # No subprocess could understand it.
 #     https://stackoverflow.com/a/1158231/9780968
-# precmd_functions=(restart_vim)
+# precmd_functions=(__restart_vim)
 
 # Key Bindings {{{1
 # Delete {{{2
@@ -1181,7 +1249,7 @@ bindkey  '\e[3~'  delete-char
 #
 # Idea: improve the function so that it opens the completion menu,
 # this way we could cd into any directory (without `cd`, thanks to `AUTOCD`).
-function reverse-menu-complete-or-list-files() {
+__reverse-menu-complete-or-list-files() {
   emulate -LR zsh
   if [[ $#BUFFER == 0 ]]; then
     BUFFER="ls "
@@ -1195,7 +1263,7 @@ function reverse-menu-complete-or-list-files() {
     #         autoload -Uz compinit
     #         compinit
     #         zstyle ':completion:*' menu select
-    #         function reverse-menu-complete-or-list-files() {
+    #         __reverse-menu-complete-or-list-files() {
     #           emulate -LR zsh
     #           if [[ $#BUFFER == 0 ]]; then
     #             BUFFER="ls "
@@ -1206,8 +1274,8 @@ function reverse-menu-complete-or-list-files() {
     #             zle reverse-menu-complete
     #           fi
     #         }
-    #         zle -N reverse-menu-complete-or-list-files
-    #         bindkey '\e[Z' reverse-menu-complete-or-list-files
+    #         zle -N __reverse-menu-complete-or-list-files
+    #         bindkey '\e[Z' __reverse-menu-complete-or-list-files
     #
     # If I replace `reverse-menu-complete` with `backward-kill-word`,
     # `zle` deletes the previous word as expected, so why doesn't
@@ -1221,14 +1289,14 @@ function reverse-menu-complete-or-list-files() {
   fi
 }
 
-# bind `reverse-menu-complete-or-list-files` to s-tab
+# bind `__reverse-menu-complete-or-list-files` to s-tab
 # Why is it commented?{{{
 #
 # Currently,  this key  binding breaks  the behavior  of `s-tab`  when we  cycle
 # through the candidates of a completion menu.
 #}}}
-#     zle -N reverse-menu-complete-or-list-files
-#     bindkey '\e[Z' reverse-menu-complete-or-list-files
+#     zle -N __reverse-menu-complete-or-list-files
+#     bindkey '\e[Z' __reverse-menu-complete-or-list-files
 
 # use S-Tab to cycle backward during a completion
 bindkey '\e[Z' reverse-menu-complete
@@ -1245,7 +1313,7 @@ bindkey '^ ' set-mark-command
 # C-q        quote-big-word {{{3
 
 # useful to quote a url which contains special characters
-quote-big-word() {
+__quote-big-word() {
   emulate -LR zsh
   zle set-mark-command
   zle vi-backward-blank-word
@@ -1258,14 +1326,14 @@ quote-big-word() {
   #   LBUFFER+="'"
   #   zle vi-forward-blank-word
 }
-zle -N quote-big-word
+zle -N __quote-big-word
 #    │
 #    └─ -N widget [ function ]
 #       Create a user-defined widget. When the new widget is invoked
 #       from within the editor, the specified shell function is called.
 #       If no function name is specified, it defaults to the same name as the
 #       widget.
-bindkey '^Q' quote-big-word
+bindkey '^Q' __quote-big-word
 
 # C-r C-h    fzf-history-widget {{{3
 
@@ -1321,7 +1389,7 @@ bindkey '^T' transpose-chars
 
 # C-x C-r         re-source zshrc {{{4
 
-reread_zshrc() {
+__reread_zshrc() {
   emulate -LR zsh
   . "${HOME}/.zshrc" 2>/dev/null
 #                    └─────────┤{{{
@@ -1333,8 +1401,8 @@ reread_zshrc() {
 #     https://github.com/zsh-users/zsh/commit/4d007e269d1892e45e44ff92b6b9a1a205ff64d5#diff-c47c7c7383225ab55ff591cb59c41e6b
 #}}}
 }
-zle -N reread_zshrc
-bindkey '^X^R' reread_zshrc
+zle -N __reread_zshrc
+bindkey '^X^R' __reread_zshrc
 
 # C-x C-s         reexecute-with-sudo {{{4
 #
@@ -1395,7 +1463,7 @@ bindkey -s '^Xr' '^A^Kfor f in *; do mv \"$f\" \"${f}\";done\e7^B'
 #     https://www.youtube.com/watch?v=SW-dKIO3IOI
 #
 # https://unix.stackexchange.com/a/10851/232487
-fancy-ctrl-z () {
+__fancy-ctrl-z () {
   emulate -LR zsh
 
   # if the current line is empty …
@@ -1412,7 +1480,7 @@ fancy-ctrl-z () {
     #             [1]    continued  sleep 100
     #
     #     if there's no paused job:
-    #             fancy-ctrl-z:bg:18: no current job
+    #             __fancy-ctrl-z:bg:18: no current job
   else
     # Push the entire current multiline construct onto the buffer stack.
     # If it's only a single line, this is exactly like `push-line`.
@@ -1422,14 +1490,14 @@ fancy-ctrl-z () {
     zle push-input
   fi
 }
-zle -N fancy-ctrl-z
+zle -N __fancy-ctrl-z
 # NOTE:
 # This  key  binding  won't prevent  us  to  put  a  foreground process  in  the
 # background. When  we hit  `C-z` while  a process  is in  the foreground,  it's
 # probably the terminal driver which intercepts the keystroke and sends a signal
 # to the process to  pause it. In other words, `C-z` should  reach zsh only if
 # no process has the control of the terminal.
-bindkey '^Z' fancy-ctrl-z
+bindkey '^Z' __fancy-ctrl-z
 
 # META {{{2
 # M-#       pound-insert {{{3
@@ -1478,22 +1546,22 @@ bindkey '\ee' run-help
 
 # TODO:
 # Explain how it works.
-# Also,   what's    the   difference   between    `normalize-command-line`   and
-# `expand-aliases`?
+# Also,   what's   the   difference   between   `__normalize-command-line`   and
+# `__expand-aliases`?
 # They seem to do the same thing. If that's so, then remove one of the functions
 # and key bindings.
-normalize-command-line () {
+__normalize-command-line () {
   functions[__normalize_command_line_tmp]=$BUFFER
   BUFFER=${${functions[__normalize_command_line_tmp]#$'\t'}//$'\n\t'/$'\n'}
   ((CURSOR == 0 || CURSOR == $#BUFFER))
   unset 'functions[__normalize_command_line_tmp]'
 }
-zle -N normalize-command-line
-bindkey '\em' normalize-command-line
+zle -N __normalize-command-line
+bindkey '\em' __normalize-command-line
 
 # M-o       previous-directory (Old) {{{3
 # cycle between current dir and old dir
-previous-directory() {
+__previous-directory() {
   emulate -LR zsh
   # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
   # so, no need to check it's not empty
@@ -1501,8 +1569,8 @@ previous-directory() {
   # refresh the prompt so that it reflects the new working directory
   zle reset-prompt
 }
-zle -N previous-directory
-bindkey '\eo' previous-directory
+zle -N __previous-directory
+bindkey '\eo' __previous-directory
 
 # M-Z       fuZzy-select-output {{{3
 
@@ -1528,29 +1596,29 @@ bindkey -s '\eZ' '$(!!|fzf)'
 #        name given by the key and the body given by the value.  Unsetting  a
 #        key removes the definition for the function named by the key.
 
-expand-aliases() {
+__expand-aliases() {
   emulate -LR zsh
-  unset 'functions[_expand-aliases]'
-  # We put the current command line into `functions[_expand-aliases]`
-  functions[_expand-aliases]=$BUFFER
+  unset 'functions[___expand-aliases]'
+  # We put the current command line into `functions[___expand-aliases]`
+  functions[___expand-aliases]=$BUFFER
   #     alias ls='ls --color=auto'
   #     alias -g V='|vipe'
-  #     functions[_expand-aliases]='ls V'
-  #     echo $functions[_expand-aliases]          →  ls --color=auto | vipe
-  #     echo $+functions[_expand-aliases]         →  1
-  #    (($+functions[_expand-aliases])); echo $?  →  0
+  #     functions[___expand-aliases]='ls V'
+  #     echo $functions[___expand-aliases]          →  ls --color=auto | vipe
+  #     echo $+functions[___expand-aliases]         →  1
+  #    (($+functions[___expand-aliases])); echo $?  →  0
 
   # this command does 3 things, and stops as soon as one of them fails:
   #     check the command is syntactically valid
   #     set the buffer
   #     set the position of the cursor
-  (($+functions[_expand-aliases])) &&
-    BUFFER=${functions[_expand-aliases]#$'\t'} &&
+  (($+functions[___expand-aliases])) &&
+    BUFFER=${functions[___expand-aliases]#$'\t'} &&
     CURSOR=$#BUFFER
 }
 
-zle -N expand-aliases
-bindkey '\e^E' expand-aliases
+zle -N __expand-aliases
+bindkey '\e^E' __expand-aliases
 #        │
 #        └─ C-M-e
 
@@ -1610,20 +1678,20 @@ bindkey -M menuselect '^L' forward-char
 #
 # bindkey -M menuselect '^D'  5 down-line-or-history    ✘
 #
-#     fast-down-line-or-history() {
+#     __fast-down-line-or-history() {
 #       zle down-line-or-history
 #     }
-#     zle -N fast-down-line-or-history
-#     bindkey -M menuselect '^D'  fast-down-line-or-history
+#     zle -N __fast-down-line-or-history
+#     bindkey -M menuselect '^D'  __fast-down-line-or-history
 #
 # Actually, the problem comes from the `menuselect` keymap.
 # We can't bind any custom widget in this keymap:
 #
-#     some-widget() {
+#     __some-widget() {
 #       zle end-of-history
 #     }
-#     zle -N some-widget
-#     bindkey -M menuselect 'G' some-widget
+#     zle -N __some-widget
+#     bindkey -M menuselect 'G' __some-widget
 #
 #
 # G will insert G instead of moving the cursor on the last line of the
@@ -1743,7 +1811,7 @@ abbrev=(
   "Jv"    "vim -Nu /tmp/vimrc -U NONE -i NONE --noplugin"
 )
 
-abbrev-expand() {
+__abbrev-expand() {
   emulate -LR zsh
   # In addition to the characters `*(|<[?`, we also want `#` to be regarded as a
   # pattern for filename generation.
@@ -1802,9 +1870,9 @@ abbrev-expand() {
 }
 
 # define a widget to expand when inserting a space
-zle -N abbrev-expand
+zle -N __abbrev-expand
 # bind it to the space key
-bindkey ' ' abbrev-expand
+bindkey ' ' __abbrev-expand
 
 # When searching in the history with default `C-r` or `C-s`, we don't want
 # a space to expand an abbreviation, just to insert itself.

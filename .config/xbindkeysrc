@@ -1,9 +1,3 @@
-# How to restart `xbindkeys`?{{{
-#
-#     $ killall xbindkeys
-#     $ xbindkeys -f "${HOME}"/.config/xbindkeysrc &
-# }}}
-
 "dmenu_run -b -fn Monospace-20:normal -l 10"
   Alt+Control+j
 
