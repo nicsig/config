@@ -1,3 +1,6 @@
+-- Source:
+--     https://github.com/oltodosel/interSubs/blob/master/interSubs.lua
+
 -- v. 2.5
 -- Interactive subtitles for `mpv` for language learners.
 --

@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Source:
+#     https://github.com/oltodosel/interSubs/blob/master/interSubs_config.py
+
 # v. 2.3
 # Interactive subtitles for `mpv` for language learners.
 
@@ -55,8 +58,10 @@ update_time = .01
 # interval in seconds between checking if mpv is in focus using `xdotool` and/or in fullscreen; in seconds
 focus_checking_time = .1
 
-# firefox "https://en.wiktionary.org/wiki/${word}"
-show_in_browser = 'chromium "http://www.linguee.com/german-english/search?source=german&query=${word}"'
+# https://www.wordreference.com/enfr/guy
+# show_in_browser = 'firefox "https://en.wiktionary.org/wiki/${word}"'
+show_in_browser = 'firefox "https://www.wordreference.com/enfr/${word}"'
+# show_in_browser = 'chromium "http://www.linguee.com/german-english/search?source=german&query=${word}"'
 
 # filename where to save words if needed by bound to mouse-button function f_save_word_to_file; checks if the word is already there.
 save_word_to_file_fname = '~/saved_words_by_interSubs'

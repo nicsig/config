@@ -1,4 +1,6 @@
---
+-- Source:
+--     https://github.com/Argon-/mpv-stats/
+
 -- Please consult the readme for information about usage and configuration:
 -- https://github.com/Argon-/mpv-stats
 --
@@ -708,8 +710,7 @@ local function process_key_binding(oneshot)
             mp.register_event("tick", recorder)
         end
         display_timer:kill()
-        display_time100 26026  100 26026    0     0  70837      0 --:--:-- --:--:-- --:--:-- 70722
-r.oneshot = oneshot
+        display_timer.oneshot = oneshot
         display_timer.timeout = oneshot and o.duration or o.redraw_delay
         add_page_bindings()
         print_page(curr_page)

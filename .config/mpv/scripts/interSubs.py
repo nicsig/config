@@ -1,8 +1,36 @@
 #! /usr/bin/env python
 
+# Source:
+#     https://github.com/oltodosel/interSubs/blob/master/interSubs.py
+
+# FIXME: the right-click is sometimes broken{{{
+#
+# When you right-click on a word to hear its pronunciation, often the contextual
+# menu displaying the translations gets frozen.
+#
+# Here's an error message:
+#
+#     [interSubs] Starting interSubs ...
+#     [py part] Starting interSubs ... (31%) A-V:  0.000
+#     QApplication: invalid style override passed, ignoring it.
+#
+# I'm not sure it's related to this issue.
+# I think it can be displayed even if we don't right-click.
+#}}}
+
 # If you have difficulties to make the script work, see this issue:{{{
 #
 #     https://github.com/oltodosel/interSubs/issues/9
+#
+# TLDR:
+# you need a recent version of the Python interpreter, of pip, and a few Python modules:
+#
+#     • beautifulsoup4
+#     • lxml
+#     • numpy
+#     • pyqt5
+#     • requests
+#     • six
 #}}}
 
 # v. 2.5
