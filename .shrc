@@ -22,7 +22,7 @@
 
 # TODO:
 # It would be useful to be able to search for a pattern inside all configuration
-# files with `:vimrgrep`. Including the ones for the shell.
+# files with `:vimgrep`. Including the ones for the shell.
 # We could create symlinks inside `~/.config` which would point to the config files
 # that we can't (easily) move, like `~/.bashrc` or `~/.tmux.conf`.
 # But there are still a lot of  irrelevant files in `~/.config` (cache of chrome
@@ -52,14 +52,10 @@
 
 # Recovered Aliases:
 
-alias check_glob='printf "%s\n"'
 alias checki='sudo rlwrap checkinstall -y'
-alias df=dfc
-# https://unix.stackexchange.com/a/299922/287634
-alias fxk='~/bin/keyboard.sh'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'
 alias gs='git log --all --source -p -S'
-alias l=ls++
+
 # ls folders only
 #
 # -1    list one file per line
@@ -84,7 +80,10 @@ alias lss='ls++ --psf'
 #
 # Mnemonic:    t for Time
 alias lst='ls++ --ptsf'
-alias mountc='grc mount'
+
+alias mount='grc mount'
+alias traceroute='grc traceroute'
+
 # Warning:{{{
 #
 # This alias shadows the `nb` binary installed by the `nanoblogger` package.
@@ -99,13 +98,9 @@ alias web='WWW_HOME=duckduckgo.com w3m'
 # Recovered Functions:
 alert() {
   local icon summary
-  icon='$([[ $? -eq 0 ]] && printf "terminal\n" || printf "error\n")'
+  icon='$([[ $? -eq 0 ]] && printf -- "terminal\n" || printf -- "error\n")'
   summary="$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
   eval "notify-send --urgency=low -i " "${icon}" '"${summary}"'
-}
-
-cdt() {
-  builtin cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
 }
 
 help() {
@@ -120,38 +115,33 @@ img_w3m() {
 	w3m -o imgdisplay=/usr/lib/w3m/w3mimgdisplay "$1"
 }
 
-# check alias is free
-is_it_free() {
-	apt-file -x search "/$1$"
-}
-
 vim_prof() {
+  local TMP
 	TMP="$(mktemp /tmp/.profile_vim.XXXXXXXXXX)"
+  pushd >/dev/null
 	builtin cd /tmp
 	vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
 	vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
-	builtin cd -
+  popd >/dev/null
 }
 
 vim_startup() {
+  local TMP
 	TMP="$(mktemp /tmp/.startup_vim.XXXXXXXXXX)"
+  pushd >/dev/null
 	builtin cd /tmp
-	vim --startuptime "${TMP}" +'q' startup_vim_file && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' +'sil 7,$!sort -k2' +'$' "${TMP}"
-	builtin cd -
+  vim --startuptime "${TMP}" \
+      +'q' startup_vim_file \
+      && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' \
+      +'sil 7,$!sort -k2' \
+      +'$' "${TMP}"
+  popd >/dev/null
 }
 
 # Testing eNViRonment
 tnvr() {
 	builtin cd "$(mktemp -d /tmp/.tvr.XXXXXXXXXX)"
 	cp -R "${OLDPWD}"/* .
-}
-
-what_is_in_checkinstall() {
-  aptitude search "?section(checkinstall)"
-}
-
-what_is_in_repo() {
-  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' /var/lib/apt/lists/*"$1"*
 }
 
 # useful to check the contents of a value of an environment variable:
@@ -161,26 +151,10 @@ what_is_in_repo() {
 # in bytes.
 what_is_in_var() {
 	var="$1"
-	printf "%s" "$var" | od -t c
+	printf -- "%s" "$var" | od -t c
 }
 
 # Alias {{{1
-# color {{{2
-
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias grep='grep --color=auto'
-
-alias ls='ls --color=auto'
-
-alias top='htop'
-
-# aptitude {{{2
-
-alias api='sudo aptitude install'
-alias app='sudo aptitude purge'
-alias aps='aptitude show'
-
 # git {{{2
 
 # Usage:
@@ -235,7 +209,7 @@ alias local_testing_server='python3 -m http.server'
 
 # py {{{2
 
-alias py='/usr/local/bin/python3.6'
+alias py='/usr/local/bin/python3.7'
 
 # surfraw {{{2
 
@@ -246,54 +220,25 @@ alias surfraw='surfraw -browser=w3m'
 
 alias tlmgr_gui='nohup tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 &'
 
-# trash {{{2
-
-alias te='trash-empty'
-
-alias tl='trash-list'
-
-alias tp='trash-put'
-
-# TRash Restore
-alias trr='rlwrap restore-trash'
-
 # others {{{2
 
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ......='cd ../../../../..'
-
-# l'option -l charge la librairie mathématique standard et configure
-# automatiquement `scale` sur 20
-alias bc='bc -q -l'
+# TODO:
+# How is it different than the `cdr` function in zsh?
+# Is it useful?
+# If it is, how to rename this  alias to move it into `~/.zshrc` without getting
+# a name conflict?
 
 # CD into most Recent accessed subdirectory in current directory
-alias cdr='cd "$(ls -dt */ | head -1)"'
-#             │     ││ │    │
-#             │     ││ │    └── only first entry
-#             │     ││ └── only list directories
-#             │     │└── sort by modification time, newest first
-#             │     └── don't display all the contents of the directories, only their names
+# alias cdr='cd "$(ls -dt */ | head -1)"'
+#             │      ││ │    │
+#             │      ││ │    └── only first entry
+#             │      ││ └── only list directories
+#             │      │└── sort by modification time, newest first
+#             │      └── don't display all the contents of the directories, only their names
 #             └── quote the command substitution, in case the name of the resulting directory
 #                 contains a space
 
-alias dl_mp3='youtube-dl -x --audio-format mp3 -o "%(title)s.%(ext)s"'
-alias dl_pl='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(autonumber)02d - %(title)s.%(ext)s"'
-alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
-
-# FIXME:
-# Why can't we restore the old working directory (`cd -`)?
-# Why ANY command after `subliminal` is skipped?
-dl_sub() {
-  cd "${HOME}/Videos/"
-  subliminal -l fr -- "$1"
-}
-
 alias emacs='emacs -nw'
-
-alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
 
 # `iotop` est un outil en cli qui permet de savoir quels processus accèdent
 # (lecture / écriture) au disque:
@@ -365,9 +310,9 @@ alias sudo='sudo '
 
 alias vb='VBoxManage'
 
-# `nethogs` est un outil en cli qui permet de savoir quels processus bouffe de
-# la bande passante.
-alias watch_net='nethogs enp3s0'
+# `nethogs` is a utility showing  which processes are consuming bandwidth on our
+# network interface.
+alias net_watch='nethogs enp3s0'
 
 # Environment Variables {{{1
 # CDPATH {{{2
@@ -445,95 +390,6 @@ export PATH=$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
 # Useful for `texdoc`.
 export PDFVIEWER=zathura
 
-# TERM {{{2
-#     What's `$TERM` inside a terminal, by default?{{{
-#
-# In many terminals, including xfce-terminal, guake, konsole:
-#
-#   $TERM = xterm
-#
-# Yeah, they lie about their identity to the programs they run.
-#
-# In urxvt:
-#
-#   $TERM = rxvt-unicode-256color
-#
-# urxvt tells the truth.
-#}}}
-#     Where is the configuration file for a terminal?{{{
-#
-# xfce-terminal and guake don't seem to have one.
-# However, you may find a way to  configure how they advertise themselves to the
-# programs they run, like this:
-#
-#     1. right-click
-#     2. preferences
-#     3. compatibility
-#
-# urxvt has ~/.Xresources.
-#}}}
-#     Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
-#
-# For the  colorschemes of programs to  be displayed correctly in  the terminal,
-# `$TERM`  must contain  '-256color'. Otherwise,  the programs  will assume  the
-# terminal is only  able to interpret a limited amount  of escape sequences used
-# to encode 8 colors, and they will restrict themselves to a limited palette.
-#}}}
-#     Ok, but why do it in this file?{{{
-#
-# The configuration  of `$TERM` should  happen only in a  terminal configuration
-# file. But for xfce4-terminal, I haven't found  one.  So, we must try to detect
-# the identity of the terminal from here.
-#}}}
-#     How to detect we're in an xfce terminal?{{{
-#
-# If you look at  the output of `env` and search for  'terminal' or 'xfce4', you
-# should find `COLORTERM`  whose value is set to  'xfce4-terminal'.  We're going
-# to use it to detect an xfce4 terminal.
-#}}}
-#     Is it enough?{{{
-#
-# No, watch this:
-#
-#   1. start xfce4-terminal
-#   2. $ tmux (start server)
-#   3. $ echo $TERM  →  tmux-256color  ✔
-#
-#   4. start another xfce4-terminal
-#   5. $ tmux (connect to running server)
-#   6. $ echo $TERM  →  xterm-256color  ✘
-#
-# We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
-# server. Because the  latter will already  have set `$TERM`  to 'tmux-256color'
-# (thanks to the  option 'default-terminal' in `~/.tmux.conf`), which  is one of
-# the few valid value ({screen|tmux}[-256color]).
-#
-# One way to be sure that we're not connected to Tmux , is to check that `$TERM`
-# is set to 'xterm'.  That's the default value set by xfce4-terminal.
-#}}}
-if [[ "${TERM}" == "xterm" ]]; then
-  if [[ "${COLORTERM}" == "xfce4-terminal" || -n "${KONSOLE_PROFILE_NAME}" ]]; then
-  #                                           └──────────────────────────┤
-  #                                                                      └ to also detect the Konsole terminal
-    export TERM=xterm-256color
-  fi
-fi
-#     Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
-#
-#     if [[ "${TERM}" == "xterm" ]]; then
-#         if [[ -n "${COLORTERM}" ]]; then
-#             if [[ "${COLORTERM}" == "gnome-terminal" || "${COLORTERM}" == "xfce-terminal" ]]; then
-#                 TERM=xterm-256color
-#             fi
-#         elif [[ -n "${VTE_VERSION}" ]]; then
-#             TERM=xterm-256color
-#         fi
-#     fi
-#
-# Source:
-# https://github.com/romainl/Apprentice/wiki/256-colors-and-you
-#}}}
-
 # XDG {{{2
 
 # https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
@@ -565,42 +421,3 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                               └ should exist on any OS using systemd
 #                                 not sure about the others
 
-# Functions {{{1
-fzf-surfraw() { #{{{2
-  surfraw "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
-}
-
-mountp() { #{{{2
-
-  # mount pretty ; fonction qui espace / rend plus jolie la sortie de la commande mount
-  mount | awk '{ print $1 "\t", $2 "\t", $3 "\t", $4 "\t", $5 "\t", $6 }' -
-
-}
-
-# nstring() { #{{{2
-
-# Synopsis : nstring str foo{{{
-# Description : compte le nb d'occurrences de la sous-chaîne str dans la chaîne foo.
-
-# -o = --only-matching ;
-# n'affiche que le pattern str trouvé, autant de fois qu'il y a de matchs et à chaque fois sur une ligne différente
-
-# <<< = redirige la chaîne "$2" en entrée à grep (qui par défaut n'accepte qu'un nom de fichier en entrée) # }}}
-
-# grep -o "$1" <<< "$2" | wc -l
-
-# }
-
-# Various {{{1
-
-stty -ixon
-
-# Disable XON/XOFF flow control.
-# By default, `C-s` and `C-q`  are interpreted by the terminal driver as
-# “stop sending data“, “continue sending“.
-#
-# Explanations:
-#         http://unix.stackexchange.com/a/12108/125618
-#         http://unix.stackexchange.com/a/12146/125618
-#         http://unix.stackexchange.com/a/72092/125618
-#         https://en.wikipedia.org/wiki/Software_flow_control

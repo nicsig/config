@@ -3,9 +3,9 @@
 # Source:
 #     https://github.com/oltodosel/interSubs/blob/master/interSubs.py
 
-# FIXME: the right-click is sometimes broken{{{
+# FIXME: the `f_listen` function is sometimes broken{{{
 #
-# When you right-click on a word to hear its pronunciation, often the contextual
+# When you invoke it  on a word to hear its  pronunciation, often the contextual
 # menu displaying the translations gets frozen.
 #
 # Here's an error message:
@@ -14,8 +14,18 @@
 #     [py part] Starting interSubs ... (31%) A-V:  0.000
 #     QApplication: invalid style override passed, ignoring it.
 #
-# I'm not sure it's related to this issue.
-# I think it can be displayed even if we don't right-click.
+# I'm not sure it's related to this issue, though.
+#}}}
+
+# FIXME: the `f_deepl_translation` function is sometimes broken.{{{
+# When  you invoke it  on a  sentence to translate  it, often the  subtitle gets
+# frozen. You have to restart `mpv` to get updated subtitles again.
+#}}}
+
+# TODO: How to prevent the player from resuming the video while our cusor is on a word,{{{
+# and we're reading all the translations?
+# Or at least, how to increase the current time (≈ 3s) before the player resumes
+# the video.
 #}}}
 
 # If you have difficulties to make the script work, see this issue:{{{

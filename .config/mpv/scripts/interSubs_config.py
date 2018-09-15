@@ -46,9 +46,11 @@ tab_divided_dict_fname = '~/d/python_shit/mpv/scripts/z.dict'
 tab_divided_dict_remove_tags_B = True
 
 pause_during_translation_B = True
-# don't hide subtitle when its time is up and keep it on screen until the next line
+# don't hide subtitle when its time is up,
+# and keep it on screen until the next subtitle is displayed
 extend_subs_duration2max_B = True
-# limit extension duration in seconds; N == 0: do not limit
+# don't keep displaying a subtitle more than 15s no matter what
+# (N == 0: do not limit)
 extend_subs_duration_limit_sec = 15
 # show interSubs only in fullscreen
 hide_when_not_fullscreen_B = True
@@ -58,21 +60,21 @@ update_time = .01
 # interval in seconds between checking if mpv is in focus using `xdotool` and/or in fullscreen; in seconds
 focus_checking_time = .1
 
-# https://www.wordreference.com/enfr/guy
-# show_in_browser = 'firefox "https://en.wiktionary.org/wiki/${word}"'
-show_in_browser = 'firefox "https://www.wordreference.com/enfr/${word}"'
-# show_in_browser = 'chromium "http://www.linguee.com/german-english/search?source=german&query=${word}"'
+# show_in_browser = 'firefox "https://www.wordreference.com/enfr/${word}"'
+show_in_browser = 'firefox "https://www.linguee.com/english-french/search?query=${word}"'
 
 # filename where to save words if needed by bound to mouse-button function f_save_word_to_file; checks if the word is already there.
 save_word_to_file_fname = '~/saved_words_by_interSubs'
 
-# for going through lines step by step
-# skip pausing when subs are less then X words
+# pause the player every time a long subtitle (more than 10 words) is displayed,
+# so I have the time to read it
 auto_pause_min_words = 10
-# 0 - don't pause
-# 1 - pause after subs change
-# 2 - pause before subs change
-# wheel click on interSubs cycles through options
+# 0 - don't pause, no matter how long a subtitle is
+# 1 - pause after the sub change
+# 2 - pause before the sub change
+#
+# Press the wheel click on the subtitles to cycle through these values.
+# You'll probably want `0` or `2`.
 auto_pause = 0
 
 # translated language is written right-to-left, e.g Hebrew/Arabic
@@ -89,7 +91,7 @@ R2L_to_B = False
 # show subtitles at the top of the screen
 subs_top_placement_B = False
 # distance to the edge; in px
-subs_screen_edge_padding = 1
+subs_screen_edge_padding = 40
 subs_padding_between_lines = 0
 
 # when subtitle consists of only one overly long line - splitting into two
@@ -129,6 +131,8 @@ font: bold italic large "Times New Roman" 34px;
 '''
 
 # CSS styles for subtitles
+# If  you don't  like the  default size of  the subtitles,  change the  value of
+# `font-size`.
 style_subs = '''
 	/* looks of subtitles */
 	QFrame {
@@ -137,7 +141,7 @@ style_subs = '''
 
 		font-family: "Trebuchet MS";
 		font-weight: bold;
-		font-size: 43px;
+		font-size: 53px;
 	}
 '''
 
@@ -251,10 +255,10 @@ hover_underline_thickness = 5
 
 mouse_buttons = [
 	['LeftButton',		'NoModifier',		'f_show_in_browser'],
-	['RightButton',		'NoModifier',		'f_listen'],
+	['RightButton',		'NoModifier',		'f_deepl_translation'],
 	['MiddleButton',	'NoModifier',		'f_auto_pause_options'],
 
-	['BackButton',		'NoModifier',		'f_deepl_translation'],
+	['BackButton',		'NoModifier',		'f_listen'],
 
 	['ScrollDown',		'NoModifier',		'f_scroll_translations_down'],
 	['ScrollUp',		'NoModifier',		'f_scroll_translations_up'],

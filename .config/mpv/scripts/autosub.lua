@@ -53,13 +53,7 @@ function load_sub_fn()
         --                                  ^^
         --                                  remove that shit!
         --
-        -- I changed it because the command failed:
-        --
-        --     $ /usr/bin/subliminal download -s -l en /path/to/file
-        --
-        -- Maybe because I use an old version of `subliminal`.
-        --
-        -- So, instead I execute:
+        -- If you use an old version of `subliminal`, try this instead:
         --
         --     $ /usr/bin/subliminal -l en -- /path/to/file
         --}}}

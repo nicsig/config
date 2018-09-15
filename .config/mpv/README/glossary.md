@@ -85,3 +85,47 @@ INTERFACE > Property list).
 In `$ man mpv` (COMMAND INTERFACE > property expansion), a property name is
 annotated with RW to indicate whether it's generally writable.
 
+# What does “upscaling” mean?
+
+It's a process through  which `mpv` converts a low resolution  media file into a
+higher resolution one, to utilize your screen maximum resolution.
+
+Example:
+
+the resolution  of your screen  is 1920 x  1080p, and you  want to play  a movie
+whose resolution is only 720 x 567p.
+If `mpv` didn't upscale the video, it wouldn't utilize all the pixels.
+
+Upscaling uses  an interpolation  (inferring new data  by extracting  from known
+elements) algorithm, and tells pixels what to do based on what those surrounding
+it are displaying.
+
+But upscaling has a few drawbacks:
+
+        • it can't add more detail than is already present
+
+        • it can produce visual artifacts (especially with fast-moving videos),
+          like the ringing artifact (looks like a “ghost”);
+          blurring and distortion are also possible
+
+---
+
+Note that  you can choose the  upscaling algorithm used by  `mpv`, and configure
+some of its options.
+Example:
+
+
+        vo=gpu:scale=ewa_lanczos:scale-radius=16
+           │         │           │
+           │         │           └ configuration of the algorithm
+           │         │
+           │         └ name of the upscaling algorithm to use
+           │
+           └ video output driver
+
+---
+
+For more info, see:
+
+        https://github.com/mpv-player/mpv/wiki/Upscaling
+

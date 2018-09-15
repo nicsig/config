@@ -1,15 +1,38 @@
+# noa vim //gj /home/jean/Dropbox/conf/bin/**/*.sh ~/.shrc ~/.bashrc ~/.zshrc ~/.vim/plugged/vim-snippets/UltiSnips/sh.snippets | cw
+#         ^
+#         put whatever pattern you want to refactor
+
 # TODO:
-# Replace everywhere `cd -` and `-C` with `pushd` and `popd`?
+# Make sure to never abuse the `local` keyword.
+# Remember the issue we had created in `gifrec.sh`.
+# Note that the variables  set by a script should not  affect the current shell,
+# because the script is executed in a subshell.
+# So, is it recommended to use `local` in the functions of a script?
+
+# TODO:
+# Make sure every time you've written `exit` you've provided an exit code:
+#
+#     exit 1
+#
+# This way, you can see something went wrong in the shell prompt.
+
+# TODO:
+# review `printf` everywhere  (unnecessary double quotes, extract interpolations
+# using %s items, replace a multi-line printf with a here-doc ...)
+
+# TODO: improve our scripts by reading:
+#
+#     http://www.kfirlavi.com/blog/2012/11/14/defensive-bash-programming/
+#
+# Also, have a look at `bashmount`:
+#
+#     https://github.com/jamielinux/bashmount
+#     https://www.youtube.com/watch?v=WaYZ9D7sX4U
 
 # TODO:
 # To document in our notes:
 #
 #     https://unix.stackexchange.com/a/88851/289772
-
-# TODO:
-# Remove `echo` everywhere:
-#
-#     noa vim /\C\<echo\>/gj /home/jean/Dropbox/conf/bin/**/*.sh | cw
 
 # TODO:
 # Do these substitutions:
@@ -116,10 +139,6 @@
 # To read:
 # https://github.com/sindresorhus/pure (≈ 550 sloc, 2 fichiers: pure.zsh, async.zsh)
 
-# TODO:
-# Add an indicator in the prompt, showing whether the last command succeeded.
-# ($?)
-
 # How to use one of the custom prompts available by default?{{{
 #
 # initialize the prompt system
@@ -139,37 +158,69 @@
 #     │ prompt off          │ no theme                 │
 #     └─────────────────────┴──────────────────────────┘
 #}}}
-# ┌─ man zshparam
-# │    > PARAMETERS USED BY THE SHELL
+# Why a newline in the prompt?{{{
+#
+# It's easier to copy-paste a command,  without having to remove a possible long
+# filepath.
+#}}}
+
+# ┌ set left prompt{{{
 # │
-# │         ┌ man zshzle
-# │         │   > CHARACTER HIGHLIGHTING
-# │  ┌──────┤
-PS1='%F{blue}%1d%f%% '
-#            └─┤
-#              └ man zshmisc
-#                  > SIMPLE PROMPT ESCAPES
-#                    > Shell state
-
-# Alternatives:
-#     PS1='%F{34}%1d%f%% '
-#     PS1=$'%{\e[34m%1d\e[m%}%% '
-
-# WARNING:
-# a completion function doesn't work for an alias, only for a command
-# or a function
+# │   man zshzle
+# │   > CHARACTER HIGHLIGHTING
+# │
+# │  ┌ set the color to blue
+# │  │
+# │  │   man zshmisc
+# │  │   > SIMPLE PROMPT ESCAPES
+# │  │   > Shell state
+# │  │
+# │  │       ┌ current workding directory (but replace $HOME by a tilde)
+# │  │       │
+# │  │       │   man zshparam
+# │  │       │   > PARAMETERS USED BY THE SHELL
+# │  │       │
+# │  │       │ ┌ reset the color
+# │  │       │ │
+# │  │       │ │         ┌ Add an indicator showing whether the last command succeeded ($?):
+# │  │       │ │         │
+# │  │       │ │         │     man zshmisc
+# │  │       │ │         │     > CONDITIONAL SUBSTRINGS IN PROMPTS
+# │  │       │ │         │
+# │  ├──────┐├┐├┐        ├─────────┐}}}
+PS1='%F{blue}%~%f %F{red}%(?..[%?] )%f
+$ '
+# How does `%(?..[%?] )` work?{{{
 #
-# WARNING:
-# Sometimes, when I define a test completion function, it seems zsh memorize it
-# even if I comment the whole .zshrc and I remove the file where it was defined.
-# To fix this, try to restore the line:
-#     fpath=(~/.zsh/completion $fpath)
+# The syntax of a conditional substring in a prompt is:
 #
-# If the pb occurs again, comment out the `fpath` line, and try to add or remove
-# a file inside /usr/local/share/zsh/site-functions/, to force zsh to update its
-# database of completion functions.
-# Try to find where this database is, or better understand how all of this
-# works.
+#     %(x.true-text.false-text)
+#       │ │        ││
+#       │ │        │└ text to display if the condition is false
+#       │ │        │
+#       │ │        └ separator between the 3 tokens
+#       │ │          (it can be any character which is not in `true-text`)
+#       │ │
+#       │ └ text to display if the condition is true
+#       │
+#       └ test character (condition)
+#         it can be preceded by any number to be used during the evaluation of the test
+#         Example:
+#
+#             123?  ⇔  was the exit status of the last command 123?
+#
+# So:
+#
+#     $(?..[%?] )
+#       │├┘├───┘
+#       ││ └ otherwise display the exit status (`%?`),
+#       ││   surrounded by brackets, and followed by a space
+#       ││
+#       │└ if the condition was true, display nothing
+#       │
+#       └ was the exit status of the last command 0?
+#         (without any number, zsh assumes 0)
+#}}}
 
 # What's `fpath`?{{{
 #
@@ -200,12 +251,12 @@ fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
 # Use modern completion system
 autoload -Uz compinit
 #         ││{{{
-#         │└── from `man zshbuiltins`:
-#         │     mark the function to be autoloaded using the zsh style,
-#         │     as if the option KSH_AUTOLOAD was unset
+#         │└ from `man zshbuiltins`:
+#         │  mark the function to be autoloaded using the zsh style,
+#         │  as if the option KSH_AUTOLOAD was unset
 #         │
-#         └── from `man zshmisc`:
-#             suppress usual alias expansion during reading
+#         └ from `man zshmisc`:
+#           suppress usual alias expansion during reading
 #
 # according to `run-help autoload`,   `autoload`   is equivalent to `functions -u`
 #                                                                          │
@@ -267,20 +318,14 @@ zstyle ':completion:*' menu select=long
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 zstyle ':completion:*' use-compctl false
 zstyle ':completion:*' verbose true
-
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
-
-
 # Necessary to be able to move in a completion menu:
 #
 #     bindkey -M menuselect '^L' forward-char
 zstyle ':completion:*' menu select
-
-
 # enable case-insensitive search (useful for the `zaw` plugin)
 zstyle ':filter-select' case-insensitive yes
-
 # Suggest us only video files when we tab complete `$ mpv`.
 #
 # TODO: To explain.
@@ -298,6 +343,20 @@ zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|av
 # It would break them too (maybe because it removes the space key binding?).
 #}}}
 bindkey -e
+
+# disable XON/XOFF flow control
+# Why?{{{
+#
+# By default, `C-s` and `C-q`  are interpreted by the terminal driver as
+# “stop sending data“, “continue sending“.
+#
+# Explanations:
+#         http://unix.stackexchange.com/a/12108/125618
+#         http://unix.stackexchange.com/a/12146/125618
+#         http://unix.stackexchange.com/a/72092/125618
+#         https://en.wikipedia.org/wiki/Software_flow_control
+#}}}
+stty -ixon
 
 # don't move `Plugins` after syntax highlighting
 # Plugins {{{1
@@ -376,6 +435,109 @@ unset fasd_cache
 [[ -f ${HOME}/.shrc ]] && . "${HOME}/.shrc"
 
 # Aliases {{{1
+# regular {{{2
+# aptitude {{{3
+
+# TODO: to remove?
+alias kff='killall ffmpeg 2>/dev/null'
+
+alias api='sudo aptitude install'
+alias app='sudo aptitude purge'
+alias aps='aptitude show'
+
+# bc {{{3
+
+alias bc='bc -q -l'
+#             │  │
+#             │  └ load standard math library (to get more accuracy, and some functions)
+#             │
+#             └ do not print the welcome message
+
+# cd {{{3
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
+
+# df {{{3
+
+alias df=dfc
+
+# dl {{{3
+
+alias dl_mp3='youtube-dl -x --audio-format mp3 -o "%(title)s.%(ext)s"'
+alias dl_pl='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(autonumber)02d - %(title)s.%(ext)s"'
+
+alias dl_sub_en='subliminal download -l en'
+alias dl_sub_fr='subliminal download -l fr'
+
+alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
+
+# fasd {{{3
+
+alias m='f -e mpv'
+#           │
+#           └─ look for a file and open it with `mpv`
+
+alias o='a -e xdg-open'
+#           │
+#           └─ open with `xdg-open`
+
+alias v='f -t -e vim -b viminfo'
+#           │  │      │
+#           │  │      └─ use `viminfo` backend only (search only for files present in `viminfo`)
+#           │  └─ open with vim
+#           └─ match by recent access only
+
+# grep {{{3
+
+alias grep='grep --color=auto'
+
+# ls {{{3
+
+alias ls='ls --color=auto'
+alias l=ls++
+
+# mpv {{{3
+
+# start `mpv` in “keybindings testing mode”
+alias mpv_test_keybinding='mpv --input-test --force-window --idle'
+#                                │            │              │{{{
+#                                │            │              └ don't quit immediately,
+#                                │            │                even though there's no file to play
+#                                │            │
+#                                │            └ create a video output window even if there is no video
+#                                │
+#                                └ when I press a key, don't execute the bound command,
+#                                instead, display the name of the key on the OSD;
+#                                useful when you're crafting a key binding
+#}}}
+
+# ranger {{{3
+
+alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
+
+# top {{{3
+
+alias top='htop'
+
+# trash {{{3
+
+alias te='trash-empty'
+
+alias tl='trash-list'
+
+alias tp='trash-put'
+
+# TRash Restore
+alias trr='rlwrap restore-trash'
+
+# xbindkeys {{{3
+
+alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
+
 # global {{{2
 
 # We could implement the following global aliases as abbreviations, but we won't
@@ -385,7 +547,7 @@ unset fasd_cache
 # align columns
 alias -g AC='| column -t'
 
-alias -g L='| less'
+alias -g L='2>&1 | less -R'
 
 # silence!
 #                    ┌───── redirect output to /dev/null
@@ -438,48 +600,6 @@ alias -g V='2>&1 | vipe >/dev/null'
 #                       │
 #                       └─ don't write on the terminal, the Vim buffer is enough
 
-# regular {{{2
-
-# start `mpv` in “keybindings testing mode”
-alias mpv_test_keybinding='mpv --input-test --force-window --idle'
-#                                │            │              │
-#                                │            │              └ don't quit immediately,
-#                                │            │                even though there's no file to play
-#                                │            │
-#                                │            └ create a video output window even if there is no video
-#                                │
-#                                └ when I press a key, don't execute the bound command,
-#                                instead, display the name of the key on the OSD;
-#                                useful when you're crafting a key binding
-
-alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
-
-# TODO:
-# I don't move the `fasd` aliases into `~/.shrc` because I only source its
-# functions in zsh. IIRC, the syntax isn't the same between bash and zsh.
-# Look at the readme:
-#     https://github.com/clvv/fasd
-#
-# If we want to move them in `~/.shrc`, first look at the `sourcing` section and
-# change the code so that it checks which shell is running.
-# Basically, we would need to also move the sourcing in `shrc`, check which shell
-# is running, and source `fasd` functions with the right syntax.
-
-# fasd
-alias m='f -e mpv'
-#           │
-#           └─ look for a file and open it with `mpv`
-
-alias o='a -e xdg-open'
-#           │
-#           └─ open with `xdg-open`
-
-alias v='f -t -e vim -b viminfo'
-#           │  │      │
-#           │  │      └─ use `viminfo` backend only (search only for files present in `viminfo`)
-#           │  └─ open with vim
-#           └─ match by recent access only
-
 # suffix {{{2
 
 # automatically open a file with the right program, according to its extension
@@ -494,64 +614,66 @@ alias -s odt=libreoffice
 alias -s pdf=zathura
 
 # Functions {{{1
-# cfg-* {{{2
+alias_is_it_free() { #{{{2
+  emulate -L zsh
+  apt-file -x search "/$1$"
+}
+
+cdt() { #{{{2
+  emulate -L zsh
+  builtin cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
+}
+
+# *_cfg {{{2
 
 #                                                       ┌ https://stackoverflow.com/a/7507068/9780968
 #                                                       │
-cfg_autostart() { "${EDITOR}" "${HOME}/bin/autostartrc" ;}
-cfg_bash() { "${EDITOR}" "${HOME}/.bashrc" ;}
-cfg_conky_rings() { "${EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
-cfg_conky_system() { "${EDITOR}" "${HOME}/.conky/system.lua" ;}
-cfg_conky_time() { "${EDITOR}" "${HOME}/.conky/time.lua" ;}
-cfg_firefox() { "${EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
-cfg_mpv() { "${EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
-cfg_shell() { "${EDITOR}" "${HOME}/.shrc" ;}
-cfg_tmux() { "${EDITOR}" "${HOME}/.tmux.conf" ;}
-cfg_vim() { "${EDITOR}" "${HOME}/.vim/vimrc" ;}
-cfg_w3m() { "${EDITOR}" "${HOME}/.w3m/config" ;}
-cfg_xbindkeys() { "${EDITOR}" "${HOME}/.config/xbindkeysrc" ;}
-cfg_xmodmap() { "${EDITOR}" "${HOME}/.Xmodmap" ;}
-cfg_zsh() { "${EDITOR}" "${HOME}/.zshrc" ;}
+autostart_cfg() { "${EDITOR}" "${HOME}/bin/autostartrc" ;}
+bash_cfg() { "${EDITOR}" "${HOME}/.bashrc" ;}
+conky_rings_cfg() { "${EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
+conky_system_cfg() { "${EDITOR}" "${HOME}/.conky/system.lua" ;}
+conky_time_cfg() { "${EDITOR}" "${HOME}/.conky/time.lua" ;}
+firefox_cfg() { "${EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
+mpv_cfg() { "${EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
+tmux_cfg() { "${EDITOR}" "${HOME}/.tmux.conf" ;}
+vim_cfg() { "${EDITOR}" "${HOME}/.vim/vimrc" ;}
+w3m_cfg() { "${EDITOR}" "${HOME}/.w3m/config" ;}
+xbindkeys_cfg() { "${EDITOR}" "${HOME}/.config/xbindkeysrc" ;}
+xmodmap_cfg() { "${EDITOR}" "${HOME}/.Xmodmap" ;}
+zsh_cfg() { "${EDITOR}" "${HOME}/.zshrc" ;}
 
-fix() {
-  # For more info:
-  #     https://unix.stackexchange.com/q/79684/289772
-  reset
-  stty sane
-  stty -ixon
-  # What's the `rs1` capability?{{{
-  #
-  # A Reset String.
-  #
-  #     $ man -Kw rs1
-  #     $ man infocmp (/rs1)
-  #     $ man tput (/rs1)
-  #}}}
-  tput rs1
-  tput rs2
-  tput rs3
-  clear
-  printf '\ec'
+checkinstall_what_have_you() { #{{{2
+  emulate -L zsh
+  aptitude search "?section(checkinstall)"
 }
 
 cmdfu() { #{{{2
-  # What's the effect of `emulate -LR zsh`?{{{
+  # Why don't you use the `-R` option anymore (`emulate -LR`)?{{{
   #
   # `emulate -R zsh` resets all the options to their default value, which can be
   # checked with:
-  #               ┌─ current environment
-  #               │         ┌─ reset environment
+  #
+  #               ┌ current environment
+  #               │         ┌ reset environment
   #               │         │
   #     vimdiff <(setopt) <(emulate -R zsh; setopt)
   #
-  # `emulate -L` makes the new values local to the current function, which
-  # prevents the changes to affect the current interactive zsh session.
+  # It can be useful, but it can also have undesired effect:
   #
-  # Here, we don't need this command, however it can be a good habit to include it.
+  #     https://unix.stackexchange.com/questions/372779/when-is-it-necessary-to-include-emulate-lr-zsh-in-a-function-invoked-by-a-zsh/372866#comment663732_372866
   #
-  #     https://unix.stackexchange.com/a/372866/232487
+  # Besides, most widgets shipped with zsh use `-L` instead of `-LR`.
   #}}}
-  emulate -LR zsh
+  emulate -L zsh
+  #        │{{{
+  #        └ any option reset via `setopt` should be local to the current function,
+  #          so that it doesn't affect the current shell
+  #
+  #          See:
+  #              `man zshbuiltins`
+  #              > SHELL BUILTIN COMMANDS
+  #              > emulate
+  #}}}
 
   # Purpose: {{{
   #
@@ -565,7 +687,7 @@ cmdfu() { #{{{2
   # OR
   #     $ sudo aptitude install python-pygments (✔✔)
   # OR
-  #     $ sudo pip install pygments (✔✔✔)
+  #     $ python3 -m pip install --user pygments (✔✔✔)
   #}}}
 
   # Where is `pygments` documentation? {{{
@@ -578,13 +700,13 @@ cmdfu() { #{{{2
   #
   #     https://en.wikipedia.org/wiki/Lexical_analysis#Lexer_generator
   #}}}
-  # How to choose a lexer?{{{
-  #
-  #     $ pygmentize -l <my_lexer>
-  #}}}
   # How to list all available lexers?{{{
   #
   #     $ pygmentize -L
+  #}}}
+  # How to select a lexer?{{{
+  #
+  #     $ pygmentize -l <my_lexer>
   #}}}
 
   # store our keywords in the variable `keywords`, replacing spaces with dashes
@@ -596,12 +718,12 @@ cmdfu() { #{{{2
   #
   # Watch:
   #
-  #         $ printf "hello world" | base64
+  #         $ printf -- 'hello world' | base64
   #
   #             → aGVsbG8gd29ybGQ= (✔)
   #
   #         $ base64 <<< 'hello world'
-  #         $ printf "hello world\n" | base64
+  #         $ printf -- 'hello world\n' | base64
   #
   #             → aGVsbG8gd29ybGQK (✘)
   #
@@ -612,7 +734,7 @@ cmdfu() { #{{{2
   #
   # The appended newline alters the encoding.
   #}}}
-  encoding="$(printf "$@" | base64)"
+  encoding="$(printf -- "$@" | base64)"
 
   # Alternative using `highlight`:{{{
   #
@@ -648,36 +770,73 @@ cmdfu() { #{{{2
   #}}}
 }
 
-dl_sub() { #{{{2
-  emulate -LR zsh
-  cd "${HOME}/Videos/"
-  subliminal -l fr -- "$1"
-  cd -
-}
-
 ff_audio_record() { #{{{2
+  emulate -L zsh
   ffmpeg -f pulse -i default -y /tmp/rec.wav
-  printf "\nThe audio stream has been recorded into '/tmp/rec.wav'\n"
+  printf -- "\nThe audio stream has been recorded into '/tmp/rec.wav'\n"
 }
 
-fzf_sr() { #{{{2
-  emulate -LR zsh
-  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
-  #     ├─────────────────────────────────────────────┘   ├─────┘   ├────┘
-  #     │                                                 │         └ search the pattern input by the user
-  #     │                                                 │           exactly (disable fuzzy matching)
-  #     │                                                 │           -e` = `--exact` exact-match
-  #     │                                                 │
-  #     │                                                 └ sort numerically
-  #     └ remove empty lines in
-  #       the bookmark file
+fix_terminal() { #{{{2
+  emulate -L zsh
+
+  # For more info:
+  #     https://unix.stackexchange.com/q/79684/289772
+  reset
+  stty sane
+  stty -ixon
+  # What's the `rs1` capability?{{{
+  #
+  # A Reset String.
+  #
+  #     $ man -Kw rs1
+  #     $ man infocmp (/rs1)
+  #     $ man tput (/rs1)
+  #}}}
+  tput rs1
+  tput rs2
+  tput rs3
+  clear
+  printf -- '\ec'
+  "${HOME}/bin/keyboard.sh"
 }
 
 fzf_clipboard() { #{{{2
-  emulate -LR zsh
+  emulate -L zsh
 
   # fuzzy find clipboard history
-  printf "$(greenclip print | fzf -e -i)" | xclip -selection clipboard
+  printf -- "$(greenclip print | fzf -e -i)" | xclip -selection clipboard
+}
+
+glob_what_do_you_match() { #{{{2
+  emulate -L zsh
+
+  # Purpose?{{{
+  #
+  # Suppose you want to remove some files, and you pass a glob pattern to `rm`:
+  #
+  #     $ rm foo*bar
+  #
+  # You're afraid of removing important files, because you're not sure what the glob
+  # expands into.
+  # `glob_what_do_you_match` to the rescue:
+  #
+  #     $ glob_what_do_you_match foo*bar
+  #}}}
+  # Why not `$*`?{{{
+  #
+  # Because  it would  quote  the whole  expansion  of the  glob  passed to  the
+  # function as a single argument.
+  # As a result, the latter would be printed on a single line.
+  #
+  # I prefer the  expansion of the glob to be printed on  several lines: one per
+  # file.
+  #}}}
+  if [[ $# -eq 0 ]]; then
+    printf -- "usage:\n    $0 <a glob pattern>\n"
+    printf -- "\nexample:\n    $0 *\n"
+    return
+  fi
+  printf -- '%s\n' "$@"
 }
 
 loc() { #{{{2
@@ -692,7 +851,7 @@ loc() { #{{{2
   #     $ loc 'foo (bar|baz)'
   #}}}
 
-  emulate -LR zsh
+  emulate -L zsh
   #               ┌ 'foo bar' → 'foo.*bar'
   #               │                         ┌ ( → \(
   #               │                         │                ┌ | → \|
@@ -708,19 +867,19 @@ loc() { #{{{2
 
 mkcd() { #{{{2
   # create directory and cd into it right away
-  emulate -LR zsh
+  emulate -L zsh
   mkdir "$*" && cd "$*"
 }
 
 mountp() { #{{{2
-  emulate -LR zsh
+  emulate -L zsh
 
   # mount pretty ; fonction qui espace / rend plus jolie la sortie de la commande mount
-  mount | awk '{ printf "%-11s %s %-26s %s %-15s %s\n", $1, $2, $3, $4, $5, $6 }' -
+  mount | awk '{ printf -- "%-11s %s %-26s %s %-15s %s\n", $1, $2, $3, $4, $5, $6 }' -
 }
 
 nstring() { #{{{2
-  emulate -LR zsh
+  emulate -L zsh
 
   # Description:
   # count the nb of occurrences of a substring `sub` inside a string `foo`.
@@ -729,11 +888,11 @@ nstring() { #{{{2
 
   grep -o "$1" <<< "$2" | wc -l
   #     │       │
-  #     │       └── redirection ; `grep` only accepts filepaths, not a string
-  #     └── --only-matching; print  only the matched (non-empty) parts of
-  #                          a matching line, with each such part on a separate
-  #                          output line
-
+  #     │       └ redirection ; `grep` only accepts filepaths, not a string
+  #     │
+  #     └ --only-matching; print  only the matched (non-empty) parts of
+  #                        a matching line, with each such part on a separate
+  #                        output line
 }
 
 nv() { #{{{2
@@ -744,7 +903,7 @@ nv() { #{{{2
 #      subshell. It could cause an issue when we suspend then restart Vim.
 #           https://unix.stackexchange.com/a/445192/289772
 
-  emulate -LR zsh
+  emulate -L zsh
 
   # check whether a Vim server is running
   #
@@ -928,6 +1087,7 @@ __catch_signal_usr1() {
 # `SPC R` from Vim.
 #}}}
 __restart_vim() {
+  emulate -L zsh
   if [[ -n "${restarting_vim}" ]]; then
     # reset the flag
     # restarting_vim=
@@ -953,24 +1113,45 @@ __restart_vim() {
 }
 
 palette(){ #{{{2
-  emulate -LR zsh
+  emulate -L zsh
 
   local i
   for i in {0..255} ; do
-    printf '\e[48;5;%dm%3d\e[0m ' "$i" "$i"
+    printf -- '\e[48;5;%dm%3d\e[0m ' "$i" "$i"
     if (( i == 15 )) || (( i > 15 )) && (( (i-15) % 6 == 0 )); then
-      printf '\n'
+      printf -- '\n'
     fi
   done
 }
 
-ppa_what_have_you() { #{{{2
-  emulate -LR zsh
-  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$@"
+repo_what_have_you() { #{{{2
+  emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    printf -- "usage:\n    $0 <press Tab>\n"
+    return
+  fi
+  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' /var/lib/apt/lists/*"$1"*
+}
+
+shellcheck_wiki() { #{{{2
+  xdg-open "https://github.com/koalaman/shellcheck/wiki/SC$1"
+}
+
+sr_fzf() { #{{{2
+  emulate -L zsh
+  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
+  #     ├─────────────────────────────────────────────┘   ├─────┘   ├────┘
+  #     │                                                 │         └ search the pattern input by the user
+  #     │                                                 │           exactly (disable fuzzy matching)
+  #     │                                                 │           -e` = `--exact` exact-match
+  #     │                                                 │
+  #     │                                                 └ sort numerically
+  #     └ remove empty lines in
+  #       the bookmark file
 }
 
 truecolor() { #{{{2
-  emulate -LR zsh
+  emulate -L zsh
 
   local i r g b
 
@@ -1008,29 +1189,126 @@ truecolor() { #{{{2
     if [[ $g -gt 255 ]]; then
       g=$((2*255 - g))
     fi
-    printf '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
+    printf -- '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
   done
-  printf '\n'
+  printf -- '\n'
 }
 
 up() { #{{{2
-  emulate -LR zsh
+  emulate -L zsh
 
   # make sure `~/log/` exists
   [[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
-  LOGFILE="${HOME}/log/update_system.log"
-  __update_system 2>&1 | tee -a "${LOGFILE}"
+  local LOGFILE="${HOME}/log/update_system.log"
+  __update_system "${LOGFILE}" 2>&1 | tee -a "${LOGFILE}"
 }
 
 __update_system() {
-  emulate -LR zsh
+  emulate -L zsh
 
-  printf '\n%s\n===========\n\n' "$(date +%m-%d\ %H:%M)"
+  # Why putting the month before the day?{{{
+  #
+  # It's a good habit.
+  # If you have files  whose name begin with a date, it's easier  to find a file
+  # dating from a particular time in the  output of `$ ls` (or in `ranger`) when
+  # the month comes before the day.
+  #}}}
+  printf -- '---\n---\n%s\n===========\n\n' "$(date +%m-%d\ %H:%M)"
 
-  # update
+  printf -- 'system\n------\n\n'
   sudo aptitude update
   sudo aptitude safe-upgrade
 
+  # What does it do?{{{
+  #
+  # Resynchronize the package contents from their sources.
+  # The  lists of  the  contents  of packages  are  fetched  from the  location(s)
+  # specified in /etc/apt/sources.list.
+  #}}}
+  # Why do you do it?{{{
+  #
+  # As time goes on, some new file(s) may be included in a package.
+  # One day, we may be looking for which package contains it:
+  #
+  #     $ apt-file search <missing_file>
+  #
+  # If our local package contents are not up-to-date, the previous command
+  # may return nothing (or not the package we need).
+  # Thus we may wrongly assume that we can't get that file.
+  #}}}
+  # Why do you use `script`?{{{
+  #
+  # `apt-file` is a perl script, which doesn't write on its standard output,
+  # but on `/dev/tty`.
+  #
+  # Usually, they seem to be the same thing: the standard output of a process is
+  # often connected to the terminal.
+  # But here, you've redirected the standard output the input of `tee`.
+  # So, they're not the same anymore.
+  # And I don't think it's possible to redirect `/dev/tty` to a file.
+  #
+  # So, we use `script` instead.
+  #
+  # For more:
+  #   https://askubuntu.com/a/1074946/867754
+  #   https://stackoverflow.com/a/4668579/9780968
+  #}}}
+  # Why don't you use it to log the whole function?{{{
+  #
+  # When you pass a value to the `-c` option of the `script` command,
+  # I think that the normal shell  function lookup is suppressed, i.e. you can't
+  # execute a function only a command.
+  # Same thing with `bash -c '...'`.
+  #
+  # Besides,  `script` logs the linefeeds  as literal carriage returns  which is
+  # distracting.
+  # It does the same thing with other characters such as backspaces.
+  #}}}
+  printf -- '\napt-file\n--------\n\n'
+  script -a -c 'apt-file update' -q "$1"
+  #       │  │                    │   │{{{
+  #       │  │                    │   └ log the output in this file
+  #       │  │                    │
+  #       │  │                    └ be quiet (no message when `script` starts/ends)
+  #       │  │
+  #       │  └ execute the next command,
+  #       │    instead of waiting the user to execute commands interactively
+  #       │
+  #       └ append to the logfile
+  #}}}
+
+  printf -- '\npip\n---\n\n'
+  python  -m pip install --upgrade pip
+  python3 -m pip install --upgrade pip
+
+  # https://stackoverflow.com/a/3452888/9780968
+  # Knowing the current state of the packages could be useful to restore it later;{{{
+  # copy the logged output of `pip freeze` in a file `/tmp/req.txt`, then:
+  #
+  #     $ python[3] -m pip install -r /tmp/req.txt
+  #}}}
+  printf -- '\ncurrent versions of the python2 packages\n---\n\n'
+  python -m pip freeze
+  printf -- '\nupdate python2 packages\n---\n\n'
+  python -m pip list --outdated --format=freeze \
+    | grep -Ev '^(-e|#)' \
+    | cut -d= -f1 \
+    | xargs -r -n1 python -m pip install --user --upgrade
+    #        │  │{{{
+    #        │  └ pass only one package name at a time to `pip install`,
+    #        │    so that if one installation fails, the other ones go on
+    #        │
+    #        └ don't run the command if the input is empty
+    #          (we need at least one package name)
+    #}}}
+
+  printf -- '\ncurrent versions of the python3 packages\n---\n\n'
+  python3 -m pip freeze
+  printf -- '\nupdate python3 packages\n---\n\n'
+  python3 -m pip list --outdated --format=freeze \
+    | grep -Ev '^(-e|#)' \
+    | cut -d= -f1 \
+    | xargs -r -n1 python3 -m pip install --user --upgrade
   # update `mpv` completion function
   curl -sL 'https://raw.githubusercontent.com/mpv-player/mpv/master/TOOLS/zsh.pl' | \
     perl - \
@@ -1042,7 +1320,7 @@ __update_system() {
   #
   #     https://tex.stackexchange.com/a/55459/169646
   #}}}
-  printf '\ntexlive packages\n---\n\n'
+  printf -- '\ntexlive packages\n---\n\n'
   #       ┌ https://stackoverflow.com/a/677212/9780968
   #       ├────────┐
   if [[ $(command -v tlmgr) ]]; then
@@ -1056,7 +1334,7 @@ __update_system() {
     #              └ update `tlmgr` itself}}}
   fi
 
-  printf '\nyoutube-dl\n---\n\n'
+  printf -- '\nyoutube-dl\n---\n\n'
   up_yt
 
   [[ -d "${HOME}/.zsh/plugins" ]] || mkdir -p "${HOME}/.zsh/plugins"
@@ -1067,7 +1345,7 @@ __update_system() {
 }
 
 __update_git_programs() {
-  emulate -LR zsh
+  emulate -L zsh
 
   local width dashes
   # How to get the length of a string?{{{
@@ -1091,26 +1369,26 @@ __update_git_programs() {
   #         → E767: Too many arguments to printf()
   #
   #     # ✔
-  #     $ printf '-%s+' 'a' 'b' 'c'
+  #     $ printf -- '-%s+' 'a' 'b' 'c'
   #
   #         → -a+-b+-c+
   #
   # `$ printf` repeats the format as many times as necessary.
   # So:
   #
-  #     $ printf '-%s' {1..5}
+  #     $ printf -- '-%s' {1..5}
   #
   #         → -1-2-3-4-5
   #
-  #     $ printf '%s' 3
+  #     $ printf -- '%s' 3
   #
   #         → 3
   #
-  #     $ printf '%.0s' 3
+  #     $ printf -- '%.0s' 3
   #
   #         → ∅ (empty string, because the precision flag `.0` asks for 0 characters)
   #
-  #     $ printf '-%.0s' {1..5}
+  #     $ printf -- '-%.0s' {1..5}
   #
   #         → -----
   #
@@ -1118,12 +1396,12 @@ __update_git_programs() {
   #
   #     https://stackoverflow.com/a/5349842/9780968
   #}}}
-  dashes="$(printf -- '-%.0s' $(seq 1 ${width}))"
+  dashes="$(printf -- '-%.0s' $(seq 1 "${width}"))"
   #                │
   #                └ necessary for bash, not zsh
   # `zsh` alternative:{{{
   #
-  #   dashes="$(printf '-%.0s' {1..${width}})"
+  #   dashes="$(printf -- '-%.0s' {1..${width}})"
   #
   # In bash, inside a brace expansion, you can't refer to a variable.
   # So, instead of writing this:
@@ -1137,7 +1415,7 @@ __update_git_programs() {
   #     $ echo $(seq 1 ${width})
   #}}}
 
-  printf "\n$1\n%s\n\n" "${dashes}" "${dashes}"
+  printf -- "\n$1\n%s\n\n" "${dashes}"
 
   [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zsh-completions'
   [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/changyuheng/zsh-interactive-cd'
@@ -1148,6 +1426,8 @@ __update_git_programs() {
 }
 
 up_yt() { #{{{2
+  emulate -L zsh
+
   # https://rg3.github.io/youtube-dl/download.html
   curl -sL 'https://yt-dl.org/downloads/latest/youtube-dl' -o "${HOME}/bin/youtube-dl"
   chmod a+rx "${HOME}/bin/youtube-dl"
@@ -1184,15 +1464,16 @@ xt() { #{{{2
   # Then,  cd  into  the  directory  where  the  contents  of  the  archive  was
   # extracted. The code is taken from `:Man atool`.
   #}}}
-  emulate -LR zsh
+  emulate -L zsh
 
-  TMP=$(mktemp /tmp/xt.XXXXXXXXXX)
-  #     │                  │
-  #     │                  └ template for the filename, the `X` will be
-  #     │                    randomly replaced with characters matched
-  #     │                    by the regex `[0-9a-zA-Z]`
-  #     │
-  #     └ create a temporary file and store its path into `TMP`
+  local TMP
+  TMP="$(mktemp /tmp/xt.XXXXXXXXXX)"
+  #      │                  │
+  #      │                  └ template for the filename, the `X` will be
+  #      │                    randomly replaced with characters matched
+  #      │                    by the regex `[0-9a-zA-Z]`
+  #      │
+  #      └ create a temporary file and store its path into `TMP`
 
   atool -x --save-outdir="${TMP}" "$@"
   #          │
@@ -1200,6 +1481,7 @@ xt() { #{{{2
   #            extracted inside the temporary file
 
   # Assign the name of the extraction folder inside to the variable `DIR`.
+  local DIR
   DIR="$(cat "${TMP}")"
   [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
   #  ├─────────┘    ├────────────┘       ├─────────┘
@@ -1220,11 +1502,6 @@ xt() { #{{{2
 # Because  if  you  refer  to  a  function in  the  value  of  a  variable  (ex:
 # `precmd_functions`), and it doesn't exist yet, it may raise an error.
 #}}}
-
-# commands whose combined user and system execution times (measured in seconds)
-# are greater than this value have timing statistics printed for them
-# the report can be formatted with `TIMEFMT` (man zshparam)
-export REPORTTIME=15
 
 # It doesn't seem necessary to export the variable.
 # `precmd_functions` is a variable specific to the zsh shell.
@@ -1249,8 +1526,8 @@ bindkey  '\e[3~'  delete-char
 #
 # Idea: improve the function so that it opens the completion menu,
 # this way we could cd into any directory (without `cd`, thanks to `AUTOCD`).
-__reverse-menu-complete-or-list-files() {
-  emulate -LR zsh
+__reverse_menu_complete_or_list_files() {
+  emulate -L zsh
   if [[ $#BUFFER == 0 ]]; then
     BUFFER="ls "
     CURSOR=3
@@ -1263,8 +1540,8 @@ __reverse-menu-complete-or-list-files() {
     #         autoload -Uz compinit
     #         compinit
     #         zstyle ':completion:*' menu select
-    #         __reverse-menu-complete-or-list-files() {
-    #           emulate -LR zsh
+    #         __reverse_menu_complete_or_list_files() {
+    #           emulate -L zsh
     #           if [[ $#BUFFER == 0 ]]; then
     #             BUFFER="ls "
     #             CURSOR=3
@@ -1274,8 +1551,8 @@ __reverse-menu-complete-or-list-files() {
     #             zle reverse-menu-complete
     #           fi
     #         }
-    #         zle -N __reverse-menu-complete-or-list-files
-    #         bindkey '\e[Z' __reverse-menu-complete-or-list-files
+    #         zle -N __reverse_menu_complete_or_list_files
+    #         bindkey '\e[Z' __reverse_menu_complete_or_list_files
     #
     # If I replace `reverse-menu-complete` with `backward-kill-word`,
     # `zle` deletes the previous word as expected, so why doesn't
@@ -1289,14 +1566,14 @@ __reverse-menu-complete-or-list-files() {
   fi
 }
 
-# bind `__reverse-menu-complete-or-list-files` to s-tab
+# bind `__reverse_menu_complete_or_list_files` to s-tab
 # Why is it commented?{{{
 #
 # Currently,  this key  binding breaks  the behavior  of `s-tab`  when we  cycle
 # through the candidates of a completion menu.
 #}}}
-#     zle -N __reverse-menu-complete-or-list-files
-#     bindkey '\e[Z' __reverse-menu-complete-or-list-files
+#     zle -N __reverse_menu_complete_or_list_files
+#     bindkey '\e[Z' __reverse_menu_complete_or_list_files
 
 # use S-Tab to cycle backward during a completion
 bindkey '\e[Z' reverse-menu-complete
@@ -1310,11 +1587,11 @@ bindkey '\e[Z' reverse-menu-complete
 
 bindkey '^ ' set-mark-command
 
-# C-q        quote-big-word {{{3
+# C-q        quote_big_word {{{3
 
 # useful to quote a url which contains special characters
-__quote-big-word() {
-  emulate -LR zsh
+__quote_big_word() {
+  emulate -L zsh
   zle set-mark-command
   zle vi-backward-blank-word
   zle quote-region
@@ -1326,14 +1603,14 @@ __quote-big-word() {
   #   LBUFFER+="'"
   #   zle vi-forward-blank-word
 }
-zle -N __quote-big-word
+zle -N __quote_big_word
 #    │
 #    └─ -N widget [ function ]
 #       Create a user-defined widget. When the new widget is invoked
 #       from within the editor, the specified shell function is called.
 #       If no function name is specified, it defaults to the same name as the
 #       widget.
-bindkey '^Q' __quote-big-word
+bindkey '^Q' __quote_big_word
 
 # C-r C-h    fzf-history-widget {{{3
 
@@ -1390,7 +1667,7 @@ bindkey '^T' transpose-chars
 # C-x C-r         re-source zshrc {{{4
 
 __reread_zshrc() {
-  emulate -LR zsh
+  emulate -L zsh
   . "${HOME}/.zshrc" 2>/dev/null
 #                    └─────────┤{{{
 #                              └ “stty: 'standard input': Inappropriate ioctl for device”
@@ -1444,7 +1721,7 @@ bindkey -s '^Xc' 'vimdiff <() <()\e5^B'
 
 bindkey -s '^Xr' '^A^Kfor f in *; do mv \"$f\" \"${f}\";done\e7^B'
 
-# C-z        fancy-ctrl-z {{{3
+# C-z        fancy_ctrl_z {{{3
 #
 # FIXME:
 # I can't bring a suspended process to the foreground anymore.
@@ -1463,8 +1740,8 @@ bindkey -s '^Xr' '^A^Kfor f in *; do mv \"$f\" \"${f}\";done\e7^B'
 #     https://www.youtube.com/watch?v=SW-dKIO3IOI
 #
 # https://unix.stackexchange.com/a/10851/232487
-__fancy-ctrl-z () {
-  emulate -LR zsh
+__fancy_ctrl_z() {
+  emulate -L zsh
 
   # if the current line is empty …
   if [[ $#BUFFER -eq 0 ]]; then
@@ -1480,7 +1757,7 @@ __fancy-ctrl-z () {
     #             [1]    continued  sleep 100
     #
     #     if there's no paused job:
-    #             __fancy-ctrl-z:bg:18: no current job
+    #             __fancy_ctrl_z:bg:18: no current job
   else
     # Push the entire current multiline construct onto the buffer stack.
     # If it's only a single line, this is exactly like `push-line`.
@@ -1490,14 +1767,14 @@ __fancy-ctrl-z () {
     zle push-input
   fi
 }
-zle -N __fancy-ctrl-z
+zle -N __fancy_ctrl_z
 # NOTE:
 # This  key  binding  won't prevent  us  to  put  a  foreground process  in  the
 # background. When  we hit  `C-z` while  a process  is in  the foreground,  it's
 # probably the terminal driver which intercepts the keystroke and sends a signal
 # to the process to  pause it. In other words, `C-z` should  reach zsh only if
 # no process has the control of the terminal.
-bindkey '^Z' __fancy-ctrl-z
+bindkey '^Z' __fancy_ctrl_z
 
 # META {{{2
 # M-#       pound-insert {{{3
@@ -1542,35 +1819,35 @@ bindkey '\euu' up-case-word
 # so rebind it to `M-e` instead
 bindkey '\ee' run-help
 
-# M-m       norMalize-command-line {{{3
+# M-m       normalize_command_line {{{3
 
 # TODO:
 # Explain how it works.
-# Also,   what's   the   difference   between   `__normalize-command-line`   and
-# `__expand-aliases`?
+# Also,   what's   the   difference   between   `__normalize_command_line`   and
+# `__expand_aliases`?
 # They seem to do the same thing. If that's so, then remove one of the functions
 # and key bindings.
-__normalize-command-line () {
+__normalize_command_line() {
   functions[__normalize_command_line_tmp]=$BUFFER
   BUFFER=${${functions[__normalize_command_line_tmp]#$'\t'}//$'\n\t'/$'\n'}
   ((CURSOR == 0 || CURSOR == $#BUFFER))
   unset 'functions[__normalize_command_line_tmp]'
 }
-zle -N __normalize-command-line
-bindkey '\em' __normalize-command-line
+zle -N __normalize_command_line
+bindkey '\em' __normalize_command_line
 
-# M-o       previous-directory (Old) {{{3
+# M-o       previous_directory (Old) {{{3
 # cycle between current dir and old dir
-__previous-directory() {
-  emulate -LR zsh
+__previous_directory() {
+  emulate -L zsh
   # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
   # so, no need to check it's not empty
   builtin cd -
   # refresh the prompt so that it reflects the new working directory
   zle reset-prompt
 }
-zle -N __previous-directory
-bindkey '\eo' __previous-directory
+zle -N __previous_directory
+bindkey '\eo' __previous_directory
 
 # M-Z       fuZzy-select-output {{{3
 
@@ -1579,10 +1856,10 @@ bindkey '\eo' __previous-directory
 bindkey -s '\eZ' '$(!!|fzf)'
 
 # CTRL-META {{{2
-# C-M-e      expand-aliases {{{3
+# C-M-e      expand_aliases {{{3
 
 # TODO:
-# fully explain the `expand-aliases` function
+# fully explain the `expand_aliases` function
 #
 #     https://unix.stackexchange.com/a/150737/232487
 #     https://unix.stackexchange.com/a/372865/232487
@@ -1596,29 +1873,29 @@ bindkey -s '\eZ' '$(!!|fzf)'
 #        name given by the key and the body given by the value.  Unsetting  a
 #        key removes the definition for the function named by the key.
 
-__expand-aliases() {
-  emulate -LR zsh
-  unset 'functions[___expand-aliases]'
-  # We put the current command line into `functions[___expand-aliases]`
-  functions[___expand-aliases]=$BUFFER
+__expand_aliases() {
+  emulate -L zsh
+  unset 'functions[___expand_aliases]'
+  # We put the current command line into `functions[___expand_aliases]`
+  functions[___expand_aliases]=$BUFFER
   #     alias ls='ls --color=auto'
   #     alias -g V='|vipe'
-  #     functions[___expand-aliases]='ls V'
-  #     echo $functions[___expand-aliases]          →  ls --color=auto | vipe
-  #     echo $+functions[___expand-aliases]         →  1
-  #    (($+functions[___expand-aliases])); echo $?  →  0
+  #     functions[___expand_aliases]='ls V'
+  #     echo $functions[___expand_aliases]          →  ls --color=auto | vipe
+  #     echo $+functions[___expand_aliases]         →  1
+  #    (($+functions[___expand_aliases])); echo $?  →  0
 
   # this command does 3 things, and stops as soon as one of them fails:
   #     check the command is syntactically valid
   #     set the buffer
   #     set the position of the cursor
-  (($+functions[___expand-aliases])) &&
-    BUFFER=${functions[___expand-aliases]#$'\t'} &&
+  (($+functions[___expand_aliases])) &&
+    BUFFER=${functions[___expand_aliases]#$'\t'} &&
     CURSOR=$#BUFFER
 }
 
-zle -N __expand-aliases
-bindkey '\e^E' __expand-aliases
+zle -N __expand_aliases
+bindkey '\e^E' __expand_aliases
 #        │
 #        └─ C-M-e
 
@@ -1678,20 +1955,20 @@ bindkey -M menuselect '^L' forward-char
 #
 # bindkey -M menuselect '^D'  5 down-line-or-history    ✘
 #
-#     __fast-down-line-or-history() {
+#     __fast_down_line_or_history() {
 #       zle down-line-or-history
 #     }
-#     zle -N __fast-down-line-or-history
-#     bindkey -M menuselect '^D'  __fast-down-line-or-history
+#     zle -N __fast_down_line_or_history
+#     bindkey -M menuselect '^D'  __fast_down_line_or_history
 #
 # Actually, the problem comes from the `menuselect` keymap.
 # We can't bind any custom widget in this keymap:
 #
-#     __some-widget() {
+#     __some_widget() {
 #       zle end-of-history
 #     }
-#     zle -N __some-widget
-#     bindkey -M menuselect 'G' __some-widget
+#     zle -N __some_widget
+#     bindkey -M menuselect 'G' __some_widget
 #
 #
 # G will insert G instead of moving the cursor on the last line of the
@@ -1806,13 +2083,13 @@ abbrev=(
   # column
   "Jc"    "| awk '{ print $"
   "Jn"    "2>/dev/null"
-  "Jp"    "printf '"
+  "Jp"    "printf -- '"
   "Jt"    "| tail -20"
   "Jv"    "vim -Nu /tmp/vimrc -U NONE -i NONE --noplugin"
 )
 
-__abbrev-expand() {
-  emulate -LR zsh
+__abbrev_expand() {
+  emulate -L zsh
   # In addition to the characters `*(|<[?`, we also want `#` to be regarded as a
   # pattern for filename generation.
   setopt EXTENDED_GLOB
@@ -1870,9 +2147,9 @@ __abbrev-expand() {
 }
 
 # define a widget to expand when inserting a space
-zle -N __abbrev-expand
+zle -N __abbrev_expand
 # bind it to the space key
-bindkey ' ' __abbrev-expand
+bindkey ' ' __abbrev_expand
 
 # When searching in the history with default `C-r` or `C-s`, we don't want
 # a space to expand an abbreviation, just to insert itself.

@@ -2963,6 +2963,60 @@ nno  <m-p>  ['
 nno  <silent>  =A  :<c-u>set opfunc=myfuncs#op_toggle_alignment<cr>g@
 xno  <silent>  =A  :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
 
+" >                   indent without 'shiftround' {{{3
+
+" What does these mappings?{{{
+"
+" They indent  a text-object, like  the default  `>` and `<`,  while temporarily
+" disabling 'sr'.
+"}}}
+" Why do you install them?{{{
+"
+" Watch:
+"     foo
+"       bar
+"     baz
+"
+" press `>ip` →
+"
+"            foo
+"            bar
+"            baz
+"
+" The relative indentation between them has been lost.
+" They now all have the same  indentation level, while before `bar` had a bigger
+" indentation level.
+"
+" The cause seems to be 'sr'.
+"}}}
+nno  <silent>  >  :<c-u>call <sid>set_indentation_direction('forward')
+                  \ <bar>set opfunc=<sid>indent_without_shiftround<cr>g@
+
+nno  <silent>  <  :<c-u>call <sid>set_indentation_direction('backward')
+                  \ <bar>set opfunc=<sid>indent_without_shiftround<cr>g@
+
+fu! s:set_indentation_direction(dir) abort
+    if a:dir is# 'forward'
+       let s:indentation_direction = 'forward'
+    else
+       let s:indentation_direction = 'backward'
+    endif
+endfu
+
+fu! s:indent_without_shiftround(type) abort
+    let sr_save = &sr
+    try
+        set nosr
+        let operator = get(s:, 'indentation_direction', '') is# 'backward' ? '<' : '>'
+        exe 'norm! '.line("'[").'G'.operator.line("']").'G'
+        set sr
+    catch
+        return lg#catch_error()
+    finally
+        let &sr = sr_save
+    endtry
+endfu
+
 " >b  <b              create/destroy box {{{3
 
 " Draw a box around the text inside the paragraph.
@@ -4091,6 +4145,12 @@ endfu
 "
 " Source:
 "     https://github.com/Kuniwak/vint/issues/245#issuecomment-337296606
+"
+" It seems to be true, if you look at this file:
+"
+"         https://github.com/vim/vim/blob/master/src/eval.c
+"
+" And if you search for 'VV_COMPAT', you only find these 5 variables atm.
 "
 " Maybe we could just memorize those 5 variable names, and eliminate the command.
 
@@ -6496,40 +6556,13 @@ endfu
 " see `:h system()`, and look for `silent`.
 "
 " 127 -
-" sometimes, when we  indent a block of code, the  original relative indentation
-" between the lines gets lost. ex:
-" abc
-"    def
-" ^^^
-" the issue occurs only when the indentation is not a multiple of 'sw'
-"
-" copy these lines in a vim file.
-" press `>ip`:
-"
-"     abc
-"     def
-"
-" the indentation of `def` should be greater than the one of `abc`.
-" the issue disappears if we indent from visual mode.
-" maybe because of a custom mapping which fixes the issue.
-" find a way to fix the issue in normal mode too.
-" maybe install a wrapper around the normal command `>` to force vim
-" to pass in visual mode.
-"
-" also, when we indent some block of code, and it contains an empty line,
-" we don't want vim to add spaces on it.
-"
-" update:
-" maybe this behavior is good, as it tries to fix a wrong indentation...
-"
-" 128 -
 " once neovim has `reg_recording()`, use it in all `q` mappings:
 "
 "     noa vim /nno.*\<q\>/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "
 " so that we can end a recording without closing the window.
 "
-" 129 -
+" 128 -
 " we should use more abbreviations.
 " review the triggers:
 "
@@ -6550,7 +6583,7 @@ endfu
 " implement  a   `-a`  mapping   showing  the   available  abbreviations   in  a
 " sidebar/cheatsheet. show only the less well known at any given time.
 "
-" 130 -
+" 129 -
 " Atm, `:FzFiles` doesn't search hidden files/directories.
 " Solution:
 "
@@ -6560,11 +6593,11 @@ endfu
 "
 "     https://github.com/junegunn/fzf.vim/issues/226
 "
-" 131 -
+" 130 -
 " Try to make some existing mappings smarter by reacting differently
 " when we're at the more prompt (see `:h mode()`, `rm` mode).
 "
-" 132 -
+" 131 -
 " Should we  remap '@' so  that when we  replay a macro  the `esc` key  is never
 " interpreted as a part of a function-like (F1, arrow, ...) key?
 "
@@ -6582,7 +6615,7 @@ endfu
 " Also,  it would prevent  to use function-like keys  during the recording  of a
 " macro.
 "
-" 133 -
+" 132 -
 " I think there's  no need to escape (so that the visual  marks are set) to know
 " where the visual selection begins/ends.
 " You can use `getpos('v')`, and `line('.')`:
@@ -6595,6 +6628,53 @@ endfu
 "
 " Try to use this technique in your plugin(s) instead of escaping.
 " Unless they really need to update the visual marks.
+"
+" 133 -
+" Document  the fact  that if  a message  is erased  right after  being printed,
+" there's no need to invoke a timer, a simple `:redraw` may be enough.
+"
+"     " ✘
+"     call timer_start(0, {-> execute('pwd', '')})
+"
+"     " ✔
+"     redraw
+"     pwd
+"
+" See `:h :echo-redraw`.
+
+
+
+" nno  <silent>  key  :<c-u>set opfunc=function name<cr>g@
+" nno  <silent>  keyey  :<c-u>set opfunc=function name<bar>exe 'norm! '.v:count1.'g@_'<cr>
+" xno  <silent>  key  :<c-u>call function name('vis')<cr>
+" fu! function name(type, ...) abort
+"     let cb_save  = &cb
+"     let sel_save = &sel
+"     let reg_save = ['"', getreg('"'), getregtype('"')]
+"     try
+"         set cb-=unnamed cb-=unnamedplus
+"         set sel=inclusive
+        " if a:type is# 'char'
+        "     sil norm! `[v`]y
+        " elseif a:type is# 'line'
+        "     sil norm! '[V']y
+        " elseif a:type is# 'block'
+        "     sil exe "norm! `[\<c-v>`]y"
+        " elseif a:type is# 'vis'
+        "     sil norm! gvy
+        " elseif a:type is# 'Ex'
+        "     sil exe a:1.','.a:2.'y'
+        " else
+        "     return
+        " endif
+    " catch
+        " return lg#catch_error()
+    " finally
+        " let &cb  = cb_save
+        " let &sel = sel_save
+        " call call('setreg', reg_save)
+    " endtry
+" endfu
 
 
 

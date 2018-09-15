@@ -1,6 +1,21 @@
-# TODO:
-# review ~/.inputrc
+# How to restore the file to its default contents?{{{
+#
+#     :%d_
+#     :0r /etc/skel/.bashrc
+#}}}
+# Where can I find some completion functions or script examples?{{{
+#
+#     /usr/share/doc/bash/examples/
+#
+# If the directory does not exist, install the package `bash-doc`.
+#}}}
 
+# TODO: review this file:
+#
+#     • can we delete things?
+#     • is everything fully understood/explained?
+
+# TODO: review ~/.inputrc
 
 # TODO:
 #
@@ -13,34 +28,27 @@
 #     man -Kw --regex 'blink*matching*paren'
 #
 # It seems we don't know how to search some text containing a dash.
-
-
-# TODO:
-# review this file:
 #
-#     • can we delete things?
-#     • can we move things in `~/.shrc`?
-#     • is everything fully understood/explained?
-
-
-# To restore the file to its default contents:
-#     /etc/skel/.bashrc
+# Update:
+# In fact, the issue is more complex:
 #
-# To get inspiration before writing an editing / completion function, or
-# a script:
-#     /usr/share/doc/bash/examples/
+#     man -Kw --regex 'the following is a'
 #
-# If the directory is not present, install the package `bash-doc`.
+# The output contains the page for bash (which does NOT match the regex),
+# but NOT the terminfo page (which DOES match the regex).
+
 
 
 # If not running interactively, don't do anything
+# Why don't you use the single line `[[ $- = *i* ]] || return` (shorter)?{{{
+#
+#     1. It's not posix.
+#     2. The `case` syntax seems more powerful.
+#}}}
 case "$-" in
   *i*) ;;
   *) return ;;
 esac
-
-#     [[ $- = *i* ]] || return    ✘ not POSIX
-# Besides the `case` syntax seems more powerful.
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [[ -z "${debian_chroot:-}" ]] && [[ -r /etc/debian_chroot ]]; then
@@ -48,24 +56,6 @@ if [[ -z "${debian_chroot:-}" ]] && [[ -r /etc/debian_chroot ]]; then
 fi
 
 PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
-
-# Aliases {{{1
-
-# TODO:
-# How is it different than the `cdr` function in zsh?
-# How to rename this alias to move it into `~/.shrc` without getting a name
-# conflict?
-
-# CD into most Recent accessed subdirectory in current directory
-#             ┌─ quote the command substitution, in case the name of the resulting
-#             │  directory contains a space
-#             │      ┌─ don't display all the contents of the directories, only their names
-#             │      │
-alias cdr='cd "$(ls -dt */ | head -1)"'
-#                     │  │   │
-#                     │  │   └── only first entry
-#                     │  └── only list directories
-#                     └── sort by modification time, newest first
 
 # Environment Variables {{{1
 
@@ -118,22 +108,23 @@ export HISTSIZE=
 export HISTTIMEFORMAT="[%F %T] "
 
 # merge the history of all terminals
-#
+
 # the value of `PROMPT_COMMAND` is executed as a command prior to issuing each
 # primary prompt; for more info about `history`:
 # `man bash`  section “shell builtin commands“
 export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
-#                     │         │           │           │
-#                     │         │           │           └── Read the contents of the history file
-#                     │         │           │               and append them to the current history list
+#                     │         │           │           │{{{
+#                     │         │           │           └ Read the contents of the history file
+#                     │         │           │             and append them to the current history list
 #                     │         │           │
-#                     │         │           └── Clear the history list by deleting all the entries
+#                     │         │           └ Clear the history list by deleting all the entries
 #                     │         │
-#                     │         └── Append the history list to the history file
-#                     │             history list = history lines entered since the beginning
-#                     │                            of the current bash session (kind of temporary buffer)
+#                     │         └ Append the history list to the history file
+#                     │           history list = history lines entered since the beginning
+#                     │                          of the current bash session (kind of temporary buffer)
 #                     │
-#                     └── double quotes to allow the expansion of `${PROMPT_COMMAND}`
+#                     └ double quotes to allow the expansion of `${PROMPT_COMMAND}`
+#}}}
 
 # Functions {{{1
 
@@ -189,21 +180,14 @@ shopt -s histreedit
 # further modification.
 shopt -s histverify
 
-
-# don't move `Sourcing` after `Key bindings`, because it would give priority
-# to the key bindings defined in third-party files over ours
-
 # Sourcing {{{1
 
+# Warning: Don't move `Sourcing` after `Key bindings`!{{{
+#
+# It would give  priority to the key bindings defined  in third-party files over
+# ours.
+#}}}
 . /usr/share/bash-completion/bash_completion
-
-. "${HOME}/.fzf.bash"
-
-# source our custom aliases and functions (common to bash and zsh) last
-# so that they can override anything that could have been sourced before
-. "${HOME}/.shrc"
-
-[[ -f ${HOME}/.fzf.bash ]] && . "${HOME}/.fzf.bash"
 
 # Key bindings {{{1
 # CTRL {{{2
@@ -343,12 +327,12 @@ bind '"\em": "\C-aman \ef\C-k\C-m"'
 # M-z       previous directory {{{3
 
 # FIXME: how to refresh the prompt?
-previous-directory() {
+previous_directory() {
   # check that `$OLDPWD` is set otherwise we get an error
   [[ -z "${OLDPWD}" ]] && return
   builtin cd -
 }
-bind -x '"\ez": previous-directory'
+bind -x '"\ez": previous_directory'
 
 # M-Z       fuzzy-select-output {{{3
 
