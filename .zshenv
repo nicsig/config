@@ -40,10 +40,83 @@
 # So, we need a guard:    MY_ENVIRONMENT_HAS_BEEN_SET
 # }}}
 
-if [[ -z $MY_ENVIRONMENT_HAS_BEEN_SET ]]; then
+if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
   export MY_ENVIRONMENT_HAS_BEEN_SET=yes
-  export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
-  export GOPATH=$HOME/go
+
+  export EDITOR='vim'
+
+  # to get the name of the day/month in english
+  export LC_TIME=en_US.UTF-8
+
+  # $LS_COLORS
+  eval "$(dircolors "${HOME}/.dircolors")"
+  # if [ -x /usr/bin/dircolors ]; then
+  #     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+
+  # use Vim as default man pager
+  export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
+  #               ├─────────┘  ├────┘│         │ {{{
+  #               │            │     │         └ don't display  “Vim: Reading from stdin...”
+  #               │            │     │
+  #               │            │     └ replace tabs with spaces
+  #               │            │
+  #               │            └ remove some control characters like ^H
+  #               │
+  #               └ wrap the whole command in `/bin/sh -c`
+  #                 because the value of $MANPAGER can't use a pipe directly
+  #
+  # }}}
+
+  # Why this value?{{{
+  #
+  # It's recommended in `man par`.
+  #
+  # It's useful to prevent the following kind of wrong formatting:
+  #
+  #     par <<< 'The quick brown fox jumps over the lazy dog.
+  #     The quick brown fox jumps over the lazy dog foo bar baz.'
+  #
+  #         The quick brown fox jumps over the lazy dog.
+  #         The quick brown fox jumps over the lazy dog foo bar baz                .    ✘
+  #
+  # With the right value for `PARINIT`:
+  #
+  #         The quick brown fox jumps over the lazy dog.  The quick brown fox jumps
+  #         over the lazy dog foo bar baz.                                              ✔
+  #}}}
+  # TODO: Finish explaining the value (meaning of options, body/quote characters).
+  export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
+  #               ├────┘ │ │││├┘├┘ │ ├┘││{{{
+  #               │      │ ││││ │  │ │ │└ literal `|` (for diagrams)
+  #               │      │ ││││ │  │ │ └ literal `>` (for quotes in markdown)
+  #               │      │ ││││ │  │ │
+  #               │      │ ││││ │  │ └ whitespace
+  #               │      │ ││││ │  │
+  #               │      │ ││││ │  └ set of quote characters
+  #               │      │ ││││ │
+  #               │      │ ││││ └ [a-z]
+  #               │      │ │││└ [A-Z]
+  #               │      │ │││
+  #               │      │ ││└ literal `?`
+  #               │      │ │└ literal `,`
+  #               │      │ └ literal `.`
+  #               │      │
+  #               │      └ set of body characters
+  #               │
+  #               └ boolean and numerics options (probably)
+  #}}}
+
+  export CDPATH=:${HOME}:/tmp
+  # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
+  export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
+  # add man pages for `texlive` and `dasht`
+  export MANPATH=$HOME/texlive/2018/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
+  # add the `texlive` and `dasht` binaries to our path
+  export PATH=$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
+
+  # Choose which program should be used to open pdf documents.
+  # Useful for `texdoc`.
+  export PDFVIEWER=zathura
 
   # When a command take more than a few seconds, print some timing statistics at
   # the end of it, so that we can know how much it took exactly.
@@ -132,10 +205,43 @@ if [[ -z $MY_ENVIRONMENT_HAS_BEEN_SET ]]; then
   #}}}
   if [[ "${TERM}" == "xterm" ]]; then
     if [[ "${COLORTERM}" == "xfce4-terminal" || -n "${KONSOLE_PROFILE_NAME}" ]]; then
-    #                                           └──────────────────────────┤
-    #                                                                      └ to also detect the Konsole terminal
+    #                                           ├──────────────────────────┘{{{
+    #                                           └ to also detect the Konsole terminal}}}
       export TERM=xterm-256color
     fi
   fi
+
+  # directories relative  to which various kinds of user-specific  files should be
+  # written
+  # For more info, see:{{{
+  #
+  #     https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+  #}}}
+  # The link talks about data files. What are they?{{{
+  #
+  #     • trash
+  #     • icons
+  #     • viminfo
+  #     • swap files
+  #     • .desktop files
+  #     • .keyring files
+  #     • ...
+  #}}}
+
+  export XDG_DATA_HOME=$HOME/.local/share
+
+  # configuration files
+  export XDG_CONFIG_HOME=$HOME/.config
+
+  # non-essential (cached) data
+  export XDG_CACHE_HOME=$HOME/.cache
+
+  # runtime files and other file objects
+  # (temporary files created by processes owned by the logged user)
+  export XDG_RUNTIME_DIR=/run/user/$UID
+  #                      ├────────┘{{{
+  #                      └ should exist on any OS using systemd
+  #                        not sure about the others
+  #}}}
 fi
 

@@ -3,16 +3,19 @@ if &cp | set nocp | endif
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
+silent tabonly
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
 badd +191 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
 badd +1 ~/Dropbox/wiki/markdown/main.md
-badd +79 ~/.vim/plugged/vim-markdown/ftplugin/markdown.vim
+badd +1 ~/.vim/plugged/vim-markdown/ftplugin/markdown.vim
 argglobal
 silent! argdel *
 set stal=2
+tabnew
+tabnext -1
 edit ~/.vim/plugged/vim-markdown/ftplugin/markdown.vim
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -20,7 +23,10 @@ split
 1wincmd k
 wincmd w
 wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
@@ -58,10 +64,14 @@ normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/Dropbox/wiki/markdown/main.md
+tabnext
+edit ~/Dropbox/wiki/markdown/main.md
 set splitbelow splitright
 wincmd t
-set winminheight=1 winheight=1 winminwidth=1 winwidth=1
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#stacked()
@@ -81,7 +91,7 @@ normal! zt
 normal! 0
 tabnext 2
 set stal=1
-if exists('s:wipebuf') && s:wipebuf != bufnr('%')
+if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf

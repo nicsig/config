@@ -19,8 +19,8 @@ start_command = 'python3 "%s" "%s" "%s"'
 sub_file = '/tmp/mpv_sub'
 mpv_socket = '/tmp/mpv_socket'
 
-keybinding = 'F5'
-keybinding_hide = 'F6'
+keybinding = 'F1'
+keybinding_hide = 'F2'
 
 pyname = '~/.config/mpv/scripts/interSubs.py'
 

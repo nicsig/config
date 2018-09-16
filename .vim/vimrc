@@ -824,17 +824,15 @@ endfu
 " indentation {{{2
 
 set autoindent
-
 set expandtab
-
-
 " Why don't we set 'ts'?{{{
 "
 " It would mess the alignment in help files, where tabs are used with a width of
 " 8 cells. Besides, 'ts' is NOT used when 'expandtab' is set.
 "}}}
 
-
+" What's the effect of 'sr'?{{{
+"
 " When we hit:
 "
 "        • {count}>>
@@ -842,23 +840,58 @@ set expandtab
 "        • >{motion}
 "        • <{motion}
 "
-" … on indented lines, we want the new level of indentation to be a multiple of `&sw`.
+" ... on indented lines,  if 'sr' is enabled, the new  level of indentation will
+" be a multiple of `&sw`.
 " Ex:
 " The current level of indentation is 2, and `&sw` is 4.
 " We hit `>>`:
 "
 "         • without `shiftround`, the new indent becomes 6
 "         • with    `shiftround`, the new indent becomes 4
+"}}}
+" Why don't you enable 'sr' anymore?{{{
+"
+" It seems  to cause an  unexpected result when  we indent a  paragraph (`>ip`),
+" some lines  of which  have an  indentation level  which is  not a  multiple of
+" `&sw`.
+" For more info, see our comments about our custom `>>` mapping.
+"}}}
+" Does it cause an issue?{{{
+"
+" Yes, the indentation is not fixed anymore when we do something like `>ip`.
+"}}}
+" Is there a solution?{{{
+"
+" I think you  want 'sr' to be  disabled only for buffers where  you take notes,
+" not for code.
+"
+" Maybe you could install an autocmd (listening to BufEnter?), which would reset
+" 'sr' when you enter a markdown buffer.
+" Note that 'sr' is global, and not buffer-local unfortunately.
+" So, you would have to re-enable 'sr' when you leave a markdown buffer (BufLeave?).
+"
+" For the moment,  I don't use this  solution because I'm fed up  with the “bug”
+" where the relative indentation of a block of lines is lost when we do `>ip`.
+" So, I prefer to  let 'sr' disabled by default, and  only enable it temporarily
+" when I use `>>` or `<<`.
+"
+" But you may try later to use autocmds instead if you're curious.
+" If this other solution works, you could remove the `>>` and `<<` mappings.
+"
+" Also, note that you can still fix  the indentation of a block of code with the
+" `=` operator.
+"}}}
+"     set shiftround
 
-set shiftround
-
-"  Number of spaces added/removed when you hit:
+" What's the effect of 'sw'?{{{
+"
+" It controls the number of spaces added/removed when you hit:
 "
 "          • {count}>>
 "          • {count}<<
 "          • >{motion}
 "          • <{motion}
-
+"}}}
 set shiftwidth=4
 
 " When we hit `Tab` or `BS` in front of a line, we want to add/remove
@@ -2963,14 +2996,39 @@ nno  <m-p>  ['
 nno  <silent>  =A  :<c-u>set opfunc=myfuncs#op_toggle_alignment<cr>g@
 xno  <silent>  =A  :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
 
-" >                   indent without 'shiftround' {{{3
+" >>                  indent without 'shiftround' {{{3
 
-" What does these mappings?{{{
+nno  <silent>  >>  :<c-u>call <sid>indent_without_shiftround('increase')<cr>
+nno  <silent>  <<  :<c-u>call <sid>indent_without_shiftround('decrease')<cr>
+
+fu! s:indent_without_shiftround(dir) abort
+    let op = (a:dir is# 'increase' ? '>>' : '<<')
+    let sr_save = &sr
+    try
+        set sr
+        exe 'norm! '.v:count1.op
+    catch
+        return lg#catch_error()
+    finally
+        let &sr = sr_save
+    endtry
+    sil! call repeat#set(op)
+endfu
+
+" Why don't you use the following code anymore.{{{
+"
+" It breaks  `>>` and `<<`, because as  soon as you press `>` or  `<`, Vim calls
+" the corresponding operator.
+" When we press `>`/`<` a second time, we don't provide a valid motion/text-object.
+" Therefore, the operation is cancelled.
+"}}}
+
+" What did these mappings?{{{
 "
 " They indent  a text-object, like  the default  `>` and `<`,  while temporarily
 " disabling 'sr'.
 "}}}
-" Why do you install them?{{{
+" Why did you install them?{{{
 "
 " Watch:
 "     foo
@@ -2989,33 +3047,32 @@ xno  <silent>  =A  :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
 "
 " The cause seems to be 'sr'.
 "}}}
-nno  <silent>  >  :<c-u>call <sid>set_indentation_direction('forward')
-                  \ <bar>set opfunc=<sid>indent_without_shiftround<cr>g@
-
-nno  <silent>  <  :<c-u>call <sid>set_indentation_direction('backward')
-                  \ <bar>set opfunc=<sid>indent_without_shiftround<cr>g@
-
-fu! s:set_indentation_direction(dir) abort
-    if a:dir is# 'forward'
-       let s:indentation_direction = 'forward'
-    else
-       let s:indentation_direction = 'backward'
-    endif
-endfu
-
-fu! s:indent_without_shiftround(type) abort
-    let sr_save = &sr
-    try
-        set nosr
-        let operator = get(s:, 'indentation_direction', '') is# 'backward' ? '<' : '>'
-        exe 'norm! '.line("'[").'G'.operator.line("']").'G'
-        set sr
-    catch
-        return lg#catch_error()
-    finally
-        let &sr = sr_save
-    endtry
-endfu
+" nno  <silent>  >  :<c-u>call <sid>set_indentation_direction('increase')
+"                   \ <bar>set opfunc=<sid>indent_without_shiftround<cr>g@
+"
+" nno  <silent>  <  :<c-u>call <sid>set_indentation_direction('decrease')
+"                   \ <bar>set opfunc=<sid>indent_without_shiftround<cr>g@
+"
+" fu! s:set_indentation_direction(dir) abort
+"     if a:dir is# 'increase'
+"        let s:indentation_direction = 'increase'
+"     else
+"        let s:indentation_direction = 'decrease'
+"     endif
+" endfu
+"
+" fu! s:indent_without_shiftround(type) abort
+"     let sr_save = &sr
+"     try
+"         set nosr
+"         let operator = get(s:, 'indentation_direction', '') is# 'decrease' ? '<' : '>'
+"         exe 'norm! '.line("'[").'G'.operator.line("']").'G'
+"     catch
+"         return lg#catch_error()
+"     finally
+"         let &sr = sr_save
+"     endtry
+" endfu
 
 " >b  <b              create/destroy box {{{3
 
@@ -3318,20 +3375,20 @@ nno  Y  y$
 " So, we use an  expression, to make sure that they are consecutive.
 xno  <expr>  Y  '$"'.v:register.'y'
 
-" yc / yC    ym / yM      yank comments / Code  matching / non-matching lines {{{3
+" yc / yC    ym / yM      yank code / Comments  matching / non-matching lines {{{3
 
 " comments
-nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
+nno  <silent>  yC   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
                    \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  myc  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
+xno  <silent>  myC  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
                    \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " Code
 "                      don't yank where a commented line is found ┐
 "                                                                 │
-nno  <silent>  yC   :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
+nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
                    \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  myC  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
+xno  <silent>  myc  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
                    \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " lines matching last search
@@ -3627,17 +3684,17 @@ xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar(),1)<cr>
 "         • Make |v_b_I| and |v_b_A| available in all kinds of Visual mode.
 "         • Adjust the selected area to be intuitive before doing blockwise insertion.
 
-fu! s:niceblock(key) abort
-    let niceblock_keys = {
-    \   '$'    : {'v': 'g$h',      'V': '$',          "\<c-v>": '$'},
-    \   'I'    : {'v': "\<c-v>I",  'V': "\<c-v>^o^I", "\<c-v>": 'I'},
-    \   'A'    : {'v': "\<c-v>A",  'V': "\<c-v>0o$A", "\<c-v>": 'A'},
-    \   'gI'   : {'v': "\<c-v>0I", 'V': "\<c-v>0o$I", "\<c-v>": '0I'},
-    \   '>'    : {'v': "\<c-v>>",  'V': "0\<c-v>>",   "\<c-v>": '>'},
-    \   '<'    : {'v': "\<c-v><",  'V': "0\<c-v><",   "\<c-v>": '<'},
-    \ }
+let s:niceblock_keys = {
+\   '$'    : {'v': 'g$h',      'V': '$',          "\<c-v>": '$'},
+\   'I'    : {'v': "\<c-v>I",  'V': "\<c-v>^o^I", "\<c-v>": 'I'},
+\   'A'    : {'v': "\<c-v>A",  'V': "\<c-v>0o$A", "\<c-v>": 'A'},
+\   'gI'   : {'v': "\<c-v>0I", 'V': "\<c-v>0o$I", "\<c-v>": '0I'},
+\   '>'    : {'v': "\<c-v>>",  'V': "0\<c-v>>",   "\<c-v>": '>'},
+\   '<'    : {'v': "\<c-v><",  'V': "0\<c-v><",   "\<c-v>": '<'},
+\ }
 
-    return niceblock_keys[a:key][mode()]
+fu! s:niceblock(key) abort
+    return s:niceblock_keys[a:key][mode()]
 endfu
 
 
@@ -5863,6 +5920,7 @@ endfu
 "        • API: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
 "        • CmdlineChanged
 "        • ColorSchemePre
+"        • DiffUpdate
 "        • DirChanged
 "        • ExitPre
 "        • TextChangedP
@@ -6643,41 +6701,6 @@ endfu
 " See `:h :echo-redraw`.
 
 
-
-" nno  <silent>  key  :<c-u>set opfunc=function name<cr>g@
-" nno  <silent>  keyey  :<c-u>set opfunc=function name<bar>exe 'norm! '.v:count1.'g@_'<cr>
-" xno  <silent>  key  :<c-u>call function name('vis')<cr>
-" fu! function name(type, ...) abort
-"     let cb_save  = &cb
-"     let sel_save = &sel
-"     let reg_save = ['"', getreg('"'), getregtype('"')]
-"     try
-"         set cb-=unnamed cb-=unnamedplus
-"         set sel=inclusive
-        " if a:type is# 'char'
-        "     sil norm! `[v`]y
-        " elseif a:type is# 'line'
-        "     sil norm! '[V']y
-        " elseif a:type is# 'block'
-        "     sil exe "norm! `[\<c-v>`]y"
-        " elseif a:type is# 'vis'
-        "     sil norm! gvy
-        " elseif a:type is# 'Ex'
-        "     sil exe a:1.','.a:2.'y'
-        " else
-        "     return
-        " endif
-    " catch
-        " return lg#catch_error()
-    " finally
-        " let &cb  = cb_save
-        " let &sel = sel_save
-        " call call('setreg', reg_save)
-    " endtry
-" endfu
-
-
-
 " sessions to finish:
 "
 "         01. sandwich
@@ -6687,21 +6710,20 @@ endfu
 "         05. config
 "         06. paragraph (master `$ par`)
 "         07. qf_issue (finish the last two questions)
-"         08. session_issue (read the first Todos)
-"         09. completion
-"         10. ultisnips
-"         11. profiling
-"         12. debug
-"         13. try
-"         14. async
-"         15. unix
-"         16. tree
-"         17. breakdown
-"         18. package
-"         19. tag
-"         20. cwd
-"         21. unix
-"         22. keyboard
+"         08. completion
+"         09. ultisnips
+"         10. profiling
+"         11. debug
+"         12. try
+"         13. async
+"         14. unix
+"         15. tree
+"         16. breakdown
+"         17. package
+"         18. tag
+"         19. cwd
+"         20. unix
+"         21. keyboard
 "
 " Once finished, get back to studying the terminal and latex.
 

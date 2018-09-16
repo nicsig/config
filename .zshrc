@@ -1,6 +1,7 @@
-# noa vim //gj /home/jean/Dropbox/conf/bin/**/*.sh ~/.shrc ~/.bashrc ~/.zshrc ~/.vim/plugged/vim-snippets/UltiSnips/sh.snippets | cw
+# noa vim //gj /home/jean/Dropbox/conf/bin/**/*.sh ~/.shrc ~/.bashrc ~/.zshrc ~/.zshenv ~/.vim/plugged/vim-snippets/UltiSnips/sh.snippets | cw
 #         ^
 #         put whatever pattern you want to refactor
+
 
 # TODO:
 # Make sure to never abuse the `local` keyword.
@@ -8,13 +9,15 @@
 # Note that the variables  set by a script should not  affect the current shell,
 # because the script is executed in a subshell.
 # So, is it recommended to use `local` in the functions of a script?
-
-# TODO:
-# Make sure every time you've written `exit` you've provided an exit code:
 #
-#     exit 1
+# Update:
+# The google style guide recommends to always use them.
+# Maybe  we should  re-use `local`  in `gifrec.sh`,  and pass  the variables  as
+# arguments between functions...
+# What about `VERSION` inside `upp.sh`? Should we make this variable local?
 #
-# This way, you can see something went wrong in the shell prompt.
+# Update:
+#
 
 # TODO:
 # review `printf` everywhere  (unnecessary double quotes, extract interpolations
@@ -1192,6 +1195,30 @@ truecolor() { #{{{2
     printf -- '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
   done
   printf -- '\n'
+}
+
+unclutter_toggle() { #{{{2
+  # Purpose:{{{
+  #
+  # `unclutter` interferes with `~/.config/mpv/scripts/interSubs.py`.
+  #
+  # Besides, it may cause issues in the future:
+  #
+  #     https://wiki.archlinux.org/index.php/unclutter#Known_bugs
+  #
+  # We  need  an easy  way  to  toggle the  program  when  watching movies  with
+  # interactive subtitles.
+  #}}}
+  emulate -LR zsh
+  local pid
+  pid="$(pgrep unclutter)"
+  if [[ -n "${pid}" ]]; then
+    kill "${pid}"
+  else
+    unclutter -idle 2 & disown
+    #                   │
+    #                   └ https://unix.stackexchange.com/a/148698/289772
+  fi
 }
 
 up() { #{{{2
