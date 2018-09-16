@@ -231,12 +231,16 @@ alias tlmgr_gui='nohup tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/
 # CD into most Recent accessed subdirectory in current directory
 # alias cdr='cd "$(ls -dt */ | head -1)"'
 #             │      ││ │    │
-#             │      ││ │    └── only first entry
-#             │      ││ └── only list directories
-#             │      │└── sort by modification time, newest first
-#             │      └── don't display all the contents of the directories, only their names
-#             └── quote the command substitution, in case the name of the resulting directory
-#                 contains a space
+#             │      ││ │    └ only first entry
+#             │      ││ │
+#             │      ││ └ only list directories
+#             │      ││
+#             │      │└ sort by modification time, newest first
+#             │      │
+#             │      └ don't display all the contents of the directories, only their names
+#             │
+#             └ quote the command substitution, in case the name of the resulting directory
+#               contains a space
 
 alias emacs='emacs -nw'
 

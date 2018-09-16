@@ -1,12 +1,111 @@
-# Configuration file for dircolors, a utility to help you set the
-# LS_COLORS environment variable used by GNU ls with the --color option.
-# Copyright (C) 1996-2016 Free Software Foundation, Inc.
-# Copying and distribution of this file, with or without modification,
-# are permitted provided the copyright notice and this notice are preserved.
-# The keywords COLOR, OPTIONS, and EIGHTBIT (honored by the
-# slackware version of dircolors) are recognized but ignored.
-# Below are TERM entries, which can be a glob patterns, to match
-# against the TERM environment variable to determine if it is colorizable.
+# What's this file?{{{
+#
+# A configuration file for `/usr/bin/dircolors`.
+#}}}
+# What's `dircolors`?{{{
+#
+# A utility to help you set `$LS_COLORS`.
+#}}}
+# What's `LS_COLORS`?{{{
+#
+# An environment variable which controls how `ls --color` colorizes its output.
+#}}}
+
+# The current value of `$LS_COLORS` is unreadable! How to make it more readable?{{{
+#
+#         $ echo $LS_COLORS | sed -e 's/:/\n/g'
+#}}}
+# But it's still unreadable!{{{
+#
+#         $ ~/bin/ls-colors.sh
+#
+# It will display all the values in `$LS_COLORS` in a human readable format.
+# In particular, each color value is colorized with the actual color it stands for.
+#}}}
+# How to get a command which restores `$LS_COLORS` as it is now?{{{
+#
+#         $ dircolors -b
+#
+# The output will be a string looking like this:
+#
+#         LS_COLORS='...'; export LS_COLORS
+#}}}
+# How to dump in a file the default config used by `ls` to colorize its output?{{{
+#
+#         $ dircolors -p >~/.dircolors
+#}}}
+
+# If I change a setting in this file, will it be automatically used by `ls`?{{{
+#
+# In zsh, yes.
+# Because we've included this command in `~/.zshenv`:
+#
+#         $ eval "$(dircolors "${HOME}/.dircolors")"
+#
+# Just make sure to start a new shell so that `~/.zshenv` is sourced.
+# Note that if you're in tmux, opening a new pane/window won't be enough
+# to see the result of your new settings.
+#
+# Indeed, the new shell will be a child of the server, and so
+# `$MY_ENVIRONMENT_HAS_BEEN_SET` will prevent `~/.zshenv` to be resourced.
+# In this case, restart tmux, or execute the previous `$ eval` command.
+#}}}
+# If I comment all the settings, does `ls --color` prints its output without any color?{{{
+#
+# No, `ls` falls back on some internal default config.
+#}}}
+# What's the syntax of a setting?{{{
+#
+#         <item>=<style>;<color>
+#
+# `item` can have, among other values:
+#
+#     • `di` for a directory
+#     • `fi` for a file
+#     • `ln` for a symlink
+#     • ...
+#
+# `style` can have, among other values:
+#
+#         00  = default color
+#         01  = bold
+#         30  = yellow background
+#         34  = green background
+#         37  = red background
+#         40  = black background
+#
+# `color` can have, among other values:
+#
+#         31  = red
+#         32  = green
+#         33  = orange
+#         34  = blue
+#         35  = purple
+#         36  = cyan
+#         37  = grey
+#         90  = dark grey
+#         91  = light red
+#         92  = light green
+#         93  = yellow
+#         94  = light blue
+#         95  = light purple
+#         96  = turquoise
+#
+# Sometimes, a setting can combine several styles.
+# Example:
+#
+#         or=40;31;01
+#         │  │  │  │
+#         │  │  │  └ bold text
+#         │  │  └ red text
+#         │  └ dark background
+#         └ broken symlink
+#
+# In this case, it seems that the second style is added at the end.
+#}}}
+
+# Below are TERM entries, which can be  a glob pattern, to match against `$TERM`
+# to determine if it is colorizable.
 TERM Eterm
 TERM ansi
 TERM color-xterm
@@ -37,50 +136,87 @@ TERM terminator
 TERM tmux*
 TERM vt100
 TERM xterm*
-# Below are the color init strings for the basic file types. A color init
-# string consists of one or more of the following numeric codes:
+
+# Below are the color init strings for the basic file types.
+# A color init string consists of one or more of the following numeric codes:
 # Attribute codes:
-# 00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
+#
+#         00=none
+#         01=bold
+#         04=underscore
+#         05=blink
+#         07=reverse
+#         08=concealed
+#
 # Text color codes:
-# 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
+#
+#         30=black
+#         31=red
+#         32=green
+#         33=yellow
+#         34=blue
+#         35=magenta
+#         36=cyan
+#         37=white
+#
 # Background color codes:
-# 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
-#NORMAL 00 # no color code at all
-#FILE 00 # regular file: use no color at all
-RESET 0 # reset to "normal" color
+#
+#         40=black
+#         41=red
+#         42=green
+#         43=yellow
+#         44=blue
+#         45=magenta
+#         46=cyan
+#         47=white
+#
+# NORMAL 00 # no color code at all
+# FILE 00   # regular file: use no color at all
+
+RESET 0   # reset to "normal" color
 DIR 01;34 # directory
-LINK 02;35 # symbolic link. (If you set this to 'target' instead of a
- # numerical value, the color is as for the file pointed to.)
-MULTIHARDLINK 00 # regular file with more than one link
-FIFO 40;33 # pipe
-SOCK 01;35 # socket
-DOOR 01;35 # door
-BLK 40;33;01 # block device driver
-CHR 40;33;01 # character device driver
-ORPHAN 40;31;01 # symlink to nonexistent file, or non-stat'able file ...
-MISSING 00 # ... and the files they point to
-SETUID 37;41 # file that is setuid (u+s)
-SETGID 30;43 # file that is setgid (g+s)
-CAPABILITY 30;41 # file with capability
+
+# If you set this to 'target' instead of  a numerical value, the color is as for
+# the file pointed to.
+LINK 02;35 # symbolic link.
+
+MULTIHARDLINK 00            # regular file with more than one link
+FIFO 40;33                  # pipe
+SOCK 01;35                  # socket
+DOOR 01;35                  # door
+BLK 40;33;01                # block device driver
+CHR 40;33;01                # character device driver
+ORPHAN 40;31;01             # symlink to nonexistent file, or non-stat'able file ...
+MISSING 00                  # ... and the files they point to
+SETUID 37;41                # file that is setuid (u+s)
+SETGID 30;43                # file that is setgid (g+s)
+CAPABILITY 30;41            # file with capability
 STICKY_OTHER_WRITABLE 30;42 # dir that is sticky and other-writable (+t,o+w)
-OTHER_WRITABLE 34;42 # dir that is other-writable (o+w) and not sticky
-STICKY 37;44 # dir with the sticky bit set (+t) and not other-writable
-# This is for files with execute permission:
-EXEC 01;32
-# List any file extensions like '.gz' or '.tar' that you would like ls
-# to colorize below. Put the extension, a space, and the color init string.
-# (and any comments you want to add after a '#')
-# If you use DOS-style suffixes, you may want to uncomment the following:
-#.cmd 01;32 # executables (bright green)
-#.exe 01;32
-#.com 01;32
-#.btm 01;32
-#.bat 01;32
-# Or if you want to colorize scripts even if they do not have the
-# executable bit actually set.
-#.sh 01;32
-#.csh 01;32
- # archives or compressed (bright red)
+OTHER_WRITABLE 34;42        # dir that is other-writable (o+w) and not sticky
+STICKY 37;44                # dir with the sticky bit set (+t) and not other-writable
+EXEC 01;32                  # files with execute permission
+
+# Colors by file extensions
+#
+# List any file extensions like that you would like `ls` to colorize below.
+# Put the extension, a space, and the color init string.
+#
+# If you use DOS-style suffixes, you may want to use:
+#
+#    .cmd 01;32 # executables (bright green)
+#    .exe 01;32
+#    .com 01;32
+#    .btm 01;32
+#    .bat 01;32
+#
+# Or if you want to colorize scripts even if they do not have the executable bit
+# actually set.
+#
+#    .sh 01;32
+#    .csh 01;32
+
+# archives or compressed{{{
+
 .tar 01;31
 .tgz 01;31
 .arc 01;31
@@ -122,7 +258,9 @@ EXEC 01;32
 .7z 01;31
 .rz 01;31
 .cab 01;31
-# image formats
+# }}}
+# image formats{{{
+
 .jpg 01;35
 .jpeg 01;35
 .gif 01;35
@@ -171,7 +309,9 @@ EXEC 01;32
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
 .ogv 01;35
 .ogx 01;35
-# audio formats
+# }}}
+# audio formats{{{
+
 .aac 00;36
 .au 00;36
 .flac 00;36
@@ -189,3 +329,4 @@ EXEC 01;32
 .opus 00;36
 .spx 00;36
 .xspf 00;36
+# }}}

@@ -48,7 +48,9 @@ if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
   # to get the name of the day/month in english
   export LC_TIME=en_US.UTF-8
 
-  # $LS_COLORS
+  # Ask  `dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
+  # `$LS_COLORS`.
+  # The latter controls the colors in the output of `ls --color`.
   eval "$(dircolors "${HOME}/.dircolors")"
 
   # use Vim as default man pager
