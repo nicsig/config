@@ -104,8 +104,10 @@
 # In this case, it seems that the second style is added at the end.
 #}}}
 
-# Below are TERM entries, which can be  a glob pattern, to match against `$TERM`
-# to determine if it is colorizable.
+# TERM entries which determine if the current terminal is colorizable.{{{
+# Each entry is matched against `$TERM`
+# It can use a glob pattern.
+
 TERM Eterm
 TERM ansi
 TERM color-xterm
@@ -136,6 +138,7 @@ TERM terminator
 TERM tmux*
 TERM vt100
 TERM xterm*
+# }}}
 
 # Below are the color init strings for the basic file types.
 # A color init string consists of one or more of the following numeric codes:
@@ -312,21 +315,24 @@ EXEC 01;32                  # files with execute permission
 # }}}
 # audio formats{{{
 
-.aac 00;36
-.au 00;36
-.flac 00;36
-.m4a 00;36
-.mid 00;36
-.midi 00;36
-.mka 00;36
-.mp3 00;36
-.mpc 00;36
-.ogg 00;36
-.ra 00;36
-.wav 00;36
+# Originally, all the audio formats shared the same color init string `00;36`.
+# I like  the italic style (like what  the subtitles in a movie, when  a song is
+# performed).
+.aac 03;30
+.au 03;30
+.flac 03;30
+.m4a 03;30
+.mid 03;30
+.midi 03;30
+.mka 03;30
+.mp3 03;30
+.mpc 03;30
+.ogg 03;30
+.ra 03;30
+.wav 03;30
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
-.oga 00;36
-.opus 00;36
-.spx 00;36
-.xspf 00;36
+.oga 03;30
+.opus 03;30
+.spx 03;30
+.xspf 03;30
 # }}}
