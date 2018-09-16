@@ -50,8 +50,6 @@ if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
 
   # $LS_COLORS
   eval "$(dircolors "${HOME}/.dircolors")"
-  # if [ -x /usr/bin/dircolors ]; then
-  #     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
 
   # use Vim as default man pager
   export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
