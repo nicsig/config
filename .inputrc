@@ -5,7 +5,6 @@
 # If some of them don't work, rebind them to key sequences recognized by the terminal.
 # Find a way to replicate the same functionalities provided by `readline` in `zle`.
 
-
 # When a program  using the readline library  starts up, this file  is read, and
 # the  key bindings  and  variables are  set.  For more  information  on how  to
 # configure this file: man 3 readline
@@ -55,6 +54,34 @@ set bind-tty-special-chars Off
 # bind M-DEL to delete a WORD (by default it deletes a word)
 "\e\C-?": unix-word-rubout
 
+# M-p / M-n
+"\ep": history-search-backward
+"\en": history-search-forward
+
+# Rationale:{{{
+#
+# readline provides several functions to modify the case of a word:
+#
+#         • M-c    capitalize
+#         • M-l    downcase
+#         • M-u    upcase
+#
+# Unfortunately, we can't use some of  them because they're already used in tmux
+# / fzf.
+# So, we want to use `M-u` as a prefix to change the case of a word.
+# We do it in this file, instead of `~/.bashrc`, because this way, we can affect
+# all the interpreters using readline. (lua, python, ...)
+#}}}
+# We start  by removing the  default key binding using  `M-u` to upcase  a word,{{{
+# otherwise readline would execute `upcase-word` after 1s, which is too quick.
+#
+#     https://unix.stackexchange.com/a/374535/289772
+#}}}
+"\eu": nop
+"\euu": upcase-word
+"\eul": downcase-word
+"\euc": capitalize-word
+
 # Tab / S-Tab: cycle between candidates in a completion menu
 #
 # no double quotes around the name of the TAB key
@@ -64,10 +91,6 @@ TAB: menu-complete
 # but on my machine `S-TAB` produces the keycodes:  Esc [ Z
 # we can use the keycodes instead
 "\e[Z": menu-complete-backward
-
-# M-p / M-n
-"\ep": history-search-backward
-"\en": history-search-forward
 
 # }}}
 # Macros {{{

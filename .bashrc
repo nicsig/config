@@ -244,7 +244,7 @@ bind    '"\C-x\C-r":   "\e[99i~\e[99b~"'
 # │
 # │  yeah, I know, it's a weird bug ...
 reread() {
-  . "${HOME}/.bashrc" </dev/null 2> /dev/null
+  . "${HOME}/.bashrc" </dev/null 2>/dev/null
 }
 
 # C-x C-s      reexecute-with-sudo {{{3
@@ -286,35 +286,9 @@ bind '"\C-xc": "\C-a\C-kvimdiff <() <()\e5\C-b"'
 
 bind '"\C-xr": "\C-a\C-kfor f in *; do mv \"$f\" \"${f}\";done\e7\C-b"'
 #          │
-#          └─ Rename
+#          └ Rename
 
 # META {{{2
-# M-c/l/u   change-case {{{3
-
-# readline provides several functions to modify the case of a word:
-#
-#         • m-c    capitalize
-#         • m-l    downcase
-#         • m-u    upcase
-#
-# Unfortunately, we can't use some of them because they're already used in tmux / fzf.
-# So, we want to use `M-u` as a prefix to change the case of a word.
-# We start by removing the default key binding using `M-u` to upcase a word.
-
-bind -r '\eu'
-
-# M-u c
-# upcase a word (by default it's M-c)
-bind '"\euc": capitalize-word'
-
-# M-u l
-# downcase a word (by default it's M-l)
-bind '"\eul": downcase-word'
-
-# M-u M-u
-# upcase a word (by default it's M-u)
-bind '"\euu": upcase-word'
-
 # M-m       display man for the current command {{{3
 
 bind '"\em": "\C-aman \ef\C-k\C-m"'

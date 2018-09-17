@@ -54,7 +54,6 @@
 
 alias checki='sudo rlwrap checkinstall -y'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'
-alias gs='git log --all --source -p -S'
 
 # ls folders only
 #
@@ -84,12 +83,6 @@ alias lst='ls++ --ptsf'
 alias mount='grc mount'
 alias traceroute='grc traceroute'
 
-# Warning:{{{
-#
-# This alias shadows the `nb` binary installed by the `nanoblogger` package.
-#}}}
-alias nb='newsboat -q'
-alias zsh_prof='repeat 10 time zsh -i -c exit'
 alias conky_reload='killall -SIGUSR1 conky'
 alias xresources_reload='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
 alias web='WWW_HOME=duckduckgo.com w3m'
@@ -105,7 +98,7 @@ alert() {
 
 help() {
 	if [[ $0 == "bash" ]]; then
-		builtin help -m "$@" | vipe
+		help -m "$@" | vipe
 	else
 		run-help "$@" | vipe
 	fi
@@ -115,33 +108,10 @@ img_w3m() {
 	w3m -o imgdisplay=/usr/lib/w3m/w3mimgdisplay "$1"
 }
 
-vim_prof() {
-  local TMP
-	TMP="$(mktemp /tmp/.profile_vim.XXXXXXXXXX)"
-  pushd >/dev/null
-	builtin cd /tmp
-	vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
-	vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
-  popd >/dev/null
-}
-
-vim_startup() {
-  local TMP
-	TMP="$(mktemp /tmp/.startup_vim.XXXXXXXXXX)"
-  pushd >/dev/null
-	builtin cd /tmp
-  vim --startuptime "${TMP}" \
-      +'q' startup_vim_file \
-      && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' \
-      +'sil 7,$!sort -k2' \
-      +'$' "${TMP}"
-  popd >/dev/null
-}
-
 # Testing eNViRonment
 tnvr() {
-	builtin cd "$(mktemp -d /tmp/.tvr.XXXXXXXXXX)"
-	cp -R "${OLDPWD}"/* .
+  cd "$(mktemp -d /tmp/.tvr.XXXXXXXXXX)"
+  cp -R "${OLDPWD}"/* .
 }
 
 # useful to check the contents of a value of an environment variable:
@@ -150,8 +120,8 @@ tnvr() {
 # The number which is displayed in the lower right corner seems to be a weight
 # in bytes.
 what_is_in_var() {
-	var="$1"
-	printf -- "%s" "$var" | od -t c
+  var="$1"
+  printf -- "%s" "$var" | od -t c
 }
 
 # Alias {{{1
@@ -203,13 +173,11 @@ alias gp='rlwrap -H /dev/null git push'
 # Git Restore Last Commit
 alias grlc='git reset --hard "$(git rev-parse HEAD)"'
 
+alias gs='git log --all --source -p -S'
+
 # local_testing_server {{{2
 
 alias local_testing_server='python3 -m http.server'
-
-# py {{{2
-
-alias py='/usr/local/bin/python3.7'
 
 # surfraw {{{2
 
@@ -238,15 +206,6 @@ alias surfraw='surfraw -browser=w3m'
 #             └ quote the command substitution, in case the name of the resulting directory
 #               contains a space
 
-alias emacs='emacs -nw'
-
-# `iotop` est un outil en cli qui permet de savoir quels processus accèdent
-# (lecture / écriture) au disque:
-#
-#     -o    seulement les processus actifs
-#     -P    seulement des processus (pas les threads)
-alias iotop='iotop -o -P'
-
 #              ┌ --no-group in a long listing, don't print group names
 #              │┌ like -l, but do not list owner
 #              ││ ┌ --almost-all do not list implied . and ..
@@ -267,21 +226,4 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 #
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
-
-# -f, --format=FORMAT
-#        Change edit format of text file.
-#        Available edit formats are:
-#
-#        `single-column'       (or `sc')
-#        `dual-column'         (or `dc')
-#        `destination-only'    (or `do')
-#
-#        The default format is dual-column.
-alias qmv='qmv --format=destination-only'
-
-alias vb='VBoxManage'
-
-# `nethogs` is a utility showing  which processes are consuming bandwidth on our
-# network interface.
-alias net_watch='nethogs enp3s0'
 

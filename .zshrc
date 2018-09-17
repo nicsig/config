@@ -2,6 +2,15 @@
 #         ^
 #         put whatever pattern you want to refactor
 
+# TODO:
+# ideas to improve our scripts:
+#
+#     • they should better handle errors
+#       (no stacktrace, show a human-readable message;
+#       take inspiration from `mv unexisting_file dest`)
+#
+#     • usage when the script is called without arguments
+
 
 # TODO:
 # Make sure to never abuse the `local` keyword.
@@ -17,7 +26,12 @@
 # What about `VERSION` inside `upp.sh`? Should we make this variable local?
 #
 # Update:
-#
+# These variables are indeed in a function, but they don't have to.
+# We  could remove the  functions, and just execute  the code directly  from the
+# script.
+# We've put them in functions to make the code more readable.
+# IOW, I don't think they have to be local.
+
 
 # TODO:
 # review `printf` everywhere  (unnecessary double quotes, extract interpolations
@@ -282,6 +296,30 @@ compinit
 unalias run-help >/dev/null 2>&1
 # autoload `run-help` function
 autoload -Uz run-help
+# Purpose:{{{
+#
+# Show me the help of `aptitude`, when I type `sudo aptitude` then press
+# the key binding invoking `run-help`.
+#
+# By default, it's the help of `sudo` which would be shown.
+#
+# Note, that  `run-help` will  first show you  that `sudo` is  an alias  on your
+# machine. Press any key to get the manpage of `aptitude`.
+#
+# Do the same thing for various other  commands (if I type `git add`, `run-help`
+# should show you the help of `git-add`, ...).
+#
+#   https://stackoverflow.com/a/32293317/9780968
+#}}}
+# Where did you find this list of functions?{{{
+#
+#     $ dpkg -L zsh | grep run-help
+#}}}
+autoload -Uz run-help-sudo \
+             run-help-git \
+             run-help-ip \
+             run-help-openssl \
+             run-help-sudo
 
 
 # When we hit C-w, don't delete back to a space, but to a space OR a slash.
@@ -503,6 +541,15 @@ alias v='f -t -e vim -b viminfo'
 
 alias grep='grep --color=auto'
 
+# iotop {{{3
+
+# `iotop` monitors which process(es) access our disk to read/write it:
+alias iotop='iotop -o -P'
+#                   │  │
+#                   │  └ no threads
+#                   │
+#                   └ only active processes
+
 # ls {{{3
 
 alias ls='ls --color=auto'
@@ -522,6 +569,39 @@ alias mpv_test_keybinding='mpv --input-test --force-window --idle'
 #                                instead, display the name of the key on the OSD;
 #                                useful when you're crafting a key binding
 #}}}
+
+# nb {{{3
+
+# Warning:{{{
+#
+# This alias shadows the `nb` binary installed by the `nanoblogger` package.
+#}}}
+alias nb='newsboat -q'
+
+# nethogs {{{3
+
+# `nethogs` is a utility showing  which processes are consuming bandwidth on our
+# network interface.
+alias net_watch='nethogs enp3s0'
+
+# qmv {{{3
+
+alias qmv='qmv --format=destination-only'
+#                │
+#                └ -f, --format=FORMAT
+#
+# Change edit format of text file.
+# Available edit formats are:
+#
+#     `single-column`       (or `sc`)
+#     `dual-column`         (or `dc`)
+#     `destination-only`    (or `do`)
+#
+# The default format is dual-column.
+
+# py {{{3
+
+alias py='/usr/local/bin/python3.7'
 
 # ranger {{{3
 
@@ -558,7 +638,9 @@ alias sudo='sudo '
 
 # tlmgr_gui {{{3
 
-alias tlmgr_gui='tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 & disown'
+alias tlmgr_gui='tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 &!'
+#                                                                                       ├┘
+#                                                                                       └ ⇔ & disown
 
 # top {{{3
 
@@ -575,9 +657,17 @@ alias tp='trash-put'
 # TRash Restore
 alias trr='rlwrap restore-trash'
 
+# VBoxManage {{{3
+
+alias vb='VBoxManage'
+
 # xbindkeys {{{3
 
 alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
+
+# zsh_prof {{{3
+
+alias zsh_prof='repeat 10 time zsh -i -c exit'
 
 # zsh_sourcetrace {{{3
 
@@ -670,7 +760,7 @@ alias_is_it_free() { #{{{2
 
 cdt() { #{{{2
   emulate -L zsh
-  builtin cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
+  cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
 }
 
 # *_cfg {{{2
@@ -1266,15 +1356,34 @@ unclutter_toggle() { #{{{2
   # We  need  an easy  way  to  toggle the  program  when  watching movies  with
   # interactive subtitles.
   #}}}
-  emulate -LR zsh
+  emulate -L zsh
   local pid
   pid="$(pgrep unclutter)"
   if [[ -n "${pid}" ]]; then
     kill "${pid}"
   else
     unclutter -idle 2 & disown
-    #                   │
-    #                   └ https://unix.stackexchange.com/a/148698/289772
+    #                 │ │{{{
+    #                 │ └ don't interrupt the process if we close the shell
+    #                 │
+    #                 │   `disown` removes the job from the list of active jobs of the shell:
+    #                 │
+    #                 │     • the job can't be accessed via `%n`
+    #                 │     • it can't be resumed in the foreground
+    #                 │     • it can't be interrupted by sending a `SIGHUP` to the shell
+    #                 │       because the latter won't relay it to the process
+    #                 │
+    #                 └ give me the control of the shell back
+    #
+    #                   `&` puts the process in the bg:
+    #
+    #                       • make it halt if it tries to read its stdin
+    #                       • prevent the shell from waiting the process completion
+    #
+    # For more info about the difference between `&`, `disown`, `nohup`, see:
+    #
+    #     https://unix.stackexchange.com/a/148698/289772
+    #}}}
   fi
 }
 
@@ -1541,6 +1650,31 @@ up_yt() { #{{{2
   popd >/dev/null
 }
 
+vim_prof() { #{{{2
+  emulate -L zsh
+  local TMP
+  TMP="$(mktemp /tmp/.vim_profile.XXXXXXXXXX)"
+  pushd >/dev/null
+  cd /tmp
+  vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
+  vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
+  popd >/dev/null
+}
+
+vim_startup() { #{{{2
+  emulate -L zsh
+  local TMP
+  TMP="$(mktemp /tmp/.vim_startup.XXXXXXXXXX)"
+  pushd >/dev/null
+  cd /tmp
+  vim --startuptime "${TMP}" \
+      +'q' startup_vim_file \
+      && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' \
+      +'sil 7,$!sort -k2' \
+      +'$' "${TMP}"
+  popd >/dev/null
+}
+
 xt() { #{{{2
   # Purpose:{{{
   #
@@ -1803,7 +1937,10 @@ bindkey -s '^Xc' 'vimdiff <() <()\e5^B'
 
 # C-x r           snippet-rename {{{4
 
-bindkey -s '^Xr' '^A^Kfor f in *; do mv \"$f\" \"${f}\";done\e7^B'
+bindkey -s '^Xr' '^A^Kfor f in *; do echo mv \"$f\" \"${f}\";done\e7^B'
+#                                    │
+#                                    └ print the command to let us review it
+#                                      before doing anything
 
 # C-z        fancy_ctrl_z {{{3
 #
@@ -1899,8 +2036,8 @@ bindkey '\euu' up-case-word
 # from `type run-help`:    run-help is an autoload shell function
 # it's an alias to `man` that will look in other places before invoking man
 #
-# by default it's bound to `M-h`, but use this key to move between tmux windows
-# so rebind it to `M-e` instead
+# by default  it's bound  to `M-h`,  but we use  this key  to move  between tmux
+# windows so rebind it to `M-e` instead
 bindkey '\ee' run-help
 
 # M-m       normalize_command_line {{{3
@@ -1926,7 +2063,7 @@ __previous_directory() {
   emulate -L zsh
   # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
   # so, no need to check it's not empty
-  builtin cd -
+  cd -
   # refresh the prompt so that it reflects the new working directory
   zle reset-prompt
 }

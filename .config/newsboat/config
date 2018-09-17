@@ -53,6 +53,13 @@ bind-key j down
 bind-key k up
 bind-key l open
 
-# Options
+# Options {{{1
 
 browser firefox
+
+# reload feeds when newsboat starts up, and then periodically
+auto-reload yes
+
+# reload feeds every 15 minutes
+reload-time 15
+

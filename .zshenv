@@ -40,6 +40,12 @@
 # So, we need a guard:    MY_ENVIRONMENT_HAS_BEEN_SET
 # }}}
 
+# Should we copy some of the next statements in `~/.bashrc`?{{{
+#
+# No.
+# When you start a bash shell, it's always from a zsh shell.
+# So the bash shell will inherit all the environment of the zsh shell.
+#}}}
 if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
   export MY_ENVIRONMENT_HAS_BEEN_SET=yes
 
