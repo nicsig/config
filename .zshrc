@@ -457,6 +457,10 @@ alias bc='bc -q -l'
 #             │
 #             └ do not print the welcome message
 
+# bookmarks {{{3
+
+alias bookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
+
 # cd {{{3
 
 alias ..='cd ..'
@@ -523,6 +527,39 @@ alias mpv_test_keybinding='mpv --input-test --force-window --idle'
 
 alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
 
+# sudo {{{3
+
+# Why?{{{
+#
+# Suppose you have an alias `foo`.
+# You want to execute it with `sudo`:
+#
+#     # ✘
+#     $ sudo foo
+#
+# It won't  work because the shell  doesn't check for an alias  beyond the first
+# word.
+# The solution is given in `man bash` (/^ALIASES):
+#
+#      If  the last  character of  the alias  value is  a blank,  then the  next
+#      command word following the alias is also checked for alias expansion.
+#
+# By creating the alias  `alias sudo='sudo '`, we make sure  that when the shell
+# will  expand  the alias  `sudo`  in  `sudo foo`,  the  last  character of  the
+# expansion will be a blank.
+# This  will cause the shell  to check the next  word for an alias,  and make it
+# expand `foo`.
+#
+# See also:
+#
+#     https://askubuntu.com/a/22043/867754
+#}}}
+alias sudo='sudo '
+
+# tlmgr_gui {{{3
+
+alias tlmgr_gui='tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 & disown'
+
 # top {{{3
 
 alias top='htop'
@@ -541,6 +578,14 @@ alias trr='rlwrap restore-trash'
 # xbindkeys {{{3
 
 alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
+
+# zsh_sourcetrace {{{3
+
+# get the list of files sourced by zsh
+alias zsh_sourcetrace='zsh -o sourcetrace'
+#                           ├────────────┘
+#                           └ start a new zsh shell, enabling the 'sourcetrace' option
+#                             see `man zshoptions` for a description of the option
 
 # global {{{2
 

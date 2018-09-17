@@ -15,7 +15,7 @@
 # useful to enable motion with `C-left` and `C-right`
 $include /etc/inputrc
 
-# Options # {{{
+# Options {{{
 
 # when we type a closing parentheses, don't make the cursor jump to the opening one
 set blink-matching-paren off
@@ -40,7 +40,7 @@ set menu-complete-display-prefix on
 
 # }}}
 $if mode=emacs
-# Functions# {{{
+# Functions {{{
 
 # bind C-w to delete a word (by default it deletes a WORD)
 # We prefer word as it's more granular and allows to delete only a node in a long path,
@@ -70,15 +70,15 @@ TAB: menu-complete
 "\en": history-search-forward
 
 # }}}
-# Macros # {{{
+# Macros {{{
 
-# C-x C-q = quote current word or previous one if we're on a whitespace
+# quote current word or previous one if we're on a whitespace
 "\C-x\C-q": "\eb\"\ef\""
 #             │  │ │  │
-#             │  │ │  └── insert closing quote
-#             │  │ └── go to end of word
-#             │  └── insert opening quote
-#             └── go back to beginning of word
+#             │  │ │  └ insert closing quote
+#             │  │ └ go to end of word
+#             │  └ insert opening quote
+#             └ go back to beginning of word
 
 # M-: = insert most recent file/directory
 #

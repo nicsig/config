@@ -162,7 +162,7 @@ what_is_in_var() {
 #     config add /path/to/file
 #     config commit -m 'my message'
 #     config push
-alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
 
 alias ga='git add'
 
@@ -201,7 +201,7 @@ alias ga='git add'
 alias gc='git commit'
 alias gp='rlwrap -H /dev/null git push'
 # Git Restore Last Commit
-alias grlc='git reset --hard $(git rev-parse HEAD)'
+alias grlc='git reset --hard "$(git rev-parse HEAD)"'
 
 # local_testing_server {{{2
 
@@ -215,10 +215,6 @@ alias py='/usr/local/bin/python3.7'
 
 alias srr='sr ixquick'
 alias surfraw='surfraw -browser=w3m'
-
-# tlmgr_gui {{{2
-
-alias tlmgr_gui='nohup tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 &'
 
 # others {{{2
 
@@ -251,19 +247,19 @@ alias emacs='emacs -nw'
 #     -P    seulement des processus (pas les threads)
 alias iotop='iotop -o -P'
 
-#              ┌─ --no-group in a long listing, don't print group names
-#              │┌─ like -l, but do not list owner
-#              ││ ┌─ --almost-all do not list implied . and ..
+#              ┌ --no-group in a long listing, don't print group names
+#              │┌ like -l, but do not list owner
+#              ││ ┌ --almost-all do not list implied . and ..
 #              ││ │
 alias lsa='ls -GghA'
 #       │
-#       └─ mnemonic: all
+#       └ mnemonic: all
 
-#                             ┌─ --indicator-style=slash append / indicator to directories
+#                             ┌ --indicator-style=slash append / indicator to directories
 #                             │
 alias lsf='ls --color=always -p | grep -v "/$"'
 #       │
-#       └─ mnemonic: files only
+#       └ mnemonic: files only
 
 # -X    Sort alphabetically by extension, then by the rest.
 #       Directories can't have an extension, so they always come first.
@@ -271,8 +267,6 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 #
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
-
-alias mybookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
 
 # -f, --format=FORMAT
 #        Change edit format of text file.
@@ -284,33 +278,6 @@ alias mybookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
 #
 #        The default format is dual-column.
 alias qmv='qmv --format=destination-only'
-
-# Why?{{{
-#
-# Suppose you have an alias `foo`.
-# You want to execute it with `sudo`:
-#
-#     # ✘
-#     $ sudo foo
-#
-# It won't  work because the shell  doesn't check for an alias  beyond the first
-# word.
-# The solution is given in `man bash` (/^ALIASES):
-#
-#      If  the last  character of  the alias  value is  a blank,  then the  next
-#      command word following the alias is also checked for alias expansion.
-#
-# By creating the alias  `alias sudo='sudo '`, we make sure  that when the shell
-# will  expand  the alias  `sudo`  in  `sudo foo`,  the  last  character of  the
-# expansion will be a blank.
-# This  will cause the shell  to check the next  word for an alias,  and make it
-# expand `foo`.
-#
-# See also:
-#
-#     https://askubuntu.com/a/22043/867754
-#}}}
-alias sudo='sudo '
 
 alias vb='VBoxManage'
 

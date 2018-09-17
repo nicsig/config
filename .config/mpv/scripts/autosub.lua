@@ -34,9 +34,20 @@
 
 local utils = require 'mp.utils'
 function load_sub_fn()
-    -- use `$ which subliminal` to find the path
-    subl = "/home/jean/.local/bin/subliminal"
-    -- TODO: Get the path to the program dynamically.
+    -- we need the path to `subliminal`
+
+    -- read the output of `$ which subliminal`{{{
+    --
+    --     https://stackoverflow.com/a/9676174/9780968
+    --
+    -- Don't add `sub:close()` like in the answer.
+    -- It would break the code.
+    --}}}
+    subl = io.popen("which subliminal")
+    subl = subl:read("*all")
+    -- remove the trailing newline
+    --     https://stackoverflow.com/a/24799170/9780968
+    subl = subl:sub(1,-2)
 
     -- There was no `for` loop in the original code.
     -- It only cared about english.
