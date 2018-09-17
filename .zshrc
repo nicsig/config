@@ -361,6 +361,7 @@ bindkey -e
 #}}}
 stty -ixon
 
+
 # don't move `Plugins` after syntax highlighting
 # Plugins {{{1
 
@@ -777,6 +778,17 @@ ff_audio_record() { #{{{2
   emulate -L zsh
   ffmpeg -f pulse -i default -y /tmp/rec.wav
   printf -- "\nThe audio stream has been recorded into '/tmp/rec.wav'\n"
+}
+
+ff_extract_sub() { #{{{2
+  emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF
+usage:    $0 <file> [<subtitle number>]
+EOF
+    return
+  fi
+  ffmpeg -i "$1" -map 0:s:"$2" sub.srt
 }
 
 fix_terminal() { #{{{2

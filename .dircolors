@@ -6,11 +6,26 @@
 #
 # A utility to help you set `$LS_COLORS`.
 #}}}
-# What's `LS_COLORS`?{{{
+# What's `$LS_COLORS`?{{{
 #
 # An environment variable which controls how `ls --color` colorizes its output.
 #}}}
 
+# How to restore the default config of `dircolors`?{{{
+#
+#         $ dircolors -p >~/.dircolors
+#}}}
+# How to save the current value of `$LS_COLORS`?{{{
+#
+#         $ dircolors -b
+#
+# The output will be a string looking like this:
+#
+#         LS_COLORS='...'; export LS_COLORS
+#
+# If you execute this command, it will restore `$LS_COLORS` as it is now.
+# Write it somewhere.
+#}}}
 # The current value of `$LS_COLORS` is unreadable! How to make it more readable?{{{
 #
 #         $ echo $LS_COLORS | sed -e 's/:/\n/g'
@@ -21,18 +36,6 @@
 #
 # It will display all the values in `$LS_COLORS` in a human readable format.
 # In particular, each color value is colorized with the actual color it stands for.
-#}}}
-# How to get a command which restores `$LS_COLORS` as it is now?{{{
-#
-#         $ dircolors -b
-#
-# The output will be a string looking like this:
-#
-#         LS_COLORS='...'; export LS_COLORS
-#}}}
-# How to dump in a file the default config used by `ls` to colorize its output?{{{
-#
-#         $ dircolors -p >~/.dircolors
 #}}}
 
 # If I change a setting in this file, will it be automatically used by `ls`?{{{
@@ -93,6 +96,11 @@
 # What's the syntax of a setting?{{{
 #
 #         <item>=<style>;<color>
+#         <item>=<color>;<style>
+#         <item>=<style>;<color>;<style>
+#         ...
+#
+# An item can contain as many styles/colors as you want, in any order.
 #
 # `item` can have, among other values:
 #
@@ -126,19 +134,8 @@
 #         94  = light blue
 #         95  = light purple
 #         96  = turquoise
-#
-# Sometimes, a setting can combine several styles.
-# Example:
-#
-#         or=40;31;01
-#         │  │  │  │
-#         │  │  │  └ bold text
-#         │  │  └ red text
-#         │  └ dark background
-#         └ broken symlink
-#
-# In this case, it seems that the second style is added at the end.
 #}}}
+
 
 
 # TERM entries which determine if the current terminal is colorizable.{{{
@@ -176,8 +173,6 @@ TERM tmux*
 TERM vt100
 TERM xterm*
 # }}}
-
-
 # Colors for different kinds of files.{{{
 
 # NORMAL 00 # no color code at all
@@ -190,21 +185,22 @@ DIR 01;34 # directory
 # the file pointed to.
 LINK 02;35 # symbolic link.
 
-MULTIHARDLINK 00            # regular file with more than one link
-FIFO 40;33                  # pipe
-SOCK 01;35                  # socket
-DOOR 01;35                  # door
-BLK 40;33;01                # block device driver
-CHR 40;33;01                # character device driver
-ORPHAN 40;31;01             # symlink to nonexistent file, or non-stat'able file ...
-MISSING 00                  # ... and the files they point to
-SETUID 37;41                # file that is setuid (u+s)
-SETGID 30;43                # file that is setgid (g+s)
-CAPABILITY 30;41            # file with capability
-STICKY_OTHER_WRITABLE 30;42 # dir that is sticky and other-writable (+t,o+w)
-OTHER_WRITABLE 34;42        # dir that is other-writable (o+w) and not sticky
-STICKY 37;44                # dir with the sticky bit set (+t) and not other-writable
-EXEC 01;32                  # files with execute permission
+MULTIHARDLINK 00               # regular file with more than one link
+FIFO 40;33                     # pipe
+SOCK 01;35                     # socket
+DOOR 01;35                     # door
+BLK 40;33;01                   # block device driver
+CHR 40;33;01                   # character device driver
+ORPHAN 40;31;01                # symlink to nonexistent file, or non-stat'able file ...
+MISSING 00                     # ... and the files they point to
+SETUID 30;41                   # file that is setuid (u+s)
+SETGID 30;43                   # file that is setgid (g+s)
+CAPABILITY 30;41;04            # file with capability
+STICKY_OTHER_WRITABLE 30;42;04 # dir that is sticky and other-writable (+t,o+w)
+OTHER_WRITABLE 30;42           # dir that is other-writable (o+w) and not sticky
+STICKY 29;7                    # dir with the sticky bit set (+t) and not other-writable
+EXEC 01;32                     # files with execute permission
+
 # }}}
 # Colors for different format of files.{{{
 

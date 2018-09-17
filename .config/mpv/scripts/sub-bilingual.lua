@@ -232,4 +232,4 @@ function create_bilingual_subtitles()
     end
 end
 
-mp.add_key_binding("B", "create-bilingual-subtitles", create_bilingual_subtitles)
+mp.add_key_binding("ctrl+b", "create-bilingual-subtitles", create_bilingual_subtitles)
