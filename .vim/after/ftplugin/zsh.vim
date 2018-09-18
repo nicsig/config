@@ -1,28 +1,12 @@
-" load filetype plugin for `sh`
-
-runtime! ftplugin/sh.vim
-
-" Why?{{{
+" Why do you load the 'sh' filetype plugins for 'zsh'?{{{
 "
-" When we  edit some comments  in a `zsh`  file, the automatic  reindentation is
-" annoying.
-" For example, sometimes,  when we open a  new line (`o`), Vim  adds 2 undesired
-" spaces in front of the comment leader.
+" It's convenient to avoid repeating ourselves.
+" For example, for folding settings.
 "
-" The issue seems specific to `zsh`.
-" It's probably due to the logic in an indent function here:
+" Besides, the default zsh indent plugin does something similar:
 "
-"         /usr/local/share/vim/vim81/indent/sh.vim
-"
-" Look for the pattern `zsh`.
+"     " $VIMRUNTIME/indent/zsh.vim:14
+"     runtime! indent/sh.vim
 "}}}
-setl indk-=o,O
-
-" teardown {{{1
-
-let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
-                    \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-                    \ ."
-                    \      setl indk<
-                    \  "
+runtime! ftplugin/sh.vim
 

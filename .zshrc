@@ -7,9 +7,35 @@
 #
 #     • they should better handle errors
 #       (no stacktrace, show a human-readable message;
-#       take inspiration from `mv unexisting_file dest`)
+#       take inspiration from `mv garb age`)
 #
 #     • usage when the script is called without arguments
+#
+#     • use the output streams correctly
+#
+#       Write error messages on stderr, not on stdout.
+#       This way, if you pipe the output of your script to another utility,
+#       and an error is raised, the message won't be sent to the utility.
+#       There's no sense piping an error message to anything.
+#       Same thing for a usage message (which can be seen as a special
+#       kind of error message).
+#       And if the user really wants to pipe the error message,
+#       they still can with `2>&1 |` (or `|&`).
+#
+#     • any error should be accompanied by an `exit` statement, so that:
+#
+#           ./script.sh && echo 'success'
+#
+#       doesn't print 'success' if the script fails.
+#
+#       Use `exit 1` for a random error, and `exit 64` for a usage message.
+#       See here for which code to use:
+#
+#           https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
+#
+#       It's not an obligation to use this page, just a useful convention.
+#
+#     • write a manpage for the script
 
 
 # TODO:
@@ -343,9 +369,15 @@ add-zsh-hook chpwd chpwd_recent_dirs
 autoload -Uz zmv
 autoload -Uz zrecompile
 
+#      ┌ context       ┌ name of the style
+#      ├─────────────┐ ├──────────────┐
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
-zstyle ':completion:*' format 'Completing %d'
+# The 'format' style controls the title  of each category of candidates when you
+# tab-complete a word on the command-line.
+zstyle ':completion:*' format '    %F{89}%d%f'
+#                                     ├┘
+#                                     └ hi `:PmenuSel`
 zstyle ':completion:*' group-name ''
 # show completion menu when number of options is at least 2
 zstyle ':completion:*' menu select=2
@@ -373,6 +405,12 @@ zstyle ':filter-select' case-insensitive yes
 # Source:
 #     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
 zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
+#                   │ │ │   │{{{
+#                   │ │ │   └ argument
+#                   │ │ └ command
+#                   │ └ completer
+#                   └ function (source: from bash to zsh, page 239)
+#}}}
 
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
@@ -398,7 +436,6 @@ bindkey -e
 #         https://en.wikipedia.org/wiki/Software_flow_control
 #}}}
 stty -ixon
-
 
 # don't move `Plugins` after syntax highlighting
 # Plugins {{{1
@@ -660,6 +697,16 @@ alias trr='rlwrap restore-trash'
 # VBoxManage {{{3
 
 alias vb='VBoxManage'
+
+# vim {{{3
+
+# Replace `ftplugin` with `indent` or `syntax` to add breakpoints in other kinds
+# of plugins.
+alias vim_break_ftplugin=$'vim -c \'breakadd file */ftplugin/*.vim\''
+#                        │
+#                        └ by prefixing the string with a dollar sign,
+#                          we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
+#                          otherwise, we would need to write `'\''`, which is less readable
 
 # xbindkeys {{{3
 

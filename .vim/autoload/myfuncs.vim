@@ -1731,7 +1731,7 @@ fu! myfuncs#wf_complete(arglead, _c, _p) abort
     return join(['-min_length', '-weighted'], "\n")
 endfu
 
-fu! myfuncs#xor_lines(bang) abort range "{{{1
+fu! myfuncs#diff_lines(bang) abort range "{{{1
     if exists('w:xl_match')
         call matchdelete(w:xl_match)
         unlet w:xl_match
