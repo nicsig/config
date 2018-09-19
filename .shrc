@@ -55,31 +55,6 @@
 alias checki='sudo rlwrap checkinstall -y'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'
 
-# ls folders only
-#
-# -1    list one file per line
-# -d, --directory
-#       list directory entries instead of contents,
-#       and do not dereference symbolic links
-#
-# ls *        list everything
-# ls */       list every folder and their contents
-# ls -d */    list every folder (only their entries)
-alias lsd='ls++ -1d */'
-# n for new?
-alias lsn='ls -Ggthr --time=ctime'
-# o for owner?
-alias lso='ls++ --potsf'
-# s for size?
-alias lss='ls++ --psf'
-# ls by time/changes, newest at bottom
-#
-# -c    with  -lt:
-#       sort  by,  and show, ctime (time of last modification of file status information)
-#
-# Mnemonic:    t for Time
-alias lst='ls++ --ptsf'
-
 alias mount='grc mount'
 alias traceroute='grc traceroute'
 
@@ -186,26 +161,6 @@ alias surfraw='surfraw -browser=w3m'
 
 # others {{{2
 
-# TODO:
-# How is it different than the `cdr` function in zsh?
-# Is it useful?
-# If it is, how to rename this  alias to move it into `~/.zshrc` without getting
-# a name conflict?
-
-# CD into most Recent accessed subdirectory in current directory
-# alias cdr='cd "$(ls -dt */ | head -1)"'
-#             │      ││ │    │
-#             │      ││ │    └ only first entry
-#             │      ││ │
-#             │      ││ └ only list directories
-#             │      ││
-#             │      │└ sort by modification time, newest first
-#             │      │
-#             │      └ don't display all the contents of the directories, only their names
-#             │
-#             └ quote the command substitution, in case the name of the resulting directory
-#               contains a space
-
 #              ┌ --no-group in a long listing, don't print group names
 #              │┌ like -l, but do not list owner
 #              ││ ┌ --almost-all do not list implied . and ..
@@ -226,4 +181,30 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 #
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
+
+# ls folders only
+#
+# -1    list one file per line
+# -d, --directory
+#       list directory entries instead of contents,
+#       and do not dereference symbolic links
+#
+# ls *        list everything
+# ls */       list every folder and their contents
+# ls -d */    list every folder (only their entries)
+alias lsd='ls++ -1d */'
+# n for new?
+alias lsn='ls -Ggthr --time=ctime'
+
+# o for owner?
+alias lso='ls++ --potsf'
+# s for size?
+alias lss='ls++ --psf'
+# ls by time/changes, newest at bottom
+#
+# -c    with  -lt:
+#       sort  by,  and show, ctime (time of last modification of file status information)
+#
+# Mnemonic:    t for Time
+alias lst='ls++ --ptsf'
 

@@ -1802,6 +1802,87 @@ xt() { #{{{2
   rm "${TMP}"
 }
 
+# Hooks {{{1
+
+# There's no  `HISTIGNORE` option in  zsh, to ask  some commands to  be excluded
+# from the history.
+#
+# Solution:
+# zsh provides a hook function `zshaddhistory` which can be used for that.
+# If `zshaddhistory_functions` contains  the name of a function  which returns a
+# non-zero value, the command is not saved in the history file.
+zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
+
+CMDS_TO_IGNORE=(
+  api \
+  app \
+  aps \
+  bg \
+  cd \
+  clear \
+  config \
+  cp \
+  dl_video \
+  echo \
+  exit \
+  fg \
+  imv \
+  jobs \
+  ls \
+  man \
+  mv \
+  reset \
+  rm \
+  rmdir \
+  sleep \
+  sr \
+  touch \
+  tp \
+  web \
+  )
+
+ignore_these_cmds() {
+  emulate -L zsh
+  local first_word
+  # zsh passes the command-line to this function via $1
+  # we extract the first word on the line
+  # Source:
+  #     https://unix.stackexchange.com/a/273277/289772
+  first_word=${${(z)1}[1]}
+  # now we check whether it's somewhere in our array of commands to ignore
+  #     https://unix.stackexchange.com/a/411331/289772
+  if ((${CMDS_TO_IGNORE[(I)$first_word]})); then
+    # Why `2` instead of `1`?{{{
+    #
+    # `1` = the command is removed from the history of the session,
+    #     as soon as you execute another command
+    #
+    # `2` = the command is still in the history of the session,
+    #     even after executing another command,
+    #     so you can retrieve it by pressing M-p or C-p
+    #}}}
+    return 2
+  else
+    return 0
+  fi
+}
+
+ignore_short_or_failed_cmds() {
+  emulate -L zsh
+  # ignore commands who are shorter than 10 characters
+  # Why `-le 11` instead of `-le 10`?{{{
+  #
+  # Because zsh sends a newline at the end of the command.
+  #}}}
+  #                             ┌ ignore non-recognized commands
+  #                             ├─────────┐
+  if [[ "${#1}" -le 11 ]] || [[ "$?" == 127 ]]; then
+    return 2
+  else
+    return 0
+  fi
+}
+
 # Variables {{{1
 # WARNING: Make sure this `Variables` section is always after `Functions`.{{{
 #
@@ -2375,24 +2456,6 @@ setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
 setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
 setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
 setopt HIST_BEEP                 # Beep when accessing nonexistent history.
-
-# FIXME:
-# there's no `HISTIGNORE` option in zsh, to ask some commands to be excluded
-# from the history
-#
-# solution 1:
-# zsh provides a hook function zshaddhistory that can be used for that, if it returns
-# non-zero the command is not saved in history
-#
-# solution 2:
-# alias the commands to have a space in front, maybe something like:
-#     for c in (ls fg bg jobs exit clear reset); do alias $c=" $c"; done
-
-# zshaddhistory_functions=(some_fu)
-# some_fu() {
-#   emulate -L zsh
-#   # return 
-# }
 
 # allow comments even in interactive shells
 setopt INTERACTIVE_COMMENTS
