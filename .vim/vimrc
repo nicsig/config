@@ -269,7 +269,9 @@ set termencoding=utf-8
 
 " FTPLUGINS + SYNTAX {{{2
 
-" Commented because we don't need this anymore. `vim-plug` already does it for us.
+" Commented because we don't need this anymore.{{{
+"
+" `vim-plug` already does it for us.
 " I keep this section in case it might be necessary if one day we change our plugin
 " manager.
 "
@@ -280,80 +282,27 @@ set termencoding=utf-8
 "         and syntax on from your .vimrc as they are automatically handled by
 "         plug#begin() and plug#end().
 "
-" https://github.com/junegunn/vim-plug/issues/83
-
-
+" See also:
+"         https://github.com/junegunn/vim-plug/issues/83
+"}}}
 " filetype plugin indent on
 
-
-"        ┌─ from `:h syn_cmd`:         Only define colors for groups that don't have highlighting yet
-"        │  from `:h syntax_loading`:  ":syntax enable" only sets groups that weren't set yet
-"        │
-" syntax enable
-"        │
-"        └─ :so $VIMRUNTIME/syntax/syntax.vim
-"             → :so $VIMRUNTIME/syntax/nosyntax.vim                clear old syntax, and remove `b:current_syntax`
-"                                                                  so, don't expect a guard:
+" Why do you comment this?{{{
 "
-"                                                                      if exists('b:current_syntax')
-"                                                                          finish
-"                                                                      endif
+" `vim-plug` already does it.
+"}}}
+" Why the guard?{{{
 "
-"                                                                   … to prevent a syntax plugin from being
-"                                                                   re-sourced when you re-enable the syntax
-"                                                                   highlighting mechanism
+" To avoid syntax plugins to be reloaded every time we source our vimrc.
+"}}}
+" Why not `if !exists('g:syntax_on')`?{{{
 "
-"
-"             → :so $VIMRUNTIME/syntax/synload.vim
-"
-"                 → :so $VIMRUNTIME/syntax/syncolor.vim            setup the colors for syntax highlighting
-"                                                                  answer the question “how do we color?
-"
-"                 → install autocmd listening to `Syntax *`
-"                   which sources:
-"                   :so syntax/{&ft}.vim                           setup the syntax
-"                   :so syntax/{&ft}/*.vim                         answer the question “what do we color?“
-"
-"             → :so $VIMRUNTIME/filetype.vim                       filetype detection
-"               installs autocmd to set 'filetype'
-"
-"             → install autocmd listening to `FileType *`          syntax detection
-"               which sets the value of 'syntax'
-"
-"             → execute this autocmd for all buffers:
-"                   doautoall syntaxset FileType
-"                   set syntax=…
-"                   Syntax event
-"                   source syntax files
-
-
-" `:syntax on` and `:syntax enable` both source the file:
-"
-"         $VIMRUNTIME/syntax/syncolor.vim
-"
-" The latter execute the custom commands `:SynColor` and `:SynLink`, which,
-" depending on the argument passed to `:syn` (`enable` or `on`), are defined
-" differently:
-"
-"         on:
-"             command -nargs=* SynColor hi          <args>
-"             command -nargs=* SynLink  hi link     <args>
-"
-"         enable:
-"             command -nargs=* SynColor hi def      <args>
-"             command -nargs=* SynLink  hi def link <args>
-"
-" We can see  that for `:syntax enable`,  the commands use `:hi  def` instead of
-" just `:hi`. The `def` argument prevents that we override a HG which was linked
-" to a syntax element by a colorscheme.
-
-" If you enable syntax manually, use a guard:
-"
-"         if !exists('g:syntax_on')
-"             syntax enable
-"         endif
-"
-" … so that it's not enabled every time you re-source the vimrc.
+" A global variable seems more brittle.
+" It could be wrongly deleted.
+"}}}
+" if has('vim_starting')
+"     syntax enable
+" endif
 
 " GUI {{{2
 
@@ -6696,6 +6645,7 @@ endfu
 "     pwd
 "
 " See `:h :echo-redraw`.
+
 
 
 " sessions to finish:

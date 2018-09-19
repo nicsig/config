@@ -56,7 +56,7 @@
 # We  could remove the  functions, and just execute  the code directly  from the
 # script.
 # We've put them in functions to make the code more readable.
-# IOW, I don't think they have to be local.
+# IOW, I think they are supposed to be accessible from the whole script.
 
 
 # TODO:
@@ -292,35 +292,44 @@ fpath=(${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath)
 fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
 
 # Use modern completion system
-autoload -Uz compinit
-#         ││{{{
-#         │└ from `man zshbuiltins`:
-#         │  mark the function to be autoloaded using the zsh style,
-#         │  as if the option KSH_AUTOLOAD was unset
-#         │
-#         └ from `man zshmisc`:
-#           suppress usual alias expansion during reading
-#
-# according to `run-help autoload`,   `autoload`   is equivalent to `functions -u`
-#                                                                          │
-#                                                                          └ autoload flag
-# according to `run-help functions`,  `functions`  is equivalent to `typeset -f`
-#                                                                        │
-#                                                                        └─ refer to function
-#                                                                           rather than parameter
-#
-# according to `run-help typeset`,    `typeset`    sets or displays attributes and
-#                                                  values for shell parameters}}}
-compinit
 
-# By default, `run-help` is an alias for `man`.
-# Remove it silently (black hole is needed to avoid error messages when we
-# reload zshrc).
-# This is necessary ONLY if we've compiled zsh. If we've installed it from
-# a default repo, the help files have probably already been generated,
-# and `run-help` hasn't been aliased to `man`.
+#         ┌ from `man zshbuiltins`:{{{
+#         │ mark the function to be autoloaded using the zsh style,
+#         │ as if the option KSH_AUTOLOAD was unset
+#         │
+#         │┌ from `man zshmisc`:
+#         ││ suppress usual alias expansion during reading
+#         ││}}}
+autoload -Uz compinit
+compinit
+# What's `autoload`?{{{
+#
+# According to `run-help autoload`,
+# `autoload` is equivalent to `functions -u`
+#                                      │
+#                                      └ autoload flag
+#
+# According to `run-help functions`,
+# `functions` is equivalent to `typeset -f`
+#                                     │
+#                                     └─ refer to function
+#                                        rather than parameter
+#
+# According to `run-help typeset`,
+# `typeset` sets or displays attributes and values for shell parameters.
+#}}}
+
+# Why removing the alias `run-help`?{{{
+#
+# By default, `run-help` is merely an alias for `man`.
+# We want  the `run-help`  command  which displays  help files  for some  other
+# builtin commands, inside a pager.
+#}}}
+# Why silently?{{{
+#
+# To avoid error messages when we reload zshrc.
+#}}}
 unalias run-help >/dev/null 2>&1
-# autoload `run-help` function
 autoload -Uz run-help
 # Purpose:{{{
 #
@@ -335,7 +344,7 @@ autoload -Uz run-help
 # Do the same thing for various other  commands (if I type `git add`, `run-help`
 # should show you the help of `git-add`, ...).
 #
-#   https://stackoverflow.com/a/32293317/9780968
+#     https://stackoverflow.com/a/32293317/9780968
 #}}}
 # Where did you find this list of functions?{{{
 #
@@ -373,15 +382,33 @@ autoload -Uz zrecompile
 #      ├─────────────┐ ├──────────────┐
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete _correct _approximate
-# The 'format' style controls the title  of each category of candidates when you
-# tab-complete a word on the command-line.
-zstyle ':completion:*' format '    %F{89}%d%f'
-#                                     ├┘
-#                                     └ hi `:PmenuSel`
+# format{{{
+#
+# The 'format'  style enables  and controls the  appearance of  an informational
+# message  for  each list  of  matches,  when you  tab-complete  a  word on  the
+# command-line.
+#
+# The format style is  so named because the value of the  style gives the format
+# to print the message in.
+#                              ┌ change the color of any following text
+#                              │ (why 89? see `:hi PmenuSel`)
+#                              │
+#                              │     ┌ text of the message (Description)
+#                              │     │
+#                              │     │ ┌ reset color
+#                              ├────┐├┐├┐}}}
+zstyle ':completion:*' format '%F{89}%d%f'
 zstyle ':completion:*' group-name ''
 # show completion menu when number of options is at least 2
 zstyle ':completion:*' menu select=2
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+#                                            ├────┘{{{
+#                                            └ `man zshexpn`
+#                                            > PARAMETER EXPANSION
+#                                            > Parameter Expansion Flags
+#                                            > s:string:
+#                                                   Force field splitting at the separator string.
+#}}}
 zstyle ':completion:*' list-colors ''
 zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
 # not sure, but the first part of the next command probably makes completion
@@ -406,10 +433,10 @@ zstyle ':filter-select' case-insensitive yes
 #     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
 zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
 #                   │ │ │   │{{{
-#                   │ │ │   └ argument
-#                   │ │ └ command
-#                   │ └ completer
-#                   └ function (source: from bash to zsh, page 239)
+#                   │ │ │   └ any argument and any tag
+#                   │ │ └ the command `mpv`
+#                   │ └ any completer
+#                   └ any function (`man zshcomp` > COMPLETION SYSTEM CONFIGURATION > Overview)
 #}}}
 
 # Use emacs keybindings even if our EDITOR is set to vi.
@@ -440,36 +467,48 @@ stty -ixon
 # don't move `Plugins` after syntax highlighting
 # Plugins {{{1
 
-# Le code qui suit a pour but de sourcer un ensemble de fonctions fournies par
-# le script fasd:
-#
-# posix-alias          define aliases that applies to all posix shells
-# zsh-hook             define _fasd_preexec and add it to zsh preexec array
-# zsh-ccomp            zsh command mode completion definitions
-# zsh-ccomp-install    setup command mode completion for zsh
-# zsh-wcomp            zsh word mode completion definitions
-# zsh-wcomp-install    setup word mode completion for zsh
-#
-# Pour réduire le ralentissement induit par ces fonctions au lancement d'un
-# shell zsh, on les écrit dans un fichier cache, ~/.fasd-init-zsh, qu'on met à
-# jour quand le script fasd est plus récent (-nt).
-#
-# Code inspiré (adaptation bash → zsh) par un passage de cette page:
-#     https://github.com/clvv/fasd#install
-#
-# Alternativement, pour initialiser fasd, on pourrait se contenter d'une des
-# lignes qui suit :
-#
-# eval "$(fasd --init auto)"                        code générique pour n'importe quel shell
-# eval "$(fasd --init posix-alias zsh-hook)"        code minimaliste pour zsh (pas de complétion via tab)
+# if we execute a non-existing command, suggest us some package(s),
+# where we could find it (requires the deb package `command-not-found`)
+[[ -f /etc/zsh_command_not_found ]] && . /etc/zsh_command_not_found
 
-if [[ ! -f ${HOME}/bin/fasd ]]; then
+# download fasd
+if [[ ! -f "${HOME}/bin/fasd" ]]; then
   curl -sL 'https://raw.githubusercontent.com/clvv/fasd/master/fasd' -o "${HOME}/bin/fasd"
   chmod +x "${HOME}/bin/fasd"
 fi
 
+# When we start a shell, the fasd functions may slow the start up.
+# As a workaround, we write them in a cache (`~/.fasd-init-zsh`), which we
+# update when fasd is more recent.
 fasd_cache="${HOME}/.fasd-init-zsh"
 if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
+  # Source a set of functions provided by fasd:{{{
+  #
+  #     ┌───────────────────┬──────────────────────────────────────────────────────┐
+  #     │ posix-alias       │ define aliases that applies to all posix shells      │
+  #     ├───────────────────┼──────────────────────────────────────────────────────┤
+  #     │ zsh-hook          │ define _fasd_preexec and add it to zsh preexec array │
+  #     ├───────────────────┼──────────────────────────────────────────────────────┤
+  #     │ zsh-ccomp         │ zsh command mode completion definitions              │
+  #     ├───────────────────┼──────────────────────────────────────────────────────┤
+  #     │ zsh-ccomp-install │ setup command mode completion for zsh                │
+  #     ├───────────────────┼──────────────────────────────────────────────────────┤
+  #     │ zsh-wcomp         │ zsh word mode completion definitions                 │
+  #     ├───────────────────┼──────────────────────────────────────────────────────┤
+  #     │ zsh-wcomp-install │ setup word mode completion for zsh                   │
+  #     └───────────────────┴──────────────────────────────────────────────────────┘
+  #
+  # Alternatively, to init fasd, we could use one of those lines:
+  #
+  #     # generic code for any shell
+  #     $ eval "$(fasd --init auto)"
+  #
+  #     # minimalist code for zsh (no tab completion)
+  #     $ eval "$(fasd --init posix-alias zsh-hook)"
+  #
+  # Source:
+  #       https://github.com/clvv/fasd#install
+  #}}}
   fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install >| "${fasd_cache}"
 fi
 . "${fasd_cache}"
@@ -477,7 +516,7 @@ unset fasd_cache
 
 
 # source fzf config
-[[ -f ${HOME}/.fzf.zsh ]] && . "${HOME}/.fzf.zsh"
+[[ -f "${HOME}/.fzf.zsh" ]] && . "${HOME}/.fzf.zsh"
 
 # https://github.com/zsh-users/zaw
 #
@@ -512,6 +551,8 @@ unset fasd_cache
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
 [[ -f ${HOME}/.shrc ]] && . "${HOME}/.shrc"
+# TODO:
+# Remove this once we've removed `~/.shrc`.
 
 # Aliases {{{1
 # regular {{{2
@@ -1982,6 +2023,30 @@ bindkey -s '^Xc' 'vimdiff <() <()\e5^B'
 #        └── interpret the arguments as strings of characters
 #            without `-s`, `vimdiff` would be interpreted as the name of a zle widget
 
+# C-x h           complete-help {{{4
+
+# TODO:
+# This shows tags when we're at a  certain point of a command-line where we want
+# to customize the completion system.
+# Explain what tags are, and how to read the output of `_complete_help`.
+#
+# See `man zshcompsys` > COMPLETION SYSTEM CONFIGURATION > Overview
+#                    > BINDABLE COMMANDS
+bindkey '^Xh' _complete_help
+
+# The _complete_help bindable command shows  all the contexts and tags available
+# for completion at a particular point.
+# This provides an easy way of finding information for tag-order and other styles.
+#
+# This  widget displays information about  the context names, the  tags, and the
+# completion functions used when completing at the current cursor position.
+# If given a  numeric argument other than  1 (as in `ESC-2 ^Xh'),  then the styles
+# used and the contexts for which they are used will be shown, too.
+#
+# Note that  the information about styles  may be incomplete; it  depends on the
+# information available  from the  completion functions called,  which in  turn is
+# determined by the user's own styles and other settings.
+
 # C-x r           snippet-rename {{{4
 
 bindkey -s '^Xr' '^A^Kfor f in *; do echo mv \"$f\" \"${f}\";done\e7^B'
@@ -2079,52 +2144,6 @@ bindkey '\euu' up-case-word
 # `c`, `l` or `u` would change the case of words.
 
 # M-e       run-hElp {{{3
-#
-# from `type run-help`:    run-help is an autoload shell function
-# it's an alias to `man` that will look in other places before invoking man
-#
-# by default  it's bound  to `M-h`,  but we use  this key  to move  between tmux
-# windows so rebind it to `M-e` instead
-bindkey '\ee' run-help
-
-# M-m       normalize_command_line {{{3
-
-# TODO:
-# Explain how it works.
-# Also,   what's   the   difference   between   `__normalize_command_line`   and
-# `__expand_aliases`?
-# They seem to do the same thing. If that's so, then remove one of the functions
-# and key bindings.
-__normalize_command_line() {
-  functions[__normalize_command_line_tmp]=$BUFFER
-  BUFFER=${${functions[__normalize_command_line_tmp]#$'\t'}//$'\n\t'/$'\n'}
-  ((CURSOR == 0 || CURSOR == $#BUFFER))
-  unset 'functions[__normalize_command_line_tmp]'
-}
-zle -N __normalize_command_line
-bindkey '\em' __normalize_command_line
-
-# M-o       previous_directory (Old) {{{3
-# cycle between current dir and old dir
-__previous_directory() {
-  emulate -L zsh
-  # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
-  # so, no need to check it's not empty
-  cd -
-  # refresh the prompt so that it reflects the new working directory
-  zle reset-prompt
-}
-zle -N __previous_directory
-bindkey '\eo' __previous_directory
-
-# M-Z       fuZzy-select-output {{{3
-
-# insert an entry from the output of the previous command,
-# selecting it with fuzzy search
-bindkey -s '\eZ' '$(!!|fzf)'
-
-# CTRL-META {{{2
-# C-M-e      expand_aliases {{{3
 
 # TODO:
 # fully explain the `expand_aliases` function
@@ -2163,7 +2182,53 @@ __expand_aliases() {
 }
 
 zle -N __expand_aliases
-bindkey '\e^E' __expand_aliases
+bindkey '\ee' __expand_aliases
+
+# M-m       normalize_command_line {{{3
+
+# TODO:
+# Explain how it works.
+# Also,   what's   the   difference   between   `__normalize_command_line`   and
+# `__expand_aliases`?
+# They seem to do the same thing. If that's so, then remove one of the functions
+# and key bindings.
+__normalize_command_line() {
+  functions[__normalize_command_line_tmp]=$BUFFER
+  BUFFER=${${functions[__normalize_command_line_tmp]#$'\t'}//$'\n\t'/$'\n'}
+  ((CURSOR == 0 || CURSOR == $#BUFFER))
+  unset 'functions[__normalize_command_line_tmp]'
+}
+zle -N __normalize_command_line
+bindkey '\em' __normalize_command_line
+
+# M-o       previous_directory (Old) {{{3
+# cycle between current dir and old dir
+__previous_directory() {
+  emulate -L zsh
+  # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
+  # so, no need to check it's not empty
+  cd -
+  # refresh the prompt so that it reflects the new working directory
+  zle reset-prompt
+}
+zle -N __previous_directory
+bindkey '\eo' __previous_directory
+
+# M-Z       fuZzy-select-output {{{3
+
+# insert an entry from the output of the previous command,
+# selecting it with fuzzy search
+bindkey -s '\eZ' '$(!!|fzf)'
+
+# CTRL-META {{{2
+# M-e      expand_aliases {{{3
+
+# from `type run-help`:    run-help is an autoload shell function
+# it's an alias to `man` that will look in other places before invoking man
+#
+# by default  it's bound  to `M-h`,  but we use  this key  to move  between tmux
+# windows so rebind it to `M-e` instead
+bindkey '\e^e' run-help
 #        │
 #        └─ C-M-e
 
@@ -2264,13 +2329,13 @@ bindkey -M menuselect '^Q' send-break
 # commands are being read from standard input, i.e. in interactive use.
 #
 # Works in combination with `CDPATH`:
-#     % cd /tmp
-#     % Downloads
-#     % pwd
+#     $ cd /tmp
+#     $ Downloads
+#     $ pwd
 #     ~/Downloads/
 #
 # Works with completion:
-#     % Do Tab
+#     $ Do Tab
 #     Documents/  Downloads/
 setopt AUTO_CD
 
@@ -2316,12 +2381,18 @@ setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 # from the history
 #
 # solution 1:
-# zsh provides a hook function preexec that can be used for that, if it returns
+# zsh provides a hook function zshaddhistory that can be used for that, if it returns
 # non-zero the command is not saved in history
 #
 # solution 2:
 # alias the commands to have a space in front, maybe something like:
 #     for c in (ls fg bg jobs exit clear reset); do alias $c=" $c"; done
+
+# zshaddhistory_functions=(some_fu)
+# some_fu() {
+#   emulate -L zsh
+#   # return 
+# }
 
 # allow comments even in interactive shells
 setopt INTERACTIVE_COMMENTS
@@ -2367,10 +2438,10 @@ __abbrev_expand() {
   # the last space
   local MATCH
 
-  #                ┌─ remove longest suffix matching the following pattern
+  #                ┌ remove longest suffix matching the following pattern
   #                │
-  #                │   ┌─ populates `$MATCH` with the suffix removed by `%%`
-  #                │   │  for more info:    man zshexpn, filename generation
+  #                │   ┌ populates `$MATCH` with the suffix removed by `%%`
+  #                │   │ for more info:    man zshexpn, filename generation
   LBUFFER=${LBUFFER%%(#m)[_a-zA-Z0-9]#}
   #                                  │
   #                                  └─ matches 0 or more of the previous pattern (word character)

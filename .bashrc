@@ -42,7 +42,7 @@
 # If not running interactively, don't do anything
 # Why don't you use the single line `[[ $- = *i* ]] || return` (shorter)?{{{
 #
-#     1. It's not posix.
+#     1. It's not posix-compliant.
 #     2. The `case` syntax seems more powerful.
 #}}}
 case "$-" in
@@ -125,28 +125,6 @@ export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
 #                     │
 #                     └ double quotes to allow the expansion of `${PROMPT_COMMAND}`
 #}}}
-
-# Functions {{{1
-
-# cd /usr/local/bin/
-# cd bin share    ⇔    cd /usr/local/share/
-
-cd() {
-  if [[ $# -eq 2 ]]; then
-    # bashism replacing the first occurrence of `$1` inside `$PWD` with `$2`
-    builtin cd "${PWD/$1/$2}"
-
-  elif [[ $# -eq 1 ]]; then
-    builtin cd "$1"
-#   │
-#   └── force `cd` to be interpreted as a builtin;
-#       not an alias, not a function
-
-  else
-    # without argument, go back to home
-    builtin cd
-  fi
-}
 
 # Options {{{1
 
@@ -304,7 +282,7 @@ bind '"\em": "\C-aman \ef\C-k\C-m"'
 previous_directory() {
   # check that `$OLDPWD` is set otherwise we get an error
   [[ -z "${OLDPWD}" ]] && return
-  builtin cd -
+  cd -
 }
 bind -x '"\ez": previous_directory'
 
@@ -325,8 +303,5 @@ bind '"\eZ": "$(!!|fzf)"'
 #           ┌─ Black hole
 #           │
 bind '"\e\C-b":  "\C-e >/dev/null 2>&1 &\C-m"'
-#                      │          │  │ │
-#                      │          │  │ └─ execute in the background
-#                      └────────┤ └──┤
-#                               │    └ same thing for errors
-#                               └───── redirect output to /dev/null
+#                                      │
+#                                      └─ execute in the background

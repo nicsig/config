@@ -132,12 +132,16 @@ function write_bilingual_subtitles(subs_original, subs_original_start, subs_orig
     f:write("[Script Info]", "\n\n")
     f:write("[V4+ Styles]", "\n")
     f:write("Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding", "\n")
-    f:write("Style: English,Arial,20,&H00FFFFFF,&H000000FF,&H00000000,&H50000000,0,0,0,0,100,100,0,0,4,1,6.25,2,10,10,10,1", "\n")
+    f:write("Style: English,Arial,16,&H00FFFFFF,&H000000FF,&H00000000,&H50000000,0,0,0,0,100,100,0,0,4,1,6.25,2,10,10,10,1", "\n")
+    --                            ^^
+    --                            controls the size of the english subtitles
     f:write("[Events]", "\n")
     f:write("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text", "\n")
 
     local translated_sub_lines = {}
-    local translates_sub_style = "\\N{\\fs2} \\N{\\fs14}{\\c&H009DDFF1&}"
+    local translates_sub_style = "\\N{\\fs2} \\N{\\fs12}{\\c&H009DDFF1&}"
+    --                                               ^^
+    --                                               controls the size of the french subtitles
 
     for i, sub_text in ipairs(subs_original) do
         local sub_start = subs_original_start[i]
