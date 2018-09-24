@@ -2262,11 +2262,15 @@ nno  <space>t  :<c-u>exe (v:count ? v:count.'tabnew' : 'tabnew')<cr>
 "  ]k ]j align the end of the current line with the one of the
 "  previous/next line
 
-nno  <silent>  [k  :<c-u>exe 'left ' . indent(line('.')-1)<cr>
-nno  <silent>  [j  :<c-u>exe 'left ' . indent(line('.')+1)<cr>
+nmap  <silent>  [k  <plug>(align_with_beginning_above)
+nmap  <silent>  [j  <plug>(align_with_beginning_below)
+nno   <silent>  <plug>(align_with_beginning_above)  :<c-u>call myfuncs#align_with_beginning(-1)<cr>
+nno   <silent>  <plug>(align_with_beginning_below)  :<c-u>call myfuncs#align_with_beginning(1)<cr>
 
-nno  <silent>  ]k  :<c-u>call myfuncs#align_with_end(-1)<cr>
-nno  <silent>  ]j  :<c-u>call myfuncs#align_with_end(1)<cr>
+nmap  <silent>  ]k  <plug>(align_with_end_above)
+nmap  <silent>  ]j  <plug>(align_with_end_below)
+nno   <silent>  <plug>(align_with_end_above)  :<c-u>call myfuncs#align_with_end(-1)<cr>
+nno   <silent>  <plug>(align_with_end_below)  :<c-u>call myfuncs#align_with_end(1)<cr>
 
 " \                   (prefix) {{{3
 " \b            select current box {{{4
@@ -2775,10 +2779,15 @@ fu! s:edit_readme() abort
     endif
 endfu
 
-" -s -S            edit/show snippets {{{4
+" -s               edit snippets {{{4
 
+" Why did you remove `-S`, which showed all our snippets?{{{
+"
+" `SPC fs` is better.
+" It  allows   us  to   fuzzy  search  our   snippets,  and   can  automatically
+" inserts+expands the selected tab trigger.
+"}}}
 nno  <silent>  -s  :<c-u>UltiSnipsEdit<cr>
-nno  <silent>  -S  :<c-u>call myfuncs#snip_cheat()<cr>
 
 " -U               show unicode table {{{4
 
@@ -2798,18 +2807,15 @@ endfu
 nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
 " +                   (prefix) {{{3
-" +>    +\      split listing or long object {{{4
+" +>    +<      split/join listing or long data {{{4
 
-" long object = dictionary or list
+" long data = dictionary, list, bulleted list
 
-nmap            +>                                  <plug>(myfuncs_long_listing_split)
-nno   <silent>  <plug>(myfuncs_long_listing_split)  :<c-u>call myfuncs#long_listing_split()<cr>
+nmap            +<                               <plug>(myfuncs_long_data_split)
+nno   <silent>  <plug>(myfuncs_long_data_split)  :<c-u>call myfuncs#long_data_split()<cr>
 
-nmap            +\                                 <plug>(myfuncs_long_object_split)
-nno   <silent>  <plug>(myfuncs_long_object_split)  :<c-u>call myfuncs#long_object_split()<cr>
-
-nmap            +\                                <plug>(myfuncs_long_object_join)
-nno   <silent>  <plug>(myfuncs_long_object_join)  :<c-u>call myfuncs#long_object_join()<cr>
+nno  <silent>  +<  :<c-u>set opfunc=myfuncs#long_data_join<cr>g@
+xno  <silent>  +<  :<c-u>call myfuncs#long_data_join('vis')<cr>
 
 " +t            trim whitespace {{{4
 
@@ -3051,6 +3057,7 @@ nno  <silent>  <plug>(myfuncs_box_destroy)  :<c-u>call myfuncs#box_destroy()<cr>
 nno  <silent>  =d  :<c-u>call <sid>fix_display()<cr>
 
 fu! s:fix_display() abort
+    let view = winsaveview()
     " redraw screen
     redraw!
     " redraw all status lines
@@ -3078,6 +3085,8 @@ fu! s:fix_display() abort
     "}}}
     syntax sync minlines=200
     syntax sync maxlines=400
+
+    call winrestview(view)
 endfu
 
 " =m                  fix macro {{{3
@@ -6645,6 +6654,13 @@ endfu
 "     pwd
 "
 " See `:h :echo-redraw`.
+"
+" 133 -
+" Try to remove all our invocations  of `repeat#set()`, and replace them with an
+" operator func.
+" It would allow us to avoid this annoying and recurring bug:
+"
+"     https://github.com/tpope/vim-repeat/issues/63#issuecomment-390281441
 
 
 

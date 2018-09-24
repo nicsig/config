@@ -49,9 +49,23 @@
 
 # Custom key bindings {{{1
 
+bind-key g home
+bind-key G end
+
 bind-key j down
 bind-key k up
 bind-key l open
+
+# by default, it's `p` which I find confusing
+bind-key N prev-unread
+
+# toggle  the read flag  for the currently  selected article, and  clears delete
+# flag if set
+bind-key SPACE toggle-article-read
+
+bind-key s sort
+bind-key S revsort
+bind-key ^S save
 
 # Options {{{1
 

@@ -51,6 +51,12 @@ if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
 
   export EDITOR='vim'
 
+  # infinite history
+  #     https://unix.stackexchange.com/a/273863
+  export HISTFILE="${HOME}/.zsh_eternal_history"
+  export HISTSIZE=10000000
+  export SAVEHIST=10000000
+
   # to get the name of the day/month in english
   export LC_TIME=en_US.UTF-8
 
@@ -112,7 +118,7 @@ if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
   #               └ boolean and numerics options (probably)
   #}}}
 
-  export CDPATH=:${HOME}:/tmp
+  export CDPATH=:${HOME}:${HOME}/Downloads
   # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
   export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
   # add man pages for `texlive` and `dasht`

@@ -302,6 +302,10 @@ bind '"\eZ": "$(!!|fzf)"'
 #
 #           ┌─ Black hole
 #           │
-bind '"\e\C-b":  "\C-e >/dev/null 2>&1 &\C-m"'
+# bind '"\e\C-b":  "\C-e >/dev/null 2>&1 &\C-m"'
 #                                      │
 #                                      └─ execute in the background
+
+# Update:
+# I've commented the key binding because I hit it by accident too often.
+# It happens when I press Escape then C-b quickly afterwards.

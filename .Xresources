@@ -167,23 +167,42 @@ Xft.lcdfilter:  lcddefault
 
 
 ! Perl extensions
-URxvt.perl-ext-common:  default,-searchable-scrollback,selection-to-clipboard,pasta,matcher,keyboard-select,confirm-paste
-!                               │
-!                               └── disable `searchable scrollback` extension
-!                                   because it shadows our Vim mapping `M-s`
-
-! All extensions are implemented in `/usr/lib/urxvt/perl/`.
-
-! Matcher:
-! Underline arbitrary patterns and make them clickable.
+! Warning:{{{
+!
+! There should be no spaces between the names of the plugins.
+! In particulare, no spaces between a comma and a backslash,
+! and no spaces between a beginning of line and the name of a plugin.
+!}}}
+! Where are all these extensions located?{{{
+!
+!     /usr/lib/urxvt/perl/
+!}}}
+! What does `selection-to-clipboard` do?{{{
+!
+! It puts the selection into the system clipboard.
+!
+! Select some text  in the terminal, and  you can automatically paste  it in the
+! browser, pressing `C-v`.
+!
+! In tmux, you need to disable the mouse (pfx + M-m) for the extension to work.
+!}}}
+! What does `-searchable-scrollback` do?{{{
+!
+! It disables the `searchable scrollback`  extension, because it shadows our Vim
+! mapping `M-s`.
+!}}}
+! What does `matcher` do?{{{
+!
+! It underlines arbitrary patterns and make them clickable.
 ! By default, it's used to make URLs clickable.
-
-! `selection-to-clipboard`:
-! Put the selection into the system clipboard.
-! Select some text in the terminal, and you can automatically paste it in the
-! browser, hitting `C-S-v`.
-! In tmux, you need to disable the mouse (pfx + m) for the extension to work.
-
+!}}}
+URxvt.perl-ext-common:  default,\
+selection-to-clipboard,\
+-searchable-scrollback,\
+pasta,\
+matcher,\
+keyboard-select,\
+confirm-paste
 
 ! temporarily disabled, we need to find another key to not shadow `M-u` (readline capitalize)
 ! besides, the next key binding can't work because we don't have any url-select extension
@@ -234,8 +253,13 @@ XTerm*metaSendsEscape: true
 xterm*faceName: DejaVu Sans Mono
 xterm*faceSize: 20
 
+! TODO:
+! We  can paste some  text selected  in firefox by  pressing down shift  and the
+! mouse wheel.
+! How to do the same with a key binding which doesn't involve the mouse?
+
 ! Let us paste the system clipboard via C-S-v.
-! https://unix.stackexchange.com/a/225076/277716
+!     https://unix.stackexchange.com/a/225076/277716
 xterm*VT100.Translations: #override \
                  Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
                  Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)

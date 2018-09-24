@@ -65,10 +65,9 @@ alias web='WWW_HOME=duckduckgo.com w3m'
 
 # Recovered Functions:
 alert() {
-  local icon summary
-  icon='$([[ $? -eq 0 ]] && printf -- "terminal\n" || printf -- "error\n")'
-  summary="$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
-  eval "notify-send --urgency=low -i " "${icon}" '"${summary}"'
+  notify-send --urgency=low \
+    -i $([[ "$?" -eq 0 ]] && printf -- 'terminal\n' || printf -- 'error\n') \
+    "$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
 }
 
 help() {
@@ -96,7 +95,7 @@ tnvr() {
 # in bytes.
 what_is_in_var() {
   var="$1"
-  printf -- "%s" "$var" | od -t c
+  printf -- '%s' "${var}" | od -t c
 }
 
 # Alias {{{1

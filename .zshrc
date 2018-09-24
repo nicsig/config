@@ -28,7 +28,8 @@
 #
 #       doesn't print 'success' if the script fails.
 #
-#       Use `exit 1` for a random error, and `exit 64` for a usage message.
+#       Use `exit 1` for a random error, `exit 64` for a usage message,
+#       `65` for bad user input, and `77` for not enough permission.
 #       See here for which code to use:
 #
 #           https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
@@ -72,13 +73,11 @@
 #     https://github.com/jamielinux/bashmount
 #     https://www.youtube.com/watch?v=WaYZ9D7sX4U
 
-# TODO:
-# To document in our notes:
+# TODO: To document in our notes:
 #
 #     https://unix.stackexchange.com/a/88851/289772
 
-# TODO:
-# Do these substitutions:
+# TODO: Do these substitutions:
 #
 #     ~ → ${HOME}
 #
@@ -207,32 +206,6 @@
 # filepath.
 #}}}
 
-# ┌ set left prompt{{{
-# │
-# │   man zshzle
-# │   > CHARACTER HIGHLIGHTING
-# │
-# │  ┌ set the color to blue
-# │  │
-# │  │   man zshmisc
-# │  │   > SIMPLE PROMPT ESCAPES
-# │  │   > Shell state
-# │  │
-# │  │       ┌ current workding directory (but replace $HOME by a tilde)
-# │  │       │
-# │  │       │   man zshparam
-# │  │       │   > PARAMETERS USED BY THE SHELL
-# │  │       │
-# │  │       │ ┌ reset the color
-# │  │       │ │
-# │  │       │ │         ┌ Add an indicator showing whether the last command succeeded ($?):
-# │  │       │ │         │
-# │  │       │ │         │     man zshmisc
-# │  │       │ │         │     > CONDITIONAL SUBSTRINGS IN PROMPTS
-# │  │       │ │         │
-# │  ├──────┐├┐├┐        ├─────────┐}}}
-PS1='%F{blue}%~%f %F{red}%(?..[%?] )%f
-$ '
 # How does `%(?..[%?] )` work?{{{
 #
 # The syntax of a conditional substring in a prompt is:
@@ -264,6 +237,66 @@ $ '
 #       └ was the exit status of the last command 0?
 #         (without any number, zsh assumes 0)
 #}}}
+# ┌ set left prompt{{{
+# │
+# │   man zshzle
+# │   > CHARACTER HIGHLIGHTING
+# │
+# │  ┌ set the color to blue
+# │  │
+# │  │   man zshmisc
+# │  │   > SIMPLE PROMPT ESCAPES
+# │  │   > Shell state
+# │  │
+# │  │       ┌ current workding directory
+# │  │       │
+# │  │       │ replace $HOME with a tilde,
+# │  │       │ and in a path prefixed by a named directory,
+# │  │       │ replace the latter with the name
+# │  │       │ (if the result is shorter and if you've referred to it in a command at least once)
+# │  │       │
+# │  │       │   man zshparam
+# │  │       │   > PARAMETERS USED BY THE SHELL
+# │  │       │
+# │  │       │ ┌ reset the color
+# │  │       │ │
+# │  │       │ │         ┌ Add an indicator showing whether the last command succeeded ($?):
+# │  │       │ │         │
+# │  │       │ │         │     man zshmisc
+# │  │       │ │         │     > CONDITIONAL SUBSTRINGS IN PROMPTS
+# │  │       │ │         │
+# │  ├──────┐├┐├┐        ├─────────┐}}}
+PS1='%F{blue}%~%f %F{red}%(?..[%?] )%f
+%% '
+
+# Why?{{{
+#
+# Named directories  are handy to  abbreviate the reference to  some directories
+# with long paths.
+#
+# Here, as an example,  when I cd into `~/Downloads/XDCC`, I  want the prompt to
+# print `~xdcc` instead of the full path.
+#
+# To do so, we need to:
+#
+#       1. create the named directory `~xdcc`
+#       2. refer to it in a(ny) command
+#}}}
+# Could we use another command instead of `:`?{{{
+#
+# Yes, any command would do.
+# }}}
+# What does `:` do in general?{{{
+#
+# From `man zshbuiltins`:
+#
+# : [ arg ... ]
+#
+#      This  command  does  nothing,  although  normal  argument  expansions  is
+#      performed which may have effects on shell parameters.
+#}}}
+xdcc=~/Downloads/XDCC/
+: ~xdcc
 
 # What's `fpath`?{{{
 #
@@ -293,12 +326,12 @@ fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
 
 # Use modern completion system
 
-#         ┌ from `man zshbuiltins`:{{{
-#         │ mark the function to be autoloaded using the zsh style,
-#         │ as if the option KSH_AUTOLOAD was unset
+#         ┌ from `man zshmisc`:{{{
+#         │     suppress usual alias expansion during reading
 #         │
-#         │┌ from `man zshmisc`:
-#         ││ suppress usual alias expansion during reading
+#         │┌ from `man zshbuiltins` (AUTOLOADING FUNCTIONS):
+#         ││     mark the function to be autoloaded using the zsh style,
+#         ││     as if the option KSH_AUTOLOAD was unset
 #         ││}}}
 autoload -Uz compinit
 compinit
@@ -473,7 +506,7 @@ stty -ixon
 
 # download fasd
 if [[ ! -f "${HOME}/bin/fasd" ]]; then
-  curl -sL 'https://raw.githubusercontent.com/clvv/fasd/master/fasd' -o "${HOME}/bin/fasd"
+  curl -Ls 'https://raw.githubusercontent.com/clvv/fasd/master/fasd' -o "${HOME}/bin/fasd"
   chmod +x "${HOME}/bin/fasd"
 fi
 
@@ -558,9 +591,6 @@ unset fasd_cache
 # regular {{{2
 # aptitude {{{3
 
-# TODO: to remove?
-alias kff='killall ffmpeg 2>/dev/null'
-
 alias api='sudo aptitude install'
 alias app='sudo aptitude purge'
 alias aps='aptitude show'
@@ -580,14 +610,18 @@ alias bookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
 # cd {{{3
 
 alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ......='cd ../../../../..'
+alias ..2='cd ../..'
+alias ..3='cd ../../..'
+alias ..4='cd ../../../..'
+alias ..5='cd ../../../../..'
 
 # df {{{3
 
 alias df=dfc
+
+# dirs {{{3
+
+alias dirs='dirs -v'
 
 # dl {{{3
 
@@ -853,21 +887,38 @@ cdt() { #{{{2
 
 # *_cfg {{{2
 
-#                                                       ┌ https://stackoverflow.com/a/7507068/9780968
-#                                                       │
-autostart_cfg() { "${EDITOR}" "${HOME}/bin/autostartrc" ;}
-bash_cfg() { "${EDITOR}" "${HOME}/.bashrc" ;}
-conky_rings_cfg() { "${EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
-conky_system_cfg() { "${EDITOR}" "${HOME}/.conky/system.lua" ;}
-conky_time_cfg() { "${EDITOR}" "${HOME}/.conky/time.lua" ;}
-firefox_cfg() { "${EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
-mpv_cfg() { "${EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
-tmux_cfg() { "${EDITOR}" "${HOME}/.tmux.conf" ;}
-vim_cfg() { "${EDITOR}" "${HOME}/.vim/vimrc" ;}
-w3m_cfg() { "${EDITOR}" "${HOME}/.w3m/config" ;}
-xbindkeys_cfg() { "${EDITOR}" "${HOME}/.config/xbindkeysrc" ;}
-xmodmap_cfg() { "${EDITOR}" "${HOME}/.Xmodmap" ;}
-zsh_cfg() { "${EDITOR}" "${HOME}/.zshrc" ;}
+#                                                        ┌ https://stackoverflow.com/a/7507068/9780968
+#                                                        │
+autostart_cfg() { "${=EDITOR}" "${HOME}/bin/autostartrc" ;}
+bash_cfg() { "${=EDITOR}" "${HOME}/.bashrc" ;}
+conky_rings_cfg() { "${=EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
+conky_system_cfg() { "${=EDITOR}" "${HOME}/.conky/system.lua" ;}
+conky_time_cfg() { "${=EDITOR}" "${HOME}/.conky/time.lua" ;}
+firefox_cfg() { "${=EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
+mpv_cfg() { "${=EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
+tmux_cfg() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
+vim_cfg() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
+w3m_cfg() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
+xbindkeys_cfg() { "${=EDITOR}" "${HOME}/.config/xbindkeysrc" ;}
+xmodmap_cfg() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
+zsh_cfg() { "${=EDITOR}" "${HOME}/.zshrc" ;}
+#              │{{{
+#              └ Suppose that we export a value containing a whitespace:
+#
+#                    export EDITOR='env not_called_by_me=1 vim'
+#
+# This `export`  would cause  our functions  to fail,  because of the quotes
+# which prevent zsh from doing field splitting.
+# Besides, even  without the quotes,  zsh (contrary to  bash) does NOT  do field
+# splitting on  variable expansion.
+# So zsh would interpret the name of the command as `env ...`, instead of `vim`.
+#
+# Fortunately, we can force zsh to do field splitting using the `=` flag.
+# For more info:
+#
+#     man zshexpn
+#     /${=spec}
+#}}}
 
 checkinstall_what_have_you() { #{{{2
   emulate -L zsh
@@ -965,7 +1016,7 @@ cmdfu() { #{{{2
 
   # Alternative using `highlight`:{{{
   #
-  #     curl -sL "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
+  #     curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
   #     | highlight -O xterm256 -S bash -s bright | less -iR
   #                  │           │       │
   #                  │           │       └ we want the 'olive' highlighting style
@@ -980,7 +1031,7 @@ cmdfu() { #{{{2
   #     │
   #     │┌ if the url page has changed, try the new address
   #     ││}}}
-  curl -sL "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
+  curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
   | pygmentize -l shell \
   | less -iR
   #       ││{{{
@@ -995,6 +1046,46 @@ cmdfu() { #{{{2
   #        when we search for a  pattern (`/pat`), ignore the difference between
   #        uppercase and lowercase characters in the text
   #}}}
+}
+
+expand_this() { #{{{2
+  emulate -L zsh
+
+  # Purpose?{{{
+  #
+  # Suppose you want to remove some files, and you pass a glob pattern to `rm`:
+  #
+  #     $ rm foo*bar
+  #
+  # You're afraid of removing important files, because you're not sure what the glob
+  # expands into.
+  # `expand_this` to the rescue:
+  #
+  #     $ expand_this foo*bar
+  #}}}
+  # Why not `$*`?{{{
+  #
+  # Because  it would  quote  the whole  expansion  of the  glob  passed to  the
+  # function as a single argument.
+  # As a result, the latter would be printed on a single line.
+  #
+  # I prefer the  expansion of the glob to be printed on  several lines: one per
+  # file.
+  #}}}
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+usage:
+    $0 <glob pattern>
+    $0 <expansion parameter>
+
+examples:
+    $0 *
+    $0 "\${path[@]}"
+EOF
+
+    return
+  fi
+  printf -- '%s\n' "$@"
 }
 
 ff_audio_record() { #{{{2
@@ -1014,7 +1105,7 @@ EOF
   ffmpeg -i "$1" -map 0:s:"$2" sub.srt
 }
 
-fix_terminal() { #{{{2
+fix() { #{{{2
   emulate -L zsh
 
   # For more info:
@@ -1043,38 +1134,6 @@ fzf_clipboard() { #{{{2
 
   # fuzzy find clipboard history
   printf -- "$(greenclip print | fzf -e -i)" | xclip -selection clipboard
-}
-
-glob_what_do_you_match() { #{{{2
-  emulate -L zsh
-
-  # Purpose?{{{
-  #
-  # Suppose you want to remove some files, and you pass a glob pattern to `rm`:
-  #
-  #     $ rm foo*bar
-  #
-  # You're afraid of removing important files, because you're not sure what the glob
-  # expands into.
-  # `glob_what_do_you_match` to the rescue:
-  #
-  #     $ glob_what_do_you_match foo*bar
-  #}}}
-  # Why not `$*`?{{{
-  #
-  # Because  it would  quote  the whole  expansion  of the  glob  passed to  the
-  # function as a single argument.
-  # As a result, the latter would be printed on a single line.
-  #
-  # I prefer the  expansion of the glob to be printed on  several lines: one per
-  # file.
-  #}}}
-  if [[ $# -eq 0 ]]; then
-    printf -- "usage:\n    $0 <a glob pattern>\n"
-    printf -- "\nexample:\n    $0 *\n"
-    return
-  fi
-  printf -- '%s\n' "$@"
 }
 
 loc() { #{{{2
@@ -1365,10 +1424,41 @@ palette(){ #{{{2
 repo_what_have_you() { #{{{2
   emulate -L zsh
   if [[ $# -eq 0 ]]; then
-    printf -- "usage:\n    $0 <press Tab>\n"
+    cat <<EOF >&2
+usage:
+    $0 <Tab>
+EOF
     return
   fi
   awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' /var/lib/apt/lists/*"$1"*
+}
+
+script_record() { #{{{2
+  emulate -L zsh
+  if [[ "$#" -eq 0 ]]; then
+    # record interactive session
+    script -q --timing=/tmp/.script_timing.log /tmp/.script_record.log
+  else
+    # record a specific (set of) command(s)
+    script -q --timing=/tmp/.script_timing.log -c "$1" /tmp/.script_record.log
+  fi
+}
+
+script_replay() { #{{{2
+  emulate -L zsh
+  if [[ ! -f /tmp/.script_record.log ]]; then
+    cat <<EOF >&2
+Usage:
+
+first invoke:
+  \`script_record\` to record an interactive shell session
+OR
+  \`script_record 'cmd'\` to record a specific command
+
+EOF
+    return
+  fi
+  scriptreplay -s /tmp/.script_record.log -t /tmp/.script_timing.log
 }
 
 shellcheck_wiki() { #{{{2
@@ -1427,7 +1517,7 @@ truecolor() { #{{{2
     if [[ $g -gt 255 ]]; then
       g=$((2*255 - g))
     fi
-    printf -- '\e[48;2;%d;%d;%dm \e[0m' $r $g $b
+    printf -- '\e[48;2;%d;%d;%dm \e[0m' "$r" "$g" "$b"
   done
   printf -- '\n'
 }
@@ -1475,292 +1565,23 @@ unclutter_toggle() { #{{{2
   fi
 }
 
-up() { #{{{2
-  emulate -L zsh
-
-  # make sure `~/log/` exists
-  [[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
-  local LOGFILE="${HOME}/log/update_system.log"
-  __update_system "${LOGFILE}" 2>&1 | tee -a "${LOGFILE}"
-}
-
-__update_system() {
-  emulate -L zsh
-
-  # Why putting the month before the day?{{{
-  #
-  # It's a good habit.
-  # If you have files  whose name begin with a date, it's easier  to find a file
-  # dating from a particular time in the  output of `$ ls` (or in `ranger`) when
-  # the month comes before the day.
-  #}}}
-  printf -- '---\n---\n%s\n===========\n\n' "$(date +%m-%d\ %H:%M)"
-
-  printf -- 'system\n------\n\n'
-  sudo aptitude update
-  sudo aptitude safe-upgrade
-
-  # What does it do?{{{
-  #
-  # Resynchronize the package contents from their sources.
-  # The  lists of  the  contents  of packages  are  fetched  from the  location(s)
-  # specified in /etc/apt/sources.list.
-  #}}}
-  # Why do you do it?{{{
-  #
-  # As time goes on, some new file(s) may be included in a package.
-  # One day, we may be looking for which package contains it:
-  #
-  #     $ apt-file search <missing_file>
-  #
-  # If our local package contents are not up-to-date, the previous command
-  # may return nothing (or not the package we need).
-  # Thus we may wrongly assume that we can't get that file.
-  #}}}
-  # Why do you use `script`?{{{
-  #
-  # `apt-file` is a perl script, which doesn't write on its standard output,
-  # but on `/dev/tty`.
-  #
-  # Usually, they seem to be the same thing: the standard output of a process is
-  # often connected to the terminal.
-  # But here, you've redirected the standard output the input of `tee`.
-  # So, they're not the same anymore.
-  # And I don't think it's possible to redirect `/dev/tty` to a file.
-  #
-  # So, we use `script` instead.
-  #
-  # For more:
-  #   https://askubuntu.com/a/1074946/867754
-  #   https://stackoverflow.com/a/4668579/9780968
-  #}}}
-  # Why don't you use it to log the whole function?{{{
-  #
-  # When you pass a value to the `-c` option of the `script` command,
-  # I think that the normal shell  function lookup is suppressed, i.e. you can't
-  # execute a function only a command.
-  # Same thing with `bash -c '...'`.
-  #
-  # Besides,  `script` logs the linefeeds  as literal carriage returns  which is
-  # distracting.
-  # It does the same thing with other characters such as backspaces.
-  #}}}
-  printf -- '\napt-file\n--------\n\n'
-  script -a -c 'apt-file update' -q "$1"
-  #       │  │                    │   │{{{
-  #       │  │                    │   └ log the output in this file
-  #       │  │                    │
-  #       │  │                    └ be quiet (no message when `script` starts/ends)
-  #       │  │
-  #       │  └ execute the next command,
-  #       │    instead of waiting the user to execute commands interactively
-  #       │
-  #       └ append to the logfile
-  #}}}
-
-  printf -- '\npip\n---\n\n'
-  python  -m pip install --upgrade pip
-  python3 -m pip install --upgrade pip
-
-  # https://stackoverflow.com/a/3452888/9780968
-  # Knowing the current state of the packages could be useful to restore it later;{{{
-  # copy the logged output of `pip freeze` in a file `/tmp/req.txt`, then:
-  #
-  #     $ python[3] -m pip install -r /tmp/req.txt
-  #}}}
-  printf -- '\ncurrent versions of the python2 packages\n---\n\n'
-  python -m pip freeze
-  printf -- '\nupdate python2 packages\n---\n\n'
-  python -m pip list --outdated --format=freeze \
-    | grep -Ev '^(-e|#)' \
-    | cut -d= -f1 \
-    | xargs -r -n1 python -m pip install --user --upgrade
-    #        │  │{{{
-    #        │  └ pass only one package name at a time to `pip install`,
-    #        │    so that if one installation fails, the other ones go on
-    #        │
-    #        └ don't run the command if the input is empty
-    #          (we need at least one package name)
-    #}}}
-
-  printf -- '\ncurrent versions of the python3 packages\n---\n\n'
-  python3 -m pip freeze
-  printf -- '\nupdate python3 packages\n---\n\n'
-  python3 -m pip list --outdated --format=freeze \
-    | grep -Ev '^(-e|#)' \
-    | cut -d= -f1 \
-    | xargs -r -n1 python3 -m pip install --user --upgrade
-  # update `mpv` completion function
-  curl -sL 'https://raw.githubusercontent.com/mpv-player/mpv/master/TOOLS/zsh.pl' | \
-    perl - \
-    >"${HOME}/.zsh/my-completions/_mpv"
-
-  __update_git_programs 'ranger' "${HOME}/GitRepos/ranger/"
-
-  # For more info:{{{
-  #
-  #     https://tex.stackexchange.com/a/55459/169646
-  #}}}
-  printf -- '\ntexlive packages\n---\n\n'
-  #       ┌ https://stackoverflow.com/a/677212/9780968
-  #       ├────────┐
-  if [[ $(command -v tlmgr) ]]; then
-    tlmgr update --self --all --reinstall-forcibly-removed
-    #              │      │     │{{{
-    #              │      │     └ reinstall a package
-    #              │      │       if it was corrupted during a previous update
-    #              │      │
-    #              │      └ update all packages
-    #              │
-    #              └ update `tlmgr` itself}}}
-  fi
-
-  printf -- '\nyoutube-dl\n---\n\n'
-  up_yt
-
-  [[ -d "${HOME}/.zsh/plugins" ]] || mkdir -p "${HOME}/.zsh/plugins"
-  __update_git_programs 'zsh-completions'         "${HOME}/.zsh/zsh-completions/"
-  __update_git_programs 'zsh-interactive-cd'      "${HOME}/.zsh/plugins/zsh-interactive-cd"
-  __update_git_programs 'zsh-syntax-highlighting' "${HOME}/.zsh/plugins/zsh-syntax-highlighting"
-  __update_git_programs 'zaw'                     "${HOME}/.zsh/plugins/zaw"
-}
-
-__update_git_programs() {
-  emulate -L zsh
-
-  local width dashes
-  # How to get the length of a string?{{{
-  #
-  #   $ string='hello'
-  #   $ echo ${#string}
-  #
-  # Source:
-  #
-  #     https://stackoverflow.com/a/17368090/9780968
-  #}}}
-  width=${#1}
-  # How to repeat a string (like `repeat('foo', 3)`)? {{{
-  #
-  # Contrary to Vim's `printf()`, you  can give more expressions than `%s` items
-  # in the format:
-  #
-  #     " ✘
-  #     :echo printf('-%s+', 'a', 'b', 'c')
-  #
-  #         → E767: Too many arguments to printf()
-  #
-  #     # ✔
-  #     $ printf -- '-%s+' 'a' 'b' 'c'
-  #
-  #         → -a+-b+-c+
-  #
-  # `$ printf` repeats the format as many times as necessary.
-  # So:
-  #
-  #     $ printf -- '-%s' {1..5}
-  #
-  #         → -1-2-3-4-5
-  #
-  #     $ printf -- '%s' 3
-  #
-  #         → 3
-  #
-  #     $ printf -- '%.0s' 3
-  #
-  #         → ∅ (empty string, because the precision flag `.0` asks for 0 characters)
-  #
-  #     $ printf -- '-%.0s' {1..5}
-  #
-  #         → -----
-  #
-  # Source:
-  #
-  #     https://stackoverflow.com/a/5349842/9780968
-  #}}}
-  dashes="$(printf -- '-%.0s' $(seq 1 "${width}"))"
-  #                │
-  #                └ necessary for bash, not zsh
-  # `zsh` alternative:{{{
-  #
-  #   dashes="$(printf -- '-%.0s' {1..${width}})"
-  #
-  # In bash, inside a brace expansion, you can't refer to a variable.
-  # So, instead of writing this:
-  #
-  #     # ✘
-  #     $ echo {1..${width}}
-  #
-  # You have to write this
-  #
-  #     # ✔
-  #     $ echo $(seq 1 ${width})
-  #}}}
-
-  printf -- "\n$1\n%s\n\n" "${dashes}"
-
-  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zsh-completions'
-  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/changyuheng/zsh-interactive-cd'
-  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zsh-syntax-highlighting'
-  [[ -d "$2" ]] || git -C "${HOME}/.zsh/plugins/" clone 'https://github.com/zsh-users/zaw'
-
-  git -C "$2" pull
-}
-
-up_yt() { #{{{2
-  emulate -L zsh
-
-  # https://rg3.github.io/youtube-dl/download.html
-  curl -sL 'https://yt-dl.org/downloads/latest/youtube-dl' -o "${HOME}/bin/youtube-dl"
-  chmod a+rx "${HOME}/bin/youtube-dl"
-
-  if [[ ! -d "${HOME}/GitRepos/youtube-dl/" ]]; then
-    mkdir -p "${HOME}/GitRepos/"
-    git -C "${HOME}/GitRepos/" clone 'https://github.com/rg3/youtube-dl'
-  fi
-
-  # add current directory to the top of the directory stack
-  pushd >/dev/null
-  cd "${HOME}/GitRepos/youtube-dl"
-  git pull
-  # install zsh completion function
-  make youtube-dl.zsh && \
-    mv "${HOME}/GitRepos/youtube-dl/youtube-dl.zsh" "${HOME}/.zsh/my-completions/_youtube-dl.zsh"
-
-  # install manpage:
-  #     https://askubuntu.com/a/244810/867754
-  #     https://askubuntu.com/a/633924/867754
-  #     man 1 manpath
-  #     man 5 manpath
-  make youtube-dl.1 && \
-    mkdir -p "${HOME}/share/man/man1" && \
-    mv youtube-dl.1 "${HOME}/share/man/man1"
-  # remove top of the directory stack to get back where we were before updating youtube-dl
-  popd >/dev/null
-}
-
 vim_prof() { #{{{2
   emulate -L zsh
   local TMP
   TMP="$(mktemp /tmp/.vim_profile.XXXXXXXXXX)"
-  pushd >/dev/null
-  cd /tmp
   vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
   vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
-  popd >/dev/null
 }
 
 vim_startup() { #{{{2
   emulate -L zsh
   local TMP
   TMP="$(mktemp /tmp/.vim_startup.XXXXXXXXXX)"
-  pushd >/dev/null
-  cd /tmp
   vim --startuptime "${TMP}" \
       +'q' startup_vim_file \
       && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' \
       +'sil 7,$!sort -k2' \
       +'$' "${TMP}"
-  popd >/dev/null
 }
 
 xt() { #{{{2
@@ -1804,6 +1625,8 @@ xt() { #{{{2
 
 # Hooks {{{1
 
+# TODO: better explain how it works
+
 # There's no  `HISTIGNORE` option in  zsh, to ask  some commands to  be excluded
 # from the history.
 #
@@ -1813,33 +1636,36 @@ xt() { #{{{2
 # non-zero value, the command is not saved in the history file.
 zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
 
-CMDS_TO_IGNORE=(
-  api \
-  app \
-  aps \
-  bg \
-  cd \
-  clear \
-  config \
-  cp \
-  dl_video \
-  echo \
-  exit \
-  fg \
-  imv \
-  jobs \
-  ls \
-  man \
-  mv \
-  reset \
-  rm \
-  rmdir \
-  sleep \
-  sr \
-  touch \
-  tp \
-  web \
-  )
+# The shell allows newlines to separate array elements.
+# So,  an array  assignment can  be split  over multiple  lines without  putting
+# backslashes on the end of the line.
+CMDS_TO_IGNORE_IN_HISTORY=(
+  api
+  app
+  aps
+  bg
+  cd
+  clear
+  config
+  cp
+  dl_video
+  echo
+  exit
+  fg
+  imv
+  jobs
+  ls
+  man
+  mv
+  reset
+  rm
+  rmdir
+  sleep
+  sr
+  touch
+  tp
+  web
+)
 
 ignore_these_cmds() {
   emulate -L zsh
@@ -1849,9 +1675,36 @@ ignore_these_cmds() {
   # Source:
   #     https://unix.stackexchange.com/a/273277/289772
   first_word=${${(z)1}[1]}
+  # What's the effect of this `z` flag in the expansion of the `$1` parameter?{{{
+  #
+  # It splits the result of the expansion into words.
+  #
+  # Watch:
+  #     $ sentence='Hello jane, how are you!'
+  #
+  #     $ printf -- '%s\n' ${sentence}
+  #         Hello jane, how are you!
+  #
+  #     $ printf -- '%s\n' ${(z)sentence}
+  #         Hello
+  #         jane,
+  #         how
+  #         are
+  #         you!
+  #
+  #     $ printf -- '%s\n' ${${(z)sentence}[2]}
+  #         jane,
+  #
+  # For more info, see:
+  #
+  #     man zshexpn
+  #     > PARAMETER EXPANSION
+  #     > Parameter Expansion Flags
+  #}}}
+
   # now we check whether it's somewhere in our array of commands to ignore
   #     https://unix.stackexchange.com/a/411331/289772
-  if ((${CMDS_TO_IGNORE[(I)$first_word]})); then
+  if ((${CMDS_TO_IGNORE_IN_HISTORY[(I)$first_word]})); then
     # Why `2` instead of `1`?{{{
     #
     # `1` = the command is removed from the history of the session,
@@ -1869,14 +1722,14 @@ ignore_these_cmds() {
 
 ignore_short_or_failed_cmds() {
   emulate -L zsh
-  # ignore commands who are shorter than 10 characters
-  # Why `-le 11` instead of `-le 10`?{{{
+  # ignore commands who are shorter than 5 characters
+  # Why `-le 6` instead of `-le 5`?{{{
   #
   # Because zsh sends a newline at the end of the command.
   #}}}
   #                             ┌ ignore non-recognized commands
   #                             ├─────────┐
-  if [[ "${#1}" -le 11 ]] || [[ "$?" == 127 ]]; then
+  if [[ "${#1}" -le 6 ]] || [[ "$?" == 127 ]]; then
     return 2
   else
     return 0
@@ -2097,12 +1950,27 @@ bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
 # an interrupt signal sent to kill the foreground process. Even if hit after `C-x`.
 # It's probably done by the terminal driver. Maybe we could disable this with
 # `stty` (the output of `stty -a` contains `intr = ^C`), but it wouldn't be
-# wise, because it's too important. We would need to find a way to disable it
-# only after `C-x`.
-bindkey -s '^Xc' 'vimdiff <() <()\e5^B'
+# wise, because it's too important.
+# We would need to find a way to disable it only after `C-x`.
+
+# Why `=()` instead of `<()`?{{{
+#
+# `<()` asks the shell to open a special file (e.g. `/proc/13319/fd/11`).
+# Sometimes, however, you need a regular file, not a special file.
+# That's because  the special  files are  streams of data,  which when  read are
+# forgotten.
+# Some commands need  to be able to  go backwards and read earlier  parts of the
+# file.
+# This is called a seek operation.
+# To  get around  this problem,  zsh provides  the substitution  `=(cmd)`, which
+# creates a regular file (in `/tmp`) to hold the output of `cmd`.
+# This  regular file  is  removed  automatically as  soon  as  the main  command
+# finishes.
+#}}}
+bindkey -s '^Xc' 'vimdiff =() =()\e5^B'
 #        │
-#        └── interpret the arguments as strings of characters
-#            without `-s`, `vimdiff` would be interpreted as the name of a zle widget
+#        └ interpret the arguments as strings of characters
+#          without `-s`, `vimdiff` would be interpreted as the name of a zle widget
 
 # C-x h           complete-help {{{4
 
@@ -2432,17 +2300,10 @@ setopt BRACE_CCL
 setopt CORRECT
 
 # Whenever a command  completion or spelling correction is  attempted, make sure
-# the  entire command  path  ($PATH?)  is hashed  first.  This  makes the  first
-# completion slower but avoids false reports of spelling errors.
+# the entire command path ($PATH?) is hashed first.
+# This makes  the first completion slower  but avoids false reports  of spelling
+# errors.
 setopt HASH_LIST_ALL
-
-# infinite history in zsh
-#
-# https://unix.stackexchange.com/a/273863
-
-export HISTFILE="$HOME/.zsh_eternal_history"
-export HISTSIZE=10000000
-export SAVEHIST=10000000
 
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
 setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
@@ -2467,6 +2328,9 @@ setopt LONG_LIST_JOBS
 # insert the first match immediately.
 # This makes us enter the menu in a single Tab, instead of 2.
 setopt MENU_COMPLETE
+
+# Don't push multiple copies of the same directory onto the directory stack.
+setopt PUSHD_IGNORE_DUPS
 
 # Do not query the user before executing `rm *` or `rm path/*`
 setopt RM_STAR_SILENT

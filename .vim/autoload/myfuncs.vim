@@ -132,26 +132,26 @@ fu! myfuncs#block_select_paragraph() abort
 
         " search the beginning of the text in the current paragraph
         call search('\n\s*\n', 'bW')
-        let [ start_line, start_col ] = searchpos('\S')
+        let [firstline, firstcol] = searchpos('\S')
         " search the end of the text in the current paragraph
-        let end_line = search('\n\s*\n', 'nW')
-        let end_col = searchpos('.*\zs\S\s*' ,'nW')[1]
+        let lastline = search('\n\s*\n', 'nW')
+        let lastcol = searchpos('.*\zs\S\s*' ,'nW')[1]
 
         " search the longest line in the paragraph;
         " iterate over the lines in the latter
-        for line in range(start_line, end_line)
+        for line in range(firstline, lastline)
             +
             " if a line in the paragraph is longer than the previous value of
-            " `end_col`, update the latter
-            let end_col = searchpos('.*\zs\S\s*' ,'nW')[1] > end_col
+            " `lastcol`, update the latter
+            let lastcol = searchpos('.*\zs\S\s*' ,'nW')[1] > lastcol
                       \ ?     searchpos('.*\zs\S\s*' ,'nW')[1]
-                      \ :     end_col
+                      \ :     lastcol
         endfor
 
         " execute the command which will select a block containing the paragraph
-        return (start_line - 2)."G".(start_col - 2)."|"
+        return (firstline - 2)."G".(firstcol - 2)."|"
              \ ."\<c-v>"
-             \ .(end_col + 2)."|".(end_line + 1)."G"
+             \ .(lastcol + 2)."|".(lastline + 1)."G"
 
     catch
         return lg#catch_error()
@@ -472,65 +472,82 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
     endtry
 endfu
 
+fu! myfuncs#long_data_join(type, ...) abort "{{{1
+    " This function should do the following conversion:{{{
+    "
+    "     let list = [1,
+    "     \ 2,
+    "     \ 3,
+    "     \ 4]
+    " →
+    "     let list = [1, 2, 3, 4]
+    "}}}
+    let cb_save  = &cb
+    let sel_save = &sel
+    let reg_save = ['"', getreg('"'), getregtype('"')]
+    try
+        set cb-=unnamed cb-=unnamedplus
+        set sel=inclusive
+
+        if a:type is# 'char' || a:type is# 'line' || a:type is# 'block'
+            let range = line("'[").','.line("']")
+        elseif a:type is# 'vis'
+            let range = line("'<").','.line("'>")
+        else
+            return
+        endif
+
+        let bullets = '[•*-]'
+        let join_bulleted_list = getline('.') =~# '^\s*'.bullets
+
+        if join_bulleted_list
+            sil exe 'keepj keepp'.range.'s/^\s*\zs'.bullets.'\s*//'
+            sil exe 'keepj keepp'.range.'-s/$/,/'
+            sil exe range.'j'
+        else
+            sil exe 'keepj keepp '.range.'s/\n\s*\\//ge'
+            call cursor(a:type is# 'vis' ? line("'<") : line("'["), 1)
+            sil keepj keepp s/\m\zs\s*,\ze\s\=[\]}]//e
+        endif
+    catch
+        return lg#catch_error()
+    finally
+        let &cb  = cb_save
+        let &sel = sel_save
+        call call('setreg', reg_save)
+    endtry
+endfu
+
 fu! myfuncs#long_listing_split() abort "{{{1
     let line = getline('.')
     if stridx(line, ',') == -1
         return
     endif
-
-    let view = winsaveview()
     " We use `strdisplaywidth()` because the indentation could contain tabs.
     let indent_lvl = strdisplaywidth(matchstr(line, '.\{-}\ze\S'))
     let indent_txt = repeat(' ', indent_lvl)
-
-    sil keepj keepp s/\v\ze\S/• /e
-    sil keepj keepp s/\v\s*,\s*%(et\s+)?|\s*<et>\s*/\="\n".indent_txt.'• '/ge
-
-    call winrestview(view)
-    sil! call repeat#set("\<plug>(myfuncs_long_listing_split)")
+    sil keepj keepp s/\m\ze\S/• /e
+    let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<et\|and\>\s*'
+    let l:Rep = {-> "\n".indent_txt.'• '}
+    sil exe 'keepj keepp s/'.pat.'/\=l:Rep()/ge'
 endfu
 
-" long_object_{split|join} {{{1
-
-fu! myfuncs#long_object_split() abort
-    let view = winsaveview()
+fu! myfuncs#long_data_split() abort "{{{1
     let line = getline('.')
-
-    " If the line doesn't contain a list ([]), a dictionary ({}), don't do anything.
-
-    if match(line, '\[.*\]\|{.*}') == -1
-        return
+    let contains_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
+    if contains_list_or_dict
+        let data_indent = repeat(' ', match(line, '\m[[{].*[\]}]$'))
+        " If the  first item in the  list/dictionary begins right after  the opening
+        " symbol (`[` or `{`), add a space:
+        sil keepj keepp s/\m[\[{]\s\@!\zs/ /e
+        " Move the first item in the list on a dedicated line.
+        sil keepj keepp s/\m[\[{]\zs/\="\n".data_indent."\\"/e
+        " split the data
+        sil keepj keepp s/,\zs/\="\n".data_indent.'\'/ge
+        " move the closing symbol on a dedicated line
+        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n".data_indent."\\ "/e
+    else
     endif
-
-    let object_indent = repeat(' ', match(line, '\[\|{\'))
-
-    " If the first item in the list/dictionary begins right after the opening
-    " symbol (`[` or `{`) add a space:
-    sil keepj keepp s/\v[\[{]%(\s)@!\zs/ /e
-
-    " Move the first item in the list on a dedicated line.
-    sil keepj keepp s/\v[\[{]\zs/\="\n".object_indent."\\"/e
-
-    " split the object
-    sil keepj keepp s/,\zs/\="\n".object_indent.'\'/ge
-
-    " move the closing symbol on a dedicated line
-    sil keepj keepp s/\v\zs\s?\ze%([\]}])/\=",\n".object_indent."\\ "/e
-
-    call winrestview(view)
-
-    sil! call repeat#set("\<plug>(myfuncs_long_object_split)")
-endfu
-
-fu! myfuncs#long_object_join() abort
-    let end_line = search('\]\|}', 'cW')
-    let beg_line = search('\[\|{', 'bW')
-
-    exe 'sil keepj keepp '.beg_line.','.end_line.'s/\n\s*\\//ge'
-    call cursor(beg_line, 1)
-    sil keepj keepp s/\zs\s*,\ze\s\?[\]}]//e
-
-    sil! call repeat#set("\<plug>(myfuncs_long_object_join)")
 endfu
 
 fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
@@ -863,15 +880,20 @@ fu! myfuncs#op_toggle_alignment(type) abort
     endif
 endfu
 
-fu! myfuncs#align_with_end(offset) abort
+fu! myfuncs#align_with_beginning(dir) abort
+    exe 'left '.indent(line('.')+a:dir)
+    sil! call repeat#set("\<plug>(align_with_beginning_".(a:dir == -1 ? 'above' : 'below').')')
+endfu
 
-    " l:text_length is the length of text to align on the current line
-    let l:text_length = strchars(matchstr(getline('.'), '\S.*$'))
+fu! myfuncs#align_with_end(dir) abort
+    " length of text to align on the current line
+    let text_length = strchars(matchstr(getline('.'), '\S.*$'))
 
-    " l:neighbour_length is the length of the previous/next line
-    let l:neighbour_length = strchars(getline(line(".") + a:offset))
+    " length of the previous/next line
+    let neighbour_length = strchars(getline(line(".") + a:dir))
 
-    exe 'left ' . (l:neighbour_length - l:text_length)
+    exe 'left ' . (neighbour_length - text_length)
+    sil! call repeat#set("\<plug>(align_with_end_".(a:dir == -1 ? 'above' : 'below').')')
 endfu
 
 fu! myfuncs#op_trim_ws(type) abort "{{{2
@@ -1235,25 +1257,6 @@ fu! s:search_todo_text(dict) abort
         let dict.text = get(filter(lines, { i,v -> v !~ pat }), 0, '')
     endif
     return dict
-endfu
-
-fu! myfuncs#snip_cheat() abort "{{{1
-    call UltiSnips#SnippetsInCurrentScope(1)
-    if empty(g:current_ulti_dict)
-        return
-    endif
-
-    let tempfile = tempname().'/snip cheat'
-    exe 'lefta '.(&columns/3).'vnew '.tempfile
-    setl bh=delete bt=nofile nobl noswf nowrap
-
-    sil 0put =map(sort(deepcopy(keys(g:current_ulti_dict))), { i,v -> v.' : '.g:current_ulti_dict[v] })
-    sil %!column -s: -t
-
-    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    call matchadd('Identifier', '^\S\+\ze\s*', 0, -1)
-    let &l:pvw = 1
-    wincmd p
 endfu
 
 " tmux_{current|last}_command {{{1
