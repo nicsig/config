@@ -2244,9 +2244,10 @@ omap  m       <plug>(fzf-maps-o)
 " nno <space>B :vert sbuffer *
 " nno <space>B :<c-u>sbuffer *
 
-" s                             saiw {{{4
+" s S                           saiw  saiW{{{4
 
 nmap  <space>s  saiw
+nmap  <space>S  saiW
 
 " t                             new tab page {{{4
 
@@ -2837,6 +2838,40 @@ endfu
 nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
 " +                   (prefix) {{{3
+" ^             put an error sign below {{{4
+
+nno <silent>  +^  :<c-u>set opfunc=<sid>put_error_sign<cr>g@l
+
+fu! s:put_error_sign(type) abort
+    let error_sign = '^✘'
+    let vcol = virtcol('.')
+
+    let next_line = getline(line('.')+1)
+    if next_line =~# '\V'.error_sign
+        let pat = '\%'.vcol.'v'.repeat('.', strchars('^✘', 1))
+
+        " if our  cursor is on the  20th cell, while the  next line occupies
+        " only 10  cells the  next substitution will  fail, because  it will
+        " target a non-existing character
+        let next_line_length = strchars(next_line, 1)
+        if vcol > next_line_length
+            let next_line .= repeat(' ', vcol - next_line_length + 1)
+        endif
+
+        let new_line = substitute(next_line, pat, error_sign, '')
+        +d_
+        -
+    else
+        let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
+        let indent = indent('.')
+        let spaces_between_cml_and_mark = repeat(' ', virtcol('.')-1-strchars(cml, 1)-indent)
+        let indent = repeat(' ', indent)
+        let new_line = indent.cml.spaces_between_cml_and_mark.error_sign
+    endif
+
+    call append('.', new_line)
+endfu
+
 " +>    +<      split/join listing or long data {{{4
 
 " long data = dictionary, list, bulleted list
@@ -3211,10 +3246,9 @@ fu! s:my_crs() abort
     call winrestview(view)
     let pat = @/
     "                           ┌ snake case
-    "                           │     ┌ matters for undo (?)
-    "                           │     │┌ type the keys now
-    "                           │     ││
-    call feedkeys("\<plug>Coerces", 'itx')
+    "                           │     ┌ type the keys now
+    "                           │     │
+    call feedkeys("\<plug>Coerces", 'ix')
     " save the coerced word
     let rep = expand('<cword>')
     " Why do we need to restore the search register?{{{
@@ -3225,10 +3259,33 @@ fu! s:my_crs() abort
     "
     " We need to undo this automatic restoration.
     "}}}
-    call timer_start(0, {-> execute('let @/ = '.string(pat))})
-    " Make the  dot command repeat this  edition for the next  occurrence of the
-    " pattern.
-    sil! call repeat#set('cgn'.rep."\e")
+    call timer_start(0, {-> execute('let @/ = '.string(pat))
+        \ + feedkeys('ucgn'.rep."\e", 'int')})
+        "             │
+        "             └ undo our initial coercion
+        " Why do you undo?{{{
+        "
+        " We need to repeat the coercion a 2nd time.
+        " But, in the end, we only want 1 coercion.
+        "}}}
+        " Why do repeat the coercion a 2nd time?{{{
+        "
+        " We need the last normal command to be `cgn{rep}Esc`,
+        " so that the dot command repeats it.
+        "}}}
+        " Why do you include `feedkeys()` in the timer?{{{
+        "
+        " `feedkeys()` writes `gn` in the typeahead buffer.
+        " If we call `feedkeys()` now, `gn` will be processed after the function
+        " has returned.
+        " At that point, the search register will have been restored to whatever
+        " contents it had prior to the invocation of `s:my_crs()`.
+        " So, `gn` may select the wrong text.
+        "
+        " We could call `feedkeys()` with the flag 'x', but for some reason, `.`
+        " would repeat  the coercion  on the  current word  instead of  the next
+        " occurrence.
+        "}}}
 endfu
 
 " dr                  replace without yank {{{3
@@ -5288,7 +5345,7 @@ endfu
 "
 "       op + v + motion
 "
-" I've just checked with `!gvj` (grep text from current position until next
+" I've just checked with `|gvj` (grep text from current position until next
 " line, characterwise). And inside `op_grep()`, `a:type` is `char`, which is
 " good. If it had been visual, we could have a problem, because our function
 " would think we are operating from visual mode, instead of normal mode.
@@ -5297,7 +5354,8 @@ endfu
 "
 " Update:
 " Should we save/restore the visual marks, in all our plugins?
-" YES: see what we did with the function called by the `dr` operator.
+" YES: see what we did with the function called by the `dr` operator,
+" and read the comments.
 "
 " Should we yank with noautocmd to prevent our visual ring from saving
 " a possible selection?
@@ -6682,22 +6740,10 @@ endfu
 "         endif
 "
 " 133 -
-"
-"     nno cd :<c-u>call <sid>append_error_sign()<cr>
-"     fu! s:append_error_sign() abort
-"         let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
-"         call append('.', cml.repeat(' ', virtcol('.')-1-strchars(cml, 1)).'^✘')
-"     endfu
-"
-" However, you should improve the code so that you can press the mapping several
-" times on  the same line,  and all  markers would be  aligned on the  same line
-" below.
-"
-" 134 -
 " Search for `[ SPC`, `SPC ]`, `{ SPC`, `SPC }`, `^\s*\\` everywhere.
 " Refactor the style.
 "
-" 135 -
+" 134 -
 " Search for `g@` everywhere.
 " Do you need to save and restore the unnamed register, and the options every time?
 " Should  we refactor the snippets  so that it  allows us to remove  those parts
