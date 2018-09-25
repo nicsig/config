@@ -31,11 +31,11 @@ endfu
 
 fu! s:backticks() abort "{{{1
     let attributes = {
-    \                  'fg'      : 0,
-    \                  'bg'      : 0,
-    \                  'bold'    : 0,
-    \                  'reverse' : 0,
-    \ }
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
 
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Comment')), k)})
 
@@ -53,11 +53,11 @@ fu! s:tabline() abort "{{{1
     " TabLine
 
     let attributes = {
-    \                  'fg'      : 0,
-    \                  'bg'      : 0,
-    \                  'bold'    : 0,
-    \                  'reverse' : 0,
-    \ }
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
 
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
 
@@ -82,11 +82,11 @@ fu! s:user() abort "{{{1
     " They allow us to set the real attributes (`fg` and `bg`) for Vim in
     " terminal or in GUI.
     let attributes = {
-    \                  'fg'      : 0,
-    \                  'bg'      : 0,
-    \                  'bold'    : 0,
-    \                  'reverse' : 0,
-    \ }
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
 
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
 

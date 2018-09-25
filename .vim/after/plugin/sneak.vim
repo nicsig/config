@@ -57,7 +57,7 @@ endif
 "}}}
 " How to find the mappings installed by `vim-sneak` in normal mode?{{{
 "
-"     put =filter(split(execute('nno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^n\s\+\%([ft,;]\\|<plug>\)' })
+"     put =filter(split(execute('nno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^n\s\+\%([ft,;]\\|<plug>\)'})
 "
 " We invoke `filter()` to ignore:
 "
@@ -69,13 +69,13 @@ endif
 "}}}
 " How to find the mappings installed by `vim-sneak` in visual mode?{{{
 "
-"     put =filter(split(execute('xno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^x\s\+\%([ft,;]\\|<plug>\)' })
+"     put =filter(split(execute('xno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^x\s\+\%([ft,;]\\|<plug>\)'})
 "}}}
 sil! xunmap Z
 
 " How to find the mappings installed by `vim-sneak` in operator-pending mode?{{{
 "
-"     put =filter(split(execute('ono'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)' })
+"     put =filter(split(execute('ono'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)'})
 "}}}
 sil! ounmap z
 sil! ounmap Z

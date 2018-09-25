@@ -198,7 +198,7 @@ let g:UltiSnipsRemoveSelectModeMappings = 1
 " But we don't want UltiSnips to remove our mapping for the Tab
 " key in select mode (Tab is NOT a printable character, but UltiSnips seems to
 " unmap it as if it was one):
-let g:UltiSnipsMappingsToIgnore = [ 'mycompletion#snippet_or_complete' ]
+let g:UltiSnipsMappingsToIgnore = ['mycompletion#snippet_or_complete']
 " More info on this here:    :h UltiSnips-warning-smapping
 " Edit:
 " It doesn't seem necessary anymore, but I'll keep it anyway, just in case …

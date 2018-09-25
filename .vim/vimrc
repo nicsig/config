@@ -1740,10 +1740,10 @@ fu! s:reminder_new_mapping(new_lhs) abort
 endfu
 
 call s:remember_new_mappings([
-\            ['-e', '!e'],
-\            ['g?', '!m'],
-\            ['zs', '!s'],
-\          ])
+    \ ['-e', '!e'],
+    \ ['g?', '!m'],
+    \ ['zs', '!s'],
+    \ ])
 
 " FREE {{{2
 
@@ -2262,15 +2262,10 @@ nno  <space>t  :<c-u>exe (v:count ? v:count.'tabnew' : 'tabnew')<cr>
 "  ]k ]j align the end of the current line with the one of the
 "  previous/next line
 
-nmap  <silent>  [k  <plug>(align_with_beginning_above)
-nmap  <silent>  [j  <plug>(align_with_beginning_below)
-nno   <silent>  <plug>(align_with_beginning_above)  :<c-u>call myfuncs#align_with_beginning(-1)<cr>
-nno   <silent>  <plug>(align_with_beginning_below)  :<c-u>call myfuncs#align_with_beginning(1)<cr>
-
-nmap  <silent>  ]k  <plug>(align_with_end_above)
-nmap  <silent>  ]j  <plug>(align_with_end_below)
-nno   <silent>  <plug>(align_with_end_above)  :<c-u>call myfuncs#align_with_end(-1)<cr>
-nno   <silent>  <plug>(align_with_end_below)  :<c-u>call myfuncs#align_with_end(1)<cr>
+nno  <silent>  [k  :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@_
+nno  <silent>  [j  :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@_
+nno  <silent>  ]k  :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<cr>g@_
+nno  <silent>  ]j  :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<cr>g@_
 
 " \                   (prefix) {{{3
 " \b            select current box {{{4
@@ -2439,7 +2434,7 @@ nno  <silent>  m?  :<c-u>call <sid>add_to_loclist(0)<cr>
 
 fu! s:add_to_loclist(populate) abort
     let s:my_marks = a:populate
-                 \ ?     get(s:, 'my_marks', []) + [ {'bufnr': bufnr('%'), 'lnum': line('.'), 'col': col('.')} ]
+                 \ ?     get(s:, 'my_marks', []) + [{'bufnr': bufnr('%'), 'lnum': line('.'), 'col': col('.')}]
                  \ :     []
     "                               ┌─ without this, Vim would create a new
     "                               │  loclist every time we invoke the function
@@ -2811,8 +2806,7 @@ nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
 " long data = dictionary, list, bulleted list
 
-nmap            +<                               <plug>(myfuncs_long_data_split)
-nno   <silent>  <plug>(myfuncs_long_data_split)  :<c-u>call myfuncs#long_data_split()<cr>
+nno  <silent>  +>  :<c-u>set opfunc=myfuncs#long_data_split<cr>g@_
 
 nno  <silent>  +<  :<c-u>set opfunc=myfuncs#long_data_join<cr>g@
 xno  <silent>  +<  :<c-u>call myfuncs#long_data_join('vis')<cr>
@@ -3039,12 +3033,10 @@ endfu
 " The fields must be separated with `|`.
 " The function will populate the `s` and `x` registers with 2 kind of
 " separation lines. We can paste them to fine tune the box.
-nmap           >b                          <plug>(myfuncs_box_create)
-nno   <silent> <plug>(myfuncs_box_create)  :<c-u>call myfuncs#box_create()<cr>
+nno  <silent>  >b  :<c-u>set opfunc=myfuncs#box_create<cr>g@ip
 
 " undo the box, make it come back to just bars between cells
-nmap           <b                           <plug>(myfuncs_box_destroy)
-nno  <silent>  <plug>(myfuncs_box_destroy)  :<c-u>call myfuncs#box_destroy()<cr>
+nno  <silent>  <b  :<c-u>set opfunc=myfuncs#box_destroy<cr>g@ip
 
 " =d                  fix display {{{3
 
@@ -5270,6 +5262,8 @@ endfu
 "
 " Update:
 " Should we save/restore the visual marks, in all our plugins?
+" YES: see what we did with the function called by the `dr` operator.
+"
 " Should we yank with noautocmd to prevent our visual ring from saving
 " a possible selection?
 "
@@ -6635,7 +6629,7 @@ endfu
 "
 "         xno  <silent><expr>  <c-a>  Func()
 "         fu! Func() abort
-"             let lnums = [ getpos('v')[1], line('.')]
+"             let lnums = [getpos('v')[1], line('.')]
 "             echom 'the visual selection starts at line '.min(lnums).' and ends at line '.max(lnums)
 "         endfu
 "
@@ -6658,9 +6652,62 @@ endfu
 " 133 -
 " Try to remove all our invocations  of `repeat#set()`, and replace them with an
 " operator func.
-" It would allow us to avoid this annoying and recurring bug:
+" It would allow us to avoid  this annoying and recurring bug (repetition broken
+" after an undo):
 "
 "     https://github.com/tpope/vim-repeat/issues/63#issuecomment-390281441
+"
+" The issue is that the dot command does not work after an undo.
+" It should.
+" You can check it doesn't work with `vim-easy-align`:
+"
+"     gaip*|
+"     u
+"     .
+"
+" The dot  command should repeat  the alignment of all  the bars in  the current
+" paragraph. Instead, it asks again for the characters to align.
+"
+" Also, in the past, I found another issue with `] SPC`:
+"
+"     1. ] SPC
+"     2. dd
+"     3. you press `.` to repeat `dd`
+"
+"         → Vim repeated `] SPC`
+"
+" I found  a solution,  which was  to add  this line  at the  end of  our custom
+" function (after invoking `repeat#set()`):
+"
+"         do <nomodeline> CursorMoved
+"
+" Anyway, these bugs  and tpope's comment seems to  indicate that `repeat#set()`
+" is a hack. Avoid it at all costs.
+"
+" 134 -
+" Visually select these lines, then press `=ri`:
+"
+"         if !a:0
+"             let [mode, is_fwd, capitalize] = ['n', 1, 1]
+"         else
+"             let [mode, is_fwd, capitalize] = [a:mode, a:1, 0]
+"         endif
+"
+" 135 -
+"
+"     nno cd :<c-u>call <sid>append_error_sign()<cr>
+"     fu! s:append_error_sign() abort
+"         let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
+"         call append('.', cml.repeat(' ', virtcol('.')-1-strchars(cml, 1)).'^✘')
+"     endfu
+"
+" However, you should improve the code so that you can press the mapping several
+" times on  the same line,  and all  markers would be  aligned on the  same line
+" below.
+"
+" 136 -
+" Search for `[ SPC`, `SPC ]`, `{ SPC`, `SPC }`, `^\s*\\` everywhere.
+" Refactor the style.
 
 
 
@@ -6847,20 +6894,6 @@ endfu
 
 
 
-" DO NOT REMOVE (still interesting).
-"
-"     nno cd :<c-u>call <sid>append_error_sign()<cr>
-"     fu! s:append_error_sign() abort
-"         let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
-"         call append('.', cml.repeat(' ', virtcol('.')-1-strchars(cml, 1)).'^✘')
-"     endfu
-"
-" However, you should improve the code so that you can press the mapping several
-" times on  the same line,  and all  markers would be  aligned on the  same line
-" below.
-
-
-
 "  pair_complete.vim
 "  undotreeshow       4929 (before big refactoring)
 "  undotreeshow       5247 (after  ")
@@ -6954,20 +6987,20 @@ fu! s:goyo_enter() abort
 
     if get(g:, 'my_goyo_without_syntax_hl', 1)
         let syntax_groups = [
-        \                     'Conditional',
-        \                     'Delimiter',
-        \                     'Function',
-        \                     'Identifier',
-        \                     'MatchParen',
-        \                     'Number',
-        \                     'Operator',
-        \                     'PreProc',
-        \                     'Special',
-        \                     'Statement',
-        \                     'String',
-        \                     'Type',
-        \                     'snipSnippet',
-        \                   ]
+            \ 'Conditional',
+            \ 'Delimiter',
+            \ 'Function',
+            \ 'Identifier',
+            \ 'MatchParen',
+            \ 'Number',
+            \ 'Operator',
+            \ 'PreProc',
+            \ 'Special',
+            \ 'Statement',
+            \ 'String',
+            \ 'Type',
+            \ 'snipSnippet',
+            \ ]
 
         for group in syntax_groups
             exe 'hi '.group.' term=NONE cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=NONE guibg=NONE'

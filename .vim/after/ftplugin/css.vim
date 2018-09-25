@@ -11,14 +11,14 @@ setl sw=2
 " Variables {{{1
 
 let b:mc_chain = [
-\       'file',
-\       'omni',
-\       'keyp',
-\       'dict',
-\       'ulti',
-\       'abbr',
-\       'c-p',
-\ ]
+    \ 'file',
+    \ 'omni',
+    \ 'keyp',
+    \ 'dict',
+    \ 'ulti',
+    \ 'abbr',
+    \ 'c-p',
+    \ ]
 
 " Teardown {{{1
 

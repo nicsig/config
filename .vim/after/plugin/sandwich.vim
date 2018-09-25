@@ -71,10 +71,10 @@ fu! s:set_recipes() abort
     " expression
     "}}}
     let g:sandwich#recipes = g:sandwich#default_recipes
-                         \ + [ {'buns': ['“', '”'],   'input': ['u"'] } ]
-                         \ + [ {'buns': ['‘', '’'],   'input': ["u'"] } ]
-                         "                │
-                         "                └ used in man pages (ex: `man tmux`)
+                         \ + [{'buns': ['“', '”'], 'input': ['u"']}]
+                         \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
+                         "               │
+                         "               └ used in man pages (ex: `man tmux`)
 
     " TODO:
     " Instead of removing some problematic  recipes, we should add recipes which
