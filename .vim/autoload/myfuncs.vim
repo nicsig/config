@@ -397,10 +397,8 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         call filter(files, { i,v -> v !~# '\v\c_?footer%(.md)?$'})
 
         mark x
-        for file in files
-            sil put =file
-        endfor
-        put =''
+        call append('.', files+[''])
+        exe 'norm! '.(len(files)+1).'j'
         mark y
 
         sil keepj keepp 'x+,'y-s/^/# /
@@ -409,7 +407,7 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         sil keepj keepp 'x+,'y-g/^-\+\s*$/d_ | -s/^/### /
         sil keepj keepp 'x+,'y-s/\v^#.{-}\n\zs\s*\n\ze##//
 
-        sil keepj keepp 'x+,'y-g/^#\%(#\)\@!/-put ='#'
+        sil keepj keepp 'x+,'y-g/^#\%(#\)\@!/call append(line('.')-1, '#')
         sil update
 
     catch
@@ -561,7 +559,7 @@ fu! myfuncs#long_data_join(type, ...) abort "{{{1
 endfu
 
 fu! myfuncs#long_data_split(type, ...) abort "{{{1
-    let line = getline("'[")
+    let line = getline('.')
 
     let is_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
     let has_comma = stridx(line, ',') > -1
@@ -591,71 +589,10 @@ endfu
 fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
     let lines = getline(a:lnum1,a:lnum2)
     keepj sil %d_
-    sil put =lines
-    keepj 1d_
+    call setline('.', lines)
 endfu
 
 " OPERATORS {{{1
-" op_gq {{{2
-
-" Don't need this code anymore, because since Vim 8.0.0179, 'formatprg' can be
-" buffer-local. I keep the code for educational purpose.
-
-
-
-" With the `gq` operator, we can format text.
-" We would like to use different formatters for different type of buffers.
-" Unfortunately, the option 'formatprg', read by `gq` to determine which
-" formatter to call, is global and not buffer-local.
-"
-" To fix this, we wrap the `gq` operator inside the function `myfuncs#gq()`.
-"
-"         nno <silent> gq  :<c-u>set opfunc=myfuncs#op_gq<cr>g@
-"         nno <silent> gqq :<c-u>set opfunc=myfuncs#op_gq<bar> exe 'norm! '.v:count1.'g@_'<cr>
-"         xno <silent> gq  :<c-u>call myfuncs#op_gq('vis')<cr>
-
-
-
-" This function checks whether the variable `b:formatprg` exists.
-" If it does, `myfuncs#gq()` temporarily resets `&formatprg` with the value of
-" `b:formatprg`.
-" And when the formatting is done, myfuncs#gq() restores the old value of the
-" option.
-" Thanks to this, we can define a buffer-local formatter, by setting the
-" variable `b:formatprg` in a filetype plugin.
-" Usage example:
-"
-"     let b:formatprg = 'pandoc -f html -t html'
-"
-" Solution found here:
-" http://vimcasts.org/episodes/using-external-filter-commands-to-reformat-html/
-" https://gist.github.com/PeterRincker/9773667
-
-"         fu! myfuncs#op_gq(type) abort
-"             let cb_save  = &cb
-"             let sel_save = &selection
-"             let fp_save  = &formatprg
-"             try
-"                 set cb-=unnamed cb-=unnamedplus
-"                 set inclusive
-"                 let &formatprg = get(b:, 'formatprg', &formatprg)
-"
-"                 if a:type is# 'vis'
-"                     norm! '<V'>gq
-"                 else
-"                     norm! '[gq']
-"                 endif
-"
-"             catch
-"                 return lg#catch_error()
-"
-"             finally
-"                 let &cb        = cb_save
-"                 let &sel       = sel_save
-"                 let &formatprg = fp_save
-"             endtry
-"         endfu
-
 fu! myfuncs#op_grep(type, ...) abort "{{{2
     let cb_save  = &cb
     let sel_save = &selection
@@ -943,12 +880,15 @@ fu! myfuncs#plugin_install(url) abort "{{{1
 
     call cursor(1, 1)
     call search('^\s*Plug')
-    " We should write `zR` to open all folds, so that the while loop can
-    " search in closed folds (it seems it misses the plugins lines inside
-    " folds). But I don't want the new line to pasted inside a fold. It's not
-    " where it should be. It should be pasted just above the fold.
-    " I don't know how to detect an open fold, and then how to move to the
-    " first line.
+    " We should write `zR` to open all  folds, so that the while loop can search
+    " in closed folds (it seems it misses the plugins lines inside folds).
+    "
+    " But I don't want the new line to be pasted inside a fold.
+    " It's not where it should be.
+    "
+    " It should be pasted just above the fold.
+    " I don't know how to detect an open fold, and then how to move to the first
+    " line.
     norm! zv
     let plugin_on_current_line = ''
 
@@ -961,8 +901,18 @@ fu! myfuncs#plugin_install(url) abort "{{{1
         let plugin_on_current_line = matchstr(getline('.'), '\vPlug ''.{-}/(vim-)?\zs.{-}\ze/?''')
     endwhile
 
-    -put =plug_line
+    call append(line('.')-1, plug_line)
     update
+    " Why?{{{
+    "
+    " Saving  `vimrc`, and  triggering  its  resourcing, is  not  enough to  let
+    " `vim-plug` know that it must manage a new plugin.
+    " Indeed we've guarded all `:Plug` commands with `if has('vim_starting')`.
+    " So, to avoid having to restart  Vim, we manually tell `vim-plug` about our
+    " new plugin.
+    "}}}
+    exe plug_line
+    " now vim-plug can install our new plugin
     PlugInstall
     let win_plug = win_getid()
 

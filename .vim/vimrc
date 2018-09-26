@@ -2263,10 +2263,10 @@ nno  <space>t  :<c-u>exe (v:count ? v:count.'tabnew' : 'tabnew')<cr>
 "  ]k ]j align the end of the current line with the one of the
 "  previous/next line
 
-nno  <silent>  [k  :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@_
-nno  <silent>  [j  :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@_
-nno  <silent>  ]k  :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<cr>g@_
-nno  <silent>  ]j  :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<cr>g@_
+nno  <silent>  [k  :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@l
+nno  <silent>  [j  :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@l
+nno  <silent>  ]k  :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
+nno  <silent>  ]j  :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
 
 " \                   (prefix) {{{3
 " \b            select current box {{{4
@@ -2528,7 +2528,7 @@ endfu
 " zd {{{4
 
 " make `zd` repeatable
-nno  <silent>  zd  :<c-u>set opfunc=<sid>my_zd<cr>g@_
+nno  <silent>  zd  :<c-u>set opfunc=<sid>my_zd<cr>g@l
 
 fu! s:my_zd(type) abort
     norm! zd
@@ -2838,46 +2838,11 @@ endfu
 nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
 " +                   (prefix) {{{3
-" ^             put an error sign below {{{4
-
-nno <silent>  +^  :<c-u>set opfunc=<sid>put_error_sign<cr>g@l
-
-fu! s:put_error_sign(type) abort
-    let error_sign = '^✘'
-    let vcol = virtcol('.')
-
-    let next_line = getline(line('.')+1)
-    if next_line =~# '\V'.error_sign
-        let pat = '\%'.vcol.'v'.repeat('.', strchars('^✘', 1))
-
-        " if our  cursor is on the  20th cell, while the  next line occupies
-        " only 10  cells the  next substitution will  fail, because  it will
-        " target a non-existing character
-        let next_line_length = strchars(next_line, 1)
-        if vcol > next_line_length
-            let next_line .= repeat(' ', vcol - next_line_length + 1)
-        endif
-
-        let new_line = substitute(next_line, pat, error_sign, '')
-        +d_
-        -
-    else
-        let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
-        let indent = indent('.')
-        let spaces_between_cml_and_mark = repeat(' ', virtcol('.')-1-strchars(cml, 1)-indent)
-        let indent = repeat(' ', indent)
-        let new_line = indent.cml.spaces_between_cml_and_mark.error_sign
-    endif
-
-    call append('.', new_line)
-endfu
-
 " +>    +<      split/join listing or long data {{{4
 
 " long data = dictionary, list, bulleted list
 
-nno  <silent>  +>  :<c-u>set opfunc=myfuncs#long_data_split<cr>g@_
-
+nno  <silent>  +>  :<c-u>set opfunc=myfuncs#long_data_split<cr>g@l
 nno  <silent>  +<  :<c-u>set opfunc=myfuncs#long_data_join<cr>g@
 xno  <silent>  +<  :<c-u>call myfuncs#long_data_join('vis')<cr>
 
@@ -3021,8 +2986,17 @@ xno  <silent>  =A  :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
 
 " >>                  indent without 'shiftround' {{{3
 
-nno  <silent>  >>  :<c-u>call <sid>indent_without_shiftround_save('increase')<bar>set opfunc=<sid>indent_without_shiftround<cr>g@_
-nno  <silent>  <<  :<c-u>call <sid>indent_without_shiftround_save('decrease')<bar>set opfunc=<sid>indent_without_shiftround<cr>g@_
+" You refer to `v:count1` in the mapping, then in the function. Isn't it too much?{{{
+"
+" No.
+" In the mapping, you can't press `g@` without `v:count1`.
+" `g@` alone would reset `v:count1` to `1`.
+"
+" We could probably use `']` and the `>` operator in our function,
+" but `v:count1` seems simpler.
+"}}}
+nno  <silent>  >>  :<c-u>call <sid>indent_without_shiftround_save('increase')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '.v:count1.'g@l'<cr>
+nno  <silent>  <<  :<c-u>call <sid>indent_without_shiftround_save('decrease')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '.v:count1.'g@l'<cr>
 
 fu! s:indent_without_shiftround_save(dir) abort
     let s:indent_without_shiftround_dir = a:dir
@@ -4004,7 +3978,7 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 
 " We can notice that the address of the 1st line of the 1st block is expressed
 " in 2 different ways, depending on the context.
-" Inside the range passed to `:g` it's `.` (current line).
+" Inside the range passed to `:g` it's `.` (current line when `:g` starts).
 " Inside the command executed by `:g`, it can't be `.` anymore (because the
 " current line changes constantly), so here we use `''` instead.
 " Indeed, before jumping to the first line to process, `:g` adds an entry in the
@@ -4023,6 +3997,8 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " Remember:
 " `.` doesn't stand for the same line inside a range passed to `:g`, and inside
 " a range passed to a command executed by the same `:g`.
+" Also, if `:Ex`  is a command executed by `:g`  (`:g/pat/Ex`), inside `:Ex` you
+" can use `''` to refer to the initial line when `:g` was started.
 
 
 " `:g` will cycle through the lines of the 1st block, and always move + join
@@ -5292,10 +5268,6 @@ endfu
 "     :new
 "     :file some_file    ✘
 "
-" Edit:
-" Our section `FTPLUGINS + SYNTAX` has become too long.
-" Re-read. Summarize. Extract in markdown notes.
-"
 " 30 -
 " Protect all temporary change of option with `try|catch|endtry`.
 " Look for the pattern:
@@ -5540,7 +5512,7 @@ endfu
 " Look for all  the instances where we've  used a timer and where  we could have
 " used a simple `:redraw`. Replace the timer if it makes sense.
 "
-" Note that in `mirvish`, in `mirvish#show_metadata()`, we MUST use a `:redraw`,
+" Note that in `vim-fex`, in `fex#print_metadata()`, we MUST use a `:redraw`,
 " not a timer.
 " Otherwise,  the  first  part  of  the  message  is  correctly  displayed  (via
 " `:echon`), but not the second one.
@@ -5609,12 +5581,14 @@ endfu
 "         unlet! g:loaded_{guard-name}
 "         so file1.vim
 "         so file2.vim
-"         …
+"         ...
 "
-" We would put `file1`, `file2`, … with:
-"         put =map(filter(glob($HOME.'/.vim/plugged/{plugin-name}/**/*.vim', 0, 1),
-"         \               { i,v -> v !~# '/t\%[est]/' }),
-"         \        { i,v -> 'so '.v })
+" We would put `file1`, `file2`, ... with:
+"
+"         call setline('.',
+"             \ map(filter(glob($HOME.'/.vim/plugged/{plugin-name}/**/*.vim', 0, 1),
+"             \ { i,v -> v !~# '/t\%[est]/' }),
+"             \ { i,v -> 'so '.v }))
 "
 " 56 -
 " Check whether some commands would be better suited as mappings.
@@ -6002,7 +5976,7 @@ endfu
 " it, with z, and z;.
 " The issue is in the mapping:
 "
-"         n  Z<NL>       * <SNR>109_move('Z<NL>')
+"         n  z<NL>       * <SNR>109_move('z<NL>')
 "
 " The newline probably breaks prematurely the invocation of the function.
 " We could tweak the code to protect such a special character with `<lt>`.
@@ -6345,9 +6319,26 @@ endfu
 "     • no need to escape double quotes
 "     • silent by default (no need of `:silent` contrary to `:put`)
 "     • the cursor doesn't move
-"     • current position is not added to the jumplist (no need of `:keepj`)
 "
 "     noa vim /\<put\s\+=/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
+"
+" Update:
+" `:put` seems better suited to interactive use.
+" But it's also better when you have multiple pastes to perform.
+" The fact that the cursor moves can help.
+" It's more difficult with `append()`, because you constantly need to update the
+" line below which you have to paste.
+"
+" `setline()` is very good when you have only one paste to make in a new buffer,
+" or at the end of an existing buffer whose last line is empty.
+" `append()` is very  good when you have  only one paste to make  in an existing
+" buffer (but not on its last line).
+"
+" Trick:
+" If you need `append()` and make the cursor move like `:put`:
+"
+"       let lines = [...]
+"       call append('.', lines) | exe '+'.len(lines)
 "
 " 105 -
 " we should remove `cop` mapping in `vim-help`.
@@ -6731,27 +6722,24 @@ endfu
 " See `:h :echo-redraw`.
 "
 " 132 -
-" Visually select these lines, then press `=ri`:
-"
-"         if !a:0
-"             let [mode, is_fwd, capitalize] = ['n', 1, 1]
-"         else
-"             let [mode, is_fwd, capitalize] = [a:mode, a:1, 0]
-"         endif
-"
-" 133 -
 " Search for `[ SPC`, `SPC ]`, `{ SPC`, `SPC }`, `^\s*\\` everywhere.
 " Refactor the style.
+"     noa vim /\[ \| \]\|{ \| }\|^\s*\\/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "
-" 134 -
+" 133 -
 " Search for `g@` everywhere.
 " Do you need to save and restore the unnamed register, and the options every time?
 " Should  we refactor the snippets  so that it  allows us to remove  those parts
 " (including the Ex command)?
 "
-" Do you have saved and restored the visual marks?
+" Have you saved and restored the visual marks?
+"
 " Do you need to save and restore v:register every time?
 " Do you need to save and restore v:count every time?
+"
+" 134 -
+" All your commands should print a usage message when executed without
+" arguments (similar to what our shell function do with a heredoc).
 
 
 
@@ -6898,9 +6886,10 @@ fu! s:save_last_qfl() abort
     "         call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
     "}}}
     call map(qfl,
-    \        {i,v -> extend(v,
-    \                       {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
-    let g:MY_LAST_QFL = {'qfl': qfl, 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
+        \    {i,v -> extend(v,
+        \        {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
+    let g:MY_LAST_QFL = {'qfl': qfl,
+        \ 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}
 endfu
 
 fu! s:restore_last_qfl() abort

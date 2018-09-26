@@ -6,7 +6,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +0 ~/Dropbox/conf/bin/upp.sh
+badd +1 ~/Dropbox/conf/bin/upp.sh
 argglobal
 silent! argdel *
 edit ~/Dropbox/conf/bin/upp.sh
@@ -23,18 +23,18 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-121
+95
 normal! zo
-200
+123
 normal! zo
-248
+239
 normal! zo
-let s:l = 330 - ((16 * winheight(0) + 15) / 31)
+let s:l = 330 - ((57 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 330
-normal! 06|
+normal! 01|
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

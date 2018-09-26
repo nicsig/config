@@ -1649,7 +1649,6 @@ CMDS_TO_IGNORE_IN_HISTORY=(
   config
   cp
   dl_video
-  echo
   exit
   fg
   imv
@@ -2341,7 +2340,7 @@ setopt RM_STAR_SILENT
 
 #        ┌ `abbrev` refer to an associative array parameter
 #        │
-declare -Ag abbrev
+typeset -Ag abbrev
 #         │
 #         └ don't restrict to local scope
 
@@ -2470,7 +2469,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
 # The configuration of the plugin is written in an associative array,
 # stored in a variable called `ZSH_HIGHLIGHT_STYLES`.
 # Declare the latter
-declare -A ZSH_HIGHLIGHT_STYLES
+typeset -A ZSH_HIGHLIGHT_STYLES
 
 ##################################
 # Styles from `main` highlighter #
