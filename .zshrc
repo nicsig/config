@@ -2563,3 +2563,5 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #     . "$HOME/GitRepos/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 #     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main root)
 #     ZSH_HIGHLIGHT_STYLES[root]='bg=red'
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

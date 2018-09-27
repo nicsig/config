@@ -589,7 +589,7 @@ endfu
 fu! myfuncs#only_selection(lnum1,lnum2) abort "{{{1
     let lines = getline(a:lnum1,a:lnum2)
     keepj sil %d_
-    call setline('.', lines)
+    call setline(1, lines)
 endfu
 
 " OPERATORS {{{1
@@ -1308,11 +1308,11 @@ fu! myfuncs#tab_toc() abort "{{{1
         \ }
 
     let toc = []
-    for l:lnum in range(1, line('$'))
-        let col = match(getline(l:lnum), patterns[&ft])
-        if col !=# -1 && synIDattr(synID(l:lnum, col, 0), 'name') =~? syntaxes[&ft]
-            let text = substitute(getline(l:lnum), '\s\+', ' ', 'g')
-            call add(toc, {'bufnr': bufnr('%'), 'lnum': l:lnum, 'text': text})
+    for lnum in range(1, line('$'))
+        let col = match(getline(lnum), patterns[&ft])
+        if col !=# -1 && synIDattr(synID(lnum, col, 0), 'name') =~? syntaxes[&ft]
+            let text = substitute(getline(lnum), '\s\+', ' ', 'g')
+            call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
         endif
    endfor
 
@@ -1629,16 +1629,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     exe winnr('#').'windo call winrestview(view)'
 endfu
 
-fu! myfuncs#wf_complete(arglead, _c, _p) abort
-    " Why not filtering the candidates?{{{
-    "
-    " We don't need to, because the command invoking this completion function is
-    " defined with the attribute `-complete=custom`, not `-complete=customlist`,
-    " which means Vim performs a basic filtering automatically:
-    "
-    "     • each event must begin with `a:arglead`
-    "     • the comparison respects 'ic' and 'scs'
-    " }}}
+fu! myfuncs#wf_complete(arglead, _cmdline, _pos) abort
     return join(['-min_length', '-weighted'], "\n")
 endfu
 
