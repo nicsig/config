@@ -310,4 +310,3 @@ bind '"\eZ": "$(!!|fzf)"'
 # I've commented the key binding because I hit it by accident too often.
 # It happens when I press Escape then C-b quickly afterwards.
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash

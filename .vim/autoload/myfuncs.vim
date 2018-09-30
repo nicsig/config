@@ -477,10 +477,24 @@ fu! myfuncs#in_A_not_in_B(...) abort "{{{1
     endif
 
     " http://unix.stackexchange.com/a/28159
+    " Why `wc -l < file` instead of simply `wc -l file`?{{{
+    "
+    "     $ wc -l file
+    "     5 file
+    "
+    "     $ wc -l < file
+    "     5
+    "
+    " I think that when you reconnect the  input of `$ wc` like this, it doesn't
+    " see a  file anymore, only  its contents, which  removes some noise  in the
+    " output.
+    "}}}
     let output = systemlist('diff -U $(wc -l < '.fileA.') '.fileA.' '.fileB." | grep '^-' | sed 's/^-//g'")
+
     call map(output, {i,v -> {'text': v}})
     call setloclist(0, output)
     call setloclist(0, [], 'a', {'title': 'in  '.fileA.'  but not in  '.fileB})
+
     do <nomodeline> QuickFixCmdPost lopen
     call qf#set_matches('myfuncs#in_A_not_in_B', 'Conceal', 'double_bar')
     call qf#create_matches()
@@ -757,6 +771,12 @@ fu! myfuncs#op_replace_without_yank(type) abort
         set selection=inclusive
 
         " save registers and types to restore later.
+        " FIXME:
+        " Wait...
+        " We save and restore the register which can prefixed before the `dr` operator.
+        " Is it necessary?
+        " If so, have we done the same for the other operators which can be prefixed
+        " by a register?
         call lg#reg#save(['"', s:replace_reg_name])
 
         " Why do you save the visual marks?{{{
@@ -770,6 +790,9 @@ fu! myfuncs#op_replace_without_yank(type) abort
         "}}}
         let visual_marks_save = [getpos("'<"), getpos("'>")]
 
+        " TODO:
+        " Should  we use  `getreg(..., 1)`  to properly  restore the  expression
+        " register.
         let replace_reg_contents = getreg(s:replace_reg_name)
         let replace_reg_type     = getregtype(s:replace_reg_name)
 
@@ -794,6 +817,8 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " indentation.
 
         if a:type is# 'line' || replace_current_line
+            " TODO:
+            " Should we use `:keepj` in all our operators?
             exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
 
         elseif a:type is# 'block'
@@ -1296,15 +1321,15 @@ fu! myfuncs#tab_toc() abort "{{{1
     endif
 
     let patterns = {
-        \ 'man'      : '\S\zs',
-        \ 'markdown' : '\v^%(#+)?\S.\zs',
-        \ 'help'     : '\S\ze\*$\|^\s*\*\zs\S',
+        \ 'man'     : '\S\zs',
+        \ 'markdown': '\v^%(#+)?\S.\zs',
+        \ 'help'    : '\S\ze\*$\|^\s*\*\zs\S',
         \ }
 
     let syntaxes = {
-        \ 'man'      : 'heading\|title',
-        \ 'markdown' : 'markdownH\d\+',
-        \ 'help'     : 'helpHyperTextEntry\|helpStar',
+        \ 'man'     : 'heading\|title',
+        \ 'markdown': 'markdownH\d\+',
+        \ 'help'    : 'helpHyperTextEntry\|helpStar',
         \ }
 
     let toc = []

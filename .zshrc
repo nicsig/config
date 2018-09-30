@@ -549,7 +549,44 @@ unset fasd_cache
 
 
 # source fzf config
-[[ -f "${HOME}/.fzf.zsh" ]] && . "${HOME}/.fzf.zsh"
+# Do NOT edit this line!{{{
+#
+# Not a single character.
+# Otherwise, when you execute:
+#
+#     ~/.fzf/install
+#
+# manually or automatically, the installer will not recognize your line.
+# It will then append this line at the end of your `~/.zshrc`:
+#
+#     [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+#
+# As a result, some of your zsh key bindings may be overridden.
+# Including the 'transpose-chars' command bound to `C-t`.
+#}}}
+# But I want to!{{{
+#
+# Then you'll have to remove this line from your `~/.vimrc`:
+#
+#     :Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install ...'}
+#                                             ^^^^^^^^^^^^^^^^^^^^
+#                                             this invokes the fzf installer
+#                                             whenever there's an update
+#
+# You could also tweak the installer command by passing other arguments:
+#
+#     % ~/.fzf/install --all --no-bash --no-key-bindings
+#                                      ^^^^^^^^^^^^^^^^^
+#
+# The `~/.fzf.zsh` file will be generated without containing any line related to
+# key bindings.
+# In this case, don't forget to remove the old `~/.fzf.zsh` before invoking
+# the installer.
+# For more info about the options you can pass to the installer:
+#
+#     % ~/.fzf/install --help
+#}}}
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # https://github.com/zsh-users/zaw
 #
@@ -1997,6 +2034,22 @@ bindkey '^Xh' _complete_help
 
 # C-x r           snippet-rename {{{4
 
+# TODO: What about this alias alternative:{{{
+#
+#     alias snip_rename='for f in *; do echo mv "$f" "${f}";done'
+#
+# Pro:
+# You don't have to find a new free keysequence for every snippet.
+# You can use the `snip` keyword as a prefix so that the tab completion
+# menu shows you all your snippets.
+# A sequence of commands is displayed one command per line: it's more readable.
+#
+# Con:
+# You have to expand your snippet by pressing `M-e`.
+# You can't control the cursor position.
+# A sequence of commands is displayed one command per line: it's harder to edit.
+#}}}
+alias snip_rename='for f in *; do echo mv "$f" "${f}";done'
 bindkey -s '^Xr' '^A^Kfor f in *; do echo mv \"$f\" \"${f}\";done\e7^B'
 #                                    │
 #                                    └ print the command to let us review it
@@ -2564,4 +2617,3 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main root)
 #     ZSH_HIGHLIGHT_STYLES[root]='bg=red'
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

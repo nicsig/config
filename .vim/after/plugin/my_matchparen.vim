@@ -1,3 +1,5 @@
+" DO NOT rename this file to `matchparen.vim`!
+" It would cause a conflict with the plugin in $VIMRUNTIME.
 if exists(':DoMatchParen') != 2
     finish
 endif
