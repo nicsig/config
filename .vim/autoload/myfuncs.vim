@@ -358,6 +358,95 @@ fu! myfuncs#box_destroy(type) abort
     exe 'norm! '.lnum1.'Gj_'
 endfu
 
+fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
+    if a:option is# '-h' || a:option is# '--help'
+        echo printf("%s\n\nusage:\n    %s\n    %s\n    %s\n\n%s",
+        \ ':DiffLines allows you to see and cycle through the differences between 2 lines',
+        \ ':5,10DiffLines    diff between lines 5 and 10',
+        \ ':DiffLines        diff between current line and next one',
+        \ ':DiffLines!       clear the match',
+        \ 'The differences are in the location list (press [l, ]l, [L, ]L to visit them)',
+        \ )
+        return
+    endif
+
+    if exists('w:xl_match')
+        call matchdelete(w:xl_match)
+        unlet w:xl_match
+    endif
+
+    if a:bang
+        return
+    endif
+
+    " Get some info: ln1/ln2       = line numbers
+    "                l1/l2         = lines
+    "                chars1/chars2 = lists of characters
+    "
+    " If a:line1 = a:line2, it means :XorLines was called without a range
+    if a:line1 ==# a:line2
+        let [ln1, ln2] = [line('.'), line('.')+1]
+    else
+        let [ln1, ln2] = [a:line1, a:line2]
+    endif
+    let [l1, l2] = [getline(ln1), getline(ln2)]
+    let [chars1, chars2] = [split(l1, '\zs'), split(l2, '\zs')]
+    let min_chars = min([len(chars1), len(chars2)])
+
+    " Build a pattern matching the characters which are different
+    let pattern = ''
+    for i in range(min_chars)
+        if chars1[i] isnot# chars2[i]
+
+            " FIXME: for some reason, we need to write a dot at the end of each
+            " branch of the pattern, so we add 'v.' at the end instead of just 'v'.
+            " The problem seems to come from :lvim and the g flag.
+            "
+            " MWE:    :lvim /\v%1l%2v/g %
+            " … adds 2 duplicate entries in the location list instead of one.
+            "
+            "               :lvim /\v%1l%2v|%1l%3v/g %
+            " … adds 2 duplicate entries in the location list, 3 in total instead of two.
+            "
+            "               :lvim /\v%1l%2v|%1l%4v/g %
+            " … adds 2 couple of duplicate entries in the location list, 4 in total instead of two.
+            " It seems each time a `%{digit}v` anchor matches the beginning of a group
+            " of consecutive characters, it adds 2 duplicate entries instead of one.
+
+            let pattern .= (empty(pattern) ? '' : '\|').'\%'.ln1.'l'.'\%'.(i+1).'v.'
+            let pattern .= (empty(pattern) ? '' : '\|').'\%'.ln2.'l'.'\%'.(i+1).'v.'
+        endif
+    endfor
+
+    " If one of the lines is longer than the other, we have to add its end in
+    " the pattern.
+    if len(chars1) > len(chars2)
+
+        " Suppose that the shortest line has 50 characters:
+        " it's better to write `\%>50v.` than `\%50v.*`.
+        "
+        " `\%>50v.` = any character after the 50th character:
+        "             this will add one entry in the loclist for EVERY character
+        "
+        " `\%50v.*` = the WHOLE set of characters after the 50th:
+        "             this will add only ONE entry in the loclist
+
+        let pattern .= (!empty(pattern) ? '\|' : '').'\%'.ln1.'l'.'\%>'.len(chars2).'v.'
+
+    elseif len(chars1) < len(chars2)
+        let pattern .= (!empty(pattern) ? '\|' : '').'\%'.ln2.'l'.'\%>'.len(chars1).'v.'
+    endif
+
+    " Give the result
+    if !empty(pattern)
+        noa exe 'lvim /'.pattern.'/g %'
+        let w:xl_match = matchadd('SpellBad', pattern, -1)
+    else
+        echohl WarningMsg
+        echom 'Lines are identical'
+        echohl None
+    endif
+endfu
 fu! myfuncs#dump_wiki(url) abort "{{{1
     " TODO: Regarding triple backticks.{{{
     "
@@ -695,6 +784,13 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                                              /tmp/foo%bar
             "                                              /tmp/foo\%bar
             "                                                      ^
+            " Update:
+            " If the argument  which can contain special characters  is the name
+            " of  the current  file,  you  can use  the  filename modifier  `:S`
+            " instead of `shellescape(..., 1)`.
+            " It's less verbose.
+            " `:S` must be the last modifier, and it can work with other special
+            " characters such as `#` or `<cfile>`.
             "}}}
             cgetexpr s:op_grep_get_qfl(@")
             call setqflist([], 'a', {'title': &grepprg.' '.@".' .'})
@@ -1658,81 +1754,3 @@ fu! myfuncs#wf_complete(arglead, _cmdline, _pos) abort
     return join(['-min_length', '-weighted'], "\n")
 endfu
 
-fu! myfuncs#diff_lines(bang) abort range "{{{1
-    if exists('w:xl_match')
-        call matchdelete(w:xl_match)
-        unlet w:xl_match
-    endif
-
-    if a:bang
-        return
-    endif
-
-    " Get some info: ln1/ln2       = line numbers
-    "                l1/l2         = lines
-    "                chars1/chars2 = lists of characters
-    "
-    " If a:firstline = a:lastline, it means :XorLines was called without a range
-    if a:firstline ==# a:lastline
-        let [ln1, ln2] = [line('.'), line('.')+1]
-    else
-        let [ln1, ln2] = [a:firstline, a:lastline]
-    endif
-    let [l1, l2] = [getline(ln1), getline(ln2)]
-    let [chars1, chars2] = [split(l1, '\zs'), split(l2, '\zs')]
-    let min_chars = min([len(chars1), len(chars2)])
-
-    " Build a pattern matching the characters which are different
-    let pattern = ''
-    for i in range(min_chars)
-        if chars1[i] isnot# chars2[i]
-
-            " FIXME: for some reason, we need to write a dot at the end of each
-            " branch of the pattern, so we add 'v.' at the end instead of just 'v'.
-            " The problem seems to come from :lvim and the g flag.
-            "
-            " MWE:    :lvim /\v%1l%2v/g %
-            " … adds 2 duplicate entries in the location list instead of one.
-            "
-            "               :lvim /\v%1l%2v|%1l%3v/g %
-            " … adds 2 duplicate entries in the location list, 3 in total instead of two.
-            "
-            "               :lvim /\v%1l%2v|%1l%4v/g %
-            " … adds 2 couple of duplicate entries in the location list, 4 in total instead of two.
-            " It seems each time a `%{digit}v` anchor matches the beginning of a group
-            " of consecutive characters, it adds 2 duplicate entries instead of one.
-
-            let pattern .= (empty(pattern) ? '' : '\|').'\%'.ln1.'l'.'\%'.(i+1).'v.'
-            let pattern .= (empty(pattern) ? '' : '\|').'\%'.ln2.'l'.'\%'.(i+1).'v.'
-        endif
-    endfor
-
-    " If one of the lines is longer than the other, we have to add its end in
-    " the pattern.
-    if len(chars1) > len(chars2)
-
-        " Suppose that the shortest line has 50 characters:
-        " it's better to write `\%>50v.` than `\%50v.*`.
-        "
-        " `\%>50v.` = any character after the 50th character:
-        "             this will add one entry in the loclist for EVERY character
-        "
-        " `\%50v.*` = the WHOLE set of characters after the 50th:
-        "             this will add only ONE entry in the loclist
-
-        let pattern .= (!empty(pattern) ? '\|' : '').'\%'.ln1.'l'.'\%>'.len(chars2).'v.'
-
-    elseif len(chars1) < len(chars2)
-        let pattern .= (!empty(pattern) ? '\|' : '').'\%'.ln2.'l'.'\%>'.len(chars1).'v.'
-    endif
-
-    " Give the result
-    if !empty(pattern)
-        noa exe 'lvim /'.pattern.'/g %'
-        let w:xl_match = matchadd('SpellBad', pattern, -1)
-    else
-        echohl WarningMsg
-        echom 'Lines are identical'
-        echohl None
-    endif
-endfu

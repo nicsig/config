@@ -329,6 +329,17 @@ endif
 " `C-]` to automatically jump to an arbitrary location inside the wiki.
 " This would also allow us to leverage all built-in commands/functions dedicated
 " to tags.
+"
+" See also:
+"     https://maximewack.com/post/tagbar/
+"     https://github.com/vimwiki/utils/blob/master/vwtags.py
+"     https://gist.github.com/MaximeWack/cdbdcd373d68d1fe5b3aca22e3dcfe46
+"     https://gist.github.com/MaximeWack/388c393b7db290dd732f0a2d403118c5
+"
+"     https://github.com/majutsushi/tagbar
+"     https://github.com/majutsushi/tagbar/wiki#markdown
+"     https://github.com/jszakmeister/markdown2ctags
+"     https://github.com/lvht/tagbar-markdown
 "}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
 let $MY_WIKI = $HOME.'/Dropbox/wiki'
@@ -1383,7 +1394,7 @@ augroup tags_vimrc
     exe 'au BufWritePost '.resolve($HOME.'/.vim/autoload/myfuncs.vim')
     \ . ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
 
-    au! BufWritePost .zshrc call system('source '.shellescape(expand('%:p')))
+    au! BufWritePost .zshrc call system('source '.expand('%:p:S'))
 augroup END
 
 " temporary files:  undo, swap, backup {{{2
@@ -3965,13 +3976,7 @@ endfu
 
 " DiffLines {{{2
 
-" :DiffLines allows to see and cycle through the differences between 2 lines.
-" Usage: :5,10DiffLines    diff between lines 5 and 10
-"        :DiffLines        diff between current line and next one
-"        :DiffLines!       clear the match
-" The differences are in the location list (hit [l, ]l, [L, ]L to navigate).
-
-com! -bar -bang -range DiffLines <line1>,<line2>call myfuncs#diff_lines(<bang>0)
+com! -bar -bang -range -nargs=? DiffLines call myfuncs#diff_lines(<bang>0, <line1>, <line2>, <q-args>)
 
 " DiffOrig {{{2
 
@@ -4191,6 +4196,9 @@ com! -bar -nargs=1 PluginGlobalVariables call myfuncs#plugin_global_variables(<q
 com! -bar PU call s:plugins_update()
 
 fu! s:plugins_update() abort
+    " :h spellfile-cleanup
+    runtime spell/cleanadd.vim
+
     " Install `wfrench` package. Useful for dictionary completion.
     if expand('`aptitude show wfrench | sed -n "2p"`') =~? 'state:\s*not\s\+installed'
         echom 'Need to install the wfrench package for the french dictionary.'
@@ -4375,23 +4383,24 @@ endfu
 
 " " We define the :SortLines command which moves lines containing foo or bar at
 " " the bottom. Lines containing foo are put before the ones containing bar.
-" com! -bar -range=% SortLines <line1>,<line2>call s:sort_lines()
-
-" fu! s:compare_lines(l1, l2) abort
-"     " The greater the score, the further to the right in the sorted list
-"     let score1 = a:l1=~ 'bar' ? 2 : a:l1 =~ 'foo'
-"     let score2 = a:l2=~ 'bar' ? 2 : a:l2 =~ 'foo'
-"     return score1 - score2
-" endfu
-
-" fu! s:sort_lines() abort range
-"     let sorted_lines = sort(getline(a:firstline, a:lastline), 's:compare_lines')
-"     let c = 0
-"     for line in sorted_lines
-"         call setline(a:firstline + c, line)
-"         let c+=1
-"     endfor
-" endfu
+"
+"     com! -bar -range=%  SortLines  call s:sort_lines(<line1>, <line2>)
+"
+"     fu! s:compare_lines(l1, l2) abort
+"         " The greater the score, the further to the right in the sorted list
+"         let score1 = a:l1=~ 'bar' ? 2 : a:l1 =~ 'foo'
+"         let score2 = a:l2=~ 'bar' ? 2 : a:l2 =~ 'foo'
+"         return score1 - score2
+"     endfu
+"
+"     fu! s:sort_lines(line1, line2) abort
+"         let sorted_lines = sort(getline(a:line1, a:line2), 's:compare_lines')
+"         let c = 0
+"         for line in sorted_lines
+"             call setline(a:firstline + c, line)
+"             let c+=1
+"         endfor
+"     endfu
 
 " SumColumn {{{2
 
@@ -4714,13 +4723,13 @@ augroup filter_special_file
     " But  for some  reason,  Vim doesn't  fire `BufReadPost`  when  it reads  a
     " `.docx` or `.epub` file.
     "
-    "     au BufReadPost *.docx sil exe '%!pandoc -f docx -t markdown '.shellescape(expand('%:p'), 1)
+    "     au BufReadPost *.docx sil exe '%!pandoc -f docx -t markdown '.expand('%:p:S')
     "        ^
     "        ✘
     "
     " We could use `FileType tar`:
     "
-    "     au FileType tar sil exe '%!pandoc -f docx -t markdown '.shellescape(expand('%:p'), 1)
+    "     au FileType tar sil exe '%!pandoc -f docx -t markdown '.expand('%:p:S')
     "
     " …  but  $VIMRUNTIME/plugin/tarPlugin.vim   would leave some undesired
     " messages inside the buffer; it's noise.
@@ -4735,7 +4744,7 @@ fu! s:filter_special_file() abort
         return
     endif
 
-    let fname = shellescape(expand('%:p'), 1)
+    let fname = expand('%:p:S')
     let ext = expand('%:e')
     let ext2cmd = {
     \               'doc' : '%!antiword '.fname,
