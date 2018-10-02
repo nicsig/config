@@ -1,4 +1,4 @@
-if !exists('g:loaded_fugitive')
+if exists('g:loaded_fugitive') || stridx(&rtp, 'vim-fugitive') == -1
     finish
 endif
 
@@ -21,3 +21,4 @@ fu! s:glog_conceal(when) abort
         call qf#create_matches()
     endif
 endfu
+

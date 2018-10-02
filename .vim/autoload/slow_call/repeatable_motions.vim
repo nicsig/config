@@ -1,36 +1,9 @@
-" Is there an alternative?{{{
-"
-" Yes:
-"     if !has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
-"         finish
-"     endif
-"
-"     sil verb runtime autoload/lg/motion/repeatable/make.vim
-"     if v:errmsg is# 'not found in ''runtimepath'': "autoload/lg/motion/main.vim"'
-"         finish
-"     endif
-"}}}
-" Why don't you use one of them?{{{
-"
-" The first alternative relies on `vim-plug` being used.
-" We may not use this plugin in the future.
-"
-" Also, when  we're debugging, we frequently  end up with a  minimal vimrc where
-" `Plug` statements are replaced by `set rtp^=...` statements.
-" In which case, `g:plugs` won't exist, but we may still want to load `vim-lg-lib`.
-"
-" The second alternative doesn't seem to work.
-" I don't know why. It should.
-" It seems `v:errmsg` is empty even when  there's an error, or it gets populated
-" by another error...
-" }}}
-
-if filter(split(&rtp, ','), {i,v -> v =~# 'vim-lg-lib'}) == []
+if stridx(&rtp, 'vim-lg-lib') == -1
     finish
 endif
 
 " Define some motions {{{1
-" Why define them here? Why not in vimrc?{{{
+"       Why define them here? Why not in vimrc?{{{
 "
 " In vimrc, we would need a guard:
 "
@@ -47,12 +20,12 @@ endif
 " We'll undoubtedly forget it sometimes, and then lose time wondering why one
 " of our motion is not repeatable.
 "}}}
-" g,  g; {{{2
+"    g,  g; {{{2
 
 nno  <unique>  g;  g,zv
 nno  <unique>  g,  g;zv
 
-" gj  gk         vertical jump {{{2
+"    gj  gk         vertical jump {{{2
 
 noremap  <expr><silent><unique>  gk  <sid>vertical_jump_rhs(0)
 noremap  <expr><silent><unique>  gj  <sid>vertical_jump_rhs(1)
@@ -133,7 +106,7 @@ fu! s:get_jump_height(is_fwd) abort
     \    :     line('.') - max(lnums)
 endfu
 
-" ]h  ]r  ]u     move to next path/ref/url {{{2
+"    ]h  ]r  ]u     move to next path/ref/url {{{2
 
 " Why not `]H`?{{{
 "
@@ -176,7 +149,7 @@ noremap  <expr>  <silent><unique>  ]u  lg#motion#regex#rhs('url', 1)
 noremap  <expr>  <silent><unique>  [U  lg#motion#regex#rhs('concealed_url', 0)
 noremap  <expr>  <silent><unique>  ]U  lg#motion#regex#rhs('concealed_url', 1)
 
-" <t  >t         move tab pages {{{2
+"    <t  >t         move tab pages {{{2
 
 nno  <silent>  <t  :<c-u>call <sid>move_tabpage('-1')<cr>
 nno  <silent>  >t  :<c-u>call <sid>move_tabpage('+1')<cr>
@@ -494,3 +467,4 @@ call lg#motion#repeatable#make#all({
 \                     {'bwd': '[oz',  'fwd': ']oz'},
 \                   ]
 \ })
+

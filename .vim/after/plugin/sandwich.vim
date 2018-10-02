@@ -1,4 +1,4 @@
-if !exists('g:loaded_sandwich')
+if stridx(&rtp, 'vim-sandwich') == -1
     finish
 endif
 
@@ -40,7 +40,7 @@ endif
 "           For example, a tag recipe is not very useful in a vim file.
 "           But it's certainly useful in an html file.
 "
-"           Bottom_line:
+"           Bottom Line:
 "
 "               - Better understand how to define/customize a recipe.
 "               - Define a minimum of recipes.
@@ -81,13 +81,13 @@ fu! s:set_recipes() abort
     " we know not to cause any issue.
     " IOW, a whitelist is more reliable than a blacklist.
     let problematic_recipes = [
-    \ {'noremap':    0,
-    \ 'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
-    \ 'kind':        ['replace', 'textobj'],
-    \ 'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
-    \ 'input':       ['t'],
-    \ 'synchro':     1},
-    \ ]
+        \ {'noremap':     0,
+        \  'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
+        \  'kind':        ['replace', 'textobj'],
+        \  'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
+        \  'input':       ['t'],
+        \  'synchro':     1},
+        \ ]
 
     for recipe in problematic_recipes
         let idx = index(g:sandwich#recipes, recipe)

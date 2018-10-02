@@ -1,9 +1,3 @@
-# Which directories can I use to configure my plugins?
-
-        ~/.vim/plugin/
-        ~/.vim/after/plugin/
-        ~/.vim/autoload/slow_call/
-
 # What's the purpose of this directory?
 
 You can use it to delay the call to functions installing some interface, if they
@@ -13,6 +7,59 @@ For example:
         • lg#motion#repeatable#make#all()
         • operator#sandwich#set()
         • submode#map()
+
+# Why should I put a guard in every script of this directory?
+
+Are there alternatives to this guard?
+
+1.
+    if !has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
+        finish
+    endif
+
+2.
+    sil verb runtime autoload/lg/motion/repeatable/make.vim
+    if v:errmsg is# 'not found in ''runtimepath'': "autoload/lg/motion/main.vim"'
+        finish
+    endif
+
+3.
+    "only works in a filetype plugin
+    try
+        if !exists('b:repeatable_motions')
+            call lg#motion#repeatable#make#all(...)
+        endif
+    catch
+        " don't use `lg#catch_error()`, it probably doesn't exist in this case
+        echom v:exception
+    endtry
+
+
+
+
+Why don't you use one of them?
+
+1. relies on `vim-plug` being used.
+We may not use this plugin in the future.
+
+Also, when  we're debugging, we frequently  end up with a  minimal vimrc where
+`Plug` statements are replaced by `set rtp^=...` statements.
+In which case, `g:plugs` won't exist, but we may still want to load `vim-lg-lib`.
+
+2. doesn't seem to work.
+I don't know why. It should.
+It seems `v:errmsg` is empty even when  there's an error, or it gets populated
+by another error...
+
+3. would only work in a filetype plugin.
+
+
+
+
+Why not checking the existence of `lg#motion#repeatable#make#all()`?
+
+Not reliable, because it's an autoloaded function.
+Maybe it hasn't been sourced, and thus doesn't exist, but can be.
 
 ##
 # Can a conflict arise between a file in `~/.vim/autoload/` and the `autoload/` of a third-party plugin?

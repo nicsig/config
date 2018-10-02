@@ -28,7 +28,7 @@ You can use it to:
               For this, you HAVE TO use `after/plugin/`, to be sure
               the interface has been installed.
 
-              Btw, that's what the documentation for `Abolish.vim` recommends.
+              Btw, that's what the documentation of `Abolish.vim` recommends.
 
 ## What's the purpose of `tidy_tab_completion.vim`?
 
@@ -52,7 +52,7 @@ You may be able to reproduce a bug, that no one else will.
 
 ## How to prevent it from happening?
 
-Disable 'loadplugins' (see `:h load-plugins`):
+Disable `'loadplugins'` (see `:h load-plugins`):
 
         $ vim --noplugin -Nu /tmp/minimal_vimrc
                 │
@@ -81,26 +81,8 @@ be sourced separately:
          • you either source both
          • or none (`--noplugin` or `-u NONE`)
 
-If you don't like this, you could:
-
-        1. rename this directory into `my_plugins` (outside the rtp)
-
-        2. install an autocmd in `vimrc` to manually source the files
-
-                augroup default_plugins_customization
-                    au!
-                    au VimEnter * call s:source_plugin_custom()
-                augroup END
-
-                fu! s:source_plugin_custom() abort
-                    let files = glob($HOME.'/.vim/after/my_plugins/*.vim', 0, 1)
-                    for file in files
-                        exe 'source '.file
-                    endfor
-                endfu
-
-This way, they would only be sourced from the vimrc.
-Not when you start Vim with a minimum of customizations.
+If you don't like this, you can temporarily rename this directory into
+`my_plugins` (outside the rtp).
 
 ## Should I put a guard in those files?
 

@@ -1,3 +1,7 @@
+if stridx(&rtp, 'vim-submode') == -1
+    finish
+endif
+
 " Usage example:
 "
 "     call submode#enter_with('undo/redo', 'n', '', 'g-', 'g-')

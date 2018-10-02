@@ -1,4 +1,4 @@
-if !exists('g:loaded_quickhl')
+if exists('g:loaded_quickhl') || stridx(&rtp, 'vim-quickhl') == -1
     finish
 endif
 
@@ -129,3 +129,4 @@ nmap  <unique>  +hw  <plug>(quickhl-cword-toggle)
 
 " highlight text-object
 nmap  <unique>  +h  <plug>(operator-quickhl-manual-this-motion)
+

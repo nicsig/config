@@ -1,3 +1,7 @@
+if exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1
+    finish
+endif
+
 " Why must I put the config of UltiSnips in this directory instead of `~/.vim/after/plugin/`?{{{
 "
 " If you configure UltiSnips from  `~/.vim/after/plugin/`, when the interface of
@@ -6,7 +10,7 @@
 "
 " So, it will use `Tab` and install some mappings.
 " In `vim-completion`,  we also install some  mappings using the `Tab`  key, and
-" using the `<unique>` argument.
+" the `<unique>` argument.
 "
 " They will conflict with the UltiSnips mappings.
 "
@@ -22,16 +26,6 @@
 
 " Why S-F15..17 ? {{{
 
-" Currently we've decided to assign `S-F15`, `S-F16`, `S-F17` (garbage keys) to
-"
-"     g:UltiSnipsExpandTrigger,
-"     g:UltiSnipsJumpForwardTrigger,
-"     g:UltiSnipsJumpBackwardTrigger
-"
-" But in fact, we'll use Tab and S-Tab.
-"
-" Why S-F15..17 then?
-"
 " First, because  I'm looking  for unused  keys, which will  stay unused  in the
 " future. Currently, the maximum value `xx` to create a <F-xx> {lhs} is `37`:
 "
@@ -86,7 +80,7 @@
 "     3. Add this file to the list of (2) files which one of our autocmd resources
 "        automatically when we save our vimrc.
 "        Why? Because when we save our vimrc, the 2 Tab mappings will be reset by
-"        UltiSnips (only after the 1st save it seems…).
+"        UltiSnips (only after the 1st save it seems ...).
 "        Specifically because of this file:
 "
 "                ~/.vim/plugged/ultisnips/autoload/UltiSnips/map_keys.vim
@@ -144,24 +138,28 @@ xno  <silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 " an horizontal split.
 let g:UltiSnipsEditSplit = 'horizontal'
 
-" We want UltiSnips to look for the snippet file in the directory
+" We want UltiSnips to look for the snippet files in only 1 directory.{{{
 "
-"     ~/.vim/UltiSnips
+"     ~/.vim/plugged/vim-snippets/UltiSnips/
 "
-" … and only there; i.e. not in a public snippet directory provided by
-" a third-party plugin:
+" ... and  only there;  i.e. not  in a  public snippet  directory provided  by a
+" third-party plugin:
 "
 "     https://github.com/honza/vim-snippets
 
 " This has also the benefit of increasing the performance, because UltiSnips
 " won't search the rtp.
+"}}}
 let g:UltiSnipsSnippetDirectories = [$HOME.'/.vim/plugged/vim-snippets/UltiSnips']
 
-" Prevent UltiSnips from looking for SnipMate snippets (sub-directories of the rtp
-" ending with `snippets/`).
+" Prevent UltiSnips from looking for SnipMate snippets.{{{
+"
+" Those are in sub-directories of the rtp ending with `snippets/`.
+"
 " If we don't do this, UltiSnips will load SnipMate snippets that we install
 " from a third party plugin, even though we've set `g:UltiSnipsSnippetDirectories`
 " to a single absolute path.
+"}}}
 let g:UltiSnipsEnableSnipMate = 0
 
 " Remove select mode mappings using printable characters {{{
@@ -195,11 +193,12 @@ let g:UltiSnipsEnableSnipMate = 0
 "}}}
 let g:UltiSnipsRemoveSelectModeMappings = 1
 
-" But we don't want UltiSnips to remove our mapping for the Tab
-" key in select mode (Tab is NOT a printable character, but UltiSnips seems to
-" unmap it as if it was one):
+" But don't do it for Tab!{{{
+"
+" Tab is NOT a printable character, but UltiSnips seems to unmap it as if it was one.
+"}}}
 let g:UltiSnipsMappingsToIgnore = ['mycompletion#snippet_or_complete']
 " More info on this here:    :h UltiSnips-warning-smapping
 " Edit:
-" It doesn't seem necessary anymore, but I'll keep it anyway, just in case …
+" It doesn't seem necessary anymore, but I'll keep it anyway, just in case ...
 

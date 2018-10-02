@@ -1,3 +1,7 @@
+if exists('g:loaded_emmet') || stridx(&rtp, 'emmet-vim') == -1
+    finish
+endif
+
 " Options {{{1
 
 " We don't want global mappings. We prefer buffer-local ones.
@@ -29,10 +33,10 @@ let g:user_emmet_leader_key = '<c-g>'
 "
 "}}}
 let g:user_emmet_settings = {
-\       'html': {
-\           'block_all_childless' : 1,
-\       },
-\ }
+    \     'html': {
+    \         'block_all_childless' : 1,
+    \     },
+    \ }
 
 " For more options see:
 "     ~/.vim/plugged/emmet-vim/autoload/emmet.vim:999
@@ -40,24 +44,37 @@ let g:user_emmet_settings = {
 " The keys of the first level are names of filetypes.
 " The keys of the second level are names of abbreviations, snippets and options.
 
-" Mappings {{{1
+" Autocmds {{{1
 
 augroup my_emmet
     au!
-    au FileType css,html  call s:emmet_set_mappings()
-    " We  enable the  emmet  mappings in  the notes  we  take about  web-related
-    " technologies (html, css, emmet, ...).
+    au FileType css,html  call s:install_mappings()
+    " enable emmet mappings in our notes about web-related technologies (html, css, emmet, ...){{{
+    "
     " TODO:
     " However, maybe we could enable them to all markdown files...
     "
-    "     au FileType css,html,markdown  call s:emmet_set_mappings()
+    "     au FileType css,html,markdown  call s:install_mappings()
     "                          ^^^^^^^^
-    au BufReadPost,BufNewFile  */wiki/web/*.md  call s:emmet_set_mappings()
+    "}}}
+    au BufReadPost,BufNewFile  */wiki/web/*.md  call s:install_mappings()
 augroup END
 
-fu! s:emmet_set_mappings() abort
-    " The default mappings are global and not silent.
-    " We prefer to install them locally, and make them silent.
+" Functions {{{1
+fu! s:install_mappings() abort "{{{2
+    " The default mappings are not silent (and they probably don't use `<nowait>` either).
+    " We prefer to make them silent.
+
+    " Why this guard?{{{
+    "
+    " We need `:EmmetInstall` later at the end of the function.
+    " But if we disable `emmet.vim`, it won't exist.
+    " Besides, if  `emmet.vim` is disabled,  there's no point in  installing the
+    " next mappings (C-g, ...).
+    "}}}
+    if exists(':EmmetInstall') !=# 2
+        return
+    endif
 
     " Where did you find all the `{rhs}`?{{{
     "
@@ -107,16 +124,12 @@ fu! s:emmet_set_mappings() abort
     xmap  <buffer><nowait><silent>  <c-g>a      <plug>(emmet-anchorize-url)
     xmap  <buffer><nowait><silent>  <c-g>A      <plug>(emmet-anchorize-summary)
 
-    " These 2 mappings are specific to visual mode.
+    " these 2 mappings are specific to visual mode
     xmap  <buffer><nowait><silent>  <c-g><c-m>  <plug>(emmet-merge-lines)
     xmap  <buffer><nowait><silent>  <c-g>p      <plug>(emmet-code-pretty)
 
-    " Now, you also need to install the `<plug>` mappings.
-    if exists(':EmmetInstall') ==# 2
-    "  │
-    "  └ if we disable `emmet.vim`, the command won't exist
-        EmmetInstall
-    endif
+    " now, we also need to install the `<plug>` mappings
+    EmmetInstall
     " Would this work if I lazy-loaded emmet?{{{
     "
     " No.
@@ -162,6 +175,42 @@ fu! s:emmet_set_mappings() abort
     "     “Premature optimization is the root of all evil.“
     "}}}
 
-    " I haven't been able to update `b:undo_ftplugin` from here ...
+    call s:set_undo_ftplugin()
+endfu
+
+fu! s:set_undo_ftplugin() abort "{{{2
+    let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
+        \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+        \ . "
+        \       exe 'iunmap <buffer> <c-g>,'
+        \     | exe 'iunmap <buffer> <c-g>;'
+        \     | exe 'iunmap <buffer> <c-g><c-u>'
+        \     | exe 'iunmap <buffer> <c-g>s'
+        \     | exe 'iunmap <buffer> <c-g>S'
+        \     | exe 'iunmap <buffer> <c-g>n'
+        \     | exe 'iunmap <buffer> <c-g>N'
+        \     | exe 'iunmap <buffer> <c-g>i'
+        \     | exe 'iunmap <buffer> <c-g>/'
+        \     | exe 'iunmap <buffer> <c-g><c-j>'
+        \     | exe 'iunmap <buffer> <c-g><c-k>'
+        \     | exe 'iunmap <buffer> <c-g>a'
+        \     | exe 'iunmap <buffer> <c-g>A'
+        \
+        \     | exe 'xunmap <buffer> <c-g>,'
+        \     | exe 'xunmap <buffer> <c-g>;'
+        \     | exe 'xunmap <buffer> <c-g><c-u>'
+        \     | exe 'xunmap <buffer> <c-g>s'
+        \     | exe 'xunmap <buffer> <c-g>S'
+        \     | exe 'xunmap <buffer> <c-g>n'
+        \     | exe 'xunmap <buffer> <c-g>N'
+        \     | exe 'xunmap <buffer> <c-g>i'
+        \     | exe 'xunmap <buffer> <c-g>/'
+        \     | exe 'xunmap <buffer> <c-g><c-j>'
+        \     | exe 'xunmap <buffer> <c-g><c-k>'
+        \     | exe 'xunmap <buffer> <c-g>a'
+        \     | exe 'xunmap <buffer> <c-g>A'
+        \     | exe 'xunmap <buffer> <c-g><c-m>'
+        \     | exe 'xunmap <buffer> <c-g>p'
+        \   "
 endfu
 

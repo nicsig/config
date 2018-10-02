@@ -1,14 +1,22 @@
-" DO NOT rename this file to `matchparen.vim`!
-" It would cause a conflict with the plugin in $VIMRUNTIME.
-if exists(':DoMatchParen') != 2
-    finish
-endif
-
+" DO NOT rename this file to `matchparen.vim`!{{{
+"
+" If you do, when you'll press `cop`, you'll execute:
+"     runtime! plugin/matchparen.vim
+"
+" This will source the current script (✔), then `$VIMRUNTIME/plugin/matchparen.vim` (✘).
+" The default script would undo our toggling.
+"}}}
+" Purpose:{{{
+"
 " The current script will be sourced when Vim starts.
 " It will disable the `matchparen` plugin.
 " But we also source it in a mapping to toggle the plugin.
 "
 "         ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:441
+"}}}
+if exists(':DoMatchParen') != 2
+    finish
+endif
 
 if exists('g:loaded_matchparen')
     " command defined in `$VIMRUNTIME/plugin/matchparen.vim`
@@ -32,3 +40,4 @@ else
     au! default_cursor_moved
     aug! default_cursor_moved
 endif
+

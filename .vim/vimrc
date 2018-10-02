@@ -197,7 +197,7 @@ Plug 'lacygoill/vim-window'
 Plug 'mattn/emmet-vim'
 Plug 'machakann/vim-sandwich'
 Plug 'keith/tmux.vim'
-Plug 'mbbill/undotree', { 'on': 'UndotreeShow' }
+Plug 'mbbill/undotree'
 Plug 'chrisbra/unicode.vim'
 Plug 'lervag/vimtex'
 
@@ -214,9 +214,10 @@ augroup delay_slow_call
     au!
     " Do NOT use a simple timer:{{{
     "
-    "     au VimEnter * call timer_start(1000, {->  execute('runtime  autoload/toggle_settings.vim
-    "     \ |                                                runtime! autoload/slow_call/*.vim', '')
-    "     \                                    })
+    "     au VimEnter * call timer_start(1000, {->
+    "         \       execute('runtime  autoload/toggle_settings.vim
+    "         \ |              runtime! autoload/slow_call/*.vim', '')
+    "         \ })
     "
     " It could cause issues, for example, if you enter insert mode quickly (i.e.
     " before  the  callback),  and  some  custom  code  of  yours  rely  on  the
@@ -3825,13 +3826,13 @@ xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar(),1)<cr>
 "         • Adjust the selected area to be intuitive before doing blockwise insertion.
 
 let s:niceblock_keys = {
-\   '$'    : {'v': 'g$h',      'V': '$',          "\<c-v>": '$'},
-\   'I'    : {'v': "\<c-v>I",  'V': "\<c-v>^o^I", "\<c-v>": 'I'},
-\   'A'    : {'v': "\<c-v>A",  'V': "\<c-v>0o$A", "\<c-v>": 'A'},
-\   'gI'   : {'v': "\<c-v>0I", 'V': "\<c-v>0o$I", "\<c-v>": '0I'},
-\   '>'    : {'v': "\<c-v>>",  'V': "0\<c-v>>",   "\<c-v>": '>'},
-\   '<'    : {'v': "\<c-v><",  'V': "0\<c-v><",   "\<c-v>": '<'},
-\ }
+    \   '$'    : {'v': 'g$h',      'V': '$',          "\<c-v>": '$'},
+    \   'I'    : {'v': "\<c-v>I",  'V': "\<c-v>^o^I", "\<c-v>": 'I'},
+    \   'A'    : {'v': "\<c-v>A",  'V': "\<c-v>0o$A", "\<c-v>": 'A'},
+    \   'gI'   : {'v': "\<c-v>0I", 'V': "\<c-v>0o$I", "\<c-v>": '0I'},
+    \   '>'    : {'v': "\<c-v>>",  'V': "0\<c-v>>",   "\<c-v>": '>'},
+    \   '<'    : {'v': "\<c-v><",  'V': "0\<c-v><",   "\<c-v>": '<'},
+    \ }
 
 fu! s:niceblock(key) abort
     return s:niceblock_keys[a:key][mode()]
@@ -3851,7 +3852,7 @@ xno  <expr>  A   <sid>niceblock('A')
 "         niceblock_keys['>']['V'] = "0\<c-v>>"
 "         niceblock_keys['<']['V'] = "0\<c-v><"
 "
-" … and not simply:
+" ... and not simply:
 "
 "         niceblock_keys['>']['V'] = ">"
 "         niceblock_keys['<']['V'] = "<"
@@ -4742,15 +4743,15 @@ augroup filter_special_file
     " But  for some  reason,  Vim doesn't  fire `BufReadPost`  when  it reads  a
     " `.docx` or `.epub` file.
     "
-    "     au BufReadPost *.docx sil exe '%!pandoc -f docx -t markdown '.expand('%:p:S')
+    "     au BufReadPost  *.docx  sil %!pandoc -f docx -t markdown %:p:S
     "        ^
     "        ✘
     "
     " We could use `FileType tar`:
     "
-    "     au FileType tar sil exe '%!pandoc -f docx -t markdown '.expand('%:p:S')
+    "     au FileType  tar  sil %!pandoc -f docx -t markdown %:p:S
     "
-    " …  but  $VIMRUNTIME/plugin/tarPlugin.vim   would leave some undesired
+    " ... but $VIMRUNTIME/plugin/tarPlugin.vim would leave some undesired
     " messages inside the buffer; it's noise.
     " Maybe it's because the event is fired too early, and the built-in tar plugin
     " processes the buffer after the event.
@@ -6789,76 +6790,29 @@ endfu
 " https://unix.stackexchange.com/a/316166/289772
 "
 " 132 -
-" Fe,
-"   ^
-"   should jump to the previous 'e', but jumps to the next one
 "
-" MWE1: (repetition goes in wrong direction)
+" Write this in `/tmp/dot.dot`:
 "
-"     set rtp^=~/.vim/plugged/vim-lg-lib
-"     set rtp^=~/.vim/plugged/vim-sneak
-"     so ~/.vim/autoload/slow_call/repeatable_motions.vim
-"     so ~/.vim/after/plugin/sneak.vim
+"     digraph graphname {
+"         a -> b -> c;
+"         b -> d;
+"     }
 "
+" Execute this:
+"     !dot -Txlib %:p:S &
 "
-" MWE2: (repetition goes in right direction)
+" It works, the graph is shown.
 "
-"     let g:sneak#absolute_dir = 1
-"     set rtp^=~/.vim/plugged/vim-sneak
-"     set rtp^=~/.vim/plugged/vim-lg-lib
-
-"     noremap  <expr><unique>  f   <sid>fts('f')
-"     noremap  <expr><unique>  F   <sid>fts('F')
-
-"     fu! s:fts(cmd) abort
-"         if lg#motion#repeatable#make#is_repeating(',_;')
-"             let move_fwd = a:cmd =~# '\C[fts]'
-"             call feedkeys(move_fwd ? "\<plug>Sneak_;" : "\<plug>Sneak_,", 'i')
-"         else
-"             call feedkeys("\<plug>Sneak_".a:cmd, 'i')
-"         endif
-"         return ''
-"     endfu
-
-"     call lg#motion#repeatable#make#all({
-"     \        'mode':   '',
-"     \        'buffer': 0,
-"     \        'axis':   {'bwd': ',', 'fwd': ';'},
-"     \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
-"     \        'motions': [
-"     \                     {'bwd': 'F' ,  'fwd': 'f' },
-"     \                   ],
-"     \ })
+" Now try this:
+"     call system('!dot -Txlib '.expand('%:p:S').' &')
 "
-" MWE3: (right direction)
-"
-"     let g:sneak#absolute_dir = 1
-"     set rtp^=~/.vim/plugged/vim-lg-lib
-"     set rtp^=~/.vim/plugged/vim-sneak
-"     so ~/.vim/autoload/slow_call/repeatable_motions.vim
-"
-" MWE4: (right direction)
-"
-"     " remove the guard in `~/.vim/after/plugin/sneak.vim`
-"     so ~/.vim/after/plugin/sneak.vim
-"     set rtp^=~/.vim/plugged/vim-lg-lib
-"     set rtp^=~/.vim/plugged/vim-sneak
-"     so ~/.vim/autoload/slow_call/repeatable_motions.vim
+" The graph is not shown.
+" Why?
+" Has it been compiled?
+" Does it mean that for an interactive use (... &) we HAVE TO use `:!`?
 "
 " 133 -
-" Remove this everywhere:
-"     if [!]has_key(get(g:, 'plugs', {}), '...')
-"
-" We can't source  such a script without vim-plug, which  is annoying when we're
-" debugging Vim.
-"
-" Find an alternative.
-"
-" Update: Try this one:
-"
-"     if filter(split(&rtp, ','), {i,v -> v =~# 'vim-lg-lib'}) == []
-"         finish
-"     endif
+" Move as much code from `after/plugin/` to `plugin/`.
 
 
 
