@@ -1,3 +1,8 @@
+" What's this file for?{{{
+"
+" Use it to disable some keys.
+" Use it to remove some undesirable mappings installed by other plugins.
+"}}}
 " Why should I disable keys in `~/.vim/after/plugin`, instead of `vimrc`?{{{
 "
 " Plugin authors often use `mapcheck()` to decide whether they can remap a key.
@@ -123,4 +128,67 @@ nno  go<esc>  <nop>
 " I think we often press `Uu` by accident.
 " When that happens, Vim undo our edits, which I don't want.
 nno  Uu  <nop>
+
+" {{{1
+" Remove mappings {{{1
+" \ {{{2
+" Why?{{{
+"
+" By default, vim-sneak binds `\` to the same function which is bound to `,`:
+"
+"     repeat the previous `fx` or `sxy` motion
+"
+" It does this for normal, visual and operator-pending mode.
+"
+" I find  this annoying,  because when  I hit  the key  by accident,  the cursor
+" jumps. Besides, we already have `,`.
+"}}}
+" Could I remove these lines in the future?{{{
+"
+" In theory yes.
+" If you map something  to `\`, or use it as a prefix  to build several `{lhs}`,
+" `vim-sneak` won't install the mappings mentioned earlier.
+"
+" But I recommend you leave `unmap \` here nonetheless.
+" Atm, we essentially use `\` as a prefix in filetype plugins (which `vim-sneak`
+" ignores).
+" We only have a few global mappings using `\`.
+" And you may remove them one day.
+"}}}
+if maparg('\') =~? '\csneak'
+    unmap \
+endif
+
+" x_Z  o_z  o_Z {{{2
+
+" Why?{{{
+"
+" The  default mappings  installed by  `vim-sneak`  are too  inconsistent to  be
+" memorized.
+" They also conflict with `vim-sandwich`.
+"}}}
+" How to find the mappings installed by `vim-sneak` in normal mode?{{{
+"
+"     put =filter(split(execute('nno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^n\s\+\%([ft,;]\\|<plug>\)'})
+"
+" We invoke `filter()` to ignore:
+"
+"         • the `<plug>` mappings (they can't be typed directly,
+"           so they can't interfer in our work)
+"
+"         • [fFtT,;]
+"           we ignore those because, contrary to  [sSzZ]  , they ARE consistent
+"}}}
+" How to find the mappings installed by `vim-sneak` in visual mode?{{{
+"
+"     put =filter(split(execute('xno'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^x\s\+\%([ft,;]\\|<plug>\)'})
+"}}}
+sil! xunmap Z
+
+" How to find the mappings installed by `vim-sneak` in operator-pending mode?{{{
+"
+"     put =filter(split(execute('ono'), '\n'), { i,v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)'})
+"}}}
+sil! ounmap z
+sil! ounmap Z
 
