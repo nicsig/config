@@ -1,11 +1,31 @@
-" Alternative:{{{
+" Is there an alternative?{{{
 "
-"     sil verb runtime autoload/lg/motion/main.vim
+" Yes:
+"     if !has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
+"         finish
+"     endif
+"
+"     sil verb runtime autoload/lg/motion/repeatable/make.vim
 "     if v:errmsg is# 'not found in ''runtimepath'': "autoload/lg/motion/main.vim"'
 "         finish
 "     endif
 "}}}
-if !has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
+" Why don't you use one of them?{{{
+"
+" The first alternative relies on `vim-plug` being used.
+" We may not use this plugin in the future.
+"
+" Also, when  we're debugging, we frequently  end up with a  minimal vimrc where
+" `Plug` statements are replaced by `set rtp^=...` statements.
+" In which case, `g:plugs` won't exist, but we may still want to load `vim-lg-lib`.
+"
+" The second alternative doesn't seem to work.
+" I don't know why. It should.
+" It seems `v:errmsg` is empty even when  there's an error, or it gets populated
+" by another error...
+" }}}
+
+if filter(split(&rtp, ','), {i,v -> v =~# 'vim-lg-lib'}) == []
     finish
 endif
 

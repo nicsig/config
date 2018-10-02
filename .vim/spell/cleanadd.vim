@@ -27,6 +27,10 @@ for s:fname in split(globpath(&rtp, "spell/*.add"), "\n")
     unlet s:f
   endif
 endfor
-unlet s:fname
+unlet! s:fname
+"    ^
+" The original script didn't add a bang.
+" We need one, because the loop could iterate over an empty list.
+" In which case `s:fname` is never assigned any value.
 
 echo "Done"

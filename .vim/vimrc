@@ -6787,6 +6787,78 @@ endfu
 " When  is  it   better  to  use  `$XDG_RUNTIME_DIR`  instead   of  `/tmp`  (via
 " `tempname()`)?
 " https://unix.stackexchange.com/a/316166/289772
+"
+" 132 -
+" Fe,
+"   ^
+"   should jump to the previous 'e', but jumps to the next one
+"
+" MWE1: (repetition goes in wrong direction)
+"
+"     set rtp^=~/.vim/plugged/vim-lg-lib
+"     set rtp^=~/.vim/plugged/vim-sneak
+"     so ~/.vim/autoload/slow_call/repeatable_motions.vim
+"     so ~/.vim/after/plugin/sneak.vim
+"
+"
+" MWE2: (repetition goes in right direction)
+"
+"     let g:sneak#absolute_dir = 1
+"     set rtp^=~/.vim/plugged/vim-sneak
+"     set rtp^=~/.vim/plugged/vim-lg-lib
+
+"     noremap  <expr><unique>  f   <sid>fts('f')
+"     noremap  <expr><unique>  F   <sid>fts('F')
+
+"     fu! s:fts(cmd) abort
+"         if lg#motion#repeatable#make#is_repeating(',_;')
+"             let move_fwd = a:cmd =~# '\C[fts]'
+"             call feedkeys(move_fwd ? "\<plug>Sneak_;" : "\<plug>Sneak_,", 'i')
+"         else
+"             call feedkeys("\<plug>Sneak_".a:cmd, 'i')
+"         endif
+"         return ''
+"     endfu
+
+"     call lg#motion#repeatable#make#all({
+"     \        'mode':   '',
+"     \        'buffer': 0,
+"     \        'axis':   {'bwd': ',', 'fwd': ';'},
+"     \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+"     \        'motions': [
+"     \                     {'bwd': 'F' ,  'fwd': 'f' },
+"     \                   ],
+"     \ })
+"
+" MWE3: (right direction)
+"
+"     let g:sneak#absolute_dir = 1
+"     set rtp^=~/.vim/plugged/vim-lg-lib
+"     set rtp^=~/.vim/plugged/vim-sneak
+"     so ~/.vim/autoload/slow_call/repeatable_motions.vim
+"
+" MWE4: (right direction)
+"
+"     " remove the guard in `~/.vim/after/plugin/sneak.vim`
+"     so ~/.vim/after/plugin/sneak.vim
+"     set rtp^=~/.vim/plugged/vim-lg-lib
+"     set rtp^=~/.vim/plugged/vim-sneak
+"     so ~/.vim/autoload/slow_call/repeatable_motions.vim
+"
+" 133 -
+" Remove this everywhere:
+"     if [!]has_key(get(g:, 'plugs', {}), '...')
+"
+" We can't source  such a script without vim-plug, which  is annoying when we're
+" debugging Vim.
+"
+" Find an alternative.
+"
+" Update: Try this one:
+"
+"     if filter(split(&rtp, ','), {i,v -> v =~# 'vim-lg-lib'}) == []
+"         finish
+"     endif
 
 
 
