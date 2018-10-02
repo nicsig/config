@@ -763,6 +763,16 @@ set foldopen-=block
 " Useful in our faq notes.
 set foldminlines=0
 
+" ft_ignore_pat {{{2
+
+let g:ft_ignore_pat = '\.\(Z\|gz\|bz2\|zip\|tgz\|log\)$'
+"                                                ^^^
+" We don't want `$VIMRUNTIME/filetype.vim` to set the filetype
+" of a `.log` file to `conf` simply because one of its first
+" lines begin with a `#`.
+"
+" Indeed we often fold some log files using lines beginning with `#`.
+
 " :grep {{{2
 
 " --vimgrep =
@@ -4248,7 +4258,7 @@ fu! s:plugins_update() abort
     "     [A-Z]
     "     [0-9]
     "     .
-    "     -
+    "     - (but not at the very beginning)
     "     _
     "
     " https://stackoverflow.com/a/458001/8243465
@@ -4649,6 +4659,15 @@ fu! s:wipe_noname() abort
         sil! exe 'bw! '.join(to_wipe, ' ')
     endif
 endfu
+
+" Fold My Logs {{{2
+
+augroup fold_my_logs
+    au!
+    " to get folding
+    au! BufRead,BufNewFile  *.log  let b:title_like_in_markdown = 1
+        \ | runtime! ftplugin/markdown.vim
+augroup END
 
 " Jump Last Position {{{2
 

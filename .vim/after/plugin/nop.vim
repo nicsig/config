@@ -28,8 +28,9 @@
 " Update:
 " This issue has been fixed:
 "     https://github.com/vim/vim/commit/f88a5bc10232cc3fac92dba4e8455f4c14311f8e
+"     https://github.com/neovim/neovim/commit/207cfce3dea64eca3b93735adfac0a75cc6c1a4a
 "
-" Still, the patch may not be merged in Neovim for a long time.
+" Still, disabling a key after the plugins have been sourced seems more reliable.
 "}}}
 
 " Various keys used as a prefix {{{1
@@ -71,7 +72,7 @@ fu! s:cancel_prefix(prefixes) abort
         "}}}
     endfor
 endfu
-call s:cancel_prefix(['+', '-', '<bar>', 'U', 's', 'S'])
+call s:cancel_prefix(['+', '-', '<space>','<bar>', 'U', 's', 'S'])
 
 " You've disabled `s` and `S`. What about `sS` and `Ss`?{{{
 "

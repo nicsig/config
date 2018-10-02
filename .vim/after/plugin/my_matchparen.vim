@@ -8,7 +8,7 @@ endif
 " It will disable the `matchparen` plugin.
 " But we also source it in a mapping to toggle the plugin.
 "
-"         ~/.vim/plugged/vim-toggle-settings/plugin/toggle_settings.vim
+"         ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:441
 
 if exists('g:loaded_matchparen')
     " command defined in `$VIMRUNTIME/plugin/matchparen.vim`

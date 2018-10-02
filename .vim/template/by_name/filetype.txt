@@ -3,5 +3,6 @@ if exists('did_load_filetypes')
 endif
 
 augroup filetypedetect
-    au! BufRead,BufNewFile  *.???  set filetype=???
+    au! BufRead,BufNewFile  *.???  setf ???
 augroup END
+

@@ -1,6 +1,6 @@
 " Why using this file instead of `ftdetect/`?{{{
 "
-" Because it's sourced BEFORE $VIMRUNTIME/filetype.vim .
+" Because it's sourced BEFORE `$VIMRUNTIME/filetype.vim`.
 " Our autocmds  will match first,  and because  the other autocmds  use `:setf`,
 " they won't re-set 'filetype'.
 "
@@ -27,6 +27,15 @@
 " No need to move the file in an `after/` subdirectory, Vim will look for
 " files in `~/.vim/ftdetect` AFTER `$VIMRUNTIME/filetype.vim`.
 "}}}
+" Why do you use `:set` in this file, instead of `:setf` like in other filetype detection scripts?{{{
+"
+" Both would be fine here.
+"
+" However, `:set` better expresses our intent.
+" We use this file to be the first to set some filetypes.
+" We don't want any other script to change them later.
+" We want this script to have the priority over all the other ones.
+"}}}
 
 if exists('did_load_filetypes')
     finish
@@ -37,20 +46,23 @@ augroup filetypedetect
     "
     " `$VIMRUNTIME/filetype.vim` thinks that the filetype of `~/.shrc` is `conf`:
     "
-    "         " Generic configuration file (check this last, it's just guessing!)
+    "         " Generic configuration file. Use FALLBACK, it's just guessing!
     "         au filetypedetect BufNewFile,BufRead,StdinReadPost *
-    "             \ if !did_filetype() && expand("<amatch>") !~ g:ft_ignore_pat
-    "             \    && (getline(1) =~ '^#' || getline(2) =~ '^#' || getline(3) =~ '^#'
-    "             \ || getline(4) =~ '^#' || getline(5) =~ '^#') |
-    "             \   setf conf |
-    "             \ endif
+    "           \ if !did_filetype() && expand("<amatch>") !~ g:ft_ignore_pat
+    "           \    && (getline(1) =~ '^#' || getline(2) =~ '^#' || getline(3) =~ '^#'
+    "           \	|| getline(4) =~ '^#' || getline(5) =~ '^#') |
+    "           \   setf FALLBACK conf |
+    "           \ endif
     "
     " We want `sh` instead.
     "}}}
-    au! BufRead,BufNewFile ~/.shrc setf sh
+    au! BufRead,BufNewFile ~/.shrc set sh
 
-    " to get folding
-    au! BufRead,BufNewFile *.log setf markdown
+    " When the optional FALLBACK argument is present, a
+    " later :setfiletype command will override the
+    " 'filetype'.  This is to used for filetype detections
+    " that are just a guess.  |did_filetype()| will return
+    " false after this command.
 
     " Why?{{{
     "
@@ -76,7 +88,7 @@ augroup filetypedetect
     "
     "         au BufNewFile,BufRead zsh*,zlog*      call s:StarSetf('zsh')
     "}}}
-    au! BufRead,BufNewFile zsh.snippets setf snippets
+    au! BufRead,BufNewFile zsh.snippets set snippets
 
-    au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} setf help
+    au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} set help
 augroup END
