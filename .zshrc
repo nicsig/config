@@ -812,13 +812,18 @@ alias vb='VBoxManage'
 
 # vim {{{3
 
-# Replace `ftplugin` with `indent` or `syntax` to add breakpoints in other kinds
-# of plugins.
-alias vim_break_ftplugin=$'vim -c \'breakadd file */ftplugin/*.vim\''
-#                        │
-#                        └ by prefixing the string with a dollar sign,
-#                          we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
-#                          otherwise, we would need to write `'\''`, which is less readable
+# Rationale:{{{
+#
+# This alias is not meant to be executed as it is.
+# It's meant to be expanded on the command-line (press `M-e`), then edited.
+# It's useful to remind us of all the options available when we're debugging Vim,
+# and we need to reproduce an issue with a minimal of configurations.
+#}}}
+alias vim_with_less_config=$'vim -Nu /tmp/vimrc --cmd \'filetype plugin indent on | syntax enable\' -U NONE -i NONE --noplugin'
+#                          │
+#                          └ by prefixing the string with a dollar sign,
+#                            we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
+#                            otherwise, we would need to write `'\''`, which is less readable
 
 # xbindkeys {{{3
 
@@ -2403,7 +2408,6 @@ abbrev=(
   "Jn"    "2>/dev/null"
   "Jp"    "printf -- '"
   "Jt"    "| tail -20"
-  "Jv"    "vim -Nu /tmp/vimrc -U NONE -i NONE --noplugin"
 )
 
 __abbrev_expand() {

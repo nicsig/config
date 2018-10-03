@@ -1446,14 +1446,8 @@ https://www.reddit.com/r/vim/comments/6tb492/vi_is_not_vim/dlkgv6f/
 https://www.reddit.com/r/vim/comments/6ucyus/editing_prose_with_vim_help_with_using_vim_to/dlrrsfc/
 https://medium.com/brigade-engineering/sharpen-your-vim-with-snippets-767b693886db
 https://medium.com/@crashybang/supercharge-vim-with-fzf-and-ripgrep-d4661fc853d2#.hfnqelusz
-https://dougblack.io/words/a-good-vimrc.html
 https://nondev.io/Fuzzy-completion-in-Vim
 https://blog.bugsnag.com/tmux-and-vim/
-
-https://gist.github.com/romainl/ce55ce6fdc1659c5fbc0f4224fd6ad29
-linting the vanilla way
-https://gist.github.com/BoltsJ/5942ecac7f0b0e9811749ef6e19d2176
-place sign after linting
 
 Relire le plugin sensible
 
@@ -1462,15 +1456,12 @@ Lire :h include-search
 ======================
 Vim Stack Exchange
 
-https://vi.stackexchange.com/a/8571/13370
 https://vi.stackexchange.com/questions/2115/can-i-be-notified-when-im-undoing-changes-from-the-undofile
-https://vi.stackexchange.com/questions/4584/how-to-create-my-own-autocomplete-function/9192#9192
 https://vi.stackexchange.com/questions/9156/what-is-a-more-efficient-way-to-use-buffers
 https://vi.stackexchange.com/questions/8122/how-to-open-a-file-from-active-buffer-into-a-split-window
 https://vi.stackexchange.com/questions/8670/how-can-i-enable-folding-only-for-files-longer-than-a-certain-length/8672#8672
 https://vi.stackexchange.com/questions/8674/how-to-save-and-restore-the-result-of-the-command-set
 https://vi.stackexchange.com/questions/8709/keep-windows-reference-in-memory
-https://stackoverflow.com/questions/5215163/how-to-get-a-unique-identifier-for-a-window/
 https://vi.stackexchange.com/questions/8926/is-it-possible-to-obtain-the-displayable-area-width-and-height-of-current-buffe
 https://stackoverflow.com/questions/26315925/get-usable-window-width-in-vim-script/26318602#26318602
 https://vi.stackexchange.com/questions/9700/mutliple-choice-substitute
@@ -1518,7 +1509,6 @@ https://vi.stackexchange.com/questions/10077/get-index-of-search-in-substitute-e
 https://vi.stackexchange.com/questions/10083/how-can-i-sort-a-file-by-word-frequency/10092#10092
 https://vi.stackexchange.com/questions/10167/is-there-a-way-that-i-can-identify-which-window-is-a-terminal-after-calling-the/10173#10173
 https://vi.stackexchange.com/questions/9416/how-do-you-find-where-a-variable-was-last-assigned
-https://vi.stackexchange.com/questions/3177/use-single-ftplugin-for-more-than-one-filetype
 
 syntax highlighting
 
@@ -1535,26 +1525,6 @@ https://vi.stackexchange.com/questions/10132/vim-syntax-file-how-to-match-captur
 https://vi.stackexchange.com/questions/10193/how-do-i-make-regexes-mutually-contain-each-other
 http://stackoverflow.com/questions/2683521/vim-search-in-c-c-code-lines/2696143#2696143
 https://vi.stackexchange.com/questions/11371/where-does-red-highlighting-come-from-with-syntax-off-and-spell-on-in-neovim
-
-
-How to find where a variable was defined? (':5verbose let' doesn't give the information)
-
-Possible solutions:
-
-    1 - :cexpr system('grep -Rn g:myvar ~/.vim')
-
-    2 - cd ~/.vim && ctags -R .
-
-        :tselect g:myvar    ou    :tjump g:myvar
-
-    doesn't always work (e.g. b:changedtick)
-    LOL it depends on where you are (the value of 'tags' matters), add this to make it always work:    set tags+=$VIMRUNTIME/doc/tags
-
-
-
-How to jump to a definition of a function or variable defined in myfunctions.vim?
-ctags -R . produces a tag file containing all the info, but then which key must be hit? (gd, gD, []dD don't work)
-Type `C-]`, you idiot!!!
 
 
 

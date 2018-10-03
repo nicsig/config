@@ -56,7 +56,7 @@ augroup filetypedetect
     "
     " We want `sh` instead.
     "}}}
-    au! BufRead,BufNewFile ~/.shrc set sh
+    au! BufRead,BufNewFile ~/.shrc set ft=sh
 
     " When the optional FALLBACK argument is present, a
     " later :setfiletype command will override the
@@ -88,7 +88,8 @@ augroup filetypedetect
     "
     "         au BufNewFile,BufRead zsh*,zlog*      call s:StarSetf('zsh')
     "}}}
-    au! BufRead,BufNewFile zsh.snippets set snippets
+    au! BufRead,BufNewFile zsh.snippets set ft=snippets
 
-    au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} set help
+    au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} set ft=help
 augroup END
+

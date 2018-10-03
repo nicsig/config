@@ -1,3 +1,9 @@
+" Purpose:{{{
+"
+" Use this  file to remove a  command which you  never use and pollute  your tab
+" completion suggestions.
+"}}}
+
 " TODO:{{{
 " Find a way to remove the built-in command `:Print`.
 " From `:h :Print`:

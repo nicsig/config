@@ -1,4 +1,4 @@
-if stridx(&rtp, 'vim-sandwich') == -1
+if !exists('g:loaded_sandwich')
     finish
 endif
 

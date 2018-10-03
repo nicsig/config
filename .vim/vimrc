@@ -4661,6 +4661,36 @@ fu! s:wipe_noname() abort
     endif
 endfu
 
+" Filetype Linter {{{2
+
+" TODO:
+" Instead of using a match, automatically populate the qfl, and place signs.
+"     https://gist.github.com/BoltsJ/5942ecac7f0b0e9811749ef6e19d2176
+
+" Purpose: get a warning when we make a typo in a filetype detection script {{{
+"
+" We often write something like this:
+"
+"     set sh
+"
+" Instead of:
+"
+"     set ft=sh
+"}}}
+augroup filetype_linter
+    au!
+    au BufWinEnter filetype.vim,*/ftdetect/*.vim call s:filetype_linter()
+augroup END
+
+fu! s:filetype_linter() abort
+    if exists('w:my_filetype_linter')
+        sil! call matchdelete(w:my_filetype_linter)
+        unlet! w:my_filetype_linter
+    endif
+    let pat = '\m\C\%(^\%(\s*"\)\@!.*\)\@<=\mset\s\+\%(ft\|filetype\)\@!'
+    let w:my_filetype_linter = matchadd('Error', pat)
+endfu
+
 " Fold My Logs {{{2
 
 augroup fold_my_logs
@@ -4979,7 +5009,7 @@ fu! s:trailing_whitespace(create_match) abort
         call matchdelete(w:my_trailing_whitespace)
         unlet w:my_trailing_whitespace
 
-    elseif  a:create_match
+    elseif a:create_match
        \ && !exists('w:my_trailing_whitespace')
        \ && index(s:NO_TRAILING_WHITESPACE_FT, &ft) ==# -1
         "                                                            ┌ non breaking space (C-k NS)
@@ -6812,7 +6842,8 @@ endfu
 " Does it mean that for an interactive use (... &) we HAVE TO use `:!`?
 "
 " 133 -
-" Move as much code from `after/plugin/` to `plugin/`.
+" Be  consistent  in  how  you  chose  the  priority  of  matches  created  with
+" `matchadd()`.
 
 
 

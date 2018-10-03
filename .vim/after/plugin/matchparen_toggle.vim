@@ -1,11 +1,3 @@
-" DO NOT rename this file to `matchparen.vim`!{{{
-"
-" If you do, when you'll press `cop`, you'll execute:
-"     runtime! plugin/matchparen.vim
-"
-" This will source the current script (✔), then `$VIMRUNTIME/plugin/matchparen.vim` (✘).
-" The default script would undo our toggling.
-"}}}
 " Purpose:{{{
 "
 " The current script will be sourced when Vim starts.
@@ -14,6 +6,15 @@
 "
 "         ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:441
 "}}}
+" Warning: DO NOT rename this file to `matchparen.vim`!{{{
+"
+" If you do, when you'll press `cop`, you'll execute:
+"     runtime! plugin/matchparen.vim
+"
+" This will source the current script (✔), then `$VIMRUNTIME/plugin/matchparen.vim` (✘).
+" The default script would undo our toggling.
+"}}}
+
 if exists(':DoMatchParen') != 2
     finish
 endif

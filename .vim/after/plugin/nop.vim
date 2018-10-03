@@ -1,6 +1,6 @@
-" What's this file for?{{{
+" Purpose:{{{
 "
-" Use it to disable some keys.
+" Use this file to disable some keys.
 " Use it to remove some undesirable mappings installed by other plugins.
 "}}}
 " Why should I disable keys in `~/.vim/after/plugin`, instead of `vimrc`?{{{

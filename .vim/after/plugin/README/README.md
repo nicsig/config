@@ -1,17 +1,11 @@
 # Warning: ANY file in this directory will be automatically sourced. Even if it's inside a subdirectory.
 
-    $ cat ~/.vim/plugin/foo/bar/baz.vim
-        let g:loaded = 1
+        $ mkdir -p ~/.vim/after/plugin/foo/bar/ \
+          && echo 'let g:set_from_vim_after_plugin = 1' >>~/.vim/after/plugin/foo/bar/baz.vim
 
-    $ vim
-    :echo loaded
-        → 1
-
-# Which directories can I use to configure my plugins?
-
-        ~/.vim/plugin/
-        ~/.vim/after/plugin/
-        ~/.vim/autoload/slow_call/
+        $ vim
+        :echo set_from_vim_after_plugin
+            → 1
 
 ##
 # Purpose
@@ -21,7 +15,8 @@ You can use it to:
 
         • customize third-party plugins after they have been sourced
 
-              You could also use `~/.vim/plugin/`.
+              You could also use `~/.vim/plugin/`, to customize them before
+              they're sourced.
 
         • directly execute some interface of the plugin
 
@@ -30,82 +25,43 @@ You can use it to:
 
               Btw, that's what the documentation of `Abolish.vim` recommends.
 
-## What's the purpose of `tidy_tab_completion.vim`?
-
-Use it to remove  a command which you never use and  pollute your tab completion
-suggestions.
-
-## What's the purpose of `nop.vim`?
-
-Use this file to disable a keysequence (`nno <key> <nop>`).
-
 ##
-# Debugging
-## Why can the files in this directory interfere when I debug my setup?
-
-When you want to debug Vim by starting it like this:
-
-        $ vim -Nu /tmp/minimal_vimrc
-
-You still source all these files, which may interfere.
-You may be able to reproduce a bug, that no one else will.
-
-## How to prevent it from happening?
-
-Disable `'loadplugins'` (see `:h load-plugins`):
-
-        $ vim --noplugin -Nu /tmp/minimal_vimrc
-                │
-                └─ same as:    --cmd 'set noloadplugins'
-
-
-As a  convenience, we've  defined an  abbreviation in  `~/.zshrc` to  easily and
-reliably start a Vim session with no custom config:
-
-        Jv
-
-    →
-
-        vim -Nu /tmp/vimrc -U NONE -i NONE --noplugin
-                │
-                └─ can be tweaked,
-                   because `Jv` is an abbreviation which will be expanded,
-                   not an alias
-
----
-
-But an issue remains.
-Your custom plugins in `~/.vim/after/plugin` and the ones in $VIMRUNTIME can not
-be sourced separately:
-
-         • you either source both
-         • or none (`--noplugin` or `-u NONE`)
-
-If you don't like this, you can temporarily rename this directory into
-`my_plugins` (outside the rtp).
-
-## Should I put a guard in those files?
+# Guard
+## Should I put a guard in those files?  Why?
 
 If you can, yes.
 
-If we  temporarily disable a  plugin in our  vimrc, its configuration  should be
-disabled too, to not interfere.
+A script  shouldn't be  sourced if  the plugin it  configures has  been disabled
+while we debug some issue (`$ vim -Nu /tmp/vimrc`).
+Otherwise, you may be able to reproduce a bug, that no one else will.
 
-Note that these  guards don't replace the previous solutions  (including the one
-relying on `--noplugin`):
+Note that for some files, you can't write a guard:
 
-        - for some files, you can't write a guard.
+        • nop.vim
+        • matchparen_toggle.vim
+        • tidy_tab_completion.vim
 
-          For example:
+## Which template should I follow?
 
-              • nop.vim
-              • tidy_tab_completion
-              • undotree.vim
-              • vimtex.vim
+           ┌ load the script only if it makes sense
+           │ (i.e. the plugin it configures has been loaded)
+           │
+           ├───────────────────┐
+        if !exists(g:loaded_...)
+            finish
+        endif
 
-        - you still have files in `~/.vim/plugin`, and you can't put a guard in
-          those (because, when  they're sourced, you don't know  yet whether the
-          plugin you're setting up will be sourced).
+Or:
+
+        if stridx(&rtp, 'vim-...') == -1
+            finish
+        endif
+
+Note that the  name of the plugin  does not necessarily begin  with 'vim-', it's
+just a widely adopted convention.
+Adapt the first template to the plugin you're working on.
+
+Use the second one if the author of the plugin forgot to set a guard.
 
 ##
 # Misc
