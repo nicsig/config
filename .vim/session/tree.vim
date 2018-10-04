@@ -146,7 +146,7 @@ exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#stacked()
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

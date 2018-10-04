@@ -20,7 +20,7 @@ set winminwidth=0
 set winwidth=1
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#stacked()
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

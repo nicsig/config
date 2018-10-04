@@ -116,7 +116,7 @@ wincmd w
 argglobal
 if bufexists('~/Desktop/final_analysis.hydra') | buffer ~/Desktop/final_analysis.hydra | else | edit ~/Desktop/final_analysis.hydra | endif
 setlocal fdm=expr
-setlocal fde=fold#md#stacked()
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

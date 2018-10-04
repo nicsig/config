@@ -1,4 +1,4 @@
-# Warning: ANY file in this directory will be automatically sourced. Even if it's inside a subdirectory.
+# Warning: ANY script in this directory will be automatically sourced. Even if it's inside a subdirectory.
 
         $ mkdir -p ~/.vim/after/plugin/foo/bar/ \
           && echo 'let g:set_from_vim_after_plugin = 1' >>~/.vim/after/plugin/foo/bar/baz.vim
@@ -6,6 +6,9 @@
         $ vim
         :echo set_from_vim_after_plugin
             → 1
+
+So, do NOT try to lazy-load anything from this directory.
+Use `autoload/` instead.
 
 ##
 # Purpose
@@ -27,7 +30,7 @@ You can use it to:
 
 ##
 # Guard
-## Should I put a guard in those files?  Why?
+## Should I put a guard in those scripts?  Why?
 
 If you can, yes.
 
@@ -35,7 +38,7 @@ A script  shouldn't be  sourced if  the plugin it  configures has  been disabled
 while we debug some issue (`$ vim -Nu /tmp/vimrc`).
 Otherwise, you may be able to reproduce a bug, that no one else will.
 
-Note that for some files, you can't write a guard:
+Note that for some scripts, you can't write a guard:
 
         • nop.vim
         • matchparen_toggle.vim
@@ -63,48 +66,27 @@ Adapt the first template to the plugin you're working on.
 
 Use the second one if the author of the plugin forgot to set a guard.
 
-##
-# Misc
-## Can I use this directory to lazy-load the config of a plugin?
+## How to prevent a script to be sourced twice?
 
-No.
+I don't think you can.
 
-Read the warning at the top:
-all  the files  in this  directory will  be automatically  sourced during  Vim's
-startup.
+The first time a  script is sourced here, the plugin  it configures will ALREADY
+have been sourced.
+So `g:loaded_...` will exist, and you won't be able to write this:
 
-You can't lazy-load anything from this directory.
-Use `autoload/` instead.
+        if exists('g:loaded_...')
+            finish
+        endif
 
-## Can I use `<unique>` if I install a mapping in one of the files in this directory?
+It would always prevent your script from being sourced.
 
-No.
+OTOH, you can write this:
 
-Consider the files here as an extension of your `vimrc`.
+        if !exists('g:loaded_...')
+            finish
+        endif
 
-`<unique>` is for a plugin author who  doesn't want to overwrite the mappings of
-their users.
-`~/.vim/plugin/`  is  not  the  directory  of a  third-party  plugin,  it's  the
-directory of a user (you).
-
-You never use `<unique>` in your `vimrc`,  so be consistent and don't do it here
-either.
-
-
-In `~/.vim/after/plugin/`, there's another reason not to use it:
-you want to have the last word on some mappings.
-If you  use `<unique>`  in one  of your  mapping, and  a third-party  plugin has
-already installed another mapping using the same key, your mapping will fail and
-raise an error.
-
-## Must I avoid a conflict between a filename here, and a filename in a third-party plugin?
-
-No.
-
-For example, if you have the files:
-
-        ~/.vim/after/plugin/abolish.vim
-        ~/.vim/plugged/vim-abolish/plugin/abolish.vim
-
-Even though they have the same name, they will be both sourced.
+But it serves another purpose.
+It prevents the script from being sourced,  if the plugin it configures has been
+disabled.
 

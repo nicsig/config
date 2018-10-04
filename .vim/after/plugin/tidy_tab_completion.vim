@@ -12,24 +12,6 @@
 "         people that keep the shift key pressed too long...
 "}}}
 
-" vim-exchange {{{1
-"
-" They allow you to remove an existing  highligting created by the plugin, or to
-" enable/disable/toggle the  mode which  controls whether the  plugin highlights
-" the text on which we operate.
-
-" Why the check?{{{
-"
-" To avoid polluting `v:errmsg` when Vim starts up.
-" `v:errmsg` can be useful when we're debugging.
-"}}}
-if exists(':XchangeClear') == 2
-    sil! delc XchangeClear
-    sil! delc XchangeHighlightDisable
-    sil! delc XchangeHighlightEnable
-    sil! delc XchangeHighlightToggle
-endif
-
 " LogiPat {{{1
 
 " Here are all the commands installed by the LogiPat plugin:

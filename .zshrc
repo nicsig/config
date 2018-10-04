@@ -38,6 +38,25 @@
 #
 #     • write a manpage for the script
 
+# TODO:
+# Type `$ vim Tab`.
+# Look at the distance between the suggestions in the `shell function` section.
+# It's too big.
+# The result feels jarring compared to the other sections.
+# I think it's because zsh tries to use  a certain width for the whole menu, and
+# divides it by `n` (`n` being the number of suggestions on a given line).
+# If `n` is small (atm we only have 3 shell functions beginning with `vim`),
+# the width of each suggestion on a line is needlessly big.
+#
+# It seems that the completion menu splits the suggestions on several lines once
+# there're 10 of them (at least if their size is similar to `vim_cfg`).
+#
+# How to control the geometry of the zsh completion menu?
+# Width of the suggestions, max number of entries on a single line ...
+# It would be useful to tell zsh that if we have less than, say, 10 suggestions,
+# we want them each on a separate line.
+# Or better yet, how to ask zsh to fill columns, before filling lines?
+
 
 # TODO:
 # Make sure to never abuse the `local` keyword.

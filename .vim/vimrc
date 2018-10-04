@@ -4691,15 +4691,6 @@ fu! s:filetype_linter() abort
     let w:my_filetype_linter = matchadd('Error', pat)
 endfu
 
-" Fold My Logs {{{2
-
-augroup fold_my_logs
-    au!
-    " to get folding
-    au! BufRead,BufNewFile  *.log  let b:title_like_in_markdown = 1
-        \ | runtime! ftplugin/markdown.vim
-augroup END
-
 " Jump Last Position {{{2
 
 augroup jump_last_position
@@ -5858,10 +5849,10 @@ endfu
 "
 "     cmdline#reset_did_transform(
 "     comment#object(
-"     fold#md#sort_by_size(
-"     fold#md#stacked(
-"     fold#md#toggle_fde(
-"     fold#text(
+"     fold#md#sort#by_size(
+"     fold#md#fde#stacked(
+"     fold#md#fde#toggle(
+"     fold#fdt#get(
 "     qf#create_matches(
 "     qf#open(
 "     qf#set_matches(
@@ -6297,7 +6288,7 @@ endfu
 " Update:
 " it probably has sth to do with these functions:
 "
-"     • fold#motion_go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
+"     • fold#motion#go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
 "     • lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
 "
 " Update:
@@ -6844,6 +6835,19 @@ endfu
 " 133 -
 " Be  consistent  in  how  you  chose  the  priority  of  matches  created  with
 " `matchadd()`.
+"
+" 134 -
+" Saving an option, changing it, then restoring it via a timer is a bad idea.
+" Check where you did it.
+" Remove the timer.
+
+
+
+" https://github.com/jgm/pandoc/blob/master/INSTALL.md
+" $ api /usr/bin/rsvg-convert
+" $ pandoc file.md --pdf-engine=xelatex -o file.pdf
+nno  <silent>  <bar>c  :<c-u>sil make! <bar> redraw! <bar> cw<cr>
+
 
 
 

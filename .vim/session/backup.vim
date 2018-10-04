@@ -44,7 +44,7 @@ wincmd w
 argglobal
 if bufexists('~/Desktop/backup.md') | buffer ~/Desktop/backup.md | else | edit ~/Desktop/backup.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#stacked()
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
