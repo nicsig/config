@@ -70,7 +70,19 @@ fu! s:set_recipes() abort
     " Thus,  Vim has  to create  a  new reference  to  store the  result of  the
     " expression
     "}}}
+    " Why the recipe for ['`', "'"]?{{{
+    "
+    " It's often used to quote some word in man pages.
+    " See here for more info:
+    "     https://english.stackexchange.com/q/17695/313834
+    "     https://www.cl.cam.ac.uk/~mgk25/ucs/quotes.html
+    "}}}
+    " Why the input 'g'?{{{
+    "
+    " 'g' for Grave accent.
+    "}}}
     let g:sandwich#recipes = g:sandwich#default_recipes
+                         \ + [{'buns': ['`', "'"], 'input': ['g']}]
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
                          "               │

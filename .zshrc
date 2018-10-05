@@ -37,6 +37,9 @@
 #       It's not an obligation to use this page, just a useful convention.
 #
 #     • write a manpage for the script
+#
+#     • split a long command using an array whose elements are arguments of the latter:
+#           https://unix.stackexchange.com/a/473257/289772
 
 # TODO:
 # Type `$ vim Tab`.
@@ -1195,6 +1198,71 @@ fzf_clipboard() { #{{{2
 
   # fuzzy find clipboard history
   printf -- "$(greenclip print | fzf -e -i)" | xclip -selection clipboard
+}
+
+grep_pdf() { #{{{2
+  # Alternative: pdfgrep utility{{{
+  #     $ aptitude install pdfgrep
+  #     $ find /path -iname '*.pdf' -exec pdfgrep pattern {} +
+  #
+  # The `+`  at the end prevents  `find` from executing a  `pdfgrep` command for
+  # every file it finds.
+  # Instead it  concatenates  them all  and  pass them  to  a single  `pdfgrep`
+  # command:
+  #     pdfgrep pat file1
+  #     pdfgrep pat file2
+  #     ...
+  #   →
+  #     pdfgrep pat file1 file2 ...
+  #
+  # Source:
+  #     https://unix.stackexchange.com/a/27517/289772
+  #}}}
+  emulate -L zsh
+  if [[ $# -lt 2 ]]; then
+    cat <<EOF >&2
+usage:
+    grep_pdf 'vim regex' file1.pdf file2.pdf ...
+    grep_pdf 'vim regex' *.pdf
+EOF
+    return
+  fi
+  local pat="$1"
+  # remove the first argument so that `$@` expands to the files,
+  # without including the pattern
+  # Why `:argdo`?{{{
+  #
+  # The buffers need to be converted to text.
+  # We have an autocmd `filter_special_file` in our vimrc to do that.
+  # It listens to `BufWinEnter`.
+  # So we fire it for every buffer in the arglist.
+  #
+  # Note that you could use `BufReadPost` too.
+  #}}}
+  # Why not `:doautoall BufWinEnter` instead?{{{
+  #
+  # For some reason it doesn't work.
+  #
+  # According to `:h :doautoall`, the command  works only on loaded buffers; and
+  # our pdf buffers, even though not converted yet, are immediately loaded.
+  #
+  # Also, the help mentions this:
+  #
+  #     Careful: Don't use this for autocommands that delete a
+  #     buffer, change to another buffer or CHANGE THE
+  #     CONTENTS OF A BUFFER; THE RESULT IS UNPREDICTABLE.
+  #
+  # It could explain why `:doautoall` fails.
+  #}}}
+  # Why `sil!` before `:vim`?{{{
+  #
+  # If the pattern is absent, I don't want any error message to be printed.
+  #}}}
+  shift
+  vim \
+  +'argdo do BufWinEnter' \
+  +"sil! noa vim /${pat}/gj ## | cw" \
+  "$@"
 }
 
 loc() { #{{{2
