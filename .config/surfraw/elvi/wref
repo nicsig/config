@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# elvis: WordReference		-- Search word translation using WordReference (http://www.wordreference.com/enfr/)
+# elvis: wref		-- Search word translation using WordReference (http://www.wordreference.com/enfr/)
 . surfraw || exit 1
 
 w3_usage_hook () {

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# elvis: Wikipedia FR		-- Search general info using Wikipedia FR (https://fr.wikipedia.org)
+# elvis: wfr		-- Search general info using Wikipedia FR (https://fr.wikipedia.org)
 . surfraw || exit 1
 
 w3_usage_hook () {

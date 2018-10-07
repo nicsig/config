@@ -71,11 +71,11 @@ setlocal fml=0
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
-let s:l = 858 - ((3 * winheight(0) + 13) / 27)
+let s:l = 859 - ((4 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-858
+859
 normal! 0
 wincmd w
 3wincmd w

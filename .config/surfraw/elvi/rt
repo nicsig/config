@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# elvis: Rotten Tomatoes		-- Search movie score using Rotten Tomatoes (https://www.rottentomatoes.com/)
+# elvis: rt		-- Search movie score using Rotten Tomatoes (https://www.rottentomatoes.com/)
 . surfraw || exit 1
 
 w3_usage_hook () {

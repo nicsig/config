@@ -22,7 +22,7 @@ vim_subreddit       https://www.reddit.com/r/vim/                  # reddit # vi
 neovim_subreddit    https://www.reddit.com/r/neovim/               # reddit # neovim
 unix.stack.exchange https://unix.stackexchange.com/                # linux # stackexchange
 amazon.com          https://www.amazon.com/                        # amazon # us
-github              https://github.com/lifepillar/vim-mucomplete   # github
+github              https://github.com/lacygoill?tab=repositories
 keybr               https://www.keybr.com/multiplayer              # keyboard # learn
 keyhero             https://www.keyhero.com/profile/               # keyboard # learn
 youtube             https://www.youtube.com/                       # youtube

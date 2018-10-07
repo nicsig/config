@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# elvis: Vim StackExchange		-- Search answers using Vim StackExchange
+# elvis: stack_vim		-- Search answers using Vim StackExchange
 # (https://vi.stackexchange.com)
 . surfraw || exit 1
 

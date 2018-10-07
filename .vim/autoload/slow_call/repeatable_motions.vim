@@ -333,16 +333,17 @@ call lg#motion#repeatable#make#all({
 \                   ]
 \ })
 
-" resize window / move tabpage
+" fold more|less / move tabpage / resize window
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
 \        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
+\                     {'bwd': '<f'    ,  'fwd': '>f'},
+\                     {'bwd': '<t'    ,  'fwd': '>t'},
 \                     {'bwd': 'z<c-h>',  'fwd': 'z<c-l>'},
 \                     {'bwd': 'z<c-k>',  'fwd': 'z<c-j>'},
-\                     {'bwd': '<t'    ,  'fwd': '>t'},
 \                   ]
 \ })
 

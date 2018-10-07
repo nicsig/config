@@ -6,9 +6,9 @@ augroup my_dircolors
                            \ | setl cole=3
 augroup END
 
-let b:undo_ftplugin =          get(b:, 'undo_ftplugin', '')
-    \                 . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-    \                 . "
-    \                       setl cocu< cole< fdm< fdt<
-    \                     | exe 'au!  my_dircolors * <buffer>'
-    \                   "
+let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
+    \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+    \ . "
+    \       setl cocu< cole< fdm< fdt<
+    \     | exe 'au!  my_dircolors * <buffer>'
+    \   "

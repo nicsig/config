@@ -1672,9 +1672,9 @@ endfu
 
 fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     let flags  = {
-    \              'min_length' : matchstr(a:1, '-min_length\s\+\zs\d\+'),
-    \              'weighted'   : stridx(a:1, '-weighted') !=# -1,
-    \            }
+        \  'min_length': matchstr(a:1, '-min_length\s\+\zs\d\+'),
+        \  'weighted': stridx(a:1, '-weighted') !=# -1,
+        \ }
 
     let view       = winsaveview()
     let words      = split(join(getline(a:line1, a:line2), "\n"), '\v%(%(\k@!|\d).)+')
@@ -1716,12 +1716,12 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         "   • otherwise, by default, an abbreviation should be 3 characters long
 
         let abbrev_length = '(
-        \                        strchars(v:key) ==# 4
-        \                      ?     2
-        \                      : v:key[-1:-1] is# "s" && index(keys(freq), v:key[:strlen(v:key)-1]) >= 0
-        \                      ?     4
-        \                      :     3
-        \                    )'
+            \     strchars(v:key) ==# 4
+            \   ?     2
+            \   : v:key[-1:-1] is# "s" && index(keys(freq), v:key[:strlen(v:key)-1]) >= 0
+            \   ?     4
+            \   :     3
+            \ )'
 
         let weighted_freq = deepcopy(freq)
         call map(weighted_freq, {k,v -> v * (strchars(k) - abbrev_length)})
@@ -1744,7 +1744,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     sil! %!column -t
     sil! %!sort -rn -k2
 
-    exe 'vert res '.(max(map(getline(1, '$'), {i,v -> strchars(v)}))+4)
+    exe 'vert res '.(max(map(getline(1, '$'), {i,v -> strchars(v, 1)}))+4)
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
     exe winnr('#').'windo call winrestview(view)'

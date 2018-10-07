@@ -870,7 +870,7 @@ alias zsh_sourcetrace='zsh -o sourcetrace'
 # To be expanded, an abbreviation needs to be followed by a space.
 
 # align columns
-alias -g AC='| column -t'
+alias -g C='| column -t'
 
 alias -g L='2>&1 | less -R'
 
@@ -1201,6 +1201,26 @@ fzf_clipboard() { #{{{2
 }
 
 grep_pdf() { #{{{2
+  # Purpose:{{{
+  #
+  # Grep a pattern in a set of pdf files.
+  #}}}
+  # Rationale:{{{
+  #
+  # We can't grep for a pattern in a set of files with any grep-like shell tool.
+  #
+  # You can in Vim, but you need to visit each buffer so that one of our autocmd
+  # converts it from pdf to text.
+  # This function takes care of all of that.
+  #}}}
+  # Tip:{{{
+  #
+  # You don't  need to re-invoke this  function when you're looking  for several
+  # patterns in the SAME set of files.
+  # After the function has been invoked  once, the pdfs will have been converted
+  # to  text in  Vim buffers,  and you'll  be able  to grep  them as  usual with
+  # `:vimgrep` from the current Vim instance.
+  #}}}
   # Alternative: pdfgrep utility{{{
   #     $ aptitude install pdfgrep
   #     $ find /path -iname '*.pdf' -exec pdfgrep pattern {} +
@@ -1232,7 +1252,7 @@ EOF
   # without including the pattern
   # Why `:argdo`?{{{
   #
-  # The buffers need to be converted to text.
+  # Before we can grep the buffers, they need to be converted to text.
   # We have an autocmd `filter_special_file` in our vimrc to do that.
   # It listens to `BufWinEnter`.
   # So we fire it for every buffer in the arglist.
@@ -1789,7 +1809,6 @@ CMDS_TO_IGNORE_IN_HISTORY=(
   rm
   rmdir
   sleep
-  sr
   touch
   tp
   web
