@@ -37,9 +37,9 @@
 # Example:
 #
 #                                                           ┌ last argument of the previous command,
-#                                                           │ here it should be `/tmp/vim.log`
+#                                                           │ here it should be `/tmp/vim.log` (could use `$_` too)
 #                                                           ├┐
-#         vim -c 'q' --startuptime /tmp/vim.log && tail -n1 $_
+#         vim -c 'q' --startuptime /tmp/vim.log && tail -n1 !$
 #             vs
 #         vim -c 'q' --startuptime >(tail -n1)
 

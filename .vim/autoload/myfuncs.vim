@@ -1304,12 +1304,12 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
         " therefore the  next time we  invoke the  function, it won't  split the
         " window, thinking the pane is still there.
         " We must make sure it's still open before going further.
-        "                                                           ┌ eliminate trailing newline
-        "                                                       ┌───┤
+        "                                                       ┌ eliminate trailing newline
+        "                                                       ├───┐
         let open_panes = split(system("tmux list-panes -F '#D'")[:-2])
         "                                               │   │
-        "                                               │   └─ unique pane ID
-        "                                               └─ format the output according to the following string
+        "                                               │   └ unique pane ID
+        "                                               └ format the output according to the following string
         let is_pane_still_open = index(open_panes, s:pane_id) >= 0
         if !is_pane_still_open
             " the pane should be closed, but better be safe

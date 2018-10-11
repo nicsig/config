@@ -120,11 +120,11 @@ Plug 'junegunn/vim-easy-align'
 Plug 'lacygoill/vim-exchange'
 Plug 'tpope/vim-fugitive'
 " You can pass more arguments to the fzf installer:
-"     % ~/.fzf/install --help
+"     $ ~/.fzf/install --help
 Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash'}
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/goyo.vim', {'frozen': 1}
-Plug 'ludovicchabant/vim-gutentags', {'frozen': 1}
+Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/limelight.vim', {'frozen': 1}
 Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
@@ -366,7 +366,7 @@ set backspace=indent,eol,start
 
 " clipboard {{{2
 " Do NOT tweak this option!
-" Why could you be tempted to change the value of this option?{{{
+"         Why could you be tempted to change the value of this option?{{{
 "
 " When you use a pasting command,  and you don't specify from which register you
 " want the text to be pulled, Vim uses the `"` register.
@@ -384,7 +384,7 @@ set backspace=indent,eol,start
 " use the system register, instead of the unnamed one.
 " That's what 'cb' is for.
 "}}}
-" How should you change it?{{{
+"         How should you change it?{{{
 "
 "         set clipboard^=unnamedplus
 "
@@ -398,7 +398,7 @@ set backspace=indent,eol,start
 "
 " It would APpend the value to the list.
 "}}}
-" Technically, what happens if you do it?{{{
+"         Technically, what happens if you do it?{{{
 "
 " The system  register register will  now have  a similar (although  not exactly
 " identical) behavior than the one of the unnamed:
@@ -429,7 +429,7 @@ set backspace=indent,eol,start
 "     set cb&             | let [@+, @"] = ['foo', 'bar'] | norm! p
 "           → bar
 "}}}
-" Are there pitfalls?{{{
+"         Are there pitfalls?{{{
 "
 " Yes a shitload.
 "
@@ -2191,6 +2191,10 @@ endfu
 ino  <silent>  <bslash>  <c-r>=<sid>indent_before_backslash()<cr>
 
 fu! s:indent_before_backslash() abort
+    if &ft isnot# 'vim'
+        return '\'
+    endif
+
     let has_text_before_cursor = matchstr(getline('.'), '.*\%'.col('.').'c') =~# '\S'
     let prev_indent            = matchstr(getline(line('.')-1), '^\s*\\')
     let next_indent            = matchstr(getline(line('.')+1), '^\s*\\')
@@ -4163,26 +4167,28 @@ com! -bar -bang -nargs=1 JoinBlocks
 
 com! -bar -range=% OnlySelection call myfuncs#only_selection(<line1>,<line2>)
 
-" PlugCommit {{{2
+" PluginsToCommit {{{2
 
-com! -bar -nargs=0 PlugCommit  call s:plug_commit()
+com! -bar -nargs=0 PluginsToCommit  call s:plugins_to_commit()
 
-fu! s:plug_commit() abort
+fu! s:plugins_to_commit() abort
     let script = 'commit-these-vim-plugins.sh'
     if !executable(script)
-        echom '[PlugCommit]: '.script.' is not available'
+        echom '[PluginsToCommit]: '.script.' is not available'
         return
     endif
 
     let output = systemlist('commit-these-vim-plugins.sh')
     if output == []
-        echom '[PlugCommit]: nothing to commit'
+        echom '[PluginsToCommit]: nothing to commit'
         return
     endif
 
     call filter(output, {i,v -> v =~ '^\S'})
     call map(output, {i,v -> {'filename': $HOME.'/.vim/plugged/'.v, 'valid': 1}})
     call setqflist(output)
+    call setqflist([], 'a', {'title': 'Plugins to commit'})
+    cw
 endfu
 
 " PluginGlobalVariables {{{2
@@ -5092,8 +5098,10 @@ endfu
 " We could edit this temp buffer, and after writing it, the original selection
 " would be replaced by it.
 " There's a plugin for that:
+"
 "     https://github.com/chrisbra/NrrwRgn
-" … but the source code is too long (1500 sloc) for what it does.
+"
+" ... but the source code is too long (1500 sloc).
 " Take inspiration from it.
 "
 " 6 - Implement ]n, ]s, ]u, ]x, ]y from unimpaired.vim
@@ -5273,8 +5281,8 @@ endfu
 " this way, we can move along long lines with ; and ,
 "
 " 21 -
-" integrate ~/dropbox/wiki/diff into ~/dropbox/wiki/vim
-" or into ~/dropbox/wiki/admin
+" integrate ~/Dropbox/wiki/diff.md into ~/Dropbox/wiki/vim/vim.md
+" or into ~/Dropbox/wiki/admin.md
 " yeah... maybe everything which is related to diff or vimdiff, put it inside
 " admin
 "
@@ -5667,7 +5675,7 @@ endfu
 " is there any functionality we could steal?
 "
 " 46 -
-" finish reviewing ~/dropbox/vim_plugins/pair_complete.vim
+" finish reviewing ~/Dropbox/vim_plugins/pair_complete.vim
 "
 " 47 -
 " we use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
@@ -6022,13 +6030,6 @@ endfu
 "        • 'varsofttabstop', 'vartabstop'
 "        • :h `matchadd()`, new `window` key in optional dictionary
 "        • :unl[et] ${env-name} (:h :unlet-$)
-"        • api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
-"        • cmdlinechanged
-"        • colorschemepre
-"        • diffupdate
-"        • dirchanged
-"        • exitpre
-"        • textchangedp
 "        • `appendbufline()`
 "        • `deletebufline()`
 "        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
@@ -6038,7 +6039,15 @@ endfu
 "        • `term_setansicolors()`, `term_getansicolors()`, `g:term_ansi_colors`
 "        • `term_setsize()`
 "        • `trim()`
+"        • `winlayout()`
+"        • api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
+"        • cmdlinechanged
+"        • colorschemepre
+"        • diffupdate
+"        • dirchanged
+"        • exitpre
 "        • prompt-buffer
+"        • textchangedp
 "
 " 74 -
 " in `vim-window`, don't do this:
@@ -6749,6 +6758,8 @@ endfu
 " do you need to save and restore v:register every time?
 " do you need to save and restore v:count every time?
 "
+" Have you used `:s`, while you should have used `setline()`?
+"
 " 121 -
 " all your commands should print a usage message when executed without arguments
 " or with  `--help`, or  `-h` (similar to  what our shell  function does  with a
@@ -6818,14 +6829,56 @@ endfu
 " 128 -
 " Be consistent in how you extract the comment leader.
 " Vimgrep everywhere for `cml`.
-
-
-
-" We should save the last 10 or so messages we wrote in a git commit message.
-" Basically, we should have a history.
-" And it should be persistent (i.e. survive a reboot).
-" And we should be able to cycle through it.
-" Use `]m` and `[m` for the keys.
+"
+" 129 -
+" We have 5 plugins which uses `repeat#set()`:
+"
+"     vim-abolish
+"     vim-easy-align
+"     vim-sneak
+"     vim-speeddating
+"     vimtex
+"
+" Try to get rid of the call to the function, either by:
+"
+"     • submitting bug report
+"     • re-implementing the plugin
+"
+" 130 -
+" You shouldn't have frozen plugins.
+" If a plugin is  frozen because you've fixed an issue, submit  the issue on the
+" bug tracker.
+"
+" 131 -
+"     :vim /<buffer>/gj ~/.vim/plugged/vimtex/**/*.vim | cw
+"     :Cfilter! <nowait>\|autocmd\|<buffer>\s*\%(<plug>\|<sid>\)
+"
+" Watch for local mappings  where the lhs is a sequence which  can be pressed by
+" the user (!= <plug>), and which doesn't contain <nowait>.
+" Submit a PR/issue to suggest adding `<nowait>`.
+"
+" 132 -
+" Search for all vimtex mappings which haven't `<c-u>` before `:call`.
+" Submit an issue whose message looks like:
+"
+"     I'm not saying the absence of C-u causes/caused any issue, but you seem to
+"     care a  lot about the  reliability of your  plugin (confirmed by  the `l:`
+"     scope used  systematically even though  it's not strictly  necessary ...),
+"     and so thought you would agree with using C-u to avoid that your functions
+"     are called unnecessarily several times.
+"
+" But make sure they are not necessary. They could be, if the function needs
+" to be re-called several times when the user pressed a count.
+"
+" 133 -
+" Try to replace as many `:s` commands with `setline()`:
+"
+"     noa vim !s\([/:;@]\).\{-}\1!gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
+"     Cfilter! -other_plugins -commented -tmp
+"     Cfilter! ^\s*\%(let\|call\|echo\|return\|if\|unlet!\=\|&&\)\s
+"
+" 134 -
+" Ask whether `abort` should be added to all vimtex functions.
 
 
 
@@ -7089,7 +7142,7 @@ fu! s:goyo_enter() abort
     " FIXME: We should  use the function `s:restore_change_position()`  but it's
     " local to `vim-window`.
     sil! exe 'norm! '.(exists('b:my_change_position') ? '99g;' : '99g,')
-    \                .(b:my_change_position - 1) .'g,'
+        \ .(b:my_change_position - 1) .'g,'
     call setpos('.', pos)
 
     if get(g:, 'my_goyo_without_syntax_hl', 1)
@@ -7148,6 +7201,33 @@ augroup my_goyo
     au User GoyoLeave nested call s:goyo_leave()
 augroup END
 
+nno  <silent>  coj  :<c-u>call <sid>nofrils()<cr>
+
+fu! s:nofrils() abort
+    if stridx(execute('hi Conditional'), 'cleared') != -1
+        exe 'colo '.g:colors_name
+        return
+    endif
+
+    let syntax_groups = [
+    \ 'Conditional',
+    \ 'Delimiter',
+    \ 'Function',
+    \ 'Identifier',
+    \ 'MatchParen',
+    \ 'Number',
+    \ 'Operator',
+    \ 'PreProc',
+    \ 'Special',
+    \ 'Statement',
+    \ 'String',
+    \ 'Type',
+    \ 'snipSnippet',
+    \ ]
+    for group in syntax_groups
+        exe 'hi '.group.' term=NONE cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=NONE guibg=NONE'
+    endfor
+endfu
 
 
 " MISC {{{1

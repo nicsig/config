@@ -22,12 +22,6 @@
 # frozen. You have to restart `mpv` to get updated subtitles again.
 #}}}
 
-# TODO: How to prevent the player from resuming the video while our cusor is on a word,{{{
-# and we're reading all the translations?
-# Or at least, how to increase the current time (≈ 3s) before the player resumes
-# the video.
-#}}}
-
 # If you have difficulties to make the script work, see this issue:{{{
 #
 #     https://github.com/oltodosel/interSubs/issues/9
