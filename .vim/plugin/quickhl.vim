@@ -7,15 +7,15 @@ endif
 "
 " I.e. we can highlight a line:
 "
-"     SPC h h _
+"     + h _
 "
 " We can highlight another:
 "
-"     SPC h h _
+"     + h _
 "
 " But they will be colored differently.
 "
-" Maybe we could use `SPC H` as another prefix to add/remove
+" Maybe we could use `+ H` as another prefix to add/remove
 " a match to/from another.
 
 " TODO:
@@ -39,14 +39,6 @@ endif
 " I don't like the plugin highlighting all windows.
 " I would prefer it to affect only the current window.
 " And maybe all the others via an option, command argument, ...
-
-" TODO:
-" Study vim-operator-user:
-"
-"     ~/.vim/plugged/vim-operator-user/doc/operator-user.txt
-"
-" We've installed it to be able to highlight a text-object.
-" The code is short: 76 sloc.
 
 " FIXME:
 " We can't clear a highlight installed from a visual selection,
@@ -115,18 +107,6 @@ nmap  <unique>  +hw  <plug>(quickhl-cword-toggle)
 "}}}
 " nmap  <unique>  +h]  <plug>(quickhl-tag-toggle)
 
-" FIXME:
-"
-" MWE:
-"     ] SPC    insert a blank line below
-"     .        repeat
-"     uu       undo
-"     +h_      highlight current line
-"     j        move to line below
-"     .        try to highlight the line
-"
-"                  → Vim inserts a blank line    ✘
-
 " highlight text-object
-nmap  <unique>  +h  <plug>(operator-quickhl-manual-this-motion)
+nmap  <unique>  +h  <plug>(quickhl-manual-this-motion)
 

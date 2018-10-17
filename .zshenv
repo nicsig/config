@@ -79,6 +79,28 @@ if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
   #
   # }}}
 
+  # Purpose:{{{
+  #
+  # Write the word `printf` in a markdown buffer, then press `K`.
+  # `$ man` will give to Vim the `printf` page from the section 1.
+  #
+  # But what if you prefer to give the priority to the section 3?
+  # That's where `$MANSECT` comes in.
+  # It allows you to change the priority of the man sections.
+  # Here, I export the default value given in:
+  #
+  #     /etc/manpath.config
+  #
+  # Use this `export` statement to change the priority of the sections.
+  #
+  # Note that pressing `3K`  or executing `man 3 printf` will  give you the page
+  # from the section 3, no matter what `$MANSECT` contains.
+  # This variable is only useful for when you don't provide the section number.
+  #
+  # See `$ man 1 man` for more info.
+  #}}}
+  export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
+
   # Why this value?{{{
   #
   # It's recommended in `man par`.

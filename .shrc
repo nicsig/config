@@ -56,7 +56,10 @@ alias checki='sudo rlwrap checkinstall -y'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'
 
 alias mount='grc mount'
-alias traceroute='grc traceroute'
+# alias traceroute='grc traceroute'
+traceroute() {
+  grc traceroute "$1"
+}
 
 alias conky_reload='killall -SIGUSR1 conky'
 alias xresources_reload='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'

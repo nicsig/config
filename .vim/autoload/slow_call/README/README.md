@@ -8,9 +8,16 @@ For example:
         • operator#sandwich#set()
         • submode#map()
 
+##
 # Why should I put a guard in every script of this directory?
 
-Are there alternatives to this guard?
+If you're debugging your vimrc, you may temporarily disable a plugin.
+If  the plugin  you're disabling  provides  a function  called in  one of  those
+scripts, it will raise an error, because the function is not defined anywher.
+
+# Are there alternatives to this guard?
+
+Yes, 3.
 
 1.
     if !has_key(get(g:, 'plugs', {}), 'vim-lg-lib')
@@ -34,10 +41,7 @@ Are there alternatives to this guard?
         echom v:exception
     endtry
 
-
-
-
-Why don't you use one of them?
+# Why don't you use one of them?
 
 1. relies on `vim-plug` being used.
 We may not use this plugin in the future.
@@ -53,13 +57,11 @@ by another error...
 
 3. would only work in a filetype plugin.
 
+# Why not checking the existence of autoloaded functions in your guards?
 
-
-
-Why not checking the existence of `lg#motion#repeatable#make#all()`?
-
-Not reliable, because it's an autoloaded function.
-Maybe it hasn't been sourced, and thus doesn't exist, but can be.
+If an  autoloaded function hasn't already  been called, it hasn't  been sourced,
+and thus doesn't exist.
+But that does NOT mean it cannot exist (in the future).
 
 ##
 # Can a conflict arise between a file in `~/.vim/autoload/` and the `autoload/` of a third-party plugin?

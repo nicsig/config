@@ -11,10 +11,23 @@ functions, such as `xt()` or `sr()`.
 The file containing  the code of the completion function  for the custom `foo()`
 function, must be named `_foo`.
 
-## Can I write a completion function for an alias?  For a script?
+## Can I write a completion function for an alias?  A function?  For a script?
 
 Not for an alias.
-But you can for a script.
+But you can for a script and a shell function.
+
+---
+
+TODO:
+
+You can customize the completion of an alias in bash:
+
+    $ alias vtex="vim --servername VIM"
+    $ complete -f -X '!*.tex' vtex
+    $ vtex Tab
+        → only suggests `.tex` files
+
+How to do the same in zsh?
 
 ##
 # Documentation

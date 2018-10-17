@@ -1641,18 +1641,13 @@ fu! myfuncs#unicode_toggle(line1, line2) abort
 endfu
 
 fu! s:vim_parent() abort "{{{1
-    " getpid()
-    "
-    "     return the PID of Vim
-    "
-    " ps -p <Vim PID> -o ppid=
-    "
-    "     display the PID of the parent of Vim
-    "
-    " ps -p $(…) -o comm=
-    "
-    "     display the name of the parent of Vim
-
+    " ┌────────────────────────────┬─────────────────────────────────────┐
+    " │ :echo getpid()             │ print the PID of Vim                │
+    " ├────────────────────────────┼─────────────────────────────────────┤
+    " │ $ ps -p <Vim PID> -o ppid= │ print the PID of the parent of Vim  │
+    " ├────────────────────────────┼─────────────────────────────────────┤
+    " │ $ ps -p $(..^..) -o comm=  │ print the name of the parent of Vim │
+    " └────────────────────────────┴─────────────────────────────────────┘
     return expand('`ps -p $(ps -p '.getpid().' -o ppid=) -o comm=`')
 endfu
 

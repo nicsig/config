@@ -20,7 +20,10 @@ split
 wincmd w
 wincmd w
 wincmd t
-set winminheight=1 winminwidth=1 winheight=1 winwidth=1
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 27 + 16) / 33)
@@ -34,12 +37,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 8 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-8
-normal! 084|
+1
+normal! 0
 wincmd w
 arglocal
 silent! argdel *
@@ -71,11 +74,11 @@ setlocal fml=0
 setlocal fdn=20
 setlocal nofen
 silent! normal! zE
-let s:l = 859 - ((4 * winheight(0) + 13) / 27)
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-859
+1
 normal! 0
 wincmd w
 3wincmd w
@@ -87,7 +90,7 @@ if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 winminheight=1 winminwidth=1 shortmess=filnxtToOAacFIsW
+set winheight=1 winwidth=20 winminheight=1 winminwidth=1 shortmess=filnxtToOacFIsW
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)

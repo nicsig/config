@@ -99,22 +99,23 @@ if has('vim_starting')
 " They will be downloaded inside `~/.vim/plugged/`.
 call plug#begin('~/.vim/plugged')
 
-" TO_STUDY:
+" To Assimilate:
 Plug 'lacygoill/vim-graph'
-" FIXME: {{{
-
-" Type: :fu! Func() C-v C-j endfu
+" Type: :fu! Func() C-v C-j endfu{{{
 "
 " Now try to uppercase a word with `cru`. `abolish` raises the error:
 "     E705: Variable name conflicts with existing function: Func
 "
 " I've fixed the bug by renaming `Func` into `l:Func` inside the `s:send()`
 " function of the abolish plugin.
+" PR fixing the issue:
+"
+"     https://github.com/tpope/vim-abolish/pull/68
 "}}}
 Plug 'tpope/vim-abolish', {'frozen': 1}
 Plug 'yegappan/asyncmake', {'frozen': 1}
+Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-debug'
-Plug 'justinmk/vim-dirvish'
 Plug 'lacygoill/vim-fex'
 Plug 'junegunn/vim-easy-align'
 Plug 'lacygoill/vim-exchange'
@@ -130,25 +131,20 @@ Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
-" required to get some functionality in `vim-quickhl`
-Plug 'kana/vim-operator-user', {'frozen': 1}
 Plug 'lacygoill/potion'
 Plug 't9md/vim-quickhl', {'frozen': 1}
 Plug 'tpope/vim-repeat', {'frozen': 1}
 Plug 'tpope/vim-rhubarb'
-Plug 'lacygoill/vim-cwd'
-" Alternative:
-" https://github.com/t9md/vim-textmanip
+" Alternative: https://github.com/t9md/vim-textmanip
 Plug 'lacygoill/vim-schlepp'
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'tpope/vim-speeddating'
 Plug 'kana/vim-submode', {'frozen': 1}
 Plug 'jebaum/vim-tmuxify', {'frozen': 1}
-Plug 'SirVer/ultisnips'
 Plug 'lacygoill/vim-unix'
 
-" DONE:
+" Done:
 Plug 'lacygoill/vim-awk'
 Plug 'lacygoill/vim-brackets'
 Plug 'lacygoill/vim-breakdown'
@@ -168,6 +164,7 @@ Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
 Plug 'lacygoill/vim-iabbrev'
 Plug 'lacygoill/vim-interactive-lists'
+Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-lg-lib'
 Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-lua'
@@ -179,6 +176,7 @@ Plug 'lacygoill/vim-readline'
 Plug 'lacygoill/vim-reorder'
 Plug 'lacygoill/vim-save'
 Plug 'lacygoill/vim-search'
+Plug 'lacygoill/vim-selection-ring'
 Plug 'lacygoill/vim-session'
 Plug 'lacygoill/vim-sh'
 Plug 'lacygoill/vim-snippets'
@@ -189,17 +187,19 @@ Plug 'lacygoill/vim-term'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
-Plug 'lacygoill/vim-selection-ring'
-Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-window'
 
-" DGAF:
-Plug 'mattn/emmet-vim'
+" Read Doc:
+Plug 'SirVer/ultisnips'
+Plug 'justinmk/vim-dirvish'
+Plug 'lervag/vimtex'
 Plug 'machakann/vim-sandwich'
+Plug 'mattn/emmet-vim'
+
+" Other:
+Plug 'chrisbra/unicode.vim'
 Plug 'keith/tmux.vim'
 Plug 'mbbill/undotree'
-Plug 'chrisbra/unicode.vim'
-Plug 'lervag/vimtex'
 
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup. We delay them.
@@ -236,6 +236,7 @@ augroup END
 call plug#end()
 endif
 
+" }}}1
 " OPTIONS_2 {{{1
 " ENCODING {{{2
 " Why should you leave this section at the top of our options configurations.{{{
@@ -598,7 +599,7 @@ endif
 
 " When I type `:r some_file` or `:'<,'>w some_file`, I don't want `some_file`
 " to become the alternate file of the current window.
-set cpo-=aA
+" set cpo-=aA
 
 " 'cpo' doesn't contain the M flag by default.
 " It means that escaped parentheses are ignored when we hit ib
@@ -635,6 +636,9 @@ set cpo+=M
 
 " Start diff mode with vertical splits (unless explicitly specified otherwise).
 set diffopt+=vertical
+
+" Turn off diff mode automatically for a buffer which becomes hidden.
+set diffopt+=hiddenoff
 
 " display {{{2
 
@@ -766,13 +770,19 @@ set foldminlines=0
 
 " ft_ignore_pat {{{2
 
-let g:ft_ignore_pat = '\.\(Z\|gz\|bz2\|zip\|tgz\|log\)$'
-"                                                ^^^
-" We don't want `$VIMRUNTIME/filetype.vim` to set the filetype
-" of a `.log` file to `conf` simply because one of its first
-" lines begin with a `#`.
+" Purpose:{{{
+"
+" We don't want `$VIMRUNTIME/filetype.vim` to set  the filetype of a `.log` file
+" to `conf` simply because one of its first lines begin with a `#`.
 "
 " Indeed we often fold some log files using lines beginning with `#`.
+"}}}
+" Where did you find the beginning of the value?{{{
+"
+"     $VIMRUNTIME/filetype.vim:40
+"}}}
+let g:ft_ignore_pat = '\.\%(Z\|gz\|bz2\|zip\|tgz\|log\)$'
+"                                                 ^^^
 
 " :grep {{{2
 
@@ -1022,7 +1032,7 @@ set kp=:help
 "   mapping which makes the cursor move far from its initial position, then
 "   come back. Example:  zv  *
 "
-" • junegunn, tpope, justinmk, blueyed,  mhinz … they all  set this option.
+" • junegunn, tpope, justinmk, blueyed,  mhinz ... they all  set this option.
 "}}}
 " Is there any pitfall?{{{
 "
@@ -1083,8 +1093,8 @@ set showmatch
 " Why does the pb appear only in html file?
 " And why only with curly brackets, and not with round / square brackets?
 " Edit:
-" It seems to happen  in any file… And it's not an  issue with 'matchtime' but
-" with 'showmatch'.
+" It seems to happen  in any file ...
+" And it's not an issue with 'matchtime' but with 'showmatch'.
 
 set matchtime=0
 
@@ -1151,30 +1161,51 @@ set sidescroll=5
 
 " shortmess {{{2
 
-" don't give the "ATTENTION" message when an existing swap file is found
-" If we've edited the current file in another Vim instance, the change will
-" be noticed when CursorHold will be fired (custom autocmd).
+" What does it do?{{{
 "
-" If we change the file before CursorHold, then try to save, Vim will warn us:
+" Prevent Vim  from printing the "ATTENTION" message when  an existing swap file
+" is found.
+"}}}
+" If I edit a file in a second Vim instance, will the change be reflected in the first?{{{
+"
+" Yes, it should whenever CursorHold is fired.
+" Because, in vim-term, we have:
+"
+"     • a custom autocmd executing `:checktime`
+"
+"          it will check whether the file has been changed
+"          outside the current Vim instance
+"
+"     • set 'autoread'
+"
+"          it will automatically reload the file if the file has been changed
+"          outside the current Vim instance
+"}}}
+" What happens if I edit a file in a 2nd Vim instance, get back to the 1st, and change it before `CursorHold`?{{{
+"
+" In theory, Vim should warn you:
 "
 "     WARNING: The file has been changed since reading it!!!
 "     Do you really want to write to it (y/n)?
 "
-" Answer no.
+" If you  don't want to lose the  changes from the 2nd Vim  instance, you should
+" answer no.
 " Then, wait for CursorHold, or execute `:checktime`.
-set shm+=A
-" FIXME:
-" But now, if Vim crashes, when we restart  it to edit the file we were editing,
-" we won't have any error message.
-" Assimilate the plugins dealing with swap files (session “swap”).
-" We could tell Vim to echom a message letting us know that a swap file has been
-" found, and make it automatically recover the file.
-" Read `:h usr_11`.
+"
+" In practice, there should be no such message, because, in vim-term, we have an
+" autocmd listening to  `FocusGained` and `FocusLost` which reloads  the file if
+" it has been changed outside the current Vim instance.
+"}}}
+" Why don't you enable the flag anymore?{{{
+"
+" I deal with the "ATTENTION" message with an autocmd listening to `SwapExists`.
+"}}}
+" set shm+=A
 
 " enable all sort of abbreviations
 set shm+=a
 
-" Don't give |ins-completion-menu| messages.  For example:
+" Don't print |ins-completion-menu| messages.  For example:
 "
 "     - "-- XXX completion (YYY)"
 "     - "match 1 of 2"
@@ -1183,17 +1214,17 @@ set shm+=a
 "     - "Back at original"
 set shm+=c
 
-" don't give the file info when editing a file, as if `:silent` was used
+" don't print the file info when editing a file, as if `:silent` was used
 set shm+=F
 
 " When starting Vim without any argument, we enter into an unnamed buffer
-" displaying a long message; hide this message
+" displaying a long message; hide this message.
 set shm+=I
 
-" don't give "search hit BOTTOM, continuing at TOP" message
+" don't print "search hit BOTTOM, continuing at TOP"
 set shm+=s
 
-" don't give "written" or "[w]" when writing a file
+" don't print "written" or "[w]" when writing a file
 set shm+=W
 
 " signcolumn {{{2
@@ -1837,6 +1868,7 @@ set cpo+=n
 " allow `h` and `l` motion to move across lines
 set whichwrap=h,l
 
+" }}}1
 " MAPPINGS {{{1
 " NEW {{{2
 
@@ -1929,97 +1961,6 @@ let mapleader = "\<s-f13>"
 let maplocalleader = "\<s-f14>"
 
 " COMMAND LINE {{{2
-" Tab    S-Tab    C-q {{{3
-
-" By default,  when you search  for a  pattern, C-g and  C-t allow you  to cycle
-" through all the matches, without leaving the command-line.
-" We remap these commands to Tab and S-Tab on the search command-line.
-
-" Also, on the Ex command-line (:), Tab can expand wildcards.
-" But sometimes there are  too many suggestions, and we want to  get back to the
-" command-line prior to the expansion, and refine the wildcards.
-" We use  our Tab mapping  to save the command-line  prior to an  expansion, and
-" install a C-q mapping to restore it.
-
-cno  <expr>  <tab>    <sid>c_tab(1)
-cno  <expr>  <s-tab>  <sid>c_tab(0)
-cno          <c-q>    <c-\>e<sid>restore_cmdline_after_expansion()<cr>
-
-augroup my_cmdline_tab
-    au!
-    au CmdlineLeave : unlet! s:cmdline_before_expansion
-augroup END
-
-fu! s:c_tab(is_fwd) abort
-    if getcmdtype() =~# '[?/]'
-        return empty(getcmdline())
-           \ ?     "\<up>"
-           \ :     a:is_fwd ? "\<c-g>" : "\<c-t>"
-    else
-        if a:is_fwd
-            return s:save_cmdline_before_expansion()
-        endif
-        let flags = 'in'.(!wildmenumode() ? 't' : '')
-        "                                    │
-        "           handle key as if typed,  ┘
-        "           otherwise it's  handled as if  coming from a  mapping, which
-        "           matters when we  try to open the wildmenu,  or cycle through
-        "           its entries
-
-        " Why use `feedkeys()`?{{{
-        "
-        " If we used this mapping:
-        "         cno <expr>  <s-tab>  getcmdtype() =~ '[?/]' ? '<c-t>' : '<s-tab>'
-        "
-        " When we would hit <s-tab> on the command-line (:) (outside the wildmenu),
-        " it would insert the 7 characters '<s-tab>', literally.
-        " That's not what `S-Tab` does by default. It should simply open the wildmenu
-        " and select its last entry.
-        " We need `S-Tab` to be treated as if it wasn't coming from a mapping.
-        " We need to pass the `t` flag to `feedkeys()`.
-        "}}}
-        " Why not pass the `t` flag unconditionally?{{{
-        "
-        " It breaks the  replay of a macro during which  we've pressed `Tab`
-        " or `S-Tab` on the command line.
-        " MWE:
-        "         qqq
-        "         qq : Tab Tab CR    (should execute `:#`)
-        "         q
-        "
-        "         :nunmap @
-        "         @q
-        "             → should print the current line; does not
-        "}}}
-        call feedkeys("\<s-tab>", flags)
-        return ''
-    endif
-endfu
-
-fu! s:save_cmdline_before_expansion() abort
-    if wildmenumode()
-        return "\<tab>"
-    endif
-    let cmdline = getcmdline()
-    call timer_start(0, {-> s:save_if_wildmenu_is_active(cmdline)})
-    return "\<tab>"
-endfu
-
-fu! s:save_if_wildmenu_is_active(cmdline) abort
-    if wildmenumode()
-        let s:cmdline_before_expansion = a:cmdline
-    endif
-endfu
-
-fu! s:restore_cmdline_after_expansion() abort
-    if !exists('s:cmdline_before_expansion')
-        return getcmdline()
-    endif
-    redraw
-    call timer_start(0, {-> execute('unlet! s:cmdline_before_expansion')})
-    return get(s:, 'cmdline_before_expansion', getcmdline())
-endfu
-
 " C-r C-h       fuzzy search history {{{3
 
 " Why not C-r C-r?{{{
@@ -2034,8 +1975,9 @@ cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHi
 
 " C-r C-l       insert current line {{{3
 
-cno  <c-r><c-l>  <c-r><c-r>=substitute(getline('.'), '^\s*"\?\s*:\?', '', '')<cr>
+cno  <c-r><c-l>  <c-r><c-r>=substitute(getline('.'), '^\s*"\=\s*:\=', '', '')<cr>
 
+" }}}2
 " INSERT {{{2
 
 " Most of these mappings take care of not breaking undo sequence (C-g U).
@@ -2089,6 +2031,7 @@ fu! s:compact_whitespace() abort
     return ''
 endfu
 
+" }}}3
 " C-m             more granular undo {{{3
 
 " When we write a paragraph then hit `u` to undo, Vim removes the whole
@@ -2220,6 +2163,7 @@ fu! s:indent_before_backslash() abort
     "                └ includes a backslash at the end
 endfu
 
+" }}}2
 " NORMAL {{{2
 " SPC                 (prefix) {{{3
 " SPC                           za {{{4
@@ -2374,6 +2318,7 @@ nmap  <space>S  saiW
 " nno <space><tab>    :<c-u>tabnew<cr>
 nno  <space>t  :<c-u>exe (v:count ? v:count.'tabnew' : 'tabnew')<cr>
 
+"}}}3
 " [    ]              (prefix) {{{3
 " ]kj                           various alignments {{{4
 
@@ -2388,6 +2333,7 @@ nno  <silent>  [j  :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set o
 nno  <silent>  ]k  :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
 nno  <silent>  ]j  :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
 
+" }}}3
 " \                   (prefix) {{{3
 " \b            select current box {{{4
 
@@ -2410,6 +2356,7 @@ nno  \f  f
 
 nno  <expr><silent>  \p  myfuncs#block_select_paragraph()
 
+" }}}3
 " g                   (prefix) {{{3
 " g^ g$       first/last tabpage {{{4
 
@@ -2476,7 +2423,7 @@ fu! s:install_vimrc_mappings() abort
 endfu
 
 fu! s:try_to_edit_plugin_config(cmd) abort
-    let pat = '\C^\s*\<Plug\s\+''.\{-}/\%(vim-\)\=\zs.\{-}\ze\%([.-]vim\)\='''
+    let pat = '\C^\s*\<Plug\s\+''.\{-}/\%(vim-\)\=\zs.\{-}\ze\%([.-]vim\)\=/\='''
     let plugin = matchstr(getline('.'), pat)
 
     if empty(plugin)
@@ -2484,7 +2431,7 @@ fu! s:try_to_edit_plugin_config(cmd) abort
             exe 'norm! '.a:cmd
         catch
             echohl ErrorMsg
-            echo v:exception
+            echom v:exception
             echohl NONE
         endtry
     else
@@ -2535,6 +2482,7 @@ nno  <expr>  gQ ":\e".execute('ToggleEditingCommands 0', 'silent!').'gQ'
 nno  <silent>  gt  :<c-u>call myfuncs#search_todo('buffer')<cr>
 nno  <silent>  gT  :<c-u>call myfuncs#search_todo('project')<cr>
 
+"}}}3
 " m                   (prefix) {{{3
 " m/  m?         put current location in loclist {{{4
 
@@ -2562,6 +2510,7 @@ fu! s:add_to_loclist(populate) abort
     call setloclist(0, [], 'a', {'title': 'My marks'})
 endfu
 
+"}}}3
 " U                   (prefix) {{{3
 
 " go to previous save
@@ -2724,6 +2673,7 @@ fu! s:repeatable_spell_commands(type) abort
     exe 'norm! '.cmd
 endfu
 
+" }}}3
 " |                   (prefix) {{{3
 " |C  |F     open html file in firefox/chrome {{{4
 
@@ -2789,6 +2739,7 @@ nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
 nno  <silent>  <bar>x  :<c-u>call myfuncs#tmux_last_command()<cr>
 nno  <silent>  <bar>X  :<c-u>call myfuncs#tmux_current_command(getline('.'))<cr>
 
+" }}}3
 " -                   (prefix) {{{3
 " -a  -8           ascii / bytes info {{{4
 
@@ -2869,10 +2820,10 @@ endfu
 "}}}
 " Usage:{{{
 "
-"     :FAQ
+"     press `-q`
 "             begin answering a faq in a wiki
 "
-"     :FAQ!
+"     press `-q` again
 "             stop answering the faq
 "}}}
 
@@ -2888,9 +2839,8 @@ fu! s:faq() abort
     let faq_file = $XDG_RUNTIME_VIM.'/faq'
 
     for win in win_in_this_tab
-        if bufname(get(win, 'bufnr', -1)) is# faq_file
-            exe win.winnr.'close'
-            exe "norm 1\<space>G"
+        if bufname(get(win, 'bufnr', '')) is# faq_file
+            exe win.winnr . 'close'
             sil norm ]oz
             return ''
         endif
@@ -2898,15 +2848,13 @@ fu! s:faq() abort
 
     call map(deepcopy(win_in_this_tab), {i,v -> getwinvar(v.winnr, '&pvw', 0)})
     if index(win_in_this_tab , 1) !=# -1
-        return 'E590: A preview window already exists: previewwindow'
+        return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
     if index(map(deepcopy(win_in_this_tab), {i,v -> bufname(v.bufnr)}), faq_file) !=# -1
         echo 'a window displaying  '.faq_file.'  already exists'
         return ''
     endif
-
-    exe "norm 1\<space>G"
 
     exe 'sp '.faq_file
     sil norm [oP
@@ -2932,7 +2880,20 @@ fu! s:edit_readme() abort
     let readme = get(readmes, 0, '')
     if filereadable(readme) || isdirectory(readme)
         exe 'sp '.readme
-        1
+        " Why `:exe`?{{{
+        "
+        " If later  you add  a bar  after the  command, `1`  will be  interpreted as
+        " `:1p[rint]`.
+        " We don't want that side-effect.
+        "
+        " MWE:
+        "     " ✘ the 123th line is printed on the command-line
+        "     123 | sleep 1
+        "
+        "     " ✔ nothing is printed
+        "     exe '123' | sleep 1
+        "}}}
+        exe '1'
     endif
 endfu
 
@@ -2963,6 +2924,7 @@ endfu
 " `D` toggles the diff window.
 nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
+" }}}3
 " +                   (prefix) {{{3
 " +>    +<      split/join listing or long data {{{4
 
@@ -2993,6 +2955,7 @@ fu! s:clear_z() abort
     echo 'z register: cleared'
 endfu
 
+" }}}3
 " CR / Tab / Shift / Control / Meta {{{3
 " CR                  move cursor on 80/100 column {{{4
 
@@ -3019,7 +2982,7 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
 "                                 which would move the cursor 42 lines below the
 "                                 current one
 
-" S-→    C-↑ …        modified arrow keys {{{4
+" S-→    C-↑ ...      modified arrow keys {{{4
 
 " A terminal emulator gives its name to the programs through the shell
 " environment variable $TERM.
@@ -3105,6 +3068,7 @@ nno  <silent>  <m-m>  :<c-u>noh <bar> call <sid>where_are_my_matches()<cr>
 nno  <m-n>  ]'
 nno  <m-p>  ['
 
+" }}}3
 " =A                  toggle alignment {{{3
 
 nno  <silent>  =A  :<c-u>set opfunc=myfuncs#op_toggle_alignment<cr>g@
@@ -3549,6 +3513,7 @@ nno  <silent>  yM   :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
                    \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
+" }}}2
 " OBJECTS {{{2
 " i% {{{3
 
@@ -3706,6 +3671,7 @@ ono  aS  as
 xno  iS  is
 xno  aS  as
 
+" }}}2
 " SELECT {{{2
 
 " DWIM:
@@ -3796,29 +3762,38 @@ endfu
 " .    @ {{{3
 
 " Repeat last edit on all the visually selected lines with dot
-xno  <silent>  .  :norm .<cr>
-" We don't put a bang at the end of :norm. Why ?
-" Because it seems to prevent the repetition of a custom operator
-" and object, such as `ysil`.
+xno  <silent>  .  :norm! .<cr>
+"                      ^
+" Warning: The bang may prevent the repetition of pseudo-operators such as `ys` provided by `vim-surround`.{{{
+"
+" I think that's because `vim-surround` doesn't implement real operators.
+" It emulates them.
+" `vim-sandwich` doesn't suffer from this issue.
+"}}}
 
-" Repeat last macro on all the visually selected lines with @{reg}
-" The following mappings doesn't work, because the last carriage return which
-" executes the command (norm @q^M) is moved before the register name (norm @^Mq)
+" Purpose:{{{
 "
-"     xno <silent> @ :norm @<c-r>=nr2char(getchar(),1)<cr><cr>
+" Repeat last macro on all the visually selected lines with `@{reg}`.
+"}}}
+" Why not `xno  @  :norm @<c-r>=nr2char(getchar())<cr><cr>`?{{{
 "
-" The reason is probably because input() consumes the remaining characters
-" from the mapping. At the end of the mapping, there's a CR.
-" When input() is called it consumes it, instead of just waiting for our
-" input.
-" The solution would be to use inputsave() / inputrestore(), but that would
+" The  last carriage  return which  executes the  command (norm  @q^M) is  moved
+" before the register name (`norm @^Mq`).
+"
+" The reason is  probably because `getchar()` consumes  the remaining characters
+" from the mapping.
+" At the end of the mapping, there's a CR.
+" When `getchar()` is called, it consumes it, instead of just waiting for our input.
+" The solution would be to use  `inputsave()` / `inputrestore()`, but that would
 " make the mapping uselessly complex.
-xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar(),1)<cr>
+"}}}
+xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar())<cr>
 "                                    │
-"                                    └─ do NOT add a bang:
-"                                       we want the recursiveness, for one of our mapping to be used
-"                                       it temporarily disables some keysyms which may break the replay
-"                                       of a macro
+"                                    └─ Do NOT add a bang:{{{
+"
+" We want the recursiveness, for one of our mapping to be used.
+" It temporarily disables some keysyms which may break the replay of a macro.
+"}}}
 
 " A  I  gI    niceblock {{{3
 
@@ -3928,13 +3903,13 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 "                                                     └─ first, reverse the order of the blocks
 "                                                        then, join them
 
+" }}}1
 " COMMANDS {{{1
-" Warning:{{{
+" Warning: Here, do NOT create commands which are only relevant for a specific type of buffer. {{{2
 "
-" Do NOT use `vimrc`  to create commands which are only  relevant for a specific
-" type of buffer.  Those should be defined  in a plugin, or in a filetype plugin
-" with the `-buffer` attribute.
-"}}}
+" Those should be defined in a filetype plugin with the `-buffer` attribute.
+" }}}2
+
 " CGrep / LGrep {{{2
 
 " :Grep /  :LGrep grep  for a  pattern below  the cwd  using the  external shell
@@ -4488,7 +4463,34 @@ com! -bar
 \            WordFrequency
 \            call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
 
+" }}}1
 " AUTOCOMDS {{{1
+" Warning: If you need to write an autocmd listening to `BufWritePost`, put it BEFORE the one reloading our vimrc.{{{
+"
+" Otherwise, if the pattern is `$MYVIMRC`,  it won't work, probably because when
+" the vimrc is reloaded, the augroup it cleared.
+" Yes, the autocmd is re-installed, but it's  a new one, which won't take effect
+" immediately for the current `BufWritePost` event.
+" It will be executed only for the next `BufWritePost`.
+" At that point, the issue will repeat.
+"
+" MWE:
+"
+"     $ cat /tmp/vim.vim
+"         augroup test_sth
+"             au!
+"             au  BufWritePost  /tmp/vim.vim  so %
+"             au  BufWritePost  *             let g:d_ebug = get(g:, 'd_ebug', 0) + 1
+"         augroup END
+"
+"     $ vim -Nu /tmp/vim.vim /tmp/vim.vim
+"     :w
+"     :echo d_ebug
+"         → ✘ E121
+"
+" The issue disappears if you change the order of the autocmds.
+"}}}
+
 " Command Window {{{2
 
 " Form more ideas:
@@ -4498,35 +4500,48 @@ augroup my_cmdline_window
     au!
     au CmdWinEnter * nno  <buffer><nowait><silent>  q      :<c-u>q<cr>
     au CmdWinEnter * nno  <buffer><nowait><silent>  ZZ     <cr>
-    au CmdWinEnter * nno  <buffer><nowait><expr>    <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
+    " Purpose:{{{
+    "
     " By default,  C-c is useful to  quit the command-line window,  and populate
     " the command-line with the command which was being edited in the window.
-    " But, it doesn't get rid of the display of the command-line window.
+    " But, it doesn't erases the command-line window.
     " Our `C-c` mapping takes care of that.
+    "}}}
+    " FIXME: `:redraw` has an undesired side-effect.{{{
+    "
+    " It works,  it erases the  command-line window  immediately, as soon  as we
+    " leave it, and get back on the regular command-line.
+    " However, for  some reason, if our  command is supposed to  print a message
+    " (e.g. `:echo`), once we execute it later, the message is ALSO erased.
+    "}}}
+    au CmdWinEnter * nno  <buffer><nowait><expr>    <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
 
-    " These autocmds try to update the command-line history of the current
-    " session, and to make it persist across sessions, by overwriting
-    " `~/.viminfo` every time some lines were deleted in the command-line
+    " Purpose:{{{
+    "
+    " These  autocmds try  to update  the  command-line history  of the  current
+    " session,  and  to   make  it  persist  across   sessions,  by  overwriting
+    " `~/.viminfo`  every  time some  lines  were  deleted in  the  command-line
     " window.
+    "}}}
     au CmdWinEnter : let s:old_cmd_hist = getline(1, line('$')-1)
     au CmdWinLeave : call s:update_history()
     "              │
     "              └─ only Ex command-line window
 augroup END
 
-" If one day you want to add support for the search window (`q/`, `q?`), be
-" aware that it's tricky.
+" If one day you want to add support for the search window (`q/`, `q?`), be aware that it's tricky.{{{
+"
 " It seems Vim merges both search history (/ + ?) in the window.
 " Also, in `~/.viminfo`, an entry corresponding to a:
 "
 "         • forward  search,  begins with  `?/`
 "         • backward search,  begins with  `? `  (note the space)
-
+"}}}
 fu! s:update_history() abort
-    " update history of current session
-    "                               remove any command 5 characters long or shorter ┐
-    "                                                                ┌──────────────┤
-    let new_hist = filter(getline(1, '$'), { i,v -> v !~# '^\s*$' && v !~# '^.\{,5}$' })
+    " update history of CURRENT session
+    "                              remove any command 5 characters long or shorter ┐
+    "                                                               ┌──────────────┤
+    let new_hist = filter(getline(1, '$'), {i,v -> v !~# '^\s*$' && v !~# '^.\{,5}$'})
     call histdel(':')
     for line in new_hist
         call histadd(':', line)
@@ -4543,25 +4558,26 @@ fu! s:update_history() abort
     " One of the next 2 lines should probably be improved, because it seems to
     " fail to delete an entry containing a literal CR.
     "
-    "                                               ┌ take the old history
-    "                            ┌──────────────────┤
-    let deleted_entries = filter(copy(s:old_cmd_hist), { i,v -> index(new_hist, v) ==# -1 })
-    "                                                           └───────────────────────┤
-    "               … and keep only the entries which aren't in the new history anymore ┘
+    "                            ┌ take the old history
+    "                            ├──────────────────┐
+    let deleted_entries = filter(copy(s:old_cmd_hist), {i,v -> index(new_hist, v) ==# -1})
+    "                                                          └───────────────────────┤
+    "            ... and keep only the entries which aren't in the new history anymore ┘
     "
     " convert the text entries to delete, into their numeric indexes inside
     " the list `info`
-    call map(deleted_entries, { i,v -> index(info, ':'.v) })
+    call map(deleted_entries, {i,v -> index(info, ':'.v)})
 
     " sort them, and check they were all found (no -1)
-    call sort(filter(deleted_entries, { i,v -> v >= 0 }))
+    call sort(filter(deleted_entries, {i,v -> v >= 0}))
     if empty(deleted_entries)
         return
     endif
 
-    " every time we delete a line, the addresses of the next ones decrease by
-    " one; to not have to update the addresses after each removal, delete the
-    " lines in reverse order
+    " Every time we  delete a line, the  addresses of the next  ones decrease by
+    " one.
+    " To avoid  having to update  the addresses  after each removal,  delete the
+    " lines in reverse order.
     for entry in reverse(deleted_entries)
         call remove(info, entry, entry + 1)
     endfor
@@ -4574,11 +4590,11 @@ fu! s:make_missing_dir(file, buf) abort
     " Before creating a directory, make sure that the current buffer:
     "
     "     • is not a special one    :h special-buffers
-    "     • is not a remote file    ftp://…
+    "     • is not a remote file    ftp://...
     "
     " Found here:    http://stackoverflow.com/a/4294176
 
-    if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'\v^\w+\:\/'
+    if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'^\w\+:/'
         let dir = fnamemodify(a:file, ':h')
         if !isdirectory(dir)
             call mkdir(dir, 'p')
@@ -4588,7 +4604,7 @@ endfu
 
 augroup make_missing_dir
     au!
-    au BufWritePre * call s:make_missing_dir(expand('<afile>'), expand('<abuf>'))
+    au BufWritePre * call s:make_missing_dir(expand('<afile>:p'), expand('<abuf>'))
 augroup END
 
 " Default Extension {{{2
@@ -4872,42 +4888,6 @@ endfu
 
 " Reload config {{{2
 
-" FIXME:
-" For some reason, the following line doesn't work:
-"
-"         au BufWritePost …,$HOME/.vim/autoload/myfuncs.vim …
-"
-" It seems the reason is `$HOME/.vim/autoload/` is a symlink.
-" Maybe, when we write the file and `BufWritePost` is triggered, the autocmd
-" checks for a match against the path as it was typed, not resolved.
-"
-" It's weird, because according to `:h autocmd-patterns`, Vim should also check
-" for a match against the full path and after resolving symbolic links:
-
-"     2. When there is a '/' in the pattern, Vim checks for a match against both the
-"        short file name (as you typed it) and the full file name (after expanding
-"        it to a full path and resolving symbolic links).
-"
-" Maybe it doesn't work because it's not the file itself which is the target
-" of a symlink, but one of the component of its path, namely `autoload/`.
-"
-" Indeed, atm:
-"
-"         autoload -> /home/user/Dropbox/conf/vim/autoload
-"
-" Solutions:
-" 1 - write the resolved filename; atm it's:
-"
-"         au BufWritePost …,$HOME/Dropbox/conf/vim/autoload/myfuncs.vim …
-"
-" I don't want that. Why?
-" Because I could change the location of the file.
-" The only thing that will probably never move is the symlink itself.
-"
-" 2 - Force Vim to resolve the path, using `resolve()`.
-" This way, I can change the location of the `autoload/` directory and the target
-" of the symlink whenever I want, without breaking the autocmd.
-
 augroup source_files
     au!
     " Why no `-merge`?{{{
@@ -4919,9 +4899,20 @@ augroup source_files
     "
     " See `xrdb -query` to get a list of all existing resources.
     "}}}
-    au BufWritePost ~/.Xresources call system('xrdb ~/.Xresources')
-    exe 'au BufWritePost $MYVIMRC,'.resolve($HOME.'/.vim/autoload/myfuncs.vim')
-    \ . ' nested exe "source ".expand("<afile>")'
+    au BufWritePost  ~/.Xresources  call system('xrdb ~/.Xresources')
+    au BufWritePost  ~/.vim/autoload/myfuncs.vim  exe 'source '.expand('<afile>:p')
+
+    " Why shouldn't I write any autocmd listening to `BufWritePost` after this one?{{{
+    "
+    " see `Warning` at the beginning of our autocmd section.
+    "}}}
+    " Could I move the autocmd sourcing `myfuncs.vim` afterwards nonetheless?{{{
+    "
+    " Yes, because they are not triggered by the same filename.
+    " When you write `myfuncs.vim`, this augroup is not cleared.
+    " Still, don't do it.
+    "}}}
+    au BufWritePost  $MYVIMRC  exe 'source '.expand('<afile>:p')
 augroup END
 
 " Standard Input {{{2
@@ -4951,18 +4942,105 @@ augroup END
 " So we do it here, for every spell binary file, but only if
 " the binary (.add.spl) is older than the original addition file (.add).
 
-for spell_file in glob('~/.vim/spell/*.add', 1, 1)
-    if filereadable(spell_file) && !filereadable(spell_file.'.spl')
-  \ || (getftime(spell_file) > getftime(spell_file.'.spl'))
-        exe 'mkspell! '.fnameescape(spell_file)
-    endif
-endfor
+fu! s:mkspell() abort
+    for spell_file in glob('~/.vim/spell/*.add', 1, 1)
+        if filereadable(spell_file) && !filereadable(spell_file.'.spl')
+      \ || (getftime(spell_file) > getftime(spell_file.'.spl'))
+            exe 'mkspell! '.fnameescape(spell_file)
+        endif
+    endfor
+endfu
+call s:mkspell()
 
 " Why the for loop?
 " Because there can be several spell files (one per language), in which we
 " made additions.
 "
 " http://vi.stackexchange.com/a/5052/6960
+
+" Swapfile Handling "{{{2
+
+" What does it do?{{{
+"
+" It answers automatically to the question asked when a swapfile is found.
+" If the swapfile is older than the  file, it's removed because useless, and the
+" file is editd as if nothing happened.
+"
+" If the swapfile is newer, the file is opened in readonly mode, so that you can
+" see its contents, but not change it (without being warned).
+"}}}
+" Why do you use this autocmd, instead of `set shm+=A`?{{{
+"
+" `set  shm+=A` would  completely bypass  the question  and the  existence of  a
+" swapfile would never be brought to our attention.
+"
+" In contrast, this autocmd will still warn us whenever a swapfile is found, and
+" write the warning in  the messages, so that we can review it  later if we need
+" to debug some unexpected behavior from Vim.
+"
+" Besides, it won't let us edit a file for which a newer swapfile exists.
+" There could be valuable information in there.
+"}}}
+" A swapfile has been found, and the file has been loaded in readonly mode!  What should I do?{{{
+"
+" If you only need to read it, nothing. Just read it.
+"
+" If you need to edit it, you have an issue.
+" Indeed, if  the autocmd hasn't  removed the swapfile,  it means the  latter is
+" more recent than the file (or has the same timestamp).
+"
+" So, it  could contain valuable  information, that  you need to  recover BEFORE
+" doing any further change (because this valuable information may radically alter
+" the change you intend to do).
+"}}}
+" How do I recover the contents of a swapfile?{{{
+"
+"     # recover swapfile
+"     $ vim -r file
+"
+"     " save the result in another file
+"     :write file.recovered
+"
+"     " load the original (unrecovered) file in readonly mode
+"     " (this works thanks to our autocmd which should answer the question)
+"     :e!
+"
+"     " show the differences between the original file and its recovered version
+"     :diffsp file.recovered
+"
+" We have encapsulated this procedure in a zsh function (`vim_recover()`).
+"
+" If the recovered file looks good, you still have to execute:
+"
+"     $ mv file.recovered file
+"
+" See `:h 11.1` for more info.
+"}}}
+
+" (stolen from blueyed)
+augroup swapfile_handling
+    au!
+    au SwapExists * call s:handle_swapfile(expand('<afile>:p'))
+augroup END
+
+fu! s:handle_swapfile(filename) abort
+    " If swapfile is older than file itself, just get rid of it.
+    if getftime(v:swapname) < getftime(a:filename)
+        call s:warning_msg('Old swapfile detected, and deleted:   '.a:filename)
+        call delete(v:swapname)
+        let v:swapchoice = 'e'
+    else
+        call s:warning_msg('Swapfile detected, opening read-only:   '.a:filename)
+        let v:swapchoice = 'o'
+    endif
+endfu
+
+fu! s:warning_msg(msg) abort
+    echohl WarningMsg
+    " It seems that when `SwapExists` is fired, Vim executes `:echom` silently.
+    unsilent echom a:msg
+    echohl NONE
+endfu
 
 " Terminal {{{2
 
@@ -5045,6 +5123,7 @@ fu! s:trailing_whitespace(create_match) abort
     endif
 endfu
 
+" }}}1
 " TO_DO {{{1
 
 " *s/^\v%V"\s=\zs\d+\ze\s*-/\=submatch(0)-1/c
@@ -5438,7 +5517,7 @@ endfu
 "             typically show error:
 "
 "                     echohl errormsg
-"                     echo v:exception.' | '.v:throwpoint
+"                     echom v:exception.' | '.v:throwpoint
 "                     echohl none
 "
 "         finally
@@ -5973,7 +6052,7 @@ endfu
 "         :h e325
 "
 " but the error won't be catched because vim prompts us with a question to know
-" what we want to do (edit, quit, …).
+" what we want to do (edit, quit, ...).
 " worse, the question is not visible.
 "
 " solution: for the moment, press `e` to choose to edit the file.
@@ -5981,7 +6060,7 @@ endfu
 " but this begs the question. how to deal with an error prompting us
 " with a question? how to catch it properly?
 "
-" update:
+" Update:
 " we have the same issue in `~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim`
 "
 "         if tabpagenr('$') ==# 1 && winnr('$') ==# 1
@@ -6002,6 +6081,13 @@ endfu
 "                     endtry
 "
 "                 we wouldn't see the error message (until we press enter?).
+"
+" Update:
+" In  this particular  case  (there are  others?),  the solution  is  to use  an
+" autocmd listening  to `SwapExists`,  and use `v:swapchoice`  to make  a choice
+" automatically.
+"
+" Or, add the `A` flag to 'shm' to completely ignore the message.
 "
 " 71 -
 " write your own colorscheme.
@@ -6030,12 +6116,12 @@ endfu
 "        • 'varsofttabstop', 'vartabstop'
 "        • :h `matchadd()`, new `window` key in optional dictionary
 "        • :unl[et] ${env-name} (:h :unlet-$)
+"        • `:swapname`
 "        • `appendbufline()`
 "        • `deletebufline()`
 "        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
 "        • `getcwd(-1)` return the global directory
 "        • `reg_recording()` + `reg_executing()`
-"        • `swapname()`
 "        • `term_setansicolors()`, `term_getansicolors()`, `g:term_ansi_colors`
 "        • `term_setsize()`
 "        • `trim()`
@@ -6778,32 +6864,10 @@ endfu
 " https://unix.stackexchange.com/a/316166/289772
 "
 " 124 -
-"
-" write this in `/tmp/dot.dot`:
-"
-"     digraph graphname {
-"         a -> b -> c;
-"         b -> d;
-"     }
-"
-" execute this:
-"     !dot -txlib %:p:s &
-"
-" it works, the graph is shown.
-"
-" now try this:
-"     call system('!dot -txlib '.expand('%:p:s').' &')
-"
-" the graph is not shown.
-" why?
-" has it been compiled?
-" does it mean that for an interactive use (... &) we have to use `:!`?
-"
-" 125 -
 " be  consistent  in  how  you  chose  the  priority  of  matches  created  with
 " `matchadd()`.
 "
-" 126 -
+" 125 -
 " saving an option, changing it, then restoring it via a timer is a bad idea.
 " check where you did it.
 " remove the timer.
@@ -6812,7 +6876,7 @@ endfu
 " in a try conditional, and restore it in the finally clause
 " (for example, we didn't in vim-breakdown)
 "
-" 127 -
+" 126 -
 "
 " Check how plugin authors implement a scratch buffer.
 " Which options do they set? For which purpose exactly?
@@ -6826,30 +6890,40 @@ endfu
 " possible bugs,  and to be  consistent in  the options you  set as well  as the
 " order in which you set them.
 "
-" 128 -
+" 127 -
 " Be consistent in how you extract the comment leader.
 " Vimgrep everywhere for `cml`.
 "
-" 129 -
-" We have 5 plugins which uses `repeat#set()`:
+" Update:
+" We should probably define functions in our library (lg-lib), to:
+"
+"     • extract the comment leader
+"     • get a pattern to detect whether the current line is commented
+"     • return the commented version of a line (before pasting it somewhere)
+"
+" 128 -
+" We have 5 plugins which use `repeat#set()`:
+"
+"     vimtex
+"
+"     vim-easy-align
+"
+"     vim-sneak
 "
 "     vim-abolish
-"     vim-easy-align
-"     vim-sneak
 "     vim-speeddating
-"     vimtex
 "
 " Try to get rid of the call to the function, either by:
 "
-"     • submitting bug report
+"     • submitting a bug report/PR
 "     • re-implementing the plugin
 "
-" 130 -
+" 129 -
 " You shouldn't have frozen plugins.
 " If a plugin is  frozen because you've fixed an issue, submit  the issue on the
 " bug tracker.
 "
-" 131 -
+" 130 -
 "     :vim /<buffer>/gj ~/.vim/plugged/vimtex/**/*.vim | cw
 "     :Cfilter! <nowait>\|autocmd\|<buffer>\s*\%(<plug>\|<sid>\)
 "
@@ -6857,7 +6931,7 @@ endfu
 " the user (!= <plug>), and which doesn't contain <nowait>.
 " Submit a PR/issue to suggest adding `<nowait>`.
 "
-" 132 -
+" 131 -
 " Search for all vimtex mappings which haven't `<c-u>` before `:call`.
 " Submit an issue whose message looks like:
 "
@@ -6870,59 +6944,88 @@ endfu
 " But make sure they are not necessary. They could be, if the function needs
 " to be re-called several times when the user pressed a count.
 "
-" 133 -
-" Try to replace as many `:s` commands with `setline()`:
+" 132 -
+" Try to replace as many `:s` commands as possible with `setline()`:
 "
 "     noa vim !s\([/:;@]\).\{-}\1!gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "     Cfilter! -other_plugins -commented -tmp
 "     Cfilter! ^\s*\%(let\|call\|echo\|return\|if\|unlet!\=\|&&\)\s
 "
-" 134 -
+" 133 -
 " Ask whether `abort` should be added to all vimtex functions.
+"
+"         :noa vim /^\s*function!\%(.*abort\)\@!/gj ~/.vim/plugged/vimtex/**/*.vim | cw
+"
+" 134 -
+" Every  time you open a  window, be aware that  an error may be  raised because
+" you're in the command-line window.
+" You may want to catch that error to avoid a stack trace.
+"
+" 135 -
+" Watch out for this anti-pattern:
+"
+"     " assume that `var` can only have 3 values ['foo', 'bar', 'baz']
+"     echo var is# 'foo'
+"         \ ?     1
+"         \ : var is# 'bar'
+"         \ ?     2
+"         \ :     3
+"
+" You should rewrite the code like so:
+"
+"     echo {'foo': 1, 'bar': 2, 'baz': 3}[var]
+"
+" It's better because:
+"
+"     • more concise/readable
+"     • mention explicitly the third value 'baz'
+"         (before it was implicit/not mentioned at all)
+"     • easier to expand later if `var` can have more values
+"
+" 136 -
+" Recently, when we try to push a commit and press enter after our username,
+" the terminal writes `^M` instead of a linefeed.
+" Next time it happens, try:
+"
+"     # check settings (`icrnl` should not be prefixed by `-`)
+"     $ stty -a
+"
+"     # fix tty
+"     $ stty icrnl
+"
+"     https://askubuntu.com/a/454663/867754
+"
+" Find what's causing the issue.
+" Is it something we do in Vim?
 
 
 
 " sessions to finish:
 "
-"         01. sandwich
-"         02. markdown
-"         03. emmet
-"         04. arglist (improve our arglist mappings)
-"         05. config
-"         06. paragraph (master `$ par`)
-"         07. qf_issue (finish the last two questions)
-"         08. completion
-"         09. ultisnips
-"         10. profiling
-"         11. debug
-"         12. try
-"         13. async
-"         14. unix
-"         15. tree
-"         16. breakdown
-"         17. package
-"         18. tag
-"         19. cwd
-"         20. unix
-"         21. keyboard
+"         01. swap
+"         02. sandwich
+"         03. markdown
+"         04. emmet
+"         05. arglist (improve our arglist mappings)
+"         06. config
+"         07. paragraph (master `$ par`)
+"         08. qf_issue (finish the last two questions)
+"         09. completion
+"         10. ultisnips
+"         11. profiling
+"         12. debug
+"         13. try
+"         14. async
+"         15. unix
+"         16. tree
+"         17. breakdown
+"         18. package
+"         19. tag
+"         20. cwd
+"         21. unix
+"         22. keyboard
 "
 " Once finished, get back to studying the terminal and latex.
-
-
-
-" augroup test_sth
-"     au!
-"     " FIXME:
-"     " Why does this autocmd fails to print 'hello' when we write the vimrc?
-"     " Why does it work if I rename the augroup, then `:w` again?
-"     " Why does it work in another file?
-"     " Does `:unsilent` have any effect on `:echom`?
-"     au  BufWritePost * call Func_to_test()
-" augroup END
-"
-" fu! Func_to_test()
-"      echom 'hello'
-" endfu
 
 
 
@@ -7093,14 +7196,8 @@ endfu
 
 
 
-"  pair_complete.vim
-"  undotreeshow       4929 (before big refactoring)
-"  undotreeshow       5247 (after  ")
-
-
-
-" ino <c-c> <c-r>=string(eval(input('Calculate: ')))<cr>
-" ino <c-c> <c-r>=eval(input('Calculate: '))<cr>
+" ino <c-g>c <c-r>=string(eval(input('Calculate: ')))<cr>
+" ino <c-g>c <c-r>=eval(input('Calculate: '))<cr>
 
 
 " don't use `<space>g`, I press it by accident too often
@@ -7230,8 +7327,6 @@ fu! s:nofrils() abort
 endfu
 
 
-" MISC {{{1
-
 " let g:nums = split(": one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen")
 " let g:tens = split(": ten twenty thirty fourty fifty sixty seventy eighty ninety")
 
@@ -7314,3 +7409,4 @@ endfu
 "     call setline('.', new_line)
 "     return repeat("\<Right>", col('$') - col('.'))
 " endfu
+

@@ -196,6 +196,26 @@
 #     apt-file update
 #     apt-file -x search '/myalias$'
 
+# FIXME:
+# Find a video whose title contains a single quote; e.g.:
+#
+#   [HorribleSubs] JoJo's Bizarre Adventure - Golden Wind - 01 [480p].mkv
+#
+# Start ranger, navigate to the directory containing of the video, and play it.
+# Quit ranger:
+#
+#   zsh:1: unmatched '
+#
+# The issue is probably in ranger, because it persists even if I disable the zshrc.
+# However, I can't find anything wrong in:
+#
+#   ~/.config/ranger/rifle.conf
+#   →
+#   mime ^video,       has mpv,      X, flag f = mpv -- "$@"
+#                                                       ^^^^
+#                                                       should properly a video title
+#                                                       even if it contains a single quote
+
 # TODO:
 # understand: https://unix.stackexchange.com/questions/366549/how-to-deal-with-filenames-containing-a-single-quote-inside-a-zsh-completion-fun
 
@@ -1720,6 +1740,17 @@ vim_prof() { #{{{2
   TMP="$(mktemp /tmp/.vim_profile.XXXXXXXXXX)"
   vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
   vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
+}
+
+vim_recover() { #{{{2
+  emulate -L zsh
+  local file
+  file="$(basename "$1")"
+  # recover swapfile
+  vim -r "$1" +"w /tmp/.${file}.recovered | e! | diffsp /tmp/.${file}.recovered"
+  # If the recovered version of the file looks good, you still have to do this:
+  #
+  #   $ mv recovered_file original_file
 }
 
 vim_startup() { #{{{2
