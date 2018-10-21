@@ -1,4 +1,4 @@
-if exists(':Abolish') != 2
+if exists(':Abolish') !=# 2
     finish
 endif
 

@@ -124,7 +124,7 @@ fu! myfuncs#block_select_box() abort "{{{1
         let guard += 1
     endwhile
 
-    if guard == 99
+    if guard ==# 99
         call winrestview(view)
         return
     endif
@@ -480,7 +480,7 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
     try
         let url = substitute(a:url, '/$', '', '').'.wiki'
         let tempdir = substitute(tempname(), '\v.*/\zs.{-}', '', '')
-        call system('git clone '.shellescape(url).' '.tempdir)
+        sil call system('git clone '.shellescape(url).' '.tempdir)
         let files = glob(tempdir.'/*', 0, 1)
         call map(files, { i,v -> substitute(v, '^\C\V'.tempdir.'/', '', '')})
         call filter(files, { i,v -> v !~# '\v\c_?footer%(.md)?$'})
@@ -578,7 +578,7 @@ fu! myfuncs#in_A_not_in_B(...) abort "{{{1
     " see a  file anymore, only  its contents, which  removes some noise  in the
     " output.
     "}}}
-    let output = systemlist('diff -U $(wc -l < '.fileA.') '.fileA.' '.fileB." | grep '^-' | sed 's/^-//g'")
+    sil let output = systemlist('diff -U $(wc -l < '.fileA.') '.fileA.' '.fileB." | grep '^-' | sed 's/^-//g'")
 
     call map(output, {i,v -> {'text': v}})
     call setloclist(0, output)
@@ -592,7 +592,7 @@ endfu
 fu! myfuncs#join_blocks(first_reverse) abort "{{{1
     let [line1, line2] = [line("'<"), line("'>")]
 
-    if (line2 - line1 + 1) % 2 == 1
+    if (line2 - line1 + 1) % 2 ==# 1
         echohl ErrorMsg
         echo ' Total number of lines must be even'
         echohl None
@@ -771,14 +771,14 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "       • the shell use `shellescape(…)`
             "       • both      use `shellescape(…, 1)`
             "                                       │
-            "                                       └─ only needed after a `:!` command; not in `system(…)`
+            "                                       └─ only needed after a `:!` command; not in `system(...)`
             "                                          `:!` is the only command to remove the backslashes
             "                                          added by the 2nd non-nul argument
             "
             "                                MWE:
             "                                :e /tmp/foo%bar
-            "                                :call system('echo '.shellescape(expand('%')).' >>/tmp/file')
-            "                                :call system('echo '.shellescape(expand('%'),1).' >>/tmp/file')
+            "                                :sil call system('echo '.shellescape(expand('%')).' >>/tmp/file')
+            "                                :sil call system('echo '.shellescape(expand('%'),1).' >>/tmp/file')
             "
             "                                          $ cat /tmp/foo%bar
             "                                              /tmp/foo%bar
@@ -806,7 +806,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
 endfu
 
 fu! s:op_grep_get_qfl(pat) abort
-    return systemlist(&grepprg.' '.shellescape(a:pat).' 2>/dev/null')
+    sil return systemlist(&grepprg.' '.shellescape(a:pat).' 2>/dev/null')
 endfu
 
 fu! myfuncs#op_incremental_yank(type) abort "{{{2
@@ -869,7 +869,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " save registers and types to restore later.
         " FIXME:
         " Wait...
-        " We save and restore the register which can prefixed before the `dr` operator.
+        " We save and restore the register which can be prefixed before the `dr` operator.
         " Is it necessary?
         " If so, have we done the same for the other operators which can be prefixed
         " by a register?
@@ -895,8 +895,8 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " build condition to check if we're replacing the current line
 
         let replace_current_line =     line("'[") ==# line("']")
-        \                          &&  col("'[") == 1
-        \                          && (col("']") ==# col('$')-1 || col('$') == 1)
+        \                          &&  col("'[") ==# 1
+        \                          && (col("']") ==# col('$')-1 || col('$') ==# 1)
 
         " If we copy a line containing leading whitespace, and try to replace
         " another line like this: `0dr$`
@@ -1070,15 +1070,15 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
         "         :PQ find /etc -name '*.conf'                    ✘
         "         :PQ grep -IRn foobar ~/.vim | grep -v backup    ✔
         " cgetexpr systemlist(a:cmd)
-        call system(a:cmd.' >/tmp/my_cfile')
+        sil call system(a:cmd.' >/tmp/my_cfile')
         cgetfile /tmp/my_cfile
 
         call setqflist([], 'a', {'title': a:cmd})
 
     elseif a:list is# 'arglist'
-        exe 'tab args '.join(map(filter(systemlist(a:cmd),
-        \                        {i,v -> filereadable(v)}),
-        \                    {i,v -> fnameescape(v)}))
+        sil exe 'tab args '.join(map(filter(systemlist(a:cmd),
+            \     {i,v -> filereadable(v)}),
+            \ {i,v -> fnameescape(v)}))
         " enable item indicator in the statusline
         let g:my_stl_list_position = 2
     endif
@@ -1304,12 +1304,12 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
         " therefore the  next time we  invoke the  function, it won't  split the
         " window, thinking the pane is still there.
         " We must make sure it's still open before going further.
-        "                                                       ┌ eliminate trailing newline
-        "                                                       ├───┐
-        let open_panes = split(system("tmux list-panes -F '#D'")[:-2])
-        "                                               │   │
-        "                                               │   └ unique pane ID
-        "                                               └ format the output according to the following string
+        "                                                           ┌ eliminate trailing newline
+        "                                                           ├───┐
+        sil let open_panes = split(system("tmux list-panes -F '#D'")[:-2])
+        "                                                   │   │
+        "                                                   │   └ unique pane ID
+        "                                                   └ format the output according to the following string
         let is_pane_still_open = index(open_panes, s:pane_id) >= 0
         if !is_pane_still_open
             " the pane should be closed, but better be safe
@@ -1319,12 +1319,12 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
     endif
 
     if !exists('s:pane_id')
-        let s:pane_id = systemlist(
-        \       'tmux split-window -c '.shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
-        \ )[0]
+        sil let s:pane_id = systemlist(
+            \ 'tmux split-window -c '.shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
+            \ )[0]
     endif
 
-    let pane_current_path = systemlist("tmux list-panes -F '#{pane_current_path}__::__#D'")
+    sil let pane_current_path = systemlist("tmux list-panes -F '#{pane_current_path}__::__#D'")
     call filter(pane_current_path, {i,v -> v =~# '\m\C'.s:pane_id.'$'})
     let pane_current_path = substitute(get(pane_current_path, 0, ''), '__::__.\{-}$', '', '')
 
@@ -1335,7 +1335,7 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
         " Without `-l`, it would be translated into a CR.
         let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape('cd '.shellescape(a:1))
                    \ . ' && tmux send-keys -t '.s:pane_id.' C-m'
-        call system(tmux_cmd)
+        sil call system(tmux_cmd)
     endif
 
     " TODO:
@@ -1353,7 +1353,7 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
 
     let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape(cmd)
                \ . ' && tmux send-keys -t '.s:pane_id.' C-m'
-    call system(tmux_cmd)
+    sil call system(tmux_cmd)
     " The `-d`  in `tmux split-window ...`  means “do NOT give  focus“, so don't
     " try to use `tmux last-pane`, there's no last pane.
 endfu

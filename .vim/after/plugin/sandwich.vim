@@ -94,7 +94,7 @@ fu! s:set_recipes() abort
     " IOW, a whitelist is more reliable than a blacklist.
     let problematic_recipes = [
         \ {'noremap':     0,
-        \  'expr_filter': ['operator#sandwich#kind() ==# "replace"'],
+        \  'expr_filter': ['operator#sandwich#kind() is# "replace"'],
         \  'kind':        ['replace', 'textobj'],
         \  'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
         \  'input':       ['t'],

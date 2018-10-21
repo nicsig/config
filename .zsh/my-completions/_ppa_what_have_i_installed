@@ -1,0 +1,4 @@
+#compdef ppa_what_have_i_installed
+
+_arguments '1:ppa:_values /var/lib/apt/lists/*_Packages' && return 0
+

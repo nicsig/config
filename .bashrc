@@ -161,13 +161,38 @@ shopt -s histreedit
 shopt -s histverify
 
 # Sourcing {{{1
-
 # Warning: Don't move `Sourcing` after `Key bindings`!{{{
 #
 # It would give  priority to the key bindings defined  in third-party files over
 # ours.
 #}}}
-. /usr/share/bash-completion/bash_completion
+
+# What's the purpose of this command?{{{
+#
+# It  installs  programmable  completion  functions for  the  most  common  Unix
+# commands.
+#}}}
+# Will it work on a new machine?{{{
+#
+# No.
+#
+# You need to install the `bash-completion` package.
+#}}}
+# What's the equivalent in zsh?{{{
+#
+#     % autoload -Uz compinit
+#     % compinit
+#}}}
+# How to make sure it worked as expected?{{{
+#
+# Type:
+#
+#     $ help Tab Tab
+#
+# Bash should complete `:` (which is a command).
+# If bash completes a filename, the completion functions were not installed.
+#}}}
+. /etc/bash_completion
 
 # Key bindings {{{1
 # CTRL {{{2

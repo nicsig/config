@@ -366,33 +366,58 @@ fpath=(${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath)
 #     https://github.com/sunaku/dasht
 fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
 
-# Use modern completion system
-
-#         ┌ from `man zshmisc`:{{{
-#         │     suppress usual alias expansion during reading
-#         │
-#         │┌ from `man zshbuiltins` (AUTOLOADING FUNCTIONS):
-#         ││     mark the function to be autoloaded using the zsh style,
-#         ││     as if the option KSH_AUTOLOAD was unset
-#         ││}}}
-autoload -Uz compinit
-compinit
+# What's the purpose of this command?{{{
+#
+# It  installs  programmable  completion  functions for  the  most  common  Unix
+# commands.
+#}}}
+# What's the equivalent in bash?{{{
+#
+#     $ . /etc/bash_completion
+#}}}
 # What's `autoload`?{{{
 #
-# According to `run-help autoload`,
-# `autoload` is equivalent to `functions -u`
+# `autoload` is equivalent to `functions -u`    (see `run-help autoload`)
 #                                      │
 #                                      └ autoload flag
 #
-# According to `run-help functions`,
-# `functions` is equivalent to `typeset -f`
+# `functions` is equivalent to `typeset -f`     (see `run-help functions`)
 #                                     │
 #                                     └─ refer to function
 #                                        rather than parameter
 #
-# According to `run-help typeset`,
-# `typeset` sets or displays attributes and values for shell parameters.
+# So:
+#
+#     autoload
+#     ⇔
+#     typeset -f -u
+#
+# Also, `typeset`  sets or displays  attributes and values for  shell parameters
+# (see `run-help typeset`).
 #}}}
+# Why is `compinit` an autoloadable function, instead of a simple sourced script?{{{
+#
+# The behavior of a script could be altered by custom aliases.
+# OTOH, a function can be made  autoloadable with `autoload` which can be passed
+# the `-U` option, to suppress alias expansion.
+#}}}
+autoload -Uz compinit
+#         ││{{{
+#         │└ from `man zshbuiltins` (AUTOLOADING FUNCTIONS):
+#         │      mark the function to be autoloaded using the zsh style,
+#         │      as if the option KSH_AUTOLOAD was unset
+#         │
+#         └ from `man zshmisc`:
+#               suppress usual alias expansion during reading
+#}}}
+# Is this command slow?{{{
+#
+# The first time you start it, yes.
+# If you've removed `~/.zcompdump`, yes.
+#
+# Otherwise, no.
+#}}}
+compinit
 
 # Why removing the alias `run-help`?{{{
 #
@@ -416,8 +441,8 @@ autoload -Uz run-help
 # Note, that  `run-help` will  first show you  that `sudo` is  an alias  on your
 # machine. Press any key to get the manpage of `aptitude`.
 #
-# Do the same thing for various other  commands (if I type `git add`, `run-help`
-# should show you the help of `git-add`, ...).
+# Do  the  same  thing for  various  other  commands  (if  you type  `git  add`,
+# `run-help` should show you the help of `git-add`, ...).
 #
 #     https://stackoverflow.com/a/32293317/9780968
 #}}}
@@ -732,6 +757,23 @@ alias v='f -t -e vim -b viminfo'
 
 alias grep='grep --color=auto'
 
+# iconv {{{3
+
+# What's `iconv`?{{{
+#
+# A utility to convert a text from one encoding (-f ...) to another (-t ...).
+#}}}
+# What's `ascii//TRANSLIT`?{{{
+#
+# An encoding similar to `ascii`.
+# The difference is that characters are transliterated when needed and possible.
+#
+# This means that when a character cannot be represented in the target character
+# set, it should be approximated through one or several similar looking characters.
+# Characters that cannot be transliterated are replaced with a question mark (?).
+#}}}
+alias iconv_no_accent='iconv -f utf8 -t ascii//TRANSLIT'
+
 # iotop {{{3
 
 # `iotop` monitors which process(es) access our disk to read/write it:
@@ -848,6 +890,13 @@ alias tp='trash-put'
 # TRash Restore
 alias trr='rlwrap restore-trash'
 
+# ubuntu-code-name {{{3
+
+alias ubuntu-code-name='lsb_release -sc'
+#                                    ││
+#                                    │└ --codename
+#                                    └ --short
+
 # VBoxManage {{{3
 
 alias vb='VBoxManage'
@@ -895,12 +944,12 @@ alias -g C='| column -t'
 alias -g L='2>&1 | less -R'
 
 # silence!
-#                    ┌───── redirect output to /dev/null
-#                    │    ┌ same thing for errors
-#           ┌────────┤ ┌──┤
+#           ┌ redirect output to /dev/null
+#           │          ┌ same thing for errors
+#           ├────────┐ ├──┐
 alias -g S='>/dev/null 2>&1 &'
 #                           │
-#                           └─ execute in background
+#                           └ execute in background
 
 # watch a video STream with the local video player:
 #
@@ -1133,8 +1182,6 @@ cmdfu() { #{{{2
 }
 
 expand_this() { #{{{2
-  emulate -L zsh
-
   # Purpose?{{{
   #
   # Suppose you want to remove some files, and you pass a glob pattern to `rm`:
@@ -1147,6 +1194,8 @@ expand_this() { #{{{2
   #
   #     $ expand_this foo*bar
   #}}}
+  emulate -L zsh
+
   # Why not `$*`?{{{
   #
   # Because  it would  quote  the whole  expansion  of the  glob  passed to  the
@@ -1167,7 +1216,7 @@ examples:
     $0 "\${path[@]}"
 EOF
 
-    return
+    return 64
   fi
   printf -- '%s\n' "$@"
 }
@@ -1184,7 +1233,7 @@ ff_extract_sub() { #{{{2
     cat <<EOF
 usage:    $0 <file> [<subtitle number>]
 EOF
-    return
+    return 64
   fi
   ffmpeg -i "$1" -map 0:s:"$2" sub.srt
 }
@@ -1265,7 +1314,7 @@ usage:
     grep_pdf 'vim regex' file1.pdf file2.pdf ...
     grep_pdf 'vim regex' *.pdf
 EOF
-    return
+    return 64
   fi
   local pat="$1"
   # remove the first argument so that `$@` expands to the files,
@@ -1303,6 +1352,31 @@ EOF
   +'argdo do BufWinEnter' \
   +"sil! noa vim /${pat}/gj ## | cw" \
   "$@"
+}
+
+in_fileA_but_not_in_fileB() { #{{{2
+  emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+usage:
+    in_fileA_but_not_in_fileB <file_a> <file_b>
+EOF
+    return 64
+  fi
+  # http://unix.stackexchange.com/a/28159
+  # Why `wc -l <file` instead of simply `wc -l file`?{{{
+  #
+  #     $ wc -l file
+  #     5 file
+  #
+  #     $ wc -l < file
+  #     5
+  #
+  # I think that when you reconnect the  input of `$ wc` like this, it doesn't
+  # see a  file anymore, only  its contents, which  removes some noise  in the
+  # output.
+  #}}}
+  diff -U $(wc -l <"$1") "$1" "$2" | grep '^-' | sed 's/^-//g'
 }
 
 loc() { #{{{2
@@ -1590,16 +1664,61 @@ palette(){ #{{{2
   done
 }
 
-repo_what_have_you() { #{{{2
+ppa_what_can_i_install() { #{{{2
   emulate -L zsh
   if [[ $# -eq 0 ]]; then
     cat <<EOF >&2
 usage:
+    $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
     $0 <Tab>
 EOF
-    return
+    return 64
   fi
-  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' /var/lib/apt/lists/*"$1"*
+  awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$1"
+}
+
+ppa_what_have_i_installed() { #{{{2
+  emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+usage:
+    $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
+    $0 <Tab>
+EOF
+    return 64
+  fi
+  packages="$(awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$1")"
+  cat <<EOF
+  The following packages are currently installed on your machine,
+  and they can be installed from the PPA you provided.
+  So, there's a good chance for them to have been installed from this PPA.
+  However, they could also have been installed from somewhere else
+  (e.g. your default repositories).
+  To be sure, for each of them, execute this command:
+
+      $ apt-cache policy <package>
+
+EOF
+  for package in ${=packages}; do
+    if ! dpkg-query -W -f='${status}\n' "${package}" |& grep -E 'not-installed|deinstall|no packages found' >/dev/null 2>&1; then
+    #                │  │{{{
+    #                │  └ -f='<format>'
+    #                │      You can select one or several fields, and format them
+    #                │      however you want.
+    #                │      For the full list of fields, see:
+    #                │
+    #                │         `man dpkg-query`
+    #                │         > OPTIONS
+    #                │         > /-f\>
+    #                │
+    #                └ -W [package-name-pattern...]
+    #                      List all packages matching the given pattern.
+    #                      The output can be  customized using the `-f` option.
+    #                      `-W` is the long form of `--show`
+    #                                                  ^}}}
+      printf -- "${package}\n"
+    fi
+  done
 }
 
 script_record() { #{{{2
@@ -1625,7 +1744,7 @@ OR
   \`script_record 'cmd'\` to record a specific command
 
 EOF
-    return
+    return 64
   fi
   scriptreplay -s /tmp/.script_record.log -t /tmp/.script_timing.log
 }
@@ -2704,7 +2823,12 @@ ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=137,bold'
 
 # differentiate aliases and functions from other types of command
 ZSH_HIGHLIGHT_STYLES[alias]='fg=magenta,bold'
-ZSH_HIGHLIGHT_STYLES[function]='fg=magenta,underline'
+ZSH_HIGHLIGHT_STYLES[function]='fg=168,bold'
+#                                  │{{{
+#                                  └ press `1!s` on a builtin zsh command in this file,
+#                                  and you'll see that the syntax element is linked to
+#                                  the `Keyword` HG, which currently uses the color 168.
+#}}}
 
 # have valid paths colored
 ZSH_HIGHLIGHT_STYLES[path]='fg=cyan'

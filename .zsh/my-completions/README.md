@@ -60,3 +60,21 @@ For more info:
 
         https://unix.stackexchange.com/a/2184/289772
 
+##
+# Todo
+
+These 2 completion functions give too many suggestions:
+
+    _ppa_what_can_i_install
+    _ppa_what_have_i_installed
+
+We don't use the i386 cpu architecture.
+
+---
+
+        $ ppa_what_can_i_install google Tab
+            → ∅
+
+        $ ppa_what_have_i_installed google Tab
+            → ∅
+

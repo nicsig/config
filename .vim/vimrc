@@ -100,48 +100,37 @@ if has('vim_starting')
 call plug#begin('~/.vim/plugged')
 
 " To Assimilate:
-Plug 'lacygoill/vim-graph'
-" Type: :fu! Func() C-v C-j endfu{{{
-"
-" Now try to uppercase a word with `cru`. `abolish` raises the error:
-"     E705: Variable name conflicts with existing function: Func
-"
-" I've fixed the bug by renaming `Func` into `l:Func` inside the `s:send()`
-" function of the abolish plugin.
-" PR fixing the issue:
-"
-"     https://github.com/tpope/vim-abolish/pull/68
-"}}}
-Plug 'tpope/vim-abolish', {'frozen': 1}
-Plug 'yegappan/asyncmake', {'frozen': 1}
+Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
+Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
 Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-debug'
-Plug 'lacygoill/vim-fex'
 Plug 'junegunn/vim-easy-align'
 Plug 'lacygoill/vim-exchange'
+Plug 'lacygoill/vim-fex'
 Plug 'tpope/vim-fugitive'
 " You can pass more arguments to the fzf installer:
 "     $ ~/.fzf/install --help
 Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash'}
 Plug 'junegunn/fzf.vim'
-Plug 'junegunn/goyo.vim', {'frozen': 1}
+Plug 'lacygoill/goyo.vim', {'branch': 'assimil'}
+Plug 'lacygoill/vim-graph'
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'junegunn/limelight.vim', {'frozen': 1}
+Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
 Plug 'djmoch/vim-makejob'
 Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
 Plug 'lacygoill/potion'
-Plug 't9md/vim-quickhl', {'frozen': 1}
-Plug 'tpope/vim-repeat', {'frozen': 1}
+Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
+Plug 'lacygoill/vim-repeat', {'branch': 'assimil'}
 Plug 'tpope/vim-rhubarb'
 " Alternative: https://github.com/t9md/vim-textmanip
 Plug 'lacygoill/vim-schlepp'
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'tpope/vim-speeddating'
-Plug 'kana/vim-submode', {'frozen': 1}
-Plug 'jebaum/vim-tmuxify', {'frozen': 1}
+Plug 'lacygoill/vim-submode', {'branch': 'assimil'}
+Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
 Plug 'lacygoill/vim-unix'
 
 " Done:
@@ -190,16 +179,16 @@ Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-window'
 
 " Read Doc:
-Plug 'SirVer/ultisnips'
 Plug 'justinmk/vim-dirvish'
-Plug 'lervag/vimtex'
-Plug 'machakann/vim-sandwich'
 Plug 'mattn/emmet-vim'
+Plug 'machakann/vim-sandwich'
+Plug 'SirVer/ultisnips'
+Plug 'lervag/vimtex'
 
 " Other:
+Plug 'mbbill/undotree'
 Plug 'chrisbra/unicode.vim'
 Plug 'keith/tmux.vim'
-Plug 'mbbill/undotree'
 
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup. We delay them.
@@ -353,6 +342,7 @@ let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
 " For more info about `$XDG_RUNTIME_DIR`:
 "
 "     https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
+" }}}2
 
 " backspace {{{2
 
@@ -1436,7 +1426,7 @@ augroup tags_vimrc
     exe 'au BufWritePost '.resolve($HOME.'/.vim/autoload/myfuncs.vim')
     \ . ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
 
-    au! BufWritePost .zshrc call system('source '.expand('%:p:S'))
+    au! BufWritePost .zshrc sil call system('source '.expand('%:p:S'))
 augroup END
 
 " temporary files:  undo, swap, backup {{{2
@@ -3300,58 +3290,6 @@ nno  cg#  g#``/<up><cr>``cgN
 nmap  crg   <plug>(MakeDigraph)
 nmap  crgg  <plug>(MakeDigraph)_
 
-" crs                 coerce to snake case (repeatable) {{{3
-
-nno  <silent>  crs  :<c-u>call <sid>my_crs()<cr>
-fu! s:my_crs() abort
-    let view = winsaveview()
-    " populate search register with original word
-    norm! *``
-    call winrestview(view)
-    let pat = @/
-    "                           ┌ snake case
-    "                           │     ┌ type the keys now
-    "                           │     │
-    call feedkeys("\<plug>Coerces", 'ix')
-    " save the coerced word
-    let rep = expand('<cword>')
-    " Why do we need to restore the search register?{{{
-    "
-    " Vim  automatically  restores  the  value  it  had  before  a  function  is
-    " invoked. Here, we don't want that, because  it will interfere with the dot
-    " command.
-    "
-    " We need to undo this automatic restoration.
-    "}}}
-    call timer_start(0, {-> execute('let @/ = '.string(pat))
-        \ + feedkeys('ucgn'.rep."\e", 'int')})
-        "             │
-        "             └ undo our initial coercion
-        " Why do you undo?{{{
-        "
-        " We need to repeat the coercion a 2nd time.
-        " But, in the end, we only want 1 coercion.
-        "}}}
-        " Why do repeat the coercion a 2nd time?{{{
-        "
-        " We need the last normal command to be `cgn{rep}Esc`,
-        " so that the dot command repeats it.
-        "}}}
-        " Why do you include `feedkeys()` in the timer?{{{
-        "
-        " `feedkeys()` writes `gn` in the typeahead buffer.
-        " If we call `feedkeys()` now, `gn` will be processed after the function
-        " has returned.
-        " At that point, the search register will have been restored to whatever
-        " contents it had prior to the invocation of `s:my_crs()`.
-        " So, `gn` may select the wrong text.
-        "
-        " We could call `feedkeys()` with the flag 'x', but for some reason, `.`
-        " would repeat  the coercion  on the  current word  instead of  the next
-        " occurrence.
-        "}}}
-endfu
-
 " dr                  replace without yank {{{3
 
 " We save the name of the register which was called just before `dr` inside
@@ -4153,14 +4091,15 @@ fu! s:plugins_to_commit() abort
         return
     endif
 
-    let output = systemlist('commit-these-vim-plugins.sh')
+    sil let output = systemlist('commit-these-vim-plugins.sh')
     if output == []
         echom '[PluginsToCommit]: nothing to commit'
         return
     endif
 
     call filter(output, {i,v -> v =~ '^\S'})
-    call map(output, {i,v -> {'filename': $HOME.'/.vim/plugged/'.v, 'valid': 1}})
+    call map(output, {i,v -> glob($HOME.'/.vim/plugged/'.v.'/*', 0, 1)[0]})
+    call map(output, {i,v -> {'filename': v, 'valid': 1}})
     call setqflist(output)
     call setqflist([], 'a', {'title': 'Plugins to commit'})
     cw
@@ -4899,7 +4838,7 @@ augroup source_files
     "
     " See `xrdb -query` to get a list of all existing resources.
     "}}}
-    au BufWritePost  ~/.Xresources  call system('xrdb ~/.Xresources')
+    au BufWritePost  ~/.Xresources  sil call system('xrdb ~/.Xresources')
     au BufWritePost  ~/.vim/autoload/myfuncs.vim  exe 'source '.expand('<afile>:p')
 
     " Why shouldn't I write any autocmd listening to `BufWritePost` after this one?{{{
@@ -5778,6 +5717,7 @@ endfu
 " 48 -
 " it would be  convenient to have a  command which saves a  particular qfl/ll in
 " `~/.viminfo`, and which could restore it when needed.
+" Update: don't use viminfo (I don't trust this file)
 "
 " 49 -
 " finish reviewing  the section in our  notes which deals with  string functions
@@ -6130,6 +6070,7 @@ endfu
 "        • cmdlinechanged
 "        • colorschemepre
 "        • diffupdate
+"        • DiffUpdated
 "        • dirchanged
 "        • exitpre
 "        • prompt-buffer
@@ -6197,10 +6138,10 @@ endfu
 "     :h tips.txt
 "
 " 80 -
-" study ~/dropbox/vim_plugins/fastfold.vim
+" study ~/Dropbox/vim_plugins/fastfold.vim
 "
 " 81 -
-" in ~/dropbox/wiki/vim/viml.md, look for the pattern `funcref()`.
+" in ~/Dropbox/wiki/vim/viml.md, look for the pattern `funcref()`.
 " there are 2 codes side-by-side.
 " they are separated with `┊` characters.
 " if you press `+sip` on the code, only the one on the left is sourced.
@@ -6324,7 +6265,7 @@ endfu
 "
 " 86 -
 "
-"     :vim /^>\|^\%u00a0/gj ~/dropbox/wiki/**/*.md
+"     :vim /^>\|^\%u00a0/gj ~/Dropbox/wiki/**/*.md
 "
 " in our notes, we sometimes use `>` or a non-breaking space at the beginning of
 " a line to quote some text, or apply some style.
@@ -6724,31 +6665,13 @@ endfu
 " wrong terminal height (big command-line).
 "
 " 111 -
-" when vim is  running, the terminal is  in “raw” mode: it sends  a character as
-" soon as it receives one.
-"
-" but when  you execute a shell  command (via `:!` or  `system()`), the terminal
-" switches to “cooked” mode: it buffers the received characters until a cr.
-"
-" this allows the terminal to implement some rudimentary line-editing functions.
-" but when the terminal is in cooked  mode, some stray characters may be left on
-" the screen, forcing you to `:redraw`.
-"
-" should we invoke `system()` with `:silent` systematically?
-"
-"     :silent let f = system('ls *.vim')
-"     :silent call system(...)
-"
-" see `:h system()`, and look for `silent`.
-"
-" 112 -
 " once neovim has `reg_recording()`, use it in all `q` mappings:
 "
 "     noa vim /nno.*\<q\>/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "
 " so that we can end a recording without closing the window.
 "
-" 113 -
+" 112 -
 " we should use more abbreviations.
 " review the triggers:
 "
@@ -6769,7 +6692,7 @@ endfu
 " implement  a   `-A`  mapping   showing  the   available  abbreviations   in  a
 " sidebar/cheatsheet. show only the less well known at any given time.
 "
-" 114 -
+" 113 -
 " atm, `:fzfiles` doesn't search hidden files/directories.
 " solution:
 "
@@ -6779,11 +6702,11 @@ endfu
 "
 "     https://github.com/junegunn/fzf.vim/issues/226
 "
-" 115 -
+" 114 -
 " try to make some existing mappings smarter by reacting differently
 " when we're at the more prompt (see `:h mode()`, `rm` mode).
 "
-" 116 -
+" 115 -
 " should we  remap '@' so  that when we  replay a macro  the `esc` key  is never
 " interpreted as a part of a function-like (f1, arrow, ...) key?
 "
@@ -6801,7 +6724,7 @@ endfu
 " also,  it would prevent  to use function-like keys  during the recording  of a
 " macro.
 "
-" 117 -
+" 116 -
 " i think there's  no need to escape (so that the visual  marks are set) to know
 " where the visual selection begins/ends.
 " you can use `getpos('v')`, and `line('.')`:
@@ -6815,7 +6738,7 @@ endfu
 " try to use this technique in your plugin(s) instead of escaping.
 " unless they really need to update the visual marks.
 "
-" 118 -
+" 117 -
 " document  the fact  that if  a message  is erased  right after  being printed,
 " there's no need to invoke a timer, a simple `:redraw` may be enough.
 "
@@ -6828,12 +6751,12 @@ endfu
 "
 " see `:h :echo-redraw`.
 "
-" 119 -
+" 118 -
 " search for `[ spc`, `spc ]`, `{ spc`, `spc }`, `^\s*\\` everywhere.
 " refactor the style.
 "     noa vim /\[ \| \]\|{ \| }\|^\s*\\/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "
-" 120 -
+" 119 -
 " search for `g@` everywhere.
 " do you need to save and restore the unnamed register, and the options every time?
 " should  we refactor the snippets  so that it  allows us to remove  those parts
@@ -6846,7 +6769,7 @@ endfu
 "
 " Have you used `:s`, while you should have used `setline()`?
 "
-" 121 -
+" 120 -
 " all your commands should print a usage message when executed without arguments
 " or with  `--help`, or  `-h` (similar to  what our shell  function does  with a
 " heredoc).
@@ -6854,20 +6777,20 @@ endfu
 " if there's too much info to print,  you could separate them on different pages
 " by using a `--help {keyword}` argument.
 "
-" 122 -
+" 121 -
 " eliminate `lg#reg#save()`, `lg#reg#restore()` whenever possible.
 " we don't need to save/restore @+ anymore.
 "
-" 123 -
+" 122 -
 " when  is  it   better  to  use  `$xdg_runtime_dir`  instead   of  `/tmp`  (via
 " `tempname()`)?
 " https://unix.stackexchange.com/a/316166/289772
 "
-" 124 -
+" 123 -
 " be  consistent  in  how  you  chose  the  priority  of  matches  created  with
 " `matchadd()`.
 "
-" 125 -
+" 124 -
 " saving an option, changing it, then restoring it via a timer is a bad idea.
 " check where you did it.
 " remove the timer.
@@ -6876,7 +6799,7 @@ endfu
 " in a try conditional, and restore it in the finally clause
 " (for example, we didn't in vim-breakdown)
 "
-" 126 -
+" 125 -
 "
 " Check how plugin authors implement a scratch buffer.
 " Which options do they set? For which purpose exactly?
@@ -6890,7 +6813,7 @@ endfu
 " possible bugs,  and to be  consistent in  the options you  set as well  as the
 " order in which you set them.
 "
-" 127 -
+" 126 -
 " Be consistent in how you extract the comment leader.
 " Vimgrep everywhere for `cml`.
 "
@@ -6901,16 +6824,15 @@ endfu
 "     • get a pattern to detect whether the current line is commented
 "     • return the commented version of a line (before pasting it somewhere)
 "
-" 128 -
-" We have 5 plugins which use `repeat#set()`:
+" 127 -
+" We have 4 plugins which use `repeat#set()`:
 "
-"     vimtex
+"     vim-abolish
 "
 "     vim-easy-align
 "
 "     vim-sneak
 "
-"     vim-abolish
 "     vim-speeddating
 "
 " Try to get rid of the call to the function, either by:
@@ -6918,12 +6840,7 @@ endfu
 "     • submitting a bug report/PR
 "     • re-implementing the plugin
 "
-" 129 -
-" You shouldn't have frozen plugins.
-" If a plugin is  frozen because you've fixed an issue, submit  the issue on the
-" bug tracker.
-"
-" 130 -
+" 128 -
 "     :vim /<buffer>/gj ~/.vim/plugged/vimtex/**/*.vim | cw
 "     :Cfilter! <nowait>\|autocmd\|<buffer>\s*\%(<plug>\|<sid>\)
 "
@@ -6931,7 +6848,7 @@ endfu
 " the user (!= <plug>), and which doesn't contain <nowait>.
 " Submit a PR/issue to suggest adding `<nowait>`.
 "
-" 131 -
+" 129 -
 " Search for all vimtex mappings which haven't `<c-u>` before `:call`.
 " Submit an issue whose message looks like:
 "
@@ -6944,24 +6861,24 @@ endfu
 " But make sure they are not necessary. They could be, if the function needs
 " to be re-called several times when the user pressed a count.
 "
-" 132 -
+" 130 -
 " Try to replace as many `:s` commands as possible with `setline()`:
 "
 "     noa vim !s\([/:;@]\).\{-}\1!gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "     Cfilter! -other_plugins -commented -tmp
 "     Cfilter! ^\s*\%(let\|call\|echo\|return\|if\|unlet!\=\|&&\)\s
 "
-" 133 -
+" 131 -
 " Ask whether `abort` should be added to all vimtex functions.
 "
 "         :noa vim /^\s*function!\%(.*abort\)\@!/gj ~/.vim/plugged/vimtex/**/*.vim | cw
 "
-" 134 -
+" 132 -
 " Every  time you open a  window, be aware that  an error may be  raised because
 " you're in the command-line window.
 " You may want to catch that error to avoid a stack trace.
 "
-" 135 -
+" 133 -
 " Watch out for this anti-pattern:
 "
 "     " assume that `var` can only have 3 values ['foo', 'bar', 'baz']
@@ -6982,7 +6899,7 @@ endfu
 "         (before it was implicit/not mentioned at all)
 "     • easier to expand later if `var` can have more values
 "
-" 136 -
+" 134 -
 " Recently, when we try to push a commit and press enter after our username,
 " the terminal writes `^M` instead of a linefeed.
 " Next time it happens, try:
@@ -6997,6 +6914,41 @@ endfu
 "
 " Find what's causing the issue.
 " Is it something we do in Vim?
+"
+" 135 -
+" Add  spaces  around  all  concatenation  operators: it  makes  the  code  more
+" readable?
+"
+" 136 -
+" Remove all `==#`, `!=#`, `==?`, `!=?`.
+" Replace them with `==`, `!=`.
+" The `#` and `?` is useless now.
+" In the past,  we used them to make  sure not to forget them  when doing string
+" comparison.
+" But we don't do string comparison with `==` and `!=` anymore.
+" We use `is` and `isnot` now.
+"
+"     noa vim /\%(\s[!=]=\|\s[><]\)\zs[#?]/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc | cw
+"
+" Update:
+" Yeah, but what if we have an expression evaluated as a number, which sometimes
+" is evaluated as a string.
+" Wouldn't we be happy to have a strict comparison in this case?
+"
+" 137 -
+" Remove `&l:` when it's not necessary?
+"
+" 138 -
+" Use full name of commands?
+"
+" 139 -
+" Switch from 4 spaces to 2 spaces for indentation?
+"
+" 140 -
+" We often have errors when we import the contents of a file with `:r`,
+" because the current buffer is not modifiable.
+" Maybe we should always bail out in those cases...
+
 
 
 
