@@ -366,9 +366,9 @@ fpath=(${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath)
 #     https://github.com/sunaku/dasht
 fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
 
-# What's the purpose of this command?{{{
+# What's the purpose of these commands?{{{
 #
-# It  installs  programmable  completion  functions for  the  most  common  Unix
+# They  install  programmable completion  functions  for  the most  common  Unix
 # commands.
 #}}}
 # What's the equivalent in bash?{{{
@@ -410,14 +410,62 @@ autoload -Uz compinit
 #         └ from `man zshmisc`:
 #               suppress usual alias expansion during reading
 #}}}
-# Is this command slow?{{{
+compinit
+# Is `compinit` slow?{{{
 #
 # The first time you start it, yes.
 # If you've removed `~/.zcompdump`, yes.
 #
 # Otherwise, no.
 #}}}
-compinit
+
+# What's the purpose of these commands?{{{
+#
+# For some commands, like `$ pandoc`, there's no easy way to find/generate a zsh
+# completion function. But there's one for bash.
+# In this case, it can be useful to use the bash completion function.
+# To do so, we need to install a compatibility layer to emulate `compgen` and `complete`.
+#
+# Source:
+#     $ man zshcompsys
+#}}}
+# Will it always work as expected?{{{
+#
+# It depends on whether the bash completion function you want to use needs
+# only `compgen` and/or `complete`.
+# If so, it should work, otherwise probably not.
+#
+# Source:
+#     https://unix.stackexchange.com/a/417143/289772
+#}}}
+autoload -Uz bashcompinit
+bashcompinit
+
+# Why do you need to source this file here?{{{
+#
+# There's no default zsh completion function for pandoc:
+#     https://github.com/jgm/pandoc/issues/4668
+#
+# So, we try to use the bash one instead.
+#}}}
+# How did you generate this file?{{{
+#
+#     $ pandoc --bash-completion
+#}}}
+# Is there an alternative to this command?{{{
+#
+# Yes:
+#     $ . <(pandoc --bash-completion)
+# Or:
+#     # From: https://pandoc.org/MANUAL.html
+#     $ eval "$(pandoc --bash-completion)"
+#}}}
+# Why don't you use it?{{{
+#
+# I don't want to re-generate the  bash completion function every time I start a
+# zsh shell.
+#}}}
+. ~/.zsh/my-completions/_pandoc
 
 # Why removing the alias `run-help`?{{{
 #
