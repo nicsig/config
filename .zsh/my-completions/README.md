@@ -29,6 +29,24 @@ You can customize the completion of an alias in bash:
 
 How to do the same in zsh?
 
+## Can I write use a bash completion function?
+
+You can try.
+
+Write its contents in a file here, then source it from `~/.zshrc`.
+
+That's what we did for pandoc.
+It works thanks to these lines in `~/.zshrc` in `~/.zshrc`:
+
+        autoload -Uz bashcompinit
+        bashcompinit
+
+Note that  whether it succeeds  or not depends on  which features does  the bash
+function rely on.
+
+Source:
+        https://unix.stackexchange.com/a/417143/289772
+
 ##
 # Documentation
 ## Where can I get more info on how to write my own completion function?

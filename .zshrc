@@ -466,6 +466,25 @@ bashcompinit
 # zsh shell.
 #}}}
 . ~/.zsh/my-completions/_pandoc
+# FIXME: Autoload this bash function.
+# TODO: Use a `bash_source` wrapper command to source this function to avoid any issue{{{
+# with other bash completion functions in the future.
+#
+# Try something like this:
+#
+#     bash_source() {
+#       alias shopt=':'
+#       alias _expand=_bash_expand
+#       alias _complete=_bash_comp
+#       emulate -L sh
+#       setopt kshglob noshglob braceexpand
+#
+#       source "$@"
+#     }
+#
+# Source:
+#     https://web.archive.org/web/20180404080213/http://zshwiki.org/home/convert/bash
+#}}}
 
 # Why removing the alias `run-help`?{{{
 #
@@ -980,6 +999,7 @@ alias zsh_sourcetrace='zsh -o sourcetrace'
 #                           └ start a new zsh shell, enabling the 'sourcetrace' option
 #                             see `man zshoptions` for a description of the option
 
+# }}}2
 # global {{{2
 
 # We could implement the following global aliases as abbreviations, but we won't
@@ -1054,7 +1074,7 @@ alias -s {epub,mobi}=ebook-viewer
 alias -s {md,markdown,txt,html,css}=vim
 alias -s odt=libreoffice
 alias -s pdf=zathura
-
+# }}}1
 # Functions {{{1
 alias_is_it_free() { #{{{2
   emulate -L zsh
@@ -1451,6 +1471,19 @@ loc() { #{{{2
   #       │└ search for a basic regexp (not a literal string)
   #       │
   #       └ ignore the case
+}
+
+man_zsh() { #{{{2
+  emulate -L zsh
+  # Purpose:{{{
+  #
+  # We often need to look up a word in the 16 zsh man pages.
+  # This function  could be handy to  narrow down the few  pages containing this
+  # word.
+  #}}}
+  man -s1 -Kw "$@" | grep zsh
+  #   ├─┘
+  #   └ drastically reduce the amount of time the search takes
 }
 
 mkcd() { #{{{2
@@ -1970,6 +2003,7 @@ xt() { #{{{2
   rm "${TMP}"
 }
 
+# }}}1
 # Hooks {{{1
 
 # TODO: better explain how it works
@@ -2240,6 +2274,17 @@ autoload -Uz edit-command-line
 zle -N edit-command-line
 bindkey '^X^E' edit-command-line
 
+# C-x C-h         describe-key-briefly {{{4
+
+# Usage:{{{
+#
+# Press `C-x C-h`, then some key combination  for which you want the name of the
+# zle function which is invoked, like `M-!`, and you'll see something like:
+#
+#     "^[!" is _bash_complete-word
+#}}}
+bindkey '^X^H' describe-key-briefly
+
 # C-x C-t         fzf-file-widget {{{4
 #
 # By default, `fzf` rebinds `C-t` to one its function `fzf-file-widget`
@@ -2364,6 +2409,7 @@ bindkey -s '^Xr' '^A^Kfor f in *; do echo mv \"$f\" \"${f}\";done\e7^B'
 #                                    └ print the command to let us review it
 #                                      before doing anything
 
+# }}}3
 # C-z        fancy_ctrl_z {{{3
 #
 # FIXME:
@@ -2419,11 +2465,96 @@ zle -N __fancy_ctrl_z
 # no process has the control of the terminal.
 bindkey '^Z' __fancy_ctrl_z
 
+# }}}2
 # META {{{2
-# M-#       pound-insert {{{3
+# M-[!$/@~]     _bash_complete-word {{{3
+
+# What's this “unnamed” function?{{{
+#
+# An anonymous function.
+# See `man zshmisc` for more info.
+#}}}
+# Why such a function?{{{
+#
+# It's automatically executed after being defined, then removed.
+#}}}
+# Why do you use a function?{{{
+#
+# To make the `key` variable local, and not pollute the shell environment.
+#}}}
+# Where did you find the code for the for loop?{{{
+#
+#     ~/GitRepos/zsh/Completion/Base/Widget/_bash_completions
+#     https://sourceforge.net/p/zsh/code/ci/master/tree/Completion/Base/Widget/_bash_completions
+#}}}
+() {
+  emulate -L zsh
+  local key
+  for key in '!' '$' '@' '/' '~'; do
+    # What do these key bindings do? {{{
+    #
+    # They emulate what `M-!`, `M-$`, ..., `C-x !`, `C-x $`, ... do in bash.
+    #
+    # In bash, when  you press these keys,  you always end up  invoking the same
+    # completion  function, which  seems  to inspect  the last  key  of the  key
+    # binding which was pressed, to decide which kind of completion to use.
+    #
+    #     ! = command names
+    #     $ = variable names
+    #     / = file names
+    #     @ = host names
+    #     ~ = user names (or named directories)
+    #
+    #     M- = opens the completion menu
+    #     C-x = prints the list of matches
+    # }}}
+    bindkey "\e${key}" _bash_complete-word
+    bindkey "^X${key}" _bash_list-choices
+  done
+}
+
+# TODO: bash also provides `complete-in-braces`, bound by default to `M-{`.{{{
+#
+# Try  it in  bash; press  `M-AltGr-4` (not  `M-AltGr-x`, the  terminal wouldn't
+# receive anything).
+# It dumps on the command-line an expression  which can be expanded into all the
+# filenames of  the current  directory whose  name matches  the text  before the
+# cursor:
+#
+#     $ D M-{
+#         → D{esktop,o{cuments,wnloads},ropbox}
+#
+# Unfortunately, it's not supported by `_bash_complete-word`.
+# Try and find a way to re-implement it in zsh.
+#}}}
+# TODO: When we press `M-~`, our terminal doesn't receive anything. {{{
+#
+# Try this in bash:
+#
+#     $ xmodmap -e 'keycode  11 = a a a a asciitilde'
+#     $ cat
+#     # press M-AltGr-2
+#         → ^[ ~
+#         ✔
+#
+#     $ xmodmap -e 'keycode  56 = a a a a asciitilde'
+#     $ cat
+#     # press M-AltGr-b
+#         → ∅
+#         ✘
+#
+# It seems `M-~`  works when `~` is  produced by many keys (`a`,  `s`, `,`, ...)
+# but not all (`b`, `v`, ...).
+#
+# Solution:
+# Make another additional key generate `~`.
+# Maybe you could try the key `1`.
+#}}}
+
+# M-#           pound-insert {{{3
 bindkey '\e#' pound-insert
 
-# M-c/l/u   change-Case {{{3
+# M-c/l/u       change-Case {{{3
 
 # zle provides several functions to modify the case of a word:
 #
@@ -2453,7 +2584,7 @@ bindkey '\euu' up-case-word
 # We could press `M-u` to enter the submode, then, for a brief period of time,
 # `c`, `l` or `u` would change the case of words.
 
-# M-e       run-hElp {{{3
+# M-e           __expand_aliases {{{3
 
 # TODO:
 # fully explain the `expand_aliases` function
@@ -2494,7 +2625,7 @@ __expand_aliases() {
 zle -N __expand_aliases
 bindkey '\ee' __expand_aliases
 
-# M-m       normalize_command_line {{{3
+# M-m           normalize_command_line {{{3
 
 # TODO:
 # Explain how it works.
@@ -2511,7 +2642,7 @@ __normalize_command_line() {
 zle -N __normalize_command_line
 bindkey '\em' __normalize_command_line
 
-# M-o       previous_directory (Old) {{{3
+# M-o           previous_directory (Old) {{{3
 # cycle between current dir and old dir
 __previous_directory() {
   emulate -L zsh
@@ -2524,14 +2655,15 @@ __previous_directory() {
 zle -N __previous_directory
 bindkey '\eo' __previous_directory
 
-# M-Z       fuZzy-select-output {{{3
+# M-Z           fuZzy-select-output {{{3
 
 # insert an entry from the output of the previous command,
 # selecting it with fuzzy search
 bindkey -s '\eZ' '$(!!|fzf)'
 
+# }}}2
 # CTRL-META {{{2
-# M-e      expand_aliases {{{3
+# M-C-e      run-help {{{3
 
 # from `type run-help`:    run-help is an autoload shell function
 # it's an alias to `man` that will look in other places before invoking man
@@ -2542,6 +2674,7 @@ bindkey '\e^e' run-help
 #        │
 #        └─ C-M-e
 
+# }}}2
 # MENUSELECT {{{2
 # Warning: I've disabled all key bindings using a printable character.{{{
 #
@@ -2623,13 +2756,14 @@ bindkey -M menuselect '^L' forward-char
 
 bindkey -M menuselect '^O' accept-and-menu-complete
 #                          │
-#                          └─ insert the current completion into the buffer,
-#                             but don't close the menu
+#                          └ insert the selected match on the command-line,
+#                            but don't close the menu
 
 # In Vim we quit the completion menu with C-q (custom).
 # We want to do the same in zsh (by default it's C-g in zsh).
 bindkey -M menuselect '^Q' send-break
 
+# }}}1
 # Options {{{1
 
 # Let us `cd` into a directory just by typing its name, without `cd`:
@@ -2684,6 +2818,25 @@ setopt INTERACTIVE_COMMENTS
 
 # display PID when suspending processes as well
 setopt LONG_LIST_JOBS
+
+# Make zsh perform filename expansion on the command arguments of the form `var=val`.{{{
+#
+# zsh doesn't do it by default.
+#
+# MWE:
+#     % unsetopt MAGIC_EQUAL_SUBST
+#     % dd if=/dev/zero bs=1M count=1 of=~/test2
+#                                        ^
+#                                        ✘ not expanded into `/home/user`
+#
+#     % echo foo=~/bar:~/baz
+#          → foo=~/bar:~/baz
+#                ^     ^
+#                ✘     ✘
+#
+# This behavior differs from bash.
+#}}}
+setopt MAGIC_EQUAL_SUBST
 
 # On an ambiguous completion, instead of listing possibilities,
 # insert the first match immediately.
@@ -2813,9 +2966,9 @@ bindkey -M isearch ' ' self-insert
 # Source the plugin `zsh-syntax-highlighting`:
 #     https://github.com/zsh-users/zsh-syntax-highlighting
 
-# It must be done after all custom widgets have been created (i.e., after all zle -N calls).
-# because the plugin creates a wrapper around each of them.
-# If we source it before some custom widgets, it will still work, but won't be
+# It must be  done after all custom  widgets have been created  (i.e., after all
+# zle -N calls). because the plugin creates a wrapper around each of them.
+# If we source it  before some custom widgets, it will still  work, but won't be
 # able to properly highlight the latter.
 
 [[ -f ${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \

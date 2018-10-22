@@ -648,7 +648,7 @@ if has('vim_starting')
     " characters, to get a continuous line.
     set fillchars=vert:┃
 
-    " Pad end of title lines with spaces instead of dashes.
+    " Pad end of title lines with spaces instead of hyphens.
     exe 'set fillchars+=fold:\ '
     " For some reason, this doesn't work:
     "
@@ -3423,20 +3423,20 @@ nno  Y  y$
 " So, we use an  expression, to make sure that they are consecutive.
 xno  <expr>  Y  '$"'.v:register.'y'
 
-" yc / yC    ym / yM      yank code / Comments  matching / non-matching lines {{{3
+" yc / yC    ym / yM      yank comments / Code  matching / non-matching lines {{{3
 
 " comments
-nno  <silent>  yC   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
+nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
                    \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  myC  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
+xno  <silent>  myc  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
                    \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " Code
 "                      don't yank where a commented line is found ┐
 "                                                                 │
-nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
+nno  <silent>  yC   :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
                    \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  myc  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
+xno  <silent>  myC  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
                    \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " lines matching last search
@@ -5752,7 +5752,7 @@ endfu
 " or when we undo a non-existing …
 "
 " 53 -
-" normalize underscore/dash in plug mappings, and function names in shell init files
+" normalize underscore/hyphen in plug mappings, and function names in shell init files
 "
 " 54 -
 " update the position of the mark in `vim-readline`
@@ -6948,6 +6948,7 @@ endfu
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
+
 
 
 

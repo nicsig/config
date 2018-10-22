@@ -57,8 +57,6 @@ fi
 
 PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 
-complete -f -X '*.@(o|so|so.!(conf|*/*)|a|[rs]pm|gif|jp?(e)g|mp3|mp?(e)g|avi|asf|ogg|class|foo|bar)' vim vi vim gvim rvim view rview rgvim rgview gview
-
 # Environment Variables {{{1
 
 #                                   ┌─ don't save commands beginning with a space

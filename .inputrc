@@ -14,7 +14,7 @@
 # useful to enable motion with `C-left` and `C-right`
 $include /etc/inputrc
 
-# Options {{{
+# Variables {{{
 
 # when we type a closing parentheses, don't make the cursor jump to the opening one
 set blink-matching-paren off
@@ -33,21 +33,45 @@ set echo-control-characters off
 # expand tilde in a filepath when we hit Tab
 set expand-tilde on
 
+# Prefix the command prompt with `*` whenever we modify a command which we've recalled from the history.{{{
+#
+# Example:
+#
+#     user@machine:~$ C-p
+#     user@machine:~$ old command
+#     *user@machine:~$ old command modified
+#     ^
+#     added because we've modified the command line by inserting 'modified' at its end
+#}}}
+set mark-modified-lines on
+
 # menu completion displays the common prefix of the list of possible completions
 # before cycling through the list
 set menu-complete-display-prefix on
+
+# Print all possible matches when we Tab complete by pressing Tab for the first time.{{{
+#
+# Useful, because we  bind Tab to `menu-complete`, which  prevents readline from
+# printing all possible matches when press Tab twice.
+#}}}
+set show-all-if-ambiguous on
 
 # }}}
 $if mode=emacs
 # Functions {{{
 
-# bind C-w to delete a word (by default it deletes a WORD)
-# We prefer word as it's more granular and allows to delete only a node in a long path,
-# instead of the whole path (ex: ls a/b/c/d).
-# Before defining the binding, we need to unset a terminal option,
-# otherwise it will be impossible to unbind the function unix-word-rubout
-# and replace it with backward-kill-word
-# Source: http://shallowsky.com/blog/linux/bash-word-erase.html
+# bind C-w to delete a word (by default it deletes a WORD){{{
+#
+# We prefer  word as it's more  granular and allows to  delete only a node  in a
+# long path, instead of the whole path (ex: ls a/b/c/d).
+#
+# Before defining the binding, we need  to unset a terminal option, otherwise it
+# will be impossible to unbind the function unix-word-rubout and replace it with
+# backward-kill-word.
+#
+# Source:
+#     http://shallowsky.com/blog/linux/bash-word-erase.html
+#}}}
 set bind-tty-special-chars Off
 "\C-w": backward-kill-word
 
@@ -76,17 +100,17 @@ set bind-tty-special-chars Off
 # otherwise readline would execute `upcase-word` after 1s, which is too quick.
 #
 #     https://unix.stackexchange.com/a/374535/289772
-#}}}
+# }}}
 "\eu": nop
 "\euu": upcase-word
 "\eul": downcase-word
 "\euc": capitalize-word
 
-# Tab / S-Tab: cycle between candidates in a completion menu
-#
-# no double quotes around the name of the TAB key
-# otherwise the key binding doesn't work
+# Tab / S-Tab: cycle through matches
+
+# Warning: This breaks `Tab Tab` which by default prints all the possible matches.
 TAB: menu-complete
+
 # the keyname `S-TAB` isn't recognized
 # but on my machine `S-TAB` produces the keycodes:  Esc [ Z
 # we can use the keycodes instead
@@ -104,21 +128,22 @@ TAB: menu-complete
 #             └ go back to beginning of word
 
 # M-: = insert most recent file/directory
-#
-# \\\' put single quotes around the name to protect a space if the file/directory name contains one
-#
-# \e\C-e = expand the previous command:    $(ls ...)
-# Warning, it will expand everything on the command line (including aliases definition),
-# which can be a problem
-#
-#                 ┌─ sort by access date (newest first)
-#                 │  ┌─ one item per line only
-#                 │  │
+#       ┌ put single quotes around the name{{{
+#       │ to protect a space if the file/directory name contains one
+#       │
+#       │         ┌ sort by access date (newest first)
+#       │         │
+#       │         │  ┌ one item per line only
+#       ├──┐      │  │}}}
 "\e:": "\\\'$(ls -t -1 -d */ | head -n 1)\\\' \e\C-e"
-#                      └───┤                  └────┤
-#                          │                       └ expand all command substitutions
-#                          └──────────────────────── list directories (because of the slash),
-#                                                    and only their names, not their contents (because of `-d`)
+#                      ├───┘                  ├────┘{{{
+#                      │                      └ expand all command substitutions (e.g. `$(ls)`)
+#                      │                        Warning, it will expand everything on the command line
+#                      │                        (including aliases definition), which can be a problem.
+#                      │
+#                      └ list directories (because of the slash),
+#                        and only their names, not their contents (because of `-d`)
+#}}}
 
 # }}}
 $endif
