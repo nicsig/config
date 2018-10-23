@@ -52,10 +52,10 @@ if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
   export EDITOR='vim'
 
   # infinite history
-  #     https://unix.stackexchange.com/a/273863
-  export HISTFILE="${HOME}/.zsh_eternal_history"
-  export HISTSIZE=10000000
-  export SAVEHIST=10000000
+  #     https://unix.stackexchange.com/a/273929/289772
+  export HISTFILE="${HOME}/.zsh_history"
+  export HISTSIZE=999999999
+  export SAVEHIST=$HISTSIZE
 
   # to get the name of the day/month in english
   export LC_TIME=en_US.UTF-8

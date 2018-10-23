@@ -21,9 +21,10 @@
 # `su -l user` starts a new login shell, which will source this file (`~/.zprofile`).
 # It won't cause any issue in the console, but it will in the GUI environment.
 # }}}
-if [[ -z $DISPLAY ]]; then
+if [[ -z "${DISPLAY}" ]]; then
   setterm -background white -foreground black -store
 #         │
-#         └─ we could also use `--`, but `man setterm` recommends to use `-` in
-#            a script (section `COMPATIBILITY`)
+#         └ we could also use `--`, but `man setterm` recommends to use `-` in
+#           a script (section `COMPATIBILITY`)
 fi
+

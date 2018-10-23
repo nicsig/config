@@ -16,6 +16,9 @@ $include /etc/inputrc
 
 # Variables {{{
 
+# never ring the bell on an ambiguous completion
+set bell-style none
+
 # when we type a closing parentheses, don't make the cursor jump to the opening one
 set blink-matching-paren off
 
@@ -53,8 +56,37 @@ set menu-complete-display-prefix on
 #
 # Useful, because we  bind Tab to `menu-complete`, which  prevents readline from
 # printing all possible matches when press Tab twice.
+#
+# Test the option on this command:
+#
+#     $ echo $HO Tab
 #}}}
 set show-all-if-ambiguous on
+
+# In a listing, show the type of the matches by appending a trailing character.{{{
+#
+#     ┌───┬────────────────────┐
+#     │ / │ directory          │
+#     ├───┼────────────────────┤
+#     │ * │ executable file    │
+#     ├───┼────────────────────┤
+#     │ @ │ symbolic link      │
+#     ├───┼────────────────────┤
+#     │ | │ named pipe         │
+#     ├───┼────────────────────┤
+#     │ = │ unix domain socket │
+#     ├───┼────────────────────┤
+#     │ % │ character device   │
+#     ├───┼────────────────────┤
+#     │ # │ block device       │
+#     └───┴────────────────────┘
+#
+# FYI:
+# A  listing is printed when  you press `Esc =`,  or when you try  to perform an
+# ambiguous completion.
+# That is when there are several matches.
+#}}}
+set visible-stats on
 
 # }}}
 $if mode=emacs
@@ -108,7 +140,16 @@ set bind-tty-special-chars Off
 
 # Tab / S-Tab: cycle through matches
 
-# Warning: This breaks `Tab Tab` which by default prints all the possible matches.
+# Warning: This breaks `Tab Tab` which by default prints all the possible matches.{{{
+#
+# Test the option on this command:
+#
+#     $ echo $HO Tab Tab
+#                │   │
+#                │   └ cycle throught the matches (because of 'menu-complete')
+#                │
+#                └ prints all possible matches (because of 'show-all-if-ambiguous')
+#}}}
 TAB: menu-complete
 
 # the keyname `S-TAB` isn't recognized

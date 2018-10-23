@@ -4667,8 +4667,8 @@ endfu
 "}}}
 augroup filetype_linter
     au!
-    au BufWinEnter filetype.vim,*/ftdetect/*.vim call s:filetype_linter('enable')
-    au BufWinLeave filetype.vim,*/ftdetect/*.vim call s:filetype_linter('disable')
+    au WinEnter    filetype.vim,*/ftdetect/*.vim  call s:filetype_linter('enable')
+    au BufWinLeave filetype.vim,*/ftdetect/*.vim  call s:filetype_linter('disable')
 augroup END
 
 fu! s:filetype_linter(action) abort
@@ -4678,7 +4678,22 @@ fu! s:filetype_linter(action) abort
     endif
     if a:action is# 'enable'
         let pat = '\m\C\%(^\%(\s*"\)\@!.*\)\@<=\mset\s\+\%(ft\|filetype\)\@!'
-        let w:my_filetype_linter = matchadd('Error', pat)
+        let w:my_filetype_linter = matchadd('ErrorMsg', pat)
+    endif
+endfu
+
+" Highlight Strange Whitespace {{{2
+
+" https://vi.stackexchange.com/a/17697/17449
+augroup highlight_strange_whitespace
+    au!
+    au WinEnter * call s:highlight_strange_whitespace()
+augroup END
+
+fu! s:highlight_strange_whitespace() abort
+    if !exists('w:strange_whitespace')
+        let pat = '[\x0b\x0c\u00a0\u1680\u180e\u2000-\u200a\u2028\u202f\u205f\u3000\ufeff]'
+        let w:strange_whitespace = matchadd('ErrorMsg', pat)
     endif
 endfu
 
@@ -5044,8 +5059,8 @@ let s:NO_TRAILING_WHITESPACE_FT = ['' , 'git', 'help', 'qf']
 
 augroup trailing_whitespace
     au!
-    au BufWinEnter,InsertLeave * call s:trailing_whitespace(1)
-    au InsertEnter             * call s:trailing_whitespace(0)
+    au WinEnter,InsertLeave * call s:trailing_whitespace(1)
+    au InsertEnter          * call s:trailing_whitespace(0)
 augroup END
 
 fu! s:trailing_whitespace(create_match) abort

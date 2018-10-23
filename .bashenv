@@ -1,0 +1,104 @@
+# Should we set `$PATH` from `~/.bashrc`?{{{
+#
+# No.
+# It could  fail to  affect programs  which are  started from  a non-interactive
+# shell.
+#
+# We source `bashrc` only in interactive shells, but maybe some programs are NOT
+# started from  an interactive shell  and still rely  on `$PATH` to  be properly
+# set. Maybe some which are started by the display manager?
+#
+#     https://unix.stackexchange.com/a/88266/232487
+#
+# Quote:
+#
+#     Many distributions,  display managers and desktop  environments arrange to
+#     run ~/.profile, either by explicitly  sourcing it from the startup scripts
+#     or by running a login shell.
+#}}}
+# Does `$PATH` get its value only from here? #{{{
+#
+# No.
+#
+# Ubuntu sets  `PATH` in `/etc/environment` or  `/etc/login.defs`. This explains
+# why when we disable all our  config files, `$PATH` still contains some values,
+# including `$HOME/bin` and `$HOME/.local/bin`.
+#
+# See `man login` for more info, or:
+#
+#     http://unix.stackexchange.com/a/228167
+#}}}
+# What do you put in `$PATH` and why?{{{
+#
+# We  prepend our  private `bin`  directories  to `$PATH`,  because that's  what
+# `~/.profile` did last time I checked.
+#}}}
+# Why do you use this weird loop instead of a simple assignment?{{{
+#
+# To avoid adding a path twice.
+# It can happen when we start bash  from zsh (the latter will already have added
+# those paths).
+#
+# Source:
+#     https://unix.stackexchange.com/a/40973/289772
+#}}}
+# Why don't you use `export` for `$PATH`?{{{
+#
+#      You don't  need export  if the  variable is  already in  the environment:
+#      any  change   of  the  value  of   the  variable  is  reflected   in  the
+#      environment.¹ PATH is  pretty much  always in  the environment;  all unix
+#      systems  set it  very early  on (usually  in the  very first  process, in
+#      fact).
+#
+# Source:
+#     https://unix.stackexchange.com/a/26059/289772
+#}}}
+for p in "${HOME}/bin" "${HOME}/.local/bin"; do
+  case ":$PATH:" in
+    *":$p:"*) :;; # the path is already in `$PATH`, so we do nothing (`:`)
+    *) PATH="$p:$PATH";;
+  esac
+done
+
+export HISTCONTROL="ignoreboth:erasedups"
+#                   │          │{{{
+#                   │          └ erase duplicate lines in the history
+#                   └ ignoredups + ignorespace
+#                                  │
+#                                  └ don't save commands beginning with a space
+#}}}
+
+export HISTIGNORE="clear:history:?:??"
+#                                │ │{{{
+#                                │ └ ignore commands containing only 2 characters
+#                                └ ignore commands containing only 1 character
+#}}}
+
+export HISTFILE="${HOME}/.bash_history"
+
+export HISTFILESIZE=-1
+export HISTSIZE=-1
+export HISTTIMEFORMAT="[%F %T] "
+
+# merge the history of all terminals
+# What's the effect of the value of `PROMPT_COMMAND`?{{{
+#
+# It's executed as a command prior to issuing each primary prompt.
+# For more info about `history`:
+#
+#     man bash
+#     > shell builtin commands
+#}}}
+export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
+#                     │         │           │           │{{{
+#                     │         │           │           └ Read the contents of the history file
+#                     │         │           │             and append them to the current history list
+#                     │         │           │
+#                     │         │           └ Clear the history list by deleting all the entries
+#                     │         │
+#                     │         └ Append the history list to the history file
+#                     │           history list = history lines entered since the beginning
+#                     │                          of the current bash session (kind of temporary buffer)
+#                     │
+#                     └ double quotes to allow the expansion of `${PROMPT_COMMAND}`
+

@@ -59,6 +59,10 @@
 # It would be useful to tell zsh that if we have less than, say, 10 suggestions,
 # we want them each on a separate line.
 # Or better yet, how to ask zsh to fill columns, before filling lines?
+#
+# The 'list_rows_first' option doesn't seem to help...
+# The latter changes the position of entries in a completion menu:
+# For example, the 2nd one is on the right of the 1st one, instead of below.
 
 
 # TODO:
@@ -152,8 +156,8 @@
 # Find a better way of organizing this file.
 
 # TODO:
-# I can't create a symlink for `~/.zsh_eternal_history` pointing to a file in
-# Dropbox. So, for the moment, I did the opposite: a symlink in Dropbox to the
+# I can't create a symlink for `~/.zsh_history` pointing to a file in
+# Dropbox. So, for the moment, I do the opposite: a symlink in Dropbox to the
 # file in ~. Once we get rid of Dropbox, version control all zsh config files,
 # including the history (good idea? sensible data?).
 # If it's not a good idea, then configure a cron job to automatically make
@@ -370,6 +374,8 @@ fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
 #
 # They  install  programmable completion  functions  for  the most  common  Unix
 # commands.
+# They  also enable  some more  central  functionality, on  which `zstyle`,  for
+# example, rely.
 #}}}
 # What's the equivalent in bash?{{{
 #
@@ -545,66 +551,204 @@ add-zsh-hook chpwd chpwd_recent_dirs
 autoload -Uz zmv
 autoload -Uz zrecompile
 
-#      ┌ context       ┌ name of the style
-#      ├─────────────┐ ├──────────────┐
-zstyle ':completion:*' auto-description 'specify: %d'
-zstyle ':completion:*' completer _expand _complete _correct _approximate
-# format{{{
+# Which arguments must I pass to the `zstyle` command?{{{
 #
-# The 'format'  style enables  and controls the  appearance of  an informational
-# message  for  each list  of  matches,  when you  tab-complete  a  word on  the
-# command-line.
+#   1. a context
+#   2. a name
+#   3. a value
 #
-# The format style is  so named because the value of the  style gives the format
-# to print the message in.
-#                              ┌ change the color of any following text
-#                              │ (why 89? see `:hi PmenuSel`)
-#                              │
-#                              │     ┌ text of the message (Description)
-#                              │     │
-#                              │     │ ┌ reset color
-#                              ├────┐├┐├┐}}}
-zstyle ':completion:*' format '%F{89}%d%f'
+# Example:
+#
+#     zstyle ':completion:*' format '%F{123}%d%f'
+#            ├─────────────┘ ├────┘ ├───────────┘
+#            │               │      └ value
+#            │               └ name
+#            └ context
+#
+#}}}
+# What's the purpose of a style?{{{
+#
+# It allows you to configure a mechanism, such as the completion.
+# In particular, a style can configure  how the matches are generated, similarly
+# to shell options but with much more control.
+#}}}
+# Why can't I give a random name to my style?{{{
+#
+# A style can be seen as  a context-sensitive option, like a buffer-local option
+# in Vim.
+# The name you choose controls which aspect of the style you change.
+#
+# You can't choose the names of your Vim options;
+# you can't choose the names of your zsh styles.
+#}}}
+# Where can I find a list of valid style names?{{{
+#
+#     % man zshcompsys
+#       > COMPLETION SYSTEM CONFIGURATION
+#       > Standard Styles
+#}}}
+
+# What's a context?{{{
+#
+# Everything that the shell knows about the  meaning of the command line and the
+# significance of the cursor position.
+#}}}
+# What's a style pattern?{{{
+#
+# The first  argument passed to `zstyle`  which is matched against  a context to
+# determine whether the style should be applied.
+#}}}
+# Into which fields can a context be broken down?{{{
+#
+#   1. the system used, such as 'completion', 'filter-select', 'zle'
+#   2. a function
+#   3. a completer
+#   4. a command
+#   5. an argument
+#   6. a tag
+#}}}
+
+# What's the function field in a context?{{{
+#
+# If the completion is called from a named widget rather than through the normal
+# completion system, it's the name of the function called by the widget.
+#
+# Typically this is blank,  but it is set by special widgets to  the name of the
+# function called by the latters, often in an abbreviated form.
+#}}}
+# What's a completer? {{{
+#
+# It's the  function which  is in  overall control  of how  completion is  to be
+# performed.
+# 'complete'  is the  simplest completer,  but others  exist to  perform related
+# tasks such as correction, or to modify the behaviour of a later completer.
+# }}}
+# Which text does the completer field of a context contain? {{{
+#
+# The name  of the  function which  generates the  matches, without  the leading
+# underscore and with other underscores converted to hyphens.
+#}}}
+# Where can I find a list of completers?{{{
+#
+#     % man zshcompsys
+#       > section `Control Functions`
+#}}}
+
+# What does the style 'format' control?{{{
+#
+# It  enables and controls the  appearance of an informational  message for each
+# list of matches, when you tab-complete a word on the command-line.
+# Its value gives the format to print the message in.
+#
+# Example:
+#
+#     % zstyle ':completion:*' format 'foo %d bar'
+#     % true Tab
+#         → “foo no argument or option bar”
+#}}}
+# What is '%d' expanded into?{{{
+#
+# The text of the message (Description).
+#
+# For example, if you press:
+#     % cat qqq Tab
+#       → ˋfiles', ˋfile', or ˋcorrections'
+#
+# And, if you press:
+#     % true Tab
+#       → no argument or option
+#}}}
+# How to print the text in bold?  In standout mode?  Underlined?{{{
+#
+# You can use the same escape sequences you would use in a prompt,
+# described in `man zshmisc`, section EXPANSION OF PROMPT SEQUENCES:
+#
+#    ┌─────────┬───────────┐
+#    │ %B...%b │ Bold      │
+#    ├─────────┼───────────┤
+#    │ %S...%s │ Standout  │
+#    ├─────────┼───────────┤
+#    │ %U...%u │ Underline │
+#    └─────────┴───────────┘
+#}}}
+# How to start/stop using a new foreground color?  Background color?{{{
+#
+#     ┌──────────────┬──────────────────┐
+#     │ %F{123}...%f │ Foreground color │
+#     ├──────────────┼──────────────────┤
+#     │ %K{123}...%k │ bacKground color │
+#     └──────────────┴──────────────────┘
+#}}}
+
+# When does a completer tag its matches with 'messages'?{{{
+#
+# When there can't be any completion.
+# Ex:
+#     % true Tab
+#}}}
+# When does a completer tag its matches with 'descriptions'?{{{
+#
+# When there are matches.
+# Ex:
+#     % echo Tab
+#}}}
+# When does a completer tag its matches with 'warnings'?{{{
+#
+# When there are no matches.
+# Ex:
+#     % cat qqq Tab
+#}}}
+zstyle ':completion:*:messages'     format '%F{232}%K{230}%d%f%k'
+zstyle ':completion:*:descriptions' format '%F{232}%K{230}%d%f%k'
+zstyle ':completion:*:warnings'     format 'No matches: %d'
+
 zstyle ':completion:*' group-name ''
-# show completion menu when number of options is at least 2
-zstyle ':completion:*' menu select=2
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-#                                            ├────┘{{{
-#                                            └ `man zshexpn`
-#                                            > PARAMETER EXPANSION
-#                                            > Parameter Expansion Flags
-#                                            > s:string:
-#                                                   Force field splitting at the separator string.
-#}}}
-zstyle ':completion:*' list-colors ''
-zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
-# not sure, but the first part of the next command probably makes completion
-# case-insensitive:    https://unix.stackexchange.com/q/185537/232487
-zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
-zstyle ':completion:*' menu select=long
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-zstyle ':completion:*' use-compctl false
-zstyle ':completion:*' verbose true
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
-# Necessary to be able to move in a completion menu:
-#
-#     bindkey -M menuselect '^L' forward-char
-zstyle ':completion:*' menu select
-# enable case-insensitive search (useful for the `zaw` plugin)
-zstyle ':filter-select' case-insensitive yes
-# Suggest us only video files when we tab complete `$ mpv`.
-#
-# TODO: To explain.
-# Source:
-#     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
-zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
-#                   │ │ │   │{{{
-#                   │ │ │   └ any argument and any tag
-#                   │ │ └ the command `mpv`
-#                   │ └ any completer
-#                   └ any function (`man zshcomp` > COMPLETION SYSTEM CONFIGURATION > Overview)
-#}}}
+
+# zstyle ':completion:*:*:-command-:*:commands' group-name commands
+# zstyle ':completion:*:*:-command-:*:(commands|builtins|reserved-words|aliases)' group-name commands
+# zstyle ':completion:*:*:-command-:*:commands' group-name commands
+
+# zstyle ':completion:*' auto-description 'specify: %d'
+# zstyle ':completion:*' completer _expand _complete _correct _approximate
+# # show completion menu when number of options is at least 2
+# zstyle ':completion:*' menu select=2
+# zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+# #                                            ├────┘{{{
+# #                                            └ `man zshexpn`
+# #                                              > PARAMETER EXPANSION
+# #                                              > Parameter Expansion Flags
+# #                                              > s:string:
+# #                                                     Force field splitting at the separator string.
+##}}}
+# zstyle ':completion:*' list-colors ''
+# zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+# # not sure, but the first part of the next command probably makes completion
+# # case-insensitive:    https://unix.stackexchange.com/q/185537/232487
+# zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+# zstyle ':completion:*' menu select=long
+# zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+# zstyle ':completion:*' use-compctl false
+# zstyle ':completion:*' verbose true
+# zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+# zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+# # Necessary to be able to move in a completion menu:
+##
+# #     bindkey -M menuselect '^L' forward-char
+# zstyle ':completion:*' menu select
+# # enable case-insensitive search (useful for the `zaw` plugin)
+# zstyle ':filter-select' case-insensitive yes
+# # Suggest us only video files when we tab complete `$ mpv`.
+##
+# # TODO: To explain.
+# # Source:
+# #     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
+# zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
+# #                   │ │ │   │{{{
+# #                   │ │ │   └ any argument and any tag
+# #                   │ │ └ the command `mpv`
+# #                   │ └ any completer
+# #                   └ any function (`man zshcomp` > COMPLETION SYSTEM CONFIGURATION > Overview)
+##}}}
 
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
@@ -2373,8 +2517,8 @@ bindkey -s '^Xc' 'vimdiff =() =()\e5^B'
 #                    > BINDABLE COMMANDS
 bindkey '^Xh' _complete_help
 
-# The _complete_help bindable command shows  all the contexts and tags available
-# for completion at a particular point.
+# The  `_complete_help` widget  shows all  the contexts  and tags  available for
+# completion at a particular point.
 # This provides an easy way of finding information for tag-order and other styles.
 #
 # This  widget displays information about  the context names, the  tags, and the
@@ -2385,6 +2529,47 @@ bindkey '^Xh' _complete_help
 # Note that  the information about styles  may be incomplete; it  depends on the
 # information available  from the  completion functions called,  which in  turn is
 # determined by the user's own styles and other settings.
+
+# What's the purpose of the `_complete_debug` widget?{{{
+#
+# It performs ordinary  completion, but captures in a temporary  file a trace of
+# the shell commands executed by the completion system.
+# Each completion attempt gets its own file.
+# A command to view each of these files is pushed onto the editor buffer stack.
+#}}}
+# Why do you create a wrapper around the default widget `_complete_debug`?{{{
+#
+# After invoking the `_complete_debug` widget, you'll see sth like:
+#
+#     Trace output left in /tmp/zsh6028echo1 (up-history to view)
+#                                             ^^^^^^^^^^^^^^^^^^
+# If you invoke  `up-history` (for us `C-p`  is bound to sth  similar because of
+# `bindkey  -e`), in  theory zsh  should populate  the command  line with  a vim
+# command to read the trace file.
+# In practice, it won't happen because you've enabled 'MENU_COMPLETE'.
+# Because of this, after pressing Tab, you've already entered the menu,
+# and `C-p` will simply select the above match in the menu.
+#
+# MWE:
+#
+#     autoload -Uz compinit
+#     compinit
+#     setopt MENU_COMPLETE
+#     bindkey '^X?' _complete_debug
+#     bindkey '^P' up-history
+#
+# So, to conveniently read the trace  file, we make sure that 'MENU_COMPLETE' is
+# temporarily reset.
+#}}}
+__complete_debug() {
+  emulate -L zsh
+  unsetopt MENU_COMPLETE
+  zle _complete_debug
+  # no need to restore the option, the change is local to the function
+  # thanks to `emulate -L zsh`
+}
+zle -N __complete_debug
+bindkey '^X?' __complete_debug
 
 # C-x r           snippet-rename {{{4
 
@@ -2815,6 +3000,9 @@ setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 
 # allow comments even in interactive shells
 setopt INTERACTIVE_COMMENTS
+
+# never ring the bell on an ambiguous completion
+unsetopt LIST_BEEP
 
 # display PID when suspending processes as well
 setopt LONG_LIST_JOBS

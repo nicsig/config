@@ -57,75 +57,6 @@ fi
 
 PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 
-# Environment Variables {{{1
-
-#                                   ┌─ don't save commands beginning with a space
-#                                   │
-#                   ┌─ ignoredups + ignorespace
-#                   │
-export HISTCONTROL="ignoreboth:erasedups"
-#                              │
-#                              └─ erase duplicate lines in the history
-
-#                                  ┌─ ignore commands containing only 2 characters
-#                                  │
-export HISTIGNORE="clear:history:?:??"
-#                                │
-#                                └─ ignore commands containing only 1 character
-
-# ---------------------
-# Eternal bash history.
-# ---------------------
-# Change the file location because certain bash sessions truncate .bash_history file upon close.
-# http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
-
-# Why don't we write `~` instead of `${HOME}`?
-# Because whenever we execute a command, the `history` builtin is executed to
-# merge the history of all terminals. We've configured this merge with `PROMPT_COMMAND`.
-# And it seems that `history` can't expand the tilde.
-#
-# If we use a tilde in the path to the history file and quotes around it
-# (single or double), the latter prevent the expansion of the tilde.
-#
-# Conclusion:
-# NEVER use `~` inside an assignment, because the only special characters inside
-# quotes are:  $ ` \ @
-#
-# We could get around this issue with one of the following:
-#   export HISTFILE=~/.bash_eternal_history      ✘ works but not protecting the
-#                                                  value is a bad habit
-#   export HISTFILE=~/".bash_eternal_history"    ✘ ugly
-#
-# Fore more info:
-# https://unix.stackexchange.com/a/151865/232487
-
-export HISTFILE="${HOME}/.bash_eternal_history"
-
-# Undocumented feature which sets the size to "unlimited".
-# http://stackoverflow.com/questions/9457233/unlimited-bash-history
-export HISTFILESIZE=
-export HISTSIZE=
-export HISTTIMEFORMAT="[%F %T] "
-
-# merge the history of all terminals
-
-# the value of `PROMPT_COMMAND` is executed as a command prior to issuing each
-# primary prompt; for more info about `history`:
-# `man bash`  section “shell builtin commands“
-export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
-#                     │         │           │           │{{{
-#                     │         │           │           └ Read the contents of the history file
-#                     │         │           │             and append them to the current history list
-#                     │         │           │
-#                     │         │           └ Clear the history list by deleting all the entries
-#                     │         │
-#                     │         └ Append the history list to the history file
-#                     │           history list = history lines entered since the beginning
-#                     │                          of the current bash session (kind of temporary buffer)
-#                     │
-#                     └ double quotes to allow the expansion of `${PROMPT_COMMAND}`
-#}}}
-
 # Options {{{1
 
 # Typing a directory name alone is enough to cd into it
@@ -164,6 +95,26 @@ shopt -s histverify
 # It would give  priority to the key bindings defined  in third-party files over
 # ours.
 #}}}
+
+# Why don't you export your environment variables here?{{{
+#
+#     You  should  not  define  environment variables  in  ~/.bashrc. The  right
+#     place  to define  environment variables  such  as PATH  is ~/.profile  (or
+#     ~/.bash_profile if you don't care about shells other than bash).
+#
+# Source:
+#     https://unix.stackexchange.com/a/26059/289772
+#}}}
+# Ok, but why using `~/.bashenv` and not `~/.bash_profile`?{{{{{{
+#
+# It would create a loop, because we source bashrc from bash_profile.
+#}}}
+# Why the guard `[[ -z ... ]]`?{{{
+#
+# There's no need to export variables more than once.
+# It could have side effects.
+#}}}
+[[ -z "${HISTCONTROL}" ]] && . $HOME/.bashenv
 
 # What's the purpose of this command?{{{
 #
@@ -290,7 +241,7 @@ bind '"\C-xc": "\C-a\C-kvimdiff <() <()\e5\C-b"'
 bind '"\C-xr": "\C-a\C-kfor f in *; do mv \"$f\" \"${f}\";done\e7\C-b"'
 #          │
 #          └ Rename
-
+# }}}2
 # META {{{2
 # M-m       display man for the current command {{{3
 
@@ -316,7 +267,7 @@ bind -x '"\ez": previous_directory'
 # insert an entry from the output of the previous command,
 # selecting it with fuzzy search
 bind '"\eZ": "$(!!|fzf)"'
-
+# }}}2
 # CTRL-META {{{2
 # C-M-b     execute the current command line silently {{{3
 

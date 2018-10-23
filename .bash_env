@@ -1,0 +1,106 @@
+# Should we set `$PATH` from `~/.bashrc`?{{{
+#
+# No.
+# It could  fail to  affect programs  which are  started from  a non-interactive
+# shell.
+#
+# We source `bashrc` only in interactive shells, but maybe some programs are NOT
+# started from  an interactive shell  and still rely  on `$PATH` to  be properly
+# set. Maybe some which are started by the display manager?
+#
+#     https://unix.stackexchange.com/a/88266/232487
+#
+# Quote:
+#
+#     Many distributions,  display managers and desktop  environments arrange to
+#     run ~/.profile, either by explicitly  sourcing it from the startup scripts
+#     or by running a login shell.
+#}}}
+# Does `$PATH` get its value only from here? #{{{
+#
+# No.
+#
+# Ubuntu sets  `PATH` in `/etc/environment` or  `/etc/login.defs`. This explains
+# why when we disable all our  config files, `$PATH` still contains some values,
+# including `$HOME/bin` and `$HOME/.local/bin`.
+#
+# See `man login` for more info, or:
+#
+#     http://unix.stackexchange.com/a/228167
+#}}}
+# What do you put in `$PATH` and why?{{{
+#
+# We  prepend our  private `bin`  directories  to `$PATH`,  because that's  what
+# `~/.profile` did last time I checked.
+#}}}
+PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+
+# Environment Variables {{{1
+
+#                                   ┌─ don't save commands beginning with a space
+#                                   │
+#                   ┌─ ignoredups + ignorespace
+#                   │
+export HISTCONTROL="ignoreboth:erasedups"
+#                              │
+#                              └─ erase duplicate lines in the history
+
+#                                  ┌─ ignore commands containing only 2 characters
+#                                  │
+export HISTIGNORE="clear:history:?:??"
+#                                │
+#                                └─ ignore commands containing only 1 character
+
+# ---------------------
+# Eternal bash history.
+# ---------------------
+# Change the file location because certain bash sessions truncate .bash_history file upon close.
+# http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
+
+# Why don't we write `~` instead of `${HOME}`?
+# Because whenever we execute a command, the `history` builtin is executed to
+# merge the history of all terminals. We've configured this merge with `PROMPT_COMMAND`.
+# And it seems that `history` can't expand the tilde.
+#
+# If we use a tilde in the path to the history file and quotes around it
+# (single or double), the latter prevent the expansion of the tilde.
+#
+# Conclusion:
+# NEVER use `~` inside an assignment, because the only special characters inside
+# quotes are:  $ ` \ @
+#
+# We could get around this issue with one of the following:
+#   export HISTFILE=~/.bash_eternal_history      ✘ works but not protecting the
+#                                                  value is a bad habit
+#   export HISTFILE=~/".bash_eternal_history"    ✘ ugly
+#
+# Fore more info:
+# https://unix.stackexchange.com/a/151865/232487
+
+export HISTFILE="${HOME}/.bash_eternal_history"
+
+# Undocumented feature which sets the size to "unlimited".
+# http://stackoverflow.com/questions/9457233/unlimited-bash-history
+export HISTFILESIZE=
+export HISTSIZE=
+export HISTTIMEFORMAT="[%F %T] "
+
+# merge the history of all terminals
+
+# the value of `PROMPT_COMMAND` is executed as a command prior to issuing each
+# primary prompt; for more info about `history`:
+# `man bash`  section “shell builtin commands“
+export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
+#                     │         │           │           │{{{
+#                     │         │           │           └ Read the contents of the history file
+#                     │         │           │             and append them to the current history list
+#                     │         │           │
+#                     │         │           └ Clear the history list by deleting all the entries
+#                     │         │
+#                     │         └ Append the history list to the history file
+#                     │           history list = history lines entered since the beginning
+#                     │                          of the current bash session (kind of temporary buffer)
+#                     │
+#                     └ double quotes to allow the expansion of `${PROMPT_COMMAND}`
+#}}}
+

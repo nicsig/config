@@ -56,7 +56,7 @@ augroup filetypedetect
     "
     " We want `sh` instead.
     "}}}
-    au! BufRead,BufNewFile ~/.shrc set ft=sh
+    au! BufRead,BufNewFile ~/.{bashenv,shrc} set ft=sh
 
     " When the optional FALLBACK argument is present, a
     " later :setfiletype command will override the
