@@ -46,236 +46,238 @@
 # When you start a bash shell, it's always from a zsh shell.
 # So the bash shell will inherit all the environment of the zsh shell.
 #}}}
-if [[ -z "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
-  export MY_ENVIRONMENT_HAS_BEEN_SET=yes
-
-  export EDITOR='vim'
-
-  # infinite history
-  #     https://unix.stackexchange.com/a/273929/289772
-  export HISTFILE="${HOME}/.zsh_history"
-  export HISTSIZE=999999999
-  export SAVEHIST=$HISTSIZE
-
-  # to get the name of the day/month in english
-  export LC_TIME=en_US.UTF-8
-
-  # Ask  `dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
-  # `$LS_COLORS`.
-  # The latter controls the colors in the output of `ls --color`.
-  eval "$(dircolors "${HOME}/.dircolors")"
-
-  # use Vim as default man pager
-  export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
-  #               ├─────────┘  ├────┘│         │ {{{
-  #               │            │     │         └ don't display  “Vim: Reading from stdin...”
-  #               │            │     │
-  #               │            │     └ replace tabs with spaces
-  #               │            │
-  #               │            └ remove some control characters like ^H
-  #               │
-  #               └ wrap the whole command in `/bin/sh -c`
-  #                 because the value of $MANPAGER can't use a pipe directly
-  #
-  # }}}
-
-  # Purpose:{{{
-  #
-  # Write the word `printf` in a markdown buffer, then press `K`.
-  # `$ man` will give to Vim the `printf` page from the section 1.
-  #
-  # But what if you prefer to give the priority to the section 3?
-  # That's where `$MANSECT` comes in.
-  # It allows you to change the priority of the man sections.
-  # Here, I export the default value given in:
-  #
-  #     /etc/manpath.config
-  #
-  # Use this `export` statement to change the priority of the sections.
-  #
-  # Note that pressing `3K`  or executing `man 3 printf` will  give you the page
-  # from the section 3, no matter what `$MANSECT` contains.
-  # This variable is only useful for when you don't provide the section number.
-  #
-  # See `$ man 1 man` for more info.
-  #}}}
-  export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
-
-  # Why this value?{{{
-  #
-  # It's recommended in `man par`.
-  #
-  # It's useful to prevent the following kind of wrong formatting:
-  #
-  #     par <<< 'The quick brown fox jumps over the lazy dog.
-  #     The quick brown fox jumps over the lazy dog foo bar baz.'
-  #
-  #         The quick brown fox jumps over the lazy dog.
-  #         The quick brown fox jumps over the lazy dog foo bar baz                .    ✘
-  #
-  # With the right value for `PARINIT`:
-  #
-  #         The quick brown fox jumps over the lazy dog.  The quick brown fox jumps
-  #         over the lazy dog foo bar baz.                                              ✔
-  #}}}
-  # TODO: Finish explaining the value (meaning of options, body/quote characters).
-  export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
-  #               ├────┘ │ │││├┘├┘ │ ├┘││{{{
-  #               │      │ ││││ │  │ │ │└ literal `|` (for diagrams)
-  #               │      │ ││││ │  │ │ └ literal `>` (for quotes in markdown)
-  #               │      │ ││││ │  │ │
-  #               │      │ ││││ │  │ └ whitespace
-  #               │      │ ││││ │  │
-  #               │      │ ││││ │  └ set of quote characters
-  #               │      │ ││││ │
-  #               │      │ ││││ └ [a-z]
-  #               │      │ │││└ [A-Z]
-  #               │      │ │││
-  #               │      │ ││└ literal `?`
-  #               │      │ │└ literal `,`
-  #               │      │ └ literal `.`
-  #               │      │
-  #               │      └ set of body characters
-  #               │
-  #               └ boolean and numerics options (probably)
-  #}}}
-
-  export CDPATH=:${HOME}:${HOME}/Downloads
-  # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
-  export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
-  # add man pages for `texlive` and `dasht`
-  export MANPATH=$HOME/texlive/2018/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
-  # add the `texlive` and `dasht` binaries to our path
-  export PATH=$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
-
-  # Choose which program should be used to open pdf documents.
-  # Useful for `texdoc`.
-  export PDFVIEWER=zathura
-
-  # When a command take more than a few seconds, print some timing statistics at
-  # the end of it, so that we can know how much it took exactly.
-  # The report can be formatted with `TIMEFMT` (man zshparam).
-  export REPORTTIME=15
-
-  # What's `$TERM` inside a terminal, by default?{{{
-  #
-  # In many terminals, including xfce-terminal, guake, konsole:
-  #
-  #   $TERM = xterm
-  #
-  # Yeah, they lie about their identity to the programs they run.
-  #
-  # In urxvt:
-  #
-  #   $TERM = rxvt-unicode-256color
-  #
-  # urxvt tells the truth.
-  #}}}
-  # Where is the configuration file for a terminal?{{{
-  #
-  # xfce-terminal and guake don't seem to have one.
-  # However, you may find a way to  configure how they advertise themselves to the
-  # programs they run, like this:
-  #
-  #     1. right-click
-  #     2. preferences
-  #     3. compatibility
-  #
-  # urxvt use ~/.Xresources.
-  #}}}
-  # Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
-  #
-  # For the  colorschemes of programs to  be displayed correctly in  the terminal,
-  # `$TERM`  must contain  '-256color'. Otherwise,  the programs  will assume  the
-  # terminal is only  able to interpret a limited amount  of escape sequences used
-  # to encode 8 colors, and they will restrict themselves to a limited palette.
-  #}}}
-  # Ok, but why do it in this file?{{{
-  #
-  # The configuration  of `$TERM` should  happen only in a  terminal configuration
-  # file. But for xfce4-terminal, I haven't found  one.  So, we must try to detect
-  # the identity of the terminal from here.
-  #}}}
-  # How to detect we're in an xfce terminal?{{{
-  #
-  # If you look at  the output of `env` and search for  'terminal' or 'xfce4', you
-  # should find `COLORTERM`  whose value is set to  'xfce4-terminal'.  We're going
-  # to use it to detect an xfce4 terminal.
-  #}}}
-  # Is it enough?{{{
-  #
-  # No, watch this:
-  #
-  #   1. start xfce4-terminal
-  #   2. $ tmux (start server)
-  #   3. $ echo $TERM  →  tmux-256color  ✔
-  #
-  #   4. start another xfce4-terminal
-  #   5. $ tmux (connect to running server)
-  #   6. $ echo $TERM  →  xterm-256color  ✘
-  #
-  # We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
-  # server. Because the  latter will already  have set `$TERM`  to 'tmux-256color'
-  # (thanks to the  option 'default-terminal' in `~/.tmux.conf`), which  is one of
-  # the few valid value ({screen|tmux}[-256color]).
-  #
-  # One way to be sure that we're not connected to Tmux , is to check that `$TERM`
-  # is set to 'xterm'.  That's the default value set by xfce4-terminal.
-  #}}}
-  # Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
-  #
-  #     if [[ "${TERM}" == "xterm" ]]; then
-  #         if [[ -n "${COLORTERM}" ]]; then
-  #             if [[ "${COLORTERM}" == "gnome-terminal" || "${COLORTERM}" == "xfce-terminal" ]]; then
-  #                 TERM=xterm-256color
-  #             fi
-  #         elif [[ -n "${VTE_VERSION}" ]]; then
-  #             TERM=xterm-256color
-  #         fi
-  #     fi
-  #
-  # Source:
-  # https://github.com/romainl/Apprentice/wiki/256-colors-and-you
-  #}}}
-  if [[ "${TERM}" == "xterm" ]]; then
-    if [[ "${COLORTERM}" == "xfce4-terminal" || -n "${KONSOLE_PROFILE_NAME}" ]]; then
-    #                                           ├──────────────────────────┘{{{
-    #                                           └ to also detect the Konsole terminal}}}
-      export TERM=xterm-256color
-    fi
-  fi
-
-  # directories relative  to which various kinds of user-specific  files should be
-  # written
-  # For more info, see:{{{
-  #
-  #     https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
-  #}}}
-  # The link talks about data files. What are they?{{{
-  #
-  #     • trash
-  #     • icons
-  #     • viminfo
-  #     • swap files
-  #     • .desktop files
-  #     • .keyring files
-  #     • ...
-  #}}}
-
-  export XDG_DATA_HOME=$HOME/.local/share
-
-  # configuration files
-  export XDG_CONFIG_HOME=$HOME/.config
-
-  # non-essential (cached) data
-  export XDG_CACHE_HOME=$HOME/.cache
-
-  # runtime files and other file objects
-  # (temporary files created by processes owned by the logged user)
-  export XDG_RUNTIME_DIR=/run/user/$UID
-  #                      ├────────┘{{{
-  #                      └ should exist on any OS using systemd
-  #                        not sure about the others
-  #}}}
+if [[ -n "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
+  return
 fi
+
+export MY_ENVIRONMENT_HAS_BEEN_SET=yes
+
+export EDITOR='vim'
+
+# infinite history
+#     https://unix.stackexchange.com/a/273929/289772
+export HISTFILE="${HOME}/.zsh_history"
+export HISTSIZE=999999999
+export SAVEHIST=$HISTSIZE
+
+# to get the name of the day/month in english
+export LC_TIME=en_US.UTF-8
+
+# Ask  `dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
+# `$LS_COLORS`.
+# The latter controls the colors in the output of `ls --color`.
+eval "$(dircolors "${HOME}/.dircolors")"
+
+# use Vim as default man pager
+export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
+#               ├─────────┘  ├────┘│         │ {{{
+#               │            │     │         └ don't display  “Vim: Reading from stdin...”
+#               │            │     │
+#               │            │     └ replace tabs with spaces
+#               │            │
+#               │            └ remove some control characters like ^H
+#               │
+#               └ wrap the whole command in `/bin/sh -c`
+#                 because the value of $MANPAGER can't use a pipe directly
+#
+# }}}
+
+# Purpose:{{{
+#
+# Write the word `printf` in a markdown buffer, then press `K`.
+# `$ man` will give to Vim the `printf` page from the section 1.
+#
+# But what if you prefer to give the priority to the section 3?
+# That's where `$MANSECT` comes in.
+# It allows you to change the priority of the man sections.
+# Here, I export the default value given in:
+#
+#     /etc/manpath.config
+#
+# Use this `export` statement to change the priority of the sections.
+#
+# Note that pressing `3K`  or executing `man 3 printf` will  give you the page
+# from the section 3, no matter what `$MANSECT` contains.
+# This variable is only useful for when you don't provide the section number.
+#
+# See `$ man 1 man` for more info.
+#}}}
+export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
+
+# Why this value?{{{
+#
+# It's recommended in `man par`.
+#
+# It's useful to prevent the following kind of wrong formatting:
+#
+#     par <<< 'The quick brown fox jumps over the lazy dog.
+#     The quick brown fox jumps over the lazy dog foo bar baz.'
+#
+#         The quick brown fox jumps over the lazy dog.
+#         The quick brown fox jumps over the lazy dog foo bar baz                .    ✘
+#
+# With the right value for `PARINIT`:
+#
+#         The quick brown fox jumps over the lazy dog.  The quick brown fox jumps
+#         over the lazy dog foo bar baz.                                              ✔
+#}}}
+# TODO: Finish explaining the value (meaning of options, body/quote characters).
+export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
+#               ├────┘ │ │││├┘├┘ │ ├┘││{{{
+#               │      │ ││││ │  │ │ │└ literal `|` (for diagrams)
+#               │      │ ││││ │  │ │ └ literal `>` (for quotes in markdown)
+#               │      │ ││││ │  │ │
+#               │      │ ││││ │  │ └ whitespace
+#               │      │ ││││ │  │
+#               │      │ ││││ │  └ set of quote characters
+#               │      │ ││││ │
+#               │      │ ││││ └ [a-z]
+#               │      │ │││└ [A-Z]
+#               │      │ │││
+#               │      │ ││└ literal `?`
+#               │      │ │└ literal `,`
+#               │      │ └ literal `.`
+#               │      │
+#               │      └ set of body characters
+#               │
+#               └ boolean and numerics options (probably)
+#}}}
+
+export CDPATH=:${HOME}:${HOME}/Downloads
+# https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
+export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
+# add man pages for `texlive` and `dasht`
+export MANPATH=$HOME/texlive/2018/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
+# add the `texlive` and `dasht` binaries to our path
+export PATH=$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
+
+# Choose which program should be used to open pdf documents.
+# Useful for `texdoc`.
+export PDFVIEWER=zathura
+
+# When a command take more than a few seconds, print some timing statistics at
+# the end of it, so that we can know how much it took exactly.
+# The report can be formatted with `TIMEFMT` (man zshparam).
+export REPORTTIME=15
+
+# What's `$TERM` inside a terminal, by default?{{{
+#
+# In many terminals, including xfce-terminal, guake, konsole:
+#
+#   $TERM = xterm
+#
+# Yeah, they lie about their identity to the programs they run.
+#
+# In urxvt:
+#
+#   $TERM = rxvt-unicode-256color
+#
+# urxvt tells the truth.
+#}}}
+# Where is the configuration file for a terminal?{{{
+#
+# xfce-terminal and guake don't seem to have one.
+# However, you may find a way to  configure how they advertise themselves to the
+# programs they run, like this:
+#
+#     1. right-click
+#     2. preferences
+#     3. compatibility
+#
+# urxvt use ~/.Xresources.
+#}}}
+# Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
+#
+# For the  colorschemes of programs to  be displayed correctly in  the terminal,
+# `$TERM`  must contain  '-256color'. Otherwise,  the programs  will assume  the
+# terminal is only  able to interpret a limited amount  of escape sequences used
+# to encode 8 colors, and they will restrict themselves to a limited palette.
+#}}}
+# Ok, but why do it in this file?{{{
+#
+# The configuration  of `$TERM` should  happen only in a  terminal configuration
+# file. But for xfce4-terminal, I haven't found  one.  So, we must try to detect
+# the identity of the terminal from here.
+#}}}
+# How to detect we're in an xfce terminal?{{{
+#
+# If you look at  the output of `env` and search for  'terminal' or 'xfce4', you
+# should find `COLORTERM`  whose value is set to  'xfce4-terminal'.  We're going
+# to use it to detect an xfce4 terminal.
+#}}}
+# Is it enough?{{{
+#
+# No, watch this:
+#
+#   1. start xfce4-terminal
+#   2. $ tmux (start server)
+#   3. $ echo $TERM  →  tmux-256color  ✔
+#
+#   4. start another xfce4-terminal
+#   5. $ tmux (connect to running server)
+#   6. $ echo $TERM  →  xterm-256color  ✘
+#
+# We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
+# server. Because the  latter will already  have set `$TERM`  to 'tmux-256color'
+# (thanks to the  option 'default-terminal' in `~/.tmux.conf`), which  is one of
+# the few valid value ({screen|tmux}[-256color]).
+#
+# One way to be sure that we're not connected to Tmux , is to check that `$TERM`
+# is set to 'xterm'.  That's the default value set by xfce4-terminal.
+#}}}
+# Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
+#
+#     if [[ "${TERM}" == "xterm" ]]; then
+#         if [[ -n "${COLORTERM}" ]]; then
+#             if [[ "${COLORTERM}" == "gnome-terminal" || "${COLORTERM}" == "xfce-terminal" ]]; then
+#                 TERM=xterm-256color
+#             fi
+#         elif [[ -n "${VTE_VERSION}" ]]; then
+#             TERM=xterm-256color
+#         fi
+#     fi
+#
+# Source:
+# https://github.com/romainl/Apprentice/wiki/256-colors-and-you
+#}}}
+if [[ "${TERM}" == "xterm" ]]; then
+  if [[ "${COLORTERM}" == "xfce4-terminal" || -n "${KONSOLE_PROFILE_NAME}" ]]; then
+  #                                           ├──────────────────────────┘{{{
+  #                                           └ to also detect the Konsole terminal}}}
+    export TERM=xterm-256color
+  fi
+fi
+
+# directories relative  to which various kinds of user-specific  files should be
+# written
+# For more info, see:{{{
+#
+#     https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+#}}}
+# The link talks about data files. What are they?{{{
+#
+#     • trash
+#     • icons
+#     • viminfo
+#     • swap files
+#     • .desktop files
+#     • .keyring files
+#     • ...
+#}}}
+
+export XDG_DATA_HOME=$HOME/.local/share
+
+# configuration files
+export XDG_CONFIG_HOME=$HOME/.config
+
+# non-essential (cached) data
+export XDG_CACHE_HOME=$HOME/.cache
+
+# runtime files and other file objects
+# (temporary files created by processes owned by the logged user)
+export XDG_RUNTIME_DIR=/run/user/$UID
+#                      ├────────┘{{{
+#                      └ should exist on any OS using systemd
+#                        not sure about the others
+#}}}
 

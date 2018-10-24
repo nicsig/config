@@ -1,3 +1,12 @@
+# Why this guard?{{{
+#
+# There's no need to export variables more than once.
+# It could have side effects.
+#}}}
+if [[ -n "${MY_BASH_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
+  return
+fi
+
 # Should we set `$PATH` from `~/.bashrc`?{{{
 #
 # No.
@@ -60,6 +69,8 @@ for p in "${HOME}/bin" "${HOME}/.local/bin"; do
   esac
 done
 
+export MY_BASH_ENVIRONMENT_HAS_BEEN_SET=yes
+
 export HISTCONTROL="ignoreboth:erasedups"
 #                   │          │{{{
 #                   │          └ erase duplicate lines in the history
@@ -74,6 +85,28 @@ export HISTIGNORE="clear:history:?:??"
 #                                └ ignore commands containing only 1 character
 #}}}
 
+# Why don't you write `~` instead of `${HOME}`?{{{
+#
+# Whenever we execute a command, the  `history` builtin is executed to merge the
+# history of all terminals.
+# We've configured this merge with `PROMPT_COMMAND`.
+# And `history` can't expand the tilde.
+#
+# If we use a tilde in the path to the history file and quotes around it
+# (single or double), the latter prevent the expansion of the tilde.
+#
+# Conclusion:
+# NEVER use `~` inside an assignment, because the only special characters inside
+# double quotes are: $ ` \ @
+#
+# We could get around this issue with one of the following:
+#
+#     export HISTFILE=~/.bash_history      ✘ works but not protecting the value is a bad habit
+#     export HISTFILE=~/".bash_history"    ✘ ugly
+#
+# Fore more info:
+#     https://unix.stackexchange.com/a/151865/232487
+#}}}
 export HISTFILE="${HOME}/.bash_history"
 
 export HISTFILESIZE=-1

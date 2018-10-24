@@ -109,12 +109,7 @@ shopt -s histverify
 #
 # It would create a loop, because we source bashrc from bash_profile.
 #}}}
-# Why the guard `[[ -z ... ]]`?{{{
-#
-# There's no need to export variables more than once.
-# It could have side effects.
-#}}}
-[[ -z "${HISTCONTROL}" ]] && . $HOME/.bashenv
+. $HOME/.bashenv
 
 # What's the purpose of this command?{{{
 #
