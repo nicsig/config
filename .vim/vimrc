@@ -5704,9 +5704,33 @@ endfu
 " use `:[c|l]bottom` in your jobs plugins (if they populate a qfl asynchronously)
 "
 " 34 -
-" in our syntax plugins (awk, markdown, sh, snippets, vim, …), apply a style
-" (bold, italics, …) to texts between backticks, and conceal the backticks
-" (less noise).
+" Re-implement these mappings to open the file you're editing on github.
+" It could be handy when you want to see a commit you've just pushed.
+"
+"     nno <silent>  <space>og  V:<c-u>call <sid>open_current_file_in_github()<cr>
+"     xno <silent>  <space>og  :<c-u>call <sid>open_current_file_in_github()<cr>
+"
+"     fu! s:open_current_file_in_github() abort
+"       let file_dir = expand('%:h')
+"       sil let git_root = system('cd ' . file_dir . '; git rev-parse --show-toplevel | tr -d "\n"')
+"       let file_path = substitute(expand('%:p'), git_root . '/', '', '')
+"       sil let branch = system('git symbolic-ref --short -q HEAD | tr -d "\n"')
+"       sil let git_remote = system('cd ' . file_dir . '; git remote get-url origin')
+"       let repo_path = matchstr(matchlist(git_remote, ':\(.*\)\.')[1], 'github\.com/\zs.*')
+"       let url = 'https://github.com/' . repo_path . '/blob/' . branch . '/' . file_path
+"       let first_line = getpos("'<")[1]
+"       let url .= '#L' . first_line
+"       let last_line = getpos("'>")[1]
+"       if last_line != first_line | let url .= '-L' . last_line | endif
+"       sil call system('xdg-open ' . url)
+"     endfu
+"
+" Source:
+"     https://www.reddit.com/r/vim/comments/9r3rcd/open_current_file_in_github/
+"
+" Update:
+" `:Gbrowse` does sth similar.
+"
 "
 " 35 -
 " replace all occurrences of `norm ga` with appropriate code.
@@ -5750,7 +5774,7 @@ endfu
 " alternative:
 " fuse/sshfs provides an abstraction at the filesystem layer (as opposed to some
 " other "middleware"),  so that  any dumb local  navigator (like  dirvish) works
-" without adding special-case support for scp, ftp, webdav, …, netrw does.
+" without adding special-case support for scp, ftp, webdav, ..., netrw does.
 "
 " 43 -
 " do we really need a timer to display a message?
@@ -7070,36 +7094,25 @@ endfu
 " the cycle of directories in which `:vimgrep` should search.
 "
 " 142 -
-" Re-implement these mappings to open the file you're editing on github.
-" It could be handy when you want to see a commit you've just pushed.
-"
-"     nno <silent>  <space>og  V:<c-u>call <sid>open_current_file_in_github()<cr>
-"     xno <silent>  <space>og  :<c-u>call <sid>open_current_file_in_github()<cr>
-"
-"     fu! s:open_current_file_in_github() abort
-"       let file_dir = expand('%:h')
-"       sil let git_root = system('cd ' . file_dir . '; git rev-parse --show-toplevel | tr -d "\n"')
-"       let file_path = substitute(expand('%:p'), git_root . '/', '', '')
-"       sil let branch = system('git symbolic-ref --short -q HEAD | tr -d "\n"')
-"       sil let git_remote = system('cd ' . file_dir . '; git remote get-url origin')
-"       let repo_path = matchstr(matchlist(git_remote, ':\(.*\)\.')[1], 'github\.com/\zs.*')
-"       let url = 'https://github.com/' . repo_path . '/blob/' . branch . '/' . file_path
-"       let first_line = getpos("'<")[1]
-"       let url .= '#L' . first_line
-"       let last_line = getpos("'>")[1]
-"       if last_line != first_line | let url .= '-L' . last_line | endif
-"       sil call system('xdg-open ' . url)
-"     endfu
-"
-" Source:
-"     https://www.reddit.com/r/vim/comments/9r3rcd/open_current_file_in_github/
-"
-" Update:
-" `:Gbrowse` does sth similar.
+" In  our  syntax plugins  (awk,  markdown,  sh,  snippets,  vim, ...),  give  a
+" graphical attribute (underline? black color?)  to texts between backticks, and
+" conceal the backticks (less noise).
+" Give  another to  texts  between stars  (italic?), and  yet  another to  texts
+" between 2 stars (bold)?
+" Again, conceal the marks.
 "
 " 143 -
-" Understand how to remove duplicate entries in $PATH &friends (~/.zshenv).
-
+" This mapping works in Vim, but not in Neovim:
+"     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'int')})[-1]
+"                                                      ├───┘
+"                                                      └ yeah, you really need that
+"                                                       (to prevent "<del>" from deleting the next quote
+"                                                        when the mapping is parsed?)
+"
+" Because of this `c_^d` didn't work in Neovim.
+" It works now, because I've refactored the mapping to avoid `<expr>`.
+" But still, report it on Neovim's bug tracker.
+" Btw, it looks similar to another issue we opened.
 
 
 

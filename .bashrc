@@ -116,6 +116,16 @@ shopt -s histverify
 # Bash should complete `:` (which is a command).
 # If bash completes a filename, the completion functions were not installed.
 #}}}
+# Warning:{{{
+#
+# This breaks the Tab completion of hostnames (taken from `/etc/hosts`).
+#
+# The  issue seems  to be  that this  sourced file  disables the  'hostcomplete'
+# option (`shopt -u`).
+# But even  if you  manually re-enable  it (`shopt  -s hostcomplete`),  it still
+# doesn't work.
+# `M-@` (hostname-specific completion) and `C-x @` (list matches) still work though.
+#}}}
 . /etc/bash_completion
 
 # Key bindings {{{1
@@ -141,7 +151,7 @@ bind -r "\C-r"
 #
 # Besides, we can now use `C-r` as a prefix for various key bindings.
 #}}}
-# How did you find the original {rhs} in this key binding?{{{
+# How did you find the original {rhs} of this key binding?{{{
 #
 # Start a bash shell without removing the `C-r` key binding,
 # and execute:
@@ -155,53 +165,26 @@ bind '"\C-r\C-h": " \C-e\C-u\C-y\ey\C-u`__fzf_history__`\e\C-e\er\e^"'
 bind '"\C-x\C-f":  character-search'
 bind '"\C-x\C-F":  character-search-backward'
 
-# C-x C-r      resource-bashrc {{{3
-
-# TODO:
-# using non producable keycodes as lhs in intermediate key bindings is tricky;
-# but which keycodes are usable? (keycode space)
-bind    '"\e[99i~": re-read-init-file'
-bind -x '"\e[99b~": reread'
-#     │
-#     └─ the rhs must processed as a shell command (like `fzf-file-widget`),
-#        not a line edition command (like `\C-e | vim -R -\C-m`)
-bind    '"\C-x\C-r":   "\e[99i~\e[99b~"'
-
-# FIXME:
-# ┌─ The name of the function must have a specific length:
-# │          https://unix.stackexchange.com/q/370463/232487
-# │
-# │  yeah, I know, it's a weird bug ...
-reread() {
-  . "${HOME}/.bashrc" </dev/null 2>/dev/null
-}
-
 # C-x C-s      reexecute-with-sudo {{{3
 
 # re-execute last command with `sudo`
 bind '"\C-x\C-s": "sudo -E PATH= $PATH bash -c \"!!\" \C-m"'
 
+# When do I need to use `-x`?{{{
+#
+# When the rhs invokes a custom shell FUNCTION.
+# If  the rhs  invokes a  built-in  shell COMMAND  or  a macro  (i.e. a  literal
+# sequence of characters to press), do NOT use `-x`.
+#
+# Also note that when you use `-x`, the shell sets the READLINE_LINE variable to
+# the contents of the line buffer and the READLINE_POINT variable to the current
+# location of the insertion point.
+#
+# If your custom  shell function changes the values of  these variables, it will
+# be reflected in the editing state.
+#}}}
 bind -x '"\C-x\C-t": fzf-file-widget'
-#     │
-#     └── when `fzf-file-widget` is executed, the shell sets the READLINE_LINE
-#         variable to the contents of the line buffer and the READLINE_POINT
-#         variable to the current location of the insertion point
-#
-#         if `fzf-file-widget` changes the values of these variables, it will be
-#         reflected in the editing state
-#
-#         without this flag, `fzf-file-widget` doesn't work, which means that it
-#         probably relies on these 2 variables
-#         `-x` sets them and make sure that readline takes into account the
-#         change in their values
 
-# FIXME:
-# I don't really understand the `-x` option.
-# According to what I wrote earlier, I should use `-x` in the next key binding.
-# But if I do it gives the error:
-#         transpose-chars: command not found
-# What's the difference between `transpose-chars` and `fzf-file-widget`?
-# Why do I need `-x` in one case, but not the other?
 bind '"\C-t": transpose-chars'
 
 # C-x C-v: read output of command inside Vim
@@ -222,10 +205,10 @@ bind '"\C-xr": "\C-a\C-kfor f in *; do mv \"$f\" \"${f}\";done\e7\C-b"'
 
 bind '"\em": "\C-aman \ef\C-k\C-m"'
 #             │   │   │  │
-#             │   │   │  └─ kill everything after, up to the end of the line
-#             │   │   └─ move 1 word forward
-#             │   └─ type `man `
-#             └─ go to beginning of line
+#             │   │   │  └ kill everything after, up to the end of the line
+#             │   │   └ move 1 word forward
+#             │   └ type `man `
+#             └ go to beginning of line
 
 # M-z       previous directory {{{3
 
@@ -251,11 +234,11 @@ bind '"\eZ": "$(!!|fzf)"'
 # executing `cat`), we see that the latter receives `Escape` + `C-b`.
 # So, in our next key binding, the `lhs` must be `\e\C-b`, and not `\C-\eb`.
 #
-#           ┌─ Black hole
+#           ┌ Black hole
 #           │
 # bind '"\e\C-b":  "\C-e >/dev/null 2>&1 &\C-m"'
 #                                      │
-#                                      └─ execute in the background
+#                                      └ execute in the background
 
 # Update:
 # I've commented the key binding because I hit it by accident too often.

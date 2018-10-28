@@ -11,6 +11,9 @@
 #
 #     • usage when the script is called without arguments
 #
+#       Should we delegate this to a library function to avoid
+#       repeating always the same kind of code?
+#
 #     • use the output streams correctly
 #
 #       Write error messages on stderr, not on stdout.
@@ -40,6 +43,10 @@
 #
 #     • split a long command using an array whose elements are arguments of the latter:
 #           https://unix.stackexchange.com/a/473257/289772
+
+# TODO:
+# Integrate `~/.zprofile` here?
+# Are there commands that we really need to write in `~/.zprofile`?
 
 # TODO:
 # Type `$ vim Tab`.
@@ -154,6 +161,8 @@
 # a certain point to avoid being overridden/overriding sth.
 # It feels brittle. One day we could move them in the wrong order.
 # Find a better way of organizing this file.
+# Or  write  at  the  top  of  the file  that  some  sections  must  be  sourced
+# before/after others.
 
 # TODO:
 # I can't create a symlink for `~/.zsh_history` pointing to a file in
@@ -397,8 +406,8 @@ zmodload zsh/complist
 #
 # `functions` is equivalent to `typeset -f`     (see `run-help functions`)
 #                                     │
-#                                     └─ refer to function
-#                                        rather than parameter
+#                                     └ refer to function
+#                                       rather than parameter
 #
 # So:
 #
@@ -455,7 +464,7 @@ compinit
 autoload -Uz bashcompinit
 bashcompinit
 
-# Why do you need to source this file here?{{{
+# Why do you need to source this `_pandoc` file here?{{{
 #
 # There's no default zsh completion function for pandoc:
 #     https://github.com/jgm/pandoc/issues/4668
@@ -466,7 +475,7 @@ bashcompinit
 #
 #     $ pandoc --bash-completion
 #}}}
-# Is there an alternative to this command?{{{
+# Is there an alternative to `. /path/to/_pandoc`?{{{
 #
 # Yes:
 #     $ . <(pandoc --bash-completion)
@@ -479,26 +488,36 @@ bashcompinit
 # I don't want to re-generate the  bash completion function every time I start a
 # zsh shell.
 #}}}
-. ~/.zsh/my-completions/_pandoc
-# FIXME: Autoload this bash function.
-# TODO: Use a `bash_source` wrapper command to source this function to avoid any issue{{{
-# with other bash completion functions in the future.
+
+# Why do you use this `bash_source` function? Why don't you source `_pandoc` with a simple `source` or `.`?{{{
 #
-# Try something like this:
+# To  avoid the  bash `shopt`  builtin and  to avoid  problems with  common bash
+# functions that have the same name as zsh ones.
+#}}}
+# Where did you find the code of these 2 functions?{{{
 #
-#     bash_source() {
-#       alias shopt=':'
-#       alias _expand=_bash_expand
-#       alias _complete=_bash_comp
-#       emulate -L sh
-#       setopt kshglob noshglob braceexpand
-#
-#       source "$@"
-#     }
-#
-# Source:
 #     https://web.archive.org/web/20180404080213/http://zshwiki.org/home/convert/bash
 #}}}
+# Are they necessary here? {{{
+#
+# Not for `pandoc` but  they could be in a future update, and  they could be for
+# other bash completion functions.
+#}}}
+# TODO: Autoload the functions.
+bash_source() {
+  alias shopt=':'
+  alias _expand=_bash_expand
+  alias _complete=_bash_comp
+  emulate -L sh
+  setopt kshglob noshglob braceexpand
+
+  source "$@"
+}
+have() {
+  unset have
+  (( ${+commands[$1]} )) && have=yes
+}
+bash_source ~/.zsh/my-completions/_pandoc
 
 # Why removing the alias `run-help`?{{{
 #
@@ -2104,6 +2123,24 @@ unclutter_toggle() { #{{{2
   fi
 }
 
+var_what_have_you() { #{{{2
+  # Purpose:{{{
+  #
+  # Useful to check the contents of a value of an environment variable:
+  #
+  #     var_what_have_you $IFS
+  #
+  # The number which is displayed in the lower right corner seems to be a weight
+  # in bytes.
+  #}}}
+  var="$1"
+  printf -- '%s' "${var}" | od -t c
+  #                         ├┘ ├┘ │
+  #                         │  │  └ format = printable character or backslash escape
+  #                         │  └ select output format
+  #                         └ dump stdin in another format
+}
+
 vim_prof() { #{{{2
   emulate -L zsh
   local TMP
@@ -2721,8 +2758,7 @@ bindkey '^Z' __fancy_ctrl_z
 #}}}
 # Where did you find the code for the for loop?{{{
 #
-#     ~/GitRepos/zsh/Completion/Base/Widget/_bash_completions
-#     https://sourceforge.net/p/zsh/code/ci/master/tree/Completion/Base/Widget/_bash_completions
+#     /usr/share/zsh/functions/Completion/Base/_bash_completions
 #}}}
 () {
   emulate -L zsh
@@ -2745,7 +2781,24 @@ bindkey '^Z' __fancy_ctrl_z
     #     M- = opens the completion menu
     #     C-x = prints the list of matches
     # }}}
-    bindkey "\e${key}" _bash_complete-word
+    # Do some of them shadow a builtin zsh command?{{{
+    #
+    # Yes.
+    # By default, `M-!` is bound to `spell-word`.
+    # And `M-$` to `history-expansion`.
+    #
+    # I don't care  about any of them, because  it seems that Tab is  able to do
+    # the same:
+    #
+    #     % echoz Tab
+    #         → echo
+    #
+    #     % !! !! !! Tab
+    #         → last command, 3 times
+    #}}}
+    if [[ "${key}" != '$' ]]; then
+      bindkey "\e${key}" _bash_complete-word
+    fi
     bindkey "^X${key}" _bash_list-choices
   done
 }

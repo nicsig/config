@@ -1,15 +1,19 @@
-# TODO:
-# Learn all readline key bindings:
+# What's the purpose of this file?{{{
+#
+# When a program  using the readline library  starts up, this file  is read, and
+# the key bindings and variables are set.
+#}}}
+# Where to find information to configure it?{{{
+#
+#     $ man 3 readline
+#}}}
+
+# TODO: Learn all readline key bindings:{{{
 #     http://www.catonmat.net/download/readline-emacs-editing-mode-cheat-sheet.pdf
 #
 # If some of them don't work, rebind them to key sequences recognized by the terminal.
 # Find a way to replicate the same functionalities provided by `readline` in `zle`.
-
-# When a program  using the readline library  starts up, this file  is read, and
-# the  key bindings  and  variables are  set.
-# For more information on how to configure this file:
-#     $ man 3 readline
-
+#}}}
 
 # read commands/bindings from `/etc/inputrc`,
 # useful to enable motion with `C-left` and `C-right`
@@ -88,10 +92,9 @@ set show-all-if-ambiguous on
 # That is when there are several matches.
 #}}}
 set visible-stats on
-
 # }}}
 $if mode=emacs
-# Functions {{{
+# Key bindings whose rhs is a function {{{
 
 # bind C-w to delete a word (by default it deletes a WORD){{{
 #
@@ -158,7 +161,7 @@ TAB: menu-complete
 # we can use the keycodes instead
 "\e[Z": menu-complete-backward
 # }}}
-# Macros {{{
+# Key bindings whose rhs is a macro {{{
 
 # quote current word or previous one if we're on a whitespace
 "\C-x\C-q": "\eb\"\ef\""
