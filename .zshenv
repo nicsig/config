@@ -52,6 +52,44 @@ fi
 
 export MY_ENVIRONMENT_HAS_BEEN_SET=yes
 
+# configure `$ bat`
+# Where can I download `$ bat`?{{{
+#
+#     https://github.com/sharkdp/bat/releases
+#}}}
+# What does `BAT_STYLE` control?{{{
+#
+# The information  which will  be printed  by `$  bat file`  in addition  to the
+# contents of the file.
+#}}}
+# What values can I include in it?{{{
+#
+#     ┌─────────┬───────────────────────────────────────────────────┐
+#     │ changes │ indicators about lines added/removed              │
+#     │         │ in a modified file in a git repo                  │
+#     ├─────────┼───────────────────────────────────────────────────┤
+#     │ grid    │ lines separating the text from the header/numbers │
+#     ├─────────┼───────────────────────────────────────────────────┤
+#     │ header  │ filename                                          │
+#     ├─────────┼───────────────────────────────────────────────────┤
+#     │ numbers │ lines addresses                                   │
+#     └─────────┴───────────────────────────────────────────────────┘
+#
+# There're other values (like auto, full, plain), see `man $bat`.
+#}}}
+export BAT_STYLE=changes,grid,header
+# What are the other possible themes, and how to (pre)view them?{{{
+#
+# This command will print a default sample file for each theme:
+#
+#     $ bat --list-themes
+#
+# This command will print a preview of `/path/to/file` for each theme:
+#
+#     $ bat --list-themes | fzf --preview="bat --theme={} --color=always /path/to/file"
+#}}}
+export BAT_THEME='GitHub'
+
 export EDITOR='vim'
 
 # infinite history
@@ -68,19 +106,32 @@ export LC_TIME=en_US.UTF-8
 # The latter controls the colors in the output of `ls --color`.
 eval "$(dircolors "${HOME}/.dircolors")"
 
-# use Vim as default man pager
-export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
-#               ├─────────┘  ├────┘│         │ {{{
-#               │            │     │         └ don't display  “Vim: Reading from stdin...”
-#               │            │     │
-#               │            │     └ replace tabs with spaces
-#               │            │
-#               │            └ remove some control characters like ^H
-#               │
-#               └ wrap the whole command in `/bin/sh -c`
-#                 because the value of $MANPAGER can't use a pipe directly
+# use Neovim as default man pager
+# Why don't you use Vim like before?{{{
 #
-# }}}
+# Yeah, in the past, we used this:
+#
+#     export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
+#                     ├─────────┘  ├────┘│         │
+#                     │            │     │         └ don't display  “Vim: Reading from stdin...”
+#                     │            │     │
+#                     │            │     └ replace tabs with spaces
+#                     │            │
+#                     │            └ remove some control characters like ^H
+#                     │
+#                     └ wrap the whole command in `/bin/sh -c`
+#                       because the value of $MANPAGER can't use a pipe directly
+#
+# But, currently, the Neovim man plugin is better than our own plugin.
+# The  latter only  works in  Vim and,  contrary to  the Neovim  plugin, doesn't
+# support some attributes such as bold/underlined.
+#
+# Btw, if, later, you decide to use Vim again, read `:h manpager.vim`.
+# It recommends this command instead:
+#
+#     export MANPAGER="vim -M +MANPAGER -"
+#}}}
+export MANPAGER='nvim +Man!'
 
 # Purpose:{{{
 #
@@ -103,6 +154,24 @@ export MANPAGER='/bin/sh -c "col -bx | vim --not-a-term -"'
 # See `$ man 1 man` for more info.
 #}}}
 export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
+# Why this second export?{{{
+#
+# For some reason, when you start `(n)vim` with `$ man`, the value of `$MANSECT`
+# is truncated.
+# Only the first section number before the first colon is kept.
+# The rest is lost.
+#
+# Because of this:
+#     $ man man
+#     :Man mount
+#       → ✘
+#         man.vim: command error (11) man -w mount: No manual entry for mount
+#         See 'man 7 undocumented' for help when manual pages are not available.
+#
+# So I create this duplicate variable, which will serve as a backup.
+# And in our vimrc, I make sure to reset the value of `MANSECT` to `$MYMANSECT`.
+#}}}
+export MYMANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
 
 # Why this value?{{{
 #
@@ -248,8 +317,7 @@ if [[ "${TERM}" == "xterm" ]]; then
   fi
 fi
 
-# directories relative  to which various kinds of user-specific  files should be
-# written
+# directories relative to which various kinds of user-specific files should be written
 # For more info, see:{{{
 #
 #     https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
@@ -264,10 +332,10 @@ fi
 #     • .keyring files
 #     • ...
 #}}}
-
+# user data files
 export XDG_DATA_HOME=$HOME/.local/share
 
-# configuration files
+# user configuration files
 export XDG_CONFIG_HOME=$HOME/.config
 
 # non-essential (cached) data
@@ -280,4 +348,181 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                      └ should exist on any OS using systemd
 #                        not sure about the others
 #}}}
+
+# Purpose:{{{
+#
+# Some environment variables can contain duplicate entries.
+#
+# This is the case with `XDG_CONFIG_DIRS` and `XDG_DATA_DIRS`.
+# It can have undesired effects.
+# For example, these variables are used by Neovim to add some paths in its rtp.
+# If one day,  one of those paths  contain a filetype plugin, it  may be sourced
+# twice and lead to errors.
+#
+# This  anonymous function  makes sure  that those  variables don't  contain any
+# duplicate entries.
+#
+# To do so, it's going to iterate over the entries of a copy of each environment
+# variable.
+# Every time it finds a unique entry, it will add it to the local variable `rebuild`.
+# At  the end,  it assigns the  value of `rebuild`  to the  original environment
+# variable.
+#}}}
+() {
+  emulate -L zsh
+  local -A vars=( \
+    [PATH]="${PATH}" \
+    [XDG_CONFIG_DIRS]="${XDG_CONFIG_DIRS}" \
+    [XDG_DATA_DIRS]="${XDG_DATA_DIRS}" \
+    )
+  # iterate over the keys of `vars` (i.e. the strings 'PATH', 'XDG_...')
+  local key
+  # Would this work in bash?{{{
+  #
+  # Almost.
+  # You would only have to replace `(k)` with `!`:
+  #
+  #     for key in "${!vars[@]}"; do
+  #                   ^
+  #}}}
+  for key in "${(k)vars[@]}"; do
+    if [[ -n "${vars[$key]}" ]]; then
+      # Is the equal sign necessary?{{{
+      #
+      # Yes.
+      #
+      # To correctly reset/empty the variables after each iteration of the loop.
+      # Also, to avoid  the shell printing the value of  the local variables, on
+      # the terminal.
+      #
+      # MWE:
+      #
+      #     func() {
+      #       local var
+      #       var='val1'
+      #       local var
+      #       var='val2'
+      #     }
+      #     $ func
+      #         → the 2nd `local var` statement will make zsh print the value of `var`
+      #
+      #     func() {
+      #       local i
+      #       for i in 1 2; do
+      #         local var
+      #         var='value'
+      #       done
+      #     }
+      #     $ func
+      #         → same thing as before
+      #}}}
+      local copy=
+      local rebuild=
+      # Why do you add a colon at the end?{{{
+      #
+      # The next while loop won't end until `copy` is empty.
+      # And `copy`  shrinks after every iteration  because we remove one  of its
+      # entries with:
+      #
+      #     copy="${copy#*:}"
+      #
+      # Now, if we don't add a colon at the end, the last entry won't be removed
+      # during the last expected iteration.
+      #
+      #     foo:bar:baz
+      #         bar:baz    ('foo:' was removed)
+      #             baz    ('bar:' was removed)
+      #             baz    (nothing was removed, because nothing matched `*:`)
+      #             ...    (never ending loop)
+      #
+      # As a result, the while loop will never ends.
+      # OTOH, if we add an extra colon at the end:
+      #
+      #     foo:bar:baz:
+      #         bar:baz:   ('foo:' was removed)
+      #             baz:   ('bar:' was removed)
+      #                ∅   ('baz:' was removed)
+      #}}}
+      copy="${vars[$key]}":
+
+      # iterate over the entries of the copy
+      while [[ -n "${copy}" ]]; do
+        # extract first entry from the copy
+        entry="${copy%%:*}"
+        # Why do you add a colon right after `rebuild`?{{{
+        #
+        # We're going to compare the text stored in `rebuild` with a pattern.
+        # The latter contains 2 colons: one before and one after the entry we've
+        # just extracted.
+        # If the entry is  already present at the very end  of `rebuild`, and we
+        # don't add an extra colon, it won't be matched by `*:entry:*`
+        #
+        # MWE:
+        #     rebuild = foo:bar
+        #     entry = bar
+        #
+        #     'foo:bar'  !~ '*:bar:*' ✘
+        #     'foo:bar:' =~ '*:bar:*' ✔
+        #
+        # As a  result, the test  will fail, and the  algo will wrongly  add the
+        # entry a second time in `rebuild`.
+        #}}}
+        # Why don't you add a colon right before `rebuild`?{{{
+        #
+        # There's no need to.
+        # During  the first  iteration, `rebuild`  is  empty and  thus can't  be
+        # matched by `*:entry:*`
+        # During the second iteration, `rebuild`  contains sth like ':foo' (yes,
+        # the previous iteration has added an  extra colon at the beginning), so
+        # there's no need to add a colon.
+        # During the  third iteration,  `rebuild` contains sth  like ':foo:bar',
+        # then  ':foo:bar:baz'  and  so  on. There's   always  a  colon  at  the
+        # beginning.
+        # }}}
+        case "${rebuild}": in
+          # if the entry is already in the variable, don't do anything
+          # Why do you add a colon before and after the entry, in the pattern?{{{
+          #
+          # To be sure `entry` is indeed an entry of `rebuild`, and not merely a
+          # substring of an entry.
+          # For example, if we have those values:
+          #
+          #     entry = bar
+          #     rebuild = foo:barbar:baz
+          #
+          # And we want to check whether  'bar' is an entry of 'foo:barbar:baz',
+          # we can't compare the latter to just '*bar*'.
+          # It would result  in a positive match, and 'bar'  would not be added,
+          # because the algo would wrongly think  that 'bar' is already an entry
+          # of `rebuild`.
+          # In  reality, 'bar'  only matches  a substring  of an  entry, and  so
+          # should be added.
+          #}}}
+          *:"${entry}":*) ;;
+          # otherwise, add the entry at the end of the variable
+          *) rebuild="${rebuild}:${entry}" ;;
+        esac
+        # remove the  first entry, so  that the next  iteration of the  while loop
+        # processes the next entry
+        copy="${copy#*:}"
+      done
+
+      # Now we can assign `rebuild` to the original environment variable.
+      # Why `${rebuild#:}` instead of just `${rebuild}`?{{{
+      #
+      # The first iteration  of the while loop has introduced  an extra colon at
+      # the beginning:
+      #
+      #     rebuild="${rebuild}:${entry}"
+      #     ⇔
+      #     rebuild=":${entry}"
+      #              ^
+      #              because rebuild is initially empty
+      #
+      # We need to remove it.
+      #}}}
+      eval "$key=\"${rebuild#:}\""
+    fi
+  done
+}
 

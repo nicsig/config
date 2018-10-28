@@ -312,8 +312,7 @@
 # │  │       │ │         │     > CONDITIONAL SUBSTRINGS IN PROMPTS
 # │  │       │ │         │
 # │  ├──────┐├┐├┐        ├─────────┐}}}
-PS1='%F{blue}%~%f %F{red}%(?..[%?] )%f
-%% '
+PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
 
 # Why?{{{
 #
@@ -369,6 +368,15 @@ fpath=(${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath)
 #
 #     https://github.com/sunaku/dasht
 fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
+
+# Why loading this module?{{{
+#
+# We need it for:
+#
+#     • the `list-prompt` style to work
+#     • the `menuselect` keymap to be available when we install key bindings.
+#}}}
+zmodload zsh/complist
 
 # What's the purpose of these commands?{{{
 #
@@ -548,96 +556,10 @@ select-word-style bash
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
 
-autoload -Uz zmv
-autoload -Uz zrecompile
-
-# Which arguments must I pass to the `zstyle` command?{{{
-#
-#   1. a context
-#   2. a name
-#   3. a value
-#
-# Example:
-#
-#     zstyle ':completion:*' format '%F{123}%d%f'
-#            ├─────────────┘ ├────┘ ├───────────┘
-#            │               │      └ value
-#            │               └ name
-#            └ context
-#
-#}}}
-# What's the purpose of a style?{{{
-#
-# It allows you to configure a mechanism, such as the completion.
-# In particular, a style can configure  how the matches are generated, similarly
-# to shell options but with much more control.
-#}}}
-# Why can't I give a random name to my style?{{{
-#
-# A style can be seen as  a context-sensitive option, like a buffer-local option
-# in Vim.
-# The name you choose controls which aspect of the style you change.
-#
-# You can't choose the names of your Vim options;
-# you can't choose the names of your zsh styles.
-#}}}
-# Where can I find a list of valid style names?{{{
-#
-#     % man zshcompsys
-#       > COMPLETION SYSTEM CONFIGURATION
-#       > Standard Styles
-#}}}
-
-# What's a context?{{{
-#
-# Everything that the shell knows about the  meaning of the command line and the
-# significance of the cursor position.
-#}}}
-# What's a style pattern?{{{
-#
-# The first  argument passed to `zstyle`  which is matched against  a context to
-# determine whether the style should be applied.
-#}}}
-# Into which fields can a context be broken down?{{{
-#
-#   1. the system used, such as 'completion', 'filter-select', 'zle'
-#   2. a function
-#   3. a completer
-#   4. a command
-#   5. an argument
-#   6. a tag
-#}}}
-
-# What's the function field in a context?{{{
-#
-# If the completion is called from a named widget rather than through the normal
-# completion system, it's the name of the function called by the widget.
-#
-# Typically this is blank,  but it is set by special widgets to  the name of the
-# function called by the latters, often in an abbreviated form.
-#}}}
-# What's a completer? {{{
-#
-# It's the  function which  is in  overall control  of how  completion is  to be
-# performed.
-# 'complete'  is the  simplest completer,  but others  exist to  perform related
-# tasks such as correction, or to modify the behaviour of a later completer.
-# }}}
-# Which text does the completer field of a context contain? {{{
-#
-# The name  of the  function which  generates the  matches, without  the leading
-# underscore and with other underscores converted to hyphens.
-#}}}
-# Where can I find a list of completers?{{{
-#
-#     % man zshcompsys
-#       > section `Control Functions`
-#}}}
-
 # What does the style 'format' control?{{{
 #
-# It  enables and controls the  appearance of an informational  message for each
-# list of matches, when you tab-complete a word on the command-line.
+# It controls the appearance of a description for each list of matches, when you
+# tab-complete a word on the command line.
 # Its value gives the format to print the message in.
 #
 # Example:
@@ -646,17 +568,24 @@ autoload -Uz zrecompile
 #     % true Tab
 #         → “foo no argument or option bar”
 #}}}
-# What is '%d' expanded into?{{{
+# How is the sequence '%d' expanded?{{{
 #
-# The text of the message (Description).
+# A description of the matches.
 #
-# For example, if you press:
-#     % cat qqq Tab
-#       → ˋfiles', ˋfile', or ˋcorrections'
+# For example:
 #
-# And, if you press:
+#     % echo Tab
+#       → file
+#
 #     % true Tab
 #       → no argument or option
+#
+#     % cat qqq Tab
+#       → ˋfiles', ˋfile', or ˋcorrections'
+#}}}
+# How is the sequence '%D' expanded?{{{
+#
+# Same thing as `%d`, except that the descriptions are separated by newlines.
 #}}}
 # How to print the text in bold?  In standout mode?  Underlined?{{{
 #
@@ -680,6 +609,7 @@ autoload -Uz zrecompile
 #     └──────────────┴──────────────────┘
 #}}}
 
+# We set the 'format' style for some well-known tags/contexts.
 # When does a completer tag its matches with 'messages'?{{{
 #
 # When there can't be any completion.
@@ -698,57 +628,138 @@ autoload -Uz zrecompile
 # Ex:
 #     % cat qqq Tab
 #}}}
-zstyle ':completion:*:messages'     format '%F{232}%K{230}%d%f%k'
+zstyle ':completion:*:messages'     format '%d'
 zstyle ':completion:*:descriptions' format '%F{232}%K{230}%d%f%k'
-zstyle ':completion:*:warnings'     format 'No matches: %d'
+zstyle ':completion:*:warnings'     format $'No matches:\n%D'
 
+# What does `group-name` control?{{{
+#
+# It allows you to group the matches with particular tags to the same list.
+#}}}
+# Why do you set it to an empty string?{{{
+#
+# When we don't name our group  (empty string), the completion system groups the
+# matches according to their tag:
+#
+#     • external command
+#     • builtin command
+#     • shell function
+#     • alias
+#     • parameter
+#     ...
+#}}}
+# How could I group the matches of command names (not shell functions, parameters, ...) together?{{{
+#
+#     zstyle ':completion:*:*:-command-:*:(commands|builtins|reserved-words|aliases)' group-name commands
+#                             ├───────┘   ├────────────────────────────────────────┘
+#                             │           └ zsh glob pattern matching several types of matches
+#                             │
+#                             └ Usually, we write the name of a command in this field.
+#                               But  here, we  use  a  special name  `-command-`,
+#                               which  restricts   the  style  to   a  completion
+#                               triggered in command position.
+#
+# Alternatively,  if you  couldn't use the  glob pattern in  the tag  field, you
+# could write this instead:
+#
+#     zstyle ':completion:*:*:-command-:*:commands'       group-name commands
+#     zstyle ':completion:*:*:-command-:*:builtins'       group-name commands
+#     zstyle ':completion:*:*:-command-:*:reserved-words' group-name commands
+#     zstyle ':completion:*:*:-command-:*:aliases'        group-name commands
+#                                                                    ├──────┘
+#                                                                    └ arbitrary name for our group;
+#                                                                      every type of matches in this group
+#                                                                      would be printed in the same list
+#}}}
 zstyle ':completion:*' group-name ''
+# What does `separate-sections` control?{{{
+#
+# It's used with the `manuals` tag when completing names of manual pages.
+# When set,  zsh prints the different  sections of the manual  where the matches
+# can be found.
+#
+# If the `group-name` style is also set to an empty string, pages from different
+# sections will appear separately in different lists.
+#}}}
+zstyle ':completion:*:manuals' separate-sections true
 
-# zstyle ':completion:*:*:-command-:*:commands' group-name commands
-# zstyle ':completion:*:*:-command-:*:(commands|builtins|reserved-words|aliases)' group-name commands
-# zstyle ':completion:*:*:-command-:*:commands' group-name commands
+# Which style controls the printing of descriptions when completing command options?{{{
+#
+# 'verbose'
+#
+#     zstyle ':completion:*' verbose true
+#
+# Try it on this command:
+#
+#     % typeset - Tab
+#}}}
+# Why don't you set it?{{{
+#
+# It's already set to true by default.
+#}}}
+# What does the style `list-separator` control?{{{
+#
+# It defines the characters printed between a match and its description.
+# By default, its value is `--`.
+# I  prefer `  #`  as  it reminds  me  of a  shell  comment,  and separates  the
+# description further from the match, which makes it more readable.
+#}}}
+zstyle ':completion:*' list-separator '  #'
+# What does the style `auto-description` control?{{{
+#
+# It  defines  the  description  for  options that  are  not  described  by  the
+# completion functions, but that have exactly one argument.
+# The sequence `%d`  in the value will  be replaced by the  description for this
+# argument.
+#
+# Example:
+#     % fetchmail --a Tab
+#     option
+#     --all         # retrieve old and new messages
+#     --antispam    # ,   set antispam response values
+#     --auth        # specify: authentication types
+#                     ├───────┘├──────────────────┘
+#                     │        └ added by the expansion of `%d`:
+#                     │              description of the argument of `--auth`
+#                     │
+#                     └ added by the value of `auto-description`
+#}}}
+zstyle ':completion:*' auto-description 'specify: %d'
 
-# zstyle ':completion:*' auto-description 'specify: %d'
-# zstyle ':completion:*' completer _expand _complete _correct _approximate
-# # show completion menu when number of options is at least 2
-# zstyle ':completion:*' menu select=2
-# zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-# #                                            ├────┘{{{
-# #                                            └ `man zshexpn`
-# #                                              > PARAMETER EXPANSION
-# #                                              > Parameter Expansion Flags
-# #                                              > s:string:
-# #                                                     Force field splitting at the separator string.
-##}}}
-# zstyle ':completion:*' list-colors ''
-# zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
-# # not sure, but the first part of the next command probably makes completion
-# # case-insensitive:    https://unix.stackexchange.com/q/185537/232487
-# zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
-# zstyle ':completion:*' menu select=long
-# zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-# zstyle ':completion:*' use-compctl false
-# zstyle ':completion:*' verbose true
-# zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-# zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
-# # Necessary to be able to move in a completion menu:
-##
-# #     bindkey -M menuselect '^L' forward-char
-# zstyle ':completion:*' menu select
-# # enable case-insensitive search (useful for the `zaw` plugin)
-# zstyle ':filter-select' case-insensitive yes
-# # Suggest us only video files when we tab complete `$ mpv`.
-##
-# # TODO: To explain.
-# # Source:
-# #     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
-# zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
-# #                   │ │ │   │{{{
-# #                   │ │ │   └ any argument and any tag
-# #                   │ │ └ the command `mpv`
-# #                   │ └ any completer
-# #                   └ any function (`man zshcomp` > COMPLETION SYSTEM CONFIGURATION > Overview)
-##}}}
+zstyle ':completion:*' list-prompt %SAt %p%s
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+#                                            ├────┘{{{
+#                                            └ `man zshexpn`
+#                                              > PARAMETER EXPANSION
+#                                              > Parameter Expansion Flags
+#                                              > s:string:
+#                                                     Force field splitting at the separator string.
+#}}}
+zstyle ':completion:*' list-colors ''
+
+zstyle ':completion:*' completer _expand _complete _correct _approximate
+# show completion menu when number of options is at least 2
+zstyle ':completion:*' menu select=2
+# not sure, but the first part of the next command probably makes completion
+# case-insensitive:    https://unix.stackexchange.com/q/185537/232487
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+zstyle ':completion:*' menu select=long
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+# Necessary to be able to move in a completion menu:
+#
+#     bindkey -M menuselect '^L' forward-char
+zstyle ':completion:*' menu select
+# enable case-insensitive search (useful for the `zaw` plugin)
+zstyle ':filter-select' case-insensitive yes
+# Suggest us only video files when we tab complete `$ mpv`.
+#
+# TODO: To explain.
+# Source:
+#     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
+zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
 
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
@@ -1113,6 +1124,21 @@ alias ubuntu-code-name='lsb_release -sc'
 alias vb='VBoxManage'
 
 # vim {{{3
+
+# Rationale:{{{
+#
+# By default,  Neovim sets 'gcr', which  makes it send escape  sequences, to set
+# the shape of the cursor.
+# Those are not understood by our current xfce4-terminal.
+#
+# This is  not an  issue when  we start  `$ nvim`  with `vim-term`,  because the
+# latter correctly makes 'gcr' empty when we're in xfce4-terminal.
+# But it does become an issue when we start `$ nvim -Nu NONE`.
+#
+# Anyway, this is wrong, Neovim shouldn't do that:
+#     https://github.com/neovim/neovim/issues/6778#issuecomment-302945056
+#}}}
+alias nvim_none='nvim -Nu NONE +"set gcr="'
 
 # Rationale:{{{
 #
@@ -2472,6 +2498,33 @@ bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
 # the whole command line. Sometimes, `sudo` fails because it doesn't affect
 # a redirection.
 
+# C-x C-z         copy-earlier-word {{{4
+
+# Purpose:{{{
+#
+# `M-.` is useful to get the last argument of a previous command.
+# But what if you want the last but one argument?
+# Or the last but two.
+#
+# That's where the `copy-earlier-word` widget comes in.
+#}}}
+# usage:{{{
+#
+# Press `M-.` to insert the last argument of a previous command.
+# Repeat until you reach the line of the history you're interested in.
+# Then, press `C-x C-z` to insert the last but one argument.
+# Repeat to insert the last but two argument, etc.
+#}}}
+# How to cycle back to the last word of the command line?{{{
+#
+# Remove the inserted argument, and repeat the process:
+#     `M-.` ...
+#     `C-x C-z` ...
+#}}}
+autoload -Uz copy-earlier-word
+zle -N copy-earlier-word
+bindkey '^X^Z' copy-earlier-word
+
 # C-x c           snippet-compare {{{4
 
 # Quickly compare the output of 2 commands.
@@ -2649,7 +2702,6 @@ zle -N __fancy_ctrl_z
 # to the process to  pause it. In other words, `C-z` should  reach zsh only if
 # no process has the control of the terminal.
 bindkey '^Z' __fancy_ctrl_z
-
 # }}}2
 # META {{{2
 # M-[!$/@~]     _bash_complete-word {{{3
@@ -2702,7 +2754,7 @@ bindkey '^Z' __fancy_ctrl_z
 #
 # Try  it in  bash; press  `M-AltGr-4` (not  `M-AltGr-x`, the  terminal wouldn't
 # receive anything).
-# It dumps on the command-line an expression  which can be expanded into all the
+# It dumps on the command line a file pattern which can be expanded into all the
 # filenames of  the current  directory whose  name matches  the text  before the
 # cursor:
 #
@@ -2867,15 +2919,6 @@ bindkey '\e^e' run-help
 # reality it's going to select another entry in the completion menu.
 #}}}
 
-# to install the next key bindings, we need to load the `complist` module
-# otherwise the `menuselect` keymap won't exist
-zmodload zsh/complist
-# │
-# └─ load a given module
-
-# `zmodload`    prints the list of currently loaded modules
-# `zmodload -L` prints the same list in the form of a series of zmodload commands
-
 # use vi-like keys in menu completion
 # bindkey -M menuselect 'h' backward-char
 #        │
@@ -2943,11 +2986,15 @@ bindkey -M menuselect '^O' accept-and-menu-complete
 #                          │
 #                          └ insert the selected match on the command-line,
 #                            but don't close the menu
+# TODO:
+# By default `M-a` is bound to `accept-and-hold` which does the same thing.
+# `fzf.vim` seems to use `M-a` to do something vaguely similar: selecting
+# multiple entries in a menu.
+# Should we get rid of this C-o key binding and prefer M-a?
 
 # In Vim we quit the completion menu with C-q (custom).
 # We want to do the same in zsh (by default it's C-g in zsh).
 bindkey -M menuselect '^Q' send-break
-
 # }}}1
 # Options {{{1
 

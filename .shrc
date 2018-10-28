@@ -133,8 +133,8 @@ alias ga='git add'
 #
 # → the line disappears
 #
-# It  has nothing  to do  with  the conceal  feature. It's reproducible  without
-# syntax highglighting.
+# It has nothing to do with the conceal feature.
+# It's reproducible without syntax highglighting.
 #
 # Solutions:
 #
@@ -152,14 +152,14 @@ alias grlc='git reset --hard "$(git rev-parse HEAD)"'
 
 alias gs='git log --all --source -p -S'
 
-# local_testing_server {{{2
-
-alias local_testing_server='python3 -m http.server'
-
 # surfraw {{{2
 
 alias srr='sr ixquick'
 alias surfraw='surfraw -browser=w3m'
+
+# web_local_server {{{2
+
+alias web_local_server='python3 -m http.server'
 
 # others {{{2
 

@@ -13,9 +13,10 @@ setl tw=80
 
 " Teardown {{{1
 
-let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
-                    \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-                    \ ."
-                    \      setl cocu< cole< fdm< fdt< tw<
-                    \    | exe 'au!  my_tmux * <buffer>'
-                    \  "
+let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
+    \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+    \ . "
+    \ setl cocu< cole< fdm< fdt< tw<
+    \|exe 'au! my_tmux * <buffer>'
+    \"
+

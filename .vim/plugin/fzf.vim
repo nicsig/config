@@ -13,13 +13,19 @@ endif
 " commands ignoring our prefix.
 "}}}
 
-" Make fzf use Vim's terminal, like it does in Neovim.{{{
+" Make fzf use the builtin terminal.
+" Don't use `{'window': 'split'}`!{{{
 "
-" If you have an issue, see this:
+" Otherwise, in  Neovim, when you  invoke an fzf  Ex command (like  `:FZF`), you
+" will have 2 windows with an identical terminal buffer.
+"}}}
+" I have an issue!{{{
+"
+" See this:
 "
 "     https://github.com/junegunn/fzf/issues/1055
 "}}}
-let g:fzf_layout = {'window': 'split'}
+let g:fzf_layout = {'window': '10split enew'}
 
 let g:fzf_action = {
     \ 'ctrl-t': 'tab split',
@@ -40,6 +46,26 @@ let g:fzf_command_prefix = 'Fz'
 "
 "       $ gem install coderay
 "}}}
-let g:fzf_files_options =
-            \ '--preview "(coderay {} || cat {}) 2> /dev/null | head -'.&lines.'"'
+" Why do you use `bat` instead of `coderay` like before?{{{
+"
+" From `https://github.com/junegunn/fzf.vim/pull/712#issuecomment-432990824`:
+"
+"      It's  a  little hard  for  me  to imagine  that  someone  installed bat  or
+"      highlight would still want to use  slower – or less "modern" – alternatives
+"      like coderay or rougify.
+"}}}
+let g:fzf_files_options = '--preview "(highlight || bat {} || cat {}) 2>/dev/null | head -'.&lines.'"'
+" TODO: The documentation doesn't mention `g:fzf_files_options` anymore.{{{
+"
+" It can still be used, but the help was changed in this commit:
+"
+"     https://github.com/junegunn/fzf.vim/commit/2eaff049464e7b8304401dd4d79c86a4b0c4ed6c
+"
+" Now, it gives this command:
+"     com! -bang -nargs=? -complete=dir Files
+"       \ call fzf#vim#files(<q-args>, fzf#vim#with_preview(), <bang>0)
+"
+" I've tried it, but it doesn't display any preview for the files, when we press
+" `SPC ff`.
+"}}}
 

@@ -13,8 +13,9 @@ augroup END
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
-                    \ .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-                    \ ."
-                    \   setl cms< cocu< cole< fdm< fdt<
-                    \ | exe 'au!  my_xdefaults * <buffer>'
-                    \  "
+    \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+    \ . "
+    \ setl cms< cocu< cole< fdm< fdt<
+    \|exe 'au! my_xdefaults * <buffer>'
+    \"
+

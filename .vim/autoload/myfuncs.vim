@@ -439,7 +439,16 @@ fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
 
     " Give the result
     if !empty(pattern)
-        noa exe 'lvim /'.pattern.'/g %'
+        " Why silent?{{{
+        "
+        " If the  lines are long, `:lvim`  will print a long  message which will
+        " cause a hit-enter prompt:
+        "
+        "     (1 of 123): ...
+        "}}}
+        sil noa exe 'lvim /'.pattern.'/g %'
+        " d_opts = [{'on_stderr': function('<SNR>129_system_handler')}, {'stderr': '', 'on_exit': function('<SNR>129_system_handler'), 'on_stdout': function('<SNR>129_system_handler'), 'exit_code': 0, 'stdout': '', 'on_stderr': function('<SNR>129_system_handler')}]
+        " d_opts = [{'on_stderr': function('<SNR>129_system_handler')}]
         let w:xl_match = matchadd('SpellBad', pattern, -1)
     else
         echohl WarningMsg
@@ -447,6 +456,7 @@ fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
         echohl None
     endif
 endfu
+
 fu! myfuncs#dump_wiki(url) abort "{{{1
     " TODO: Regarding triple backticks.{{{
     "
@@ -683,7 +693,7 @@ fu! myfuncs#long_data_split(type, ...) abort "{{{1
         let indent_lvl = strdisplaywidth(matchstr(line, '.\{-}\ze\S'))
         let indent_txt = repeat(' ', indent_lvl)
         sil keepj keepp s/\m\ze\S/• /e
-        let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<et\|and\>\s*'
+        let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
         let l:Rep = {-> "\n".indent_txt.'• '}
         sil exe 'keepj keepp s/'.pat.'/\=l:Rep()/ge'
     endif

@@ -117,9 +117,14 @@ Plug 'lacygoill/vim-graph'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
 Plug 'djmoch/vim-makejob'
-Plug 'lacygoill/vim-man'
+" the neovim `man` plugin is better
+" TODO: although it doesn't support our custom motions such as `]r`
+if !has('nvim')
+    Plug 'lacygoill/vim-man'
+endif
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
+Plug 'kana/vim-operator-user/', {'frozen': 1}
 Plug 'lacygoill/potion'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
 Plug 'lacygoill/vim-repeat', {'branch': 'assimil'}
@@ -334,6 +339,26 @@ endif
 "}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
 let $MY_WIKI = $HOME.'/Dropbox/wiki'
+
+" Why?{{{
+"
+" For some reason, when you start `(n)vim` with `$ man`, the value of `$MANSECT`
+" is truncated.
+" Only the first section number before the first colon is kept.
+" The rest is lost.
+"
+" Because of this:
+"     $ man man
+"     :Man mount
+"       → ✘
+"         man.vim: command error (11) man -w mount: No manual entry for mount
+"         See 'man 7 undocumented' for help when manual pages are not available.
+"
+" So,  in `~/.zshenv`,  I've created  a duplicate  variable, `MYMANSECT`,  which
+" serves as a backup.
+" And here, I make sure to reset the value of `MANSECT` to `$MYMANSECT`.
+"}}}
+let $MANSECT = $MYMANSECT
 
 if !isdirectory($XDG_RUNTIME_DIR.'/vim')
     call mkdir($XDG_RUNTIME_DIR.'/vim', 'p', '0700')
@@ -1011,8 +1036,8 @@ set kp=:help
 " What does it do?{{{
 "
 " Prevent the screen  from being redrawn while executing  commands which haven't
-" been typed (e.g.: macros, registers). Also,  postpone the update of the window
-" title.
+" been typed (e.g.: macros, registers).
+" Also, postpone the update of the window title.
 "}}}
 " Why do you set it?{{{
 "
@@ -1058,8 +1083,44 @@ set kp=:help
 "
 " Revisit this when the PR is merged.
 "}}}
-if !has('gui_running')
-    set lazyredraw
+if !has('gui_running') && has('vim_starting')
+    " Why do you delay the 'lazyredraw' setting?{{{
+    "
+    " Start neovim like this:
+    "
+    "     $ nvim -Nu NONE +'set lz'
+    "
+    " Then press `:` immediately before Neovim has the time to draw the statusline.
+    " The statusline prints this:
+    "
+    "     [No Name]^^^...^^^0,0-1^^^^^^^^^^All
+    "              ├───────┘
+    "              └ 92 times
+    "
+    " You must press `:` really fast:
+    " position your left little finger on the left control key,
+    " your right middle finger  on `m`,
+    " and your right index finger on `:`.
+    "
+    " The issue is easier to reproduce with a custom config, because the startup
+    " time increases  a little, which  gives you more time  to press `:`  at the
+    " right moment.
+    "
+    " In Vim, when  you press `:` before the statusline  has been drawn, nothing
+    " is printed.
+    " This is less distracting than in Neovim, but it's still distracting to see
+    " the statusline not drawn.
+    "
+    " That's why we don't set 'lz' too early:
+    " so that the statusline  is correctly drawn even if we  press `:` very fast
+    " after (Neo)Vim has been started.
+    "}}}
+    augroup delay_lazy_redraw
+        au!
+        au CursorHold,InsertEnter,CmdlineEnter * set lazyredraw
+            \ | exe 'au! delay_lazy_redraw'
+            \ | augroup! delay_lazy_redraw
+    augroup END
 endif
 
 " match (showmatch / matchtime) {{{2
@@ -1722,6 +1783,11 @@ endif
 "              │
 set updatetime=2000
 
+" viminfo {{{2
+
+" Useful to save `g:MY_LAST_QFL`.
+set viminfo+=!
+
 " virtualedit {{{2
 
 " In visual-block mode, let us move the cursor on a cell where there's no character:
@@ -1779,7 +1845,9 @@ if has('vim_starting')
     "                          └─ `*` can't match a dot, and the path of an
     "                              undofile often contains 1 or 2 dots
 
-    set wig+=*.gz,*.rar,*.tar.*,*.zip
+    set wig+=*[^0-9].gz,*.rar,*.tar.*,*.zip
+    "         ├────┘
+    "         └ don't ignore man pages in `/usr/share/man/man1/`
 
     set wig+=tags
 
@@ -2305,9 +2373,7 @@ nmap  <space>S  saiW
 
 " t                             new tab page {{{4
 
-" nno <space><tab>    :<c-u>tabnew<cr>
-nno  <space>t  :<c-u>exe (v:count ? v:count.'tabnew' : 'tabnew')<cr>
-
+nno  <silent>  <space>t  :<c-u>exe (v:count ? v:count.'tabnew' : 'tabnew')<cr>
 "}}}3
 " [    ]              (prefix) {{{3
 " ]kj                           various alignments {{{4
@@ -3977,6 +4043,56 @@ com! -bar -bang -nargs=1 Hex2Dec echo expand('`echo "ibase='.(<bang>0 ? 'A' : '1
 \                                                 .';obase='.(<bang>0 ? '16' : 'A')
 \                                                 .';'.<q-args>.'" | bc`')
 
+" HlWeirdWhitespace {{{2
+
+" Why don't you use an autocmd instead?{{{
+"
+" So, you're thinking about sth like this:
+"
+"     augroup strange_whitespace
+"         au!
+"         au WinEnter * call s:strange_whitespace()
+"     augroup END
+"
+" Ok, but I wouldn't be able to disable the highlight in a 'fex_tree' buffer.
+"
+" The  same issue  would probably  apply to  other types  of buffers  (like help
+" buffers), where I don't want this highlighting.
+"
+" The issue comes from the fact that when `WinEnter` is fired after a split, the
+" current buffer is still the one displayed  in the original window, not the one
+" which is going to be loaded.
+" So this guard wouldn't work:
+"
+"     let bufnr = winbufnr(winnr())
+"     if getbufvar(bufnr, '&ft', '') is# 'fex_tree'
+"         return
+"     endif
+"
+" MWE:
+"
+"     :LogEvents! WinEnter
+"     :sp /tmp/file
+"         → 12:34  WinEnter  /home/user/.vim/vimrc
+"                            ^^^^^^^^^^^^^^^^^^^^^
+"                            ✘ we would need `/tmp/file`,
+"                              but the latter has not yet been loaded
+"}}}
+com! -bar -range=%  HlWeirdWhitespace  call s:hl_weird_whitespace()
+
+fu! s:hl_weird_whitespace() abort
+    if !exists('w:strange_whitespace')
+        " https://vi.stackexchange.com/a/17697/17449
+        let pat = '[\x0b\x0c\u00a0\u1680\u180e\u2000-\u200a\u2028\u202f\u205f\u3000\ufeff]'
+        "                                     ├───────────┘
+        "                                     └ yes, one can write an arbitrary range of unicode characters
+        let w:strange_whitespace = matchadd('ErrorMsg', pat)
+    else
+        call matchdelete(w:strange_whitespace)
+        unlet! w:strange_whitespace
+    endif
+endfu
+
 " InANotInB {{{2
 
 " This command outputs the lines which are in buffer A but not in buffer B.
@@ -4163,9 +4279,6 @@ fu! s:plugins_update() abort
         let password = inputsecret('Enter sudo password:')."\n"
         echo system('sudo -S aptitude install wfrench', password)
     endif
-    " TODO:
-    " Look for `\<install\>` in our notes, and refactor this function so that
-    " it installs any package which may enhance Vim (`gem install coderay` ?).
 
     if !isdirectory($HOME.'/.vim/tmp/snapshot')
         call mkdir($HOME.'/.vim/tmp/snapshot', 'p')
@@ -4682,21 +4795,6 @@ fu! s:filetype_linter(action) abort
     endif
 endfu
 
-" Highlight Strange Whitespace {{{2
-
-" https://vi.stackexchange.com/a/17697/17449
-augroup highlight_strange_whitespace
-    au!
-    au WinEnter * call s:highlight_strange_whitespace()
-augroup END
-
-fu! s:highlight_strange_whitespace() abort
-    if !exists('w:strange_whitespace')
-        let pat = '[\x0b\x0c\u00a0\u1680\u180e\u2000-\u200a\u2028\u202f\u205f\u3000\ufeff]'
-        let w:strange_whitespace = matchadd('ErrorMsg', pat)
-    endif
-endfu
-
 " Jump Last Position {{{2
 
 augroup jump_last_position
@@ -5051,7 +5149,7 @@ endfu
 "     augroup END
 " endif
 
-" Trailing whitespace {{{2
+" Trailing Whitespace {{{2
 
 " Trailing whitespace in red but not in insert mode, and not if the filetype
 " is in the list:
@@ -5076,7 +5174,6 @@ fu! s:trailing_whitespace(create_match) abort
         let w:my_trailing_whitespace = matchadd('Error', '\%(\s\|\%ua0\)\+$', -1)
     endif
 endfu
-
 " }}}1
 " TO_DO {{{1
 
@@ -6073,6 +6170,11 @@ endfu
 "        • :unl[et] ${env-name} (:h :unlet-$)
 "        • `:swapname`
 "        • `appendbufline()`
+"
+"        • `argc()` + `argv()`
+"          in Vim, they can now access the global arglist and the local arglist of another window
+"                 https://github.com/vim/vim/releases/tag/v8.1.0493
+"
 "        • `deletebufline()`
 "        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
 "        • `getcwd(-1)` return the global directory
@@ -6238,24 +6340,6 @@ endfu
 " also, for debugging purpose, try `:spellinfo`.
 "
 " 85 -
-" according to:
-"
-"     https://github.com/vim/vim/pull/2322
-"
-" we should be able to filter: `:let`, `:hi`, `:ju`, `:{c|l}list` and `:set`.
-" i can't:
-"         :filter /wont_find_me/ let
-"                 → should display nothing, but displays everything
-"
-"         :filter /wont_find_me/ hi
-"                 → should display nothing, but displays everything
-"
-"         ...
-"
-" update:
-" this is because the pr has not been merged.
-"
-"
 " maybe we could install a wrapper command  (:filter) which would do the job for
 " the commands which are not supported.
 " see `:h  :index`, and  search for  all the commands  which could  benefit from
@@ -6268,12 +6352,9 @@ endfu
 "         :clist (:llist)
 "         :function
 "         :ilist (:dlist, :isearch?, :dsearch?)
-"         :highlight
 "         :history
-"         :let
 "         :marks
 "         :reg
-"         :set
 "         :tags
 "
 " also, create a complete cycle (c-g f).
@@ -6772,17 +6853,35 @@ endfu
 "     noa vim /\[ \| \]\|{ \| }\|^\s*\\/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "
 " 119 -
-" search for `g@` everywhere.
-" do you need to save and restore the unnamed register, and the options every time?
-" should  we refactor the snippets  so that it  allows us to remove  those parts
+" Search for `g@` everywhere.
+" Do you need to save and restore the unnamed register, and the options every time?
+" Should  we refactor the snippets  so that it  allows us to remove  those parts
 " (including the ex command)?
 "
-" have you saved and restored the visual marks?
+" Have you saved and restored the visual marks?
 "
-" do you need to save and restore v:register every time?
-" do you need to save and restore v:count every time?
+" Do you need to save and restore v:register every time?
+" Do you need to save and restore v:count every time?
 "
 " Have you used `:s`, while you should have used `setline()`?
+"
+" You should simplify the mappings, so that we call only one function,
+" before pressing `g@`.
+" The latter should save some info if needed, and set 'opfunc'.
+"
+" The repetition of an operation in visual mode is not consistent
+" with what Vim does:
+"
+"     • press `~` on a visual selection
+"     • move the cursor on another line
+"     • press .
+"
+" Vim has recomputed a new visual selection with the same geometry
+" than the previous one.
+" That's not what your operators do.
+" Study how `vim-operator-user` solves this issue (I think it solves
+" the issue by pressing `gvg@`; that is `g@` should be pressed from
+" visual mode for the repetition to work as expected).
 "
 " 120 -
 " all your commands should print a usage message when executed without arguments
@@ -6963,6 +7062,44 @@ endfu
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
+"
+" 141 -
+" It doesn't make sense for `C-g v` to search in $VIMRUNTIME.
+" It should look into `/usr/share/zsh/`.
+" `C-g v` should inspect some buffer-local variables to determine
+" the cycle of directories in which `:vimgrep` should search.
+"
+" 142 -
+" Re-implement these mappings to open the file you're editing on github.
+" It could be handy when you want to see a commit you've just pushed.
+"
+"     nno <silent>  <space>og  V:<c-u>call <sid>open_current_file_in_github()<cr>
+"     xno <silent>  <space>og  :<c-u>call <sid>open_current_file_in_github()<cr>
+"
+"     fu! s:open_current_file_in_github() abort
+"       let file_dir = expand('%:h')
+"       sil let git_root = system('cd ' . file_dir . '; git rev-parse --show-toplevel | tr -d "\n"')
+"       let file_path = substitute(expand('%:p'), git_root . '/', '', '')
+"       sil let branch = system('git symbolic-ref --short -q HEAD | tr -d "\n"')
+"       sil let git_remote = system('cd ' . file_dir . '; git remote get-url origin')
+"       let repo_path = matchstr(matchlist(git_remote, ':\(.*\)\.')[1], 'github\.com/\zs.*')
+"       let url = 'https://github.com/' . repo_path . '/blob/' . branch . '/' . file_path
+"       let first_line = getpos("'<")[1]
+"       let url .= '#L' . first_line
+"       let last_line = getpos("'>")[1]
+"       if last_line != first_line | let url .= '-L' . last_line | endif
+"       sil call system('xdg-open ' . url)
+"     endfu
+"
+" Source:
+"     https://www.reddit.com/r/vim/comments/9r3rcd/open_current_file_in_github/
+"
+" Update:
+" `:Gbrowse` does sth similar.
+"
+" 143 -
+" Understand how to remove duplicate entries in $PATH &friends (~/.zshenv).
+
 
 
 
@@ -7055,7 +7192,6 @@ endfu
 "     call timer_start(0, {-> feedkeys("\<bs>", 'in')})
 "     return ''
 " endfu
-
 
 
 augroup save_and_restore_last_qfl

@@ -6,8 +6,9 @@
 # Find a way to replicate the same functionalities provided by `readline` in `zle`.
 
 # When a program  using the readline library  starts up, this file  is read, and
-# the  key bindings  and  variables are  set.  For more  information  on how  to
-# configure this file: man 3 readline
+# the  key bindings  and  variables are  set.
+# For more information on how to configure this file:
+#     $ man 3 readline
 
 
 # read commands/bindings from `/etc/inputrc`,
@@ -156,7 +157,6 @@ TAB: menu-complete
 # but on my machine `S-TAB` produces the keycodes:  Esc [ Z
 # we can use the keycodes instead
 "\e[Z": menu-complete-backward
-
 # }}}
 # Macros {{{
 
@@ -185,6 +185,5 @@ TAB: menu-complete
 #                      └ list directories (because of the slash),
 #                        and only their names, not their contents (because of `-d`)
 #}}}
-
 # }}}
 $endif

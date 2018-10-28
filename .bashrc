@@ -17,28 +17,6 @@
 
 # TODO: review ~/.inputrc
 
-# TODO:
-#
-# `blink-matching-paren` is a (recent) bash option, which I set in `~/.inputrc`.
-# Suppose I forget from which man page it comes from.
-# How to look for it in all man pages?
-# This doesn't work:
-#
-#     man -s1 -Kw blink-matching-paren
-#     man -Kw --regex 'blink*matching*paren'
-#
-# It seems we don't know how to search some text containing a dash.
-#
-# Update:
-# In fact, the issue is more complex:
-#
-#     man -Kw --regex 'the following is a'
-#
-# The output contains the page for bash (which does NOT match the regex),
-# but NOT the terminfo page (which DOES match the regex).
-
-
-
 # If not running interactively, don't do anything
 # Why don't you use the single line `[[ $- = *i* ]] || return` (shorter)?{{{
 #
@@ -105,9 +83,11 @@ shopt -s histverify
 # Source:
 #     https://unix.stackexchange.com/a/26059/289772
 #}}}
-# Ok, but why using `~/.bashenv` and not `~/.bash_profile`?{{{{{{
+# Ok, but why using `~/.bashenv` and not `~/.bash_profile`?{{{
 #
 # It would create a loop, because we source bashrc from bash_profile.
+# Also, I like the idea of a dedicated file for exporting environment variables,
+# because of the symmetry with `~/.zshenv`.
 #}}}
 . $HOME/.bashenv
 
