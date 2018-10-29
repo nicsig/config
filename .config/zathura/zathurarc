@@ -11,6 +11,16 @@ map  [fullscreen]  a  adjust_window width
 map                A  adjust_window best-fit
 map  [fullscreen]  A  adjust_window best-fit
 
+# Purpose: {{{
+#
+# When we  want to scroll half  a screen down,  we often press `d`  by accident,
+# instead of `C-d`.
+# But by default, `d` is bound to the function `toggle_page_mode`.
+# This is distracting because it toggles the dual page view.
+# }}}
+map                d  scroll half-down
+map  [fullscreen]  d  scroll half-down
+
 # toggle the fullscreen mode when `f` is pressed
 map                f  toggle_fullscreen
 map  [fullscreen]  f  toggle_fullscreen

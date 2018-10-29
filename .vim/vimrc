@@ -588,7 +588,7 @@ set showcmd
 
 
 " When we're in normal mode, some information can be displayed in the bar
-" which replaces the command-line:
+" which replaces the command line:
 "
 "         • current mode                  don't want to see it
 "         • normal command being typed    DO    want to see it
@@ -1060,7 +1060,7 @@ set kp=:help
 " Why do you check whether we're in gVim?{{{
 "
 " In gVim,  if you set 'lz'  and 'showcmd', then when  you press `j` and  `k` in
-" normal mode, you see `gj` and `gk` being spammed on the command-line.
+" normal mode, you see `gj` and `gk` being spammed on the command line.
 " I don't like that, and it could have a bad impact on performance.
 "
 " TODO:
@@ -1806,7 +1806,7 @@ set virtualedit=block
 " We never want to see them:
 "
 "         • in a dirvish listing
-"         • on the command-line after a tab completion
+"         • on the command line after a tab completion
 "         • in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 if has('vim_starting')
@@ -2524,11 +2524,11 @@ nno  <silent>  goT  :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
 " (E501, E749).
 "
 " So, we  install a wrapper around  `gQ` to temporarily disable  all mappings in
-" command-line mode.
+" command line mode.
 
-"                   ┌ make sure we have visited the command-line at least once since Vim's startup
+"                   ┌ make sure we have visited the command line at least once since Vim's startup
 "                   │ otherwise E501:
-"                   │ probably because custom command-line mappings haven't been installed yet,
+"                   │ probably because custom command line mappings haven't been installed yet,
 "                   │ so `ToggleEditingCommands 0` is useless / too soon
 "               ┌───┤
 nno  <expr>  gQ ":\e".execute('ToggleEditingCommands 0', 'silent!').'gQ'
@@ -2756,7 +2756,7 @@ xno  <silent>  <bar>g  :<c-u>call myfuncs#op_grep('vis')<cr>
 " Why not `!g` for the `{lhs}` ?
 " Because it would introduce some "lag" whenever we hit `!` to filter some
 " visual selection. We would need to wait, or hit the second character of our
-" command to see the bang on the command-line.
+" command to see the bang on the command line.
 
 " |t         translate {{{4
 
@@ -2943,7 +2943,7 @@ fu! s:edit_readme() abort
         " We don't want that side-effect.
         "
         " MWE:
-        "     " ✘ the 123th line is printed on the command-line
+        "     " ✘ the 123th line is printed on the command line
         "     123 | sleep 1
         "
         "     " ✔ nothing is printed
@@ -3016,7 +3016,7 @@ endfu
 " CR                  move cursor on 80/100 column {{{4
 
 " If the buffer is special (`!empty(&buftype)`), we let `CR` unchanged.
-" Special buffers include the ones displayed in the quickfix and the command-line windows.
+" Special buffers include the ones displayed in the quickfix and the command line windows.
 " It's important to not alter the behavior of `CR` in those buffers, because
 " usually it's already mapped to a very useful function such as executing
 " a command or going to an entry in the quickfix list.
@@ -3485,7 +3485,7 @@ nno  Y  y$
 "         C-v 3j $ "+ y    ✔
 "
 " As  soon as  we type  the `$`  motion, the  register name  is lost  (watch the
-" command-line).
+" command line).
 " So, we use an  expression, to make sure that they are consecutive.
 xno  <expr>  Y  '$"'.v:register.'y'
 
@@ -4554,15 +4554,15 @@ augroup my_cmdline_window
     au CmdWinEnter * nno  <buffer><nowait><silent>  ZZ     <cr>
     " Purpose:{{{
     "
-    " By default,  C-c is useful to  quit the command-line window,  and populate
-    " the command-line with the command which was being edited in the window.
-    " But, it doesn't erases the command-line window.
+    " By default,  C-c is useful to  quit the command line window,  and populate
+    " the command line with the command which was being edited in the window.
+    " But, it doesn't erases the command line window.
     " Our `C-c` mapping takes care of that.
     "}}}
     " FIXME: `:redraw` has an undesired side-effect.{{{
     "
-    " It works,  it erases the  command-line window  immediately, as soon  as we
-    " leave it, and get back on the regular command-line.
+    " It works,  it erases the  command line window  immediately, as soon  as we
+    " leave it, and get back on the regular command line.
     " However, for  some reason, if our  command is supposed to  print a message
     " (e.g. `:echo`), once we execute it later, the message is ALSO erased.
     "}}}
@@ -4570,15 +4570,15 @@ augroup my_cmdline_window
 
     " Purpose:{{{
     "
-    " These  autocmds try  to update  the  command-line history  of the  current
+    " These  autocmds try  to update  the  command line history  of the  current
     " session,  and  to   make  it  persist  across   sessions,  by  overwriting
-    " `~/.viminfo`  every  time some  lines  were  deleted in  the  command-line
+    " `~/.viminfo`  every  time some  lines  were  deleted in  the  command line
     " window.
     "}}}
     au CmdWinEnter : let s:old_cmd_hist = getline(1, line('$')-1)
     au CmdWinLeave : call s:update_history()
     "              │
-    "              └─ only Ex command-line window
+    "              └ only Ex command line window
 augroup END
 
 " If one day you want to add support for the search window (`q/`, `q?`), be aware that it's tricky.{{{
@@ -4929,7 +4929,7 @@ fu! s:filter_special_file() abort
         " So, I don't use it atm.
         "
         " Try to  fix these errors  by learning  how to better  configure `par`,
-        " through  command-line  options,  and/or through  `$PARINIT`. Then  use
+        " through  command line  options,  and/or through  `$PARINIT`. Then  use
         " `par` to format a pdf.
         "}}}
         sil exe ext2cmd[ext]
@@ -5614,7 +5614,7 @@ endfu
 " a possible selection?
 "
 " 29 -
-" create a mapping to populate command-line with `:ltag /`, then open the
+" create a mapping to populate command line with `:ltag /`, then open the
 " location window. ex:
 "
         nno  <expr>  <c-g>t  <sid>ltag(1)
@@ -6316,7 +6316,7 @@ endfu
 "      • adding an option to `getfsize()` to get a human readable result
 "
 " 83 -
-" if we press  c-g by accident on  the command-line, and we move  forward in the
+" if we press  c-g by accident on  the command line, and we move  forward in the
 " cycle, we should be able to undo and recover the previous command with c-_.
 "
 " also, we should have multiple tabstops (not just one).
@@ -6409,7 +6409,7 @@ endfu
 "         call s:setqflist([], action, {'items': list})
 "
 " 88 -
-" how to filter  a custom text-object without the command-line not being redrawn?
+" how to filter  a custom text-object without the command line not being redrawn?
 " mwe:
 "         !ie spc
 "         ![m spc
@@ -6434,14 +6434,14 @@ endfu
 "
 "         exe 'norm! '.line('.').'g'
 "
-" it would not make the cursor move, but it would make the command-line redrawn.
+" it would not make the cursor move, but it would make the command line redrawn.
 " mwe:
 "
 "         map  <silent>  ]g  :call search('pat')<cr>
-"             !]g → command-line not redrawn
+"             !]g → command line not redrawn
 "
 "         map  <silent>  ]g  :call search('pat') <bar> exe 'norm! '.line('.').'g'<cr>
-"             !]g → command-line redrawn
+"             !]g → command line redrawn
 "
 " it seems `vim-textobj-user` doesn't suffer from this issue:
 "
@@ -6640,10 +6640,10 @@ endfu
 "     :verb filter // mess
 "
 " here we would install a temporary autocmd when we enter the cycle which would
-" inspect the end of the command-line.
+" inspect the end of the command line.
 " we would need to  change the signature of the function we  call to install the
 " cycle, to have a way to let it  know that we want all candidates dumped on the
-" command-line at once and a form of completion.
+" command line at once and a form of completion.
 "
 " 101 -
 " gf, c-w f, c-w gf should also be able to parse a column number.
@@ -6782,7 +6782,7 @@ endfu
 " 110 -
 "     :vert term [++cols=20]
 "
-" wrong terminal height (big command-line).
+" wrong terminal height (big command line).
 "
 " 111 -
 " once neovim has `reg_recording()`, use it in all `q` mappings:
@@ -7013,7 +7013,7 @@ endfu
 "
 " 132 -
 " Every  time you open a  window, be aware that  an error may be  raised because
-" you're in the command-line window.
+" you're in the command line window.
 " You may want to catch that error to avoid a stack trace.
 "
 " 133 -

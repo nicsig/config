@@ -1,240 +1,27 @@
-# noa vim //gj /home/jean/Dropbox/conf/bin/**/*.sh ~/.shrc ~/.bashrc ~/.zshrc ~/.zshenv ~/.vim/plugged/vim-snippets/UltiSnips/sh.snippets | cw
-#         ^
-#         put whatever pattern you want to refactor
+# Use emacs keybindings even if our EDITOR is set to vi.
+# Warning:{{{
+#
+# Don't move this line after the `Sourcing` section.
+# It would reset `fzf` key bindings.
+#
+# Don't move it after the `Abbreviations` section either.
+# It would break them too (maybe because it removes the space key binding?).
+#}}}
+bindkey -e
 
-# TODO:
-# ideas to improve our scripts:
+# disable XON/XOFF flow control
+# Why?{{{
 #
-#     • they should better handle errors
-#       (no stacktrace, show a human-readable message;
-#       take inspiration from `mv garb age`)
+# By default, `C-s` and `C-q`  are interpreted by the terminal driver as
+# “stop sending data“, “continue sending“.
 #
-#     • usage when the script is called without arguments
-#
-#       Should we delegate this to a library function to avoid
-#       repeating always the same kind of code?
-#
-#     • use the output streams correctly
-#
-#       Write error messages on stderr, not on stdout.
-#       This way, if you pipe the output of your script to another utility,
-#       and an error is raised, the message won't be sent to the utility.
-#       There's no sense piping an error message to anything.
-#       Same thing for a usage message (which can be seen as a special
-#       kind of error message).
-#       And if the user really wants to pipe the error message,
-#       they still can with `2>&1 |` (or `|&`).
-#
-#     • any error should be accompanied by an `exit` statement, so that:
-#
-#           ./script.sh && echo 'success'
-#
-#       doesn't print 'success' if the script fails.
-#
-#       Use `exit 1` for a random error, `exit 64` for a usage message,
-#       `65` for bad user input, and `77` for not enough permission.
-#       See here for which code to use:
-#
-#           https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
-#
-#       It's not an obligation to use this page, just a useful convention.
-#
-#     • write a manpage for the script
-#
-#     • split a long command using an array whose elements are arguments of the latter:
-#           https://unix.stackexchange.com/a/473257/289772
-
-# TODO:
-# Integrate `~/.zprofile` here?
-# Are there commands that we really need to write in `~/.zprofile`?
-
-# TODO:
-# Type `$ vim Tab`.
-# Look at the distance between the suggestions in the `shell function` section.
-# It's too big.
-# The result feels jarring compared to the other sections.
-# I think it's because zsh tries to use  a certain width for the whole menu, and
-# divides it by `n` (`n` being the number of suggestions on a given line).
-# If `n` is small (atm we only have 3 shell functions beginning with `vim`),
-# the width of each suggestion on a line is needlessly big.
-#
-# It seems that the completion menu splits the suggestions on several lines once
-# there're 10 of them (at least if their size is similar to `vim_cfg`).
-#
-# How to control the geometry of the zsh completion menu?
-# Width of the suggestions, max number of entries on a single line ...
-# It would be useful to tell zsh that if we have less than, say, 10 suggestions,
-# we want them each on a separate line.
-# Or better yet, how to ask zsh to fill columns, before filling lines?
-#
-# The 'list_rows_first' option doesn't seem to help...
-# The latter changes the position of entries in a completion menu:
-# For example, the 2nd one is on the right of the 1st one, instead of below.
-
-
-# TODO:
-# Make sure to never abuse the `local` keyword.
-# Remember the issue we had created in `gifrec.sh`.
-# Note that the variables  set by a script should not  affect the current shell,
-# because the script is executed in a subshell.
-# So, is it recommended to use `local` in the functions of a script?
-#
-# Update:
-# The google style guide recommends to always use them.
-# Maybe  we should  re-use `local`  in `gifrec.sh`,  and pass  the variables  as
-# arguments between functions...
-# What about `VERSION` inside `upp.sh`? Should we make this variable local?
-#
-# Update:
-# These variables are indeed in a function, but they don't have to.
-# We  could remove the  functions, and just execute  the code directly  from the
-# script.
-# We've put them in functions to make the code more readable.
-# IOW, I think they are supposed to be accessible from the whole script.
-
-
-# TODO:
-# review `printf` everywhere  (unnecessary double quotes, extract interpolations
-# using %s items, replace a multi-line printf with a here-doc ...)
-
-# TODO: improve our scripts by reading:
-#
-#     http://www.kfirlavi.com/blog/2012/11/14/defensive-bash-programming/
-#
-# Also, have a look at `bashmount`:
-#
-#     https://github.com/jamielinux/bashmount
-#     https://www.youtube.com/watch?v=WaYZ9D7sX4U
-
-# TODO: To document in our notes:
-#
-#     https://unix.stackexchange.com/a/88851/289772
-
-# TODO: Do these substitutions:
-#
-#     ~ → ${HOME}
-#
-#     [ ... ] → [[ ... ]] (noa vim /\s\[\s/gj ~/bin/**/*.sh | cw)
-#
-#     "${HOME}"/file → "${HOME}/file"
-
-# TODO:
-# Search for `HOME` in zshrc/bashrc.
-# Should we quote all the time?
-# Example:
-#
-#            v                            v v                                 v
-#     fpath=("${HOME}/.zsh/my-completions/" "${HOME}/.zsh/zsh-completions/src/" $fpath)
-#                                                                               ^^^^^^
-#                                                                               what about that?
-#                                                                               ${fpath}?
-#                                                                               "${fpath}"?
-# Example:
-#
-#     [[ -f "${HOME}/.fzf.zsh" ]] && . "${HOME}/.fzf.zsh"
-#           ^                ^
-#
-# Example:
-#
-#     export CDPATH=:"${HOME}":/tmp
-#                    ^       ^
-#
-# See:
-#     https://unix.stackexchange.com/a/68748/289772
-
-
-# TODO:
-# Do we need to set the option `zle_bracketed_paste`?
-# The bracketed paste mode is useful, among other things, to prevent the shell
-# from executing automatically a multi-line pasted text:
-#
-#     https://cirw.in/blog/bracketed-paste
-#
-# Atm, zsh doesn't execute a multi-line pasted text. Does it mean we're good?
-# Is the bracketed paste mode enabled?
-# Or do we need to copy the code of this plugin:
-#
-#     https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/safe-paste/safe-paste.plugin.zsh
-
-# TODO:
-# Currently we have several lines in this file which must appear before or after
-# a certain point to avoid being overridden/overriding sth.
-# It feels brittle. One day we could move them in the wrong order.
-# Find a better way of organizing this file.
-# Or  write  at  the  top  of  the file  that  some  sections  must  be  sourced
-# before/after others.
-
-# TODO:
-# I can't create a symlink for `~/.zsh_history` pointing to a file in
-# Dropbox. So, for the moment, I do the opposite: a symlink in Dropbox to the
-# file in ~. Once we get rid of Dropbox, version control all zsh config files,
-# including the history (good idea? sensible data?).
-# If it's not a good idea, then configure a cron job to automatically make
-# a backup of the history on a 2nd hard drive.
-
-# TODO:
-# When we clone a git repo, it would be useful to automatically cd into it.
-# Install a hook to do that.
-# Read `man zshcontrib`, section `Manipulating Hook Functions`.
-# Also `man zshmisc`, section `SPECIAL FUNCTIONS`.
-
-# TODO:
-# automatically highlight in red special characters on the command line
-# use this regex to find all non ascii characters:
-#     [^\x00-\x7F]
-#
-# Read `man zshzle`, section `special widgets`:
-#     zle-line-pre-redraw
-#            Executed  whenever  the  input  line  is  about  to be redrawn,
-#            providing an opportunity to update the region_highlight array.
-#
-# Also read this:
-#
-#     https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/regexp.md
-
-# TODO:
-# read this tuto
-# http://reasoniamhere.com/2014/01/11/outrageously-useful-tips-to-master-your-z-shell/
-
-# TODO:
-# implement the key binding `M-Del` to delete from the cursor back to the
-# previous whitespace.
-
-# NOTE:
-# there's also a `quote-line` command bound to M-' by default.
-# As the name suggests, it quotes the entire line. No need to select a region.
-
-# TODO:
-# check that none of our alias can shadow a future command from the repos:
-#     apt-file update
-#     apt-file -x search '/myalias$'
-
-# FIXME:
-# Find a video whose title contains a single quote; e.g.:
-#
-#   [HorribleSubs] JoJo's Bizarre Adventure - Golden Wind - 01 [480p].mkv
-#
-# Start ranger, navigate to the directory containing of the video, and play it.
-# Quit ranger:
-#
-#   zsh:1: unmatched '
-#
-# The issue is probably in ranger, because it persists even if I disable the zshrc.
-# However, I can't find anything wrong in:
-#
-#   ~/.config/ranger/rifle.conf
-#   →
-#   mime ^video,       has mpv,      X, flag f = mpv -- "$@"
-#                                                       ^^^^
-#                                                       should properly a video title
-#                                                       even if it contains a single quote
-
-# TODO:
-# understand: https://unix.stackexchange.com/questions/366549/how-to-deal-with-filenames-containing-a-single-quote-inside-a-zsh-completion-fun
-
-# TODO:
-# To read:
-# https://github.com/sindresorhus/pure (≈ 550 sloc, 2 fichiers: pure.zsh, async.zsh)
+# Explanations:
+#         http://unix.stackexchange.com/a/12108/125618
+#         http://unix.stackexchange.com/a/12146/125618
+#         http://unix.stackexchange.com/a/72092/125618
+#         https://en.wikipedia.org/wiki/Software_flow_control
+#}}}
+stty -ixon
 
 # How to use one of the custom prompts available by default?{{{
 #
@@ -322,6 +109,32 @@
 # │  │       │ │         │
 # │  ├──────┐├┐├┐        ├─────────┐}}}
 PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
+# TODO: add git branch in prompt{{{
+#
+#     # https://stackoverflow.com/a/12935606/9780968
+#
+#     setopt prompt_subst
+#     autoload -Uz vcs_info
+#     zstyle ':vcs_info:*' stagedstr 'M'
+#     zstyle ':vcs_info:*' unstagedstr 'M'
+#     zstyle ':vcs_info:*' check-for-changes true
+#     zstyle ':vcs_info:*' actionformats '%F{5}[%F{2}%b%F{3}|%F{1}%a%F{5}]%f '
+#     zstyle ':vcs_info:*' formats '%F{5}[%F{2}%b%F{5}] %F{2}%c%F{3}%u%f'
+#     zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
+#     zstyle ':vcs_info:*' enable git
+#
+#     ┌ see `man zshcontrib` > +vi-git-myfirsthook()
+#     │
+#     +vi-git-untracked() {
+#       if [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == 'true' ]] && \
+#       [[ $(git ls-files --other --directory --exclude-standard | sed q | wc -l | tr -d ' ') == 1 ]]; then
+#         hook_com[unstaged]+='%F{1}??%f'
+#       fi
+#     }
+#
+#     precmd () { vcs_info }
+#     PROMPT='%F{5}[%F{2}%n%F{5}] %F{3}%3~ ${vcs_info_msg_0_} %f%# '
+#}}}
 
 # Why?{{{
 #
@@ -478,7 +291,7 @@ bashcompinit
 # Is there an alternative to `. /path/to/_pandoc`?{{{
 #
 # Yes:
-#     $ . <(pandoc --bash-completion)
+#     $ . =(pandoc --bash-completion)
 # Or:
 #     # From: https://pandoc.org/MANUAL.html
 #     $ eval "$(pandoc --bash-completion)"
@@ -589,7 +402,7 @@ add-zsh-hook chpwd chpwd_recent_dirs
 #}}}
 # How is the sequence '%d' expanded?{{{
 #
-# A description of the matches.
+# Into a description of the matches.
 #
 # For example:
 #
@@ -602,9 +415,14 @@ add-zsh-hook chpwd chpwd_recent_dirs
 #     % cat qqq Tab
 #       → ˋfiles', ˋfile', or ˋcorrections'
 #}}}
-# How is the sequence '%D' expanded?{{{
+# What about '%D'?{{{
 #
-# Same thing as `%d`, except that the descriptions are separated by newlines.
+# If there  are no matches, the  description mentions the name  of each expected
+# list of matches.
+# `%d` separates those names with spaces, `%D` with newlines.
+#
+# Don't use `%D` for any context which is not tagged with 'warnings';
+# it only works with 'warnings'.
 #}}}
 # How to print the text in bold?  In standout mode?  Underlined?{{{
 #
@@ -628,20 +446,22 @@ add-zsh-hook chpwd chpwd_recent_dirs
 #     └──────────────┴──────────────────┘
 #}}}
 
-# We set the 'format' style for some well-known tags/contexts.
-# When does a completer tag its matches with 'messages'?{{{
+# zstyle ':completion:*:paths' ambiguous false
+
+# We set the 'format' style for some well-known tags.
+# When does a completer tag the description of a list of matches with 'messages'?{{{
 #
 # When there can't be any completion.
 # Ex:
 #     % true Tab
 #}}}
-# When does a completer tag its matches with 'descriptions'?{{{
+# What about 'descriptions'?{{{
 #
 # When there are matches.
 # Ex:
 #     % echo Tab
 #}}}
-# When does a completer tag its matches with 'warnings'?{{{
+# What about 'warnings'?{{{
 #
 # When there are no matches.
 # Ex:
@@ -755,10 +575,22 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 #                                              > s:string:
 #                                                     Force field splitting at the separator string.
 #}}}
+# TODO: read this:
+#   https://unix.stackexchange.com/a/477527/289772
 zstyle ':completion:*' list-colors ''
 
 zstyle ':completion:*' completer _expand _complete _correct _approximate
 # show completion menu when number of options is at least 2
+# Warning: It has a side-effect:{{{
+#
+#   % cd /u/l/m Tab a
+#               │   │
+#               │   └ remove suggestions
+#               └ prints suggestions
+#
+# Without this style,  the suggestions would stay printed, even  after we insert
+# 'a'.
+#}}}
 zstyle ':completion:*' menu select=2
 # not sure, but the first part of the next command probably makes completion
 # case-insensitive:    https://unix.stackexchange.com/q/185537/232487
@@ -766,7 +598,7 @@ zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:
 zstyle ':completion:*' menu select=long
 zstyle ':completion:*' use-compctl false
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+zstyle ':completion:*:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 # Necessary to be able to move in a completion menu:
 #
 #     bindkey -M menuselect '^L' forward-char
@@ -778,34 +610,29 @@ zstyle ':filter-select' case-insensitive yes
 # TODO: To explain.
 # Source:
 #     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
+#
+# `(-.)`  is a  glob qualifier  restricting the  expansion to  regular files  or
+# symlinks pointing to to regular files.
+# `(-/)` does the same thing but for directories.
+# `(#i)` is a globbing flag which makes the following pattern case-insensitive.
 zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
 
-# Use emacs keybindings even if our EDITOR is set to vi.
-# Warning:{{{
+# Respect these principles for ordering the sections:{{{
 #
-# Don't move this line after the `Sourcing` section.
-# It would reset `fzf` key bindings.
+# `Plugins` should be near the beginning because  we need to be able to override
+# whatever interface they install.
 #
-# Don't move it after the `Abbreviations` section either.
-# It would break them too (maybe because it removes the space key binding?).
+# `Abbreviations` should be  right after `Key Bindings` because  it installs key
+# bindings.
+#
+# `Syntax Highlighting` should  be at the end, because the  documentation of the
+# plugin explains  that it must  be sourced after  all custom widgets  have been
+# created (i.e., after all `zle -N` calls).
+# Indeed, the plugin creates a wrapper around each widget.
+# If we source it  before some custom widgets, it will still  work, but it won't
+# be able to properly highlight the latters.
 #}}}
-bindkey -e
 
-# disable XON/XOFF flow control
-# Why?{{{
-#
-# By default, `C-s` and `C-q`  are interpreted by the terminal driver as
-# “stop sending data“, “continue sending“.
-#
-# Explanations:
-#         http://unix.stackexchange.com/a/12108/125618
-#         http://unix.stackexchange.com/a/12146/125618
-#         http://unix.stackexchange.com/a/72092/125618
-#         https://en.wikipedia.org/wiki/Software_flow_control
-#}}}
-stty -ixon
-
-# don't move `Plugins` after syntax highlighting
 # Plugins {{{1
 
 # if we execute a non-existing command, suggest us some package(s),
@@ -923,8 +750,8 @@ unset fasd_cache
 #     • we don't have to select an entry which could be far from our current position,
 #       instead we can fuzzy search it via its name
 #}}}
-[[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
-. "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
+# [[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
+# . "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
 
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
@@ -982,17 +809,77 @@ alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(t
 
 alias m='f -e mpv'
 #           │
-#           └─ look for a file and open it with `mpv`
+#           └ look for a file and open it with `mpv`
 
 alias o='a -e xdg-open'
 #           │
-#           └─ open with `xdg-open`
+#           └ open with `xdg-open`
 
 alias v='f -t -e vim -b viminfo'
 #           │  │      │
-#           │  │      └─ use `viminfo` backend only (search only for files present in `viminfo`)
-#           │  └─ open with vim
-#           └─ match by recent access only
+#           │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
+#           │  └ open with vim
+#           └ match by recent access only
+
+# git {{{3
+
+# Usage:{{{
+#
+#     % config status
+#     % config add /path/to/file
+#     % config commit -m 'my message'
+#     % config push
+#}}}
+alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
+
+alias ga='git add'
+
+# Do not add `rlwrap` before `git commit`.{{{
+# Why?
+#     1. It's not needed here.
+#     2. It causes an issue.
+#
+# How to reproduce the issue?
+#
+#   1. write at the beginning of vimrc:
+#
+#         nno <silent> cd :sil w<cr>
+#         set rtp+=~/.vim/plugged/vim-gutentags/
+#         finish
+#
+#   2. tweak some repo
+#   3. try to commit with `rlwrap git commit`
+#   4. write something on the 1st line and stay on the 1st line
+#   5. while the buffer is still modified, hit `cd`
+#
+# → the line disappears
+#
+# It has nothing to do with the conceal feature.
+# It's reproducible without syntax highglighting.
+#
+# Solutions:
+#
+#         • nno          cd :sil w<cr>
+#         • nno <silent> cd :w<cr>
+#         • commit without `rlwrap`
+#
+# We have several mechanisms to save a buffer (including an autocmd).
+# It's easier (and more future-proof) to just NOT use `rlwrap`.
+#
+# TODO:
+# I can't reproduce this issue anymore.
+# Is this comment still relevant?
+#}}}
+alias gcm='git commit'
+alias gco='git checkout'
+
+# Mnemonics: Git Find
+alias gf='git log --all --source -p -S'
+
+alias gp='rlwrap -H /dev/null git push'
+
+# Git Restore Last Commit
+alias grlc='git reset --hard "$(git rev-parse HEAD)"'
 
 # grep {{{3
 
@@ -1162,7 +1049,7 @@ alias nvim_none='nvim -Nu NONE +"set gcr="'
 # Rationale:{{{
 #
 # This alias is not meant to be executed as it is.
-# It's meant to be expanded on the command-line (press `M-e`), then edited.
+# It's meant to be expanded on the command line (press `M-e`), then edited.
 # It's useful to remind us of all the options available when we're debugging Vim,
 # and we need to reproduce an issue with a minimal of configurations.
 #}}}
@@ -1175,6 +1062,40 @@ alias vim_with_less_config=$'vim -Nu /tmp/vimrc --cmd \'filetype plugin indent o
 # xbindkeys {{{3
 
 alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
+
+# zsh_options {{{3
+
+# Purpose:{{{
+#
+# You want to know the state of an option (enabled or disabled).
+# Execute this alias, and look for the option name in both buffers.
+#
+# Once you find it, check the buffer where you found it.
+# In the left buffer, read the value as it is:
+#
+#     autocd     → 'autocd' is enabled
+#     nolistbeep → 'list_beep' is disabled
+#
+# In the right buffer, reverse the reading:
+#
+#     noaliases  → 'aliases' is ENabled
+#     chaselinks → 'chaselinks' is DISabled
+# }}}
+# Why do I need to reverse the reading in the right buffer? {{{
+#
+# Because the meaning of the output of `unsetopt` is:
+#
+#     the values of these options is NOT ...
+#
+# This 'NOT' reverses the reading:
+#
+#     NOT nooption = NOT disabled = enabled
+#     NOT option   = NOT enabled  = disabled
+# }}}
+alias zsh_options='vim -O =(setopt) =(unsetopt)'
+#                           │         │
+#                           │         └ options whose default value has NOT changed
+#                           └ options whose default value has changed
 
 # zsh_prof {{{3
 
@@ -1324,7 +1245,7 @@ cmdfu() { #{{{2
   #               ┌ current environment
   #               │         ┌ reset environment
   #               │         │
-  #     vimdiff <(setopt) <(emulate -R zsh; setopt)
+  #     vimdiff =(setopt) =(emulate -R zsh; setopt)
   #
   # It can be useful, but it can also have undesired effect:
   #
@@ -1812,7 +1733,7 @@ nv() { #{{{2
     #
     # With Vim, you should type:
     #
-    #         vim -q <(grep -Rn foo *)    ✔
+    #         vim -q =(grep -Rn foo *)    ✔
 
     elif [[ $1 == -q ]]; then
 
@@ -2256,7 +2177,7 @@ CMDS_TO_IGNORE_IN_HISTORY=(
 ignore_these_cmds() {
   emulate -L zsh
   local first_word
-  # zsh passes the command-line to this function via $1
+  # zsh passes the command line to this function via $1
   # we extract the first word on the line
   # Source:
   #     https://unix.stackexchange.com/a/273277/289772
@@ -2321,19 +2242,6 @@ ignore_short_or_failed_cmds() {
     return 0
   fi
 }
-
-# Variables {{{1
-# WARNING: Make sure this `Variables` section is always after `Functions`.{{{
-#
-# Because  if  you  refer  to  a  function in  the  value  of  a  variable  (ex:
-# `precmd_functions`), and it doesn't exist yet, it may raise an error.
-#}}}
-
-# It doesn't seem necessary to export the variable.
-# `precmd_functions` is a variable specific to the zsh shell.
-# No subprocess could understand it.
-#     https://stackoverflow.com/a/1158231/9780968
-# precmd_functions=(__restart_vim)
 
 # Key Bindings {{{1
 # Delete {{{2
@@ -2445,7 +2353,7 @@ bindkey '^Q' __quote_big_word
 bindkey -r '^R'
 # Why?{{{
 #
-# On Vim's command-line, we can't use `C-r`, nor `C-r C-r`.
+# On Vim's command line, we can't use `C-r`, nor `C-r C-r`.
 # So, we use `C-r C-h`.
 # To stay consistent, we do the same in the shell.
 #
@@ -2462,13 +2370,15 @@ bindkey '^U' backward-kill-line
 
 # C-x        (prefix) {{{3
 # C-x SPC         magic-space {{{4
-# perform history expansion
+
+# Why don't you simply use 'SPC' instead of 'C-x SPC'?{{{
+#
+# We already bind `__abbrev_expand` to SPC.
+#}}}
+# perform history expansion and insert a space
 bindkey '^X ' magic-space
 
 # C-x C-a/d/f     fasd {{{4
-
-# we can't bind the `magic-space` widget to the space key, because we use the
-# latter for `expand-abbrev`
 
 bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (files and directories)
 bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
@@ -2531,9 +2441,9 @@ bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
 # Alternative:
 #     bindkey -s '^Xs' 'sudo !!^M'
 #
-# The 1st command is more powerul, because it should escalate the privilege for
-# the whole command line. Sometimes, `sudo` fails because it doesn't affect
-# a redirection.
+# The 1st command is more powerul,  because it should escalate the privilege for
+# the whole command line.
+# Sometimes, `sudo` fails because it doesn't affect a redirection.
 
 # C-x C-z         copy-earlier-word {{{4
 
@@ -2590,16 +2500,38 @@ bindkey '^X^Z' copy-earlier-word
 # creates a regular file (in `/tmp`) to hold the output of `cmd`.
 # This  regular file  is  removed  automatically as  soon  as  the main  command
 # finishes.
+#
+# Also, the  temporary file created by  `<()` is read-only which  is annoying if
+# you have to modify it.
+# The one created  by `=()` is a  regular file, that you can  change without any
+# warning.
 #}}}
 bindkey -s '^Xc' 'vimdiff =() =()\e5^B'
 #        │
 #        └ interpret the arguments as strings of characters
 #          without `-s`, `vimdiff` would be interpreted as the name of a zle widget
 
+# C-x D           end-of-list {{{4
+
+# Purpose:{{{
+#
+# `end-of-list` allows you to make a list of matches persistent.
+#
+#     % echo $HO C-d
+#         → parameter
+#           HOME  HOST    # this list may be erased if you repress C-d later
+#
+#     % echo $HO C-d C-x D
+#         → parameter
+#           HOME  HOST    # this list is printed forever
+#     % echo $HO          # new prompt automatically populated with the previous command
+#}}}
+bindkey '^XD' end-of-list
+
 # C-x h           complete-help {{{4
 
 # TODO:
-# This shows tags when we're at a  certain point of a command-line where we want
+# This shows tags when we're at a  certain point of a command line where we want
 # to customize the completion system.
 # Explain what tags are, and how to read the output of `_complete_help`.
 #
@@ -3037,7 +2969,7 @@ bindkey -M menuselect '^L' forward-char
 
 bindkey -M menuselect '^O' accept-and-menu-complete
 #                          │
-#                          └ insert the selected match on the command-line,
+#                          └ insert the selected match on the command line,
 #                            but don't close the menu
 # TODO:
 # By default `M-a` is bound to `accept-and-hold` which does the same thing.
@@ -3049,94 +2981,6 @@ bindkey -M menuselect '^O' accept-and-menu-complete
 # We want to do the same in zsh (by default it's C-g in zsh).
 bindkey -M menuselect '^Q' send-break
 # }}}1
-# Options {{{1
-
-# Let us `cd` into a directory just by typing its name, without `cd`:
-#     my_dir/  ⇔  cd my_dir/
-#
-# Only works when `SHIN_STDIN` (SHell INput STanDard INput) is set, i.e. when the
-# commands are being read from standard input, i.e. in interactive use.
-#
-# Works in combination with `CDPATH`:
-#     $ cd /tmp
-#     $ Downloads
-#     $ pwd
-#     ~/Downloads/
-#
-# Works with completion:
-#     $ Do Tab
-#     Documents/  Downloads/
-setopt AUTO_CD
-
-# allow the expansion of `{a..z}` and `{1..9}`
-setopt BRACE_CCL
-
-# don't allow a `>` redirection to overwrite the contents of an existing file
-# use `>|` to override the option
-# setopt NO_CLOBBER
-
-# Try to correct the spelling of commands. The shell variable CORRECT_IGNORE may
-# be set to a pattern to match words that will never be offered as corrections.
-setopt CORRECT
-
-# Whenever a command  completion or spelling correction is  attempted, make sure
-# the entire command path ($PATH?) is hashed first.
-# This makes  the first completion slower  but avoids false reports  of spelling
-# errors.
-setopt HASH_LIST_ALL
-
-setopt BANG_HIST                 # Treat the '!' character specially during expansion.
-setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
-setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
-setopt SHARE_HISTORY             # Share history between all sessions.
-setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
-setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
-setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
-setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
-setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
-setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
-setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
-setopt HIST_BEEP                 # Beep when accessing nonexistent history.
-
-# allow comments even in interactive shells
-setopt INTERACTIVE_COMMENTS
-
-# never ring the bell on an ambiguous completion
-unsetopt LIST_BEEP
-
-# display PID when suspending processes as well
-setopt LONG_LIST_JOBS
-
-# Make zsh perform filename expansion on the command arguments of the form `var=val`.{{{
-#
-# zsh doesn't do it by default.
-#
-# MWE:
-#     % unsetopt MAGIC_EQUAL_SUBST
-#     % dd if=/dev/zero bs=1M count=1 of=~/test2
-#                                        ^
-#                                        ✘ not expanded into `/home/user`
-#
-#     % echo foo=~/bar:~/baz
-#          → foo=~/bar:~/baz
-#                ^     ^
-#                ✘     ✘
-#
-# This behavior differs from bash.
-#}}}
-setopt MAGIC_EQUAL_SUBST
-
-# On an ambiguous completion, instead of listing possibilities,
-# insert the first match immediately.
-# This makes us enter the menu in a single Tab, instead of 2.
-setopt MENU_COMPLETE
-
-# Don't push multiple copies of the same directory onto the directory stack.
-setopt PUSHD_IGNORE_DUPS
-
-# Do not query the user before executing `rm *` or `rm path/*`
-setopt RM_STAR_SILENT
-
 # Abbreviations {{{1
 
 # http://zshwiki.org/home/examples/zleiab
@@ -3239,7 +3083,112 @@ bindkey -M isearch ' ' self-insert
 # … as soon as we would type a space in a search, we would leave the latter and
 # go back to the regular command line.
 
-# Syntax highlighting {{{1
+# Options {{{1
+
+# Let us `cd` into a directory just by typing its name, without `cd`:
+#     my_dir/  ⇔  cd my_dir/
+#
+# Only works when `SHIN_STDIN` (SHell INput STanDard INput) is set, i.e. when the
+# commands are being read from standard input, i.e. in interactive use.
+#
+# Works in combination with `CDPATH`:
+#     $ cd /tmp
+#     $ Downloads
+#     $ pwd
+#     ~/Downloads/
+#
+# Works with completion:
+#     $ Do Tab
+#     Documents/  Downloads/
+setopt AUTO_CD
+
+# allow the expansion of `{a..z}` and `{1..9}`
+setopt BRACE_CCL
+
+# don't allow a `>` redirection to overwrite the contents of an existing file
+# use `>|` to override the option
+# setopt NO_CLOBBER
+
+# Try to correct the spelling of commands. The shell variable CORRECT_IGNORE may
+# be set to a pattern to match words that will never be offered as corrections.
+setopt CORRECT
+
+# Whenever a command  completion or spelling correction is  attempted, make sure
+# the entire command path ($PATH?) is hashed first.
+# This makes  the first completion slower  but avoids false reports  of spelling
+# errors.
+setopt HASH_LIST_ALL
+
+setopt BANG_HIST                 # Treat the '!' character specially during expansion.
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
+setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
+setopt HIST_BEEP                 # Beep when accessing nonexistent history.
+
+# allow comments even in interactive shells
+setopt INTERACTIVE_COMMENTS
+
+# never ring the bell on an ambiguous completion
+unsetopt LIST_BEEP
+
+# display PID when suspending processes as well
+setopt LONG_LIST_JOBS
+
+# Make zsh perform filename expansion on the command arguments of the form `var=val`.{{{
+#
+# zsh doesn't do it by default.
+#
+# MWE:
+#     % unsetopt MAGIC_EQUAL_SUBST
+#     % dd if=/dev/zero bs=1M count=1 of=~/test2
+#                                        ^
+#                                        ✘ not expanded into `/home/user`
+#
+#     % echo foo=~/bar:~/baz
+#          → foo=~/bar:~/baz
+#                ^     ^
+#                ✘     ✘
+#
+# This behavior differs from bash.
+#}}}
+# It also has the positive side effect of allowing filename completion.{{{
+#
+#     % echo var=/us Tab
+#}}}
+setopt MAGIC_EQUAL_SUBST
+
+# On an ambiguous completion, instead of listing possibilities,
+# insert the first match immediately.
+# This makes us enter the menu in a single Tab, instead of 2.
+setopt MENU_COMPLETE
+
+# Don't push multiple copies of the same directory onto the directory stack.
+setopt PUSHD_IGNORE_DUPS
+
+# Do not query the user before executing `rm *` or `rm path/*`
+setopt RM_STAR_SILENT
+
+# Variables {{{1
+# WARNING: Make sure this `Variables` section is always after `Functions`.{{{
+#
+# Because  if  you  refer  to  a  function in  the  value  of  a  variable  (ex:
+# `precmd_functions`), and it doesn't exist yet, it may raise an error.
+#}}}
+
+# It doesn't seem necessary to export the variable.
+# `precmd_functions` is a variable specific to the zsh shell.
+# No subprocess could understand it.
+#     https://stackoverflow.com/a/1158231/9780968
+# precmd_functions=(__restart_vim)
+
+# Syntax Highlighting {{{1
 
 # customize default syntax highlighting
 #
@@ -3253,11 +3202,6 @@ bindkey -M isearch ' ' self-insert
 
 # Source the plugin `zsh-syntax-highlighting`:
 #     https://github.com/zsh-users/zsh-syntax-highlighting
-
-# It must be  done after all custom  widgets have been created  (i.e., after all
-# zle -N calls). because the plugin creates a wrapper around each of them.
-# If we source it  before some custom widgets, it will still  work, but won't be
-# able to properly highlight the latter.
 
 [[ -f ${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
 . "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
@@ -3371,3 +3315,244 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main root)
 #     ZSH_HIGHLIGHT_STYLES[root]='bg=red'
 
+# TO_DO {{{1
+
+# noa vim //gj /home/jean/Dropbox/conf/bin/**/*.sh ~/.shrc ~/.bashrc ~/.zshrc ~/.zshenv ~/.vim/plugged/vim-snippets/UltiSnips/sh.snippets | cw
+#         ^
+#         put whatever pattern you want to refactor
+
+# TODO:
+# ideas to improve our scripts:
+#
+#     • they should better handle errors
+#       (no stacktrace, show a human-readable message;
+#       take inspiration from `mv garb age`)
+#
+#     • usage when the script is called without arguments
+#
+#       Should we delegate this to a library function to avoid
+#       repeating always the same kind of code?
+#
+#     • use the output streams correctly
+#
+#       Write error messages on stderr, not on stdout.
+#       This way, if you pipe the output of your script to another utility,
+#       and an error is raised, the message won't be sent to the utility.
+#       There's no sense piping an error message to anything.
+#       Same thing for a usage message (which can be seen as a special
+#       kind of error message).
+#       And if the user really wants to pipe the error message,
+#       they still can with `2>&1 |` (or `|&`).
+#
+#     • any error should be accompanied by an `exit` statement, so that:
+#
+#           ./script.sh && echo 'success'
+#
+#       doesn't print 'success' if the script fails.
+#
+#       Use `exit 1` for a random error, `exit 64` for a usage message,
+#       `65` for bad user input, and `77` for not enough permission.
+#       See here for which code to use:
+#
+#           https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
+#
+#       It's not an obligation to use this page, just a useful convention.
+#
+#     • write a manpage for the script
+#
+#     • split a long command using an array whose elements are arguments of the latter:
+#           https://unix.stackexchange.com/a/473257/289772
+
+# TODO:
+# Integrate `~/.zprofile` here?
+# Are there commands that we really need to write in `~/.zprofile`?
+
+# TODO:
+# Type `$ vim Tab`.
+# Look at the distance between the suggestions in the `shell function` section.
+# It's too big.
+# The result feels jarring compared to the other sections.
+# I think it's because zsh tries to use  a certain width for the whole menu, and
+# divides it by `n` (`n` being the number of suggestions on a given line).
+# If `n` is small (atm we only have 3 shell functions beginning with `vim`),
+# the width of each suggestion on a line is needlessly big.
+#
+# It seems that the completion menu splits the suggestions on several lines once
+# there're 10 of them (at least if their size is similar to `vim_cfg`).
+#
+# How to control the geometry of the zsh completion menu?
+# Width of the suggestions, max number of entries on a single line ...
+# It would be useful to tell zsh that if we have less than, say, 10 suggestions,
+# we want them each on a separate line.
+# Or better yet, how to ask zsh to fill columns, before filling lines?
+#
+# The 'list_rows_first' option doesn't seem to help...
+# The latter changes the position of entries in a completion menu:
+# For example, the 2nd one is on the right of the 1st one, instead of below.
+
+
+# TODO:
+# Make sure to never abuse the `local` keyword.
+# Remember the issue we had created in `gifrec.sh`.
+# Note that the variables  set by a script should not  affect the current shell,
+# because the script is executed in a subshell.
+# So, is it recommended to use `local` in the functions of a script?
+#
+# Update:
+# The google style guide recommends to always use them.
+# Maybe  we should  re-use `local`  in `gifrec.sh`,  and pass  the variables  as
+# arguments between functions...
+# What about `VERSION` inside `upp.sh`? Should we make this variable local?
+#
+# Update:
+# These variables are indeed in a function, but they don't have to.
+# We  could remove the  functions, and just execute  the code directly  from the
+# script.
+# We've put them in functions to make the code more readable.
+# IOW, I think they are supposed to be accessible from the whole script.
+
+
+# TODO:
+# review `printf` everywhere  (unnecessary double quotes, extract interpolations
+# using %s items, replace a multi-line printf with a here-doc ...)
+
+# TODO: improve our scripts by reading:
+#
+#     http://www.kfirlavi.com/blog/2012/11/14/defensive-bash-programming/
+#
+# Also, have a look at `bashmount`:
+#
+#     https://github.com/jamielinux/bashmount
+#     https://www.youtube.com/watch?v=WaYZ9D7sX4U
+
+# TODO: To document in our notes:
+#
+#     https://unix.stackexchange.com/a/88851/289772
+
+# TODO: Do these substitutions:
+#
+#     ~ → ${HOME}
+#
+#     [ ... ] → [[ ... ]] (noa vim /\s\[\s/gj ~/bin/**/*.sh | cw)
+#
+#     "${HOME}"/file → "${HOME}/file"
+
+# TODO:
+# Search for `HOME` in zshrc/bashrc.
+# Should we quote all the time?
+# Example:
+#
+#            v                            v v                                 v
+#     fpath=("${HOME}/.zsh/my-completions/" "${HOME}/.zsh/zsh-completions/src/" $fpath)
+#                                                                               ^^^^^^
+#                                                                               what about that?
+#                                                                               ${fpath}?
+#                                                                               "${fpath}"?
+# Example:
+#
+#     [[ -f "${HOME}/.fzf.zsh" ]] && . "${HOME}/.fzf.zsh"
+#           ^                ^
+#
+# Example:
+#
+#     export CDPATH=:"${HOME}":/tmp
+#                    ^       ^
+#
+# See:
+#     https://unix.stackexchange.com/a/68748/289772
+
+
+# TODO:
+# Do we need to set the option `zle_bracketed_paste`?
+# The bracketed paste mode is useful, among other things, to prevent the shell
+# from executing automatically a multi-line pasted text:
+#
+#     https://cirw.in/blog/bracketed-paste
+#
+# Atm, zsh doesn't execute a multi-line pasted text. Does it mean we're good?
+# Is the bracketed paste mode enabled?
+# Or do we need to copy the code of this plugin:
+#
+#     https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/safe-paste/safe-paste.plugin.zsh
+
+# TODO:
+# Currently we have several lines in this file which must appear before or after
+# a certain point to avoid being overridden/overriding sth.
+# It feels brittle. One day we could move them in the wrong order.
+# Find a better way of organizing this file.
+# Or  write  at  the  top  of  the file  that  some  sections  must  be  sourced
+# before/after others.
+
+# TODO:
+# I can't create a symlink for `~/.zsh_history` pointing to a file in
+# Dropbox. So, for the moment, I do the opposite: a symlink in Dropbox to the
+# file in ~. Once we get rid of Dropbox, version control all zsh config files,
+# including the history (good idea? sensible data?).
+# If it's not a good idea, then configure a cron job to automatically make
+# a backup of the history on a 2nd hard drive.
+
+# TODO:
+# When we clone a git repo, it would be useful to automatically cd into it.
+# Install a hook to do that.
+# Read `man zshcontrib`, section `Manipulating Hook Functions`.
+# Also `man zshmisc`, section `SPECIAL FUNCTIONS`.
+
+# TODO:
+# automatically highlight in red special characters on the command line
+# use this regex to find all non ascii characters:
+#     [^\x00-\x7F]
+#
+# Read `man zshzle`, section `special widgets`:
+#     zle-line-pre-redraw
+#            Executed  whenever  the  input  line  is  about  to be redrawn,
+#            providing an opportunity to update the region_highlight array.
+#
+# Also read this:
+#
+#     https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/regexp.md
+
+# TODO:
+# read this tuto
+# http://reasoniamhere.com/2014/01/11/outrageously-useful-tips-to-master-your-z-shell/
+
+# TODO:
+# implement the key binding `M-Del` to delete from the cursor back to the
+# previous whitespace.
+
+# NOTE:
+# there's also a `quote-line` command bound to M-' by default.
+# As the name suggests, it quotes the entire line. No need to select a region.
+
+# TODO:
+# check that none of our alias can shadow a future command from the repos:
+#     apt-file update
+#     apt-file -x search '/myalias$'
+
+# FIXME:
+# Find a video whose title contains a single quote; e.g.:
+#
+#   [HorribleSubs] JoJo's Bizarre Adventure - Golden Wind - 01 [480p].mkv
+#
+# Start ranger, navigate to the directory containing of the video, and play it.
+# Quit ranger:
+#
+#   zsh:1: unmatched '
+#
+# The issue is probably in ranger, because it persists even if I disable the zshrc.
+# However, I can't find anything wrong in:
+#
+#   ~/.config/ranger/rifle.conf
+#   →
+#   mime ^video,       has mpv,      X, flag f = mpv -- "$@"
+#                                                       ^^^^
+#                                                       should properly a video title
+#                                                       even if it contains a single quote
+
+# TODO:
+# understand: https://unix.stackexchange.com/questions/366549/how-to-deal-with-filenames-containing-a-single-quote-inside-a-zsh-completion-fun
+
+# TODO: To read:
+# https://github.com/sindresorhus/pure (≈ 550 sloc, 2 fichiers: pure.zsh, async.zsh)
+
+# TODO: to read (about glob qualifiers):
+#   https://unix.stackexchange.com/a/471081/289772

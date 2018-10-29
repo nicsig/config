@@ -21,7 +21,7 @@ $include /etc/inputrc
 
 # Variables {{{
 
-# never ring the bell on an ambiguous completion
+# never ring the bell (useful for ambiguous completions)
 set bell-style none
 
 # when we type a closing parentheses, don't make the cursor jump to the opening one
@@ -57,15 +57,7 @@ set mark-modified-lines on
 # before cycling through the list
 set menu-complete-display-prefix on
 
-# Print all possible matches when we Tab complete by pressing Tab for the first time.{{{
-#
-# Useful, because we  bind Tab to `menu-complete`, which  prevents readline from
-# printing all possible matches when press Tab twice.
-#
-# Test the option on this command:
-#
-#     $ echo $HO Tab
-#}}}
+# Print all possible matches when we press Tab for the first time.
 set show-all-if-ambiguous on
 
 # In a listing, show the type of the matches by appending a trailing character.{{{

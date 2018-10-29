@@ -97,56 +97,6 @@ tnvr() {
 }
 
 # Alias {{{1
-# git {{{2
-
-# Usage:
-#     config status
-#     config add /path/to/file
-#     config commit -m 'my message'
-#     config push
-alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
-
-alias ga='git add'
-
-# Do not add `rlwrap` before `git commit`.{{{
-# Why?
-#     1. It's not needed here.
-#     2. It causes an issue.
-#
-# How to reproduce the issue?
-#
-#   1. write at the beginning of vimrc:
-#
-#         nno <silent> cd :sil w<cr>
-#         set rtp+=~/.vim/plugged/vim-gutentags/
-#         finish
-#
-#   2. tweak some repo
-#   3. try to commit with `rlwrap git commit`
-#   4. write something on the 1st line and stay on the 1st line
-#   5. while the buffer is still modified, hit `cd`
-#
-# → the line disappears
-#
-# It has nothing to do with the conceal feature.
-# It's reproducible without syntax highglighting.
-#
-# Solutions:
-#
-#         • nno          cd :sil w<cr>
-#         • nno <silent> cd :w<cr>
-#         • commit without `rlwrap`
-#
-# We have several mechanisms to save a buffer (including an autocmd).
-# It's easier (and more future-proof) to just NOT use `rlwrap`.
-#}}}
-alias gc='git commit'
-alias gp='rlwrap -H /dev/null git push'
-# Git Restore Last Commit
-alias grlc='git reset --hard "$(git rev-parse HEAD)"'
-
-alias gs='git log --all --source -p -S'
-
 # surfraw {{{2
 
 alias srr='sr ixquick'

@@ -35,38 +35,6 @@ fi
 
 PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 
-# Options {{{1
-
-# Typing a directory name alone is enough to cd into it
-shopt -s autocd
-
-# Check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-# Used by the `select` command to determine the column length and the terminal
-# width when printing selection lists.
-shopt -s checkwinsize
-
-# don't allow a `>` redirection to overwrite the contents of an existing file
-# use `>|` to override the option
-set -o noclobber
-
-# Enable the pattern `**` to match match all files and zero or more directories
-# and subdirectories. `**/` matches any path to a folder.
-shopt -s globstar
-
-# append to the history file, don't overwrite it
-shopt -s histappend
-
-# After a failed history expansion (e.g.: !<too big number>), don't give me an
-# empty prompt. Reload it (unexpanded) into the readline editing buffer for
-# correction.
-shopt -s histreedit
-
-# After a history expansion, don't execute the resulting command immediately.
-# Instead,  write the expanded command into the readline editing  buffer for
-# further modification.
-shopt -s histverify
-
 # Sourcing {{{1
 # Warning: Don't move `Sourcing` after `Key bindings`!{{{
 #
@@ -128,6 +96,10 @@ shopt -s histverify
 #}}}
 . /etc/bash_completion
 
+# Aliases {{{1
+
+alias bash_options='vim -O <(set -o) <(shopt -s) <(shopt -u)'
+
 # Key bindings {{{1
 # CTRL {{{2
 # C-SPC        magic-space {{{3
@@ -145,7 +117,7 @@ bind '" ": magic-space'
 bind -r "\C-r"
 # Why?{{{
 #
-# On Vim's command-line, we can't use `C-r`, nor `C-r C-r`.
+# On Vim's command line, we can't use `C-r`, nor `C-r C-r`.
 # So, we use `C-r C-h`.
 # To stay consistent, we do the same in the shell.
 #
@@ -243,4 +215,36 @@ bind '"\eZ": "$(!!|fzf)"'
 # Update:
 # I've commented the key binding because I hit it by accident too often.
 # It happens when I press Escape then C-b quickly afterwards.
+
+# Options {{{1
+
+# Typing a directory name alone is enough to cd into it
+shopt -s autocd
+
+# Check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+# Used by the `select` command to determine the column length and the terminal
+# width when printing selection lists.
+shopt -s checkwinsize
+
+# don't allow a `>` redirection to overwrite the contents of an existing file
+# use `>|` to override the option
+set -o noclobber
+
+# Enable the pattern `**` to match match all files and zero or more directories
+# and subdirectories. `**/` matches any path to a folder.
+shopt -s globstar
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# After a failed history expansion (e.g.: !<too big number>), don't give me an
+# empty prompt. Reload it (unexpanded) into the readline editing buffer for
+# correction.
+shopt -s histreedit
+
+# After a history expansion, don't execute the resulting command immediately.
+# Instead,  write the expanded command into the readline editing  buffer for
+# further modification.
+shopt -s histverify
 
