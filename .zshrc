@@ -180,11 +180,14 @@ xdcc=~/Downloads/XDCC/
 # To override any possible conflicting function (a default one, or coming from a
 # third-party plugin).
 #}}}
-#                                   ┌ additional completion definitions,
-#                                   │ not available in a default installation,
-#                                   │ useful for virtualbox
-#                                   ├───────────────────────────────┐
-fpath=(${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath)
+#                                    ┌ additional completion definitions,
+#                                    │ not available in a default installation,
+#                                    │ useful for virtualbox
+#                                    ├───────────────────────────────┐
+fpath=( ${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath )
+
+# we use `~/.zsh/my-func` to autoload some of our own custom functions
+fpath=( ${HOME}/.zsh/my_func/ $fpath )
 
 # Add completion for the `dasht` command:
 #
@@ -1092,10 +1095,10 @@ alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbi
 #     NOT nooption = NOT disabled = enabled
 #     NOT option   = NOT enabled  = disabled
 # }}}
-alias zsh_options='vim -O =(setopt) =(unsetopt)'
-#                           │         │
-#                           │         └ options whose default value has NOT changed
-#                           └ options whose default value has changed
+alias options='vim -O =(setopt) =(unsetopt)'
+#                       │         │
+#                       │         └ options whose default value has NOT changed
+#                       └ options whose default value has changed
 
 # zsh_prof {{{3
 
@@ -1188,6 +1191,13 @@ alias -s pdf=zathura
 # Functions {{{1
 alias_is_it_free() { #{{{2
   emulate -L zsh
+
+  # make sure the name hasn't been taken yet
+  printf -- 'type %s:\n' "$1"
+  type "$1"
+
+  # make sure the name won't shadow a future command
+  printf -- '\napt-file -x search "/%s$":\n' "$1"
   apt-file -x search "/$1$"
 }
 
@@ -1398,23 +1408,162 @@ EOF
   fi
   printf -- '%s\n' "$@"
 }
+#}}}2
 
-ff_audio_record() { #{{{2
+ff_audio_extract() { #{{{2
   emulate -L zsh
-  ffmpeg -f pulse -i default -y /tmp/rec.wav
-  printf -- "\nThe audio stream has been recorded into '/tmp/rec.wav'\n"
-}
-
-ff_extract_sub() { #{{{2
-  emulate -L zsh
-  if [[ $# -eq 0 ]]; then
-    cat <<EOF
-usage:    $0 <file> [<subtitle number>]
+  if [[ $# -ne 2 ]]; then
+    cat <<EOF >&2
+usage:    $0 <video file> <audio stream number>
 EOF
     return 64
   fi
-  ffmpeg -i "$1" -map 0:s:"$2" sub.srt
+
+  # name of output file{{{
+  #
+  # Maybe use  an extension  matching the  original codec,  the one  reported by
+  # `ffprobe`.
+  #}}}
+  local out='audio.aac'
+  #       ┌ input file{{{
+  #       │
+  #       │       ┌ disable video recording (skip video)
+  #       │       │
+  #       │       │   ┌ copy the audio stream keeping the original codec
+  #       │       │   │}}}
+  ffmpeg -i "$1" -vn -c:a copy -map 0:a:"$2" "${out}"
+  #                             │{{{
+  #                             └ select the N-th (:"$2") audio stream
+  #                               of the first input file (0:)
+  #}}}
+  if [[ $? -eq 0 ]]; then
+    printf -- "The audio stream has been extracted in:  '%s'\n" "${out}"
+  fi
 }
+
+ff_audio_record() { #{{{2
+  emulate -L zsh
+  local out='/tmp/rec.wav'
+  ffmpeg -f pulse -i default -y "${out}"
+  #       │ │        │        │{{{
+  #       │ │        │        └ overwrite output files without asking
+  #       │ │        │
+  #       │ │        └  From `man ffmpeg-devices`:
+  #       │ │
+  #       │ │                  The filename to provide to the input device
+  #       │ │                  is a source device or the string "default".
+  #       │ │
+  #       │ └ PulseAudio output device
+  #       │
+  #       │   See:
+  #       │           man ffmpeg-devices
+  #       │           /^\s*pulse$
+  #       │
+  #       └ -f fmt (input/output):
+  #
+  #             Force input or output file format.
+  #             The format is normally auto detected for input files and guessed
+  #             from the file extension for output  files, so this option is not
+  #             needed in most cases.
+  #}}}
+  if [[ $? -eq 0 ]]; then
+    printf -- "\nThe audio stream has been recorded in:  '%s'\n" "${out}"
+  fi
+}
+
+ff_desktop_record() { #{{{2
+  ffmpeg -draw_mouse 1                     \
+         -f x11grab                        \
+         -framerate 25                     \
+         -video_size "1920x1080"           \
+         -i :0.0                           \
+         -y                                \
+                /tmp/recording_desktop.mkv \
+                >/dev/null 2>&1 &
+}
+
+ff_mux_video_and_audio() { #{{{2
+  emulate -L zsh
+  if [[ $# -ne 3 ]]; then
+    cat <<EOF >&2
+usage:    $0 <video file> <audio file> <name of the audio track>
+example:  $0 file.mkv audio.aac eng
+EOF
+    return 64
+  fi
+
+  local out='out.mkv'
+
+  # Broken down:{{{
+  #
+  # -c:v copy            = copy video stream using the same codec
+  # -c:a                 = copy audio stream using aac codec
+  # -strict experimental = allow experimental decoders and encoders
+  # -map 0               = use all the streams of the first input file
+  # -map 1:a:0           = use the first audio stream of the second input file
+  #
+  # -metadata:s:a:1 language=jpn    = give the title 'jpn' to the 2nd audio track of the muxed file
+  #           ^
+  #           per-stream (≈ local to a stream) metadata
+  #           For more info, see `man ffmpeg`, and search for '-map_metadata'.
+  #}}}
+  ffmpeg -i "$1" \
+         -i "$2" \
+         -c:v copy \
+         -c:a aac \
+         -strict experimental \
+         -map 0 \
+         -map 1:a:0 \
+         -metadata:s:a:1 language="$3" \
+         "${out}"
+
+  if [[ $? -eq 0 ]]; then
+    printf -- "The streams have been muxed in:  '%s'\n" "${out}"
+  fi
+}
+
+ff_sub_extract() { #{{{2
+  emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+usage:    $0 <video file> [<subtitle number>]
+EOF
+    return 64
+  fi
+
+  # We're going to extract the subtitles as an `.srt` file.  But what if the file contains a `.ass` subtitle stream?{{{
+  #
+  # It doesn't matter.
+  # `ffmpeg` will do the extraction AND the conversion.
+  #}}}
+  local out='sub.srt'
+  ffmpeg -i "$1" -map 0:s:"$2" "${out}"
+  #                   │ │ │{{{
+  #                   │ │ └ select the N-th one
+  #                   │ │
+  #                   │ └ select a subtitle
+  #                   │
+  #                   └ select the first input file
+  #}}}
+  if [[ $? -eq 0 ]]; then
+    printf -- "The subtitles have been extracted in:  '%s'\n" "${out}"
+  fi
+
+  # In case of an issue, see:
+  #     https://superuser.com/a/927507/913143
+}
+
+ff_video_to_gif() { #{{{2
+  emulate -L zsh
+  if [[ $# -ne 2 ]]; then
+    cat <<EOF >&2
+usage:    $0 <video file> <output.gif>
+EOF
+    return 64
+  fi
+  gifenc.sh "$1" "$2" >/dev/null 2>&1
+}
+#}}}2
 
 fix() { #{{{2
   emulate -L zsh
@@ -1854,6 +2003,7 @@ palette(){ #{{{2
     fi
   done
 }
+#}}}2
 
 ppa_what_can_i_install() { #{{{2
   emulate -L zsh
@@ -1911,6 +2061,7 @@ EOF
     fi
   done
 }
+#}}}2
 
 script_record() { #{{{2
   emulate -L zsh
@@ -1939,6 +2090,7 @@ EOF
   fi
   scriptreplay -s /tmp/.script_record.log -t /tmp/.script_timing.log
 }
+#}}}2
 
 shellcheck_wiki() { #{{{2
   xdg-open "https://github.com/koalaman/shellcheck/wiki/SC$1"
@@ -1947,7 +2099,7 @@ shellcheck_wiki() { #{{{2
 sr_fzf() { #{{{2
   emulate -L zsh
   sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
-  #     ├─────────────────────────────────────────────┘   ├─────┘   ├────┘
+  #     ├─────────────────────────────────────────────┘   ├─────┘   ├────┘{{{
   #     │                                                 │         └ search the pattern input by the user
   #     │                                                 │           exactly (disable fuzzy matching)
   #     │                                                 │           -e` = `--exact` exact-match
@@ -1955,6 +2107,7 @@ sr_fzf() { #{{{2
   #     │                                                 └ sort numerically
   #     └ remove empty lines in
   #       the bookmark file
+  #}}}
 }
 
 truecolor() { #{{{2
@@ -2056,11 +2209,13 @@ var_what_have_you() { #{{{2
   #}}}
   var="$1"
   printf -- '%s' "${var}" | od -t c
-  #                         ├┘ ├┘ │
+  #                         ├┘ ├┘ │{{{
   #                         │  │  └ format = printable character or backslash escape
   #                         │  └ select output format
   #                         └ dump stdin in another format
+  #}}}
 }
+#}}}2
 
 vim_prof() { #{{{2
   emulate -L zsh
@@ -2091,6 +2246,7 @@ vim_startup() { #{{{2
       +'sil 7,$!sort -k2' \
       +'$' "${TMP}"
 }
+#}}}2
 
 xt() { #{{{2
   # Purpose:{{{
@@ -3442,12 +3598,12 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # Should we quote all the time?
 # Example:
 #
-#            v                            v v                                 v
-#     fpath=("${HOME}/.zsh/my-completions/" "${HOME}/.zsh/zsh-completions/src/" $fpath)
-#                                                                               ^^^^^^
-#                                                                               what about that?
-#                                                                               ${fpath}?
-#                                                                               "${fpath}"?
+#             v                            v v                                 v
+#     fpath=( "${HOME}/.zsh/my-completions/" "${HOME}/.zsh/zsh-completions/src/" $fpath )
+#                                                                                ^^^^^^
+#                                                                                what about that?
+#                                                                                ${fpath}?
+#                                                                                "${fpath}"?
 # Example:
 #
 #     [[ -f "${HOME}/.fzf.zsh" ]] && . "${HOME}/.fzf.zsh"
@@ -3556,3 +3712,8 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 
 # TODO: to read (about glob qualifiers):
 #   https://unix.stackexchange.com/a/471081/289772
+
+# TODO:
+# Install a key binding to kill ffmpeg.
+# It would be useful when we record our desktop, or the sound...
+

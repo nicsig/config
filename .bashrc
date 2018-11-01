@@ -33,6 +33,33 @@ if [[ -z "${debian_chroot:-}" ]] && [[ -r /etc/debian_chroot ]]; then
   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+# TODO: Include exit code of last command in prompt.{{{
+#
+# See here for inspiration:
+#
+#     # https://stackoverflow.com/a/16715681/9780968
+#
+#     # Func to gen PS1 after CMDs
+#     __prompt_command() {
+#         # This needs to be first
+#         local EXIT="$?"
+#         PS1=""
+#         local RCol='\[\e[0m\]'
+#         local Red='\[\e[0;31m\]'
+#         local Gre='\[\e[0;32m\]'
+#         local BYel='\[\e[1;33m\]'
+#         local BBlu='\[\e[1;34m\]'
+#         local Pur='\[\e[0;35m\]'
+#         if [ $EXIT != 0 ]; then
+#             # Add red if exit code non 0
+#             PS1+="${Red}\u${RCol}"
+#         else
+#             PS1+="${Gre}\u${RCol}"
+#         fi
+#         PS1+="${RCol}@${BBlu}\h ${Pur}\W${BYel}$ ${RCol}"
+#     }
+#     PROMPT_COMMAND=__prompt_command
+#}}}
 PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 
 # Sourcing {{{1
@@ -98,7 +125,9 @@ PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[0
 
 # Aliases {{{1
 
-alias bash_options='vim -O <(set -o) <(shopt -s) <(shopt -u)'
+alias options='vim -O <(set -o) <(shopt -s) <(shopt -u) <(bind -v)'
+#                                                         │
+#                                                         └ readline variables
 
 # Key bindings {{{1
 # CTRL {{{2

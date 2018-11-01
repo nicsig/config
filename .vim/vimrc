@@ -7113,7 +7113,24 @@ endfu
 " It works now, because I've refactored the mapping to avoid `<expr>`.
 " But still, report it on Neovim's bug tracker.
 " Btw, it looks similar to another issue we opened.
-
+"
+" 144 -
+"     % hash | vipe
+"     press `gf` on a path
+"         → it takes several seconds, and the cpu load increases
+"           ✘
+"
+"     :sfin ~/.vim/plugged/vim-awk/
+"     :q
+"     press `gf` on a path
+"         → it's quick
+"           ✔
+"
+" Why the difference?
+" MWE:
+"
+"     $ vim -Nu NONE +'set path=.,**' +"set inex=substitute(v:fname,'.*=','','')" <(hash)
+"     press `gf` on a path
 
 
 
