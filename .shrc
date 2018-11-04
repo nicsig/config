@@ -78,14 +78,6 @@ alert() {
     "$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
 }
 
-help() {
-	if [[ $0 == "bash" ]]; then
-		help -m "$@" | vipe
-	else
-		run-help "$@" | vipe
-	fi
-}
-
 img_w3m() {
 	w3m -o imgdisplay=/usr/lib/w3m/w3mimgdisplay "$1"
 }

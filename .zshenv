@@ -229,6 +229,27 @@ export PDFVIEWER=zathura
 # The report can be formatted with `TIMEFMT` (man zshparam).
 export REPORTTIME=15
 
+# Purpose:{{{
+#
+# When we try to save a modified file in Neovim, we get this error:
+#
+#     Error detected while processing BufWriteCmd Auto commands for "...":
+#     sudo: no tty present and no askpass program specified
+#
+# According to the message, we need to specify an askpass program.
+# If you search 'askpass' in `$ man sudo`, you'll find the `-A` option (which we
+# use in our `vim-unix` plugin) and the `SUDO_ASKPASS` environment variable.
+#}}}
+# Where did you find this `/usr/lib/ssh/x11-ssh-askpass` file?{{{
+#
+#     $ dpkg -L ssh-askpass
+#}}}
+# Ok, and where did you find this `ssh-askpass` package?{{{
+#
+#     $ apt-file search askpass
+#}}}
+export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
+
 # What's `$TERM` inside a terminal, by default?{{{
 #
 # In many terminals, including xfce-terminal, guake, konsole:

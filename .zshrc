@@ -113,7 +113,7 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
 #
 #     # https://stackoverflow.com/a/12935606/9780968
 #
-#     setopt prompt_subst
+#     setopt PROMPT_SUBST
 #     autoload -Uz vcs_info
 #     zstyle ':vcs_info:*' stagedstr 'M'
 #     zstyle ':vcs_info:*' unstagedstr 'M'
@@ -222,8 +222,8 @@ zmodload zsh/complist
 #
 # `functions` is equivalent to `typeset -f`     (see `run-help functions`)
 #                                     │
-#                                     └ refer to function
-#                                       rather than parameter
+#                                     └ the following name refers to a function
+#                                       and not a parameter
 #
 # So:
 #
@@ -245,6 +245,9 @@ autoload -Uz compinit
 #         │└ from `man zshbuiltins` (AUTOLOADING FUNCTIONS):
 #         │      mark the function to be autoloaded using the zsh style,
 #         │      as if the option KSH_AUTOLOAD was unset
+#         │
+#         │      i.e. the definition file contains the body of the function directly
+#         │      (not `myfunc() {code}`, but just `code`)
 #         │
 #         └ from `man zshmisc`:
 #               suppress usual alias expansion during reading
@@ -325,7 +328,8 @@ bash_source() {
   alias _expand=_bash_expand
   alias _complete=_bash_comp
   emulate -L sh
-  setopt kshglob noshglob braceexpand
+  setopt KSH_GLOB BRACE_EXPAND
+  unsetopt SH_GLOB
 
   source "$@"
 }
@@ -338,14 +342,47 @@ bash_source ~/.zsh/my-completions/_pandoc
 # Why removing the alias `run-help`?{{{
 #
 # By default, `run-help` is merely an alias for `man`.
-# We want  the `run-help`  command  which displays  help files  for some  other
-# builtin commands, inside a pager.
+# We want the `run-help` shell function  which, before printing a manpage, tries
+# to find a help file in case the argument is a builtin command name.
 #}}}
 # Why silently?{{{
 #
 # To avoid error messages when we reload zshrc.
 #}}}
 unalias run-help >/dev/null 2>&1
+# Where is this `run-help` function?{{{
+#
+# It should be in:
+#     /usr/share/zsh/functions/Misc/run-help
+#
+# Otherwise, have a look at:
+#     % dpkg -L zsh | grep /run-help$
+#}}}
+# What should I do if `run-help` doesn't work?{{{
+#
+# Its directory must be in `$fpath`.
+# Make sure it is, and if it's not, add it.
+#
+# Also, the help pages must have been generated.
+# They  should be  in  the default  value  given  to `HELPDIR`  in  the code  of
+# `run-help`:
+# Probably something like:
+#
+#     /usr/share/zsh/X.Y.Z-dev-0/help/
+#
+# If they are not in the directory, try to generate them.
+# Download this perl script:
+#     https://github.com/zsh-users/zsh/blob/master/Util/helpfiles
+#
+# And use it:
+#     perl /path/to/helpfiles  dest
+#                              │
+#                              └ where you want the helpfiles to be written
+#
+# Then, export  `HELPDIR` with the  value of  the directory where  you generated
+# your helpfiles:
+#     export HELPDIR=/path/to/dir
+#}}}
 autoload -Uz run-help
 # Purpose:{{{
 #
@@ -948,6 +985,53 @@ alias nb='newsboat -q'
 # network interface.
 alias net_watch='nethogs enp3s0'
 
+# options {{{3
+
+# Purpose:{{{
+#
+# You want to know the state of an option (enabled or disabled).
+# Execute this alias, and look for the option name in both buffers.
+#
+# Once you find it, check the buffer where you found it.
+# In the left buffer, read the value as it is:
+#
+#     autocd     → 'autocd' is enabled
+#     nolistbeep → 'list_beep' is disabled
+#
+# In the right buffer, reverse the reading:
+#
+#     noaliases  → 'aliases' is ENabled
+#     chaselinks → 'chaselinks' is DISabled
+# }}}
+# Why do I need to reverse the reading in the right buffer? {{{
+#
+# Because the meaning of the output of `unsetopt` is:
+#
+#     the values of these options is NOT ...
+#
+# This 'NOT' reverses the reading:
+#
+#     NOT nooption = NOT disabled = enabled
+#     NOT option   = NOT enabled  = disabled
+# }}}
+# Is there an alternative?{{{
+#
+# Yes:  `set -o`.
+#}}}
+# Why don't you use it?{{{
+#
+# It  doesn't tell  you whether  the  default values  of the  options have  been
+# changed.
+#}}}
+alias options='vim -O =(setopt) =(unsetopt)'
+#                       │         │
+#                       │         └ options whose default value has NOT changed
+#                       └ options whose default value has changed
+
+# py {{{3
+
+alias py='/usr/local/bin/python3.7'
+
 # qmv {{{3
 
 alias qmv='qmv --format=destination-only'
@@ -962,10 +1046,6 @@ alias qmv='qmv --format=destination-only'
 #     `destination-only`    (or `do`)
 #
 # The default format is dual-column.
-
-# py {{{3
-
-alias py='/usr/local/bin/python3.7'
 
 # ranger {{{3
 
@@ -1065,40 +1145,6 @@ alias vim_with_less_config=$'vim -Nu /tmp/vimrc --cmd \'filetype plugin indent o
 # xbindkeys {{{3
 
 alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
-
-# zsh_options {{{3
-
-# Purpose:{{{
-#
-# You want to know the state of an option (enabled or disabled).
-# Execute this alias, and look for the option name in both buffers.
-#
-# Once you find it, check the buffer where you found it.
-# In the left buffer, read the value as it is:
-#
-#     autocd     → 'autocd' is enabled
-#     nolistbeep → 'list_beep' is disabled
-#
-# In the right buffer, reverse the reading:
-#
-#     noaliases  → 'aliases' is ENabled
-#     chaselinks → 'chaselinks' is DISabled
-# }}}
-# Why do I need to reverse the reading in the right buffer? {{{
-#
-# Because the meaning of the output of `unsetopt` is:
-#
-#     the values of these options is NOT ...
-#
-# This 'NOT' reverses the reading:
-#
-#     NOT nooption = NOT disabled = enabled
-#     NOT option   = NOT enabled  = disabled
-# }}}
-alias options='vim -O =(setopt) =(unsetopt)'
-#                       │         │
-#                       │         └ options whose default value has NOT changed
-#                       └ options whose default value has changed
 
 # zsh_prof {{{3
 
@@ -1241,9 +1287,9 @@ zsh_cfg() { "${=EDITOR}" "${HOME}/.zshrc" ;}
 #     /${=spec}
 #}}}
 
-checkinstall_what_have_you() { #{{{2
+checkinstall_what_have_i_installed() { #{{{2
   emulate -L zsh
-  aptitude search "?section(checkinstall)"
+  aptitude search '?section(checkinstall)'
 }
 
 cmdfu() { #{{{2
@@ -1565,6 +1611,36 @@ EOF
 }
 #}}}2
 
+find_pgm() { #{{{2
+  emulate -L zsh
+  # A failed filename generation makes zsh stop processing the function.{{{
+  #
+  # Because  of this,  and because  we  may have  a directory  in `$PATH`  which
+  # doesn't contain any file (e.g.  `/usr/local/sbin/`), zsh will fail to expand
+  # `$dir/*`, and when that happens, it will stop the function immediately.
+  # As a result, we will be missing the programs in the directories afterwards.
+  #}}}
+  unsetopt NOMATCH
+
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+usage: $0 <command name>
+example: $0 edit
+EOF
+    return 64
+  fi
+
+  for dir in "${path[@]}"; do
+    #          ┌ yes, you really need the quotes (if one of the directory name contains a path)
+    #          │
+    for cmd in "${dir}/"*; do
+      if [[ -x "${cmd}" && ! -d "${cmd}" ]]; then
+        echo "${cmd}"
+      fi
+    done
+  done | sort | grep "$1"
+}
+
 fix() { #{{{2
   emulate -L zsh
 
@@ -1638,8 +1714,8 @@ grep_pdf() { #{{{2
   if [[ $# -lt 2 ]]; then
     cat <<EOF >&2
 usage:
-    grep_pdf 'vim regex' file1.pdf file2.pdf ...
-    grep_pdf 'vim regex' *.pdf
+    $0 'vim regex' file1.pdf file2.pdf ...
+    $0 'vim regex' *.pdf
 EOF
     return 64
   fi
@@ -1681,12 +1757,24 @@ EOF
   "$@"
 }
 
+help() { #{{{2
+  # Rationale:{{{
+  #
+  # In bash, the equivalent of `run-help` is `help`.
+  # This is inconsistent.
+  #
+  # Also, `run-help` prints on the terminal.
+  # I prefer a Vim buffer.
+  #}}}
+  run-help "$@" | vipe
+}
+
 in_fileA_but_not_in_fileB() { #{{{2
   emulate -L zsh
   if [[ $# -eq 0 ]]; then
     cat <<EOF >&2
 usage:
-    in_fileA_but_not_in_fileB <file_a> <file_b>
+    $0 <file_a> <file_b>
 EOF
     return 64
   fi
@@ -2063,22 +2151,29 @@ EOF
 }
 #}}}2
 
+# script variables {{{2
+#
+# No need to export  these variables, since you set them every  time you start a
+# shell.
+script_record_dest='/tmp/.script_record.log'
+script_timing_dest='/tmp/.script_timing.log'
+#}}}2
 script_record() { #{{{2
   emulate -L zsh
   if [[ "$#" -eq 0 ]]; then
     # record interactive session
-    script -q --timing=/tmp/.script_timing.log /tmp/.script_record.log
+    script -q --timing=$script_timing_dest $script_record_dest
   else
     # record a specific (set of) command(s)
-    script -q --timing=/tmp/.script_timing.log -c "$1" /tmp/.script_record.log
+    script -q --timing=$script_timing_dest -c "$1" $script_record_dest
   fi
 }
 
 script_replay() { #{{{2
   emulate -L zsh
-  if [[ ! -f /tmp/.script_record.log ]]; then
+  if [[ ! -f $script_record_dest ]]; then
     cat <<EOF >&2
-Usage:
+usage:
 
 first invoke:
   \`script_record\` to record an interactive shell session
@@ -2088,7 +2183,7 @@ OR
 EOF
     return 64
   fi
-  scriptreplay -s /tmp/.script_record.log -t /tmp/.script_timing.log
+  scriptreplay -s $script_record_dest -t $script_timing_dest
 }
 #}}}2
 
@@ -2219,10 +2314,10 @@ var_what_have_you() { #{{{2
 
 vim_prof() { #{{{2
   emulate -L zsh
-  local TMP
-  TMP="$(mktemp /tmp/.vim_profile.XXXXXXXXXX)"
-  vim --cmd "prof start ${TMP}" --cmd 'prof! file ~/.vim/vimrc' -cq
-  vim "${TMP}" -c 'syn off' -c 'norm +tiE' -c 'update'
+  local tmp
+  tmp="$(mktemp /tmp/.vim_profile.XXXXXXXXXX)"
+  vim --cmd "prof start ${tmp}" --cmd 'prof! file ~/.vim/vimrc' -cq
+  vim "${tmp}" -c 'syn off' -c 'norm +tiE' -c 'update'
 }
 
 vim_recover() { #{{{2
@@ -2238,13 +2333,13 @@ vim_recover() { #{{{2
 
 vim_startup() { #{{{2
   emulate -L zsh
-  local TMP
-  TMP="$(mktemp /tmp/.vim_startup.XXXXXXXXXX)"
-  vim --startuptime "${TMP}" \
+  local tmp
+  tmp="$(mktemp /tmp/.vim_startup.XXXXXXXXXX)"
+  vim --startuptime "${tmp}" \
       +'q' startup_vim_file \
       && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' \
       +'sil 7,$!sort -k2' \
-      +'$' "${TMP}"
+      +'$' "${tmp}"
 }
 #}}}2
 
@@ -2257,34 +2352,34 @@ xt() { #{{{2
   #}}}
   emulate -L zsh
 
-  local TMP
-  TMP="$(mktemp /tmp/xt.XXXXXXXXXX)"
+  local tmp
+  tmp="$(mktemp /tmp/xt.XXXXXXXXXX)"
   #      │                  │
   #      │                  └ template for the filename, the `X` will be
   #      │                    randomly replaced with characters matched
   #      │                    by the regex `[0-9a-zA-Z]`
   #      │
-  #      └ create a temporary file and store its path into `TMP`
+  #      └ create a temporary file and store its path into `tmp`
 
-  atool -x --save-outdir="${TMP}" "$@"
+  atool -x --save-outdir="${tmp}" "$@"
   #          │
   #          └ write the name of the folder in which the files have been
   #            extracted inside the temporary file
 
-  # Assign the name of the extraction folder inside to the variable `DIR`.
-  local DIR
-  DIR="$(cat "${TMP}")"
-  [[ -d "${DIR}" && "${DIR}" != "" ]] && cd "${DIR}"
+  # Assign the name of the extraction folder inside to the variable `dir`.
+  local dir
+  dir="$(cat "${tmp}")"
+  [[ -d "${dir}" && "${dir}" != "" ]] && cd "${dir}"
   #  ├─────────┘    ├────────────┘       ├─────────┘
   #  │              │                    │
   #  │              │                    └ enter it
   #  │              │
   #  │              └ and if its name is not empty
   #  │
-  #  └ if the directory `DIR` exists
+  #  └ if the directory `dir` exists
 
   # Delete temporary file.
-  rm "${TMP}"
+  rm "${tmp}"
 }
 
 # }}}1
@@ -2304,7 +2399,7 @@ zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
 # The shell allows newlines to separate array elements.
 # So,  an array  assignment can  be split  over multiple  lines without  putting
 # backslashes on the end of the line.
-CMDS_TO_IGNORE_IN_HISTORY=(
+cmds_to_ignore_in_history=(
   api
   app
   aps
@@ -2367,7 +2462,7 @@ ignore_these_cmds() {
 
   # now we check whether it's somewhere in our array of commands to ignore
   #     https://unix.stackexchange.com/a/411331/289772
-  if ((${CMDS_TO_IGNORE_IN_HISTORY[(I)$first_word]})); then
+  if ((${cmds_to_ignore_in_history[(I)$first_word]})); then
     # Why `2` instead of `1`?{{{
     #
     # `1` = the command is removed from the history of the session,
@@ -2400,6 +2495,15 @@ ignore_short_or_failed_cmds() {
 }
 
 # Key Bindings {{{1
+# How to bind a function to a key sequence using both the meta and control modifiers?{{{
+#
+# This is how you would do it for `M-C-z`:
+#
+#     bindkey '\e^z' your_function
+#                 │
+#                 └ replace 'z' with the key you want
+#}}}
+
 # Delete {{{2
 
 # The delete key doesn't work in zsh.
@@ -2547,16 +2651,70 @@ autoload -Uz edit-command-line
 zle -N edit-command-line
 bindkey '^X^E' edit-command-line
 
-# C-x C-h         describe-key-briefly {{{4
+# C-x C-h         complete-help {{{4
 
-# Usage:{{{
+# TODO:
+# This shows tags when we're at a certain  point of a command line where we want
+# to customize the completion system.
+# Explain what tags are, and how to read the output of `_complete_help`.
 #
-# Press `C-x C-h`, then some key combination  for which you want the name of the
-# zle function which is invoked, like `M-!`, and you'll see something like:
+# See `man zshcompsys` > COMPLETION SYSTEM CONFIGURATION > Overview
+#                    > BINDABLE COMMANDS
+bindkey '^X^H' _complete_help
+
+# The  `_complete_help` widget  shows all  the contexts  and tags  available for
+# completion at a particular point.
+# This provides an easy way of finding information for tag-order and other styles.
 #
-#     "^[!" is _bash_complete-word
+# This  widget displays information about  the context names, the  tags, and the
+# completion functions used when completing at the current cursor position.
+# If given a  numeric argument other than  1 (as in `ESC-2 ^Xh'),  then the styles
+# used and the contexts for which they are used will be shown, too.
+#
+# Note that  the information about styles  may be incomplete; it  depends on the
+# information available  from the  completion functions called,  which in  turn is
+# determined by the user's own styles and other settings.
+
+# What's the purpose of the `_complete_debug` widget?{{{
+#
+# It performs ordinary  completion, but captures in a temporary  file a trace of
+# the shell commands executed by the completion system.
+# Each completion attempt gets its own file.
+# A command to view each of these files is pushed onto the editor buffer stack.
 #}}}
-bindkey '^X^H' describe-key-briefly
+# Why do you create a wrapper around the default widget `_complete_debug`?{{{
+#
+# After invoking the `_complete_debug` widget, you'll see sth like:
+#
+#     Trace output left in /tmp/zsh6028echo1 (up-history to view)
+#                                             ^^^^^^^^^^^^^^^^^^
+# If you invoke  `up-history` (for us `C-p`  is bound to sth  similar because of
+# `bindkey  -e`), in  theory zsh  should populate  the command  line with  a vim
+# command to read the trace file.
+# In practice, it won't happen because you've enabled 'MENU_COMPLETE'.
+# Because of this, after pressing Tab, you've already entered the menu,
+# and `C-p` will simply select the above match in the menu.
+#
+# MWE:
+#
+#     autoload -Uz compinit
+#     compinit
+#     setopt MENU_COMPLETE
+#     bindkey '^X?' _complete_debug
+#     bindkey '^P' up-history
+#
+# So, to conveniently read the trace  file, we make sure that 'MENU_COMPLETE' is
+# temporarily reset.
+#}}}
+__complete_debug() {
+  emulate -L zsh
+  unsetopt MENU_COMPLETE
+  zle _complete_debug
+  # no need to restore the option, the change is local to the function
+  # thanks to `emulate -L zsh`
+}
+zle -N __complete_debug
+bindkey '^X?' __complete_debug
 
 # C-x C-t         fzf-file-widget {{{4
 #
@@ -2684,70 +2842,36 @@ bindkey -s '^Xc' 'vimdiff =() =()\e5^B'
 #}}}
 bindkey '^XD' end-of-list
 
-# C-x h           complete-help {{{4
+# C-x h           run-help {{{4
 
-# TODO:
-# This shows tags when we're at a  certain point of a command line where we want
-# to customize the completion system.
-# Explain what tags are, and how to read the output of `_complete_help`.
+# What's this “run-help”?{{{
 #
-# See `man zshcompsys` > COMPLETION SYSTEM CONFIGURATION > Overview
-#                    > BINDABLE COMMANDS
-bindkey '^Xh' _complete_help
-
-# The  `_complete_help` widget  shows all  the contexts  and tags  available for
-# completion at a particular point.
-# This provides an easy way of finding information for tag-order and other styles.
+# From `type run-help`:
 #
-# This  widget displays information about  the context names, the  tags, and the
-# completion functions used when completing at the current cursor position.
-# If given a  numeric argument other than  1 (as in `ESC-2 ^Xh'),  then the styles
-# used and the contexts for which they are used will be shown, too.
-#
-# Note that  the information about styles  may be incomplete; it  depends on the
-# information available  from the  completion functions called,  which in  turn is
-# determined by the user's own styles and other settings.
-
-# What's the purpose of the `_complete_debug` widget?{{{
-#
-# It performs ordinary  completion, but captures in a temporary  file a trace of
-# the shell commands executed by the completion system.
-# Each completion attempt gets its own file.
-# A command to view each of these files is pushed onto the editor buffer stack.
+#     run-help is an autoload shell function
 #}}}
-# Why do you create a wrapper around the default widget `_complete_debug`?{{{
+# What does it do?{{{
 #
-# After invoking the `_complete_debug` widget, you'll see sth like:
+# It:
 #
-#     Trace output left in /tmp/zsh6028echo1 (up-history to view)
-#                                             ^^^^^^^^^^^^^^^^^^
-# If you invoke  `up-history` (for us `C-p`  is bound to sth  similar because of
-# `bindkey  -e`), in  theory zsh  should populate  the command  line with  a vim
-# command to read the trace file.
-# In practice, it won't happen because you've enabled 'MENU_COMPLETE'.
-# Because of this, after pressing Tab, you've already entered the menu,
-# and `C-p` will simply select the above match in the menu.
+#     1. pushes the current buffer (command line) onto the buffer stack
+#     2. looks for a help page for the command name on the current command line (in case it's a builtin)
+#     3. if it doesn't find one, it invokes `$ man`
 #
-# MWE:
-#
-#     autoload -Uz compinit
-#     compinit
-#     setopt MENU_COMPLETE
-#     bindkey '^X?' _complete_debug
-#     bindkey '^P' up-history
-#
-# So, to conveniently read the trace  file, we make sure that 'MENU_COMPLETE' is
-# temporarily reset.
+# For more info, see `man zshzle`.
 #}}}
-__complete_debug() {
-  emulate -L zsh
-  unsetopt MENU_COMPLETE
-  zle _complete_debug
-  # no need to restore the option, the change is local to the function
-  # thanks to `emulate -L zsh`
-}
-zle -N __complete_debug
-bindkey '^X?' __complete_debug
+bindkey '^Xh' run-help
+
+# C-x H           describe-key-briefly {{{4
+
+# Usage:{{{
+#
+# Press `C-x H`,  then some key combination  for which you want the  name of the
+# zle function which is invoked, like `M-!`, and you'll see something like:
+#
+#     "^[!" is _bash_complete-word
+#}}}
+bindkey '^XH' describe-key-briefly
 
 # C-x r           snippet-rename {{{4
 
@@ -3040,19 +3164,6 @@ bindkey '\eo' __previous_directory
 bindkey -s '\eZ' '$(!!|fzf)'
 
 # }}}2
-# CTRL-META {{{2
-# M-C-e      run-help {{{3
-
-# from `type run-help`:    run-help is an autoload shell function
-# it's an alias to `man` that will look in other places before invoking man
-#
-# by default  it's bound  to `M-h`,  but we use  this key  to move  between tmux
-# windows so rebind it to `M-e` instead
-bindkey '\e^e' run-help
-#        │
-#        └─ C-M-e
-
-# }}}2
 # MENUSELECT {{{2
 # Warning: I've disabled all key bindings using a printable character.{{{
 #
@@ -3240,8 +3351,22 @@ bindkey -M isearch ' ' self-insert
 # go back to the regular command line.
 
 # Options {{{1
+# Never use `setopt` to unset an option.{{{
+#
+# Because, when you'll  search the option name in `man  zshoptions`, you'll lose
+# time wondering why you can't find the name.
+#
+#     # ✔
+#     unsetopt LIST_BEEP
+#              ^^^^^^^^^ you can find this in `man zshoptions`
+#
+#     # ✘
+#     setopt NOLIST_BEEP
+#            ^^^^^^^^^^^ you can't find this in `man zshoptions`
+#}}}
 
-# Let us `cd` into a directory just by typing its name, without `cd`:
+# Let us `cd` into a directory just by typing its name, without `cd`:{{{
+#
 #     my_dir/  ⇔  cd my_dir/
 #
 # Only works when `SHIN_STDIN` (SHell INput STanDard INput) is set, i.e. when the
@@ -3256,6 +3381,7 @@ bindkey -M isearch ' ' self-insert
 # Works with completion:
 #     $ Do Tab
 #     Documents/  Downloads/
+#}}}
 setopt AUTO_CD
 
 # allow the expansion of `{a..z}` and `{1..9}`
@@ -3470,6 +3596,7 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #     . "$HOME/GitRepos/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 #     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main root)
 #     ZSH_HIGHLIGHT_STYLES[root]='bg=red'
+#}}}1
 
 # TO_DO {{{1
 
@@ -3500,6 +3627,25 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #       And if the user really wants to pipe the error message,
 #       they still can with `2>&1 |` (or `|&`).
 #
+#     • An error message should always contain the name of the script/function
+#       which is executed:
+#
+#           script_name: error message
+#
+#       Example:
+#
+#           $ mv x y
+#               → mv: cannot stat 'x': No such file or directory
+#                 ^^
+#
+#       This is useful when you execute it in a pipeline, because it allows you
+#       to immediately know from which simple command in the pipeline the error comes.
+#
+#       However, don't write the name literally.
+#       Use `$0` in  a function, and `$(basename  "$0")` in a script,  so that if
+#       you change  the name  of the script/function  later, the  message remains
+#       valid.
+#
 #     • any error should be accompanied by an `exit` statement, so that:
 #
 #           ./script.sh && echo 'success'
@@ -3518,6 +3664,17 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #
 #     • split a long command using an array whose elements are arguments of the latter:
 #           https://unix.stackexchange.com/a/473257/289772
+#
+#     • use  lowercase  characters for  variables/parameters,  and  uppercase  for
+#       environment variables
+#       It's just a convention suggested on page 74 of “from bash to z shell”.
+#       It's not really followed in this zshrc:
+#           http://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+#
+#       It doesn't seem there's any convention in this file.
+#       Except that most of the time, the local variables in a function
+#       use lowercase characters.
+#
 
 # TODO:
 # Integrate `~/.zprofile` here?
@@ -3713,7 +3870,6 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # TODO: to read (about glob qualifiers):
 #   https://unix.stackexchange.com/a/471081/289772
 
-# TODO:
-# Install a key binding to kill ffmpeg.
+# TODO: Install a key binding to kill ffmpeg.
 # It would be useful when we record our desktop, or the sound...
 

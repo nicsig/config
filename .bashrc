@@ -250,6 +250,9 @@ bind '"\eZ": "$(!!|fzf)"'
 # Typing a directory name alone is enough to cd into it
 shopt -s autocd
 
+# If I try to exit bash, and a job is attached
+shopt -s checkjobs
+
 # Check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 # Used by the `select` command to determine the column length and the terminal

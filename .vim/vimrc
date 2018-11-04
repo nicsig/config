@@ -2430,7 +2430,14 @@ nno  g<c-v>  `[v`]
 
 nno  <silent>  g<space>  :<c-u>set opfunc=<sid>break_line<cr>g@l
 
-fu! s:break_line(type) abort
+fu! s:break_line(_) abort
+    " I sometimes press `g SPC` by  accident after getting back to the beginning
+    " of a markdown file.
+    " It creates a superfluous empty line.
+    if col('.') ==# 1
+        return
+    endif
+
     try
         " break the line
         exe "norm! i\r"
@@ -6979,14 +6986,6 @@ endfu
 "     • re-implementing the plugin
 "
 " 128 -
-"     :vim /<buffer>/gj ~/.vim/plugged/vimtex/**/*.vim | cw
-"     :Cfilter! <nowait>\|autocmd\|<buffer>\s*\%(<plug>\|<sid>\)
-"
-" Watch for local mappings  where the lhs is a sequence which  can be pressed by
-" the user (!= <plug>), and which doesn't contain <nowait>.
-" Submit a PR/issue to suggest adding `<nowait>`.
-"
-" 129 -
 " Search for all vimtex mappings which haven't `<c-u>` before `:call`.
 " Submit an issue whose message looks like:
 "
@@ -6999,24 +6998,21 @@ endfu
 " But make sure they are not necessary. They could be, if the function needs
 " to be re-called several times when the user pressed a count.
 "
-" 130 -
+"     :noa vim /\m\cmap.*\%(<c-u>\s*\)\@<!\zs\<call\>/gj ~/.vim/plugged/vimtex/**/*.vim | cw
+"
+" 129 -
 " Try to replace as many `:s` commands as possible with `setline()`:
 "
 "     noa vim !s\([/:;@]\).\{-}\1!gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "     Cfilter! -other_plugins -commented -tmp
 "     Cfilter! ^\s*\%(let\|call\|echo\|return\|if\|unlet!\=\|&&\)\s
 "
-" 131 -
-" Ask whether `abort` should be added to all vimtex functions.
-"
-"         :noa vim /^\s*function!\%(.*abort\)\@!/gj ~/.vim/plugged/vimtex/**/*.vim | cw
-"
-" 132 -
+" 130 -
 " Every  time you open a  window, be aware that  an error may be  raised because
 " you're in the command line window.
 " You may want to catch that error to avoid a stack trace.
 "
-" 133 -
+" 131 -
 " Watch out for this anti-pattern:
 "
 "     " assume that `var` can only have 3 values ['foo', 'bar', 'baz']
@@ -7037,7 +7033,7 @@ endfu
 "         (before it was implicit/not mentioned at all)
 "     • easier to expand later if `var` can have more values
 "
-" 134 -
+" 132 -
 " Recently, when we try to push a commit and press enter after our username,
 " the terminal writes `^M` instead of a linefeed.
 " Next time it happens, try:
@@ -7053,11 +7049,11 @@ endfu
 " Find what's causing the issue.
 " Is it something we do in Vim?
 "
-" 135 -
+" 133 -
 " Add  spaces  around  all  concatenation  operators: it  makes  the  code  more
 " readable?
 "
-" 136 -
+" 134 -
 " Remove all `==#`, `!=#`, `==?`, `!=?`.
 " Replace them with `==`, `!=`.
 " The `#` and `?` is useless now.
@@ -7073,27 +7069,27 @@ endfu
 " is evaluated as a string.
 " Wouldn't we be happy to have a strict comparison in this case?
 "
-" 137 -
+" 135 -
 " Remove `&l:` when it's not necessary?
 "
-" 138 -
+" 136 -
 " Use full name of commands?
 "
-" 139 -
+" 137 -
 " Switch from 4 spaces to 2 spaces for indentation?
 "
-" 140 -
+" 138 -
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
 "
-" 141 -
+" 139 -
 " It doesn't make sense for `C-g v` to search in $VIMRUNTIME.
 " It should look into `/usr/share/zsh/`.
 " `C-g v` should inspect some buffer-local variables to determine
 " the cycle of directories in which `:vimgrep` should search.
 "
-" 142 -
+" 140 -
 " In  our  syntax plugins  (awk,  markdown,  sh,  snippets,  vim, ...),  give  a
 " graphical attribute (underline? black color?)  to texts between backticks, and
 " conceal the backticks (less noise).
@@ -7101,7 +7097,7 @@ endfu
 " between 2 stars (bold)?
 " Again, conceal the marks.
 "
-" 143 -
+" 141 -
 " This mapping works in Vim, but not in Neovim:
 "     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'int')})[-1]
 "                                                      ├───┘
@@ -7114,23 +7110,42 @@ endfu
 " But still, report it on Neovim's bug tracker.
 " Btw, it looks similar to another issue we opened.
 "
-" 144 -
+" 142 -
 "     % hash | vipe
 "     press `gf` on a path
 "         → it takes several seconds, and the cpu load increases
 "           ✘
 "
-"     :sfin ~/.vim/plugged/vim-awk/
-"     :q
-"     press `gf` on a path
-"         → it's quick
-"           ✔
+" The issue comes from 'set path=.,**' and from our current directory,
+" when the latter has many subdirectories like `~`.
 "
-" Why the difference?
 " MWE:
 "
-"     $ vim -Nu NONE +'set path=.,**' +"set inex=substitute(v:fname,'.*=','','')" <(hash)
-"     press `gf` on a path
+"     vim -Nu NONE \
+"       +'set path=.,**' \
+"       +"set inex=substitute(v:fname,'.*=','','')" \
+"       <(hash)
+"     press `gf` on a path: it's slow
+"
+"     vim -Nu NONE \
+"       +'cd ~/.vim/plugged/vim-awk' \
+"       +'set path=.,**' \
+"       +"set inex=substitute(v:fname,'.*=','','')" \
+"       <(hash)
+"     press `gf` on a path: it's quick
+"
+" We need to make `gf` smarter.
+" When it sees a directory such as `~`, it should not search in it.
+" Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
+
+
+
+
+augroup my_man_no_showbreak
+    au!
+    au FileType man setl showbreak=
+augroup END
+
 
 
 
