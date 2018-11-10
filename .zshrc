@@ -882,7 +882,7 @@ alias v='f -t -e vim -b viminfo'
 #     % config push
 #}}}
 alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
-alias config_push='config add -u && config commit -m "update"'
+alias config_push='config add -u && config commit -m "update" && config push'
 
 # config_push() {
 #   emulate -L zsh
