@@ -11,16 +11,6 @@
 
 
 # TODO:
-# Remove this file.
-# Merge it with `~/.zshrc`.
-# It introduces way too much confusion.
-# For example, we often define an alias/function  in one file, then a second one
-# in another file, both  having the same name, and we  don't notice the conflict
-# which makes debugging harder in case of a problem.
-# We  don't  want  to  use  bash  interactively  anyway,  so  there's  no  point
-# configuring it.
-
-# TODO:
 # It would be useful to be able to search for a pattern inside all configuration
 # files with `:vimgrep`. Including the ones for the shell.
 # We could create symlinks inside `~/.config` which would point to the config files
@@ -49,12 +39,6 @@
 
 
 
-# TODO:
-# Recomment the aliases/functions we've recovered after the loss of this file.
-# Also, re-read the rest of the file.
-# Maybe some parts need to be re-factored again.
-# Try to remember the fixmes/todos.
-
 # Recovered Aliases:
 
 alias checki='sudo rlwrap checkinstall -y'
@@ -68,7 +52,7 @@ traceroute() {
 
 alias conky_reload='killall -SIGUSR1 conky'
 alias xresources_reload='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
-alias web='WWW_HOME=duckduckgo.com w3m'
+alias web='WWW_HOME=new.startpage.com w3m'
 
 
 # Recovered Functions:
@@ -94,10 +78,6 @@ tnvr() {
 alias srr='sr ixquick'
 alias surfraw='surfraw -browser=w3m'
 
-# web_local_server {{{2
-
-alias web_local_server='python3 -m http.server'
-
 # others {{{2
 
 #              ┌ --no-group in a long listing, don't print group names
@@ -116,7 +96,7 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 
 # -X    Sort alphabetically by extension, then by the rest.
 #       Directories can't have an extension, so they always come first.
-#       Handy to sort files from folders.
+#       Handy to separate files from directories.
 #
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'

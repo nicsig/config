@@ -101,6 +101,36 @@ export SAVEHIST=$HISTSIZE
 # to get the name of the day/month in english
 export LC_TIME=en_US.UTF-8
 
+# What does this variable do?{{{
+#
+# It passes options automatically to `$ less`.
+#}}}
+# What does `i` mean?{{{
+#
+# It's a `$ less` option which makes a search case-insensitive.
+#
+# Note that  if your search  pattern contains  an uppercase character,  the case
+# WILL still be taken into account.
+#
+# It's like 'ignorecase' and 'smartcase' in Vim.
+#}}}
+# What does `M` mean?{{{
+#
+# It's a `$ less` option which makes the prompt more verbose.
+# At  the bottom  of  the screen,  it  prints  info about  our  position with  a
+# percentage, and line numbers.
+#}}}
+# What does `S` mean?{{{
+#
+# It's a `$ less` option which prevents long lines from being wrapped.
+#}}}
+# What does `+G` mean?{{{
+#
+# It's a `$ less` option which makes the cursor jump at the bottom of the screen
+# on startup.
+#}}}
+export LESS=iMS+G
+
 # Ask  `dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
 # `$LS_COLORS`.
 # The latter controls the colors in the output of `ls --color`.
@@ -212,7 +242,7 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 #               └ boolean and numerics options (probably)
 #}}}
 
-export CDPATH=:${HOME}:${HOME}/Downloads
+export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/Dropbox/wiki
 # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
 export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
 # add man pages for `texlive` and `dasht`

@@ -845,6 +845,17 @@ alias dl_sub_fr='subliminal download -l fr'
 
 alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
 
+# dropbox_restart {{{3
+
+# Why the subshell?{{{
+#
+# To avoid the job being terminated when  we exit the shell where we execute the
+# alias.
+# When we  start the job  from a subshell,  it's immediately re-parented  to the
+# session leader (`upstart` at the moment).
+#}}}
+alias dropbox_restart='killall dropbox; ( "${HOME}/.dropbox-dist/dropboxd" & )'
+
 # fasd {{{3
 
 alias m='f -e mpv'
@@ -942,6 +953,10 @@ alias grep='grep --color=auto'
 #}}}
 alias iconv_no_accent='iconv -f utf8 -t ascii//TRANSLIT'
 
+# info {{{3
+
+alias info='info --vi-keys'
+
 # iotop {{{3
 
 # `iotop` monitors which process(es) access our disk to read/write it:
@@ -1027,6 +1042,11 @@ alias options='vim -O =(setopt) =(unsetopt)'
 #                       │         │
 #                       │         └ options whose default value has NOT changed
 #                       └ options whose default value has changed
+
+
+# ps {{{3
+
+alias pss='ps -elfH'
 
 # py {{{3
 
@@ -1142,6 +1162,28 @@ alias vim_with_less_config=$'vim -Nu /tmp/vimrc --cmd \'filetype plugin indent o
 #                            we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
 #                            otherwise, we would need to write `'\''`, which is less readable
 
+# website_cwd {{{3
+
+# Usage:{{{
+#
+#     $ website_cwd
+#
+# In your browser, visit 0.0.0.0:8000, and you'll get access to all the files in
+# your cwd.
+# This is useful when  you create a website, and you need to  view how your html
+# files are rendered, without having to manually open each of them with C-o.
+#}}}
+# Source:{{{
+#
+#     https://www.commandlinefu.com/commands/view/71/serve-current-directory-tree-at-httphostname8000#comment
+#     https://www.commandlinefu.com/commands/view/7338/python-version-3-serve-current-directory-tree-at-httphostname8000
+#}}}
+alias website_cwd='{ python3 -m http.server >/dev/null 2>&1 & ;} && disown %'
+
+# what_is_my_ip {{{3
+
+alias what_is_my_ip='curl ifconfig.me'
+
 # xbindkeys {{{3
 
 alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
@@ -1198,8 +1240,6 @@ alias -g ST=' -o -| mpv --cache=4096 -'
 #}}}
 # Why giving the value '4096'?{{{
 #
-# Because.
-#}}}
 # The default value of the 'cache' option is 'auto', which means that `mpv` will
 # decide depending on the media whether it must cache data.
 # Also,  `--cache=auto` implies  that  the size  of  the cache  will  be set  by
@@ -1216,10 +1256,11 @@ alias -g ST=' -o -| mpv --cache=4096 -'
 # seeking back.
 # The actual  maximum percentage will usually  be the ratio between  readahead and
 # backbuffer sizes.
+#}}}
 
 alias -g V='2>&1 | vipe >/dev/null'
 #                       │
-#                       └─ don't write on the terminal, the Vim buffer is enough
+#                       └ don't write on the terminal, the Vim buffer is enough
 
 # suffix {{{2
 
@@ -2759,33 +2800,6 @@ bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
 # the whole command line.
 # Sometimes, `sudo` fails because it doesn't affect a redirection.
 
-# C-x C-z         copy-earlier-word {{{4
-
-# Purpose:{{{
-#
-# `M-.` is useful to get the last argument of a previous command.
-# But what if you want the last but one argument?
-# Or the last but two.
-#
-# That's where the `copy-earlier-word` widget comes in.
-#}}}
-# usage:{{{
-#
-# Press `M-.` to insert the last argument of a previous command.
-# Repeat until you reach the line of the history you're interested in.
-# Then, press `C-x C-z` to insert the last but one argument.
-# Repeat to insert the last but two argument, etc.
-#}}}
-# How to cycle back to the last word of the command line?{{{
-#
-# Remove the inserted argument, and repeat the process:
-#     `M-.` ...
-#     `C-x C-z` ...
-#}}}
-autoload -Uz copy-earlier-word
-zle -N copy-earlier-word
-bindkey '^X^Z' copy-earlier-word
-
 # C-x c           snippet-compare {{{4
 
 # Quickly compare the output of 2 commands.
@@ -2953,7 +2967,7 @@ zle -N __fancy_ctrl_z
 bindkey '^Z' __fancy_ctrl_z
 # }}}2
 # META {{{2
-# M-[!$/@~]     _bash_complete-word {{{3
+# M-[!$/@~]    _bash_complete-word {{{3
 
 # What's this “unnamed” function?{{{
 #
@@ -3056,6 +3070,33 @@ bindkey '^Z' __fancy_ctrl_z
 # M-#           pound-insert {{{3
 bindkey '\e#' pound-insert
 
+# M-;           copy-earlier-word {{{3
+
+# Purpose:{{{
+#
+# `M-.` is useful to get the last argument of a previous command.
+# But what if you want the last but one argument?
+# Or the last but two.
+#
+# That's where the `copy-earlier-word` widget comes in.
+#}}}
+# usage:{{{
+#
+# Press `M-.` to insert the last argument of a previous command.
+# Repeat until you reach the line of the history you're interested in.
+# Then, press `M-;` to insert the last but one argument.
+# Repeat to insert the last but two argument, etc.
+#}}}
+# How to cycle back to the last word of the command line?{{{
+#
+# Remove the inserted argument, and repeat the process:
+#     `M-.` ...
+#     `M-;` ...
+#}}}
+autoload -Uz copy-earlier-word
+zle -N copy-earlier-word
+bindkey '\e;' copy-earlier-word
+
 # M-c/l/u       change-Case {{{3
 
 # zle provides several functions to modify the case of a word:
@@ -3086,7 +3127,7 @@ bindkey '\euu' up-case-word
 # We could press `M-u` to enter the submode, then, for a brief period of time,
 # `c`, `l` or `u` would change the case of words.
 
-# M-e           __expand_aliases {{{3
+# M-e         __expand_aliases {{{3
 
 # TODO:
 # fully explain the `expand_aliases` function
