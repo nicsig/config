@@ -881,15 +881,20 @@ alias v='f -t -e vim -b viminfo'
 #     % config commit -m 'my message'
 #     % config push
 #}}}
-alias config_push='config add -u && config commit -m "update" && config push'
 alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
-
-# config_push() {
-#   emulate -L zsh
-#   config add -u
-#   config commit -m 'update'
-#   config push
-# }
+alias config_push='config add -u && config commit -m "update" && config push'
+#                             ├┘{{{
+#                             └ All tracked files in the entire working tree are updated.
+#
+# This removes as well as modifies index  entries to match the working tree, but
+# adds no new files.
+# It's easier and more reliable to use `-u`, than to manually add every modified
+# file, and remove every deleted file:
+#
+#     $ git add -u
+#   ⇔
+#     $ git add file1 ... && git rm file2 ...
+#}}}
 
 alias ga='git add'
 
