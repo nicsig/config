@@ -3070,7 +3070,7 @@ bindkey '^Z' __fancy_ctrl_z
 # M-#           pound-insert {{{3
 bindkey '\e#' pound-insert
 
-# M-;           copy-earlier-word {{{3
+# M-,           copy-earlier-word {{{3
 
 # Purpose:{{{
 #
@@ -3084,18 +3084,19 @@ bindkey '\e#' pound-insert
 #
 # Press `M-.` to insert the last argument of a previous command.
 # Repeat until you reach the line of the history you're interested in.
-# Then, press `M-;` to insert the last but one argument.
+#
+# Then, press `M-,` to insert the last but one argument.
 # Repeat to insert the last but two argument, etc.
 #}}}
 # How to cycle back to the last word of the command line?{{{
 #
 # Remove the inserted argument, and repeat the process:
 #     `M-.` ...
-#     `M-;` ...
+#     `M-,` ...
 #}}}
 autoload -Uz copy-earlier-word
 zle -N copy-earlier-word
-bindkey '\e;' copy-earlier-word
+bindkey '\e,' copy-earlier-word
 
 # M-c/l/u       change-Case {{{3
 
