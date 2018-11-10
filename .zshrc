@@ -883,6 +883,13 @@ alias v='f -t -e vim -b viminfo'
 #}}}
 alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
 
+config_push() {
+  emulate -L zsh
+  config add -u
+  config commit -m 'update'
+  config push
+}
+
 alias ga='git add'
 
 # Do not add `rlwrap` before `git commit`.{{{
