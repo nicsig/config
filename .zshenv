@@ -242,7 +242,7 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 #               └ boolean and numerics options (probably)
 #}}}
 
-export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/Dropbox/wiki
+export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/Dropbox/wiki:/run/user/$UID
 # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
 export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
 # add man pages for `texlive` and `dasht`

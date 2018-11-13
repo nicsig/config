@@ -165,6 +165,9 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
 xdcc=~/Downloads/XDCC/
 : ~xdcc
 
+tmp=/run/user/$UID/tmp
+: ~tmp
+
 # What's `fpath`?{{{
 #
 # An array (colon separated list) of  directories specifying the search path for
@@ -260,6 +263,26 @@ compinit
 #
 # Otherwise, no.
 #}}}
+
+# Why?{{{
+#
+# The virtualbox package provides different commands.
+# Among them are:
+#
+#     • `vboxmanage` and `VBoxManage`
+#     • `vboxheadless` and `VBoxHeadless`
+#
+# Thanks to the  `zsh-completions` plugin, we have completions  for the commands
+# containing uppercase characters.
+# But we don't have completions for the commands written exclusively in lowercase.
+# So, we tell zsh to complete the  lowercase commands like it would complete the
+# uppercase ones.
+# For more info, see:
+#
+#     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command
+#}}}
+compdef vboxmanage=VBoxManage
+compdef vboxheadless=VBoxHeadless
 
 # What's the purpose of these commands?{{{
 #
@@ -657,6 +680,9 @@ zstyle ':filter-select' case-insensitive yes
 # `(#i)` is a globbing flag which makes the following pattern case-insensitive.
 zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
 
+# creates an alias and precedes the command with
+# sudo if $EUID is not zero.
+
 # Respect these principles for ordering the sections:{{{
 #
 # `Plugins` should be near the beginning because  we need to be able to override
@@ -799,495 +825,6 @@ unset fasd_cache
 # TODO:
 # Remove this once we've removed `~/.shrc`.
 
-# Aliases {{{1
-# regular {{{2
-# aptitude {{{3
-
-alias api='sudo aptitude install'
-alias app='sudo aptitude purge'
-alias aps='aptitude show'
-
-# bc {{{3
-
-alias bc='bc -q -l'
-#             │  │
-#             │  └ load standard math library (to get more accuracy, and some functions)
-#             │
-#             └ do not print the welcome message
-
-# bookmarks {{{3
-
-alias bookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
-
-# cd {{{3
-
-alias ..='cd ..'
-alias ..2='cd ../..'
-alias ..3='cd ../../..'
-alias ..4='cd ../../../..'
-alias ..5='cd ../../../../..'
-
-# df {{{3
-
-alias df=dfc
-
-# dirs {{{3
-
-alias dirs='dirs -v'
-
-# dl {{{3
-
-alias dl_mp3='youtube-dl -x --audio-format mp3 -o "%(title)s.%(ext)s"'
-alias dl_pl='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(autonumber)02d - %(title)s.%(ext)s"'
-
-alias dl_sub_en='subliminal download -l en'
-alias dl_sub_fr='subliminal download -l fr'
-
-alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
-
-# dropbox_restart {{{3
-
-# Why the subshell?{{{
-#
-# To avoid the job being terminated when  we exit the shell where we execute the
-# alias.
-# When we  start the job  from a subshell,  it's immediately re-parented  to the
-# session leader (`upstart` at the moment).
-#}}}
-alias dropbox_restart='killall dropbox; ( "${HOME}/.dropbox-dist/dropboxd" & )'
-
-# fasd {{{3
-
-alias m='f -e mpv'
-#           │
-#           └ look for a file and open it with `mpv`
-
-alias o='a -e xdg-open'
-#           │
-#           └ open with `xdg-open`
-
-alias v='f -t -e vim -b viminfo'
-#           │  │      │
-#           │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
-#           │  └ open with vim
-#           └ match by recent access only
-
-# git {{{3
-
-# Usage:{{{
-#
-#     % config status
-#     % config add /path/to/file
-#     % config commit -m 'my message'
-#     % config push
-#}}}
-alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
-alias config_push='config add -u && config commit -m "update" && config push'
-#                             ├┘{{{
-#                             └ All tracked files in the entire working tree are updated.
-#
-# This removes as well as modifies index  entries to match the working tree, but
-# adds no new files.
-# It's easier and more reliable to use `-u`, than to manually add every modified
-# file, and remove every deleted file:
-#
-#     $ git add -u
-#   ⇔
-#     $ git add file1 ... && git rm file2 ...
-#}}}
-
-alias ga='git add'
-
-# Do not add `rlwrap` before `git commit`.{{{
-# Why?
-#     1. It's not needed here.
-#     2. It causes an issue.
-#
-# How to reproduce the issue?
-#
-#   1. write at the beginning of vimrc:
-#
-#         nno <silent> cd :sil w<cr>
-#         set rtp+=~/.vim/plugged/vim-gutentags/
-#         finish
-#
-#   2. tweak some repo
-#   3. try to commit with `rlwrap git commit`
-#   4. write something on the 1st line and stay on the 1st line
-#   5. while the buffer is still modified, hit `cd`
-#
-# → the line disappears
-#
-# It has nothing to do with the conceal feature.
-# It's reproducible without syntax highglighting.
-#
-# Solutions:
-#
-#         • nno          cd :sil w<cr>
-#         • nno <silent> cd :w<cr>
-#         • commit without `rlwrap`
-#
-# We have several mechanisms to save a buffer (including an autocmd).
-# It's easier (and more future-proof) to just NOT use `rlwrap`.
-#
-# TODO:
-# I can't reproduce this issue anymore.
-# Is this comment still relevant?
-#}}}
-alias gcm='git commit'
-alias gco='git checkout'
-
-# Mnemonics: Git Find
-alias gf='git log --all --source -p -S'
-
-alias gp='rlwrap -H /dev/null git push'
-
-# Git Restore Last Commit
-alias grlc='git reset --hard "$(git rev-parse HEAD)"'
-
-# grep {{{3
-
-alias grep='grep --color=auto'
-
-# iconv {{{3
-
-# What's `iconv`?{{{
-#
-# A utility to convert a text from one encoding (-f ...) to another (-t ...).
-#}}}
-# What's `ascii//TRANSLIT`?{{{
-#
-# An encoding similar to `ascii`.
-# The difference is that characters are transliterated when needed and possible.
-#
-# This means that when a character cannot be represented in the target character
-# set, it should be approximated through one or several similar looking characters.
-# Characters that cannot be transliterated are replaced with a question mark (?).
-#}}}
-alias iconv_no_accent='iconv -f utf8 -t ascii//TRANSLIT'
-
-# info {{{3
-
-alias info='info --vi-keys'
-
-# iotop {{{3
-
-# `iotop` monitors which process(es) access our disk to read/write it:
-alias iotop='iotop -o -P'
-#                   │  │
-#                   │  └ no threads
-#                   │
-#                   └ only active processes
-
-# ls {{{3
-
-alias ls='ls --color=auto'
-alias l=ls++
-
-# mpv {{{3
-
-# start `mpv` in “keybindings testing mode”
-alias mpv_test_keybinding='mpv --input-test --force-window --idle'
-#                                │            │              │{{{
-#                                │            │              └ don't quit immediately,
-#                                │            │                even though there's no file to play
-#                                │            │
-#                                │            └ create a video output window even if there is no video
-#                                │
-#                                └ when I press a key, don't execute the bound command,
-#                                instead, display the name of the key on the OSD;
-#                                useful when you're crafting a key binding
-#}}}
-
-# nb {{{3
-
-# Warning:{{{
-#
-# This alias shadows the `nb` binary installed by the `nanoblogger` package.
-#}}}
-alias nb='newsboat -q'
-
-# nethogs {{{3
-
-# `nethogs` is a utility showing  which processes are consuming bandwidth on our
-# network interface.
-alias net_watch='nethogs enp3s0'
-
-# options {{{3
-
-# Purpose:{{{
-#
-# You want to know the state of an option (enabled or disabled).
-# Execute this alias, and look for the option name in both buffers.
-#
-# Once you find it, check the buffer where you found it.
-# In the left buffer, read the value as it is:
-#
-#     autocd     → 'autocd' is enabled
-#     nolistbeep → 'list_beep' is disabled
-#
-# In the right buffer, reverse the reading:
-#
-#     noaliases  → 'aliases' is ENabled
-#     chaselinks → 'chaselinks' is DISabled
-# }}}
-# Why do I need to reverse the reading in the right buffer? {{{
-#
-# Because the meaning of the output of `unsetopt` is:
-#
-#     the values of these options is NOT ...
-#
-# This 'NOT' reverses the reading:
-#
-#     NOT nooption = NOT disabled = enabled
-#     NOT option   = NOT enabled  = disabled
-# }}}
-# Is there an alternative?{{{
-#
-# Yes:  `set -o`.
-#}}}
-# Why don't you use it?{{{
-#
-# It  doesn't tell  you whether  the  default values  of the  options have  been
-# changed.
-#}}}
-alias options='vim -O =(setopt) =(unsetopt)'
-#                       │         │
-#                       │         └ options whose default value has NOT changed
-#                       └ options whose default value has changed
-
-
-# ps {{{3
-
-alias pss='ps -elfH'
-
-# py {{{3
-
-alias py='/usr/local/bin/python3.7'
-
-# qmv {{{3
-
-alias qmv='qmv --format=destination-only'
-#                │
-#                └ -f, --format=FORMAT
-#
-# Change edit format of text file.
-# Available edit formats are:
-#
-#     `single-column`       (or `sc`)
-#     `dual-column`         (or `dc`)
-#     `destination-only`    (or `do`)
-#
-# The default format is dual-column.
-
-# ranger {{{3
-
-alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
-
-# sudo {{{3
-
-# Why?{{{
-#
-# Suppose you have an alias `foo`.
-# You want to execute it with `sudo`:
-#
-#     # ✘
-#     $ sudo foo
-#
-# It won't  work because the shell  doesn't check for an alias  beyond the first
-# word.
-# The solution is given in `man bash` (/^ALIASES):
-#
-#      If  the last  character of  the alias  value is  a blank,  then the  next
-#      command word following the alias is also checked for alias expansion.
-#
-# By creating the alias  `alias sudo='sudo '`, we make sure  that when the shell
-# will  expand  the alias  `sudo`  in  `sudo foo`,  the  last  character of  the
-# expansion will be a blank.
-# This  will cause the shell  to check the next  word for an alias,  and make it
-# expand `foo`.
-#
-# See also:
-#
-#     https://askubuntu.com/a/22043/867754
-#}}}
-alias sudo='sudo '
-
-# tlmgr_gui {{{3
-
-alias tlmgr_gui='tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 &!'
-#                                                                                       ├┘
-#                                                                                       └ ⇔ & disown
-
-# top {{{3
-
-alias top='htop'
-
-# trash {{{3
-
-alias te='trash-empty'
-
-alias tl='trash-list'
-
-alias tp='trash-put'
-
-# TRash Restore
-alias trr='rlwrap restore-trash'
-
-# ubuntu-code-name {{{3
-
-alias ubuntu-code-name='lsb_release -sc'
-#                                    ││
-#                                    │└ --codename
-#                                    └ --short
-
-# VBoxManage {{{3
-
-alias vb='VBoxManage'
-
-# vim {{{3
-
-# Rationale:{{{
-#
-# By default,  Neovim sets 'gcr', which  makes it send escape  sequences, to set
-# the shape of the cursor.
-# Those are not understood by our current xfce4-terminal.
-#
-# This is  not an  issue when  we start  `$ nvim`  with `vim-term`,  because the
-# latter correctly makes 'gcr' empty when we're in xfce4-terminal.
-# But it does become an issue when we start `$ nvim -Nu NONE`.
-#
-# Anyway, this is wrong, Neovim shouldn't do that:
-#     https://github.com/neovim/neovim/issues/6778#issuecomment-302945056
-#}}}
-alias nvim_none='nvim -Nu NONE +"set gcr="'
-
-# Rationale:{{{
-#
-# This alias is not meant to be executed as it is.
-# It's meant to be expanded on the command line (press `M-e`), then edited.
-# It's useful to remind us of all the options available when we're debugging Vim,
-# and we need to reproduce an issue with a minimal of configurations.
-#}}}
-alias vim_with_less_config=$'vim -Nu /tmp/vimrc --cmd \'filetype plugin indent on | syntax enable\' -U NONE -i NONE --noplugin'
-#                          │
-#                          └ by prefixing the string with a dollar sign,
-#                            we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
-#                            otherwise, we would need to write `'\''`, which is less readable
-
-# website_cwd {{{3
-
-# Usage:{{{
-#
-#     $ website_cwd
-#
-# In your browser, visit 0.0.0.0:8000, and you'll get access to all the files in
-# your cwd.
-# This is useful when  you create a website, and you need to  view how your html
-# files are rendered, without having to manually open each of them with C-o.
-#}}}
-# Source:{{{
-#
-#     https://www.commandlinefu.com/commands/view/71/serve-current-directory-tree-at-httphostname8000#comment
-#     https://www.commandlinefu.com/commands/view/7338/python-version-3-serve-current-directory-tree-at-httphostname8000
-#}}}
-alias website_cwd='{ python3 -m http.server >/dev/null 2>&1 & ;} && disown %'
-
-# what_is_my_ip {{{3
-
-alias what_is_my_ip='curl ifconfig.me'
-
-# xbindkeys {{{3
-
-alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
-
-# zsh_prof {{{3
-
-alias zsh_prof='repeat 10 time zsh -i -c exit'
-
-# zsh_sourcetrace {{{3
-
-# get the list of files sourced by zsh
-alias zsh_sourcetrace='zsh -o sourcetrace'
-#                           ├────────────┘
-#                           └ start a new zsh shell, enabling the 'sourcetrace' option
-#                             see `man zshoptions` for a description of the option
-
-# }}}2
-# global {{{2
-
-# We could implement the following global aliases as abbreviations, but we won't
-# because they can only be used at the end of a command.
-# To be expanded, an abbreviation needs to be followed by a space.
-
-# align columns
-alias -g C='| column -t'
-
-alias -g L='2>&1 | less -R'
-
-# silence!
-#           ┌ redirect output to /dev/null
-#           │          ┌ same thing for errors
-#           ├────────┐ ├──┐
-alias -g S='>/dev/null 2>&1 &'
-#                           │
-#                           └ execute in background
-
-# watch a video STream with the local video player:
-#
-#     $ youtube-dl [-f best] 'url' ST
-alias -g ST=' -o -| mpv --cache=4096 -'
-#                         │
-#                         └ sets the size of the cache to 4096kB
-#
-# Why is a cache important?{{{
-#
-# May be useful
-# When playing files from slow media, it's necessary, but  can also have negative
-# effects, especially  with file formats  that require a  lot of seeking,  such as
-# MP4.
-#}}}
-# Is there a downside to using a cache?{{{
-#
-# Yes.
-#}}}
-# Why giving the value '4096'?{{{
-#
-# The default value of the 'cache' option is 'auto', which means that `mpv` will
-# decide depending on the media whether it must cache data.
-# Also,  `--cache=auto` implies  that  the size  of  the cache  will  be set  by
-# '--cache-default', whose default value is '75000kB'.
-# It's too much according to this:
-#
-#     https://streamlink.github.io/issues.html#issues-player-caching
-#
-# They recommend using between '1024' and '8192', so we take the middle value.
-
-# Note that half the cache size will be used to allow fast seeking back.
-# This is also the reason why a full cache is usually not reported as 100% full.
-# The cache  fill display  does not  include the  part of  the cache  reserved for
-# seeking back.
-# The actual  maximum percentage will usually  be the ratio between  readahead and
-# backbuffer sizes.
-#}}}
-
-alias -g V='2>&1 | vipe >/dev/null'
-#                       │
-#                       └ don't write on the terminal, the Vim buffer is enough
-
-# suffix {{{2
-
-# automatically open a file with the right program, according to its extension
-
-alias -s {avi,flv,mkv,mp4,mpeg,mpg,ogv,wmv,flac,mp3,ogg,wav}=mpv
-alias -s {avi.part,flv.part,mkv.part,mp4.part,mpeg.part,mpg.part,ogv.part,wmv.part,flac.part,mp3.part,ogg.part,wav.part}=mpv
-alias -s {jpg,png}=feh
-alias -s gif=ristretto
-alias -s {epub,mobi}=ebook-viewer
-alias -s {md,markdown,txt,html,css}=vim
-alias -s odt=libreoffice
-alias -s pdf=zathura
-# }}}1
 # Functions {{{1
 alias_is_it_free() { #{{{2
   emulate -L zsh
@@ -1846,6 +1383,20 @@ EOF
   # output.
   #}}}
   diff -U $(wc -l <"$1") "$1" "$2" | grep '^-' | sed 's/^-//g'
+}
+
+key_check() { #{{{2
+  emulate -L zsh
+  if [[ $# -lt 2 ]]; then
+    cat <<EOF >&2
+  usage: $0 /path/to/key.asc <expected fingerprint>
+EOF
+    return 64
+  fi
+
+  [[ $(gpg --with-fingerprint "$1" \
+    | awk 'BEGIN { FS = " = " }; /fingerprint/ { print $2 }') == "$2" ]] \
+    && echo 'VALID' || echo 'NOT VALID'
 }
 
 loc() { #{{{2
@@ -2436,6 +1987,551 @@ xt() { #{{{2
   rm "${tmp}"
 }
 
+# }}}1
+# Aliases {{{1
+# regular {{{2
+# aptitude {{{3
+
+alias api='sudo aptitude install'
+alias app='sudo aptitude purge'
+alias aps='aptitude show'
+
+# bc {{{3
+
+alias bc='bc -q -l'
+#             │  │
+#             │  └ load standard math library (to get more accuracy, and some functions)
+#             │
+#             └ do not print the welcome message
+
+# bookmarks {{{3
+
+alias bookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
+
+# cd {{{3
+
+alias ..='cd ..'
+alias ..2='cd ../..'
+alias ..3='cd ../../..'
+alias ..4='cd ../../../..'
+alias ..5='cd ../../../../..'
+
+# df {{{3
+
+alias df=dfc
+
+# dirs {{{3
+
+alias dirs='dirs -v'
+
+# dl {{{3
+
+alias dl_mp3='youtube-dl -x --audio-format mp3 -o "%(title)s.%(ext)s"'
+alias dl_pl='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(autonumber)02d - %(title)s.%(ext)s"'
+
+alias dl_sub_en='subliminal download -l en'
+alias dl_sub_fr='subliminal download -l fr'
+
+alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
+
+# dropbox_restart {{{3
+
+# Why the subshell?{{{
+#
+# To avoid the job being terminated when  we exit the shell where we execute the
+# alias.
+# When we  start the job  from a subshell,  it's immediately re-parented  to the
+# session leader (`upstart` at the moment).
+#}}}
+alias dropbox_restart='killall dropbox; ( "${HOME}/.dropbox-dist/dropboxd" & )'
+
+# fasd {{{3
+
+alias m='f -e mpv'
+#           │
+#           └ look for a file and open it with `mpv`
+
+alias o='a -e xdg-open'
+#           │
+#           └ open with `xdg-open`
+
+alias v='f -t -e vim -b viminfo'
+#           │  │      │
+#           │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
+#           │  └ open with vim
+#           └ match by recent access only
+
+# git {{{3
+
+# Usage:{{{
+#
+#     % config status
+#     % config add /path/to/file
+#     % config commit -m 'my message'
+#     % config push
+#}}}
+alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
+alias config_push='config add -u && config commit -m "update" && config push'
+#                             ├┘{{{
+#                             └ All tracked files in the entire working tree are updated.
+#
+# This removes as well as modifies index  entries to match the working tree, but
+# adds no new files.
+# It's easier and more reliable to use `-u`, than to manually add every modified
+# file, and remove every deleted file:
+#
+#     $ git add -u
+#   ⇔
+#     $ git add file1 ... && git rm file2 ...
+#}}}
+
+alias ga='git add'
+
+# Do not add `rlwrap` before `git commit`.{{{
+# Why?
+#     1. It's not needed here.
+#     2. It causes an issue.
+#
+# How to reproduce the issue?
+#
+#   1. write at the beginning of vimrc:
+#
+#         nno <silent> cd :sil w<cr>
+#         set rtp+=~/.vim/plugged/vim-gutentags/
+#         finish
+#
+#   2. tweak some repo
+#   3. try to commit with `rlwrap git commit`
+#   4. write something on the 1st line and stay on the 1st line
+#   5. while the buffer is still modified, hit `cd`
+#
+# → the line disappears
+#
+# It has nothing to do with the conceal feature.
+# It's reproducible without syntax highglighting.
+#
+# Solutions:
+#
+#         • nno          cd :sil w<cr>
+#         • nno <silent> cd :w<cr>
+#         • commit without `rlwrap`
+#
+# We have several mechanisms to save a buffer (including an autocmd).
+# It's easier (and more future-proof) to just NOT use `rlwrap`.
+#
+# TODO:
+# I can't reproduce this issue anymore.
+# Is this comment still relevant?
+#}}}
+alias gcm='git commit'
+alias gco='git checkout'
+
+# Mnemonics: Git Find
+alias gf='git log --all --source -p -S'
+
+alias gp='rlwrap -H /dev/null git push'
+
+# Git Restore Last Commit
+alias grlc='git reset --hard "$(git rev-parse HEAD)"'
+
+# grep {{{3
+
+alias grep='grep --color=auto'
+
+# grml {{{3
+
+alias grml='vim <(curl -LSs https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc)'
+
+# iconv {{{3
+
+# What's `iconv`?{{{
+#
+# A utility to convert a text from one encoding (-f ...) to another (-t ...).
+#}}}
+# What's `ascii//TRANSLIT`?{{{
+#
+# An encoding similar to `ascii`.
+# The difference is that characters are transliterated when needed and possible.
+#
+# This means that when a character cannot be represented in the target character
+# set, it should be approximated through one or several similar looking characters.
+# Characters that cannot be transliterated are replaced with a question mark (?).
+#}}}
+alias iconv_no_accent='iconv -f utf8 -t ascii//TRANSLIT'
+
+# info {{{3
+
+alias info='info --vi-keys'
+
+# iotop {{{3
+
+# `iotop` monitors which process(es) access our disk to read/write it:
+alias iotop='iotop -o -P'
+#                   │  │
+#                   │  └ no threads
+#                   │
+#                   └ only active processes
+
+# ls {{{3
+
+alias ls='ls --color=auto'
+alias l=ls++
+
+# mpv {{{3
+
+# start `mpv` in “keybindings testing mode”
+alias mpv_test_keybinding='mpv --input-test --force-window --idle'
+#                                │            │              │{{{
+#                                │            │              └ don't quit immediately,
+#                                │            │                even though there's no file to play
+#                                │            │
+#                                │            └ create a video output window even if there is no video
+#                                │
+#                                └ when I press a key, don't execute the bound command,
+#                                instead, display the name of the key on the OSD;
+#                                useful when you're crafting a key binding
+#}}}
+
+# nb {{{3
+
+# Warning:{{{
+#
+# This alias shadows the `nb` binary installed by the `nanoblogger` package.
+#}}}
+alias nb='newsboat -q'
+
+# nethogs {{{3
+
+# `nethogs` is a utility showing  which processes are consuming bandwidth on our
+# network interface.
+alias net_watch='nethogs enp3s0'
+
+# options {{{3
+
+# Purpose:{{{
+#
+# You want to know the state of an option (enabled or disabled).
+# Execute this alias, and look for the option name in both buffers.
+#
+# Once you find it, check the buffer where you found it.
+# In the left buffer, read the value as it is:
+#
+#     autocd     → 'autocd' is enabled
+#     nolistbeep → 'list_beep' is disabled
+#
+# In the right buffer, reverse the reading:
+#
+#     noaliases  → 'aliases' is ENabled
+#     chaselinks → 'chaselinks' is DISabled
+# }}}
+# Why do I need to reverse the reading in the right buffer? {{{
+#
+# Because the meaning of the output of `unsetopt` is:
+#
+#     the values of these options is NOT ...
+#
+# This 'NOT' reverses the reading:
+#
+#     NOT nooption = NOT disabled = enabled
+#     NOT option   = NOT enabled  = disabled
+# }}}
+# Is there an alternative?{{{
+#
+# Yes:  `set -o`.
+#}}}
+# Why don't you use it?{{{
+#
+# It  doesn't tell  you whether  the  default values  of the  options have  been
+# changed.
+#}}}
+alias options='vim -O =(setopt) =(unsetopt)'
+#                       │         │
+#                       │         └ options whose default value has NOT changed
+#                       └ options whose default value has changed
+
+
+# ps {{{3
+
+# http://0pointer.de/blog/projects/systemd-for-admins-2.html
+#                   ┌ select all processes{{{
+#                   │┌ user-defined format
+#                   ││}}}
+alias psc='ps xawf -eo pid,user,cgroup,args'
+#             ││││{{{
+#             ││││
+#             ││││
+#             │││└ ASCII art process hierarchy (forest)
+#             ││└ wide output
+#             │└ list the "only yourself" restriction
+#             └ list the "must have a tty" restriction
+#}}}
+
+# py {{{3
+
+alias py='/usr/local/bin/python3.7'
+
+# qmv {{{3
+
+alias qmv='qmv --format=destination-only'
+#                │
+#                └ -f, --format=FORMAT
+#
+# Change edit format of text file.
+# Available edit formats are:
+#
+#     `single-column`       (or `sc`)
+#     `dual-column`         (or `dc`)
+#     `destination-only`    (or `do`)
+#
+# The default format is dual-column.
+
+# ranger {{{3
+
+alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
+
+# sudo {{{3
+
+# Why?{{{
+#
+# Suppose you have an alias `foo`.
+# You want to execute it with `sudo`:
+#
+#     # ✘
+#     $ sudo foo
+#
+# It won't  work because the shell  doesn't check for an alias  beyond the first
+# word.
+# The solution is given in `man bash` (/^ALIASES):
+#
+#      If  the last  character of  the alias  value is  a blank,  then the  next
+#      command word following the alias is also checked for alias expansion.
+#
+# By creating the alias  `alias sudo='sudo '`, we make sure  that when the shell
+# will  expand  the alias  `sudo`  in  `sudo foo`,  the  last  character of  the
+# expansion will be a blank.
+# This  will cause the shell  to check the next  word for an alias,  and make it
+# expand `foo`.
+#
+# See also:
+#
+#     https://askubuntu.com/a/22043/867754
+#}}}
+alias sudo='sudo '
+
+# systemd {{{3
+
+alias sc='systemctl'
+alias jc='journalctl'
+
+# Purpose: print the status of all services.
+# Mnemonic: SystemCtl List services
+# Tip: If you want only the running services, expand the alias and remove `--all`.
+alias scl='systemctl list-units --type service --all'
+
+# tlmgr_gui {{{3
+
+alias tlmgr_gui='tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/null 2>&1 &!'
+#                                                                                       ├┘
+#                                                                                       └ ⇔ & disown
+
+# top {{{3
+
+alias top='htop'
+
+# trash {{{3
+
+alias te='trash-empty'
+
+alias tl='trash-list'
+
+alias tp='trash-put'
+
+# TRash Restore
+alias trr='rlwrap restore-trash'
+
+# ubuntu-code-name {{{3
+
+alias ubuntu-code-name='lsb_release -sc'
+#                                    ││
+#                                    │└ --codename
+#                                    └ --short
+
+# ubuntu-version {{{3
+
+alias ubuntu-version='cat /etc/issue'
+
+# VirtualBox {{{3
+
+alias vb='VBoxManage'
+
+alias vb_vm_pause='vboxmanage controlvm ubuntu pause'
+alias vb_vm_resume='vboxmanage controlvm ubuntu resume'
+alias vb_vm_shutdown='vboxmanage controlvm ubuntu savestate'
+alias vb_vm_start='vboxmanage startvm ubuntu'
+
+# Some of these aliases contain `{swapname}`. They won't work, because you need the name of a real snapshot!{{{
+#
+# Yes, but we won't execute these aliases.
+# We'll expand them by pressing `M-e`.
+#}}}
+# Why do write `{snapname}` instead of `<snapname>`?{{{
+#
+# `<snapname>` causes an issue if the token is at the end of the command.
+#
+#     zsh: parse error near `\n'
+#}}}
+alias vb_snapshot_edit='VBoxManage snapshot ubuntu edit {snapname} --name "new name" --description "new description"'
+alias vb_snapshot_info='VBoxManage snapshot ubuntu showvminfo {snapname}'
+alias vb_snapshot_list='VBoxManage snapshot ubuntu list'
+alias vb_snapshot_remove='vboxmanage snapshot ubuntu delete {snapname}'
+alias vb_snapshot_restore='vboxmanage snapshot ubuntu restorecurrent'
+alias vb_snapshot_take='vboxmanage snapshot ubuntu take {snapname} --description "my snapshot" --live'
+
+# vim {{{3
+
+# Rationale:{{{
+#
+# By default,  Neovim sets 'gcr', which  makes it send escape  sequences, to set
+# the shape of the cursor.
+# Those are not understood by our current xfce4-terminal.
+#
+# This is  not an  issue when  we start  `$ nvim`  with `vim-term`,  because the
+# latter correctly makes 'gcr' empty when we're in xfce4-terminal.
+# But it does become an issue when we start `$ nvim -Nu NONE`.
+#
+# Anyway, this is wrong, Neovim shouldn't do that:
+#     https://github.com/neovim/neovim/issues/6778#issuecomment-302945056
+#}}}
+alias nvim_none='nvim -Nu NONE +"set gcr="'
+
+# Rationale:{{{
+#
+# This alias is not meant to be executed as it is.
+# It's meant to be expanded on the command line (press `M-e`), then edited.
+# It's useful to remind us of all the options available when we're debugging Vim,
+# and we need to reproduce an issue with a minimal of configurations.
+#}}}
+alias vim_with_less_config=$'vim -Nu /tmp/vimrc --cmd \'filetype plugin indent on | syntax enable\' -U NONE -i NONE --noplugin'
+#                          │
+#                          └ by prefixing the string with a dollar sign,
+#                            we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
+#                            otherwise, we would need to write `'\''`, which is less readable
+
+# website_cwd {{{3
+
+# Usage:{{{
+#
+#     $ website_cwd
+#
+# In your browser, visit 0.0.0.0:8000, and you'll get access to all the files in
+# your cwd.
+# This is useful when  you create a website, and you need to  view how your html
+# files are rendered, without having to manually open each of them with C-o.
+#}}}
+# Source:{{{
+#
+#     https://www.commandlinefu.com/commands/view/71/serve-current-directory-tree-at-httphostname8000#comment
+#     https://www.commandlinefu.com/commands/view/7338/python-version-3-serve-current-directory-tree-at-httphostname8000
+#}}}
+alias website_cwd='{ python3 -m http.server >/dev/null 2>&1 & ;} && disown %'
+
+# what_is_my_ip {{{3
+
+alias what_is_my_ip='curl ifconfig.me'
+
+# xbindkeys {{{3
+
+alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
+
+# zsh_prof {{{3
+
+alias zsh_prof='repeat 10 time zsh -i -c exit'
+
+# zsh_sourcetrace {{{3
+
+# get the list of files sourced by zsh
+alias zsh_sourcetrace='zsh -o sourcetrace'
+#                           ├────────────┘
+#                           └ start a new zsh shell, enabling the 'sourcetrace' option
+#                             see `man zshoptions` for a description of the option
+
+# }}}2
+# global {{{2
+
+# We could implement the following global aliases as abbreviations, but we won't
+# because they can only be used at the end of a command.
+# To be expanded, an abbreviation needs to be followed by a space.
+
+# align columns
+alias -g C='| column -t'
+
+alias -g L='2>&1 | less -R'
+
+# No Errors
+alias -g NE='2>/dev/null'
+
+# silence!
+#           ┌ redirect output to /dev/null
+#           │          ┌ same thing for errors
+#           ├────────┐ ├──┐
+alias -g S='>/dev/null 2>&1 &'
+#                           │
+#                           └ execute in background
+
+# watch a video STream with the local video player:
+#
+#     $ youtube-dl [-f best] 'url' ST
+alias -g ST=' -o -| mpv --cache=4096 -'
+#                         │
+#                         └ sets the size of the cache to 4096kB
+#
+# Why is a cache important?{{{
+#
+# May be useful
+# When playing files from slow media, it's necessary, but  can also have negative
+# effects, especially  with file formats  that require a  lot of seeking,  such as
+# MP4.
+#}}}
+# Is there a downside to using a cache?{{{
+#
+# Yes.
+#}}}
+# Why giving the value '4096'?{{{
+#
+# The default value of the 'cache' option is 'auto', which means that `mpv` will
+# decide depending on the media whether it must cache data.
+# Also,  `--cache=auto` implies  that  the size  of  the cache  will  be set  by
+# '--cache-default', whose default value is '75000kB'.
+# It's too much according to this:
+#
+#     https://streamlink.github.io/issues.html#issues-player-caching
+#
+# They recommend using between '1024' and '8192', so we take the middle value.
+
+# Note that half the cache size will be used to allow fast seeking back.
+# This is also the reason why a full cache is usually not reported as 100% full.
+# The cache  fill display  does not  include the  part of  the cache  reserved for
+# seeking back.
+# The actual  maximum percentage will usually  be the ratio between  readahead and
+# backbuffer sizes.
+#}}}
+
+alias -g V='2>&1 | vipe >/dev/null'
+#                       │
+#                       └ don't write on the terminal, the Vim buffer is enough
+
+# suffix {{{2
+
+# automatically open a file with the right program, according to its extension
+
+alias -s {avi,flv,mkv,mp4,mpeg,mpg,ogv,wmv,flac,mp3,ogg,wav}=mpv
+alias -s {avi.part,flv.part,mkv.part,mp4.part,mpeg.part,mpg.part,ogv.part,wmv.part,flac.part,mp3.part,ogg.part,wav.part}=mpv
+alias -s {jpg,png}=feh
+alias -s gif=ristretto
+alias -s {epub,mobi}=ebook-viewer
+alias -s {md,markdown,txt,html,css}=vim
+alias -s odt=libreoffice
+alias -s pdf=zathura
 # }}}1
 # Hooks {{{1
 

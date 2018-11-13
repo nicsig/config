@@ -5326,15 +5326,15 @@ endfu
 " completion methods manually?
 "
 " 11 -
-" why `:fzag!` + `foobar` (in interactive mode) gives much more results than
-" `:fzag! foobar`?
-" more generally, i don't know how `:ag` and `$ ag` interpret metacharacters.
-" make some tests, read doc.
-" example: compare `:fzag! foo.*bar` and `:fzag!` + `foo.*bar`
+" Why `:FzAg!` + `foobar` (in interactive mode) gives much more results than
+" `:FzAg! foobar`?
+" More generally, I don't know how `:ag` and `$ ag` interpret metacharacters.
+" Make some tests, read doc.
+" Example: compare `:FzAg! foo.*bar` and `:FzAg!` + `foo.*bar`
 "
-" i think `fzag! pattern` does not fuzzy search pattern, it performs
+" I think `:FzAg! pattern` does not fuzzy search pattern, it performs
 " a standard search (not fuzzy).
-" otoh, `fzag!` + `pattern` performs a live fuzzy search.
+" OTOH, `:FzAg!` + `pattern` performs a live fuzzy search.
 "
 " 12 -
 " use fzf (and/or fzf.vim) to create a mapping which would fuzzy search inside
