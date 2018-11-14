@@ -2366,6 +2366,7 @@ alias vb='VBoxManage'
 
 alias vb_vm_pause='vboxmanage controlvm ubuntu pause'
 alias vb_vm_resume='vboxmanage controlvm ubuntu resume'
+alias vb_vm_show_cfg='vboxmanage showvminfo ubuntu'
 alias vb_vm_shutdown='vboxmanage controlvm ubuntu savestate'
 alias vb_vm_start='vboxmanage startvm ubuntu'
 
@@ -3076,6 +3077,7 @@ zle -N __fancy_ctrl_z
 bindkey '^Z' __fancy_ctrl_z
 # }}}2
 # META {{{2
+
 # M-[!$/@~]    _bash_complete-word {{{3
 
 # What's this “unnamed” function?{{{
@@ -3206,6 +3208,30 @@ bindkey '\e#' pound-insert
 autoload -Uz copy-earlier-word
 zle -N copy-earlier-word
 bindkey '\e,' copy-earlier-word
+
+# M-;           insert-last-word-forward {{{3
+
+# Purpose:{{{
+#
+# This key binding is  useful when you press `M-.` too many  times, and you want
+# to go back to the next history event (instead of the previous one).
+#
+#     https://unix.stackexchange.com/a/481714/289772
+#}}}
+# What does the `1` argument passed to `insert-last-word` mean?{{{
+#
+# From `man zshzle`:
+#
+#     When called from a shell function  invoked from a user-defined widget, the
+#     command can take  one to three arguments.
+#     The first argument specifies a  history offset which applies to successive
+#     calls to this widget: if it is -1, the default behaviour is used, while if
+#     it is 1, successive calls will move forwards through the history.
+#}}}
+# TODO: Where is this function syntax (no braces) documented?
+insert-last-word-forward() zle insert-last-word 1
+zle -N insert-last-word-forward
+bindkey '\e;' insert-last-word-forward
 
 # M-c/l/u       change-Case {{{3
 
