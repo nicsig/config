@@ -421,6 +421,15 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #}}}
 () {
   emulate -L zsh
+  # If you have an error such as: anon: 2: no matches found{{{
+  #
+  # escape the brackets:
+  #     [PATH]=...
+  # →
+  #     \[PATH\]=...
+  #
+  # I think the issue happens on old versions of zsh, not on recent ones.
+  #}}}
   local -A vars=( \
     [PATH]="${PATH}" \
     [XDG_CONFIG_DIRS]="${XDG_CONFIG_DIRS}" \

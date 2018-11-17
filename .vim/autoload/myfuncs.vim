@@ -99,7 +99,7 @@ fu! myfuncs#block_select_box() abort "{{{1
 
     " find the upper-left corner of the box
     while guard < 99
-        " search an underscore, to try and position the cursor on the first
+        " search an underscore, to try to position the cursor on the first
         " line of the box
         call search('_', 'bW')
         " if we're on the first line of the box:
@@ -166,7 +166,7 @@ endfu
 
 " block_select_paragraph {{{1
 
-" This function should try and select a box containing the current paragraph.
+" This function should try to select a box containing the current paragraph.
 "
 " It won't work as expected if we want to select a box around a block of text:
 "

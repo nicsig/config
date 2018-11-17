@@ -183,19 +183,19 @@ tmp=/run/user/$UID/tmp
 # To override any possible conflicting function (a default one, or coming from a
 # third-party plugin).
 #}}}
-#                                    ┌ additional completion definitions,
-#                                    │ not available in a default installation,
-#                                    │ useful for virtualbox
-#                                    ├───────────────────────────────┐
-fpath=( ${HOME}/.zsh/my-completions/ ${HOME}/.zsh/zsh-completions/src/ $fpath )
+#                                   ┌ additional completion definitions,
+#                                   │ not available in a default installation,
+#                                   │ useful for virtualbox
+#                                   ├──────────────────────────────┐
+fpath=( ${HOME}/.zsh/my-completions ${HOME}/.zsh/zsh-completions/src $fpath )
 
 # we use `~/.zsh/my-func` to autoload some of our own custom functions
-fpath=( ${HOME}/.zsh/my_func/ $fpath )
+fpath=( ${HOME}/.zsh/my_func $fpath )
 
 # Add completion for the `dasht` command:
 #
 #     https://github.com/sunaku/dasht
-fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions/
+fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions
 
 # Why loading this module?{{{
 #
@@ -715,6 +715,9 @@ fi
 # As a workaround, we write them in a cache (`~/.fasd-init-zsh`), which we
 # update when fasd is more recent.
 fasd_cache="${HOME}/.fasd-init-zsh"
+#     ┌ ~/bin/fasd is newer than ~/.fasd-init-zsh{{{
+#     │                                           ┌ ~/.fasd-init-zsh is empty
+#     ├──────────────────────────────────────┐    ├──────────────────┐}}}
 if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
   # Source a set of functions provided by fasd:{{{
   #
@@ -747,6 +750,13 @@ if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
 fi
 . "${fasd_cache}"
 unset fasd_cache
+# TODO: delete the cache from time to time (once per day)?{{{
+#
+# Look at our warning comment before the global alias `V`.
+# It describes an issue which may be solved by removing the fasd cache.
+#
+# More generally, maybe we should remove any cache from time to time.
+#}}}
 
 
 # source fzf config
@@ -1425,6 +1435,16 @@ loc() { #{{{2
   #       └ ignore the case
 }
 
+logout() { #{{{2
+  # Note that  this function  shadows the  `logout` builtin,  but we  don't care
+  # because it's a synonym for `exit`.
+  emulate -L zsh
+
+  # https://unix.stackexchange.com/a/321096/289772
+  session="$(loginctl session-status | awk 'NR==1{print $1}')"
+  loginctl terminate-session "${session}"
+}
+
 man_zsh() { #{{{2
   emulate -L zsh
   # Purpose:{{{
@@ -1987,6 +2007,19 @@ xt() { #{{{2
   rm "${tmp}"
 }
 
+zsh_sourced_files() { #{{{2
+  emulate -L zsh
+  local logfile='zsh_log'
+  script -c 'zsh -o SOURCE_TRACE' "${logfile}"
+  # FIXME: How to exit the subshell started by `$ script`?{{{
+  #
+  # If I execute  `$ exit` here, not  only will the subshell  be terminated, but
+  # the current function too.
+  #}}}
+  sed -i '/^+/!d' "${logfile}"
+  "${EDITOR}" "${logfile}"
+}
+
 # }}}1
 # Aliases {{{1
 # regular {{{2
@@ -2517,6 +2550,21 @@ alias -g ST=' -o -| mpv --cache=4096 -'
 # backbuffer sizes.
 #}}}
 
+# Warning: If `cmd V` opens an empty buffer,{{{
+# then later opens the right buffer (the  one containing the output of `$ cmd`),
+# try to delete `~/.fasd-init-zsh`, and restart the shell.
+#
+# It worked in the past.
+# The issue came from:
+#
+#     ~/.fasd-init-zsh:22
+#     { eval "fasd --proc $(fasd --sanitize $1)"; } >> "/dev/null" 2>&1
+#                                            ^
+#                                            ✘ if you replace it with 2, the issue disappears
+#
+# Maybe  the issue  came  from  having installed  fasd  from  the official  repo
+# (instead of github)...
+#}}}
 alias -g V='2>&1 | vipe >/dev/null'
 #                       │
 #                       └ don't write on the terminal, the Vim buffer is enough
@@ -3932,12 +3980,12 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # Should we quote all the time?
 # Example:
 #
-#             v                            v v                                 v
-#     fpath=( "${HOME}/.zsh/my-completions/" "${HOME}/.zsh/zsh-completions/src/" $fpath )
-#                                                                                ^^^^^^
-#                                                                                what about that?
-#                                                                                ${fpath}?
-#                                                                                "${fpath}"?
+#             v                           v v                                v
+#     fpath=( "${HOME}/.zsh/my-completions" "${HOME}/.zsh/zsh-completions/src" $fpath )
+#                                                                               ^^^^^^
+#                                                                               what about that?
+#                                                                               ${fpath}?
+#                                                                               "${fpath}"?
 # Example:
 #
 #     [[ -f "${HOME}/.fzf.zsh" ]] && . "${HOME}/.fzf.zsh"

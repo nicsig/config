@@ -2845,16 +2845,19 @@ nno  -P  :<c-u>pwd<cr>
 
 fu! s:print_full_path() abort
     echohl Title
+    let fname = expand('%:p')
+    " later, we'll compare `fname` with its resolved form,
+    " and the comparison may be wrongly different because of an extra ending slash
+    let fname = substitute(fname, '/$', '', '')
 
-    if expand('%:p') is# ''
+    if fname is# ''
         echo '[No Name]'
-
     elseif &bt is# 'quickfix'
         echo w:quickfix_title
     else
-        let fname = expand('%:p')
         if fname[0] is# '/' || fname =~# '^\l\+://'
-            echo fname
+            let resolved = resolve(fname)
+            echo resolved is# fname ? fname : fname.' -> '.resolved
         else
             " Why is adding the current working directory sometimes necessary?{{{
             "
@@ -4523,7 +4526,7 @@ com! -bar
 \            call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
 
 " }}}1
-" AUTOCOMDS {{{1
+" AUTOCMDS {{{1
 " Warning: If you need to write an autocmd listening to `BufWritePost`, put it BEFORE the one reloading our vimrc.{{{
 "
 " Otherwise, if the pattern is `$MYVIMRC`,  it won't work, probably because when
@@ -4606,7 +4609,7 @@ fu! s:update_history() abort
         call histadd(':', line)
     endfor
 
-    " no need to try and update `~/.viminfo` if the latter isn't readable
+    " no need to try to update `~/.viminfo` if the latter isn't readable
     let viminfo = expand($HOME.'/.viminfo')
     if !filereadable(viminfo)
         return
@@ -4656,6 +4659,8 @@ fu! s:make_missing_dir(file, buf) abort
     if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'^\w\+:/'
         let dir = fnamemodify(a:file, ':h')
         if !isdirectory(dir)
+            " TODO: if the directory is in a root directory, `mkdir()` will fail.
+            " We would need to call `$ sudo mkdir`.
             call mkdir(dir, 'p')
         endif
     endif
@@ -5690,7 +5695,7 @@ endfu
 " it shows us a fondamental pb. how to prevent a command from taking too much
 " time? here, we have a few solutions:
 "
-"         • try and guess by computing the nr of matches on a small range if it
+"         • try to guess by computing the nr of matches on a small range if it
 "           goes beyond a certain threshold, we could report to the user that
 "           there are too many matches
 "
@@ -6200,32 +6205,33 @@ endfu
 "        • $vimruntime/colors/tools/check_colors.vim
 "        • 'user_data' entry in completion item
 "        • 'varsofttabstop', 'vartabstop'
-"        • :h `matchadd()`, new `window` key in optional dictionary
+"        • :h matchadd(), new `window` key in optional dictionary
 "        • :unl[et] ${env-name} (:h :unlet-$)
-"        • `:swapname`
-"        • `appendbufline()`
+"        • :swapname
+"        • appendbufline()
 "
-"        • `argc()` + `argv()`
+"        • argc() + argv()
 "          in Vim, they can now access the global arglist and the local arglist of another window
 "                 https://github.com/vim/vim/releases/tag/v8.1.0493
 "
-"        • `deletebufline()`
-"        • `getcompletion('*', 'arglist')`   +   com! -complete=arglist ...
-"        • `getcwd(-1)` return the global directory
-"        • `reg_recording()` + `reg_executing()`
-"        • `term_setansicolors()`, `term_getansicolors()`, `g:term_ansi_colors`
-"        • `term_setsize()`
-"        • `trim()`
-"        • `winlayout()`
+"        • DiffUpdated
 "        • api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
 "        • cmdlinechanged
 "        • colorschemepre
+"        • deletebufline()
 "        • diffupdate
-"        • DiffUpdated
 "        • dirchanged
 "        • exitpre
+"        • getcompletion('*', 'arglist')   +   com! -complete=arglist ...
+"        • getcwd(-1) return the global directory
+"        • gettagstack(), settagstack()
 "        • prompt-buffer
+"        • reg_recording() + reg_executing()
+"        • term_setansicolors(), term_getansicolors(), g:term_ansi_colors
+"        • term_setsize()
 "        • textchangedp
+"        • trim()
+"        • winlayout()
 "
 " 74 -
 " in `vim-window`, don't do this:

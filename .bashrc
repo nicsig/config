@@ -139,28 +139,6 @@ alias options='vim -O <(set -o) <(shopt -s) <(shopt -u) <(bind -v)'
 # inside various programs (python, rlwrap) …
 bind '" ": magic-space'
 
-# C-r C-h  {{{3
-
-# The default key binding to search in the history of commands is `C-r`.
-# Remove it, and re-bind the function to `C-r C-h`.
-bind -r "\C-r"
-# Why?{{{
-#
-# On Vim's command line, we can't use `C-r`, nor `C-r C-r`.
-# So, we use `C-r C-h`.
-# To stay consistent, we do the same in the shell.
-#
-# Besides, we can now use `C-r` as a prefix for various key bindings.
-#}}}
-# How did you find the original {rhs} of this key binding?{{{
-#
-# Start a bash shell without removing the `C-r` key binding,
-# and execute:
-#     $ bind -s | vipe
-#     /fzf
-#}}}
-bind '"\C-r\C-h": " \C-e\C-u\C-y\ey\C-u`__fzf_history__`\e\C-e\er\e^"'
-
 # C-x C-f/F    character-search {{{3
 
 bind '"\C-x\C-f":  character-search'
@@ -170,21 +148,6 @@ bind '"\C-x\C-F":  character-search-backward'
 
 # re-execute last command with `sudo`
 bind '"\C-x\C-s": "sudo -E PATH= $PATH bash -c \"!!\" \C-m"'
-
-# When do I need to use `-x`?{{{
-#
-# When the rhs invokes a custom shell FUNCTION.
-# If  the rhs  invokes a  built-in  shell COMMAND  or  a macro  (i.e. a  literal
-# sequence of characters to press), do NOT use `-x`.
-#
-# Also note that when you use `-x`, the shell sets the READLINE_LINE variable to
-# the contents of the line buffer and the READLINE_POINT variable to the current
-# location of the insertion point.
-#
-# If your custom  shell function changes the values of  these variables, it will
-# be reflected in the editing state.
-#}}}
-bind -x '"\C-x\C-t": fzf-file-widget'
 
 bind '"\C-t": transpose-chars'
 
@@ -221,11 +184,6 @@ previous_directory() {
 }
 bind -x '"\ez": previous_directory'
 
-# M-Z       fuzzy-select-output {{{3
-
-# insert an entry from the output of the previous command,
-# selecting it with fuzzy search
-bind '"\eZ": "$(!!|fzf)"'
 # }}}2
 # CTRL-META {{{2
 # C-M-b     execute the current command line silently {{{3
