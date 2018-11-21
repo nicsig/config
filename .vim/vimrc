@@ -1022,6 +1022,15 @@ let g:is_bash = 1
 "         https://github.com/neovim/neovim/issues/5559
 "         https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=848663
 
+" isfname {{{2
+
+" A filename can contain an @ character.
+" Example: /usr/lib/systemd/system/getty@.service
+"
+" It's important to include `@` in 'isf',  so that we can complete a filename by
+" pressing Tab.
+set isfname+=@-@
+
 " join {{{2
 
 " Don't insert two spaces after a '.', '?' and '!' with a join command.
@@ -1845,9 +1854,21 @@ if has('vim_starting')
     "                          └─ `*` can't match a dot, and the path of an
     "                              undofile often contains 1 or 2 dots
 
-    set wig+=*[^0-9].gz,*.rar,*.tar.*,*.zip
-    "         ├────┘
-    "         └ don't ignore man pages in `/usr/share/man/man1/`
+    " Why don't you ignore archives?{{{
+    "
+    "     set wig+=*[^0-9].gz,*.rar,*.tar.*,*.zip
+    "               ├────┘
+    "               └ don't ignore man pages in `/usr/share/man/man1/`
+    "
+    " Some system files are stored in archives, logs for example.
+    " When we inspect the contents of a directory in dirvish, I want to see them
+    " (whether I can open them or not).
+    " Besides, usually, they can be read in Vim.
+    " Example:
+    "
+    "     /usr/share/keymaps/i386/azerty/azerty.kmap.gz
+    "
+    "}}}
 
     set wig+=tags
 

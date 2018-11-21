@@ -1,0 +1,29 @@
+partial alphanumeric_keys
+    xkb_symbols "special_chars" {
+    key <AE02> { [ eacute, 2, less, Eacute ] };
+    key <AE03> { [ quotedbl, 3, greater ] };
+    key <AD01> { [ a, A, bar ] };
+    key <AD02> { [ z, Z, parenleft ] };
+    key <AD03> { [ e, E, parenright, EuroSign ] };
+    key <AD05> { [ t, T, grave ] };
+    key <AD08> { [ i, I ] };
+    key <AC01> { [ q, Q, equal ] };
+    key <AC02> { [ s, S, bracketleft ] };
+    key <AC03> { [ d, D, bracketright ] };
+    key <AC04> { [ f, F, minus ] };
+    key <AC05> { [ g, G, plus ] };
+    key <AC06> { [ h, H, eth ] };
+    key <AC07> { [ j, J, asterisk ] };
+    key <AC08> { [ k, K, numbersign ] };
+    key <AC09> { [ l, L ] };
+    key <AB02> { [ x, X, braceleft ] };
+    key <AB03> { [ c, C, braceright, copyright ] };
+    key <AB04> { [ v, V, v ] };
+    key <AB05> { [ b, B, asciitilde ] };
+    key <SPCE> { [ space, space, underscore, NoSymbol ] };
+    key <I253> { [ Return ] };
+};
+
+// The keysyms are case-sensitive.
+// So, don't write `return`, but `Return`.
+

@@ -1,3 +1,8 @@
+# -f = fullscreen
+# -w = active window
+"xfce4-screenshooter -f"
+  Print
+
 "dmenu_run -b -fn Monospace-20:normal -l 10"
   Alt+Control+j
 
@@ -13,14 +18,9 @@
 "${HOME}/bin/vim-anywhere.sh"
   Mod4+v
 
-"xfce4-screenshooter -w"
-  Alt+Print
-
-"xfce4-screenshooter -f"
-  Print
-
 "xfce4-popup-whiskermenu"
   Alt+F1
 
 "exo-open --launch FileManager"
   Mod4+f
+

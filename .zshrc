@@ -2397,10 +2397,25 @@ alias ubuntu-version='cat /etc/issue'
 
 alias vb='VBoxManage'
 
+# Useful to access the settings of a VM, from the GUI, while it's shut down.
+alias vb_start='virtualbox &!'
+
+# Why don't you rename `vb_vm_save_state` into `vb_vm_shutdown`?{{{
+#
+# That's not what it really does.
+# From VB point of view, the VM has not been shut down.
+# Because  of this,  some  settings  can't be  accessed  from  the GUI  (example
+# advanced network settings).
+#
+# So, I find the word “shutdown” deceiving.
+# If you really want to shut down the VM, execute from the guest:
+#
+#     $ shutdown -P now
+#}}}
 alias vb_vm_pause='vboxmanage controlvm ubuntu pause'
 alias vb_vm_resume='vboxmanage controlvm ubuntu resume'
+alias vb_vm_save_state='vboxmanage controlvm ubuntu savestate'
 alias vb_vm_show_cfg='vboxmanage showvminfo ubuntu'
-alias vb_vm_shutdown='vboxmanage controlvm ubuntu savestate'
 alias vb_vm_start='vboxmanage startvm ubuntu'
 
 # Some of these aliases contain `{swapname}`. They won't work, because you need the name of a real snapshot!{{{
@@ -2475,7 +2490,7 @@ alias what_is_my_ip='curl ifconfig.me'
 
 # xbindkeys {{{3
 
-alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}"/.config/xbindkeysrc &'
+alias xbindkeys_restart='killall xbindkeys && xbindkeys -f "${HOME}/.config/xbindkeysrc"'
 
 # zsh_prof {{{3
 
@@ -2606,7 +2621,6 @@ cmds_to_ignore_in_history=(
   cd
   clear
   config
-  cp
   dl_video
   exit
   fg

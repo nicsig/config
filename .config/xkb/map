@@ -1,0 +1,7 @@
+xkb_keymap {
+    xkb_keycodes  { include "evdev+aliases(azerty)" };
+    xkb_types     { include "complete"      };
+    xkb_compat    { include "complete"      };
+    xkb_symbols   { include "pc+fr(latin9)+programming(special_chars)+modifier(caps_ctrl)+modifier(enter_ctrl)+inet(evdev)+terminate(ctrl_alt_bksp)" };
+    xkb_geometry  { include "pc(pc105)"     };
+};
