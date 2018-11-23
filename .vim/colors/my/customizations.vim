@@ -20,7 +20,11 @@
 "         →       Error detected while processing …/colors/my_customizations.vim:
 "                 E420: BG color unknown
 try
-    hi EndOfBuffer ctermfg=bg guifg=bg
+    if $DISPLAY is# ''
+        hi EndOfBuffer ctermfg=bg
+    else
+        hi EndOfBuffer ctermfg=bg guifg=bg
+    endif
 catch
     call lg#catch_error()
 endtry

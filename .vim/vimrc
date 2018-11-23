@@ -509,14 +509,26 @@ set backspace=indent,eol,start
 " │                                     │                       └─ darkest                                 │
 " └─────────────────────────────────────┴──────────────────────────────────────────────────────────────────┘
 
-" In a console, we want a readable colorscheme.
-if $DISPLAY is# ''
-    colo morning
-else
-    augroup my_colorscheme
-        au!
-        au ColorScheme * runtime colors/my/customizations.vim
-
+augroup my_colorscheme
+    au!
+    au ColorScheme * runtime colors/my/customizations.vim
+augroup END
+" Why the guard?{{{
+"
+"     • there's no point reloading the colorscheme every time we source our
+"       vimrc
+"
+"     • without a guard, every time we write the vimrc, the colorscheme would
+"       be reloaded, which would make us lose syntax highlighting in
+"       a `freekeys` buffer, because of `:hi clear`:
+"
+"               ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+"}}}
+if has('vim_starting')
+    " In a console, we want a readable colorscheme.
+    if $DISPLAY is# ''
+        colo morning
+    else
         " What's the purpose of this call?{{{
         "
         " We want to memorize somewhere the  last version of the colorscheme we used
@@ -553,21 +565,8 @@ else
         " will have been installed to apply the italic style on the text between two
         " asterisks. We need to avoid clearing it right after Vim has been started.
         "}}}
-        au VimLeavePre * call colorscheme#save_last_version()
-    augroup END
+        au my_colorscheme VimLeavePre * call colorscheme#save_last_version()
 
-    " Why the guard?{{{
-    "
-    "     • there's no point reloading the colorscheme every time we source our
-    "       vimrc
-    "
-    "     • without a guard, every time we write the vimrc, the colorscheme would
-    "       be reloaded, which would make us lose syntax highlighting in
-    "       a `freekeys` buffer, because of `:hi clear`:
-    "
-    "               ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
-    "}}}
-    if has('vim_starting')
         " try to restore the exact version of the last colorscheme used
         let s:file = $HOME.'/.vim/colors/my/last_version.vim'
         if filereadable(s:file)
