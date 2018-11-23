@@ -131,6 +131,22 @@ export LC_TIME=en_US.UTF-8
 #}}}
 export LESS=iMS+G
 
+# Make `less` able to read archives and pdfs.
+# How does it work?{{{
+#
+# `lesspipe` is a utility which, without argument, outputs 2 export statements:
+#
+#     export LESSOPEN="| /usr/bin/lesspipe %s";
+#     export LESSCLOSE="/usr/bin/lesspipe %s %s";
+#
+# We execute them with `eval`.
+# As a result, when we try to  open an archive file, `lesspipe` will pre-process
+# it and write its uncompressed text on a pipe which `less` will read.
+#
+# For more information, see `$ man lessopen`.
+#}}}
+eval "$(lesspipe)"
+
 # Ask  `dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
 # `$LS_COLORS`.
 # The latter controls the colors in the output of `ls --color`.
@@ -248,7 +264,14 @@ export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
 # add man pages for `texlive` and `dasht`
 export MANPATH=$HOME/texlive/2018/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
 # add the `texlive` and `dasht` binaries to our path
-export PATH=$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
+export PATH=$HOME/bin:$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
+#           ├───────┘{{{
+#           └ We don't need to add this for a non-login shell,
+#             because it's included by default.
+#             Maybe because of /etc/skel/.profile:20 ...
+#             However, we DO need to add it when zsh is started as a login shell
+#             in a virtual console.
+#}}}
 
 # Choose which program should be used to open pdf documents.
 # Useful for `texdoc`.
