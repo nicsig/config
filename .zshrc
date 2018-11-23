@@ -711,53 +711,85 @@ if [[ ! -f "${HOME}/bin/fasd" ]]; then
   chmod +x "${HOME}/bin/fasd"
 fi
 
-# When we start a shell, the fasd functions may slow the start up.
-# As a workaround, we write them in a cache (`~/.fasd-init-zsh`), which we
-# update when fasd is more recent.
-fasd_cache="${HOME}/.fasd-init-zsh"
-#     ┌ ~/bin/fasd is newer than ~/.fasd-init-zsh{{{
-#     │                                           ┌ ~/.fasd-init-zsh is empty
-#     ├──────────────────────────────────────┐    ├──────────────────┐}}}
-if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
-  # Source a set of functions provided by fasd:{{{
-  #
-  #     ┌───────────────────┬──────────────────────────────────────────────────────┐
-  #     │ posix-alias       │ define aliases that applies to all posix shells      │
-  #     ├───────────────────┼──────────────────────────────────────────────────────┤
-  #     │ zsh-hook          │ define _fasd_preexec and add it to zsh preexec array │
-  #     ├───────────────────┼──────────────────────────────────────────────────────┤
-  #     │ zsh-ccomp         │ zsh command mode completion definitions              │
-  #     ├───────────────────┼──────────────────────────────────────────────────────┤
-  #     │ zsh-ccomp-install │ setup command mode completion for zsh                │
-  #     ├───────────────────┼──────────────────────────────────────────────────────┤
-  #     │ zsh-wcomp         │ zsh word mode completion definitions                 │
-  #     ├───────────────────┼──────────────────────────────────────────────────────┤
-  #     │ zsh-wcomp-install │ setup word mode completion for zsh                   │
-  #     └───────────────────┴──────────────────────────────────────────────────────┘
-  #
-  # Alternatively, to init fasd, we could use one of those lines:
-  #
-  #     # generic code for any shell
-  #     $ eval "$(fasd --init auto)"
-  #
-  #     # minimalist code for zsh (no tab completion)
-  #     $ eval "$(fasd --init posix-alias zsh-hook)"
-  #
-  # Source:
-  #       https://github.com/clvv/fasd#install
-  #}}}
-  fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install >| "${fasd_cache}"
-fi
-. "${fasd_cache}"
-unset fasd_cache
-# TODO: delete the cache from time to time (once per day)?{{{
+# Why the guard?{{{
 #
-# Look at our warning comment before the global alias `V`.
-# It describes an issue which may be solved by removing the fasd cache.
+# In a virtual console, fasd slightly slows  down the shell when the prompt must
+# be updated (after executing a command like `cd` or `ls`).
 #
-# More generally, maybe we should remove any cache from time to time.
+# The culprit line is:
+#
+#     . "${fasd_cache}"
+#
+# We could disable  only this line, but  it wouldn't make sense  to execute some
+# code which we won't use, so we disable everything related to fasd.
 #}}}
+if [[ -n "${DISPLAY}" ]]; then
+  # When we start a shell, the fasd functions may slow the start up.
+  # As a workaround, we write them in a cache (`~/.fasd-init-zsh`), which we
+  # update when fasd is more recent.
+  fasd_cache="${HOME}/.fasd-init-zsh"
+  #     ┌ ~/bin/fasd is newer than ~/.fasd-init-zsh{{{
+  #     │                                           ┌ ~/.fasd-init-zsh is empty
+  #     ├──────────────────────────────────────┐    ├──────────────────┐}}}
+  if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
+    # Source a set of functions provided by fasd:{{{
+    #
+    #     ┌───────────────────┬──────────────────────────────────────────────────────┐
+    #     │ posix-alias       │ define aliases that applies to all posix shells      │
+    #     ├───────────────────┼──────────────────────────────────────────────────────┤
+    #     │ zsh-hook          │ define _fasd_preexec and add it to zsh preexec array │
+    #     ├───────────────────┼──────────────────────────────────────────────────────┤
+    #     │ zsh-ccomp         │ zsh command mode completion definitions              │
+    #     ├───────────────────┼──────────────────────────────────────────────────────┤
+    #     │ zsh-ccomp-install │ setup command mode completion for zsh                │
+    #     ├───────────────────┼──────────────────────────────────────────────────────┤
+    #     │ zsh-wcomp         │ zsh word mode completion definitions                 │
+    #     ├───────────────────┼──────────────────────────────────────────────────────┤
+    #     │ zsh-wcomp-install │ setup word mode completion for zsh                   │
+    #     └───────────────────┴──────────────────────────────────────────────────────┘
+    #
+    # Alternatively, to init fasd, we could use one of those lines:
+    #
+    #     # generic code for any shell
+    #     $ eval "$(fasd --init auto)"
+    #
+    #     # minimalist code for zsh (no tab completion)
+    #     $ eval "$(fasd --init posix-alias zsh-hook)"
+    #
+    # Source:
+    #       https://github.com/clvv/fasd#install
+    #}}}
+    fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install >| "${fasd_cache}"
+  fi
+  . "${fasd_cache}"
+  unset fasd_cache
+  # TODO: delete the cache from time to time (once per day)?{{{
+  #
+  # Look at our warning comment before the global alias `V`.
+  # It describes an issue which may be solved by removing the fasd cache.
+  #
+  # More generally, maybe we should remove any cache from time to time.
+  #}}}
 
+  alias m='f -e mpv'
+  #           │
+  #           └ look for a file and open it with `mpv`
+
+  alias o='a -e xdg-open'
+  #           │
+  #           └ open with `xdg-open`
+
+  alias v='f -t -e vim -b viminfo'
+  #           │  │      │
+  #           │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
+  #           │  └ open with vim
+  #           └ match by recent access only
+
+  bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (files and directories)
+  bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
+  bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
+
+fi
 
 # source fzf config
 # Do NOT edit this line!{{{
@@ -826,8 +858,8 @@ unset fasd_cache
 #     • we don't have to select an entry which could be far from our current position,
 #       instead we can fuzzy search it via its name
 #}}}
-# [[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
-# . "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
+[[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
+. "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
 
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
@@ -1488,6 +1520,46 @@ nstring() { #{{{2
   #                        output line
 }
 
+# number conversion between bases {{{2
+
+# Source: http://user.it.uu.se/~embe8573/conf/.zsh/math{{{
+#
+# The link contains some errors.
+# The output base should be expressed using the input base.
+# This matters whenever the output base is bigger than the input base.
+#}}}
+change-base () {
+    local from="$1"
+    local to="$2"
+    local value="$3"
+
+    bc <<<"ibase=${from}; obase=${to}; ${value}"
+}
+
+# To look for all the functions in this file defined without curly braces:
+#
+#     /^\s*\S*()\%(.*{\)\@!
+
+# from binary
+bin2oct() change-base 2 1000  "$1"
+bin2dec() change-base 2 1010  "$1"
+bin2hex() change-base 2 10000 "$1"
+
+# from octal
+oct2bin() change-base  8  2 "$1"
+oct2dec() change-base  8 12 "$1"
+oct2hex() change-base  8 20 "$1"
+
+# from decimal
+dec2bin() change-base 10  2 "$1"
+dec2oct() change-base 10  8 "$1"
+dec2hex() change-base 10 16 "$1"
+
+# from hexadecimal
+hex2bin() change-base 16  2 "$1"
+hex2oct() change-base 16  8 "$1"
+hex2dec() change-base 16  A "$1"
+
 nv() { #{{{2
 #    │
 #    └ You want to prevent the  change of `IFS` from affecting the current shell?
@@ -1968,6 +2040,81 @@ vim_startup() { #{{{2
 }
 #}}}2
 
+xev_terse() { #{{{2
+  # Purpose:{{{
+  #
+  # Filter  the output  of  `xev` so  that it  contains  only information  about
+  # KeyPress events, and not about the other ones (like KeyRelease).
+  #}}}
+  xev | sed -n '/^KeyPress/,/^$/p'
+  #          │  ├───────────────┘
+  #          │  └ print every line between a line beginning with `KeyPress` and an empty line
+  #          │
+  #          └ don't print everything you read,
+  #            only what I explicitly ask you (with the p[rint] command)
+}
+
+xev_terse_terse() { #{{{2
+  # Purpose:{{{
+  #
+  # Filter the  output of  `xev` so that  it contains only  the keycode  and the
+  # keysym of the pressed keys.
+  #}}}
+  # What does `-A2` do?{{{
+  #
+  # The keycode and the keysym of a pressed key are printed 2 lines below
+  # the line matching `^KeyPress`.
+  # So, we ask `grep` to print 2 lines of trailing context after a line matching
+  # `^KeyPress`.
+  #
+  # Mnemonics: `-A` for After
+  #}}}
+  # What does `--line-buffered` do?{{{
+  #
+  # When the output of grep is connected to a pipe, it's buffered into a 4K block.
+  # That is, `grep` doesn't write anything on the pipe, until it has filled a 4K
+  # buffer.
+  # Because of this,  when we press a  key, `sed` doesn't receive  the output of
+  # grep immediately.
+  # We have to press several keys (22?) before `sed` prints something.
+  # This is confusing.
+  # We want `sed` to print something as soon as we press a key.
+  # `--line-buffered` asks `grep` to limit the size of its buffer to a single line.
+  # IOW, as soon as it has a line, it writes it to the pipe.
+  #}}}
+  # Is there an alternative to `--line-buffered`?{{{
+  #
+  # Yes, you can use the `stdbuf` command, included in the coreutils package:
+  #
+  #     xev |
+  #     stdbuf -oL grep -A2 '^KeyPress' |
+  #     sed -n '/keycode /s/^.*keycode \([0-9]*\).* (.*, \(.*\)).*$/\1 \2/p'
+  #
+  # Here, we use `stdbuf`  to execute `grep` and limit the  size of its internal
+  # buffer to a single line, by passing the option `-oL`.
+  # `-o` = `--output`, and `L` = line.
+  #
+  # For more info about `stdbuf`:
+  #     https://unix.stackexchange.com/a/25378/289772
+  #}}}
+  # Source: https://wiki.xfce.org/faq
+  xev |
+  grep -A2 --line-buffered '^KeyPress' |
+  sed -n '/keycode /s/^.*keycode \([0-9]*\).* (.*, \(.*\)).*$/\1 \2/p'
+  #       ├─────────┘            ├────────┘   │    ├────┘{{{
+  #       │                      │            │    └ capture the keysym (backref `\2`)
+  #       │                      │            │
+  #       │                      │            └ this is not a capturing group
+  #       │                      │              this is a literal opening parenthesis
+  #       │                      │
+  #       │                      └ capture the keycode
+  #       │                        so that we can refer to it later with the backref `\1`
+  #       │
+  #       └ operate a substitution on any line matching `keycode `
+  #}}}
+}
+#}}}2
+
 xt() { #{{{2
   # Purpose:{{{
   #
@@ -2077,22 +2224,6 @@ alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(t
 # session leader (`upstart` at the moment).
 #}}}
 alias dropbox_restart='killall dropbox; ( "${HOME}/.dropbox-dist/dropboxd" & )'
-
-# fasd {{{3
-
-alias m='f -e mpv'
-#           │
-#           └ look for a file and open it with `mpv`
-
-alias o='a -e xdg-open'
-#           │
-#           └ open with `xdg-open`
-
-alias v='f -t -e vim -b viminfo'
-#           │  │      │
-#           │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
-#           │  └ open with vim
-#           └ match by recent access only
 
 # git {{{3
 
@@ -2211,6 +2342,9 @@ alias ls='ls --color=auto'
 alias l=ls++
 
 # mpv {{{3
+
+# watch a video in a virtual console
+alias mpv_console='mpv -vo drm'
 
 # start `mpv` in “keybindings testing mode”
 alias mpv_test_keybinding='mpv --input-test --force-window --idle'
@@ -2850,12 +2984,6 @@ bindkey '^U' backward-kill-line
 #}}}
 # perform history expansion and insert a space
 bindkey '^X ' magic-space
-
-# C-x C-a/d/f     fasd {{{4
-
-bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (files and directories)
-bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
-bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 
 # C-x C-e         edit-command-line {{{4
 

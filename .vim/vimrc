@@ -509,68 +509,73 @@ set backspace=indent,eol,start
 " │                                     │                       └─ darkest                                 │
 " └─────────────────────────────────────┴──────────────────────────────────────────────────────────────────┘
 
-augroup my_colorscheme
-    au!
-    au ColorScheme * runtime colors/my/customizations.vim
+" In a console, we want a readable colorscheme.
+if $DISPLAY is# ''
+    colo morning
+else
+    augroup my_colorscheme
+        au!
+        au ColorScheme * runtime colors/my/customizations.vim
 
-    " What's the purpose of this call?{{{
-    "
-    " We want to memorize somewhere the  last version of the colorscheme we used
-    " (atm it's expressed by an ANSI code: 233 … 239, 252 … 256).
-    "}}}
-    " Is there an alternative?{{{
-    "
-    " Yes.
-    " We could use viminfo.
-    "
-    " Note that  when the vimrc  is read, the viminfo  hasn't been read  yet (:h
-    " startup),  so if  you decide  to  use viminfo,  you'll have  to delay  the
-    " loading of the colorscheme until VimEnter:
-    "
-    "      au VimEnter * nested call s:set_colorscheme()
-    "                  │
-    "                  └─ the autocmds need to nest, so that when we set the colorscheme,
-    "                     `ColorScheme` is fired, and our customizations are sourced
-    "
-    " Also, you'll need to use a variable name in uppercase.
-    "}}}
-    " Why don't you use the alternative?{{{
-    "
-    " The  alternative requires that  we delay  the sourcing of  the colorscheme
-    " until VimEnter. Besides, the colorscheme executes `:hi clear` which removes
-    " any custom HG we may have defined.
-    "
-    " So, if we delay the colorscheme, we must redefine all our custom HGs.
-    "
-    " But, I can't know in advance all the custom HGs currently defined.
-    " It depends on the files which have been read during Vim startup.
-    "
-    " For example, if  we start Vim to  read a markdown file,  the htmlItalic HG
-    " will have been installed to apply the italic style on the text between two
-    " asterisks. We need to avoid clearing it right after Vim has been started.
-    "}}}
-    au VimLeavePre * call colorscheme#save_last_version()
-augroup END
+        " What's the purpose of this call?{{{
+        "
+        " We want to memorize somewhere the  last version of the colorscheme we used
+        " (atm it's expressed by an ANSI code: 233 … 239, 252 … 256).
+        "}}}
+        " Is there an alternative?{{{
+        "
+        " Yes.
+        " We could use viminfo.
+        "
+        " Note that  when the vimrc  is read, the viminfo  hasn't been read  yet (:h
+        " startup),  so if  you decide  to  use viminfo,  you'll have  to delay  the
+        " loading of the colorscheme until VimEnter:
+        "
+        "      au VimEnter * nested call s:set_colorscheme()
+        "                  │
+        "                  └─ the autocmds need to nest, so that when we set the colorscheme,
+        "                     `ColorScheme` is fired, and our customizations are sourced
+        "
+        " Also, you'll need to use a variable name in uppercase.
+        "}}}
+        " Why don't you use the alternative?{{{
+        "
+        " The  alternative requires that  we delay  the sourcing of  the colorscheme
+        " until VimEnter. Besides, the colorscheme executes `:hi clear` which removes
+        " any custom HG we may have defined.
+        "
+        " So, if we delay the colorscheme, we must redefine all our custom HGs.
+        "
+        " But, I can't know in advance all the custom HGs currently defined.
+        " It depends on the files which have been read during Vim startup.
+        "
+        " For example, if  we start Vim to  read a markdown file,  the htmlItalic HG
+        " will have been installed to apply the italic style on the text between two
+        " asterisks. We need to avoid clearing it right after Vim has been started.
+        "}}}
+        au VimLeavePre * call colorscheme#save_last_version()
+    augroup END
 
-" Why the guard?{{{
-"
-"     • there's no point reloading the colorscheme every time we source our
-"       vimrc
-"
-"     • without a guard, every time we write the vimrc, the colorscheme would
-"       be reloaded, which would make us lose syntax highlighting in
-"       a `freekeys` buffer, because of `:hi clear`:
-"
-"               ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
-"}}}
-if has('vim_starting')
-    " try to restore the exact version of the last colorscheme used
-    let s:file = $HOME.'/.vim/colors/my/last_version.vim'
-    if filereadable(s:file)
-        exe 'so '.s:file
-        unlet! s:file
+    " Why the guard?{{{
+    "
+    "     • there's no point reloading the colorscheme every time we source our
+    "       vimrc
+    "
+    "     • without a guard, every time we write the vimrc, the colorscheme would
+    "       be reloaded, which would make us lose syntax highlighting in
+    "       a `freekeys` buffer, because of `:hi clear`:
+    "
+    "               ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+    "}}}
+    if has('vim_starting')
+        " try to restore the exact version of the last colorscheme used
+        let s:file = $HOME.'/.vim/colors/my/last_version.vim'
+        if filereadable(s:file)
+            exe 'so '.s:file
+            unlet! s:file
+        endif
+        call colorscheme#set()
     endif
-    call colorscheme#set()
 endif
 
 " cmd  mode  ruler{{{2
@@ -7167,7 +7172,6 @@ endfu
 " We need to make `gf` smarter.
 " When it sees a directory such as `~`, it should not search in it.
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
-
 
 
 

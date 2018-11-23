@@ -1,5 +1,5 @@
 # white background in console
-# Source: http://www.tuxradar.com/answers/482
+# Source: https://web.archive.org/web/20180303034251/http://www.tuxradar.com/answers/482
 
 # Why do we check that `$DISPLAY` is empty?{{{
 #
