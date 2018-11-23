@@ -1,0 +1,8 @@
+Defaults    pwfeedback
+Defaults    timestamp_timeout=30
+
+jean ubuntu=(root)NOPASSWD:/usr/bin/aptitude update,/usr/bin/aptitude upgrade
+jean ubuntu=(root)NOPASSWD:/usr/bin/aptitude install *,/usr/bin/aptitude purge *
+jean ubuntu=(root)NOPASSWD:/usr/bin/aptitude safe-upgrade
+jean ubuntu=(root)NOPASSWD:/usr/bin/systemctl
+%admin ubuntu=(root)NOEXEC:/usr/bin/vim
