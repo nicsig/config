@@ -1522,7 +1522,7 @@ nstring() { #{{{2
 
 # number conversion between bases {{{2
 
-# Source: http://user.it.uu.se/~embe8573/conf/.zsh/math{{{
+# Source: http://user.it.uu.se/~embe8573/conf/.zsh/math {{{
 #
 # The link contains some errors.
 # The output base should be expressed using the input base.
@@ -1532,6 +1532,7 @@ change-base () {
     local from="$1"
     local to="$2"
     local value="$3"
+    value="$(tr a-f A-F <<<"${value}")"
 
     bc <<<"ibase=${from}; obase=${to}; ${value}"
 }
@@ -2546,6 +2547,7 @@ alias vb_start='virtualbox &!'
 #
 #     $ shutdown -P now
 #}}}
+alias vb_vm_delete='vboxmanage unregistervm ubuntu --delete'
 alias vb_vm_pause='vboxmanage controlvm ubuntu pause'
 alias vb_vm_resume='vboxmanage controlvm ubuntu resume'
 alias vb_vm_save_state='vboxmanage controlvm ubuntu savestate'
