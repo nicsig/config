@@ -6228,11 +6228,12 @@ endfu
 " play with (or document):
 "
 "        • $vimruntime/colors/tools/check_colors.vim
+"        • 'filewinid' (location list property)
 "        • 'user_data' entry in completion item
 "        • 'varsofttabstop', 'vartabstop'
 "        • :h matchadd(), new `window` key in optional dictionary
-"        • :unl[et] ${env-name} (:h :unlet-$)
 "        • :swapname
+"        • :unl[et] ${env-name} (:h :unlet-$)
 "        • appendbufline()
 "
 "        • argc() + argv()
