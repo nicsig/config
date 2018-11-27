@@ -7174,6 +7174,17 @@ endfu
 
 
 
+
+" augroup jkjmj
+"     au!
+"     au BufLeave * call s:func()
+" augroup END
+" fu! s:func() abort
+"     let g:d_ebug = tabpagebuflist()
+" endfu
+
+
+
 augroup my_man_no_showbreak
     au!
     au FileType man setl showbreak=
