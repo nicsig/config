@@ -5,7 +5,7 @@ F:$HOME/.vim/autoload/myfuncs.vim
 G:$HOME/Dropbox/wiki/git.md
 J:$HOME/Dropbox/others_vimrc/justinmk.vim
 L:$HOME/Dropbox/wiki/l2l.md
-M:$HOME/Dropbox/wiki/VM.md
+M:$HOME/Dropbox/wiki/vim/compiler.md
 N:$HOME/.vim/doc/misc/notes
 P:$HOME/.vim/pythonx/snippet_helpers.py
 S:$HOME/Dropbox/wiki/shell/shell.md
@@ -14,4 +14,3 @@ U:$HOME/Dropbox/wiki/urxvt.md
 V:$HOME/Dropbox/wiki/vim/
 W:$HOME/Dropbox/wiki/warez.md
 X:$HOME/.Xresources
-Z:$HOME/.vim/plugged/vim-completion/plugin/completion.vim

@@ -1,3 +1,22 @@
+// Are the keysyms case-sensitive?{{{
+//
+// Yes.
+// So, don't write `return`, but `Return`.
+// }}}
+// How to get the names of the physical keys (such as AE02)? {{{
+//
+//     $ zathura <(xkbprint -label name $DISPLAY - | ps2pdf -)
+//                 │         ├────────┘ │        │
+//                 │         │          │        └ output
+//                 │         │          └ source
+//                 │         │
+//                 │         └ label to be printed on keys
+//                 │           (legal types are: none, name,code,symbols)
+//                 │
+//                 └ print an XKB keyboard description
+//
+//
+// }}}
 partial alphanumeric_keys
     xkb_symbols "special_chars" {
     key <AE02> { [ eacute, 2, less, Eacute ] };
@@ -23,7 +42,4 @@ partial alphanumeric_keys
     key <SPCE> { [ space, space, underscore, NoSymbol ] };
     key <I253> { [ Return ] };
 };
-
-// The keysyms are case-sensitive.
-// So, don't write `return`, but `Return`.
 

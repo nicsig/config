@@ -114,6 +114,26 @@ Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash'}
 Plug 'junegunn/fzf.vim'
 Plug 'lacygoill/goyo.vim', {'branch': 'assimil'}
 Plug 'lacygoill/vim-graph'
+" TODO: remove `vim-gutentags`{{{
+"
+" Use git hooks instead.
+" Less code, more control, occasion to better understand git.
+"
+"     https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration
+"     https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks
+"     https://git-scm.com/docs/githooks
+"
+"     https://tbaggery.com/2011/08/08/effortless-ctags-with-git.html
+"     https://github.com/tpope/tpope/tree/master/.git_template
+"     https://github.com/tpope/tpope/blob/master/.gitconfig
+"
+" Update:
+" A file watcher (like entr) may be even better.
+"
+" Issue:
+" Your tags will be generated only in git projects.
+" Not in projects using other VCS systems (`.hg/`, `.bzr/`, ...).
+"}}}
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
 Plug 'djmoch/vim-makejob'
@@ -182,6 +202,7 @@ Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-window'
+Plug 'lacygoill/vim-xkb'
 
 " Read Doc:
 Plug 'justinmk/vim-dirvish'
@@ -200,7 +221,7 @@ Plug 'keith/tmux.vim'
 fu! s:delay_slow_call() abort
     runtime autoload/toggle_settings.vim
     runtime! autoload/slow_call/*.vim
-    exe 'au! delay_slow_call'
+    au! delay_slow_call
     aug! delay_slow_call
 endfu
 
@@ -658,6 +679,34 @@ set diffopt+=vertical
 
 " Turn off diff mode automatically for a buffer which becomes hidden.
 set diffopt+=hiddenoff
+
+if !has('nvim')
+    " The “patience” algorithm gives more readable diffs.
+    " Why isn't patience the default?{{{
+    "
+    " The default algorithm is “myers”.
+    "
+    " 1. patience is slower:
+    "
+    "     https://marc.info/?l=git&m=133103975225142&w=2
+    "
+    " 2.
+    " > Myers has  been the universal  default diff  algorithm for so  long that
+    " > enabling an alternative algorithm by default in a low-level component of
+    " > our world (Git, Vim, etc.) could cause issues down the line.
+    "
+    " Source:
+    "         https://www.reddit.com/r/vim/comments/a26phr/the_power_of_diff_vimways_124/eavzmke/
+    "}}}
+    set diffopt+=algorithm:patience
+
+    " Use the indent heuristic for the internal diff library.
+    " Again, this gives more readable diffs.
+    set diffopt+=indent-heuristic
+    " For more info, see:
+    "
+    "     https://vimways.org/2018/the-power-of-diff/
+endif
 
 " display {{{2
 
@@ -1132,7 +1181,7 @@ if !has('gui_running') && has('vim_starting')
         au!
         au CursorHold,InsertEnter,CmdlineEnter * set lazyredraw
             \ | exe 'au! delay_lazy_redraw'
-            \ | augroup! delay_lazy_redraw
+            \ | aug! delay_lazy_redraw
     augroup END
 endif
 
@@ -3278,14 +3327,20 @@ nno  <silent>  =d  :<c-u>call <sid>fix_display()<cr>
 
 fu! s:fix_display() abort
     let view = winsaveview()
+
     " redraw screen
     redraw!
     " redraw all status lines
     redraws!
+
     " update differences between windows in diff mode
     diffupdate!
+    "         │
+    "         └ check if the file was changed externally and needs to be reloaded
+
     " update folds
     norm! zx
+
     " update title in folds
     do BufWinEnter
 
@@ -5671,8 +5726,8 @@ endfu
                     "}}}
                     " still, syntax highlighting would work better.
                     " less hack, no timer.
-                    au cmdlineleave : call timer_start(5, {-> execute("exe 'au! my_ltag ' | aug! my_ltag", 'silent!')})
-                    au filetype qf call s:ltag(2) | exe 'au! my_ltag ' | aug! my_ltag
+                    au cmdlineleave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
+                    au filetype qf call s:ltag(2) | exe 'au! my_ltag' | aug! my_ltag
                 augroup end
                 return ':ltag / | lw'.repeat("\<left>", 5)
             elseif a:step ==# 2
@@ -7175,17 +7230,6 @@ endfu
 
 
 
-
-" augroup jkjmj
-"     au!
-"     au BufLeave * call s:func()
-" augroup END
-" fu! s:func() abort
-"     let g:d_ebug = tabpagebuflist()
-" endfu
-
-
-
 augroup my_man_no_showbreak
     au!
     au FileType man setl showbreak=
@@ -7196,28 +7240,30 @@ augroup END
 
 " sessions to finish:
 "
-"         01. swap
-"         02. sandwich
-"         03. markdown
-"         04. emmet
-"         05. arglist (improve our arglist mappings)
-"         06. config
-"         07. paragraph (master `$ par`)
-"         08. qf_issue (finish the last two questions)
-"         09. completion
-"         10. ultisnips
-"         11. profiling
-"         12. debug
-"         13. try
-"         14. async
-"         15. unix
-"         16. tree
-"         17. breakdown
-"         18. package
-"         19. tag
-"         20. cwd
-"         21. unix
-"         22. keyboard
+"         01. keyboard
+"         02. systemd
+"         03. cron
+"         04. swap
+"         05. sandwich
+"         06. markdown
+"         07. emmet
+"         08. arglist (improve our arglist mappings)
+"         09. config
+"         10. paragraph (master `$ par`)
+"         11. qf_issue (finish the last two questions)
+"         12. completion
+"         13. ultisnips
+"         14. profiling
+"         15. debug
+"         16. try
+"         17. async
+"         18. unix
+"         19. tree
+"         20. breakdown
+"         21. package
+"         22. tag
+"         23. cwd
+"         24. unix
 "
 " Once finished, get back to studying the terminal and latex.
 
@@ -7328,54 +7374,32 @@ fu! s:save_last_qfl() abort
 endfu
 
 fu! s:restore_last_qfl() abort
-    " Why check the value of 'errorfile'?{{{
+    " If there's already a qfl on the stack, or if there's no qfl to restore, don't try to restore anything.
+    " How could there already be a qfl on the stack?{{{
     "
-    " To bail out in case we start Vim with the `-q` option.
-    "
-    " Suppose we start Vim with one of these commands:
-    "
+    "     $ grep -RHIinos network /etc
     "     $ vim -q <(!!)
-    "     $ cmd | vim -q /dev/stdin
-    "     $ vim -q /path/to/some/file
     "
-    " If we  restore the  last qfl of  the last Vim  instance, then,  when we'll
-    " execute `:copen`, we we'll see the  latter, instead of the one which we've
-    " just populated from the shell.
+    "     $ grep -RHIinos network /etc | vim -q /dev/stdin
     "
-    " This is probably not what we want.
-    " We probably want to see the qfl populated from the shell.
-    " We could see the latter by executing `:colder`, but we may still lose time
-    " wondering why we're seeing an irrelevant qfl.
-    "}}}
-    " Why check that the arglist is empty?{{{
-    "
-    " We face the same issue as before, if we execute:
+    "     $ grep -RHIinos network /etc >/tmp/log
+    "     $ vim -q /tmp/log
     "
     "     $ vim +'vimgrep /pat/ %' file
     "
-    " When Vim is started, 2 qfl are on the stack.
-    " The first one is the one we're probably interested in,
-    " i.e. the one looking for `pat` in `file`.
-    "
-    " The second one is the old one restored by this function.
-    " It's put in second position, because the function is called
-    " when VimEnter is fired, which happens AFTER Vim has processed
-    " the `+'...'` arguments.
-    "
-    " As a result, we have to execute `:col` to see our old qfl.
-    " Worse, we may forget about the stack, and think that something
-    " is wrong in the syntax of our command.
-    " This is especially true if our shell command is more complex
-    " (remember our custom `grep_pdf()` shell function).
-    "
-    " This kind of issue has made us lose too much time in the past.
-    " We don't want any surprise anymore.
-    " Anyway, we probably only need the qfl to be restored, when
-    " we restart Vim by pressing `SPC R`.
+    "     $ vim -S /tmp/efm.vim
     "}}}
-    if   &errorfile isnot# 'errors.err'
+    " Why not restoring the qfl if there's already one on the stack?{{{
+    "
+    " Too confusing.
+    " You would expect a certain a qfl, but get a different one.
+    " You may  lose a lot of  time/energy before remembering you  have this code
+    " which restores an old qfl.
+    " This is  especially true if the  two qfl which  end on the stack  are very
+    " similar, which happens when you're refining an 'efm'.
+    "}}}
+    if !has('nvim') && getqflist({'size':0}).size || !empty(getqflist())
     \ || empty(get(get(g:, 'MY_LAST_QFL', {}), 'qfl', []))
-    \ || !empty(argv())
         return
     endif
 

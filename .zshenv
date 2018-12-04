@@ -207,7 +207,8 @@ export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
 # Only the first section number before the first colon is kept.
 # The rest is lost.
 #
-# Because of this:
+# As a result, we face this issue:
+#
 #     $ man man
 #     :Man mount
 #       → ✘
@@ -217,7 +218,7 @@ export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
 # So I create this duplicate variable, which will serve as a backup.
 # And in our vimrc, I make sure to reset the value of `MANSECT` to `$MYMANSECT`.
 #}}}
-export MYMANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
+export MYMANSECT="${MANSECT}"
 
 # Why this value?{{{
 #
@@ -258,13 +259,13 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 #               └ boolean and numerics options (probably)
 #}}}
 
-export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/Dropbox/wiki:/run/user/$UID
+export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/Dropbox/wiki:/run/user/${UID}
 # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
-export INFOPATH=$HOME/texlive/2018/texmf-dist/doc/info:$INFOPATH
+export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 # add man pages for `texlive` and `dasht`
-export MANPATH=$HOME/texlive/2018/texmf-dist/doc/man:$HOME/GitRepos/dasht/man:$MANPATH
+export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/man:${MANPATH}
 # add the `texlive` and `dasht` binaries to our path
-export PATH=$HOME/bin:$HOME/texlive/2018/bin/x86_64-linux:$PATH:$HOME/GitRepos/dasht/bin
+export PATH=${HOME}/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/GitRepos/dasht/bin
 #           ├───────┘{{{
 #           └ We don't need to add this for a non-login shell,
 #             because it's included by default.
@@ -307,13 +308,13 @@ export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 #
 # In many terminals, including xfce-terminal, guake, konsole:
 #
-#   $TERM = xterm
+#     $TERM = xterm
 #
 # Yeah, they lie about their identity to the programs they run.
 #
 # In urxvt:
 #
-#   $TERM = rxvt-unicode-256color
+#     $TERM = rxvt-unicode-256color
 #
 # urxvt tells the truth.
 #}}}
@@ -327,26 +328,28 @@ export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 #     2. preferences
 #     3. compatibility
 #
-# urxvt use ~/.Xresources.
+# urxvt uses ~/.Xresources.
 #}}}
 # Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
 #
 # For the  colorschemes of programs to  be displayed correctly in  the terminal,
-# `$TERM`  must contain  '-256color'. Otherwise,  the programs  will assume  the
-# terminal is only  able to interpret a limited amount  of escape sequences used
-# to encode 8 colors, and they will restrict themselves to a limited palette.
+# `$TERM` must contain '-256color'.
+# Otherwise, the programs  will assume the terminal is only  able to interpret a
+# limited amount  of escape  sequences used  to encode 8  colors, and  they will
+# restrict themselves to a limited palette.
 #}}}
 # Ok, but why do it in this file?{{{
 #
 # The configuration  of `$TERM` should  happen only in a  terminal configuration
-# file. But for xfce4-terminal, I haven't found  one.  So, we must try to detect
-# the identity of the terminal from here.
+# file.
+# But for xfce4-terminal, I haven't found one.
+# So, we must try to detect the identity of the terminal from here.
 #}}}
 # How to detect we're in an xfce terminal?{{{
 #
 # If you look at  the output of `env` and search for  'terminal' or 'xfce4', you
-# should find `COLORTERM`  whose value is set to  'xfce4-terminal'.  We're going
-# to use it to detect an xfce4 terminal.
+# should find `COLORTERM` whose value is set to 'xfce4-terminal'.
+# We're going to use it to detect an xfce4 terminal.
 #}}}
 # Is it enough?{{{
 #
@@ -361,12 +364,24 @@ export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 #   6. $ echo $TERM  →  xterm-256color  ✘
 #
 # We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
-# server. Because the  latter will already  have set `$TERM`  to 'tmux-256color'
-# (thanks to the  option 'default-terminal' in `~/.tmux.conf`), which  is one of
-# the few valid value ({screen|tmux}[-256color]).
+# server.
+# Because the latter will already have set `$TERM` to 'tmux-256color' (thanks to
+# the  option 'default-terminal'  in `~/.tmux.conf`),  which is  one of  the few
+# valid value ({screen|tmux}[-256color]).
 #
 # One way to be sure that we're not connected to Tmux , is to check that `$TERM`
-# is set to 'xterm'.  That's the default value set by xfce4-terminal.
+# is set to 'xterm'.
+# That's the default value set by xfce4-terminal.
+#
+# ---
+#
+# Update:
+# The reason given earlier is not valid anymore.
+# Since tmux 2.1, `default-terminal` is a server option.
+# The reason was valid before that, when `default-terminal` was a session option.
+#
+# Still, I  think it's a  good idea to set  `$TERM` to `xterm-256color`  only if
+# it's currently set to `xterm`.
 #}}}
 # Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
 #

@@ -134,13 +134,73 @@ URxvt.termName:  rxvt-unicode-256color
 ! disable scrollbar
 URxvt.scrollBar:  false
 
+! Scroll with `M-j` and `M-k`, instead of `S-PgDown` and `S-PgUp`.
+! Where is the syntax `URxvt.keysym.<sym>: command: ...` documented?{{{
+!
+!     $ man urxvt
+!     /RESOURCES
+!     /keysym.sym: action
+!     /command:STRING
+!}}}
+! Where is the sequence `\033]720;1\007` documented?{{{
+!
+! The general form of this sequence is:
+!
+!     OSC Ps ; Pt ST
+!     │           │
+!     │           └ \007
+!     └ ESC ]
+!
+! Here:
+!
+!     Ps = 720
+!     Pt = 1
+!
+! These values are described like so:
+!
+!     Ps = 720   Move viewing window up by Pt lines
+!     Ps = 721   Move viewing window down by Pt lines
+!
+! Source:
+!
+!     $ man 7 urxvt
+!     /RXVT-UNICODE TECHNICAL REFERENCE
+!     /XTerm Operating System Commands
+!}}}
+! Why did you comment these lines?{{{
+!
+! 1. They interfere with `M-j` and `M-k` in WeeChat.
+!
+! 2. They may be too easy to press by accident.
+!    If that happens while in Vim, it's distracting.
+!
+! Find  other keysequences  to trigger  the scrolling  if you  really want  this
+! functionality.
+! Or just rely on tmux scrollback buffer.
+! }}}
+! URxvt.keysym.Meta-k: command:\033]720;1\007
+! URxvt.keysym.Meta-j: command:\033]721;1\007
+
+! How to increase the size of the scrollback buffer?{{{
+!
+! URxvt.saveLines: 8192
+!
+! Source:
+!
+!     $ man 7 urxvt
+!     /RXVT-UNICODE/URXVT FREQUENTLY ASKED QUESTIONS
+!     /Terminal Configuration
+!
+! By default, its size is limited to 1000 lines.
+!}}}
+
 ! default geometry
 
-!                ┌─ a little bigger than $COLUMNS
+!                ┌ a little bigger than $COLUMNS
 !                │
 URxvt.geometry:  121x35
 !                    │
-!                    └─  a little bigger than $LINES
+!                    └  a little bigger than $LINES
 
 
 Xft.dpi:        96

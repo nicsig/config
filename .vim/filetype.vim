@@ -55,14 +55,14 @@ augroup filetypedetect
     "           \ endif
     "
     " We want `sh` instead.
+    "
+    " About the optional FALLBACK argument:
+    "
+    " When it's present, a later `:setf` command will override 'filetype'.
+    " This is to used for filetype detections that are just a guess.
+    " `did_filetype()` will return false after this command.
     "}}}
     au! BufRead,BufNewFile ~/.{bashenv,shrc} set ft=sh
-
-    " When the optional FALLBACK argument is present, a
-    " later :setfiletype command will override the
-    " 'filetype'.  This is to used for filetype detections
-    " that are just a guess.  |did_filetype()| will return
-    " false after this command.
 
     " Why?{{{
     "

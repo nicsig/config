@@ -229,7 +229,7 @@ if has('gui_running') || &t_Co != ''
         " if we change the filetype/syntax of the buffer, the autocmd should be removed
         autocmd CursorHold <buffer> if b:current_syntax !=# 'dircolors'
         \ |                             exe 'au! my_dircolors_syntax'
-        \ |                             exe 'aug! my_dircolors_syntax'
+        \ |                             aug! my_dircolors_syntax
         \ |                         endif
     augroup END
 endif

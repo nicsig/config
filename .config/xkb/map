@@ -1,3 +1,13 @@
+// How did you get the core of this code?{{{
+//
+//     $ setxkbmap -model pc105 -layout fr -variant latin9 -option terminate:ctrl_alt_bksp -print
+//
+// I've merely added these stanzas to `xkb_symbols`:
+//
+//     programming(special_chars)
+//     modifier(caps_ctrl)
+//     modifier(enter_ctrl)
+//}}}
 xkb_keymap {
     xkb_keycodes  { include "evdev+aliases(azerty)" };
     xkb_types     { include "complete"      };
@@ -5,3 +15,4 @@ xkb_keymap {
     xkb_symbols   { include "pc+fr(latin9)+programming(special_chars)+modifier(caps_ctrl)+modifier(enter_ctrl)+inet(evdev)+terminate(ctrl_alt_bksp)" };
     xkb_geometry  { include "pc(pc105)"     };
 };
+

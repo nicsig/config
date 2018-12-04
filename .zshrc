@@ -134,6 +134,39 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
 #
 #     precmd () { vcs_info }
 #     PROMPT='%F{5}[%F{2}%n%F{5}] %F{3}%3~ ${vcs_info_msg_0_} %f%# '
+#
+# Alternative:
+#
+#     autoload -Uz vcs_info
+#     precmd_vcs_info() { vcs_info }
+#     precmd_functions+=( precmd_vcs_info )
+#     setopt prompt_subst
+#     RPROMPT=\$vcs_info_msg_0_
+#     # PROMPT=\$vcs_info_msg_0_'%# '
+#     zstyle ':vcs_info:git:*' formats '%b'
+#
+# Source:
+#     https://git-scm.com/book/en/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh
+#
+# Issue:
+# When you cd into a non git directory (like `~`):
+#
+#     VCS_INFO_detect_p4:79: maximum nested function level reached; increase FUNCNEST?
+#}}}
+# TODO: add indicator to see nested shells.{{{
+#
+#   https://github.com/wincent/wincent
+#   https://raw.githubusercontent.com/wincent/wincent/media/prompt-root-shlvl-3.png
+#}}}
+# TODO: add indicator to see background processes.{{{
+#
+#   https://github.com/wincent/wincent
+#   https://raw.githubusercontent.com/wincent/wincent/media/prompt-bg.png
+#}}}
+# TODO: add indicator to better see we're root.{{{
+#
+#   https://github.com/wincent/wincent
+#   https://raw.githubusercontent.com/wincent/wincent/media/prompt-root.png
 #}}}
 
 # Why?{{{
@@ -1327,6 +1360,7 @@ grep_pdf() { #{{{2
   # `:vimgrep` from the current Vim instance.
   #}}}
   # Alternative: pdfgrep utility{{{
+  #
   #     $ aptitude install pdfgrep
   #     $ find /path -iname '*.pdf' -exec pdfgrep pattern {} +
   #
@@ -1334,6 +1368,7 @@ grep_pdf() { #{{{2
   # every file it finds.
   # Instead it  concatenates  them all  and  pass them  to  a single  `pdfgrep`
   # command:
+  #
   #     pdfgrep pat file1
   #     pdfgrep pat file2
   #     ...
@@ -2989,10 +3024,77 @@ bindkey '^X ' magic-space
 
 # C-x C-e         edit-command-line {{{4
 
-# edit the command line in $EDITOR with C-x C-e like in readline
 autoload -Uz edit-command-line
 zle -N edit-command-line
-bindkey '^X^E' edit-command-line
+
+# Why this wrapper function around the `$ vim` command?{{{
+#
+#     C-x C-e
+#     :sp
+#     C-k
+#     C-j
+#
+# The last key should move the focus to the window below but it doesn't.
+# This is  because zle  doesn't properly  restore stty settings  when it  runs a
+# command from within command line edition:
+#
+#     https://unix.stackexchange.com/q/484764/289772
+#
+# More specifically, it doesn't remove the terminal line setting `inlcr`.
+# Here's how you can check this:
+#
+#     EDITOR=func
+#     func() {
+#       stty -a >/tmp/stty_zle
+#     }
+#     C-x C-e
+#
+#     $ stty -a >/tmp/stty
+#
+#     $ vimdiff /tmp/stty /tmp/stty_zle
+#               ├───────┘ ├───────────┘
+#               │         └ contains 'inlcr'
+#               │
+#               └ contains '-inlcr'
+#
+# Solution 1:
+# Create this wrapper function around `edit-command-line()`.
+#
+# Solution 2:
+# Copy `/usr/share/zsh/functions/Zle/edit-command-line` inside `~/.zsh/`.
+# Then edit the copy to include one of those lines:
+#
+#     STTY=sane
+#     STTY=-inlcr
+#
+# You would lose the possible future updates of the original function:
+#
+#     https://sourceforge.net/p/zsh/code/ci/ef20425381e83ebd5a10c2ab270a347018371162/log/?path=/Functions/Zle/edit-command-line
+#
+# Source:
+#     https://unix.stackexchange.com/a/485467/289772
+#}}}
+__sane_vim() STTY=sane command vim "$@"
+#            ├───────┘             ├──┘{{{
+#            │                     └ necessary for the temporary filename to be passed
+#            └ man zshparam
+#              /PARAMETERS USED BY THE SHELL
+#
+# Run `stty sane` in order to set up the terminal before executing `vim`.
+# The effect of `stty sane` is local to the `vim` command, and is reset when Vim
+# finishes or is suspended.
+#}}}
+
+sane-edit-command-line() {
+  emulate -L zsh
+  local EDITOR='__sane_vim'
+  zle edit-command-line
+}
+zle -N sane-edit-command-line
+
+bindkey '^X^E' sane-edit-command-line
+#              ^^^^^
+#              wrapper function around the `edit-command-line()` function
 
 # C-x C-h         complete-help {{{4
 
@@ -4044,10 +4146,6 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #       Except that most of the time, the local variables in a function
 #       use lowercase characters.
 #
-
-# TODO:
-# Integrate `~/.zprofile` here?
-# Are there commands that we really need to write in `~/.zprofile`?
 
 # TODO:
 # Type `$ vim Tab`.
