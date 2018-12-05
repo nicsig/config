@@ -1753,7 +1753,7 @@ set ttimeout
 " set the timeout for mappings to 3s
 set timeoutlen=3000
 
-" … and 6 ms for keycodes.
+" ... and 6 ms for keycodes.
 " Previously we used 50ms, but 6 is the max value to prevent this error:
 "
 "       1. insert sth wrong

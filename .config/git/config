@@ -4,6 +4,14 @@
 	branch = auto
 [commit]
 	template = ~/.config/git/message.txt
+        ; When I'm writing a commit message, show me unified diff between the HEAD commit and what would be committed.{{{
+        ;
+        ; Useful to  get reminded of what  changes the commit includes,  and use
+        ; that info to write a better commit title.
+        ;
+        ; See the commit.verbose configuration variable in git-config(1).
+        ;}}}
+	verbose = true
 [core]
 	editor = vim
 	excludesfile = ~/.cvsignore
@@ -13,10 +21,13 @@
 	autocorrect = 10
 [merge]
 	tool = vimdiff
-; Get rid of annoying  message when we push a branch  without providing any name
-; (`$ git push`).
-;     https://stackoverflow.com/a/13148313/9690698
 [push]
+        ; Get rid of annoying  message when we push a branch  without providing any name.{{{
+        ;
+        ;     `$ git push`
+        ;
+        ;     https://stackoverflow.com/a/13148313/9690698
+        ;}}}
 	default = simple
 [user]
 	name = lacygoill

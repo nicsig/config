@@ -2323,7 +2323,7 @@ alias ga='git add'
 # I can't reproduce this issue anymore.
 # Is this comment still relevant?
 #}}}
-alias gcm='git commit'
+alias gcm='git commit -m'
 alias gco='git checkout'
 
 # Mnemonics: Git Find
@@ -2333,6 +2333,11 @@ alias gp='rlwrap -H /dev/null git push'
 
 # Git Restore Last Commit
 alias grlc='git reset --hard "$(git rev-parse HEAD)"'
+
+# this shadows the `/usr/bin/gs` (ghostscript) utility, but I don't care
+alias gs='git status -s'
+#                     │
+#                     └ `--short`, give the output in the short-format
 
 # grep {{{3
 
@@ -2376,6 +2381,14 @@ alias iotop='iotop -o -P'
 
 alias ls='ls --color=auto'
 alias l=ls++
+
+# man_ascii {{{3
+
+#                                 ┌ print 20 lines of trailing context,{{{
+#                                 │ i.e. the 20 lines following the line where 'Tables' was matched
+#                                 ├───┐}}}
+alias man_ascii='man ascii | grep -A 20 Tables'
+alias man_ascii_long='man ascii | grep -A 67 Oct | less'
 
 # mpv {{{3
 
