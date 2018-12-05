@@ -1,3 +1,5 @@
+# Source: https://github.com/github/gitignore/tree/master/Global
+
 # Ansible {{{1
 
 *.retry
@@ -172,4 +174,3 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Source: https://github.com/github/gitignore/tree/master/Global
