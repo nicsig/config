@@ -1,4 +1,36 @@
-# Source: https://github.com/github/gitignore/tree/master/Global
+# Why do you use this file instead of something like `~/.gitignore_global`?{{{
+#
+# That's what tpope recommends in the README file for pathogen.
+#
+#     > I'll teach you how to ignore tags globally:
+#
+#     $ git config --global core.excludesfile '~/.cvsignore'
+#     $ echo tags >> ~/.cvsignore
+#
+#     > While any filename will work, I've chosen to follow the ancient
+#     > tradition of .cvsignore because utilities like rsync use it, too.
+#
+# Source:
+#
+#     https://github.com/tpope/vim-pathogen
+#}}}
+# Some of your globs don't begin with a star. Does git add one automatically?{{{
+#
+# No.
+# If there's no star, it simply means we don't need one.
+# Example:
+#
+#     .DS_Store
+#
+# This matches a file whose name is `.DS_Store`.
+# A file  named `foo.DS_Store` would  not be affected  by this glob,  and that's
+# expected.
+# `.DS_Store` is a file created automatically by macOS, not `foo.DS_Store`.
+#}}}
+# Where did you find the code for all these sections?{{{
+#
+#     https://github.com/github/gitignore/tree/master/Global
+#}}}
 
 # Ansible {{{1
 
