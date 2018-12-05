@@ -5,7 +5,7 @@
 [commit]
 	template = ~/.config/git/message.txt
 [core]
-        editor = env not_called_by_me=1 vim
+	editor = env not_called_by_me=1 vim
         ; Why not using `~/.config/git/gitignore_global`?{{{
         ;
         ;     > I'll teach you how to ignore tags globally:

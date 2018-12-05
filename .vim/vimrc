@@ -129,6 +129,15 @@ Plug 'lacygoill/vim-graph'
 "
 " Update:
 " A file watcher (like entr) may be even better.
+" http://eradman.com/entrproject/
+" See:
+"     ~/bin/entr-reload-browser
+"     ~/bin/entr-watch
+"
+" Try:
+"     % ( ls ~/Dropbox/wiki/web/practice/htdocs/*.html | entr entr-reload-browser Firefox &! )
+"     % vim ~/Dropbox/wiki/web/practice/htdocs/index.html
+"     open the file in firefox too, then edit the file in Vim, then watch the page in firefox
 "
 " Issue:
 " Your tags will be generated only in git projects.

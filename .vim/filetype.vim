@@ -91,5 +91,7 @@ augroup filetypedetect
     au! BufRead,BufNewFile zsh.snippets set ft=snippets
 
     au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} set ft=help
+
+    au! BufRead,BufNewFile $HOME/.cvsignore set ft=conf
 augroup END
 

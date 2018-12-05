@@ -162,7 +162,7 @@ fu! s:move_tabpage(where) abort
         return lg#catch_error()
     endtry
 endfu
-
+" }}}1
 " Make `fx` motion, &friends, repeatable {{{1
 
 " To make `)` repeatable, we just need to invoke `lg#motion#repeatable#make#all()`.
@@ -186,9 +186,9 @@ endfu
 "         1. save `x` to later repeat `fx`
 "         2. repeat `fx` by pressing Vim's default `;` motion
 "
-" The 1st solution will  work with `tx` and `Tx`, but only  the 1st time.  After
-" that, the  cursor won't move,  because it will always  be stopped by  the same
-" `x`.
+" The 1st solution will work with `tx` and `Tx`, but only the 1st time.
+" After that, the  cursor won't move, because  it will always be  stopped by the
+" same `x`.
 "
 " So we must use the 2nd solution, and press `;`.
 " But this introduces a special case:
@@ -243,8 +243,8 @@ fu! s:fts(cmd) abort
     augroup sneak_open_folds
         au!
         au CursorMoved * exe 'norm! zv'
-        \ |              exe 'au! sneak_open_folds '
-        \ |              aug! sneak_open_folds
+            \ |          exe 'au! sneak_open_folds '
+            \ |          aug! sneak_open_folds
     augroup END
 
     " What's the purpose of this `if` conditional?{{{
