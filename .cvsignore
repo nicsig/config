@@ -1,4 +1,19 @@
-# Why do you use this file instead of something like `~/.gitignore_global`?{{{
+# What's this file?{{{
+#
+# A global `.gitignore` for patterns matching file names we never want to track,
+# no matter the project.
+#}}}
+# What's the default location for such a file?{{{
+#
+# Whatever path is contained in the value of `core.excludesfile`:
+#
+#       $ git config --global core.excludesfile
+#
+# By default, it should be:
+#
+#       ~/.config/git/ignore
+#}}}
+# Ok, so why do you use `~/.cvsignore` instead of this default path?{{{
 #
 # That's what tpope recommends in the README file for pathogen.
 #

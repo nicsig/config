@@ -107,7 +107,7 @@ export LC_TIME=en_US.UTF-8
 #}}}
 # What does `i` mean?{{{
 #
-# It's a `$ less` option which makes a search case-insensitive.
+# It's a Less option which makes a search case-insensitive.
 #
 # Note that  if your search  pattern contains  an uppercase character,  the case
 # WILL still be taken into account.
@@ -116,9 +116,28 @@ export LC_TIME=en_US.UTF-8
 #}}}
 # What does `M` mean?{{{
 #
-# It's a `$ less` option which makes the prompt more verbose.
+# It's a Less option which makes the prompt more verbose.
 # At  the bottom  of  the screen,  it  prints  info about  our  position with  a
 # percentage, and line numbers.
+#}}}
+# What does `R` mean?{{{
+#
+# It's  an option  which prevents  Less from  displaying the  caret notation  of
+# control characters used in ANSI color escape sequences.
+# Instead, they're sent in raw form to the terminal which will interpret them to
+# set the colors of the text appropriately.
+#
+# This is useful for commands such as `$ git log`.
+# Without, you would see things like `ESC[33m ... ESC[m`.
+#
+# If you still see control characters, you can use `r` instead of `R`.
+# However, from `$ man less`:
+#
+#     Warning: when the -r option is used,  less cannot keep track of the actual
+#     appearance of the screen (since this depends on how the screen responds to
+#     each type of control character).
+#      Thus, various display  problems may result, such as long  lines being split
+#      in the wrong place.
 #}}}
 # What does `S` mean?{{{
 #
@@ -129,7 +148,7 @@ export LC_TIME=en_US.UTF-8
 # It's a `$ less` option which makes the cursor jump at the bottom of the screen
 # on startup.
 #}}}
-export LESS=iMS+G
+export LESS=iMRS+G
 
 # Make `less` able to read archives and pdfs.
 # How does it work?{{{

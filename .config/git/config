@@ -32,3 +32,14 @@
 [user]
 	name = lacygoill
 	email = lacygoill@lacygoill.me
+[diff]
+        ; use "patience diff" algorithm when generating patches
+	algorithm = patience
+[advice]
+        ; Do NOT show directions on how to proceed from the current state in the output of git-status(1),
+        ;
+        ; as  well as  in the  template shown  when writing  commit messages  in
+        ; git-commit(1), and  in the help  message shown by  gitcheckout(1) when
+        ; switching branch.
+        ;
+	statusHints = false
