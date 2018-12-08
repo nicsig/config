@@ -25,11 +25,11 @@ endfu
 
 fu! colorscheme#set_custom_hg() abort "{{{1
     call s:user()
-    call s:backticks()
+    call s:styled_comments()
     call s:tabline()
 endfu
 
-fu! s:backticks() abort "{{{1
+fu! s:styled_comments() abort "{{{1
     let attributes = {
         \ 'fg'      : 0,
         \ 'bg'      : 0,
@@ -39,13 +39,16 @@ fu! s:backticks() abort "{{{1
 
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Comment')), k)})
 
-    let cmd = has('gui_running')
-          \ ?     'hi Backticks gui=bold guifg=%s'
-          \ : &tgc
-          \ ?     'hi Backticks term=bold cterm=bold guifg=%s'
-          \ :     'hi Backticks term=bold cterm=bold ctermfg=%s'
+    for [attribute, hg] in items({'bold': 'CommentStrong', 'italic': 'CommentEmphasis'})
+        let cmd = has('gui_running')
+              \ ?     'hi '.hg.' gui='.attribute.' guifg=%s'
+              \ : &tgc
+              \ ?     'hi '.hg.' term='.attribute.' cterm='.attribute.' guifg=%s'
+              \ :     'hi '.hg.' term='.attribute.' cterm='.attribute.' ctermfg=%s'
+        exe printf(cmd, attributes.fg)
+    endfor
 
-    exe printf(cmd, attributes.fg)
+    exe 'hi CommentCodeSpan '.(has('gui_running') || &tgc ? 'guifg' : 'ctermfg').'=235'
 endfu
 
 fu! s:tabline() abort "{{{1

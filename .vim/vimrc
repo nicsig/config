@@ -760,8 +760,8 @@ augroup END
 
 " Is 'flp' used automatically? {{{
 "
-" No, you also need to include the  `n` flag inside 'fo' (we did in vimrc). This
-" tells Vim to use 'flp' to recognize lists when we use `gw`.
+" No, you also need to include the `n` flag inside 'fo' (we did in `vim-par`).
+" This tells Vim to use 'flp' to recognize lists when we use `gw`.
 "}}}
 " What's the effect?{{{
 "
@@ -4654,19 +4654,12 @@ augroup my_cmdline_window
     au CmdWinEnter * nno  <buffer><nowait><silent>  ZZ     <cr>
     " Purpose:{{{
     "
-    " By default,  C-c is useful to  quit the command line window,  and populate
+    " By default,  C-c is useful to  quit the command line  window, and populate
     " the command line with the command which was being edited in the window.
     " But, it doesn't erases the command line window.
     " Our `C-c` mapping takes care of that.
     "}}}
-    " FIXME: `:redraw` has an undesired side-effect.{{{
-    "
-    " It works,  it erases the  command line window  immediately, as soon  as we
-    " leave it, and get back on the regular command line.
-    " However, for  some reason, if our  command is supposed to  print a message
-    " (e.g. `:echo`), once we execute it later, the message is ALSO erased.
-    "}}}
-    au CmdWinEnter * nno  <buffer><nowait><expr>    <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
+    au CmdWinEnter * nno  <buffer><expr><nowait>    <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
 
     " Purpose:{{{
     "
@@ -7191,11 +7184,13 @@ endfu
 "
 " 140 -
 " In  our  syntax plugins  (awk,  markdown,  sh,  snippets,  vim, ...),  give  a
-" graphical attribute (underline? black color?)  to texts between backticks, and
-" conceal the backticks (less noise).
-" Give  another to  texts  between stars  (italic?), and  yet  another to  texts
-" between 2 stars (bold)?
+" graphical attribute  (colorless) to texts  between backticks, and  conceal the
+" backticks (less noise).
+" Give another to texts between stars (italic), and yet another to texts between
+" 2 stars (bold).
 " Again, conceal the marks.
+"
+"         :noa vim /\C^hi.*Backticks/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc | cw
 "
 " 141 -
 " This mapping works in Vim, but not in Neovim:
@@ -7237,6 +7232,56 @@ endfu
 " We need to make `gf` smarter.
 " When it sees a directory such as `~`, it should not search in it.
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
+
+
+
+let s:syled_comments_filetypes = [
+    \ 'awk',
+    \ 'conf',
+    \ 'gitconfig',
+    \ 'lua',
+    \ 'readline',
+    \ 'sh',
+    \ 'tex',
+    \ 'tmux',
+    \ 'vim',
+    \ 'xkb',
+    \ 'zsh',
+    \ ]
+augroup syled_comments
+    au!
+
+    au FileType * if index(s:syled_comments_filetypes, expand('<amatch>')) >= 0
+        \ |     call lg#styled_comment#fold()
+        \ |     call lg#styled_comment#undo_ftplugin()
+        \ | endif
+
+    au Syntax * if index(s:syled_comments_filetypes, expand('<amatch>')) >= 0
+        \ |     call lg#styled_comment#syntax()
+        \ |     call lg#styled_comment#highlight()
+        \ | endif
+augroup END
+
+" ~/.vim/after/syntax/tmux.vim
+" ~/.vim/after/ftplugin/tmux.vim
+" ~/.vim/after/syntax/zsh.vim
+" ~/.vim/after/ftplugin/zsh.vim
+" ~/.vim/plugged/vim-awk/after/syntax/awk.vim
+" ~/.vim/plugged/vim-awk/after/ftplugin/awk.vim
+" ~/.vim/plugged/vim-conf/after/syntax/conf.vim
+" ~/.vim/plugged/vim-conf/after/ftplugin/conf.vim
+" ~/.vim/plugged/vim-gitconfig/after/syntax/gitconfig.vim
+" ~/.vim/plugged/vim-gitconfig/after/ftplugin/gitconfig.vim
+" ~/.vim/plugged/vim-latex/after/syntax/tex.vim
+" ~/.vim/plugged/vim-latex/after/ftplugin/tex.vim
+" ~/.vim/plugged/vim-lua/after/syntax/lua.vim
+" ~/.vim/plugged/vim-lua/after/ftplugin/lua.vim
+" ~/.vim/plugged/vim-readline/after/syntax/readline.vim
+" ~/.vim/plugged/vim-readline/after/ftplugin/readline.vim
+" ~/.vim/plugged/vim-sh/after/syntax/sh.vim
+" ~/.vim/plugged/vim-sh/after/ftplugin/sh.vim
+" ~/.vim/plugged/vim-xkb/after/syntax/xkb.vim
+" ~/.vim/plugged/vim-xkb/after/ftplugin/xkb.vim
 
 
 
@@ -7367,8 +7412,7 @@ fu! s:save_last_qfl() abort
         let counter += 1
     endwhile
 
-    " TODO:
-    " Find a MWE showing how `fnamemodify()` is necessary.
+    " TODO: Find a MWE showing how `fnamemodify()` is necessary.
     " Why `fnamemodify()`?{{{
     "
     " I think  that without,  sometimes, we  had entries in  a qfl  which didn't

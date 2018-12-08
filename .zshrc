@@ -2323,7 +2323,7 @@ alias ga='git add'
 # I can't reproduce this issue anymore.
 # Is this comment still relevant?
 #}}}
-alias gcm='git commit -m'
+alias gcm='git commit'
 alias gco='git checkout'
 
 # Mnemonics: Git Find

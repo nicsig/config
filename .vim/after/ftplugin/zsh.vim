@@ -1,3 +1,5 @@
+finish
+
 " Why do you load the 'sh' filetype plugins for 'zsh'?{{{
 "
 " It's convenient to avoid repeating ourselves.

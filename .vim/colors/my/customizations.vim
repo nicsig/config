@@ -113,6 +113,7 @@ hi! link VertSplit Normal
 " It's deprecated in Neovim.
 " It feels useless, since we don't need this option to configure any HG.
 "}}}
+" }}}1
 " Custom HGs {{{1
 
 " We're going to define 2 HGs: User1 and User2.
@@ -176,3 +177,4 @@ endif
 " function whose purpose will be to restore as many as possible.
 "}}}
 call colorscheme#restore_cleared_hg()
+

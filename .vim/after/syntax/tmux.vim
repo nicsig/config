@@ -1,3 +1,5 @@
+finish
+
 " See also:  $VIMRUNTIME/syntax/tmux.vim
 syn region tmuxBackticks matchgroup=Comment start=/`/ end=/`/ oneline concealends containedin=tmuxComment
 

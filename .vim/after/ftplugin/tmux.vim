@@ -1,3 +1,8 @@
+" break lines beyond 80 characters
+setl tw=80
+
+finish
+
 " Options {{{1
 
 augroup my_tmux
@@ -7,9 +12,6 @@ augroup my_tmux
                            \ | setl cocu=nc
                            \ | setl cole=3
 augroup END
-
-" break lines beyond 80 characters
-setl tw=80
 
 " Teardown {{{1
 
