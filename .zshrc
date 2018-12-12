@@ -2377,6 +2377,34 @@ alias iotop='iotop -o -P'
 #                   │
 #                   └ only active processes
 
+# lessh {{{3
+
+# We can have syntax highlighting in the less pager:{{{
+#
+#         $ sudo aptitude install source-highlight
+#         $ cp /usr/share/source-highlight/src-hilite-lesspipe.sh ~/bin/src-hilite-lesspipe.sh
+#         $ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
+#         $ lessh ~/GitRepos/ranger/ranger.py
+#
+# Source:
+#
+#         https://unix.stackexchange.com/a/139787/289772
+#}}}
+# FIXME: `lessh` is highlighted in red (as if it was executed a wrong command).{{{
+#
+# It should be highlighted as an alias.
+#
+# It's fixed by this commit:
+#
+#     https://github.com/zsh-users/zsh-syntax-highlighting/commit/cb8c736a564e0023a0ef4e7635c0eb4be5eb56a4
+#
+# I use a purposefully older version of the zsh-syntax-highlighting plugin,
+# because this commit introduces a regression:
+#
+#     https://github.com/zsh-users/zsh-syntax-highlighting/issues/565
+#}}}
+alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
+
 # ls {{{3
 
 alias ls='ls --color=auto'

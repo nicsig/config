@@ -205,7 +205,7 @@ Or use a `try` conditional before trying to use its value in an assignment.
 
 ##
 # TODO
-## ???
+## ?
 
 Press `vis"` while the cursor is where the bar is:
 
@@ -220,7 +220,7 @@ Same issue with `vis'` and:
         b|ar
         ' baz
 
-## ???
+## ?
 
 Debug this:
 
@@ -234,7 +234,7 @@ However, this works as expected:
         let a = Func(ab)
         call Func(ab)
 
-## ???
+## ?
 
 Read this (taken from vim-surround note), and try to reimplement it:
 
@@ -279,7 +279,7 @@ Read this (taken from vim-surround note), and try to reimplement it:
 
           let g:surround_{char2nr("d")} = "<div\1id: \r..*\r id=\"&\"\1>\r</div>"
 
-## ???
+## ?
 
                    ↣ sdf ↢
 

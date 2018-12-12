@@ -30,5 +30,38 @@ set rtp+=~/.vim/after
 "}}}
 let &packpath = &rtp
 
+" Purpose:{{{
+"
+" On Ubuntu 16.04, we've installed the deb package `usrmerge`.
+" As a result, `/bin` is a symlink to `/usr/bin`.
+" So, the python2 interpreter can be found with 2 paths:
+"
+"     /bin/python2
+"     /usr/bin/python2
+"
+" Because of this, `:CheckHealth` contains the following message:
+"
+"     - INFO: Multiple python2 executables found.  Set `g:python_host_prog` to avoid surprises.
+"     - INFO: Executable: /usr/bin/python2
+"     - INFO: Other python executable: /bin/python2
+"
+" To get rid of the message, we explicitly tell Neovim which path it must use
+" to invoke the python2 interpreter.
+"
+" We do the same for the python3 interpreter, for 3 reasons:
+"
+"     • it helps Neovim find the interpreter faster, which makes startup faster too
+"     • no surprise (Neovim won't use a possible old installation we forgot to remove)
+"     • in case of an issue `:CheckHealth` will give better advice
+"}}}
+let g:python_host_prog = '/usr/bin/python'
+let g:python3_host_prog = '/usr/bin/python3'
+" How to disable Python 2 or Python 3 support?{{{
+"
+"     let g:loaded_python_provider = 0
+"
+"     let g:loaded_python3_provider = 0
+"}}}
+
 source $HOME/.vim/vimrc
 

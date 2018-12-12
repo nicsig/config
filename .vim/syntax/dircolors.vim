@@ -1,4 +1,6 @@
-" I copied the contents of this file from:    $VIMRUNTIME/syntax/dircolors.vim
+" I copied the contents of this file from:
+"
+"     $VIMRUNTIME/syntax/dircolors.vim
 "
 " I use this file just to wrap the autocmds at the end inside an augroup.
 " Without the augroup, they are duplicated every time we reload a `dircolors`

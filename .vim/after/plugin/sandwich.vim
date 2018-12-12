@@ -82,6 +82,7 @@ fu! s:set_recipes() abort
     " 'g' for Grave accent.
     "}}}
     let g:sandwich#recipes = g:sandwich#default_recipes
+                         \ + [{'buns': ['```', '```'], 'input': ['bb'], 'command': ["'[,']CommentToggle"]}]
                          \ + [{'buns': ['`', "'"], 'input': ['g']}]
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]

@@ -1,6 +1,4 @@
 ==============================================================================
-git
-
 http://mislav.net/2014/02/hidden-documentation/
 ==============================================================================
 Create Hyper modifier to install various global key bindings
@@ -42,6 +40,7 @@ xcape -t 170 &
 setxkbmap us -option ctrl:nocaps -option shift:both_capslock
 
 (the -t 170 flag gives a timeout; here, it will only register quick taps as Escape. Adjust to taste)
+
 ==============================================================================
 There are inconsistencies between the different implementations of the modulo
 operation over negative numbers, depending on the compiler, environment,
@@ -199,6 +198,7 @@ Toutes les fenêtres pour lesquelles cette option est active scrollent de façon
 
          :set nowrap sidescroll=1 listchars=extends:>,precedes:<
          :set sidescrolloff=1
+
 ==============================================================================
 List modification ~
 
@@ -1061,238 +1061,6 @@ hasmapto()      Function to test if the user already defined a mapping
             mappings.
 
 exists(":Cmd")      Check if a user command already exists.
-
-==============================================================================
-*41.12* Writing a filetype plugin   *write-filetype-plugin* *ftplugin*
-
-A filetype plugin is like a global plugin, except that it sets options and
-defines mappings for the current buffer only.  See |add-filetype-plugin| for
-how this type of plugin is used.
-
-First read the section on global plugins above |41.11|.  All that is said there
-also applies to filetype plugins.  There are a few extras, which are explained
-here.  The essential thing is that a filetype plugin should only have an
-effect on the current buffer.
-
-
-DISABLING
-
-If you are writing a filetype plugin to be used by many people, they need a
-chance to disable loading it.  Put this at the top of the plugin: >
-
-    " Only do this when not done yet for this buffer
-    if exists("b:did_ftplugin")
-      finish
-    endif
-    let b:did_ftplugin = 1
-
-This also needs to be used to avoid that the same plugin is executed twice for
-the same buffer (happens when using an ":edit" command without arguments).
-
-Now users can disable loading the default plugin completely by making a
-filetype plugin with only this line: >
-
-    let b:did_ftplugin = 1
-
-This does require that the filetype plugin directory comes before $VIMRUNTIME
-in 'runtimepath'!
-
-If you do want to use the default plugin, but overrule one of the settings,
-you can write the different setting in a script: >
-
-    setlocal textwidth=70
-
-Now write this in the "after" directory, so that it gets sourced after the
-distributed "vim.vim" ftplugin |after-directory|.  For Unix this would be
-"~/.vim/after/ftplugin/vim.vim".  Note that the default plugin will have set
-"b:did_ftplugin", but it is ignored here.
-
-
-OPTIONS
-
-To make sure the filetype plugin only affects the current buffer use the >
-
-    :setlocal
-
-command to set options.  And only set options which are local to a buffer (see
-the help for the option to check that).  When using |:setlocal| for global
-options or options local to a window, the value will change for many buffers,
-and that is not what a filetype plugin should do.
-
-When an option has a value that is a list of flags or items, consider using
-"+=" and "-=" to keep the existing value.  Be aware that the user may have
-changed an option value already.  First resetting to the default value and
-then changing it is often a good idea.  Example: >
-
-    :setlocal formatoptions& formatoptions+=ro
-
-
-MAPPINGS
-
-To make sure mappings will only work in the current buffer use the >
-
-    :map <buffer>
-
-command.  This needs to be combined with the two-step mapping explained above.
-An example of how to define functionality in a filetype plugin: >
-
-    if !hasmapto('<Plug>JavaImport')
-      map <buffer> <unique> <LocalLeader>i <Plug>JavaImport
-    endif
-    noremap <buffer> <unique> <Plug>JavaImport oimport ""<Left><Esc>
-
-|hasmapto()| is used to check if the user has already defined a map to
-<Plug>JavaImport.  If not, then the filetype plugin defines the default
-mapping.  This starts with |<LocalLeader>|, which allows the user to select
-the key(s) he wants filetype plugin mappings to start with.  The default is a
-backslash.
-"<unique>" is used to give an error message if the mapping already exists or
-overlaps with an existing mapping.
-|:noremap| is used to avoid that any other mappings that the user has defined
-interferes.  You might want to use ":noremap <script>" to allow remapping
-mappings defined in this script that start with <SID>.
-
-The user must have a chance to disable the mappings in a filetype plugin,
-without disabling everything.  Here is an example of how this is done for a
-plugin for the mail filetype: >
-
-    " Add mappings, unless the user didn't want this.
-    if !exists("no_plugin_maps") && !exists("no_mail_maps")
-      " Quote text by inserting "> "
-      if !hasmapto('<Plug>MailQuote')
-        vmap <buffer> <LocalLeader>q <Plug>MailQuote
-        nmap <buffer> <LocalLeader>q <Plug>MailQuote
-      endif
-      vnoremap <buffer> <Plug>MailQuote :s/^/> /<CR>
-      nnoremap <buffer> <Plug>MailQuote :.,$s/^/> /<CR>
-    endif
-
-Two global variables are used:
-no_plugin_maps      disables mappings for all filetype plugins
-no_mail_maps        disables mappings for a specific filetype
-
-
-USER COMMANDS
-
-To add a user command for a specific file type, so that it can only be used in
-one buffer, use the "-buffer" argument to |:command|.  Example: >
-
-    :command -buffer  Make  make %:r.s
-
-
-VARIABLES
-
-A filetype plugin will be sourced for each buffer of the type it's for.  Local
-script variables |s:var| will be shared between all invocations.  Use local
-buffer variables |b:var| if you want a variable specifically for one buffer.
-
-
-FUNCTIONS
-
-When defining a function, this only needs to be done once.  But the filetype
-plugin will be sourced every time a file with this filetype will be opened.
-This construct makes sure the function is only defined once: >
-
-    :if !exists("*s:Func")
-    :  function s:Func(arg)
-    :    ...
-    :  endfu
-    :endif
-<
-
-UNDO                            *undo_ftplugin*
-
-When the user does ":setfiletype xyz" the effect of the previous filetype
-should be undone.  Set the b:undo_ftplugin variable to the commands that will
-undo the settings in your filetype plugin.  Example: >
-
-    let b:undo_ftplugin = "setlocal fo< com< tw< commentstring<"
-        \ . "| unlet b:match_ignorecase b:match_words b:match_skip"
-
-Using ":setlocal" with "<" after the option name resets the option to its
-global value.  That is mostly the best way to reset the option value.
-
-This does require removing the "C" flag from 'cpoptions' to allow line
-continuation, as mentioned above |use-cpo-save|.
-
-
-FILE NAME
-
-The filetype must be included in the file name |ftplugin-name|.  Use one of
-these three forms:
-
-    .../ftplugin/stuff.vim
-    .../ftplugin/stuff_foo.vim
-    .../ftplugin/stuff/bar.vim
-
-"stuff" is the filetype, "foo" and "bar" are arbitrary names.
-
-
-SUMMARY                         *ftplugin-special*
-
-Summary of special things to use in a filetype plugin:
-
-<LocalLeader>       Value of "maplocalleader", which the user defines as
-                    the keys that filetype plugin mappings start with.
-
-:map <buffer>       Define a mapping local to the buffer.
-
-:noremap <script>   Only remap mappings defined in this script that start
-                    with <SID>.
-
-:setlocal           Set an option for the current buffer only.
-
-:command -buffer    Define a user command local to the buffer.
-
-exists("*s:Func")   Check if a function was already defined.
-
-Also see |plugin-special|, the special things used for all plugins.
-
-==============================================================================
-*41.13* Writing a compiler plugin       *write-compiler-plugin*
-
-A compiler plugin sets options for use with a specific compiler.  The user can
-load it with the |:compiler| command.  The main use is to set the
-'errorformat' and 'makeprg' options.
-
-Easiest is to have a look at examples.  This command will edit all the default
-compiler plugins: >
-
-    :next $VIMRUNTIME/compiler/*.vim
-
-Use |:next| to go to the next plugin file.
-
-There are two special items about these files.  First is a mechanism to allow
-a user to overrule or add to the default file.  The default files start with: >
-
-    :if exists("current_compiler")
-    :  finish
-    :endif
-    :let current_compiler = "mine"
-
-When you write a compiler file and put it in your personal runtime directory
-(e.g., ~/.vim/compiler for Unix), you set the "current_compiler" variable to
-make the default file skip the settings.
-                            *:CompilerSet*
-The second mechanism is to use ":set" for ":compiler!" and ":setlocal" for
-":compiler".  Vim defines the ":CompilerSet" user command for this.  However,
-older Vim versions don't, thus your plugin should define it then.  This is an
-example: >
-
-  if exists(":CompilerSet") != 2
-    command -nargs=* CompilerSet setlocal <args>
-  endif
-  CompilerSet errorformat&      " use the default 'errorformat'
-  CompilerSet makeprg=nmake
-
-When you write a compiler plugin for the Vim distribution or for a system-wide
-runtime directory, use the mechanism mentioned above.  When
-"current_compiler" was already set by a user plugin nothing will be done.
-
-When you write a compiler plugin to overrule settings from a default plugin,
-don't check "current_compiler".  This plugin is supposed to be loaded
-last, thus it should be in a directory at the end of 'runtimepath'.  For Unix
-that could be ~/.vim/after/compiler.
 
 ==============================================================================
 *41.14* Writing a plugin that loads quickly *write-plugin-quickload*
@@ -2915,11 +2683,6 @@ settings as follows.
 5   Éléments imbriqués
 
 Lire et documenter `:h syn-containedin`.
-On s'en est servi dans:
-
-        ~/.vim/after/syntax/vim.vim
-
-... pour masquer les caractères de masquage.
 Parler aussi du nom de groupe syntaxique spécial `ALL` (`:h syn-contains`).
 Parler aussi de `:h synconcealed()`.
 
@@ -3338,161 +3101,6 @@ even if it would normally match another synchronization method: >
 More about synchronizing in the reference manual: |:syn-sync|.
 
 ==============================================================================
-Plugins for a filetype
-
-How to start using filetype plugins has already been discussed here:
-|add-filetype-plugin|.  But you probably are not satisfied with the default
-settings, because they have been kept minimal.  Suppose that for C files you
-want to set the 'softtabstop' option to 4 and define a mapping to insert a
-three-line comment.  You do this with only two steps:
-
-                            *your-runtime-dir*
-1. Create your own runtime directory.  On Unix this usually is "~/.vim".  In
-   this directory create the "ftplugin" directory: >
-
-    mkdir ~/.vim
-    mkdir ~/.vim/ftplugin
-<
-   When you are not on Unix, check the value of the 'runtimepath' option to
-   see where Vim will look for the "ftplugin" directory: >
-
-    set runtimepath
-
-<  You would normally use the first directory name (before the first comma).
-   You might want to prepend a directory name to the 'runtimepath' option in
-   your |vimrc| file if you don't like the default value.
-
-2. Create the file "~/.vim/ftplugin/c.vim", with the contents: >
-
-    setlocal softtabstop=4
-    noremap <buffer> <LocalLeader>c o/**************<CR><CR>/<Esc>
-    let b:undo_ftplugin = "setl softtabstop< | unmap <buffer> <LocalLeader>c"
-
-Try editing a C file.  You should notice that the 'softtabstop' option is set
-to 4.  But when you edit another file it's reset to the default zero.  That is
-because the ":setlocal" command was used.  This sets the 'softtabstop' option
-only locally to the buffer.  As soon as you edit another buffer, it will be
-set to the value set for that buffer.  For a new buffer it will get the
-default value or the value from the last ":set" command.
-
-Likewise, the mapping for "\c" will disappear when editing another buffer.
-The ":map <buffer>" command creates a mapping that is local to the current
-buffer.  This works with any mapping command: ":map!", ":vmap", etc.  The
-|<LocalLeader>| in the mapping is replaced with the value of the
-"maplocalleader" variable.
-
-The line to set b:undo_ftplugin is for when the filetype is set to another
-value.  In that case you will want to undo your preferences.  The
-b:undo_ftplugin variable is executed as a command. Watch out for characters
-with a special meaning inside a string, such as a backslash.
-
-You can find examples for filetype plugins in this directory: >
-
-    $VIMRUNTIME/ftplugin/
-
-More details about writing a filetype plugin can be found here:
-|write-plugin|.
-
-==============================================================================
-Adding a filetype
-
-If you are using a type of file that is not recognized by Vim, this is how to
-get it recognized.  You need a runtime directory of your own.  See
-|your-runtime-dir| above.
-
-Create a file "filetype.vim" which contains an autocommand for your filetype.
-(Autocommands were explained in section |40.3|.)  Example: >
-
-    augroup filetypedetect
-    au BufNewFile,BufRead *.xyz setf xyz
-    augroup END
-
-This will recognize all files that end in ".xyz" as the "xyz" filetype.  The
-":augroup" commands put this autocommand in the "filetypedetect" group.  This
-allows removing all autocommands for filetype detection when doing ":filetype
-off".  The "setf" command will set the 'filetype' option to its argument,
-unless it was set already.  This will make sure that 'filetype' isn't set
-twice.
-
-You can use many different patterns to match the name of your file.  Directory
-names can also be included.  See |autocmd-patterns|.  For example, the files
-under "/usr/share/scripts/" are all "ruby" files, but don't have the expected
-file name extension.  Adding this to the example above: >
-
-    augroup filetypedetect
-    au BufNewFile,BufRead *.xyz         setf xyz
-    au BufNewFile,BufRead /usr/share/scripts/*  setf ruby
-    augroup END
-
-However, if you now edit a file /usr/share/scripts/README.txt, this is not a
-ruby file.  The danger of a pattern ending in "*" is that it quickly matches
-too many files.  To avoid trouble with this, put the filetype.vim file in
-another directory, one that is at the end of 'runtimepath'.  For Unix for
-example, you could use "~/.vim/after/filetype.vim".
-   You now put the detection of text files in ~/.vim/filetype.vim: >
-
-    augroup filetypedetect
-    au BufNewFile,BufRead *.txt         setf text
-    augroup END
-
-That file is found in 'runtimepath' first.  Then use this in
-~/.vim/after/filetype.vim, which is found last: >
-
-    augroup filetypedetect
-    au BufNewFile,BufRead /usr/share/scripts/*  setf ruby
-    augroup END
-
-What will happen now is that Vim searches for "filetype.vim" files in each
-directory in 'runtimepath'.  First ~/.vim/filetype.vim is found.  The
-autocommand to catch *.txt files is defined there.  Then Vim finds the
-filetype.vim file in $VIMRUNTIME, which is halfway 'runtimepath'.  Finally
-~/.vim/after/filetype.vim is found and the autocommand for detecting ruby
-files in /usr/share/scripts is added.
-   When you now edit /usr/share/scripts/README.txt, the autocommands are
-checked in the order in which they were defined.  The *.txt pattern matches,
-thus "setf text" is executed to set the filetype to "text".  The pattern for
-ruby matches too, and the "setf ruby" is executed.  But since 'filetype' was
-already set to "text", nothing happens here.
-   When you edit the file /usr/share/scripts/foobar the same autocommands are
-checked.  Only the one for ruby matches and "setf ruby" sets 'filetype' to
-ruby.
-
-
-RECOGNIZING BY CONTENTS
-
-If your file cannot be recognized by its file name, you might be able to
-recognize it by its contents.  For example, many script files start with a
-line like:
-
-    #!/bin/xyz ~
-
-To recognize this script create a file "scripts.vim" in your runtime directory
-(same place where filetype.vim goes).  It might look like this: >
-
-    if did_filetype()
-      finish
-    endif
-    if getline(1) =~ '^#!.*[/\\]xyz\>'
-      setf xyz
-    endif
-
-The first check with did_filetype() is to avoid that you will check the
-contents of files for which the filetype was already detected by the file
-name.  That avoids wasting time on checking the file when the "setf" command
-won't do anything.
-   The scripts.vim file is sourced by an autocommand in the default
-filetype.vim file.  Therefore, the order of checks is:
-
-    1. filetype.vim files before $VIMRUNTIME in 'runtimepath'
-    2. first part of $VIMRUNTIME/filetype.vim
-    3. all scripts.vim files in 'runtimepath'
-    4. remainder of $VIMRUNTIME/filetype.vim
-    5. filetype.vim files after $VIMRUNTIME in 'runtimepath'
-
-If this is not sufficient for you, add an autocommand that matches all files
-and sources a script or executes a function to check the contents of the file.
-
-==============================================================================
 11  Installer un fichier de syntaxe
 
 When your new syntax file is ready to be used, drop it in a "syntax" directory
@@ -3625,3 +3233,4 @@ This code will then let the awk code in the single quotes: >
     awk '...awk code here...'
 be highlighted using the awk highlighting syntax.  Clearly this may be
 extended to other languages.
+

@@ -99,6 +99,16 @@ call s:cancel_prefix(['+', '-', '<space>','<bar>', 'U', 's', 'S'])
 "}}}
 ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
 
+" i_. {{{1
+
+" Sometimes, when leaving insert mode and pressing `SPC p` to format the current
+" paragraph, Vim inserts some random text.
+" I'm probably pressing some wrong keys when I type too quickly.
+" The random text seems to come from a register.
+" It may be the dot register.
+
+ino <c-r>. <nop>
+
 " C-z {{{1
 
 " Don't suspend if I press C-z by accident from visual mode.

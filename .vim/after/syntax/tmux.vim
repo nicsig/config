@@ -1,9 +1,9 @@
-finish
+" Redefine the `tmuxComment` group to include our custom `tmuxCommentTitle` item.{{{
+"
+" The latter is defined in `lg#styled_comment#syntax()`:
+"
+"     ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+"}}}
+syn clear tmuxComment
+syn region tmuxComment start=/#/ skip=/\\\@<!\\$/ end=/$/ contains=tmuxTodo,tmuxCommentTitle
 
-" See also:  $VIMRUNTIME/syntax/tmux.vim
-syn region tmuxBackticks matchgroup=Comment start=/`/ end=/`/ oneline concealends containedin=tmuxComment
-
-exe 'syn match tmuxFoldMarkers  /#\=\s*{'.'{{\d*\s*\ze\n/  conceal cchar=❭  containedin=tmuxComment'
-exe 'syn match tmuxFoldMarkers  /#\=\s*}'.'}}\d*\s*\ze\n/  conceal cchar=❬  containedin=tmuxComment'
-
-hi link  tmuxBackticks    Backticks

@@ -3365,8 +3365,8 @@ fu! s:fix_display() abort
     "
     "     :syntax sync fromstart
     "
-    " But after we execute it in our `vimrc`, every time we source our vimrc, we
-    " experience lag.
+    " But after we execute  it in our `vimrc`, every time  we source the latter,
+    " we experience lag.
     "}}}
     syntax sync minlines=200
     syntax sync maxlines=400
@@ -3729,7 +3729,6 @@ fu! s:textobj_func(inside) abort
         k<
         call search('^\s*endf\%[unction]\s*$', 'eW')
         k>
-        exe 'norm! gv$'.(a:inside ? 'koj' : '')
         exe 'norm! gv$'.(a:inside ? 'koj' : '')
         " we want a linewise selection no matter the original visual mode
         exe (mode() isnot# 'V' ? 'norm! V' : '')
@@ -6343,8 +6342,8 @@ endfu
 "     set noswapfile
 "
 " 77 -
-" in  neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
-" current neovim instance. but what about vim?
+" In  neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
+" current neovim instance. But what about vim?
 "
 "     https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 "
@@ -6373,6 +6372,7 @@ endfu
 "     :h terminal.txt
 "
 "     :h if_lua.txt
+"     :h if_pyth.txt
 "
 "     :h diff.txt
 "     :h recover.txt
@@ -6444,8 +6444,8 @@ endfu
 "                 :verb filter // ab
 "
 " 84 -
-" to document.
-" if neovim is unable to suggest suggestions to fix spelling errors,
+" To document.
+" If neovim is unable to suggest suggestions to fix spelling errors,
 " start it like this:
 "
 "         $ nvim -nu norc
@@ -6455,18 +6455,18 @@ endfu
 "         helzo
 "
 " then execute `:set spell`.
-" it should make neovim download some missing files (i don't know where).
+" IT should make neovim download some missing files (i don't know where).
 " for more info:
 "
 "     https://github.com/neovim/neovim/issues/7694
 "     https://github.com/neovim/neovim/issues/7189
 "
-" also, for debugging purpose, try `:spellinfo`.
+" Also, for debugging purpose, try `:spellinfo`.
 "
 " 85 -
-" maybe we could install a wrapper command  (:filter) which would do the job for
+" Maybe we could install a wrapper command  (:filter) which would do the job for
 " the commands which are not supported.
-" see `:h  :index`, and  search for  all the commands  which could  benefit from
+" See `:h  :index`, and  search for  all the commands  which could  benefit from
 " `:filter`:
 "
 "         :args
@@ -6640,11 +6640,11 @@ endfu
 " they don't mean what we thought.
 " if `virtcol('.')` evaluates to `123`, it doesn't mean:
 "
-"     the next character is the 123th on the line
+" >   the next character is the 123th on the line
 "
 " but:
 "
-"     the next character occupies the 123th column on the line
+" >   the next character occupies the 123th column on the line
 "
 " `virtcol()` and `\%v` are influenced by some options ('wrap', 'linebreak', ...).
 "
@@ -7082,16 +7082,18 @@ endfu
 " Search for all vimtex mappings which haven't `<c-u>` before `:call`.
 " Submit an issue whose message looks like:
 "
-"     I'm not saying the absence of C-u causes/caused any issue, but you seem to
-"     care a  lot about the  reliability of your  plugin (confirmed by  the `l:`
-"     scope used  systematically even though  it's not strictly  necessary ...),
-"     and so thought you would agree with using C-u to avoid that your functions
-"     are called unnecessarily several times.
+" >    I'm not saying  the absence of C-u causes/caused any  issue, but you seem
+" >    to care a lot about the reliability of your plugin (confirmed by the `l:`
+" >    scope used systematically  even though it's not  strictly necessary ...),
+" >    and  so  thought you  would  agree  with using  C-u  to  avoid that  your
+" >    functions are called unnecessarily several times.
 "
 " But make sure they are not necessary. They could be, if the function needs
 " to be re-called several times when the user pressed a count.
 "
 "     :noa vim /\m\cmap.*\%(<c-u>\s*\)\@<!\zs\<call\>/gj ~/.vim/plugged/vimtex/**/*.vim | cw
+"
+" Also, vimtex doesn't seem to remove local mappings (b:undo_ftplugin)...
 "
 " 129 -
 " Try to replace as many `:s` commands as possible with `setline()`:
@@ -7183,16 +7185,6 @@ endfu
 " the cycle of directories in which `:vimgrep` should search.
 "
 " 140 -
-" In  our  syntax plugins  (awk,  markdown,  sh,  snippets,  vim, ...),  give  a
-" graphical attribute  (colorless) to texts  between backticks, and  conceal the
-" backticks (less noise).
-" Give another to texts between stars (italic), and yet another to texts between
-" 2 stars (bold).
-" Again, conceal the marks.
-"
-"         :noa vim /\C^hi.*Backticks/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc | cw
-"
-" 141 -
 " This mapping works in Vim, but not in Neovim:
 "     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'int')})[-1]
 "                                                      ├───┘
@@ -7205,8 +7197,10 @@ endfu
 " But still, report it on Neovim's bug tracker.
 " Btw, it looks similar to another issue we opened.
 "
-" 142 -
+" 141 -
+"
 "     % hash | vipe
+"
 "     press `gf` on a path
 "         → it takes several seconds, and the cpu load increases
 "           ✘
@@ -7220,6 +7214,7 @@ endfu
 "       +'set path=.,**' \
 "       +"set inex=substitute(v:fname,'.*=','','')" \
 "       <(hash)
+"
 "     press `gf` on a path: it's slow
 "
 "     vim -Nu NONE \
@@ -7232,12 +7227,50 @@ endfu
 " We need to make `gf` smarter.
 " When it sees a directory such as `~`, it should not search in it.
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
+"
+" 142 -
+" The last  removal of  a mapping  in `b:undo_ftplugin`  should be  executed via
+" `:exe`. Otherwise there may be an error.
+" Indeed, you don't know what the next ftplugin will add.
+" It could add a spaced before the next bar.
+" That's what happens here:
+"     ~/.vim/plugged/vim-latex/after/ftplugin/tex.vim
+"
+" Re-visit all our ftplugins.
+"
+" 143 -
+" `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
+" fold.
+" Maybe  you should  use other  keys to  handle folds,  so that  you can  decide
+" yourself if you want Vim to add an empty line or an empty fold.
+" Currently, I don't think we have an easy algo to teach Vim how to decide itself.
+"
+" 144 -
+"
+" What's the use case of the command attributes `-addr=quickfix` and `-addr=other`?
+"
+" The commit `8.1.0560`:
+"
+"     https://github.com/vim/vim/releases/tag/v8.1.0560
+"
+" has introduced the command attribute `-addr=other`.
+"
+" 145 -
+" Read this:
+"
+"     https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
+" >    Updating a quickfix/location list asynchronously without interfering with another plugin
+
+
+
+" echo get(get(filter(getwininfo(), {i,v -> v.bufnr == 19}), 0, {}), 'winid', 0)
 
 
 
 let s:syled_comments_filetypes = [
     \ 'awk',
     \ 'conf',
+    \ 'dircolors',
     \ 'gitconfig',
     \ 'lua',
     \ 'readline',
@@ -7262,27 +7295,6 @@ augroup syled_comments
         \ | endif
 augroup END
 
-" ~/.vim/after/syntax/tmux.vim
-" ~/.vim/after/ftplugin/tmux.vim
-" ~/.vim/after/syntax/zsh.vim
-" ~/.vim/after/ftplugin/zsh.vim
-" ~/.vim/plugged/vim-awk/after/syntax/awk.vim
-" ~/.vim/plugged/vim-awk/after/ftplugin/awk.vim
-" ~/.vim/plugged/vim-conf/after/syntax/conf.vim
-" ~/.vim/plugged/vim-conf/after/ftplugin/conf.vim
-" ~/.vim/plugged/vim-gitconfig/after/syntax/gitconfig.vim
-" ~/.vim/plugged/vim-gitconfig/after/ftplugin/gitconfig.vim
-" ~/.vim/plugged/vim-latex/after/syntax/tex.vim
-" ~/.vim/plugged/vim-latex/after/ftplugin/tex.vim
-" ~/.vim/plugged/vim-lua/after/syntax/lua.vim
-" ~/.vim/plugged/vim-lua/after/ftplugin/lua.vim
-" ~/.vim/plugged/vim-readline/after/syntax/readline.vim
-" ~/.vim/plugged/vim-readline/after/ftplugin/readline.vim
-" ~/.vim/plugged/vim-sh/after/syntax/sh.vim
-" ~/.vim/plugged/vim-sh/after/ftplugin/sh.vim
-" ~/.vim/plugged/vim-xkb/after/syntax/xkb.vim
-" ~/.vim/plugged/vim-xkb/after/ftplugin/xkb.vim
-
 
 
 augroup my_man_no_showbreak
@@ -7295,30 +7307,30 @@ augroup END
 
 " sessions to finish:
 "
-"         01. keyboard
-"         02. systemd
-"         03. cron
-"         04. swap
-"         05. sandwich
-"         06. markdown
-"         07. emmet
-"         08. arglist (improve our arglist mappings)
-"         09. config
-"         10. paragraph (master `$ par`)
-"         11. qf_issue (finish the last two questions)
-"         12. completion
-"         13. ultisnips
-"         14. profiling
-"         15. debug
-"         16. try
-"         17. async
-"         18. unix
-"         19. tree
-"         20. breakdown
-"         21. package
-"         22. tag
-"         23. cwd
-"         24. unix
+"          1. sandwich
+"          2. ultisnips
+"          3. markdown
+"          4. tag
+"          5. arglist (improve our arglist mappings)
+"          6. breakdown
+"          7. paragraph (master `$ par`)
+"          8. tree
+"          9. keyboard
+"          10. systemd
+"          11. cron
+"          12. swap
+"          13. emmet
+"          14. config
+"          15. qf_issue (finish the last two questions)
+"          16. completion
+"          17. profiling
+"          18. debug
+"          19. try
+"          20. async
+"          21. unix
+"          22. package
+"          23. cwd
+"          24. unix
 "
 " Once finished, get back to studying the terminal and latex.
 
@@ -7396,13 +7408,20 @@ fu! s:save_last_qfl() abort
     "                ┌ the size of the qf stack is limited to 10
     "                │
     while counter <= 10
-        let qfl = getqflist()
-        if empty(qfl)
-            if exists('g:MY_LAST_QFL')
-                unlet g:MY_LAST_QFL
-            endif
+        " TODO: once Neovim supports the 'size' property, remove `len(getqflist())`.
+        let size = !has('nvim')
+            \ ?     get(getqflist({'size': 0}), 'size', 0)
+            \ :     len(getqflist())
+
+        " Saving and restoring a long qfl takes too much time.
+        " And if the qfl is empty, we don't  want to look for another qfl in the
+        " stack.
+        if size > 9999 || size == 0
+            unlet! g:MY_LAST_QFL
             return
-        elseif get(getqflist({'title': 1}), 'title', '') =~# '^\s*:hub\s\+push\s*$'
+        endif
+
+        if get(getqflist({'title': 1}), 'title', '') =~# '^\s*:hub\s\+push\s*$'
             if get(getqflist({'nr': 0}), 'nr', 0) > 1
                 col
             else
@@ -7420,6 +7439,7 @@ fu! s:save_last_qfl() abort
     "
     "         call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
     "}}}
+    let qfl = getqflist()
     call map(qfl,
         \    {i,v -> extend(v,
         \        {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})

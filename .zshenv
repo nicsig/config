@@ -153,7 +153,7 @@ export LESS=iMRS+G
 # Make `less` able to read archives and pdfs.
 # How does it work?{{{
 #
-# `lesspipe` is a utility which, without argument, outputs 2 export statements:
+# `lesspipe` is a utility which, without argument, outputs 2 `export` statements:
 #
 #     export LESSOPEN="| /usr/bin/lesspipe %s";
 #     export LESSCLOSE="/usr/bin/lesspipe %s %s";
@@ -162,7 +162,7 @@ export LESS=iMRS+G
 # As a result, when we try to  open an archive file, `lesspipe` will pre-process
 # it and write its uncompressed text on a pipe which `less` will read.
 #
-# For more information, see `$ man lessopen`.
+# For more information, see `$ man lesspipe` or `$ man lessopen`.
 #}}}
 eval "$(lesspipe)"
 

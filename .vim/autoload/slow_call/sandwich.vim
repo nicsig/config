@@ -1,6 +1,6 @@
 " Why not moving the code from here to `~/.vim/after/plugin/sandwich.vim`?{{{
 "
-" It causes several autoload/ files to be sourced. Too slow.
+" It causes several `autoload/` files to be sourced. Too slow.
 "}}}
 
 if stridx(&rtp, 'vim-sandwich') ==# -1

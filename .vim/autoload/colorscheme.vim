@@ -48,7 +48,29 @@ fu! s:styled_comments() abort "{{{1
         exe printf(cmd, attributes.fg)
     endfor
 
-    exe 'hi CommentCodeSpan '.(has('gui_running') || &tgc ? 'guifg' : 'ctermfg').'=235'
+    " if &background is# 'light'
+    "     exe 'hi CommentCodeSpan '.(has('gui_running') || &tgc ? 'guifg' : 'ctermfg').'=235'
+    " else
+    "     exe 'hi CommentCodeSpan '.(has('gui_running') || &tgc ? 'guifg' : 'ctermfg').'=255'
+    " endif
+
+    " TODO: maybe find better color for blockquotes, codespans and codeblocks
+    " TODO: make sure that the colors are readable no matter the lightness,
+    " and even when we use the dark colorscheme (and even in GUI)
+    if has('gui_running') || &tgc
+        exe 'hi CommentCodeSpan guibg=#bcbcbc guifg=' . attributes.fg
+        exe 'hi CommentBlockQuote gui=italic guibg=#bcbcbc guifg=' . attributes.fg
+    else
+        exe 'hi CommentCodeSpan ctermbg=250 ctermfg=' . attributes.fg
+        exe 'hi CommentBlockQuote term=italic cterm=italic ctermfg=' . attributes.fg
+    endif
+
+    " if has('gui_running') || &tgc
+    "     exe 'hi CommentCodeSpan guifg=#9A7372'
+    " else
+    "     exe 'hi CommentCodeSpan ctermfg=95'
+    " endif
+
 endfu
 
 fu! s:tabline() abort "{{{1
