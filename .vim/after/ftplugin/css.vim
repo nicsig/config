@@ -25,7 +25,7 @@ let b:mc_chain = [
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \ . "
-    \ setl fp< kp< sw<
-    \|unlet! b:mc_chain
-    \"
+    \   setl fp< kp< sw<
+    \ | unlet! b:mc_chain
+    \ "
 

@@ -84,7 +84,7 @@ call s:cancel_prefix(['+', '-', '<space>','<bar>', 'U', 's', 'S'])
 " Disabling those is useless.
 "
 " When  you press  `s` after  `S`, `S`  is automatically  canceled (look  at the
-" command line; 'showcmd'). Only `S` remains.
+" command-line; 'showcmd'). Only `S` remains.
 " If you  wait for the timeout,  our `nno S  <nop>` mapping will be  used, which
 " will make sure nothing happens.
 "}}}

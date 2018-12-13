@@ -37,7 +37,7 @@ endfu
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \ . "
-    \ setl fde< fdm< fdt<
-    \|exe 'au! my_notes * <buffer>'
-    \"
+    \   setl fde< fdm< fdt<
+    \ | exe 'au! my_notes * <buffer>'
+    \ "
 

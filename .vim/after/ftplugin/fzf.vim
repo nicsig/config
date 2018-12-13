@@ -5,6 +5,6 @@ nno  <buffer><nowait><silent>  q  :<c-u>close!<cr>
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \ . "
-    \ nunmap <buffer> q
-    \"
+    \ exe 'nunmap <buffer> q'
+    \ "
 

@@ -15,9 +15,9 @@ nmap  <buffer>  p  o
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \ . "
-    \ nunmap <buffer> H
-    \|nunmap <buffer> o
-    \|nunmap <buffer> }
-    \|nunmap <buffer> {
-    \"
+    \   exe 'nunmap <buffer> H'
+    \ | exe 'nunmap <buffer> o'
+    \ | exe 'nunmap <buffer> }'
+    \ | exe 'nunmap <buffer> {'
+    \ "
 

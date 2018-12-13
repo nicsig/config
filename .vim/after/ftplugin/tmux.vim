@@ -18,7 +18,7 @@ augroup END
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \ . "
-    \ setl cocu< cole< fdm< fdt< tw<
-    \|exe 'au! my_tmux * <buffer>'
-    \"
+    \   setl cocu< cole< fdm< fdt< tw<
+    \ | exe 'au! my_tmux * <buffer>'
+    \ "
 

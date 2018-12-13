@@ -27,11 +27,34 @@ set go=M
 " PLUGINS {{{1
 " Disable plugins {{{2
 
-" :h netrw-noload
-"     no interface
-let g:loaded_netrwPlugin = 1
-"     no autoload/
-let g:loaded_netrw = 1
+" Could I disable `netrw`?{{{
+"
+" Yes:
+"
+"     " no interface
+"     let g:loaded_netrwPlugin = 1
+"
+"     "no autoload/
+"     let g:loaded_netrw = 1
+"
+" See `:h netrw-noload`.
+"}}}
+" Why don't you do it?{{{
+"
+" It would break the `:Gbrowse` command provided by `vim-fugitive` and `vim-rhubarb`.
+" If the file you're working on is hosted on GitHub, `:Gbrowse` lets you read it
+" in your webbrowser.
+"
+" Although, you could disable `netrw` and still use `:Gbrowse`:
+"
+"     com! -bar -nargs=* Browse call system('xdg-open '.shellescape(<q-args>))
+"
+" `:Browse` is an undocumented feature of `vim-fugitive`.
+" See: https://github.com/tpope/vim-fugitive/blob/2564c37d0a2ade327d6381fef42d84d9fad1d057/autoload/fugitive.vim#L3446-L3447
+"
+" I still prefer to enable `netrw`, because  other plugins may rely on it, and I
+" don't want to lose time debugging them.
+"}}}
 
 " I don't  want to  see `GLVS`  nor `GetLatestVimScripts`  when I  press Tab/C-d
 " after the beginning of the name of a command.
@@ -623,7 +646,7 @@ set showcmd
 
 
 " When we're in normal mode, some information can be displayed in the bar
-" which replaces the command line:
+" which replaces the command-line:
 "
 "         • current mode                  don't want to see it
 "         • normal command being typed    DO    want to see it
@@ -1132,7 +1155,7 @@ set kp=:help
 " Why do you check whether we're in gVim?{{{
 "
 " In gVim,  if you set 'lz'  and 'showcmd', then when  you press `j` and  `k` in
-" normal mode, you see `gj` and `gk` being spammed on the command line.
+" normal mode, you see `gj` and `gk` being spammed on the command-line.
 " I don't like that, and it could have a bad impact on performance.
 "
 " TODO:
@@ -1878,7 +1901,7 @@ set virtualedit=block
 " We never want to see them:
 "
 "         • in a dirvish listing
-"         • on the command line after a tab completion
+"         • on the command-line after a tab completion
 "         • in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 if has('vim_starting')
@@ -2102,7 +2125,7 @@ let mapleader = "\<s-f13>"
 " same thing for localleader
 let maplocalleader = "\<s-f14>"
 
-" COMMAND LINE {{{2
+" COMMAND-LINE {{{2
 " C-r C-h       fuzzy search history {{{3
 
 " Why not C-r C-r?{{{
@@ -2615,11 +2638,11 @@ nno  <silent>  goT  :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
 " (E501, E749).
 "
 " So, we  install a wrapper around  `gQ` to temporarily disable  all mappings in
-" command line mode.
+" command-line mode.
 
-"                   ┌ make sure we have visited the command line at least once since Vim's startup
+"                   ┌ make sure we have visited the command-line at least once since Vim's startup
 "                   │ otherwise E501:
-"                   │ probably because custom command line mappings haven't been installed yet,
+"                   │ probably because custom command-line mappings haven't been installed yet,
 "                   │ so `ToggleEditingCommands 0` is useless / too soon
 "               ┌───┤
 nno  <expr>  gQ ":\e".execute('ToggleEditingCommands 0', 'silent!').'gQ'
@@ -2847,7 +2870,7 @@ xno  <silent>  <bar>g  :<c-u>call myfuncs#op_grep('vis')<cr>
 " Why not `!g` for the `{lhs}` ?
 " Because it would introduce some "lag" whenever we hit `!` to filter some
 " visual selection. We would need to wait, or hit the second character of our
-" command to see the bang on the command line.
+" command to see the bang on the command-line.
 
 " |t         translate {{{4
 
@@ -3037,7 +3060,7 @@ fu! s:edit_readme() abort
         " We don't want that side-effect.
         "
         " MWE:
-        "     " ✘ the 123th line is printed on the command line
+        "     " ✘ the 123th line is printed on the command-line
         "     123 | sleep 1
         "
         "     " ✔ nothing is printed
@@ -3110,7 +3133,8 @@ endfu
 " CR                  move cursor on 80/100 column {{{4
 
 " If the buffer is special (`!empty(&buftype)`), we let `CR` unchanged.
-" Special buffers include the ones displayed in the quickfix and the command line windows.
+" Special  buffers  include   the  ones  displayed  in  the   quickfix  and  the
+" command-line windows.
 " It's important to not alter the behavior of `CR` in those buffers, because
 " usually it's already mapped to a very useful function such as executing
 " a command or going to an entry in the quickfix list.
@@ -3585,7 +3609,7 @@ nno  Y  y$
 "         C-v 3j $ "+ y    ✔
 "
 " As  soon as  we type  the `$`  motion, the  register name  is lost  (watch the
-" command line).
+" command-line).
 " So, we use an  expression, to make sure that they are consecutive.
 xno  <expr>  Y  '$"'.v:register.'y'
 
@@ -3819,7 +3843,7 @@ tno  <esc><esc>  <c-\><c-n>
 " Why?
 "
 "     z<      open a terminal
-"     Esc :   enter command line
+"     Esc :   enter command-line
 "     Esc     get back to terminal normal mode
 "     z>      close terminal
 "
@@ -4434,7 +4458,7 @@ endfu
 
 " RemoveDuplicateLines {{{2
 
-com! -bang -bar -range=% RemoveDuplicateLines exe myfuncs#remove_duplicate_lines(<line1>,<line2>, <bang>0)
+com! -bar -range=% RemoveDuplicateLines exe myfuncs#remove_duplicate_lines(<line1>,<line2>)
 
 " RemoveSwapFiles {{{2
 
@@ -4653,24 +4677,24 @@ augroup my_cmdline_window
     au CmdWinEnter * nno  <buffer><nowait><silent>  ZZ     <cr>
     " Purpose:{{{
     "
-    " By default,  C-c is useful to  quit the command line  window, and populate
-    " the command line with the command which was being edited in the window.
-    " But, it doesn't erases the command line window.
+    " By default,  C-c is useful to  quit the command-line  window, and populate
+    " the command-line with the command which was being edited in the window.
+    " But, it doesn't erases the command-line window.
     " Our `C-c` mapping takes care of that.
     "}}}
     au CmdWinEnter * nno  <buffer><expr><nowait>    <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
 
     " Purpose:{{{
     "
-    " These  autocmds try  to update  the  command line history  of the  current
+    " These  autocmds try  to update  the  command-line history  of the  current
     " session,  and  to   make  it  persist  across   sessions,  by  overwriting
-    " `~/.viminfo`  every  time some  lines  were  deleted in  the  command line
+    " `~/.viminfo`  every  time some  lines  were  deleted in  the  command-line
     " window.
     "}}}
     au CmdWinEnter : let s:old_cmd_hist = getline(1, line('$')-1)
     au CmdWinLeave : call s:update_history()
     "              │
-    "              └ only Ex command line window
+    "              └ only Ex command-line window
 augroup END
 
 " If one day you want to add support for the search window (`q/`, `q?`), be aware that it's tricky.{{{
@@ -5023,7 +5047,7 @@ fu! s:filter_special_file() abort
         " So, I don't use it atm.
         "
         " Try to  fix these errors  by learning  how to better  configure `par`,
-        " through  command line  options,  and/or through  `$PARINIT`. Then  use
+        " through  command-line  options,  and/or through  `$PARINIT`. Then  use
         " `par` to format a pdf.
         "}}}
         sil exe ext2cmd[ext]
@@ -5229,7 +5253,7 @@ endfu
 "     https://github.com/neovim/neovim/issues/5431
 "     https://github.com/neovim/neovim/pull/6142
 "
-" We can still paste text on the command line though.
+" We can still paste text on the command-line though.
 " No matter what we copy, no matter where we are, it will be put on the command
 " line, without our cursor to move.
 
@@ -5711,7 +5735,7 @@ endfu
 " a possible selection?
 "
 " 29 -
-" create a mapping to populate command line with `:ltag /`, then open the
+" create a mapping to populate command-line with `:ltag /`, then open the
 " location window. ex:
 "
         nno  <expr>  <c-g>t  <sid>ltag(1)
@@ -6416,7 +6440,7 @@ endfu
 "      • adding an option to `getfsize()` to get a human readable result
 "
 " 83 -
-" if we press  c-g by accident on  the command line, and we move  forward in the
+" if we press  c-g by accident on  the command-line, and we move  forward in the
 " cycle, we should be able to undo and recover the previous command with c-_.
 "
 " also, we should have multiple tabstops (not just one).
@@ -6509,7 +6533,7 @@ endfu
 "         call s:setqflist([], action, {'items': list})
 "
 " 88 -
-" how to filter  a custom text-object without the command line not being redrawn?
+" how to filter  a custom text-object without the command-line not being redrawn?
 " mwe:
 "         !ie spc
 "         ![m spc
@@ -6534,14 +6558,14 @@ endfu
 "
 "         exe 'norm! '.line('.').'g'
 "
-" it would not make the cursor move, but it would make the command line redrawn.
+" it would not make the cursor move, but it would make the command-line redrawn.
 " mwe:
 "
 "         map  <silent>  ]g  :call search('pat')<cr>
-"             !]g → command line not redrawn
+"             !]g → command-line not redrawn
 "
 "         map  <silent>  ]g  :call search('pat') <bar> exe 'norm! '.line('.').'g'<cr>
-"             !]g → command line redrawn
+"             !]g → command-line redrawn
 "
 " it seems `vim-textobj-user` doesn't suffer from this issue:
 "
@@ -6624,7 +6648,7 @@ endfu
 " 94 -
 " sometimes, when we  move in the qfl while  the qf window is open  we don't see
 " where we are in the qfl.
-" why doesn't vim  echo anything on the  command line, like it does  when the qf
+" why doesn't vim  echo anything on the  command-line, like it does  when the qf
 " window is closed?
 "
 " update:
@@ -6740,10 +6764,10 @@ endfu
 "     :verb filter // mess
 "
 " here we would install a temporary autocmd when we enter the cycle which would
-" inspect the end of the command line.
+" inspect the end of the command-line.
 " we would need to  change the signature of the function we  call to install the
 " cycle, to have a way to let it  know that we want all candidates dumped on the
-" command line at once and a form of completion.
+" command-line at once and a form of completion.
 "
 " 101 -
 " gf, c-w f, c-w gf should also be able to parse a column number.
@@ -6882,7 +6906,7 @@ endfu
 " 110 -
 "     :vert term [++cols=20]
 "
-" wrong terminal height (big command line).
+" wrong terminal height (big command-line).
 "
 " 111 -
 " once neovim has `reg_recording()`, use it in all `q` mappings:
@@ -7104,7 +7128,7 @@ endfu
 "
 " 130 -
 " Every  time you open a  window, be aware that  an error may be  raised because
-" you're in the command line window.
+" you're in the command-line window.
 " You may want to catch that error to avoid a stack trace.
 "
 " 131 -
@@ -7229,23 +7253,13 @@ endfu
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
 "
 " 142 -
-" The last  removal of  a mapping  in `b:undo_ftplugin`  should be  executed via
-" `:exe`. Otherwise there may be an error.
-" Indeed, you don't know what the next ftplugin will add.
-" It could add a spaced before the next bar.
-" That's what happens here:
-"     ~/.vim/plugged/vim-latex/after/ftplugin/tex.vim
-"
-" Re-visit all our ftplugins.
-"
-" 143 -
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
 " Maybe  you should  use other  keys to  handle folds,  so that  you can  decide
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 144 -
+" 143 -
 "
 " What's the use case of the command attributes `-addr=quickfix` and `-addr=other`?
 "
@@ -7255,15 +7269,29 @@ endfu
 "
 " has introduced the command attribute `-addr=other`.
 "
-" 145 -
+" 144 -
 " Read this:
 "
 "     https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
 " >    Updating a quickfix/location list asynchronously without interfering with another plugin
-
-
-
-" echo get(get(filter(getwininfo(), {i,v -> v.bufnr == 19}), 0, {}), 'winid', 0)
+"
+" 145 -
+"
+"     $ vim -Nu NONE
+"     :exe 'helpgrep vim' | exe 'helpgrep text' | exe 'helpgrep wont_be_found'
+"     :chi
+"
+"         No entries
+"
+" Shouldn't the last command print the quickfix stack?
+" Why does it tell me that the last quickfix list is empty?
+"
+" 146 -
+"
+"     :DebugLocalPlugin -kind ftplugin -filetype tex
+"
+" Focus another tmux pane or window, then come back.
+" There's an error (due to `:sil update`).
 
 
 
