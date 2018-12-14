@@ -1986,19 +1986,66 @@ set wildmenu
 " Each part defines what happens when we press Tab (&wc) the 1st/2nd/3rd/4th time.
 set wildmode=full
 
-" 'wc' =  which key  to press  to start  wildcard expansion,
-"         or to complete Ex command name / argument
+" What's 'wc'?{{{
 "
-" 'wcm' = which key to:
-"                       • press during the recording of a macro
-"                       • use in the {rhs} of a mapping
+" The  key to  press for  Vim to  start a  wildcard expansion  (which opens  the
+" wildmenu).
+"}}}
+" What's 'wcm'?{{{
 "
-" … to start wildcard expansion.
+" The key to press for Vim to start a wildcard expansion, from:
 "
-" If &wc != &wcm, we can't replay a macro opening the wildmenu.
-" So, we give them the same value:  9 / <tab>
+"     • the recording of a macro
+"     • the rhs of a mapping
+"}}}
+" What does the value `26` stand for?{{{
+"
+"     C-z
+"}}}
+" What does `set wcm=26` imply?{{{
+"
+" When you want  Vim to start a wildcard  expansion, in the rhs of  a mapping or
+" while recording a macro, you'll have to write/press `C-z`, instead of Tab.
+"
+" If you write/press Tab, the mapping/macro  won't work as expected, because the
+" Tab  characters  they  contain  will be  interpreted  literally  (no  wildcard
+" expansion).
+"}}}
+" Is there an alternative value?{{{
+"
+" Yes, you could write:
+"
+"     set wcm=9
+"}}}
+" Would it be better?{{{
+"
+" Yes, because  you could write/press Tab  in your mappings/macros, to  make Vim
+" start a wildcard expansion, exactly like you would the rest of the time.
+"}}}
+" Then, why don't you use it?{{{
+"
+" Suppose your macro contains Tab characters.
+" While on the command-line, *any* one  of them will start a wildcard expansion.
+" It may have unexpected results.
+" For a real example, run:
+"
+"     :so $VIMRUNTIME/syntax/hitest.vim
+"
+" (Taken from `:h hitest.vim`)
+" It will raise `E475`, and the dumped highlight groups won't be highlighted.
+" This is because of these commands:
+"
+"     % yank a
+"     @a
+"
+" They run the contents of the buffer as Ex commands (`@a` ⇔ `:@a`).
+" The buffer contains Tab characters.
+" They all make Vim start a wildcard expansion, but in the buffer they were just
+" used to separate some texts.
+" They were not supposed to expand anything.
+"}}}
 set wc=9
-set wcm=9
+set wcm=26
 
 " winaltkeys {{{2
 
@@ -2458,20 +2505,6 @@ nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<c
 imap  <c-g>m  <plug>(fzf-maps-i)
 xmap  mm      <plug>(fzf-maps-x)
 omap  m       <plug>(fzf-maps-o)
-
-" OLD CODE:
-"
-" Les 2 raccourcis qui suivent permettent de chercher un buffer via le
-" wildmenu. On peut donner un bout du nom du buffer qu'on cherche et
-" développer via le wildcharm = <tab>.
-" nno <space>b :<c-u>buffer *
-"
-" Ce mapping fait la même chose mais au lieu d'afficher le buffer trouvé dans
-" la fenêtre active, il passe le focus à une fenêtre qui l'affiche déjà s'il
-" y en a une, autrement il ouvre un viewport horizontal.
-" Pour un viewport vertical:
-" nno <space>B :vert sbuffer *
-" nno <space>B :<c-u>sbuffer *
 
 " s S                           saiw  saiW{{{4
 
@@ -7287,12 +7320,29 @@ endfu
 " Why does it tell me that the last quickfix list is empty?
 "
 " 146 -
+" Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
+" between `~/.vim/plugin` and `~/.vim/after/plugin/`?
 "
-"     :DebugLocalPlugin -kind ftplugin -filetype tex
+" > What  I like  about packadd  is  that **you  can actually  put the  before**
+" > **and  after  config**  and  the  loading of  the  plugin  **in  a  single**
+" > **file**.  That's because packadd loads the plugin right when it's called as
+" > apposed to most plugin managers that collect the list of all plugins to load
+" > before loading  them.  (For  that to  work plugins need  to be  installed in
+" > a  pack/**/opt  directory  i.e.  when  using  the  minpac  package  manager:
+" > minpac#add(url, {'type': 'opt'}))
 "
-" Focus another tmux pane or window, then come back.
-" There's an error (due to `:sil update`).
+" > Oh that's  a neat idea. I  think at  the moment though  I prefer to  see all
+" > external plugins that will be loaded  in the one place. I use :packadd! (the
+" > ! version) which adds the plugins to  the runtime path but doesn't load them
+" > immediately. Also, that  way the plugins are  loaded when they expect  to be
+" > loaded (ie. in the usual place in the startup order).
+"
+" Source:
+" https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
+" https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
 
+
+" hi link cComment Question
 
 
 let s:syled_comments_filetypes = [
