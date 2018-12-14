@@ -1002,7 +1002,7 @@ endfu
 
 set autoindent
 set expandtab
-" Why don't we set 'ts'?{{{
+" Why don't you set 'ts'?{{{
 "
 " It would mess the alignment in help files, where tabs are used with a width of
 " 8 cells. Besides, 'ts' is NOT used when 'expandtab' is set.
@@ -1058,7 +1058,7 @@ set expandtab
 " Also, note that you can still fix  the indentation of a block of code with the
 " `=` operator.
 "}}}
-"     set shiftround
+" set shiftround
 
 " What's the effect of 'sw'?{{{
 "

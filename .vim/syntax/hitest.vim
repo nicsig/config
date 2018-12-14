@@ -22,13 +22,9 @@
 "}}}
 
 
-fu! s:hitest() abort
-    let report   = &report
-    let wrapscan = &wrapscan
-    let ww       = &ww
-    let z_save   = [getreg('z'), getregtype('z')]
-
-    set report=99999 wrapscan ww=b,s
+fu! s:hitest() abort "{{{1
+    call s:settings_save()
+    call s:settings_set()
 
     let @z = execute('hi')
 
@@ -39,15 +35,15 @@ fu! s:hitest() abort
 
     sil edit Highlight\ test
 
-    setl ai bt=nofile fo=t noet noswf sw=16 ts=16
-    let &tw = &columns
+    setl bt=nofile noswf noet sw=16 ts=16
+    let &l:tw = &columns
 
     " insert highlight settings
     %d_
     put z
 
     " remove the colored xxx items
-    keepj keepp g/xxx / keepj keepp s/xxx//e
+    keepj keepp %s/xxx//e
 
     " remove color settings (not needed here)
     keepj keepp v/links to/ keepj keepp s/\s.*$//e
@@ -55,9 +51,42 @@ fu! s:hitest() abort
     " move linked groups to the end of file
     keepj keepp g/links to/m$
 
-    " move linked group names to the matching preferred groups
+    " reverse order in the links:{{{
+    "
+    "     markdownH1      links to Title
+    "     →
+    "     Title	links to markdownH1
+    "}}}
     keepj keepp %s/^\(\w\+\)\s*\(links to\)\s*\(\w\+\)$/\3\t\2 \1/e
+    " group all the syntax groups which are linked to the same HG on the same line
     keepj keepp g/links to/keepp norm! mz3ElD0#$p'zdd
+    "                                  ├┘├─┘│││├┘├┘├┘{{{
+    "                                  │ │  ││││ │ └ we don't this line anymore, remove it
+    "                                  │ │  ││││ │
+    "                                  │ │  ││││ └ get back where we were
+    "                                  │ │  ││││
+    "                                  │ │  │││└ paste the syntax group at the end of the line
+    "                                  │ │  │││
+    "                                  │ │  │││  we're progressively building the set of syntax groups
+    "                                  │ │  │││  which are linked to the same HG:
+    "                                  │ │  │││
+    "                                  │ │  │││          Title
+    "                                  │ │  │││          Title MarkdownH1
+    "                                  │ │  │││          Title MarkdownH1 MarkdownH2
+    "                                  │ │  │││          ...
+    "                                  │ │  │││
+    "                                  │ │  ││└ move to the previous occurrence of the syntax group name
+    "                                  │ │  ││
+    "                                  │ │  │└ the syntax group we've just deleted is linked to a HG (e.g. `Title`)
+    "                                  │ │  │  move to the beginning of the line, where the latter is written
+    "                                  │ │  │
+    "                                  │ │  └ delete the syntax group name
+    "                                  │ │
+    "                                  │ └ move to the beginning of the syntax group name
+    "                                  │   (e.g. `markdownH1`)
+    "                                  │
+    "                                  └ remember where we are
+    "}}}
 
     " delete empty lines
     keepj keepp g/^ *$/d_
@@ -73,8 +102,12 @@ fu! s:hitest() abort
     " remove syntax commands again
     keepj keepp %s/^syn keyword //
 
-    " pretty formatting
-    keepj keepp g/^/exe "norm! Wi\r\t\eAA\ex"
+    call s:pretty_formatting()
+    call s:settings_restore()
+endfu
+
+fu! s:pretty_formatting() abort "{{{1
+    keepj keepp g/^/exe "norm! Wi\r\t\egww"
     keepj keepp g/^\S/j
 
     " find out first syntax highlighting
@@ -86,20 +119,38 @@ fu! s:hitest() abort
     endwhile
 
     " insert headlines
-    call append(0, 'Highlighting groups for various occasions')
-    call append(1, '-----------------------------------------')
+    call append(0, ['Highlighting groups for various occasions', '-----------------------------------------'])
 
     if i < line('$')-1
-        let header = 'Syntax highlighting groups'
-        call append(i+1, ['', header, substitute(header, '.', '-', 'g')])
+        call append(i+1, ['', 'Syntax highlighting groups', '--------------------------'])
     endif
 
     call cursor(1,1)
-
-    let &report   = report
-    let &wrapscan = wrapscan
-    let &ww       = ww
-    call call('setreg', ['z'] + z_save)
 endfu
 
+fu! s:settings_save() abort "{{{1
+    let s:report   = &report
+    let s:wrapscan = &wrapscan
+    let s:ww       = &ww
+    let s:z_save   = [getreg('z'), getregtype('z')]
+endfu
+
+fu! s:settings_set() abort "{{{1
+    " be silent when we execute substitutions, deletions, ...
+    set report=99999
+    " could be necessary for `norm! ...#...` later
+    set wrapscan
+    " necessary for `norm! ...l...` later
+    set ww&vim
+endfu
+
+fu! s:settings_restore() abort "{{{1
+    let &report   = s:report
+    let &wrapscan = s:wrapscan
+    let &ww       = s:ww
+    call call('setreg', ['z'] + s:z_save)
+endfu
+" }}}1
+
 call s:hitest()
+
