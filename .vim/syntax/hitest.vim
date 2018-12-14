@@ -21,11 +21,12 @@
 "     (which causes an issue because we do `set ww=h,l` in our vimrc)
 "}}}
 
+
 fu! s:hitest() abort
-    let report      = &report
-    let wrapscan    = &wrapscan
-    let ww          = &ww
-    let z_save      = [getreg('z'), getregtype('z')]
+    let report   = &report
+    let wrapscan = &wrapscan
+    let ww       = &ww
+    let z_save   = [getreg('z'), getregtype('z')]
 
     set report=99999 wrapscan ww=b,s
 
@@ -46,17 +47,17 @@ fu! s:hitest() abort
     put z
 
     " remove the colored xxx items
-    keepj keepp g/xxx /s///e
+    keepj keepp g/xxx / keepj keepp s/xxx//e
 
     " remove color settings (not needed here)
-    keepj keepp v/links to/ s/\s.*$//e
+    keepj keepp v/links to/ keepj keepp s/\s.*$//e
 
     " move linked groups to the end of file
     keepj keepp g/links to/m$
 
     " move linked group names to the matching preferred groups
     keepj keepp %s/^\(\w\+\)\s*\(links to\)\s*\(\w\+\)$/\3\t\2 \1/e
-    keepj keepp g/links to/norm! mz3ElD0#$p'zdd
+    keepj keepp g/links to/keepp norm! mz3ElD0#$p'zdd
 
     " delete empty lines
     keepj keepp g/^ *$/d_
@@ -95,7 +96,6 @@ fu! s:hitest() abort
 
     call cursor(1,1)
 
-    " restore global options and registers
     let &report   = report
     let &wrapscan = wrapscan
     let &ww       = ww
