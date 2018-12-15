@@ -2815,7 +2815,17 @@ xno  <silent>  zf  :<c-u>call <sid>my_zf('vis')<cr>
 
 fu! s:my_zf(type) abort
     let cml = !empty(&l:cms) ? split(&l:cms, '%')[0] : ''
-    let pat = '^\s*'.cml.'.*\zs'.cml.'\ze\s*{'.'{{'
+    " TODO: Why did we write these wrapper mappings?{{{
+    "
+    " It seems they remove a possible superfluous comment leader:
+    "
+    "     " this is a comment " { { {
+    "                         ^
+    "                         ✘
+    "
+    " But I can't find an example where Vim adds a superfluous comment leader...
+    "}}}
+    let pat = '^\s*\V'.escape(cml, '/\').'\m.*\zs\V'.escape(cml, '/\').'\m\ze\s*{'.'{{'
     if a:type is# 'vis'
         norm! '<V'>zf
         sil! exe 'keepj keepp ''<s/'.pat.'//'

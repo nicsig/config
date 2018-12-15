@@ -23,24 +23,22 @@
 
 
 fu! s:hitest() abort "{{{1
-    call s:settings_save()
-    call s:settings_set()
-
-    let @z = execute('hi')
+    call s:options_save()
+    call s:options_set()
 
     " Open a new window if the current one isn't empty
     if line('$') != 1 || getline(1) != ''
         new
     endif
 
-    sil edit Highlight\ test
+    sil exe 'edit '.tempname()
 
-    setl bt=nofile noswf noet sw=16 ts=16
+    setl noswf noet sw=16 ts=16
     let &l:tw = &columns
 
     " insert highlight settings
     %d_
-    put z
+    put =execute('hi')
 
     " remove the colored xxx items
     keepj keepp %s/xxx//e
@@ -95,15 +93,13 @@ fu! s:hitest() abort "{{{1
     keepj keepp %s/^[^ ]*/syn keyword &\t&/
 
     " execute syntax commands
-    syn clear
-    %y z
-    @z
+    syn clear | sil update | so% | setl bt=nofile
 
     " remove syntax commands again
     keepj keepp %s/^syn keyword //
 
     call s:pretty_formatting()
-    call s:settings_restore()
+    call s:options_restore()
 endfu
 
 fu! s:pretty_formatting() abort "{{{1
@@ -128,14 +124,13 @@ fu! s:pretty_formatting() abort "{{{1
     call cursor(1,1)
 endfu
 
-fu! s:settings_save() abort "{{{1
+fu! s:options_save() abort "{{{1
     let s:report   = &report
     let s:wrapscan = &wrapscan
     let s:ww       = &ww
-    let s:z_save   = [getreg('z'), getregtype('z')]
 endfu
 
-fu! s:settings_set() abort "{{{1
+fu! s:options_set() abort "{{{1
     " be silent when we execute substitutions, deletions, ...
     set report=99999
     " could be necessary for `norm! ...#...` later
@@ -144,11 +139,11 @@ fu! s:settings_set() abort "{{{1
     set ww&vim
 endfu
 
-fu! s:settings_restore() abort "{{{1
+fu! s:options_restore() abort "{{{1
     let &report   = s:report
     let &wrapscan = s:wrapscan
     let &ww       = s:ww
-    call call('setreg', ['z'] + s:z_save)
+    unlet! s:report s:wrapscan s:ww
 endfu
 " }}}1
 
