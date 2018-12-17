@@ -2410,6 +2410,10 @@ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
 alias ls='ls --color=auto'
 alias l=ls++
 
+# lua {{{3
+
+alias lua='lua5.3'
+
 # man_ascii {{{3
 
 #                                 ┌ print 20 lines of trailing context,{{{

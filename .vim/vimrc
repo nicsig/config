@@ -5314,10 +5314,9 @@ endfu
 
 " Trailing whitespace in red but not in insert mode, and not if the filetype
 " is in the list:
-"
+let s:NO_TRAILING_WHITESPACE_FT = ['', 'git', 'help', 'qf']
 " TODO: Prevent a match from being added in an fzf buffer.
 " For some reason, adding 'fzf' in this list doesn't work.
-let s:NO_TRAILING_WHITESPACE_FT = ['', 'git', 'help', 'qf']
 
 augroup trailing_whitespace
     au!
@@ -5333,9 +5332,7 @@ fu! s:trailing_whitespace(create_match) abort
     elseif a:create_match
        \ && !exists('w:my_trailing_whitespace')
        \ && index(s:NO_TRAILING_WHITESPACE_FT, &ft) ==# -1
-        "                                                            ┌ non breaking space (C-k NS)
-        "                                                        ┌───┤
-        let w:my_trailing_whitespace = matchadd('Error', '\%(\s\|\%ua0\)\+$', -1)
+        let w:my_trailing_whitespace = matchadd('Error', '\s\+$', -1)
     endif
 endfu
 " }}}1
@@ -6445,6 +6442,8 @@ endfu
 "     :h recover.txt
 "     :h tips.txt
 "
+"     :h textprop.txt
+"
 " 80 -
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
@@ -7352,7 +7351,6 @@ endfu
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
 
 
-" hi link cComment Question
 
 
 let s:syled_comments_filetypes = [
