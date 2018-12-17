@@ -19,7 +19,7 @@
 "}}}
 
 
-fu! debug#hitest#main() abort "{{{1
+fu! s:hitest() abort "{{{1
     call s:options_save()
     call s:options_set()
 
@@ -143,4 +143,6 @@ fu! s:options_restore() abort "{{{1
     unlet! s:report s:wrapscan s:ww
 endfu
 " }}}1
+
+call s:hitest()
 
