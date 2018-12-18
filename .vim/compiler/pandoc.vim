@@ -14,7 +14,7 @@ endif
 " file.
 "}}}
 " CompilerSet efm=
-CompilerSet mp=pandoc\ %:p:S
+CompilerSet mp=pandoc\ --\ %:p:S
     \\ -N
     \\ --pdf-engine=xelatex
     \\ --variable\ mainfont=\"DejaVu\ Sans\ Mono\"

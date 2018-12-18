@@ -7349,6 +7349,12 @@ endfu
 " Source:
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
+"
+" 147 -
+" Whenever you used `system()`, `systemlist()`, or  `:!` to run a shell command,
+" and it contained a  filename, make sure you used the  filename modo `:p`, `:S`
+" and `--`  to end the optional  arguments (useful in case  your filename begins
+" with a hyphen).
 
 
 
@@ -7361,6 +7367,7 @@ let s:syled_comments_filetypes = [
     \ 'lua',
     \ 'readline',
     \ 'sh',
+    \ 'snippets',
     \ 'tex',
     \ 'tmux',
     \ 'vim',
