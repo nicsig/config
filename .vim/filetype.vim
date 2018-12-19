@@ -21,20 +21,11 @@
 "
 " Example:
 "        $ vim ~/.vim/ftdetect/notes.vim
-"          au BufRead $HOME/{Dropbox/wiki/,.wiki/}* set filetype=markdown
+"          au BufRead $HOME/{Dropbox/wiki/,.wiki/}* setf markdown
 "
 " No need for an augroup, Vim would wrap the autocmd automatically.
 " No need to move the file in an `after/` subdirectory, Vim will look for
 " files in `~/.vim/ftdetect` AFTER `$VIMRUNTIME/filetype.vim`.
-"}}}
-" Why do you use `:set` in this file, instead of `:setf` like in other filetype detection scripts?{{{
-"
-" Both would be fine here.
-"
-" However, `:set` better expresses our intent.
-" We use this file to be the first to set some filetypes.
-" We don't want any other script to change them later.
-" We want this script to have the priority over all the other ones.
 "}}}
 
 if exists('did_load_filetypes')
@@ -62,7 +53,7 @@ augroup filetypedetect
     " This is to used for filetype detections that are just a guess.
     " `did_filetype()` will return false after this command.
     "}}}
-    au! BufRead,BufNewFile ~/.{bashenv,shrc} set ft=sh
+    au! BufRead,BufNewFile ~/.{bashenv,shrc} setf sh
 
     " Why?{{{
     "
@@ -88,8 +79,8 @@ augroup filetypedetect
     "
     "         au BufNewFile,BufRead zsh*,zlog*      call s:StarSetf('zsh')
     "}}}
-    au! BufRead,BufNewFile zsh.snippets set ft=snippets
+    au! BufRead,BufNewFile zsh.snippets setf snippets
 
-    au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} set ft=help
+    au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} setf help
 augroup END
 
