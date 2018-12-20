@@ -527,16 +527,6 @@ set backspace=indent,eol,start
 "}}}
 " colorscheme {{{2
 
-" For more info about how creating a colorscheme:
-"
-"         $VIMRUNTIME/colors/README.txt:70
-"
-" In particular, the right way to set  the name of the current colorscheme is to
-" include in the latter:
-"
-"         let g:colors_name = expand('<sfile>:t:r')
-
-
 " ┌─────────────────────────────────────┬──────────────────────────────────────────────────────────────────┐
 " │ g:seoul256_current_bg               │ Current background color in ANSI code                            │
 " │ g:seoul256_current_fg               │ Current foreground color in ANSI code                            │
@@ -564,7 +554,7 @@ set backspace=indent,eol,start
 
 augroup my_colorscheme
     au!
-    au ColorScheme * runtime colors/my/customizations.vim
+    au ColorScheme * call colorscheme#customize()
 
     " What's the issue fixed by this autocommand?{{{
     "
