@@ -32,9 +32,7 @@ endtry
 " QuickFixLine {{{2
 
 " hide the current line in a qf window (the cursor and the cursor line should be enough)
-" hi! link QuickFixLine Search
-"   │
-"   └ :h E414
+"     hi link QuickFixLine Search
 
 " Update:
 " Commented, because now I  find that seeing the current entry  is nice when you

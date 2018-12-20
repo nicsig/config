@@ -1,8 +1,17 @@
-" Source: $VIMRUNTIME/syntax/colortest.vim
-" Purpose:
-" If you're writing a colorscheme, you need to make sure that the color
+" Purpose:{{{
+"
+" If you're  writing a colorscheme,  you may want  to see which  combinations of
+" colors (foreground + background) are the most readable/nice.
+" This script should display the ones which are use the most often.
+" For more info, see `:h 06.3`.
+"}}}
 
-" edit this file, then do ":source %", and check if the colors match
+" Usage: edit this  script if the combination of colors  you're interested in is
+" not present, then do ":source %"
+
+" Source: $VIMRUNTIME/syntax/colortest.vim
+
+
 
 " black         black_on_white                          white_on_black
 "                               black_on_black          black_on_black
