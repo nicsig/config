@@ -17,7 +17,7 @@
 " So, the value `bg` may not exist for all colorschemes.
 " Example:
 "         :colo default
-"         →       Error detected while processing …/colors/my_customizations.vim:
+"         →       Error detected while processing .../colors/my_customizations.vim:
 "                 E420: BG color unknown
 try
     if $DISPLAY is# ''
@@ -33,8 +33,8 @@ endtry
 
 " hide the current line in a qf window (the cursor and the cursor line should be enough)
 " hi! link QuickFixLine Search
-" │
-" └─ :h E414
+"   │
+"   └ :h E414
 
 " Update:
 " Commented, because now I  find that seeing the current entry  is nice when you
@@ -42,6 +42,7 @@ endtry
 
 " SpecialKey {{{2
 
+" The `SpecialKey` HG installed by seoul-256 is barely readable.
 hi! link SpecialKey Special
 
 " Terminal {{{2
@@ -82,20 +83,20 @@ hi! link VertSplit Normal
 "}}}
 " How does it work?{{{
 "
-" The global 'highlight' / 'hl' option can be used to configure the style of
-" various elements in the UI. It contains a comma separated list of values.
+" The global 'hl' option can be used  to configure the style of various elements
+" in the UI.
+" It contains a comma separated list of values.
 "
 " Each value follows one the following syntax:
 
-"                ┌ character standing for which element of the UI we want to configure
-"       ┌────────┤
+"       ┌ character standing for which element of the UI we want to configure
+"       │         ┌ character standing for which style we want to apply
+"       ├────────┐├────┐
 "       {occasion}{mode}
-"                 └────┤
-"                      └ character standing for which style we want to apply
 
 "       {occasion}:{HG}
 "                   │
-"                   └─ highlight group to color the element of the UI
+"                   └ highlight group to color the element of the UI
 
 " The default values all use the 2nd syntax. They all use a HG.
 " But you could also use a mode:
@@ -163,7 +164,7 @@ endif
 "}}}
 " Where does the issue come from?{{{
 "
-" The `htmlitalic` HG is sometimes cleared, because of `:hi clear`:
+" The `htmlItalic` HG is sometimes cleared, because of `:hi clear`:
 "
 "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
 "}}}

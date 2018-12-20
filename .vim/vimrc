@@ -541,10 +541,9 @@ set backspace=indent,eol,start
 " │ g:seoul256_current_bg               │ Current background color in ANSI code                            │
 " │ g:seoul256_current_fg               │ Current foreground color in ANSI code                            │
 " │                                     │                                                                  │
-" │                                     │         ┌ dark                                                   │
-" │                                     │         │                ┌ light                                 │
-" │                                     │ ┌───────┤        ┌───────┤                                       │
-" │                                     │ 233 … 239        252 … 256                                       │
+" │                                     │ ┌ dark             ┌ light                                       │
+" │                                     │ ├─────────┐        ├─────────┐                                   │
+" │                                     │ 233 ... 239        252 ... 256                                   │
 " ├─────────────────────────────────────┼──────────────────────────────────────────────────────────────────┤
 " │ g:seoul256_background               │ value to be used the NEXT time we execute `:colo seoul256`       │
 " │                                     │                                                                  │
@@ -567,6 +566,7 @@ augroup my_colorscheme
     au!
     au ColorScheme * runtime colors/my/customizations.vim
 augroup END
+
 " Why the guard?{{{
 "
 "     • there's no point reloading the colorscheme every time we source our
@@ -3421,6 +3421,14 @@ fu! s:fix_display() abort
     " update title in folds
     do BufWinEnter
 
+    " Reinstall our custom HGs when we change the colorscheme.
+    "
+    " Remember that  to change the brightness  of `seoul-256`, in effect,  we do
+    " change the colorscheme.
+    " Note that `do Syntax` will only re-install  a custom HG if it's defined in
+    " a syntax plugin which is sourced for the current buffer.
+    do Syntax
+
     " Purpose:{{{
     "
     " Reset the min/max number of lines above the viewport from which Vim begins
@@ -3821,6 +3829,83 @@ ono  <silent>  al  _
 " Besides, an operator should be able to operate on the current line when it's
 " repeated (`cc`, `yy`, `dd`…).
 " But still, it brings consistency/symmetry.
+
+" in {{{3
+
+" Source: https://vimways.org/2018/transactions-pending/
+
+" Pattern matching numbers.
+" The order matters ... Keep `\d` last!.
+" `\+` will be appended to the end of each.
+let s:pat_numbers = ['0b[01]', '0x\x', '\d']
+
+fu! s:around_number() abort "{{{4
+    " This can handle the following three formats:{{{
+    "
+    "   1. binary  (eg: "0b1010", "0b0000", etc)
+    "   2. hex     (eg: "0xffff", "0x0000", "0x10af", etc)
+    "   3. decimal (eg: "0", "0000", "10", "01", etc)
+    "
+    " If there  is no number on  the rest of  the line starting at  the  current
+    " cursor  position, then  visual selection  mode  is ended  (if  called  via
+    " `:omap`) or nothing is selected (if called via `:xmap`).
+    " This is true even if on the space following a number.
+    "}}}
+
+    let stopline = line('.')
+
+    " create pattern matching any binary, hex, decimal number
+    let pat = join(s:pat_numbers, '\+\|') . '\+'
+
+    " move cursor to end of number
+    if !search(pat, 'ce', stopline)
+        " if it fails, there was not match on the line, so return prematurely
+        return
+    endif
+
+    " move cursor to end of any trailing whitespace (if there is any)
+    call search('\%'.(virtcol('.')+1).'v\s*', 'ce', stopline)
+
+    " start visually selecting from end of number + potential trailing whitspace
+    norm! v
+
+    " move cursor to beginning of number
+    call search(pat, 'bc', stopline)
+
+    " move cursor to beginning of any whitespace preceding number (if any)
+    call search('\s*\%'.virtcol('.').'v', 'b', stopline)
+endfu
+" }}}4
+
+" next number on line and possible surrounding whitespace
+xno <silent> an :<c-u>call <sid>around_number()<cr>
+ono <silent> an :<c-u>call <sid>around_number()<cr>
+
+fu! s:in_number() abort "{{{4
+    " select the next number on the line
+
+    let stopline = line('.')
+
+    " Create pattern matching any binary, hex, decimal number.
+    let pat = join(s:pat_numbers, '\+\|') . '\+'
+
+    " move cursor to end of number
+    if !search(pat, 'ce', stopline)
+        " if it fails, there was not match on the line, so return prematurely
+        return
+    endif
+
+    " start visually selecting from end of number
+    norm! v
+
+    " move cursor to beginning of number
+    call search(pat, 'bc', stopline)
+endfu
+" }}}4
+
+" next number after cursor on current line
+xno <silent> in :<c-u>call <sid>in_number()<cr>
+ono <silent> in :<c-u>call <sid>in_number()<cr>
 
 " iS {{{3
 
@@ -7355,7 +7440,47 @@ endfu
 " and it contained a  filename, make sure you used the  filename modo `:p`, `:S`
 " and `--`  to end the optional  arguments (useful in case  your filename begins
 " with a hyphen).
-
+"
+" 148 -
+" Read: https://vimways.org/2018/vims-social-life/
+"
+" 149 -
+" Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
+"
+" 150 -
+" When we change  the colorscheme (or its brightness, which  is the same thing),
+" some of our custom HGs are cleared.
+" More  specifically,  the  ones  which  are   linked  to  a  default  HG  (like
+" `hmltItalic`) are cleared.
+" Because of this,  we lose the bold  style in a markdown buffer  when we change
+" the colorscheme.
+" But we don't lose the codespan style in a markdown buffer, because we automatically
+" re-install it in `~/.vim/autoload/colorscheme.vim`.
+"
+" Document this.
+"
+" How should we handle the clearing of custom HGs?
+" Read our comments above `colorscheme#restore_cleared_hg()`,
+" in `~/.vim/colors/my/customizations.vim`.
+"
+" Update:
+" I think we should stop trying to re-install them.
+" It's dangerous.
+" We duplicate code from some default syntax plugins which may be updated in the
+" future.
+" We could introduce inconsistencies...
+"
+" Instead, we should rely on `=d` to manually fix the syntax highlighting in the
+" current buffer.
+" Or restart Vim.
+"
+" 151 -
+" Better understand the origin of the default HGs.
+" Read:
+"
+"     :h group-name
+"     :e $VIMRUNTIME/syntax/syncolor.vim
+"     $ vim -Nu NONE +"put=execute('hi')"
 
 
 

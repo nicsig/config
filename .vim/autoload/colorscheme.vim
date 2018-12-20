@@ -4,13 +4,13 @@ fu! colorscheme#save_last_version() abort "{{{1
 endfu
 
 fu! colorscheme#set() abort "{{{1
-    let seoul_256_background = get(g:, 'my_last_colorscheme', 253)
+    let seoul_bg = get(g:, 'my_last_colorscheme', 253)
 
-    if seoul_256_background >= 233 && seoul_256_background <= 239
-        let g:seoul256_background = seoul_256_background
+    if seoul_bg >= 233 && seoul_bg <= 239
+        let g:seoul256_background = seoul_bg
         colo seoul256
     else
-        let g:seoul256_light_background = seoul_256_background
+        let g:seoul256_light_background = seoul_bg
         colo seoul256-light
     endif
 
@@ -58,9 +58,11 @@ fu! s:styled_comments() abort "{{{1
     " TODO: make sure that the colors are readable no matter the lightness,
     " and even when we use the dark colorscheme (and even in GUI)
     if has('gui_running') || &tgc
+        exe 'hi CodeSpan guibg=#bcbcbc'
         exe 'hi CommentCodeSpan guibg=#bcbcbc guifg=' . attributes.fg
         exe 'hi CommentBlockQuote gui=italic guibg=#bcbcbc guifg=' . attributes.fg
     else
+        exe 'hi CodeSpan ctermbg=250'
         exe 'hi CommentCodeSpan ctermbg=250 ctermfg=' . attributes.fg
         exe 'hi CommentBlockQuote term=italic cterm=italic ctermfg=' . attributes.fg
     endif
