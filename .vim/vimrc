@@ -168,7 +168,7 @@ Plug 'lacygoill/vim-graph'
 "}}}
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
-Plug 'djmoch/vim-makejob'
+Plug 'foxik/vim-makejob'
 " the neovim `man` plugin is better
 " TODO: although it doesn't support our custom motions such as `]r`
 if !has('nvim')
@@ -568,28 +568,58 @@ augroup my_colorscheme
 
     " What's the issue fixed by this autocommand?{{{
     "
-    "     $ cat /tmp/md.md
-    "     hello *world*
+    "     $ cat <<'EOF' >/tmp/md.md
+    "     word in *italic*
+    "     EOF
     "
     "     $ vim /tmp/md.md
-    "     $ ]ol (change lightness)
+    "     ]ol (change lightness)
     "
-    " `world` is not in italic anymore (✘).
+    " `italic` is not in italic anymore (✘).
     "}}}
     " Where does the issue come from?{{{
     "
     " The `htmlItalic` HG is sometimes cleared, because of `:hi clear`:
     "
     "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+    "
+    " More generally, any HG whose attributes  are defined in a syntax plugin is
+    " cleared.
+    " The issue doesn't affect linked HGs:
+    "
+    "     " ✔
+    "     hi [def] link SomeGroup OtherGroup
+    "
+    "     " ✘
+    "     hi [def] link SomeGroup term=... ctermfg=...
     "}}}
-    " Why don't you use a function to re-install manually every cleared HG?{{{
+    au ColorScheme * call s:reinstall_cleared_hg()
+augroup END
+
+fu! s:reinstall_cleared_hg() abort
+    " Why don't you simply run `:do Syntax`?{{{
+    "
+    " Suppose you have two windows, one with a python buffer, and the other with
+    " a markdown buffer.
+    " You change the colorscheme while in the python buffer.
+    " The HGs whose attributes are defined in `$VIMRUNTIME/syntax/html.vim` will
+    " be cleared, which may have an effect  on the rendering of some text in the
+    " markdown buffer.
+    " But since you're  in a python buffer, `:do Syntax`  will reload the python
+    " syntax plugin, while you need to reload the html syntax plugin.
+    "}}}
+    " Why don't you manually re-install every cleared HG?{{{
     "
     " It would create duplication.
     " Some HGs would be installed from a syntax plugin, and from this file.
     " If one day their definition is updated  in the syntax plugin, we would have an
     " inconsistency.
+    "
+    " Besides, we would be constantly chasing new cleared HGs, and even then, we
+    " could miss some of them.
+    " It's not reliable.
     "}}}
-    " Are there alternatives?{{{
+    " Is there an alternative?{{{
     "
     " Yes:
     "
@@ -597,8 +627,27 @@ augroup my_colorscheme
     "
     " But it's too slow when we have a lot of buffers.
     "}}}
-    au ColorScheme * do Syntax
-augroup END
+
+    " What does this code do?{{{
+    "
+    " It iterates over all the windows in all the tabpages.
+    " For each  of them,  if it  has never  seen the  filetype of  the displayed
+    " buffer, it reloads its syntax plugin.
+    "}}}
+    let orig_winid = win_getid()
+    let seen = {}
+    for info in getwininfo()
+        let ft = getbufvar(info.bufnr, '&ft')
+        if !has_key(seen, ft)
+            let seen[ft] = 1
+            if ft isnot# ''
+                call win_gotoid(info.winid)
+                do Syntax
+            endif
+        endif
+    endfor
+    call win_gotoid(orig_winid)
+endfu
 
 " Why the guard?{{{
 "
@@ -3454,12 +3503,17 @@ fu! s:fix_display() abort
     " update title in folds
     do BufWinEnter
 
-    " Reinstall our custom HGs when we change the colorscheme.
+    " Re-install HGs which may have been cleared after changing the colorscheme.{{{
     "
-    " Remember that  to change the brightness  of `seoul-256`, in effect,  we do
+    " Remember that to change the brightness  of `seoul-256`, in effect, we *do*
     " change the colorscheme.
-    " Note that `do Syntax` will only re-install  a custom HG if it's defined in
-    " a syntax plugin which is sourced for the current buffer.
+    " Also, note  that `do Syntax` will  only re-install a HG  if its attributes
+    " are defined in a syntax plugin which is sourced for the current buffer.
+    "}}}
+    " We already run `:do Syntax` from an autocmd listening to `ColorScheme`.  Is it really useful here?{{{
+    "
+    " It could be useful if we have a loaded buffer which is not displayed anywhere...
+    "}}}
     do Syntax
 
     " Purpose:{{{
@@ -7482,9 +7536,8 @@ endfu
 "
 " 150 -
 " When we change  the colorscheme (or its brightness, which  is the same thing),
-" some of our custom HGs are cleared.
-" More  specifically,  the  ones  which  are   linked  to  a  default  HG  (like
-" `hmltItalic`) are cleared.
+" some of our HGs are cleared.
+" That's what happens, for example, to `hmltItalic`.
 " Because of this,  we lose the bold  style in a markdown buffer  when we change
 " the colorscheme.
 " But we don't lose the codespan style in a markdown buffer, because we automatically
@@ -7505,14 +7558,6 @@ endfu
 " Instead, we should rely on `=d` to manually fix the syntax highlighting in the
 " current buffer.
 " Or restart Vim.
-"
-" 151 -
-" Better understand the origin of the default HGs.
-" Read:
-"
-"     :h group-name
-"     :e $VIMRUNTIME/syntax/syncolor.vim
-"     $ vim -Nu NONE +"put=execute('hi')"
 
 
 
