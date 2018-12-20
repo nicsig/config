@@ -565,6 +565,39 @@ set backspace=indent,eol,start
 augroup my_colorscheme
     au!
     au ColorScheme * runtime colors/my/customizations.vim
+
+    " What's the issue fixed by this autocommand?{{{
+    "
+    "     $ cat /tmp/md.md
+    "     hello *world*
+    "
+    "     $ vim /tmp/md.md
+    "     $ ]ol (change lightness)
+    "
+    " `world` is not in italic anymore (✘).
+    "}}}
+    " Where does the issue come from?{{{
+    "
+    " The `htmlItalic` HG is sometimes cleared, because of `:hi clear`:
+    "
+    "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+    "}}}
+    " Why don't you use a function to re-install manually every cleared HG?{{{
+    "
+    " It would create duplication.
+    " Some HGs would be installed from a syntax plugin, and from this file.
+    " If one day their definition is updated  in the syntax plugin, we would have an
+    " inconsistency.
+    "}}}
+    " Are there alternatives?{{{
+    "
+    " Yes:
+    "
+    "     :doautoall syntax
+    "
+    " But it's too slow when we have a lot of buffers.
+    "}}}
+    au ColorScheme * do Syntax
 augroup END
 
 " Why the guard?{{{
@@ -7460,8 +7493,7 @@ endfu
 " Document this.
 "
 " How should we handle the clearing of custom HGs?
-" Read our comments above `colorscheme#restore_cleared_hg()`,
-" in `~/.vim/colors/my/customizations.vim`.
+" Read our comments above the autocmd `au do Syntax` in our vimrc.
 "
 " Update:
 " I think we should stop trying to re-install them.

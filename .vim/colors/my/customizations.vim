@@ -133,7 +133,7 @@ hi! link VertSplit Normal
 " Why the delay?{{{
 "
 " gVim encounters some errors when trying to set up too early some of our custom
-" HGs (~/.vim/colors/my/customizations.vim):
+" HGs defined in `~/.vim/colors/my/customizations.vim`:
 "
 "     E417: missing argument: guifg=
 "     E254: Cannot allocate color 95
@@ -141,7 +141,7 @@ hi! link VertSplit Normal
 "
 " The  issue seems  to be  that  the HGs  whose  attributes we  need to  inspect
 " ('StatusLine',  'TabLine',   ...),  are  not  (correctly)   defined  yet  when
-" `~/.color/my/customizations` is sourced by gVim.
+" `~/.vim/colors/my/customizations.vim` is sourced by gVim.
 "}}}
 if has('gui_running') && has('vim_starting')
     augroup delay_colorscheme_when_gvim_starts
@@ -151,31 +151,4 @@ if has('gui_running') && has('vim_starting')
 else
     call colorscheme#set_custom_hg()
 endif
-
-" What's the issue fixed by this function?{{{
-"
-"     $ cat /tmp/md.md
-"     hello *world*
-"
-"     $ vim /tmp/md.md
-"     $ ]ol (change lightness)
-"
-" `world` is not in italic anymore (✘).
-"}}}
-" Where does the issue come from?{{{
-"
-" The `htmlItalic` HG is sometimes cleared, because of `:hi clear`:
-"
-"     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
-"}}}
-" How to fix it manually?{{{
-"
-" Reload the buffer where a HG has been cleared, or execute `:do syntax`.
-"}}}
-" Why do you use a function?{{{
-"
-" There're probably other HGs  which suffer from the same issue,  so we create a
-" function whose purpose will be to restore as many as possible.
-"}}}
-call colorscheme#restore_cleared_hg()
 

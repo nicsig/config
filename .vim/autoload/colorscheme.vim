@@ -166,13 +166,3 @@ fu! s:user() abort "{{{1
     exe printf(cmd2, style2, todo_fg, attributes.bg)
 endfu
 
-fu! colorscheme#restore_cleared_hg() abort "{{{1
-    " A better alternative would be:{{{
-    "
-    "     doautoall syntax
-    "
-    " But it's too slow when we have a lot of buffers.
-    "}}}
-    hi htmlItalic term=italic cterm=italic gui=italic
-endfu
-
