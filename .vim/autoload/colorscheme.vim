@@ -19,83 +19,12 @@ fu! colorscheme#customize() abort "{{{1
         call lg#catch_error()
     endtry
 
-    " the `SpecialKey` HG installed by seoul256 is barely readable
+    " the `SpecialKey` HG set by seoul256 is barely readable
     hi! link SpecialKey Special
 
-    " Is there an alternative?{{{
-    "
-    " Yes, you can configure the 'hl' option in Vim.
-    "}}}
-    " Can it be used for other HGs?{{{
-    "
-    " Yes among others, there is `SpecialKey`.
-    "}}}
-    " How to configure 'hl' to achieve the same result?{{{
-
-    " " We must reset the option so that we can change the configuration, resource
-    " " our vimrc, and immediately see the result.
-    " set hl&vim
-    "
-    " "       ┌─ column used to separate vertically split windows
-    " "       │
-    " set hl-=c:VertSplit hl+=c:StatusLine
-    " "         │               │
-    " "         │               └─ new HG
-    " "         └─ default HG
-    "
-    " "       ┌─ Meta and special keys listed with ":map"
-    " "       │
-    " set hl-=8:SpecialKey hl+=8:Special
-    "}}}
-    " How does it work?{{{
-    "
-    " The global 'hl' option can be used  to configure the style of various elements
-    " in the UI.
-    " It contains a comma separated list of values.
-    "
-    " Each value follows one the following syntax:
-
-    "       ┌ character standing for which element of the UI we want to configure
-    "       │         ┌ character standing for which style we want to apply
-    "       ├────────┐├────┐
-    "       {occasion}{mode}
-
-    "       {occasion}:{HG}
-    "                   │
-    "                   └ highlight group to color the element of the UI
-
-    " The default values all use the 2nd syntax. They all use a HG.
-    " But you could also use a mode:
-    "
-    "         r  reverse
-    "         i  italic
-    "         b  bold
-    "         s  standout
-    "         u  underline
-    "         c  undercurl
-    "         n  no highlighting
-    "}}}
-    " Why don't you use it anymore?{{{
-    "
-    " It's deprecated in Neovim.
-    " It feels useless, since we don't need this option to configure any HG.
-    "}}}
+    " the `VertSplit`  HG set  by seoul256  has a dark  background which  is too
+    " visible in the light colorscheme, and not enough in the dark one
     hi! link VertSplit Normal
-
-    " Custom HGs
-
-    " We're going to define 2 HGs: User1 and User2.
-    " We use them in the status line to customize the appearance of:
-    "
-    "     • the filename
-    "     • the modified flag
-    "
-    " We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
-    " except for one: `reverse` (boolean flag).
-    "
-    " `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
-    " Also, we set the color of the background of `User2` as the same as the
-    " foreground color of `Todo`, so that the modified flag clearly stands out.
 
     " Why the delay?{{{
     "
@@ -129,6 +58,33 @@ fu! colorscheme#set() abort "{{{1
     let seoul_bg = get(g:, 'my_last_colorscheme', 253)
 
     if seoul_bg >= 233 && seoul_bg <= 239
+        " What's this `g:seoul256_background`?{{{
+        "
+        " ┌─────────────────────────────────────┬──────────────────────────────────────────────────────────────────┐
+        " │ g:seoul256_current_bg               │ Current background color in ANSI code                            │
+        " │ g:seoul256_current_fg               │ Current foreground color in ANSI code                            │
+        " │                                     │                                                                  │
+        " │                                     │ ┌ dark             ┌ light                                       │
+        " │                                     │ ├─────────┐        ├─────────┐                                   │
+        " │                                     │ 233 ... 239        252 ... 256                                   │
+        " ├─────────────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+        " │ g:seoul256_background               │ value to be used the NEXT time we execute `:colo seoul256`       │
+        " │                                     │                                                                  │
+        " │                                     │         Valid values: 233 … 237 … 239                            │
+        " │                                     │                       │     │     │                              │
+        " │                                     │                       │     │     └─ lightest                    │
+        " │                                     │                       │     └─ default                           │
+        " │                                     │                       └─ darkest                                 │
+        " ├─────────────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+        " │ g:seoul256_light_background         │ value to be used the NEXT time we execute `:colo seoul256-light` │
+        " │                                     │                                                                  │
+        " │                                     │         Valid values: 252 … 253 … 256                            │
+        " │                                     │                       │     │     │                              │
+        " │                                     │                       │     │     └─ lightest                    │
+        " │                                     │                       │     └─ default                           │
+        " │                                     │                       └─ darkest                                 │
+        " └─────────────────────────────────────┴──────────────────────────────────────────────────────────────────┘
+        "}}}
         let g:seoul256_background = seoul_bg
         colo seoul256
     else
@@ -236,6 +192,21 @@ fu! s:tabline() abort "{{{1
 endfu
 
 fu! s:user() abort "{{{1
+    " We're going to define 2 HGs: User1 and User2.{{{
+    "
+    " We use them in the status line to customize the appearance of:
+    "
+    "     • the filename
+    "     • the modified flag
+    "
+    " We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
+    " except for one: `reverse` (boolean flag).
+    "
+    " `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
+    " Also, we set the color of the background of `User2` as the same as the
+    " foreground color of `Todo`, so that the modified flag clearly stands out.
+    "}}}
+
     " `ctermfg`, `ctermbg`, `guifg`, `guibg` are not attributes of the HG
     " `StatusLine`. They are arguments for the `:hi` command.
     " They allow us to set the real attributes (`fg` and `bg`) for Vim in

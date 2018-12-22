@@ -1121,6 +1121,13 @@ fu! myfuncs#remove_duplicate_lines(line1, line2) abort "{{{1
     return ''
 endfu
 
+fu! myfuncs#remove_leading_dollar() abort "{{{1
+    let pat = '^\%(\s*\n\s*\)*\zs\$'
+    let lnum = search(pat)
+    let text = substitute(getline(lnum), '^\s*\zs\$', '', '')
+    call setline(lnum, text)
+endfu
+
 fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     call cursor(a:line1, 1)

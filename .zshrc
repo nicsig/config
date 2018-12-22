@@ -3074,6 +3074,17 @@ zle -N edit-command-line
 
 # Why this wrapper function around the `$ vim` command?{{{
 #
+# It allows us to customize the environment.
+#
+# Atm, we simply add an autocmd to remove the leading dollar in front of a shell
+# command, which  we often  paste when  we copy some  code from  the web  or our
+# notes.
+# In the future, we could do more advanced things...
+#
+# ---
+#
+# Also:
+#
 #     C-x C-e
 #     :sp
 #     C-k
@@ -3119,9 +3130,12 @@ zle -N edit-command-line
 # Source:
 #     https://unix.stackexchange.com/a/485467/289772
 #}}}
-__sane_vim() STTY=sane command vim "$@"
-#            ├───────┘             ├──┘{{{
-#            │                     └ necessary for the temporary filename to be passed
+# Is `"$@"` necessary?{{{
+#
+# Yes, for the temporary filename to be passed.
+#}}}
+__sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call myfuncs#remove_leading_dollar()' "$@"
+#            ├───────┘                 {{{
 #            └ man zshparam
 #              /PARAMETERS USED BY THE SHELL
 #

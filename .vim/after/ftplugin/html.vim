@@ -44,6 +44,7 @@ setl sw=2
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
     \ . "
-    \ setl fp< kp< sw<
+    \   setl sw<
+    \ | set fp< kp<
     \ "
 

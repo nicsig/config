@@ -352,13 +352,13 @@ set termencoding=utf-8
 " A global variable seems more brittle.
 " It could be wrongly deleted.
 "}}}
-" if has('vim_starting')
-"     syntax enable
-" endif
+"     if has('vim_starting')
+"         syntax enable
+"     endif
 
 " GUI {{{2
 
-if has('vim_starting') && has('gui_running')
+if has('gui_running')
     set guifont=DejaVu\ Sans\ Mono\ 20
 endif
 
@@ -527,31 +527,6 @@ set backspace=indent,eol,start
 "}}}
 " colorscheme {{{2
 
-" ┌─────────────────────────────────────┬──────────────────────────────────────────────────────────────────┐
-" │ g:seoul256_current_bg               │ Current background color in ANSI code                            │
-" │ g:seoul256_current_fg               │ Current foreground color in ANSI code                            │
-" │                                     │                                                                  │
-" │                                     │ ┌ dark             ┌ light                                       │
-" │                                     │ ├─────────┐        ├─────────┐                                   │
-" │                                     │ 233 ... 239        252 ... 256                                   │
-" ├─────────────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-" │ g:seoul256_background               │ value to be used the NEXT time we execute `:colo seoul256`       │
-" │                                     │                                                                  │
-" │                                     │         Valid values: 233 … 237 … 239                            │
-" │                                     │                       │     │     │                              │
-" │                                     │                       │     │     └─ lightest                    │
-" │                                     │                       │     └─ default                           │
-" │                                     │                       └─ darkest                                 │
-" ├─────────────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-" │ g:seoul256_light_background         │ value to be used the NEXT time we execute `:colo seoul256-light` │
-" │                                     │                                                                  │
-" │                                     │         Valid values: 252 … 253 … 256                            │
-" │                                     │                       │     │     │                              │
-" │                                     │                       │     │     └─ lightest                    │
-" │                                     │                       │     └─ default                           │
-" │                                     │                       └─ darkest                                 │
-" └─────────────────────────────────────┴──────────────────────────────────────────────────────────────────┘
-
 augroup my_colorscheme
     au!
     au ColorScheme * call colorscheme#customize()
@@ -584,6 +559,26 @@ augroup my_colorscheme
     "     hi [def] link SomeGroup term=... ctermfg=...
     "}}}
     au ColorScheme * call s:reinstall_cleared_hg()
+
+    " Why changing `CursorLine`?{{{
+    "
+    " The  attributes set  by our  colorscheme make  the cursorline  not visible
+    " enough.
+    "}}}
+    " Why `ctermbg=NONE` and `guibg=NONE`?{{{
+    "
+    " To make `CursorLine` transparent in case of a conflict between two HGs.
+    " It happens  when `'cursorline'` is set,  and the *background* of  the text
+    " under the cursor is highlighted by a syntax item.
+    "}}}
+    " It's not visible enough!{{{
+    "
+    " Add the bold value:
+    "
+    "     hi CursorLine term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=NONE guibg=NONE
+    "                        ^^^^                 ^^^^_              ^^^^
+    "}}}
+    au Colorscheme * hi CursorLine term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
 augroup END
 
 fu! s:reinstall_cleared_hg() abort
@@ -642,11 +637,11 @@ endfu
 " Why the guard?{{{
 "
 "     • there's no point reloading the colorscheme every time we source our
-"       vimrc
+"       vimrc
 "
 "     • without a guard, every time we write the vimrc, the colorscheme would
-"       be reloaded, which would make us lose syntax highlighting in
-"       a `freekeys` buffer, because of `:hi clear`:
+"       be reloaded, which would make us lose syntax highlighting in
+"       a `freekeys` buffer, because of `:hi clear`:
 "
 "               ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
 "}}}
@@ -758,6 +753,10 @@ endif
 
 set cpo+=M
 
+" the nr column (`'nu'`,  `'rnu'`) will be taken into account  to decide when to
+" wrap long lines
+set cpo+=n
+
 " So instead we get:
 "     (hello \() world)
 
@@ -769,12 +768,19 @@ set cpo+=M
 " Why you shouldn't add it to 'cpo'?{{{
 "
 " It breaks  the repetition of an  edition on a  set of selected lines  with the
-" :normal and dot command:
+" `:normal` command, and with our custom dot command:
 "
-"         set cpo+=y
+"         :set cpo+=y
 "         A ) Esc
 "         visually select lines
-"         :norm .
+"         :norm! .
+"
+" Note that by default, the dot command doesn't work in visual mode.
+" It works only because of our mapping:
+"
+"     xno  <silent>  .  :norm! .<cr>
+"
+" FIXME: Why does `set cpo+=y` break `:norm! .` in visual mode?
 "}}}
 
 " diffopt {{{2
@@ -824,19 +830,14 @@ set display+=lastline
 
 " fillchars {{{2
 
-" guard to prevent Vim from appending the value every time we source manually
-" our vimrc
-if has('vim_starting')
-    " Replace ugly separators (`|`) used for vertical splits, with prettier utf8
-    " characters, to get a continuous line.
-    set fillchars=vert:┃
+set fillchars&vim
 
-    " Pad end of title lines with spaces instead of hyphens.
-    exe 'set fillchars+=fold:\ '
-    " For some reason, this doesn't work:
-    "
-    "         let &fillchars .= 'fold: '
-endif
+" Replace ugly  separators (`|`)  used for vertical  splits, with  prettier utf8
+" characters, to get a continuous line.
+set fillchars=vert:┃
+
+" Pad end of title lines with spaces instead of hyphens.
+let &fillchars .= ',fold: '
 
 " flp "{{{2
 
@@ -878,16 +879,16 @@ augroup END
 "     2. another very long line another very long line another very long line
 "        another line
 " }}}
-" Why use `let &l:` instead of `setl`? {{{
+" Why use `let &g:` instead of `setg`? {{{
 "
-" With `setl`, you  have to double the backslashes because  the value is wrapped
+" With `:setg`, you have to double  the backslashes because the value is wrapped
 " inside a non-literal string.
 "
 " Also, you have to add an extra backslash for every pipe character
 " (alternation), because one is removed by Vim to toggle its special meaning
 " (command separator).
 "
-" So:    2 backslashes for metacharacters (atoms, quantifiers, …)
+" So:    2 backslashes for metacharacters (atoms, quantifiers, ...)
 "        3 backslashes for pipes
 " }}}
 " After pressing `gwip` in a list, how are the lines indented?{{{
@@ -897,11 +898,13 @@ augroup END
 " Compared to tpope ftplugin, our pattern is simpler. {{{
 "
 " He has added a third branch to describe a footnote. Sth looking like this:
+"
 "         ^[abc]:
 "
 " https://github.com/tpope/vim-markdown/commit/14977fb9df2984067780cd452e51909cf567ee9d
 " I don't know how it's useful, so I didn't copy it.
 " The title of the commit is:
+"
 "         Indent the footnotes also.
 " }}}
 " Don't conflate the `n` flag in 'fo' with the one in 'com'. {{{
@@ -1967,81 +1970,83 @@ set virtualedit=block
 
 " wildignore(case) {{{2
 
-" Why?{{{
+" Why tweaking `'wig'`?{{{
 "
-" Some files can't be edited by Vim. Or they shouldn't.
+" Some files can't be edited by Vim.
+" Or they shouldn't.
+"
 " We never want to see them:
 "
 "         • in a dirvish listing
 "         • on the command-line after a tab completion
 "         • in the output of `expand()`, `glob()`, `globpath()`
 "}}}
-if has('vim_starting')
-    " lock files (example: ~/.gksu.lock)
-    set wig+=*.lock
 
-    " vim temporary files
-    set wig+=*.bak,*.swo,*.swp,*~
+set wig&vim
+" lock files (example: ~/.gksu.lock)
+set wig+=*.lock
 
-    " latex temporary files
-    set wig+=*.aux,*.fdb_latexmk,*.fls,*/auxiliary/*,*/build/*
+" vim temporary files
+set wig+=*.bak,*.swo,*.swp,*~
 
-    " password databases
-    set wig+=*.kdb,*.kdbx
+" latex temporary files
+set wig+=*.aux,*.fdb_latexmk,*.fls,*/auxiliary/*,*/build/*
 
-    " media files (music, pictures, ...)
-    set wig+=*.gif,*.jpeg,*.jpg,*.mp3,*.mp4,*.png
+" password databases
+set wig+=*.kdb,*.kdbx
 
-    " python objects/cache
-    set wig+=*.pyc,*/__pycache__/*
-    " Why not `*/__pycache__/**/*` ?{{{
-    "
-    " No need to. The depth of a python cache is 1.
-    " See the contents of `~/.vim/pythonx/__pycache__/`.
+" media files (music, pictures, ...)
+set wig+=*.gif,*.jpeg,*.jpg,*.mp3,*.mp4,*.png
+
+" python objects/cache
+set wig+=*.pyc,*/__pycache__/*
+" Why not `*/__pycache__/**/*` ?{{{
+"
+" No need to. The depth of a python cache is 1.
+" See the contents of `~/.vim/pythonx/__pycache__/`.
+"}}}
+
+" undo files
+"
+"                          ┌─ `*` can match any string/path
+"                          │  (including as many `/` as you want, but not a dot)
+"                          │
+let &wig .= ','.&undodir.'/*'
+let &wig .= ','.&undodir.'/*.*'
+let &wig .= ','.&undodir.'/*.*.*,'
+"                          │
+"                          └─ `*` can't match a dot, and the path of an
+"                              undofile often contains 1 or 2 dots
+
+" Why don't you ignore archives?{{{
+"
+"     set wig+=*[^0-9].gz,*.rar,*.tar.*,*.zip
+"               ├────┘
+"               └ don't ignore man pages in `/usr/share/man/man1/`
+"
+" Some system files are stored in archives, logs for example.
+" When we inspect the contents of a directory in dirvish, I want to see them
+" (whether I can open them or not).
+" Besides, usually, they can be read in Vim.
+" Example:
+"
+"     /usr/share/keymaps/i386/azerty/azerty.kmap.gz
+"
+"}}}
+
+set wig+=tags
+
+" A file in a `.git/` directory.
+set wig+=*/.git/*
+" If you see a `.git/` directory in dirvish, before tweaking this option, have a look at `fex#format_entries()`:{{{
+"
+"         ~/.vim/plugged/vim-fex/autoload/fex.vim:22
+"}}}
+" If this setting causes an issue, read this:{{{
+"
+"     https://www.reddit.com/r/vim/comments/626no2/vim_without_nerd_tree_or_ctrlp/dfkbm97/
+"     https://github.com/tpope/vim-fugitive/issues/121#issuecomment-38720847
     "}}}
-
-    " undo files
-    "
-    "                          ┌─ `*` can match any string/path
-    "                          │  (including as many `/` as you want, but not a dot)
-    "                          │
-    let &wig .= ','.&undodir.'/*'
-    let &wig .= ','.&undodir.'/*.*'
-    let &wig .= ','.&undodir.'/*.*.*,'
-    "                          │
-    "                          └─ `*` can't match a dot, and the path of an
-    "                              undofile often contains 1 or 2 dots
-
-    " Why don't you ignore archives?{{{
-    "
-    "     set wig+=*[^0-9].gz,*.rar,*.tar.*,*.zip
-    "               ├────┘
-    "               └ don't ignore man pages in `/usr/share/man/man1/`
-    "
-    " Some system files are stored in archives, logs for example.
-    " When we inspect the contents of a directory in dirvish, I want to see them
-    " (whether I can open them or not).
-    " Besides, usually, they can be read in Vim.
-    " Example:
-    "
-    "     /usr/share/keymaps/i386/azerty/azerty.kmap.gz
-    "
-    "}}}
-
-    set wig+=tags
-
-    " A file in a `.git/` directory.
-    set wig+=*/.git/*
-    " If you see a `.git/` directory in dirvish, before tweaking this option, have a look at `fex#format_entries()`:{{{
-    "
-    "         ~/.vim/plugged/vim-fex/autoload/fex.vim:22
-    "}}}
-    " If this setting causes an issue, read this:{{{
-    "
-    "     https://www.reddit.com/r/vim/comments/626no2/vim_without_nerd_tree_or_ctrlp/dfkbm97/
-    "     https://github.com/tpope/vim-fugitive/issues/121#issuecomment-38720847
-    "}}}
-endif
 
 " Tab completion should be case-insensitive.
 " If we type `:e bar Tab`, and a file `Bar` exists, we should get:
@@ -2145,13 +2150,8 @@ set linebreak
 " allow to soft-wrap after ) ] }
 set breakat+=)]}
 
-" the nr column ('nu', 'rnu') will be taken into account to decide when to wrap
-" long lines
-set cpo+=n
-
 " allow `h` and `l` motion to move across lines
 set whichwrap=h,l
-
 " }}}1
 " MAPPINGS {{{1
 " NEW {{{2
@@ -6518,6 +6518,12 @@ endfu
 "        • gettagstack(), settagstack()
 "        • prompt-buffer
 "        • reg_recording() + reg_executing()
+"        • sign_define()
+"        • sign_getdefined()
+"        • sign_getplaced()
+"        • sign_place()
+"        • sign_undefined()
+"        • sign_unplace()
 "        • term_setansicolors(), term_getansicolors(), g:term_ansi_colors
 "        • term_setsize()
 "        • textchangedp
@@ -6571,22 +6577,22 @@ endfu
 " 78 -
 " read:
 "
-"     :h channel.txt
 "     :h syntax.txt     (not that big once you remove part 4: :h syn-file-remarks
 "                        you're not supposed to read entirely anyway, only the ones
 "                        matching the types of files you use frequently;
 "                        to get a list:    :h ft-*-syn c-d)
+"     :h sign.txt
 "     :h tagsrch.txt
-"     :h terminal.txt
 "
-"     :h if_lua.txt
-"     :h if_pyth.txt
-"
-"     :h diff.txt
-"     :h recover.txt
-"     :h tips.txt
+"     :h channel.txt
 "
 "     :h textprop.txt
+"     :h diff.txt
+"     :h terminal.txt
+"     :h recover.txt
+"     :h tips.txt
+"     :h if_lua.txt
+"     :h if_pyth.txt
 "
 " 79 -
 " study ~/Dropbox/vim_plugins/fastfold.vim
@@ -7333,10 +7339,10 @@ endfu
 "
 " It's better because:
 "
-"     • more concise/readable
-"     • mention explicitly the third value 'baz'
-"         (before it was implicit/not mentioned at all)
-"     • easier to expand later if `var` can have more values
+"   • more concise/readable
+"   • mention explicitly the third value 'baz'
+"   (before it was implicit/not mentioned at all)
+"   • easier to expand later if `var` can have more values
 "
 " 131 -
 " Recently, when we try to push a commit and press enter after our username,
@@ -7504,6 +7510,15 @@ endfu
 " Read: https://vimways.org/2018/vims-social-life/
 "
 " 148 -
+" Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
+" closed fold.
+" Maybe do the same with `J` and `K` in visual mode.
+"
+" Btw:
+" I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
+" instead `H` and `L`.
+"
+" 149 -
 " Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
 
 
