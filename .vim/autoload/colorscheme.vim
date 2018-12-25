@@ -116,6 +116,7 @@ fu! s:set_custom_hg() abort "{{{1
     call s:user()
     call s:styled_comments()
     call s:tabline()
+
     " `Underlined` is meant to be used to highlight html links.{{{
     "
     " In a webbrowser, usually those are blue.
@@ -123,7 +124,8 @@ fu! s:set_custom_hg() abort "{{{1
     " So, we reset the  HG with the `underline` style, and the  colors of the HG
     " `Conditional` (because this one is blue).
     "}}}
-    hi Underlined term=underline cterm=underline gui=underline ctermfg=31 guifg=#0099BD
+    exe 'hi Underlined term=underline cterm=underline gui=underline '
+        \ . matchstr(execute('hi Conditional'), 'xxx\zs.*')
 endfu
 
 fu! s:styled_comments() abort "{{{1
@@ -150,26 +152,40 @@ fu! s:styled_comments() abort "{{{1
     let ctermbg = &bg is# 'light' ? 250 : 241
     let comment_fg = s:get_attributes('Comment').fg
     let preproc_fg = s:get_attributes('PreProc').fg
+    let repeat_fg = s:get_attributes('Repeat').fg
 
     " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
     if has('gui_running')
-        " for the markdown syntax plugin
-        exe 'hi CodeSpan guibg=' . guibg
-        " for comments in various filetypes
+        exe 'hi markdownCodeSpan guibg=' . guibg
+        exe 'hi markdownListItalic gui=italic guifg=' .repeat_fg
+        exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
+        exe 'hi markdownListBoldItalic gui=bold,italic guifg=' . repeat_fg
+        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
+
         exe 'hi CommentCodeSpan guibg=' . guibg . ' guifg=' . comment_fg
-        " for blockquotes in comments in various filetypes
         exe 'hi CommentBlockquoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
 
         exe 'hi CommentItalic gui=italic guifg=' . comment_fg
         exe 'hi CommentBold gui=bold guifg=' . comment_fg
         exe 'hi CommentBoldItalic gui=bold,italic guifg=' . comment_fg
 
+        exe 'hi CommentList guifg=' . repeat_fg
+        exe 'hi CommentListItalic gui=italic guifg=' . repeat_fg
+        exe 'hi CommentListBold gui=bold guifg=' . repeat_fg
+        exe 'hi CommentListBoldItalic gui=bold,italic guifg=' . repeat_fg
+        exe 'hi CommentListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
+
         exe 'hi CommentBlockquote gui=italic guibg=' . guibg . ' guifg=' . preproc_fg
         exe 'hi CommentBlockquoteBold gui=italic,bold guibg=' . guibg . ' guifg=' . preproc_fg
 
     " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
     elseif &tgc
-        exe 'hi CodeSpan guibg=' . guibg
+        exe 'hi markdownCodeSpan guibg=' . guibg
+        exe 'hi markdownListItalic cterm=italic guifg=' . repeat_fg
+        exe 'hi markdownListBold cterm=bold guifg=' . repeat_fg
+        exe 'hi markdownListBoldItalic cterm=bold,italic guifg=' . repeat_fg
+        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . ctermbg
+
         exe 'hi CommentCodeSpan guifg=' . comment_fg . ' guibg=' . guibg
         exe 'hi CommentBlockquoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
 
@@ -177,18 +193,35 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi CommentBold cterm=bold guifg=' . comment_fg
         exe 'hi CommentBoldItalic cterm=bold,italic guifg=' . comment_fg
 
+        exe 'hi CommentList guifg=' . repeat_fg
+        exe 'hi CommentListItalic cterm=italic cterm=italic guifg=' . repeat_fg
+        exe 'hi CommentListBold cterm=bold cterm=bold guifg=' . repeat_fg
+        exe 'hi CommentListBoldItalic cterm=bold,italic cterm=bold,italic guifg=' . repeat_fg
+        exe 'hi CommentListCodeSpan guifg=' . repeat_fg . ' guibg=' . ctermbg
+
         exe 'hi CommentBlockquote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
         exe 'hi CommentBlockquoteBold cterm=italic,bold guifg=' . preproc_fg . ' guibg=' . guibg
 
     " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
-        exe 'hi CodeSpan ctermbg=' . ctermbg
+        exe 'hi markdownCodeSpan ctermbg=' . ctermbg
+        exe 'hi markdownListItalic cterm=italic ctermfg=' . repeat_fg
+        exe 'hi markdownListBold term=bold cterm=bold ctermfg=' . repeat_fg
+        exe 'hi markdownListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
+        exe 'hi markdownListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
+
         exe 'hi CommentCodeSpan ctermfg=' . comment_fg . ' ctermbg=' . ctermbg
         exe 'hi CommentBlockquoteCodeSpan ctermfg=' . preproc_fg . ' ctermbg=' . ctermbg
 
         exe 'hi CommentItalic term=italic cterm=italic ctermfg=' . comment_fg
         exe 'hi CommentBold term=bold cterm=bold ctermfg=' . comment_fg
         exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . comment_fg
+
+        exe 'hi CommentList ctermfg=' . repeat_fg
+        exe 'hi CommentListItalic term=italic cterm=italic ctermfg=' . repeat_fg
+        exe 'hi CommentListBold term=bold cterm=bold ctermfg=' . repeat_fg
+        exe 'hi CommentListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
+        exe 'hi CommentListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
 
         exe 'hi CommentBlockquote term=italic cterm=italic ctermfg=' . preproc_fg
         exe 'hi CommentBlockquoteBold term=italic,bold cterm=italic,bold ctermfg=' . preproc_fg
