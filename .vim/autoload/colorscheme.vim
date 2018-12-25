@@ -158,40 +158,40 @@ fu! s:styled_comments() abort "{{{1
         " for comments in various filetypes
         exe 'hi CommentCodeSpan guibg=' . guibg . ' guifg=' . comment_fg
         " for blockquotes in comments in various filetypes
-        exe 'hi CommentBlockQuoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi CommentBlockquoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
 
         exe 'hi CommentItalic gui=italic guifg=' . comment_fg
         exe 'hi CommentBold gui=bold guifg=' . comment_fg
         exe 'hi CommentBoldItalic gui=bold,italic guifg=' . comment_fg
 
-        exe 'hi CommentBlockQuote gui=italic guibg=' . guibg . ' guifg=' . preproc_fg
-        exe 'hi CommentBlockQuoteBold gui=italic,bold guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi CommentBlockquote gui=italic guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi CommentBlockquoteBold gui=italic,bold guibg=' . guibg . ' guifg=' . preproc_fg
 
     " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
     elseif &tgc
         exe 'hi CodeSpan guibg=' . guibg
         exe 'hi CommentCodeSpan guifg=' . comment_fg . ' guibg=' . guibg
-        exe 'hi CommentBlockQuoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi CommentBlockquoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
 
         exe 'hi CommentItalic cterm=italic guifg=' . comment_fg
         exe 'hi CommentBold cterm=bold guifg=' . comment_fg
         exe 'hi CommentBoldItalic cterm=bold,italic guifg=' . comment_fg
 
-        exe 'hi CommentBlockQuote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
-        exe 'hi CommentBlockQuoteBold cterm=italic,bold guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi CommentBlockquote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi CommentBlockquoteBold cterm=italic,bold guifg=' . preproc_fg . ' guibg=' . guibg
 
     " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
         exe 'hi CodeSpan ctermbg=' . ctermbg
         exe 'hi CommentCodeSpan ctermfg=' . comment_fg . ' ctermbg=' . ctermbg
-        exe 'hi CommentBlockQuoteCodeSpan ctermfg=' . preproc_fg . ' ctermbg=' . ctermbg
+        exe 'hi CommentBlockquoteCodeSpan ctermfg=' . preproc_fg . ' ctermbg=' . ctermbg
 
         exe 'hi CommentItalic term=italic cterm=italic ctermfg=' . comment_fg
         exe 'hi CommentBold term=bold cterm=bold ctermfg=' . comment_fg
         exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . comment_fg
 
-        exe 'hi CommentBlockQuote term=italic cterm=italic ctermfg=' . preproc_fg
-        exe 'hi CommentBlockQuoteBold term=italic,bold cterm=italic,bold ctermfg=' . preproc_fg
+        exe 'hi CommentBlockquote term=italic cterm=italic ctermfg=' . preproc_fg
+        exe 'hi CommentBlockquoteBold term=italic,bold cterm=italic,bold ctermfg=' . preproc_fg
     endif
 endfu
 
