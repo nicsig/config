@@ -4621,25 +4621,25 @@ fu! s:plugins_update() abort
     " Why a colon is a bad idea in a filename?{{{
     "
     " 1. It's not inside  the default value of 'isf'. Which means  that Vim
-    "    doesn't consider this character  to be a part  of a filename when
-    "    using  `\f` in a pattern.
+    "   doesn't consider this character  to be a part  of a filename when
+    "   using  `\f` in a pattern.
     "
     " 2. In most buffers, the local value of 'efm' probably uses the `%f` item
-    "    to match a filename. Here's what `:h error-file-format` says about
-    "    the latter:
+    "   to match a filename. Here's what `:h error-file-format` says about
+    "   the latter:
     "
-    "         The "%f" conversion may depend on the current 'isfname' setting.
+    " >       The "%f" conversion may depend on the current 'isfname' setting.
     "
-    "    So, if you  try to parse the output  of a shell command, or  to read an
-    "    error file/buffer  to populate the  qfl, Vim  will fail to  recognize a
-    "    filename containing a colon. You'll get non-valid entries.
+    "   So, if you  try to parse the output  of a shell command, or  to read an
+    "   error file/buffer  to populate the  qfl, Vim  will fail to  recognize a
+    "   filename containing a colon. You'll get non-valid entries.
     "
     " 3. It's interpreted as a separator  in $PATH, so it can be dangerous if
-    "    used in a directory.  And if we avoid the colon in a directory name,
-    "    to stay consistent we should do the same in a filename.
+    "   used in a directory.  And if we avoid the colon in a directory name,
+    "   to stay consistent we should do the same in a filename.
     "
     " 4. It has a special meaning in  Windows, so if the file is copied on
-    "    a different OS, it can cause an issue.
+    "   a different OS, it can cause an issue.
     "}}}
     " Which character are safe to use in a filename?{{{
     "
@@ -6494,41 +6494,41 @@ endfu
 " 72 -
 " play with (or document):
 "
-"        • 'filewinid' (location list property)
-"        • 'user_data' entry in completion item
-"        • 'varsofttabstop', 'vartabstop'
-"        • :h matchadd(), new `window` key in optional dictionary
-"        • :swapname
-"        • :unl[et] ${env-name} (:h :unlet-$)
-"        • appendbufline()
+"    • 'filewinid' (location list property)
+"    • 'user_data' entry in completion item
+"    • 'varsofttabstop', 'vartabstop'
+"    • :h matchadd(), new `window` key in optional dictionary
+"    • :swapname
+"    • :unl[et] ${env-name} (:h :unlet-$)
+"    • appendbufline()
 "
-"        • argc() + argv()
-"          in Vim, they can now access the global arglist and the local arglist of another window
-"                 https://github.com/vim/vim/releases/tag/v8.1.0493
+"    • argc() + argv()
+"      in Vim, they can now access the global arglist and the local arglist of another window
+"             https://github.com/vim/vim/releases/tag/v8.1.0493
 "
-"        • DiffUpdated
-"        • api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
-"        • cmdlinechanged
-"        • deletebufline()
-"        • diffupdate
-"        • dirchanged
-"        • exitpre
-"        • getcompletion('*', 'arglist')   +   com! -complete=arglist ...
-"        • getcwd(-1) return the global directory
-"        • gettagstack(), settagstack()
-"        • prompt-buffer
-"        • reg_recording() + reg_executing()
-"        • sign_define()
-"        • sign_getdefined()
-"        • sign_getplaced()
-"        • sign_place()
-"        • sign_undefined()
-"        • sign_unplace()
-"        • term_setansicolors(), term_getansicolors(), g:term_ansi_colors
-"        • term_setsize()
-"        • textchangedp
-"        • trim()
-"        • winlayout()
+"    • DiffUpdated
+"    • api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
+"    • cmdlinechanged
+"    • deletebufline()
+"    • diffupdate
+"    • dirchanged
+"    • exitpre
+"    • getcompletion('*', 'arglist')   +   com! -complete=arglist ...
+"    • getcwd(-1) return the global directory
+"    • gettagstack(), settagstack()
+"    • prompt-buffer
+"    • reg_recording() + reg_executing()
+"    • sign_define()
+"    • sign_getdefined()
+"    • sign_getplaced()
+"    • sign_place()
+"    • sign_undefined()
+"    • sign_unplace()
+"    • term_setansicolors(), term_getansicolors(), g:term_ansi_colors
+"    • term_setsize()
+"    • textchangedp
+"    • trim()
+"    • winlayout()
 "
 " 73 -
 " in `vim-window`, don't do this:
@@ -6740,8 +6740,8 @@ endfu
 " update:
 " it probably has sth to do with these functions:
 "
-"     • fold#motion#go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
-"     • lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
+"    • fold#motion#go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
+"    • lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
 "
 " update:
 " it has to do with the `<silent>` argument in the mapping.
@@ -6781,10 +6781,10 @@ endfu
 "
 " also, make some cleaning in our mappings:
 "
-"         • x_gj      join lines
-"         • x_gc-j    join lines without inserting/removing spaces
-"         • x_mj      join two blocks
-"         • x_mc-j    join two blocks in reverse order
+"    • x_gj      join lines
+"    • x_gc-j    join lines without inserting/removing spaces
+"    • x_mj      join two blocks
+"    • x_mc-j    join two blocks in reverse order
 "
 " are they consistent?
 " could we make them easier to remember?
@@ -6818,20 +6818,20 @@ endfu
 " update:
 " two issues:
 "
-"         1 - you can't prevent the initial search (the one without `\ze`)
+"    1. you can't prevent the initial search (the one without `\ze`)
 "
-"         2 - you can't make the autocmd local to a buffer;
-"             you can only inspect `get(b:, 'current_syntax', '')` and compare it to 'dirvish'
-"             but the autocmd will still be global.
+"    2. you can't make the autocmd local to a buffer;
+"    you can only inspect `get(b:, 'current_syntax', '')` and compare it to 'dirvish'
+"    but the autocmd will still be global.
 "
 " 91 -
 " we should remove `cop` mapping in `vim-help`.
 " it's not consistent with how we use the preview window in other plugins.
 " instead, install these mappings:
 "
-"       • p preview tag under cursor
-"       • } preview next tag
-"       • { preview previous tag
+"    • p preview tag under cursor
+"    • } preview next tag
+"    • { preview previous tag
 "
 " 92 -
 " should we enable  'ttyfast'? it's useless with current terminal,  but could be
@@ -6887,16 +6887,16 @@ endfu
 " 98 -
 " develop a design to quickly handle a temp special buffer:
 "
-"     • layout
+"    • layout
 "
-"     • local settings & mappings
-"       think about using {, }, (, ), and maybe [[, ]]
+"    • local settings & mappings
+"    think about using {, }, (, ), and maybe [[, ]]
 "
-"     • syntax highlighting
-"     • filetype detection
-"     • automatic population (persistent after `:e`)
-"     • proper path/name
-"     • handle multiple invocations (there should be always only 1 (updated) window)
+"    • syntax highlighting
+"    • filetype detection
+"    • automatic population (persistent after `:e`)
+"    • proper path/name
+"    • handle multiple invocations (there should be always only 1 (updated) window)
 "
 " if you want the buffer to be  reloadable, do not populate it directly from the
 " function called by a mapping.
@@ -7041,7 +7041,7 @@ endfu
 " https://github.com/ardagnir/athame
 " https://github.com/ardagnir/athame/issues/52
 "
-"         full vim for your shell (bash, zsh, gdb, python, etc)
+" > full vim for your shell (bash, zsh, gdb, python, etc)
 "
 " could be used to expand ultisnips snippets in the shell.
 "
@@ -7062,10 +7062,10 @@ endfu
 " 107 -
 " rethink the following mappings:
 "
-"     • gt, gt (could be better used to move the current tabpage, instead of >t, <t)
-"           but what would we use to populate the location list with to_do's and fix_me's?
+"    • gt, gt (could be better used to move the current tabpage, instead of >t, <t)
+"    but what would we use to populate the location list with to_do's and fix_me's?
 "
-"     • zj (could be used to join a window to a tabpage, instead of c-n; symmetry with zt)
+"    • zj (could be used to join a window to a tabpage, instead of c-n; symmetry with zt)
 "
 " 108 -
 " in python files, we  can use multi-line comments with a  pair of triple double
@@ -7087,9 +7087,9 @@ endfu
 "
 " learn how to configure, use, integrate the following linters:
 "
-"     • pylint
-"     • pycodestyle
-"     • pydocstyle
+"    • pylint
+"    • pycodestyle
+"    • pydocstyle
 "
 " this command populates a default config file for `pylint`:
 "
@@ -7111,9 +7111,9 @@ endfu
 " we should use more abbreviations.
 " review the triggers:
 "
-"     • are they well chosen?
-"     • should you remove some of them?
-"     • should you add more?
+"    • are they well chosen?
+"    • should you remove some of them?
+"    • should you add more?
 "
 "         use `:wordfrequency`, but if you find a frequent word (like 'result'),
 "         it doesn't necessarily mean you should create an abbreviation just for
@@ -7212,9 +7212,9 @@ endfu
 " The repetition of an operation in visual mode is not consistent
 " with what Vim does:
 "
-"     • press `~` on a visual selection
-"     • move the cursor on another line
-"     • press .
+"    • press `~` on a visual selection
+"    • move the cursor on another line
+"    • press .
 "
 " Vim has recomputed a new visual selection with the same geometry
 " than the previous one.
@@ -7274,9 +7274,9 @@ endfu
 " Update:
 " We should probably define functions in our library (lg-lib), to:
 "
-"     • extract the comment leader
-"     • get a pattern to detect whether the current line is commented
-"     • return the commented version of a line (before pasting it somewhere)
+"    • extract the comment leader
+"    • get a pattern to detect whether the current line is commented
+"    • return the commented version of a line (before pasting it somewhere)
 "
 " 126 -
 " We have 4 plugins which use `repeat#set()`:
@@ -7291,39 +7291,22 @@ endfu
 "
 " Try to get rid of the call to the function, either by:
 "
-"     • submitting a bug report/PR
-"     • re-implementing the plugin
+"    • submitting a bug report/PR
+"    • re-implementing the plugin
 "
 " 127 -
-" Search for all vimtex mappings which haven't `<c-u>` before `:call`.
-" Submit an issue whose message looks like:
-"
-" >    I'm not saying  the absence of C-u causes/caused any  issue, but you seem
-" >    to care a lot about the reliability of your plugin (confirmed by the `l:`
-" >    scope used systematically  even though it's not  strictly necessary ...),
-" >    and  so  thought you  would  agree  with using  C-u  to  avoid that  your
-" >    functions are called unnecessarily several times.
-"
-" But make sure they are not necessary. They could be, if the function needs
-" to be re-called several times when the user pressed a count.
-"
-"     :noa vim /\m\cmap.*\%(<c-u>\s*\)\@<!\zs\<call\>/gj ~/.vim/plugged/vimtex/**/*.vim | cw
-"
-" Also, vimtex doesn't seem to remove local mappings (b:undo_ftplugin)...
-"
-" 128 -
 " Try to replace as many `:s` commands as possible with `setline()`:
 "
 "     noa vim !s\([/:;@]\).\{-}\1!gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "     Cfilter! -other_plugins -commented -tmp
 "     Cfilter! ^\s*\%(let\|call\|echo\|return\|if\|unlet!\=\|&&\)\s
 "
-" 129 -
+" 128 -
 " Every  time you open a  window, be aware that  an error may be  raised because
 " you're in the command-line window.
 " You may want to catch that error to avoid a stack trace.
 "
-" 130 -
+" 129 -
 " Watch out for this anti-pattern:
 "
 "     " assume that `var` can only have 3 values ['foo', 'bar', 'baz']
@@ -7344,7 +7327,7 @@ endfu
 "   (before it was implicit/not mentioned at all)
 "   • easier to expand later if `var` can have more values
 "
-" 131 -
+" 130 -
 " Recently, when we try to push a commit and press enter after our username,
 " the terminal writes `^M` instead of a linefeed.
 " Next time it happens, try:
@@ -7360,11 +7343,11 @@ endfu
 " Find what's causing the issue.
 " Is it something we do in Vim?
 "
-" 132 -
+" 131 -
 " Add  spaces  around  all  concatenation  operators: it  makes  the  code  more
 " readable?
 "
-" 133 -
+" 132 -
 " Remove all `==#`, `!=#`, `==?`, `!=?`.
 " Replace them with `==`, `!=`.
 " The `#` and `?` is useless now.
@@ -7380,27 +7363,27 @@ endfu
 " is evaluated as a string.
 " Wouldn't we be happy to have a strict comparison in this case?
 "
-" 134 -
+" 133 -
 " Remove `&l:` when it's not necessary?
 "
-" 135 -
+" 134 -
 " Use full name of commands?
 "
-" 136 -
+" 135 -
 " Switch from 4 spaces to 2 spaces for indentation?
 "
-" 137 -
+" 136 -
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
 "
-" 138 -
+" 137 -
 " It doesn't make sense for `C-g v` to search in $VIMRUNTIME.
 " It should look into `/usr/share/zsh/`.
 " `C-g v` should inspect some buffer-local variables to determine
 " the cycle of directories in which `:vimgrep` should search.
 "
-" 139 -
+" 138 -
 " This mapping works in Vim, but not in Neovim:
 "     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'int')})[-1]
 "                                                      ├───┘
@@ -7413,7 +7396,7 @@ endfu
 " But still, report it on Neovim's bug tracker.
 " Btw, it looks similar to another issue we opened.
 "
-" 140 -
+" 139 -
 "
 "     % hash | vipe
 "
@@ -7444,14 +7427,14 @@ endfu
 " When it sees a directory such as `~`, it should not search in it.
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
 "
-" 141 -
+" 140 -
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
 " Maybe  you should  use other  keys to  handle folds,  so that  you can  decide
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 142 -
+" 141 -
 "
 " What's the use case of the command attributes `-addr=quickfix` and `-addr=other`?
 "
@@ -7461,13 +7444,13 @@ endfu
 "
 " has introduced the command attribute `-addr=other`.
 "
-" 143 -
+" 142 -
 " Read this:
 "
 "     https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
-" >    Updating a quickfix/location list asynchronously without interfering with another plugin
+" >     Updating a quickfix/location list asynchronously without interfering with another plugin
 "
-" 144 -
+" 143 -
 "
 "     $ vim -Nu NONE
 "     :exe 'helpgrep vim' | exe 'helpgrep text' | exe 'helpgrep wont_be_found'
@@ -7478,7 +7461,7 @@ endfu
 " Shouldn't the last command print the quickfix stack?
 " Why does it tell me that the last quickfix list is empty?
 "
-" 145 -
+" 144 -
 " Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
 " between `~/.vim/plugin` and `~/.vim/after/plugin/`?
 "
@@ -7500,16 +7483,16 @@ endfu
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
 "
-" 146 -
+" 145 -
 " Whenever you used `system()`, `systemlist()`, or  `:!` to run a shell command,
 " and it contained a  filename, make sure you used the  filename modo `:p`, `:S`
 " and `--`  to end the optional  arguments (useful in case  your filename begins
 " with a hyphen).
 "
-" 147 -
+" 146 -
 " Read: https://vimways.org/2018/vims-social-life/
 "
-" 148 -
+" 147 -
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
@@ -7518,7 +7501,7 @@ endfu
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
 "
-" 149 -
+" 148 -
 " Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
 
 

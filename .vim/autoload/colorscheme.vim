@@ -49,6 +49,17 @@ fu! colorscheme#customize() abort "{{{1
     endif
 endfu
 
+fu! s:get_attributes(hg) abort "{{{1
+    let attributes = {
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
+
+    return map(attributes, {k,v -> synIDattr(synIDtrans(hlID(a:hg)), k)})
+endfu
+
 fu! colorscheme#save_last_version() abort "{{{1
     let line = 'let g:my_last_colorscheme = '.get(g:, 'seoul256_current_bg', 253)
     call writefile([line], $HOME.'/.vim/colors/my/last_version.vim')
@@ -118,49 +129,65 @@ fu! s:styled_comments() abort "{{{1
     "
     " 3. `s:set_custom_hg()` calls `s:styled_comments()`
     "}}}
-    let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
-        \ }
 
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Comment')), k)})
+    " Where did you find these color codes?{{{
+    "
+    " I chose a color from the terminal palette:
+    "
+    "     $ palette
+    "
+    " And to get the hex equivalent of the decimal code, I used `$ gpick`.
+    "}}}
+    let guibg = &bg is# 'light' ? '#bcbcbc' : '#626262'
+    let ctermbg = &bg is# 'light' ? 250 : 241
+    let comment_fg = s:get_attributes('Comment').fg
+    let preproc_fg = s:get_attributes('PreProc').fg
 
-    for [attribute, hg] in items({'bold': 'CommentStrong', 'italic': 'CommentEmphasis'})
-        let cmd = has('gui_running')
-              \ ?     'hi '.hg.' gui='.attribute.' guifg=%s'
-              \ : &tgc
-              \ ?     'hi '.hg.' term='.attribute.' cterm='.attribute.' guifg=%s'
-              \ :     'hi '.hg.' term='.attribute.' cterm='.attribute.' ctermfg=%s'
-        exe printf(cmd, attributes.fg)
-    endfor
+    " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
+    if has('gui_running')
+        " for the markdown syntax plugin
+        exe 'hi CodeSpan guibg=' . guibg
+        " for comments in various filetypes
+        exe 'hi CommentCodeSpan guibg=' . guibg . ' guifg=' . comment_fg
+        " for blockquotes in comments in various filetypes
+        exe 'hi CommentBlockQuoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
 
-    " if &background is# 'light'
-    "     exe 'hi CommentCodeSpan '.(has('gui_running') || &tgc ? 'guifg' : 'ctermfg').'=235'
-    " else
-    "     exe 'hi CommentCodeSpan '.(has('gui_running') || &tgc ? 'guifg' : 'ctermfg').'=255'
-    " endif
+        exe 'hi CommentStrong gui=bold guifg=' . comment_fg
+        exe 'hi CommentEmphasis gui=italic guifg=' . comment_fg
+        exe 'hi CommentStrongEmphasis gui=bold,italic guifg=' . comment_fg
 
-    " TODO: maybe find better color for blockquotes, codespans and codeblocks
-    " TODO: make sure that the colors are readable no matter the lightness,
-    " and even when we use the dark colorscheme (and even in GUI)
-    if has('gui_running') || &tgc
-        exe 'hi CodeSpan guibg=#bcbcbc'
-        exe 'hi CommentCodeSpan guibg=#bcbcbc guifg=' . attributes.fg
-        exe 'hi CommentBlockQuote gui=italic guibg=#bcbcbc guifg=' . attributes.fg
+        exe 'hi CommentBlockQuote gui=italic guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi CommentBlockQuoteStrong gui=italic,bold guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi CommentBlockQuoteEmphasis gui=italic'
+
+    " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
+    elseif &tgc
+        exe 'hi CodeSpan guibg=' . guibg
+        exe 'hi CommentCodeSpan guifg=' . comment_fg . ' guibg=' . guibg
+        exe 'hi CommentBlockQuoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
+
+        exe 'hi CommentStrong cterm=bold guifg=' . comment_fg
+        exe 'hi CommentEmphasis cterm=italic guifg=' . comment_fg
+        exe 'hi CommentStrongEmphasis cterm=bold,italic guifg=' . comment_fg
+
+        exe 'hi CommentBlockQuote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi CommentBlockQuoteStrong cterm=italic,bold guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi CommentBlockQuoteEmphasis cterm=italic'
+
+    " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
-        exe 'hi CodeSpan ctermbg=250'
-        exe 'hi CommentCodeSpan ctermbg=250 ctermfg=' . attributes.fg
-        exe 'hi CommentBlockQuote term=italic cterm=italic ctermfg=' . attributes.fg
+        exe 'hi CodeSpan ctermbg=' . ctermbg
+        exe 'hi CommentCodeSpan ctermfg=' . comment_fg . ' ctermbg=' . ctermbg
+        exe 'hi CommentBlockQuoteCodeSpan ctermfg=' . preproc_fg . ' ctermbg=' . ctermbg
+
+        exe 'hi CommentStrong term=bold cterm=bold ctermfg=' . comment_fg
+        exe 'hi CommentEmphasis term=italic cterm=italic ctermfg=' . comment_fg
+        exe 'hi CommentStrongEmphasis term=bold,italic cterm=bold,italic ctermfg=' . comment_fg
+
+        exe 'hi CommentBlockQuote term=italic cterm=italic ctermfg=' . preproc_fg
+        exe 'hi CommentBlockQuoteStrong term=italic,bold cterm=italic,bold ctermfg=' . preproc_fg
+        exe 'hi CommentBlockQuoteEmphasis term=italic cterm=italic'
     endif
-
-    " if has('gui_running') || &tgc
-    "     exe 'hi CommentCodeSpan guifg=#9A7372'
-    " else
-    "     exe 'hi CommentCodeSpan ctermfg=95'
-    " endif
-
 endfu
 
 fu! s:tabline() abort "{{{1
