@@ -140,6 +140,22 @@ fu! s:styled_comments() abort "{{{1
     " 3. `s:set_custom_hg()` calls `s:styled_comments()`
     "}}}
 
+    " Why `Underlined`?{{{
+    "
+    " From `:h group-name`:
+    "
+    " > *Underlined       text that stands out, HTML links
+    "
+    " Also, that's what the default markdown syntax plugin uses to highlight the
+    " text of a link.
+    "}}}
+    hi link markdownLinkText Underlined
+    " Why `Float`?{{{
+    "
+    " That's what the default markdown syntax plugin uses to highlight a url.
+    "}}}
+    hi link markdownUrl Float
+
     " Where did you find these color codes?{{{
     "
     " I chose a color from the terminal palette:
@@ -162,21 +178,21 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
         exe 'hi markdownListBoldItalic gui=bold,italic guifg=' . repeat_fg
 
+        exe 'hi markdownList guifg=' . repeat_fg
+        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
+        exe 'hi markdownListItalic gui=italic guifg=' . repeat_fg
+        exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
+        exe 'hi markdownListBoldItalic gui=bold,italic guifg=' . repeat_fg
+
+        exe 'hi markdownBlockquote gui=italic guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi markdownBlockquoteBold gui=italic,bold guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi markdownBlockquoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
+
         exe 'hi CommentCodeSpan guibg=' . guibg . ' guifg=' . comment_fg
 
         exe 'hi CommentItalic gui=italic guifg=' . comment_fg
         exe 'hi CommentBold gui=bold guifg=' . comment_fg
         exe 'hi CommentBoldItalic gui=bold,italic guifg=' . comment_fg
-
-        exe 'hi CommentList guifg=' . repeat_fg
-        exe 'hi CommentListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
-        exe 'hi CommentListItalic gui=italic guifg=' . repeat_fg
-        exe 'hi CommentListBold gui=bold guifg=' . repeat_fg
-        exe 'hi CommentListBoldItalic gui=bold,italic guifg=' . repeat_fg
-
-        exe 'hi CommentBlockquote gui=italic guibg=' . guibg . ' guifg=' . preproc_fg
-        exe 'hi CommentBlockquoteBold gui=italic,bold guibg=' . guibg . ' guifg=' . preproc_fg
-        exe 'hi CommentBlockquoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
 
     " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
     elseif &tgc
@@ -186,21 +202,21 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownListBold cterm=bold guifg=' . repeat_fg
         exe 'hi markdownListBoldItalic cterm=bold,italic guifg=' . repeat_fg
 
+        exe 'hi markdownList guifg=' . repeat_fg
+        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . ctermbg
+        exe 'hi markdownListItalic cterm=italic cterm=italic guifg=' . repeat_fg
+        exe 'hi markdownListBold cterm=bold cterm=bold guifg=' . repeat_fg
+        exe 'hi markdownListBoldItalic cterm=bold,italic cterm=bold,italic guifg=' . repeat_fg
+
+        exe 'hi markdownBlockquote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi markdownBlockquoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi markdownBlockquoteBold cterm=italic,bold guifg=' . preproc_fg . ' guibg=' . guibg
+
         exe 'hi CommentCodeSpan guifg=' . comment_fg . ' guibg=' . guibg
 
         exe 'hi CommentItalic cterm=italic guifg=' . comment_fg
         exe 'hi CommentBold cterm=bold guifg=' . comment_fg
         exe 'hi CommentBoldItalic cterm=bold,italic guifg=' . comment_fg
-
-        exe 'hi CommentList guifg=' . repeat_fg
-        exe 'hi CommentListCodeSpan guifg=' . repeat_fg . ' guibg=' . ctermbg
-        exe 'hi CommentListItalic cterm=italic cterm=italic guifg=' . repeat_fg
-        exe 'hi CommentListBold cterm=bold cterm=bold guifg=' . repeat_fg
-        exe 'hi CommentListBoldItalic cterm=bold,italic cterm=bold,italic guifg=' . repeat_fg
-
-        exe 'hi CommentBlockquote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
-        exe 'hi CommentBlockquoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
-        exe 'hi CommentBlockquoteBold cterm=italic,bold guifg=' . preproc_fg . ' guibg=' . guibg
 
     " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
@@ -210,21 +226,21 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownListBold term=bold cterm=bold ctermfg=' . repeat_fg
         exe 'hi markdownListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
 
+        exe 'hi markdownList ctermfg=' . repeat_fg
+        exe 'hi markdownListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
+        exe 'hi markdownListItalic term=italic cterm=italic ctermfg=' . repeat_fg
+        exe 'hi markdownListBold term=bold cterm=bold ctermfg=' . repeat_fg
+        exe 'hi markdownListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
+
+        exe 'hi markdownBlockquote term=italic cterm=italic ctermfg=' . preproc_fg
+        exe 'hi markdownBlockquoteCodeSpan ctermfg=' . preproc_fg . ' ctermbg=' . ctermbg
+        exe 'hi markdownBlockquoteBold term=italic,bold cterm=italic,bold ctermfg=' . preproc_fg
+
         exe 'hi CommentCodeSpan ctermfg=' . comment_fg . ' ctermbg=' . ctermbg
 
         exe 'hi CommentItalic term=italic cterm=italic ctermfg=' . comment_fg
         exe 'hi CommentBold term=bold cterm=bold ctermfg=' . comment_fg
         exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . comment_fg
-
-        exe 'hi CommentList ctermfg=' . repeat_fg
-        exe 'hi CommentListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
-        exe 'hi CommentListItalic term=italic cterm=italic ctermfg=' . repeat_fg
-        exe 'hi CommentListBold term=bold cterm=bold ctermfg=' . repeat_fg
-        exe 'hi CommentListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
-
-        exe 'hi CommentBlockquote term=italic cterm=italic ctermfg=' . preproc_fg
-        exe 'hi CommentBlockquoteCodeSpan ctermfg=' . preproc_fg . ' ctermbg=' . ctermbg
-        exe 'hi CommentBlockquoteBold term=italic,bold cterm=italic,bold ctermfg=' . preproc_fg
     endif
 endfu
 
