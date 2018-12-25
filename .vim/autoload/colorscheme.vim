@@ -116,6 +116,14 @@ fu! s:set_custom_hg() abort "{{{1
     call s:user()
     call s:styled_comments()
     call s:tabline()
+    " `Underlined` is meant to be used to highlight html links.{{{
+    "
+    " In a webbrowser, usually those are blue.
+    " But in `seoul256`, `Underlined` is pink.
+    " So, we reset the  HG with the `underline` style, and the  colors of the HG
+    " `Conditional` (because this one is blue).
+    "}}}
+    hi Underlined term=underline cterm=underline gui=underline ctermfg=31 guifg=#0099BD
 endfu
 
 fu! s:styled_comments() abort "{{{1
