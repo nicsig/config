@@ -5514,9 +5514,9 @@ endfu
 "
 " 2 - solve the following pbs:
 "
-"         • join
-"         • delete
-"         • sort
+"    • join
+"    • delete
+"    • sort
 "
 " … every N lines.
 " Write a command implementing each solution.
