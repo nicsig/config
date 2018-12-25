@@ -173,10 +173,6 @@ fu! s:styled_comments() abort "{{{1
     " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
     if has('gui_running')
         exe 'hi markdownCodeSpan guibg=' . guibg
-        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
-        exe 'hi markdownListItalic gui=italic guifg=' .repeat_fg
-        exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
-        exe 'hi markdownListBoldItalic gui=bold,italic guifg=' . repeat_fg
 
         exe 'hi markdownList guifg=' . repeat_fg
         exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
@@ -197,16 +193,12 @@ fu! s:styled_comments() abort "{{{1
     " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
     elseif &tgc
         exe 'hi markdownCodeSpan guibg=' . guibg
+
+        exe 'hi markdownList guifg=' . repeat_fg
         exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . ctermbg
         exe 'hi markdownListItalic cterm=italic guifg=' . repeat_fg
         exe 'hi markdownListBold cterm=bold guifg=' . repeat_fg
         exe 'hi markdownListBoldItalic cterm=bold,italic guifg=' . repeat_fg
-
-        exe 'hi markdownList guifg=' . repeat_fg
-        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . ctermbg
-        exe 'hi markdownListItalic cterm=italic cterm=italic guifg=' . repeat_fg
-        exe 'hi markdownListBold cterm=bold cterm=bold guifg=' . repeat_fg
-        exe 'hi markdownListBoldItalic cterm=bold,italic cterm=bold,italic guifg=' . repeat_fg
 
         exe 'hi markdownBlockquote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
         exe 'hi markdownBlockquoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
@@ -221,10 +213,6 @@ fu! s:styled_comments() abort "{{{1
     " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
         exe 'hi markdownCodeSpan ctermbg=' . ctermbg
-        exe 'hi markdownListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
-        exe 'hi markdownListItalic cterm=italic ctermfg=' . repeat_fg
-        exe 'hi markdownListBold term=bold cterm=bold ctermfg=' . repeat_fg
-        exe 'hi markdownListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
 
         exe 'hi markdownList ctermfg=' . repeat_fg
         exe 'hi markdownListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
