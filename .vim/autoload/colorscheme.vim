@@ -71,30 +71,30 @@ fu! colorscheme#set() abort "{{{1
     if seoul_bg >= 233 && seoul_bg <= 239
         " What's this `g:seoul256_background`?{{{
         "
-        " ┌─────────────────────────────────────┬──────────────────────────────────────────────────────────────────┐
-        " │ g:seoul256_current_bg               │ Current background color in ANSI code                            │
-        " │ g:seoul256_current_fg               │ Current foreground color in ANSI code                            │
-        " │                                     │                                                                  │
-        " │                                     │ ┌ dark             ┌ light                                       │
-        " │                                     │ ├─────────┐        ├─────────┐                                   │
-        " │                                     │ 233 ... 239        252 ... 256                                   │
-        " ├─────────────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-        " │ g:seoul256_background               │ value to be used the NEXT time we execute `:colo seoul256`       │
-        " │                                     │                                                                  │
-        " │                                     │         Valid values: 233 … 237 … 239                            │
-        " │                                     │                       │     │     │                              │
-        " │                                     │                       │     │     └─ lightest                    │
-        " │                                     │                       │     └─ default                           │
-        " │                                     │                       └─ darkest                                 │
-        " ├─────────────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-        " │ g:seoul256_light_background         │ value to be used the NEXT time we execute `:colo seoul256-light` │
-        " │                                     │                                                                  │
-        " │                                     │         Valid values: 252 … 253 … 256                            │
-        " │                                     │                       │     │     │                              │
-        " │                                     │                       │     │     └─ lightest                    │
-        " │                                     │                       │     └─ default                           │
-        " │                                     │                       └─ darkest                                 │
-        " └─────────────────────────────────────┴──────────────────────────────────────────────────────────────────┘
+        "    ┌─────────────────────────────┬──────────────────────────────────────────────────────────────────┐
+        "    │ g:seoul256_current_bg       │ Current background color in ANSI code                            │
+        "    │ g:seoul256_current_fg       │ Current foreground color in ANSI code                            │
+        "    │                             │                                                                  │
+        "    │                             │ ┌ dark             ┌ light                                       │
+        "    │                             │ ├─────────┐        ├─────────┐                                   │
+        "    │                             │ 233 ... 239        252 ... 256                                   │
+        "    ├─────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+        "    │ g:seoul256_background       │ value to be used the NEXT time we execute `:colo seoul256`       │
+        "    │                             │                                                                  │
+        "    │                             │         Valid values: 233 … 237 … 239                            │
+        "    │                             │                       │     │     │                              │
+        "    │                             │                       │     │     └─ lightest                    │
+        "    │                             │                       │     └─ default                           │
+        "    │                             │                       └─ darkest                                 │
+        "    ├─────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+        "    │ g:seoul256_light_background │ value to be used the NEXT time we execute `:colo seoul256-light` │
+        "    │                             │                                                                  │
+        "    │                             │         Valid values: 252 … 253 … 256                            │
+        "    │                             │                       │     │     │                              │
+        "    │                             │                       │     │     └─ lightest                    │
+        "    │                             │                       │     └─ default                           │
+        "    │                             │                       └─ darkest                                 │
+        "    └─────────────────────────────┴──────────────────────────────────────────────────────────────────┘
         "}}}
         let g:seoul256_background = seoul_bg
         colo seoul256
@@ -154,7 +154,21 @@ fu! s:styled_comments() abort "{{{1
     "
     " That's what the default markdown syntax plugin uses to highlight a url.
     "}}}
-    hi link markdownUrl Float
+    hi link markdownUrl      Float
+    " Why `Type`?{{{
+    "
+    " That's what the help syntax plugin uses.
+    "}}}
+    hi link markdownOption   Type
+    " Why `Delimiter`?{{{
+    "
+    " It seems to be the most meaningful choice.
+    " From `:h group-name`:
+    "
+    " >     Delimiter character that needs attention
+    "}}}
+    hi link markdownPointer  Delimiter
+    hi link markdownTable    Structure
 
     " Where did you find these color codes?{{{
     "

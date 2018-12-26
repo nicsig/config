@@ -7536,12 +7536,41 @@ endfu
 "
 " And you just limited the backtracking to 1 byte.
 " Why does it work?
+"
+" Theory:
+" The regex engine backtracks by characters not by bytes.
+" When you say:
+"
+" >     don't backtrack by more than 1 byte
+"
+" it backtracks by the least amount of text which weighs 1 byte or more.
+" That is 1 character.
+"
+" Consider this other text:
+"
+"     𞹼𞹼foo𞹼𞹼bar𞹼𞹼baz𞹼𞹼
+"
+" And this regex:
+"
+"     \%(𞹼𞹼\)\@5<=b
+"
+" It correctly finds the `b` characters.
+" Now, try this one:
+"
+"     \%(𞹼𞹼\)\@4<=b
+"
+" It doesn't find anything.
+" This is because `𞹼` weighs 4 bytes.
+" So the engine can backtrack to match the first `𞹼`, but not the second one.
+"
+" ---
+"
 " Currently, we've used `\S\@<1` several times in our syntax markdown plugin.
 " Did we make a mistake?
 "
 " Note that depending on  the style with which you try the text,  you may end up
 " with empty squares because there's no glyph in the fontface you're using.
-" It doesn't mean that there's no glyph for *all* styles.
+" It doesn't mean that there's no glyph for *all* styles, just for some of them.
 " Try them all (bold, italic, ...).
 "
 " Also:
@@ -7587,6 +7616,7 @@ augroup END
 
 augroup my_man_no_showbreak
     au!
+    " TODO: lines are too long
     au FileType man setl showbreak=
 augroup END
 
