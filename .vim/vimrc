@@ -7503,6 +7503,47 @@ endfu
 "
 " 148 -
 " Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
+"
+" 149 -
+" When you use  a lookbehind for a  pattern who you know the  maximum BYTE size,
+" use this info to make the regex faster.
+" See `:h :syntime`  and `:h \@123<=`.
+" Note that this doesn't work for a lookafter.
+"
+" Document it.
+"
+" Also:
+" Consider this text:
+"
+"     𞹼foo𞹼bar𞹼baz𞹼
+"
+" And this regex:
+"
+"     \S\@1<=b
+"
+" You shouldn't find the 2 `b` characters preceded by a non-whitespace,
+" because `𞹼` weighs 4 bytes:
+"
+"     $ echo '𞹼' | xxd -p
+"     f09eb9bc0a~
+"
+" And you just limited the backtracking to 1 byte.
+" Why does it work?
+" Currently, we've used `\S\@<1` several times in our syntax markdown plugin.
+" Did we make a mistake?
+"
+" Note that depending on  the style with which you try the text,  you may end up
+" with empty blocks because there's no glyph in the fontface you're using.
+" It doesn't mean that there's no glyph for all styles.
+" Try them all (bold, italic, ...).
+"
+" Also:
+"
+"     \%(^#\)\@1<=
+"
+" Here, I use `1` but I wonder whether `^` stands for a newline, whose weight is
+" 1 byte.
+" Should we use `\@2<=` instead in such a case?
 
 
 

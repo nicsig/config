@@ -5,5 +5,5 @@
 "     ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 "}}}
 syn clear tmuxComment
-syn region tmuxComment start=/#/ skip=/\\\@<!\\$/ end=/$/ contains=tmuxTodo,tmuxCommentTitle
+syn region tmuxComment start=/#/ skip=/\\\@1<!\\$/ end=/$/ contains=tmuxTodo,tmuxCommentTitle
 
