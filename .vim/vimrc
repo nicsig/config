@@ -1789,7 +1789,7 @@ endfu
 " (dont 'backup' et 'writebackup') et expliquée dans l'aide: :h backup-table
 "
 " Par défaut, le chemin du backup du fichier bar est:
-"         ./.bar~
+"         ./.bar~~
 " L'emplacement des fichiers de backup est déterminé par l'option 'backupdir'
 " / 'bdir'.
 " On veut qu'ils soient tous confinés dans ~/.vim/tmp/backup
@@ -7505,12 +7505,19 @@ endfu
 " Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
 "
 " 149 -
-" When you use  a lookbehind for a  pattern who you know the  maximum BYTE size,
-" use this info to make the regex faster.
+" When you  use a lookbehind for  a pattern the  maximum BYTE size of  which you
+" know, use this info to make the regex faster.
 " See `:h :syntime`  and `:h \@123<=`.
 " Note that this doesn't work for a lookafter.
 "
 " Document it.
+"
+" Theory:
+" Vim is unable to distinguish a pattern containing only literal characters from
+" a pattern containing metacharacters.
+" As a result, it  doesn't try to compute the size of what  you pass to `@<=` or
+" to `@<!`, and it  just tries to match at various  positions before the current
+" position.
 "
 " Also:
 " Consider this text:
@@ -7533,8 +7540,8 @@ endfu
 " Did we make a mistake?
 "
 " Note that depending on  the style with which you try the text,  you may end up
-" with empty blocks because there's no glyph in the fontface you're using.
-" It doesn't mean that there's no glyph for all styles.
+" with empty squares because there's no glyph in the fontface you're using.
+" It doesn't mean that there's no glyph for *all* styles.
 " Try them all (bold, italic, ...).
 "
 " Also:
