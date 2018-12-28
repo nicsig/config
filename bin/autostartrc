@@ -1,0 +1,53 @@
+#!/bin/bash
+
+mkdir -p /run/user/$UID/tmp
+
+# Autostart programs
+
+# conky
+"${HOME}/bin/conky-startup.sh"
+
+# dropbox
+"${HOME}/.dropbox-dist/dropboxd" &
+
+# We have a high memory consumption issue.
+# Is greenclip the cause of it?
+#     greenclip daemon &
+
+# redshift
+redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
+
+# Warning:{{{
+#
+# `unclutter` interferes with the `interSubs` script which allows us to read the
+# translation of subtitles.
+#
+# Besides, it may cause issues in the future:
+#
+#     https://wiki.archlinux.org/index.php/unclutter#Known_bugs
+#
+# If it happens, it  may be difficult to debug, because  `unclutter` seems to be
+# an unimportant program, so I tend to forget its existence easily.
+#}}}
+unclutter -idle 2 &
+
+# Why don't you start `urxvt` anymore?{{{
+#
+#     /usr/bin/urxvt &
+#
+# Sometimes, the terminal is slightly too high for the desktop.
+# I think the issue comes from it being started automatically.
+#}}}
+
+# xbindkeys
+xbindkeys -f "${HOME}/.config/xbindkeysrc"
+
+# Purpose:{{{
+#
+# Configure xterm. In  particular, make its  background identical to the  one in
+# urxvt (instead of black by default).
+#}}}
+xrdb -cpp "$(command -v cpp) -traditional-cpp" "${HOME}"/.Xresources
+
+"${HOME}/bin/keyboard.sh"
+
