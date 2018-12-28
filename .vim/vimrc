@@ -1197,11 +1197,6 @@ set isfname+=@-@
 " Don't insert two spaces after a '.', '?' and '!' with a join command.
 set nojoinspaces
 
-" kp {{{2
-
-" When I press `K` on a keyword, use Vim's help by default.
-set kp=:help
-
 " lazyredraw {{{2
 " What does it do?{{{
 "
@@ -6516,6 +6511,7 @@ endfu
 "    • getcompletion('*', 'arglist')   +   com! -complete=arglist ...
 "    • getcwd(-1) return the global directory
 "    • gettagstack(), settagstack()
+"    • mode() (new output `n_ov`, `n_oV`, `n_oC-v`)
 "    • prompt-buffer
 "    • reg_recording() + reg_executing()
 "    • sign_define()
@@ -7502,9 +7498,6 @@ endfu
 " instead `H` and `L`.
 "
 " 148 -
-" Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
-"
-" 149 -
 " When you  use a lookbehind for  a pattern the  maximum BYTE size of  which you
 " know, use this info to make the regex faster.
 " See `:h :syntime`  and `:h \@123<=`.
@@ -7580,6 +7573,19 @@ endfu
 " Here, I use `1` but I wonder whether `^` stands for a newline, whose weight is
 " 1 byte.
 " Should we use `\@2<=` instead in such a case?
+"
+" 149 -
+" Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
+"
+" 150 -
+" In a shell script, try to write a blockquote inside a function.
+" It's highlighted as a comment, instead of a quote.
+" Update:
+" It's because of the indentation.
+" Remove it and the issue disappears.
+"
+" The issue is not specific to shell (can reproduce in lua).
+" And it's not specific to blockquote (can reproduce with a codeblock).
 
 
 

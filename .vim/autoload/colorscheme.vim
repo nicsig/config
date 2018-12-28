@@ -291,7 +291,8 @@ fu! s:user() abort "{{{1
     "}}}
 
     " `ctermfg`, `ctermbg`, `guifg`, `guibg` are not attributes of the HG
-    " `StatusLine`. They are arguments for the `:hi` command.
+    " `StatusLine`.
+    " They are arguments for the `:hi` command.
     " They allow us to set the real attributes (`fg` and `bg`) for Vim in
     " terminal or in GUI.
     let attributes = {
@@ -306,8 +307,8 @@ fu! s:user() abort "{{{1
     if has('gui_running')
         " When 'termguicolors' is set, you set up:
         "
-        "     • the style  of a HG with the argument  `cterm`   , not `gui`
-        "     • the colors of a HG with the arguments `gui[fb]g`, not `cterm[fb]g`
+        "    • the style  of a HG with the argument  `cterm`   , not `gui`
+        "    • the colors of a HG with the arguments `gui[fb]g`, not `cterm[fb]g`
         "
         " IOW, 'tgc' has an effect on how you set up the COLORS of a HG, but not
         " its STYLE.
@@ -330,12 +331,12 @@ fu! s:user() abort "{{{1
         "                                         so, we use `%s` everywhere
     endif
 
-    " For some  colorschemes (default, darkblue,  …), some values used  in the
-    " command which is  going to be executed may be  empty. If that happens, the
-    " command will fail:
+    " For some  colorschemes (default, darkblue,  ...), some values used  in the
+    " command which is going to be executed may be empty.
+    " If that happens, the command will fail:
     "
-    "         Error detected while processing function <SNR>18_set_user_hg:
-    "         E421: Color name or number not recognized: ctermfg= ctermbg=
+    "     Error detected while processing function <SNR>18_set_user_hg:
+    "     E421: Color name or number not recognized: ctermfg= ctermbg=
     if attributes.fg is# '' || attributes.bg is# ''
         return
     endif

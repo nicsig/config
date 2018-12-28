@@ -1000,7 +1000,11 @@ fu! myfuncs#op_toggle_alignment(type) abort
 endfu
 
 fu! myfuncs#plugin_install(url) abort "{{{1
-    let pattern     =  '\vhttps?://github.com/(.{-})/(.*)/?'
+    let pattern =  '\vhttps?://github.com/(.{-})/(.*)/?'
+    if a:url !~# pattern
+        echo 'invalid url'
+        return
+    endif
     let replacement = 'Plug ''\1/\2'''
     let plug_line   = substitute(a:url, pattern, replacement, '')
     let to_install  = matchstr(plug_line, '\vPlug ''.{-}/(vim-)?\zs.{-}\ze''')
