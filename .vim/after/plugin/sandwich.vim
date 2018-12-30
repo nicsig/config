@@ -81,13 +81,14 @@ fu! s:set_recipes() abort
     "
     " 'g' for Grave accent.
     "}}}
+    " FIXME: We  need  to repeat  the  last  recipe  twice, otherwise  it's  not
+    " included in `g:sandwich#recipes`.
     let g:sandwich#recipes = g:sandwich#default_recipes
-                         \ + [{'buns': ['```', '```'], 'input': ['bb'], 'command': ["'[,']CommentToggle"]}]
                          \ + [{'buns': ['`', "'"], 'input': ['g']}]
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
-                         "               │
-                         "               └ used in man pages (ex: `man tmux`)
+                         \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
+                         \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
 
     " TODO:
     " Instead of removing some problematic  recipes, we should add recipes which

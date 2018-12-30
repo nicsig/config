@@ -2254,8 +2254,12 @@ cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHi
 
 " C-r C-l       insert current line {{{3
 
-cno  <c-r><c-l>  <c-r><c-r>=substitute(getline('.'), '^\s*"\=\s*:\=', '', '')<cr>
-
+cno  <c-r><c-l>  <c-r><c-r>=<sid>insert_current_line()<cr>
+fu! s:insert_current_line() abort
+    let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
+    let cml = '\%(\V'.escape(cml, '\').'\m\)\='
+    return substitute(getline('.'), '^\s*'.cml.'\s*:\=', '', '')
+endfu
 " }}}2
 " INSERT {{{2
 
@@ -3010,9 +3014,9 @@ nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
 
 " OLD CODE:
 "
-" nno <silent>  <bar>w  :<c-u> sil! call system('xdg-open http://www.wordreference.com/enfr/'
-"                       \   .  expand('<cword>'))
-"                       \<bar> redraw!<cr>
+"     nno <silent>  <bar>w  :<c-u> sil! call system('xdg-open http://www.wordreference.com/enfr/'
+"                           \   .  expand('<cword>'))
+"                           \<bar> redraw!<cr>
 
 " |x  |X     Tmux run last / current command {{{4
 
@@ -4623,10 +4627,10 @@ fu! s:plugins_update() abort
     "   to match a filename. Here's what `:h error-file-format` says about
     "   the latter:
     "
-    " >       The "%f" conversion may depend on the current 'isfname' setting.
+    "         > The "%f" conversion may depend on the current 'isfname' setting.
     "
-    "   So, if you  try to parse the output  of a shell command, or  to read an
-    "   error file/buffer  to populate the  qfl, Vim  will fail to  recognize a
+    "     So, if you try  to parse the output of a shell command,  or to read an
+    "   error file/buffer  to populate  the qfl,  Vim will  fail to  recognize a
     "   filename containing a colon. You'll get non-valid entries.
     "
     " 3. It's interpreted as a separator  in $PATH, so it can be dangerous if
@@ -4712,7 +4716,7 @@ com! -bar -range=% -nargs=1 ReverseEveryNLines call s:reverse_every_n_lines(<arg
 fu! s:reverse_every_n_lines(n, line1, line2) abort
     let mods = 'keepj keepp'
     let range = a:line1.','.a:line2
-    let l:Address = { -> ( line('.')- a:line1 + 1 ) % a:n ? ( line('.') - a:line1 + 1 ) % a:n : a:n }
+    let l:Address = {-> ( line('.')- a:line1 + 1 ) % a:n ? ( line('.') - a:line1 + 1 ) % a:n : a:n}
     sil exe mods.' '.range.'g/^/exe "m .-".l:Address()'
 endfu
 
@@ -5807,7 +5811,7 @@ endfu
 "         https://vi.stackexchange.com/a/541/13370
 "         http://melp.nl/2013/08/flow-charts-in-code-enter-graphviz-and-the-dot-language/
 "         https://github.com/wannesm/wmgraphviz.vim
-"         man graph-easy
+"         $ man graph-easy
 "
 " update:
 " this is really useful with vim-schlepp, and vim-draw.
@@ -7631,30 +7635,30 @@ augroup END
 
 " sessions to finish:
 "
-"          1. sandwich
-"          2. ultisnips
-"          3. markdown
-"          4. tag
-"          5. arglist (improve our arglist mappings)
-"          6. breakdown
-"          7. paragraph (master `$ par`)
-"          8. tree
-"          9. keyboard
-"          10. systemd
-"          11. cron
-"          12. swap
-"          13. emmet
-"          14. config
-"          15. qf_issue (finish the last two questions)
-"          16. completion
-"          17. profiling
-"          18. debug
-"          19. try
-"          20. async
-"          21. unix
-"          22. package
-"          23. cwd
-"          24. unix
+"    1. sandwich
+"    2. ultisnips
+"    3. markdown
+"    4. tag
+"    5. arglist (improve our arglist mappings)
+"    6. breakdown
+"    7. paragraph (master `$ par`)
+"    8. tree
+"    9. keyboard
+"    10. systemd
+"    11. cron
+"    12. swap
+"    13. emmet
+"    14. config
+"    15. qf_issue (finish the last two questions)
+"    16. completion
+"    17. profiling
+"    18. debug
+"    19. try
+"    20. async
+"    21. unix
+"    22. package
+"    23. cwd
+"    24. unix
 "
 " Once finished, get back to studying the terminal and latex.
 
@@ -7689,36 +7693,36 @@ endfu
 
 
 
-" inorea  <expr>  aa  <sid>painful_chars('angle')
-" cnorea  <expr>  aa  <sid>painful_chars('angle')
+"     inorea  <expr>  aa  <sid>painful_chars('angle')
+"     cnorea  <expr>  aa  <sid>painful_chars('angle')
 
-" inorea  <expr>  cc  <sid>painful_chars('curly')
-" cnorea  <expr>  cc  <sid>painful_chars('curly')
+"     inorea  <expr>  cc  <sid>painful_chars('curly')
+"     cnorea  <expr>  cc  <sid>painful_chars('curly')
 
-" inorea  <expr>  rr  <sid>painful_chars('round')
-" cnorea  <expr>  rr  <sid>painful_chars('round')
+"     inorea  <expr>  rr  <sid>painful_chars('round')
+"     cnorea  <expr>  rr  <sid>painful_chars('round')
 
-" inorea  <expr>  ss  <sid>painful_chars('square')
-" cnorea  <expr>  ss  <sid>painful_chars('square')
+"     inorea  <expr>  ss  <sid>painful_chars('square')
+"     cnorea  <expr>  ss  <sid>painful_chars('square')
 
-" inorea  <expr>  tt  <sid>painful_chars('tick')
-" cnorea  <expr>  tt  <sid>painful_chars('tick')
+"     inorea  <expr>  tt  <sid>painful_chars('tick')
+"     cnorea  <expr>  tt  <sid>painful_chars('tick')
 
-" fu! s:painful_chars(char) abort
-"     let seq = {
-"     \           'angle':  '<>',
-"     \           'curly':  '{}',
-"     \           'round':  '()',
-"     \           'square': '[]',
-"     \           'tick':   '``',
-"     \}
-"     if !has_key(seq, a:char)
+"     fu! s:painful_chars(char) abort
+"         let seq = {
+"         \           'angle':  '<>',
+"         \           'curly':  '{}',
+"         \           'round':  '()',
+"         \           'square': '[]',
+"         \           'tick':   '``',
+"         \}
+"         if !has_key(seq, a:char)
+"             return ''
+"         endif
+"         call feedkeys(seq[a:char]."\<left>", 'in')
+"         call timer_start(0, {-> feedkeys("\<bs>", 'in')})
 "         return ''
-"     endif
-"     call feedkeys(seq[a:char]."\<left>", 'in')
-"     call timer_start(0, {-> feedkeys("\<bs>", 'in')})
-"     return ''
-" endfu
+"     endfu
 
 
 augroup save_and_restore_last_qfl
@@ -7811,8 +7815,8 @@ endfu
 
 
 
-" ino <c-g>c <c-r>=string(eval(input('Calculate: ')))<cr>
-" ino <c-g>c <c-r>=eval(input('Calculate: '))<cr>
+"     ino <c-g>c <c-r>=string(eval(input('Calculate: ')))<cr>
+"     ino <c-g>c <c-r>=eval(input('Calculate: '))<cr>
 
 
 " don't use `<space>g`, I press it by accident too often
