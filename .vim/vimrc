@@ -760,28 +760,29 @@ set cpo+=n
 " So instead we get:
 "     (hello \() world)
 
-" What the `y` flag does?{{{
-" It allows you to redo a yank command with the dot command:
+" Why this guard for Neovim?{{{
 "
-"     set cpo+=y
-"}}}
-" Why you shouldn't add it to 'cpo'?{{{
-"
-" It breaks  the repetition of an  edition on a  set of selected lines  with the
-" `:normal` command, and with our custom dot command:
+" The next setting breaks `:norm! .` when some lines are visually selected:
 "
 "         :set cpo+=y
 "         A ) Esc
 "         visually select lines
 "         :norm! .
 "
-" Note that by default, the dot command doesn't work in visual mode.
-" It works only because of our mapping:
+" This can break our custom mapping:
 "
 "     xno  <silent>  .  :norm! .<cr>
 "
-" FIXME: Why does `set cpo+=y` break `:norm! .` in visual mode?
+" The issue is fixed in this commit:
+"
+"     https://github.com/vim/vim/releases/tag/v8.1.0686
+"
+" But it has not been merged in Neovim yet.
 "}}}
+if !has('nvim')
+    " allow us to redo a yank command with the dot command
+    set cpo+=y
+endif
 
 " diffopt {{{2
 
@@ -2881,21 +2882,23 @@ endfu
 
 " zf {{{4
 
+" Why do you write these mappings wrapping around the builtin `zf` command?{{{
+"
+" They remove a possible superfluous comment leader:
+"
+"     " this is a comment " { { {
+"                         ^
+"                         ✘
+"
+" I can't find an example where Vim adds a superfluous comment leader...
+" So, I think we wrote these mappings because, in the past, we sometimes wrongly
+" added a superfluous comment leader.
+"}}}
 nno  <silent>  zf  :<c-u>set opfunc=<sid>my_zf<cr>g@
 xno  <silent>  zf  :<c-u>call <sid>my_zf('vis')<cr>
 
 fu! s:my_zf(type) abort
     let cml = !empty(&l:cms) ? split(&l:cms, '%')[0] : ''
-    " TODO: Why did we write these wrapper mappings?{{{
-    "
-    " It seems they remove a possible superfluous comment leader:
-    "
-    "     " this is a comment " { { {
-    "                         ^
-    "                         ✘
-    "
-    " But I can't find an example where Vim adds a superfluous comment leader...
-    "}}}
     let pat = '^\s*\V'.escape(cml, '/\').'\m.*\zs\V'.escape(cml, '/\').'\m\ze\s*{'.'{{'
     if a:type is# 'vis'
         norm! '<V'>zf
@@ -4627,7 +4630,7 @@ fu! s:plugins_update() abort
     "   to match a filename. Here's what `:h error-file-format` says about
     "   the latter:
     "
-    "         > The "%f" conversion may depend on the current 'isfname' setting.
+    "     > The "%f" conversion may depend on the current 'isfname' setting.
     "
     "     So, if you try  to parse the output of a shell command,  or to read an
     "   error file/buffer  to populate  the qfl,  Vim will  fail to  recognize a
@@ -4969,9 +4972,26 @@ fu! s:make_missing_dir(file, buf) abort
     if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'^\w\+:/'
         let dir = fnamemodify(a:file, ':h')
         if !isdirectory(dir)
-            " TODO: if the directory is in a root directory, `mkdir()` will fail.
-            " We would need to call `$ sudo mkdir`.
-            call mkdir(dir, 'p')
+            try
+                call mkdir(dir, 'p')
+            catch /^Vim\%((\a\+)\)\=:E739/
+                " If the directory is in a root directory, `mkdir()` will fail.
+                " We need to run `$ sudo mkdir`.
+                let pass = inputsecret('[sudo] password for '.$USER.': ')
+                call system('sudo -S mkdir '.dir, pass."\n")
+                "                  │{{{
+                "                  └ ... read the password from the standard input
+                "                    instead of using the terminal device.
+                "                    The password must be followed by a newline character.
+                "}}}
+                " Since this function is called after `BufWritePre`, we need to write the buffer.
+                " Why do we need to do it now, but not in the previous case (`call mkdir()`)?{{{
+                "
+                " Usually, when we save, we press `C-s` which executes `:update`.
+                " This command will fail for a file owned by root.
+                "}}}
+                W
+            endtry
         endif
     endif
 endfu
@@ -5499,7 +5519,7 @@ endfu
 " }}}1
 " TO_DO {{{1
 
-" *s/^\v%V"\s=\zs\d+\ze\s*-/\=submatch(0)-1/c
+"     *s/^\v%V"\s=\zs\d+\ze\s*-/\=submatch(0)-1/c
 "
 " 1 -
 " We should never create special buffers:
@@ -5560,18 +5580,23 @@ endfu
 "
 " 7 - Tmux navigation
 " La navigation entre les panes de Tmux et les viewports de Vim n'est pas
-" cohérente. Pour aller dans un pane Tmux depuis Vim, on peut taper C-{hjkl}.
-" Mais en sens inverse (Tmux → Vim), il faut passer par le préfixe Tmux, pfx
-" + hjkl.
+" cohérente.
+" Pour aller dans un pane Tmux depuis Vim, on peut taper C-{hjkl}.
+" Mais en sens inverse (Tmux → Vim), il faut passer par le préfixe Tmux, `pfx + hjkl`.
 " On a fait ça pour ne pas perdre les raccourcis readline dans le shell.
-" On devrait peut être associer un keycode modificateur (Hyper?) sur la touche
-" Super (ou la touche ctrl gauche?), et se servir de cette dernière pour naviguer
-" entre Tmux et Vim: Super + {hjkl}.
+" On devrait peut  être associer un keycode modificateur (Hyper?)  sur la touche
+" Super  (ou la  touche  ctrl gauche?),  et  se servir  de  cette dernière  pour
+" naviguer entre Tmux et Vim: Super + {hjkl}.
 "
 " Plus généralement, revoir tout le code tmuxnavigator et repenser la
-" navigation. Trop d'incohérences. Navigation entre onglets Vim, viewports
-" Vim, panes Tmux, fenêtres Tmux, Tmux <-> Vim … C'est un gros bordel:
-" AltGr-hl, C-hjkl, pfx-hjkl, M-hl
+" navigation.
+" Trop d'incohérences.
+" Navigation entre onglets  Vim, viewports Vim, panes Tmux,  fenêtres Tmux, Tmux
+" <-> Vim …
+" C'est un gros bordel:
+"
+"     AltGr-hl, C-hjkl, pfx-hjkl, M-hl
+"
 " Autre Idée:
 "
 "     C-hjkl             pour naviguer entre viewports et onglets  Vim.  (facile?)
@@ -5720,7 +5745,7 @@ endfu
 " let myvar = other_var ==# 2    ⇔    let myvar = other_var ==# 2 ? 1 : 0
 "                                                                 -------
 "                                                                    |
-"                                                                 inutile
+"                                                                 useless
 "
 " en viml, comme en awk, une comparaison est une expression dont la valeur est
 " 1 si elle est vraie, 0 autrement.
@@ -5742,7 +5767,8 @@ endfu
 " http://blog.owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
 "
 " 23 -
-" in a temporary directory, execute these shell commands:
+" In a temporary directory, execute these shell commands:
+"
 "     touch file{1..3}; mkdir -p foo/{bar,baz}/{qux,norf}
 "     tree -a | vipe
 "
@@ -5751,7 +5777,8 @@ endfu
 " for the abbreviation, we could take inspiration from the shell commands
 " themselves. or sth else?
 "
-" a simple way of doing this would be to call just the `tree` command:
+" A simple way of doing this would be to call just the `tree` command:
+"
 "     r !touch file{1..3}; mkdir -p foo/{bar,baz/qux}/{norf,abc}; tree -a
 "
 "     during the shell expansion `bar` and `baz/qux` are appended to `foo`
@@ -6002,16 +6029,16 @@ endfu
 " it shows us a fondamental pb. how to prevent a command from taking too much
 " time? here, we have a few solutions:
 "
-"         • try to guess by computing the nr of matches on a small range if it
-"           goes beyond a certain threshold, we could report to the user that
-"           there are too many matches
+"    • try to guess by computing the nr of matches on a small range if it
+"      goes beyond a certain threshold, we could report to the user that
+"      there are too many matches
 "
-"           pb: most of the matches could be outside this small range
+"      pb: most of the matches could be outside this small range
 "
-"         • refactor the code to use a while loop, and monitor the total time
-"           taken after each iteration
+"    • refactor the code to use a while loop, and monitor the total time
+"      taken after each iteration
 "
-"           pb: the while loop seems 6 times slower overall, compared to `s///gen`
+"      pb: the while loop seems 6 times slower overall, compared to `s///gen`
 "
 " solution proposed by ingo:
 "         :help catch-interrupt

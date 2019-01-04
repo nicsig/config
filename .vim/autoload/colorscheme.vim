@@ -149,17 +149,17 @@ fu! s:styled_comments() abort "{{{1
     " Also, that's what the default markdown syntax plugin uses to highlight the
     " text of a link.
     "}}}
-    hi link markdownLinkText Underlined
+    hi link markdownLinkText   Underlined
     " Why `Float`?{{{
     "
     " That's what the default markdown syntax plugin uses to highlight a url.
     "}}}
-    hi link markdownUrl      Float
+    hi link markdownUrl        Float
     " Why `Type`?{{{
     "
     " That's what the help syntax plugin uses.
     "}}}
-    hi link markdownOption   Type
+    hi link markdownOption     Type
     " Why `Delimiter`?{{{
     "
     " It seems to be the most meaningful choice.
@@ -167,8 +167,22 @@ fu! s:styled_comments() abort "{{{1
     "
     " >     Delimiter character that needs attention
     "}}}
-    hi link markdownPointer  Delimiter
-    hi link markdownTable    Structure
+    hi link markdownPointer    Delimiter
+    hi link markdownTable      Structure
+    hi link markdownKey        Special
+    hi link markdownRule       Delimiter
+    " Why `Typedef`?{{{
+    "
+    " That's what the default markdown syntax plugin uses to highlight the id of
+    " a reference link.
+    "}}}
+    hi link markdownIdDeclaration  Typedef
+
+    hi link markdownCodeBlock           Comment
+    hi link markdownListCodeBlock       Comment
+    hi link CommentListCodeSpan         markdownListCodeSpan
+
+    hi link markdownListBlockquote  markdownBlockquote
 
     " Where did you find these color codes?{{{
     "
@@ -194,8 +208,8 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
         exe 'hi markdownListBoldItalic gui=bold,italic guifg=' . repeat_fg
 
-        exe 'hi markdownBlockquote gui=italic guibg=' . guibg . ' guifg=' . preproc_fg
-        exe 'hi markdownBlockquoteBold gui=italic,bold guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi markdownBlockquote gui=italic guifg=' . preproc_fg
+        exe 'hi markdownBlockquoteBold gui=italic,bold guifg=' . preproc_fg
         exe 'hi markdownBlockquoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
 
         exe 'hi CommentCodeSpan guibg=' . guibg . ' guifg=' . comment_fg
@@ -209,14 +223,14 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownCodeSpan guibg=' . guibg
 
         exe 'hi markdownList guifg=' . repeat_fg
-        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . ctermbg
+        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
         exe 'hi markdownListItalic cterm=italic guifg=' . repeat_fg
         exe 'hi markdownListBold cterm=bold guifg=' . repeat_fg
         exe 'hi markdownListBoldItalic cterm=bold,italic guifg=' . repeat_fg
 
-        exe 'hi markdownBlockquote gui=italic guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi markdownBlockquote gui=italic guifg=' . preproc_fg
         exe 'hi markdownBlockquoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
-        exe 'hi markdownBlockquoteBold cterm=italic,bold guifg=' . preproc_fg . ' guibg=' . guibg
+        exe 'hi markdownBlockquoteBold cterm=italic,bold guifg=' . preproc_fg
 
         exe 'hi CommentCodeSpan guifg=' . comment_fg . ' guibg=' . guibg
 
