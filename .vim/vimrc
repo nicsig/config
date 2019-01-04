@@ -3319,6 +3319,43 @@ if &term =~# '^\%(screen\|tmux\)'
     sil! exe "set <xLeft>=\e[1;*D"
 endif
 
+" C-]                 jump to definition {{{4
+
+" Purpose:{{{
+"
+" This mapping overloads `C-]`.
+"
+" It keeps  its default behavior, however,  if it fails because  there's no tags
+" file, it tries `1gd` as a fallback.
+"
+" It's useful for example, in `~/bin`, where atm we don't have any tags file.
+"}}}
+" Why `1gd` instead of `gd`?{{{
+"
+" Sometimes, `gd` jumps  to a location where the identifier  under the cursor is
+" present, but it's not its definition.
+" It happens for example,  if you have a shell script  which includes a function
+" `install`, and the command `aptitude install package` somewhere in a function.
+"
+" `1gd` makes `gd` ignore any occurrence of the identifier which is inside curly
+" brackets, and with  the closing one written  on a column whose  index is lower
+" than the one of the current cursor position.
+"}}}
+nno <silent>  <c-]>  :call <sid>jump_to_definition()<cr>
+
+fu! s:jump_to_definition() abort
+    try
+        exe "norm! \<c-]>"
+    catch /^Vim\%((\a\+)\)\=:E\%(426\|433\)/
+        if &ft isnot# 'help'
+            norm! 1gd
+            norm! zvzz
+        endif
+    catch
+        return lg#catch_error()
+    endtry
+endfu
+
 " C-g C-g             show info about current file {{{4
 
 nno  <c-g><c-g>  <c-g>
@@ -6610,6 +6647,7 @@ endfu
 "                        to get a list:    :h ft-*-syn c-d)
 "     :h sign.txt
 "     :h tagsrch.txt
+"     :h pattern.txt
 "
 "     :h channel.txt
 "
@@ -7607,16 +7645,6 @@ endfu
 "
 " 149 -
 " Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
-"
-" 150 -
-" In a shell script, try to write a blockquote inside a function.
-" It's highlighted as a comment, instead of a quote.
-" Update:
-" It's because of the indentation.
-" Remove it and the issue disappears.
-"
-" The issue is not specific to shell (can reproduce in lua).
-" And it's not specific to blockquote (can reproduce with a codeblock).
 
 
 
