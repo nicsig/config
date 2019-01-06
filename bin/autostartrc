@@ -40,7 +40,7 @@ unclutter -idle 2 &
 #}}}
 
 # xbindkeys
-xbindkeys -f "${HOME}/.config/xbindkeysrc"
+xbindkeys -f "${HOME}/.config/xbindkeys/rc.conf"
 
 # Purpose:{{{
 #

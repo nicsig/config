@@ -125,7 +125,7 @@ fu! s:set_custom_hg() abort "{{{1
     " `Conditional` (because this one is blue).
     "}}}
     exe 'hi Underlined term=underline cterm=underline gui=underline '
-        \ . matchstr(execute('hi Conditional'), 'xxx\zs.*')
+        \ . substitute(matchstr(execute('hi Conditional'), 'xxx\zs.*'), 'links to.*', '', '')
 endfu
 
 fu! s:styled_comments() abort "{{{1

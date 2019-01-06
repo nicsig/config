@@ -262,7 +262,11 @@ selection-to-clipboard,\
 pasta,\
 matcher,\
 keyboard-select,\
-confirm-paste
+confirm-paste,\
+clipboard-osc
+
+*.allowWindowOps:  true
+! xterm.VT100.allowWindowOps:  true
 
 ! temporarily disabled, we need to find another key to not shadow `M-u` (readline capitalize)
 ! besides, the next key binding can't work because we don't have any url-select extension

@@ -1938,6 +1938,14 @@ sr_fzf() { #{{{2
   #}}}
 }
 
+tor() { #{{{2
+  # For some reason, we can't execute the `.desktop` file,
+  # if we are not in its directory.
+  cd ~/.local/bin/tor-browser_en-US/
+  ./start-tor-browser.desktop
+  cd -
+}
+
 truecolor() { #{{{2
   emulate -L zsh
 

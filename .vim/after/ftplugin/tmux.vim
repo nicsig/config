@@ -1,8 +1,6 @@
 " break lines beyond 80 characters
 setl tw=80
 
-finish
-
 " Options {{{1
 
 augroup my_tmux

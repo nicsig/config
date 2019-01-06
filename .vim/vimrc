@@ -1061,9 +1061,9 @@ fu! s:inex() abort
         return substitute(v:fname, '.*=', '', '')
     else
         " The path could contain an environment variable:
-        let path = '\C\%($\u\+\|"$\u\+"\|${\u\+}\|"${\u\+}"\)'.'\V'.v:fname
-        "                                                        │
-        "                                                        └ `v:fname` could contain a tilde
+        let path = '\m\C\%($\u\+\|"$\u\+"\|${\u\+}\|"${\u\+}"\)'.'\V'.v:fname
+        "                                                          │
+        "                                                          └ `v:fname` could contain a tilde
         if line =~# path
             let path = matchstr(line, path)
             let env = matchstr(path, '\u\+')
@@ -4917,6 +4917,15 @@ com! -bar
 
 augroup my_cmdline_window
     au!
+    " Purpose:{{{
+    "
+    " By default, `Tab` is mapped to `C-x C-v` in the command-line window.
+    " We want it to be mapped to whatever it is in a regular buffer (consistency).
+    " Atm, `Tab` allows us to expand  snippets, which could be handy even in the
+    " command-line window.
+    "}}}
+    au CmdWinEnter * call s:remap_tab_key()
+
     au CmdWinEnter * nno  <buffer><nowait><silent>  q      :<c-u>q<cr>
     au CmdWinEnter * nno  <buffer><nowait><silent>  ZZ     <cr>
     " Purpose:{{{
@@ -4939,6 +4948,17 @@ augroup my_cmdline_window
     au CmdWinLeave : call s:update_history()
     "              │
     "              └ only Ex command-line window
+augroup END
+
+fu! s:remap_tab_key() abort
+    if exists('s:tab_keymap')
+        exe 'ino  <buffer><nowait><silent>  <tab>  ' . s:tab_keymap
+    endif
+endfu
+
+augroup get_tab_keymap
+    au!
+    au VimEnter * let s:tab_keymap = maparg('<tab>', 'i')
 augroup END
 
 " If one day you want to add support for the search window (`q/`, `q?`), be aware that it's tricky.{{{
@@ -5488,7 +5508,7 @@ fu! s:setup_vim_terminal() abort
     " Not Vim. We do it in this function.
     setl nowrap
     call s:setup_neovim_terminal()
-    exe 'nno  <buffer><nowait><silent>  p  i<c-e>'.&termwinkey.'""'
+    exe 'nno  <buffer><nowait><silent>  p  i<c-e>' . &l:termwinkey . '""'
 endfu
 
 fu! s:setup_neovim_terminal() abort

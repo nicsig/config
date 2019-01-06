@@ -50,9 +50,9 @@ let &packpath = &rtp
 "
 " We do the same for the python3 interpreter, for 3 reasons:
 "
-"     • it helps Neovim find the interpreter faster, which makes startup faster too
-"     • no surprise (Neovim won't use a possible old installation we forgot to remove)
-"     • in case of an issue `:CheckHealth` will give better advice
+"    • it helps Neovim find the interpreter faster, which makes startup faster too
+"    • no surprise (Neovim won't use a possible old installation we forgot to remove)
+"    • in case of an issue `:CheckHealth` will give better advice
 "}}}
 let g:python_host_prog = '/usr/bin/python'
 let g:python3_host_prog = '/usr/bin/python3'
