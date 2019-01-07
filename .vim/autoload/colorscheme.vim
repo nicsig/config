@@ -1,7 +1,17 @@
 " Interface {{{1
 fu! colorscheme#set() abort "{{{2
-    let seoul_bg = get(g:, 'my_last_colorscheme', 253)
+    " Purpose:{{{
+    "
+    " If `g:seoul256_srgb` is set to 1, the color mapping is altered to suit the
+    " way urxvt (and various other terminals) renders them.
+    " That  way, the  colors  of the  terminal and  GUI  versions are  uniformly
+    " colored on Linux.
+    "
+    "         https://github.com/junegunn/seoul256.vim#alternate-256-xterm---srgb-mapping
+    "}}}
+    let g:seoul256_srgb = 1
 
+    let seoul_bg = get(g:, 'my_last_colorscheme', 253)
     if seoul_bg >= 233 && seoul_bg <= 239
         " What's this `g:seoul256_background`?{{{
         "
@@ -36,14 +46,6 @@ fu! colorscheme#set() abort "{{{2
         let g:seoul256_light_background = seoul_bg
         colo seoul256-light
     endif
-
-    " If `let g:seoul256_srgb` is set to 1, the color mapping is altered to suit
-    " the way  urxvt (and various  other terminals) renders them. That  way, the
-    " colors of the terminal and GUI versions are uniformly colored on Linux.
-    "
-    "         https://github.com/junegunn/seoul256.vim#alternate-256-xterm---srgb-mapping
-
-    let g:seoul256_srgb = 1
 endfu
 
 fu! colorscheme#customize() abort "{{{2
