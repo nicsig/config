@@ -533,9 +533,7 @@ augroup my_colorscheme
 
     " What's the issue fixed by this autocommand?{{{
     "
-    "     $ cat <<'EOF' >/tmp/md.md
-    "     word in *italic*
-    "     EOF
+    "     $ echo 'word in *italic*' >/tmp/md.md
     "
     "     $ vim /tmp/md.md
     "     ]ol (change lightness)
@@ -544,7 +542,7 @@ augroup my_colorscheme
     "}}}
     " Where does the issue come from?{{{
     "
-    " The `htmlItalic` HG is sometimes cleared, because of `:hi clear`:
+    " The `htmlItalic` HG is cleared when we change the colorscheme, because of `:hi clear`:
     "
     "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
     "
@@ -556,29 +554,9 @@ augroup my_colorscheme
     "     hi [def] link SomeGroup OtherGroup
     "
     "     " ✘
-    "     hi [def] link SomeGroup term=... ctermfg=...
+    "     hi SomeGroup term=... ctermfg=...
     "}}}
     au ColorScheme * call s:reinstall_cleared_hg()
-
-    " Why changing `CursorLine`?{{{
-    "
-    " The  attributes set  by our  colorscheme make  the cursorline  not visible
-    " enough.
-    "}}}
-    " Why `ctermbg=NONE` and `guibg=NONE`?{{{
-    "
-    " To make `CursorLine` transparent in case of a conflict between two HGs.
-    " It happens  when `'cursorline'` is set,  and the *background* of  the text
-    " under the cursor is highlighted by a syntax item.
-    "}}}
-    " It's not visible enough!{{{
-    "
-    " Add the bold value:
-    "
-    "     hi CursorLine term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=NONE guibg=NONE
-    "                        ^^^^                 ^^^^_              ^^^^
-    "}}}
-    au Colorscheme * hi CursorLine term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
 augroup END
 
 fu! s:reinstall_cleared_hg() abort

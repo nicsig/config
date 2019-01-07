@@ -4,24 +4,25 @@
 #
 # `man update-alternatives` talks about `master` and `slave` links.
 # Example:
-#         % update-alternatives --query editor
 #
-#                 Link: /usr/bin/editor
-#                 Slaves:
-#                  editor.1.gz /usr/share/man/man1/editor.1.gz
-#                  editor.fr.1.gz /usr/share/man/fr/man1/editor.1.gz
-#                  editor.it.1.gz /usr/share/man/it/man1/editor.1.gz
-#                  editor.ja.1.gz /usr/share/man/ja/man1/editor.1.gz
-#                  editor.pl.1.gz /usr/share/man/pl/man1/editor.1.gz
-#                  editor.ru.1.gz /usr/share/man/ru/man1/editor.1.gz
-#                 Status: manual
-#                 Best: /usr/bin/vim.gtk
-#                 Value: /usr/local/bin/vim
+#         $ update-alternatives --query editor
+#
+#         Link: /usr/bin/editor~
+#         Slaves:~
+#          editor.1.gz /usr/share/man/man1/editor.1.gz~
+#          editor.fr.1.gz /usr/share/man/fr/man1/editor.1.gz~
+#          editor.it.1.gz /usr/share/man/it/man1/editor.1.gz~
+#          editor.ja.1.gz /usr/share/man/ja/man1/editor.1.gz~
+#          editor.pl.1.gz /usr/share/man/pl/man1/editor.1.gz~
+#          editor.ru.1.gz /usr/share/man/ru/man1/editor.1.gz~
+#         Status: manual~
+#         Best: /usr/bin/vim.gtk~
+#         Value: /usr/local/bin/vim~
 #
 # `/usr/bin/editor` is the master link of the group.
-#     (or is it `/etc/alternatives/editor`?)
+# (or is it `/etc/alternatives/editor`?)
 # `editor.1.gz` is a slave link.
-#     (in which directory is it? /etc/alternatives/? /usr/share/man?)
+# (in which directory is it? /etc/alternatives/? /usr/share/man?)
 #
 # Usually the slave links are for manpages.
 #
@@ -31,49 +32,48 @@
 #}}}
 # Some useful commands{{{
 #
-#     update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1
+#     $ update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1
 #
-#             Add the alternative `/usr/local/bin/vim` to the group whose
-#             generic name is `editor`, with the priority 1.
+# Add the  alternative `/usr/local/bin/vim` to  the group whose generic  name is
+# `editor`, with the priority 1.
 #
-#     update-alternatives --remove editor /usr/local/bin/vim
+#     $ update-alternatives --remove editor /usr/local/bin/vim
 #
-#             Remove the alternative `/usr/local/bin/vim` from the group `editor`.
-#             If the link group contains slave links (usually for manpages),
-#             they're updated or removed.
+# Remove the alternative `/usr/local/bin/vim` from the group `editor`.
+# If the link group contains slave links (usually for manpages), they're updated
+# or removed.
 #
-#     update-alternatives --set editor /usr/local/bin/vim
+#     $ update-alternatives --set editor /usr/local/bin/vim
 #
-#             Configure `/usr/local/bin/vim` to be THE alternative providing
-#             `editor`.
+# Configure `/usr/local/bin/vim` to be THE alternative providing `editor`.
 #
-#     update-alternatives --config editor
+#     $ update-alternatives --config editor
 #
-#             Configure the group editor interactively.
+# Configure the group editor interactively.
 #
-#     update-alternatives --auto editor
+#     $ update-alternatives --auto editor
 #
-#             Reconfigure the group `editor` so that, from now on, it will always
-#             automatically use the alternative with the highest priority.
+# Reconfigure  the  group  `editor`  so  that,  from  now  on,  it  will  always
+# automatically use the alternative with the highest priority.
 #
-#     update-alternatives --all --skip-auto
+#     $ update-alternatives --all --skip-auto
 #
-#             Reconfigure all groups of alternatives in which the used alternative
-#             has been selected manually.
+# Reconfigure all groups of alternatives in  which the used alternative has been
+# selected manually.
 #
-#     update-alternatives --query editor
-#     update-alternatives --display editor
+#     $ update-alternatives --query editor
+#     $ update-alternatives --display editor
 #
-#             Display information about the group of alternatives whose generic
-#             name is `editor`. Useful to check which alternative provides
-#             `/usr/bin/editor`.
+# Display  information about  the group  of alternatives  whose generic  name is
+# `editor`. Useful to check which alternative provides `/usr/bin/editor`.
 #
-#     update-alternatives --get-selections
+#     $ update-alternatives --get-selections
 #
-#             Show:
-#                     • all group of alternatives
-#                     • the alternative they use
-#                     • in which mode they are (manual / auto)
+# Show:
+#
+#    • all group of alternatives
+#    • the alternative they use
+#    • in which mode they are (manual / auto)
 #}}}
 # Why does `update-alternatives` use an extra level of indirection?{{{
 # Why not a single symlink?
@@ -118,16 +118,16 @@ typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rv
 for name in "${names[@]}"; do
   # add our compiled Vim to each group of alternatives
   #
-  #                                              ┌────────── generic name (symlink)
-  #                                              │
-  #                                              │         ┌ name of the alternative (again, symlink)
-  #                                              │         │ in the alternatives directory `/etc/alternatives`
-  #                             ┌────────────────┤ ┌───────┤
   update-alternatives --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
-  #                                                          └────────────────┤ │
-  #                                                       path to alternative ┘ │
-  #                                                                             │
-  #                                                                    priority ┘
+  #                             ├────────────────┘ ├───────┘ ├────────────────┘ ├┘{{{
+  #                             │                  │         │                  └ priority
+  #                             │                  │         └ path to alternative
+  #                             │                  │
+  #                             │                  └ name of the alternative (again, symlink)
+  #                             │                    in the alternatives directory `/etc/alternatives`
+  #                             │
+  #                             └ generic name (symlink)
+  #}}}
 
   # set our compiled Vim to be the master link
   update-alternatives --set "${name}" /usr/local/bin/vim

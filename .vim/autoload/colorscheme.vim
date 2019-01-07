@@ -1,23 +1,40 @@
 fu! colorscheme#customize() abort "{{{1
+    " Why changing `CursorLine`?{{{
+    "
+    " The  attributes set  by our  colorscheme make  the cursorline  not visible
+    " enough.
+    "}}}
+    " Why `ctermbg=NONE` and `guibg=NONE`?{{{
+    "
+    " To make `CursorLine` transparent in case of a conflict between two HGs.
+    " It happens  when `'cursorline'` is set,  and the *background* of  the text
+    " under the cursor is highlighted by a syntax item.
+    "}}}
+    " It's not visible enough!{{{
+    "
+    " Add the bold value:
+    "
+    "     hi CursorLine term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=NONE guibg=NONE
+    "                        ^^^^                 ^^^^               ^^^^
+    "}}}
+    hi CursorLine term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
+
     " hide the EndOfBuffer char (~) by changing its ctermfg attribute (ctermfg=bg)
-    " Why the `:try` conditional?{{{
+    " Why this `:if` guard?{{{
     "
     " Some colorschemes don't set up the `Normal` HG.
     " So, the value `bg` may not exist for all colorschemes.
     " Example:
-    "         :colo default
-    "         →       Error detected while processing .../colors/my_customizations.vim:
-    "                 E420: BG color unknown
+    "       :colo default
+    "       E420: BG color unknown ~
     "}}}
-    try
+    if execute('hi Normal') !~# 'cleared'
         if $DISPLAY is# ''
             hi EndOfBuffer ctermfg=bg
         else
             hi EndOfBuffer ctermfg=bg guifg=bg
         endif
-    catch
-        call lg#catch_error()
-    endtry
+    endif
 
     " the `SpecialKey` HG set by seoul256 is barely readable
     hi! link SpecialKey Special
@@ -195,7 +212,7 @@ fu! s:styled_comments() abort "{{{1
     let guibg = &bg is# 'light' ? '#bcbcbc' : '#626262'
     let ctermbg = &bg is# 'light' ? 250 : 241
     let comment_fg = s:get_attributes('Comment').fg
-    let preproc_fg = s:get_attributes('PreProc').fg
+    let statement_fg = s:get_attributes('Statement').fg
     let repeat_fg = s:get_attributes('Repeat').fg
 
     " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
@@ -208,9 +225,11 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
         exe 'hi markdownListBoldItalic gui=bold,italic guifg=' . repeat_fg
 
-        exe 'hi markdownBlockquote gui=italic guifg=' . preproc_fg
-        exe 'hi markdownBlockquoteBold gui=italic,bold guifg=' . preproc_fg
-        exe 'hi markdownBlockquoteCodeSpan guibg=' . guibg . ' guifg=' . preproc_fg
+        exe 'hi markdownBlockquote guifg=' . statement_fg
+        exe 'hi markdownBlockquoteItalic gui=italic guifg=' . statement_fg
+        exe 'hi markdownBlockquoteBold gui=bold guifg=' . statement_fg
+        exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg=' . statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guibg=' . guibg . ' guifg=' . statement_fg
 
         exe 'hi CommentCodeSpan guibg=' . guibg . ' guifg=' . comment_fg
 
@@ -228,9 +247,11 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownListBold cterm=bold guifg=' . repeat_fg
         exe 'hi markdownListBoldItalic cterm=bold,italic guifg=' . repeat_fg
 
-        exe 'hi markdownBlockquote gui=italic guifg=' . preproc_fg
-        exe 'hi markdownBlockquoteCodeSpan guifg=' . preproc_fg . ' guibg=' . guibg
-        exe 'hi markdownBlockquoteBold cterm=italic,bold guifg=' . preproc_fg
+        exe 'hi markdownBlockquote guifg=' . statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guifg=' . statement_fg . ' guibg=' . guibg
+        exe 'hi markdownBlockquoteItalic cterm=italic guifg=' . statement_fg
+        exe 'hi markdownBlockquoteBold cterm=bold guifg=' . statement_fg
+        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg=' . statement_fg
 
         exe 'hi CommentCodeSpan guifg=' . comment_fg . ' guibg=' . guibg
 
@@ -248,9 +269,11 @@ fu! s:styled_comments() abort "{{{1
         exe 'hi markdownListBold term=bold cterm=bold ctermfg=' . repeat_fg
         exe 'hi markdownListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
 
-        exe 'hi markdownBlockquote term=italic cterm=italic ctermfg=' . preproc_fg
-        exe 'hi markdownBlockquoteCodeSpan ctermfg=' . preproc_fg . ' ctermbg=' . ctermbg
-        exe 'hi markdownBlockquoteBold term=italic,bold cterm=italic,bold ctermfg=' . preproc_fg
+        exe 'hi markdownBlockquote ctermfg=' . statement_fg
+        exe 'hi markdownBlockquoteCodeSpan ctermfg=' . statement_fg . ' ctermbg=' . ctermbg
+        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg=' . statement_fg
+        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg=' . statement_fg
+        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . statement_fg
 
         exe 'hi CommentCodeSpan ctermfg=' . comment_fg . ' ctermbg=' . ctermbg
 
