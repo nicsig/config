@@ -3689,10 +3689,10 @@ nno  <expr>  $  &virtualedit is# 'block' ? 'g$' : 'g_'
 " Why does the dot command changes its behavior when we hit `g$`.
 " According to :h g$, `g$` differs from `$` when:
 "
-"         • preceded with a count
-"         • on a wrapped line
-"         • on a line longer than the screen
-"         • if 'virtualedit' is enabled
+"    • preceded with a count
+"    • on a wrapped line
+"    • on a line longer than the screen
+"    • if 'virtualedit' is enabled
 "
 " Here, none of these conditions is met. So what happens?
 " Should I unmap `$` in normal mode?
@@ -3700,9 +3700,9 @@ nno  <expr>  $  &virtualedit is# 'block' ? 'g$' : 'g_'
 " Hypothesis:
 " Maybe it has something to do with :h visual-repeat:
 "
-"         If the "$" command was used as one of the last commands to extend
-"         the highlighted text, the repeating will be applied up to the rightmost
-"         column of the longest line.
+" > If  the "$"  command was  used as  one of  the last  commands to  extend the
+" > highlighted text, the  repeating will be applied up to  the rightmost column
+" > of the longest line.
 
 
 " Same mappings for visual mode.
@@ -5171,38 +5171,6 @@ fu! s:filetype_linter(action) abort
         let w:my_filetype_linter = matchadd('ErrorMsg', pat)
     endif
 endfu
-
-" Jump Last Position {{{2
-
-augroup jump_last_position
-" Jump to last position when reopening a file
-" taken from :h line()
-
-    au!
-    " FIXME:
-    "
-    " Why isn't the mark `"` always correctly updated?
-    "
-    " It's updated when we quit the last buffer of a Vim session.
-    " It's updated when we quit a buffer whose window is not the last of a tab page.
-    " It's NOT updated when we quit a buffer whose window is the last in a tab page.
-    "
-    " Because of this, the following autocmd often doesn't work.
-    " Taken from `:h last-position-jump`:
-    "
-    "         au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
-    "
-    " The following could be a workaround:
-
-    au BufReadPost * sil! norm! g`.zvzz
-
-    " We use  g`.  to jump to the last edit, so that no entry is added in the jumplist.
-    "
-    " Although it doesn't make the same thing.
-    " The old automcd was supposed to position the cursor where it was the
-    " last time we quit the last window displaying a buffer.
-    " The new one positions the cursor on the last edit.
-augroup END
 
 " Man pages {{{2
 
