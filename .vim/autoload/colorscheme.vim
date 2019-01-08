@@ -49,6 +49,23 @@ fu! colorscheme#set() abort "{{{2
 endfu
 
 fu! colorscheme#customize() abort "{{{2
+    " the `SpecialKey` HG set by seoul256 is barely readable
+    hi! link SpecialKey Special
+
+    " the `VertSplit`  HG set  by seoul256  has a dark  background which  is too
+    " visible in the light colorscheme, and not enough in the dark one
+    hi! link VertSplit Normal
+
+    " `Underlined` is meant to be used to highlight html links.{{{
+    "
+    " In a webbrowser, usually those are blue.
+    " But in `seoul256`, `Underlined` is pink.
+    " So, we reset the  HG with the `underline` style, and the  colors of the HG
+    " `Conditional` (because this one is blue).
+    "}}}
+    exe 'hi Underlined term=underline cterm=underline gui=underline '
+        \ . substitute(matchstr(execute('hi Conditional'), 'xxx\zs.*'), 'links to.*', '', '')
+
     " Why changing `CursorLine`?{{{
     "
     " The  attributes set  by our  colorscheme make  the cursorline  not visible
@@ -86,33 +103,24 @@ fu! colorscheme#customize() abort "{{{2
         endif
     endif
 
-    " the `SpecialKey` HG set by seoul256 is barely readable
-    hi! link SpecialKey Special
-
-    " the `VertSplit`  HG set  by seoul256  has a dark  background which  is too
-    " visible in the light colorscheme, and not enough in the dark one
-    hi! link VertSplit Normal
-
     " Why the delay?{{{
     "
-    " gVim encounters some errors when trying to set up too early some of our custom
-    " HGs defined in `~/.vim/colors/my/customizations.vim`:
+    " gVim encounters some errors when trying to set up too early some of our custom HGs:
     "
     "     E417: missing argument: guifg=
     "     E254: Cannot allocate color 95
     "     E254: Cannot allocate color 187
     "
-    " The  issue seems  to be  that  the HGs  whose  attributes we  need to  inspect
-    " ('StatusLine',  'TabLine',   ...),  are  not  (correctly)   defined  yet  when
-    " `~/.vim/colors/my/customizations.vim` is sourced by gVim.
+    " The issue  seems to be  that the HGs whose  attributes we need  to inspect
+    " ('StatusLine', 'TabLine', ...), are not (correctly) defined yet.
     "}}}
     if has('gui_running') && has('vim_starting')
         augroup delay_colorscheme_when_gvim_starts
             au!
-            au VimEnter * call s:set_custom_hg()
+            au VimEnter * call s:tabline() | call s:user() | call s:styled_comments()
         augroup END
     else
-        call s:set_custom_hg()
+        call s:tabline() | call s:user() | call s:styled_comments()
     endif
 endfu
 
@@ -122,22 +130,6 @@ fu! colorscheme#save_last_version() abort "{{{2
 endfu
 " }}}1
 " Core {{{1
-fu! s:set_custom_hg() abort "{{{2
-    call s:user()
-    call s:styled_comments()
-    call s:tabline()
-
-    " `Underlined` is meant to be used to highlight html links.{{{
-    "
-    " In a webbrowser, usually those are blue.
-    " But in `seoul256`, `Underlined` is pink.
-    " So, we reset the  HG with the `underline` style, and the  colors of the HG
-    " `Conditional` (because this one is blue).
-    "}}}
-    exe 'hi Underlined term=underline cterm=underline gui=underline '
-        \ . substitute(matchstr(execute('hi Conditional'), 'xxx\zs.*'), 'links to.*', '', '')
-endfu
-
 fu! s:user() abort "{{{2
     " We're going to define 2 HGs: User1 and User2.{{{
     "
@@ -217,18 +209,35 @@ fu! s:user() abort "{{{2
     exe printf(cmd2, style2, todo_fg, attributes.bg)
 endfu
 
-fu! s:styled_comments() abort "{{{2
-    " How is this function called?{{{
-    "
-    " 1. `vimrc` installs:
-    "
-    "     au ColorScheme * call colorscheme#customize()
-    "
-    " 2. `colorscheme#customize()` calls `s:set_custom_hg()`
-    "
-    " 3. `s:set_custom_hg()` calls `s:styled_comments()`
-    "}}}
+fu! s:tabline() abort "{{{2
+    " the purpose of this function is to remove the underline value from the HG
+    " TabLine
 
+    let attributes = {
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
+
+    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
+
+    let cmd = has('gui_running')
+          \ ?     'hi TabLine gui=none guifg=%s'
+          \ : &tgc
+          \ ?     'hi TabLine term=none cterm=none guifg=%s'
+          \ :     'hi TabLine term=none cterm=none ctermfg=%s'
+
+    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
+    " Tabline doesn't have any value in gui. In this case, executing the command
+    " will fail.
+    if attributes.fg is# ''
+        return
+    endif
+    exe printf(cmd, attributes.fg)
+endfu
+
+fu! s:styled_comments() abort "{{{2
     " Why `Underlined`?{{{
     "
     " From `:h group-name`:
@@ -291,7 +300,7 @@ fu! s:styled_comments() abort "{{{2
     if has('gui_running')
         exe 'hi markdownCodeSpan guibg=' . guibg
 
-        exe 'hi markdownList guifg=' . repeat_fg
+        exe 'hi markdownListItem guifg=' . repeat_fg
         exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
         exe 'hi markdownListItalic gui=italic guifg=' . repeat_fg
         exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
@@ -313,7 +322,7 @@ fu! s:styled_comments() abort "{{{2
     elseif &tgc
         exe 'hi markdownCodeSpan guibg=' . guibg
 
-        exe 'hi markdownList guifg=' . repeat_fg
+        exe 'hi markdownListItem guifg=' . repeat_fg
         exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
         exe 'hi markdownListItalic cterm=italic guifg=' . repeat_fg
         exe 'hi markdownListBold cterm=bold guifg=' . repeat_fg
@@ -335,7 +344,7 @@ fu! s:styled_comments() abort "{{{2
     else
         exe 'hi markdownCodeSpan ctermbg=' . ctermbg
 
-        exe 'hi markdownList ctermfg=' . repeat_fg
+        exe 'hi markdownListItem ctermfg=' . repeat_fg
         exe 'hi markdownListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
         exe 'hi markdownListItalic term=italic cterm=italic ctermfg=' . repeat_fg
         exe 'hi markdownListBold term=bold cterm=bold ctermfg=' . repeat_fg
@@ -354,34 +363,6 @@ fu! s:styled_comments() abort "{{{2
         exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . comment_fg
     endif
 endfu
-
-fu! s:tabline() abort "{{{2
-    " the purpose of this function is to remove the underline value from the HG
-    " TabLine
-
-    let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
-        \ }
-
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
-
-    let cmd = has('gui_running')
-          \ ?     'hi TabLine gui=none guifg=%s'
-          \ : &tgc
-          \ ?     'hi TabLine term=none cterm=none guifg=%s'
-          \ :     'hi TabLine term=none cterm=none ctermfg=%s'
-
-    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
-    " Tabline doesn't have any value in gui. In this case, executing the command
-    " will fail.
-    if attributes.fg is# ''
-        return
-    endif
-    exe printf(cmd, attributes.fg)
-endfu
 " }}}1
 " Utilities {{{1
 fu! s:get_attributes(hg) abort "{{{2
@@ -391,7 +372,6 @@ fu! s:get_attributes(hg) abort "{{{2
         \ 'bold'    : 0,
         \ 'reverse' : 0,
         \ }
-
     return map(attributes, {k,v -> synIDattr(synIDtrans(hlID(a:hg)), k)})
 endfu
 
