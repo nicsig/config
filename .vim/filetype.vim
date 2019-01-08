@@ -68,9 +68,15 @@ augroup filetypedetect
     " basename is `zsh` has the filetype `zsh`.
     " It doesn't do that for other filetypes:
     "
-    "     vim py.foo        >  :echo &ft  →  ∅
-    "     vim html.foo      >  :echo &ft  →  ∅
-    "     vim zsh.foo       >  :echo &ft  →  zsh
+    "     $ vim py.foo
+    "     :echo &ft
+    "     ∅~
+    "     $ vim html.foo
+    "     :echo &ft
+    "     ∅~
+    "     $ vim zsh.foo
+    "     :echo &ft
+    "     zsh~
     "
     " Worse:
     "     vim zsh_foo.bar   >  :echo &ft  →  zsh

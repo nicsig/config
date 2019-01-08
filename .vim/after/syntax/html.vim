@@ -5,8 +5,8 @@
 "
 "     :syn list htmlError
 "
-"         → htmlError      xxx match /[<>&]/
-"                              links to Error
+"         htmlError      xxx match /[<>&]/~
+"                            links to Error~
 "
 " This is distracting when we're writing an emmet expression such as:
 "

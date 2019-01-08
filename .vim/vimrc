@@ -404,9 +404,8 @@ let $MY_WIKI = $HOME.'/Dropbox/wiki'
 " Because of this:
 "     $ man man
 "     :Man mount
-"       → ✘
-"         man.vim: command error (11) man -w mount: No manual entry for mount
-"         See 'man 7 undocumented' for help when manual pages are not available.
+"     man.vim: command error (11) man -w mount: No manual entry for mount~
+"     See 'man 7 undocumented' for help when manual pages are not available.~
 "
 " So,  in `~/.zshenv`,  I've created  a duplicate  variable, `MYMANSECT`,  which
 " serves as a backup.
@@ -494,10 +493,10 @@ set backspace=indent,eol,start
 " `"` will still  copy the text of the last changed register:
 "
 "     set cb^=unnamedplus | let [@+, @"] = ['foo', 'bar'] | norm! p
-"           → foo
+"     foo~
 "
 "     set cb&             | let [@+, @"] = ['foo', 'bar'] | norm! p
-"           → bar
+"     bar~
 "}}}
 "         Are there pitfalls?{{{
 "
@@ -1322,8 +1321,10 @@ set mouse=a
 
 " when using the `c-a` and `c-x` commands, don't treat the numbers as octla
 " E.g.:
-"         `c-a` on 007  →  010  ✘
-"         `c-a` on 007  →  008  ✔
+"         `c-a` on 007
+"         010  ✘~
+"         `c-a` on 007
+"         008  ✔~
 set nrformats-=octal
 
 " path {{{2
@@ -3431,11 +3432,11 @@ endfu
 "       bar
 "     baz
 "
-" press `>ip` →
+" press `>ip`
 "
-"            foo
-"            bar
-"            baz
+"            foo~
+"            bar~
+"            baz~
 "
 " The relative indentation between them has been lost.
 " They now all have the same  indentation level, while before `bar` had a bigger
@@ -4418,10 +4419,9 @@ com! -bar -bang -nargs=1 Hex2Dec echo expand('`echo "ibase='.(<bang>0 ? 'A' : '1
 "
 "     :LogEvents! WinEnter
 "     :sp /tmp/file
-"         → 12:34  WinEnter  /home/user/.vim/vimrc
-"                            ^^^^^^^^^^^^^^^^^^^^^
-"                            ✘ we would need `/tmp/file`,
-"                              but the latter has not yet been loaded
+"     12:34  WinEnter  /home/user/.vim/vimrc~
+"                      ^^^^^^^^^^^^^^^^^^^^^
+"                      ✘ we would need `/tmp/file`, but the latter has not yet been loaded~
 "}}}
 com! -bar -range=%  HlWeirdWhitespace  call s:hl_weird_whitespace()
 
@@ -4570,9 +4570,8 @@ endfu
 
 " Usage:
 "
-" PluginGlobalVariables ulti
-"
-"         → display all global variables containing the keyword `ulti`
+"     :PluginGlobalVariables ulti
+"     display all global variables containing the keyword `ulti`~
 
 com! -bar -nargs=1 PluginGlobalVariables call myfuncs#plugin_global_variables(<q-args>)
 
@@ -4883,7 +4882,7 @@ com! -bar
 "     $ vim -Nu /tmp/vim.vim /tmp/vim.vim
 "     :w
 "     :echo d_ebug
-"         → ✘ E121
+"     ✘ E121~
 "
 " The issue disappears if you change the order of the autocmds.
 "}}}
@@ -6676,19 +6675,16 @@ endfu
 " also:
 "
 "     c-g f
-"         → :verb filter // map
-"         ✔
+"     :verb filter // map    ✔~
 "
 "     insert `foo`
-"         → :verb filter /foo/ map
-"         ✔
+"     :verb filter /foo/ map    ✔~
 "
 "     c-g
-"         → :noa vim //gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw
-"         ✘
-"         we should get the next command in the original (!= default) cycle:
+"     :noa vim //gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc | cw~
+"     ✘ we should get the next command in the original (!= default) cycle:~
 "
-"                 :verb filter // ab
+"         :verb filter // ab
 "
 " 83 -
 " To document.
@@ -6879,7 +6875,7 @@ endfu
 " issue:
 "
 "         noa vim /pattern/j $VIMRUNTIME/**/*.vim | cw
-"             → no indicator in the statusline because of `:noa`
+"         no indicator in the statusline because of `:noa`~
 "
 " 94 -
 " try to remove as many `virtcol()` as possible everywhere.
@@ -7432,8 +7428,7 @@ endfu
 "     % hash | vipe
 "
 "     press `gf` on a path
-"         → it takes several seconds, and the cpu load increases
-"           ✘
+"     it takes several seconds, and the cpu load increases     ✘~
 "
 " The issue comes from 'set path=.,**' and from our current directory,
 " when the latter has many subdirectories like `~`.

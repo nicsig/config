@@ -20,7 +20,7 @@ endif
 "                 execute printf('normal! v%dat', v:count1)
 "
 "                 v1at
-"                     → E65: Illegal back reference
+"                 E65: Illegal back reference~
 "}}}
 " Removing these recipes may make us lose the tag object.{{{
 "

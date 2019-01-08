@@ -21,10 +21,12 @@
 " In fact, it depends on the order of installation of the mappings:
 "
 "     $ vim -Nu NONE +'nno s <nop>' +'nno sab de' +'echo mapcheck("s", "n") is# ""'
-"         → 0 ✔
+"     0~
+"     ✔
 "
 "     $ vim -Nu NONE +'nno sab de' +'nno s <nop>' +'echo mapcheck("s", "n") is# ""'
-"         → 1 ✘
+"     1~
+"     ✘
 "
 " Bottom_line:
 " We should disable a key after all plugins have been sourced.
@@ -73,7 +75,7 @@ fu! s:cancel_prefix(prefixes) abort
         "     :ino + <nop>
         "     :startinsert
         "     + Esc
-        "         → you get back to normal mode (meaning that Vim has pressed escape)
+        "     you get back to normal mode (meaning that Vim has pressed escape)~
         "}}}
     endfor
 endfu
