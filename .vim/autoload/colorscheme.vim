@@ -282,10 +282,6 @@ fu! s:styled_comments() abort "{{{2
 
     hi link markdownListItemBlockquote  markdownBlockquote
 
-    hi markdownItalic term=italic cterm=italic gui=italic
-    hi markdownBold   term=bold cterm=bold gui=bold
-    hi markdownBoldItalic term=bold,italic cterm=bold,italic gui=bold,italic
-
     " Where did you find these color codes?{{{
     "
     " I chose a color from the terminal palette:
