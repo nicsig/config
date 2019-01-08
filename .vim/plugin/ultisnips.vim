@@ -114,6 +114,19 @@ let g:UltiSnipsExpandTrigger       = '<S-F15>'
 let g:UltiSnipsJumpForwardTrigger  = '<S-F16>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-F17>'
 
+" Purpose: gain the ability to manually end the expansion of a snippet
+" Where did you find the code for the rhs of the mapping?{{{
+"
+" https://github.com/SirVer/ultisnips/issues/1017#issuecomment-452154595
+"}}}
+nno  <silent>  <c-g><tab>  :<c-u>sil! exe g:_uspy . ' UltiSnips_Manager._current_snippet_is_done()'<cr>
+" TODO: Find a way to end the expansion of a snippet when we leave insert mode.{{{
+"
+" Hint: If you install a fire-once autocmd listening to InsertLeave,
+" it will work, but you won't be able to jump to the 2nd tabstop of a snippet.
+" It may be because our custom Tab mapping manually invokes `UltiSnips#ExpandSnippet()`.
+"}}}
+
 " Purpose:{{{
 " We want  to be  able to press  Tab in  visual mode to  use the  {VISUAL} token
 " inside ultisnips snippets.
