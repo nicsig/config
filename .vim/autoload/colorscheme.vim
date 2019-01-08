@@ -277,10 +277,14 @@ fu! s:styled_comments() abort "{{{2
     hi link markdownIdDeclaration  Typedef
 
     hi link markdownCodeBlock           Comment
-    hi link markdownListCodeBlock       Comment
-    hi link CommentListCodeSpan         markdownListCodeSpan
+    hi link markdownListItemCodeBlock   Comment
+    hi link CommentListItemCodeSpan     markdownListItemCodeSpan
 
-    hi link markdownListBlockquote  markdownBlockquote
+    hi link markdownListItemBlockquote  markdownBlockquote
+
+    hi markdownItalic term=italic cterm=italic gui=italic
+    hi markdownBold   term=bold cterm=bold gui=bold
+    hi markdownBoldItalic term=bold,italic cterm=bold,italic gui=bold,italic
 
     " Where did you find these color codes?{{{
     "
@@ -301,10 +305,10 @@ fu! s:styled_comments() abort "{{{2
         exe 'hi markdownCodeSpan guibg=' . guibg
 
         exe 'hi markdownListItem guifg=' . repeat_fg
-        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
-        exe 'hi markdownListItalic gui=italic guifg=' . repeat_fg
-        exe 'hi markdownListBold gui=bold guifg=' . repeat_fg
-        exe 'hi markdownListBoldItalic gui=bold,italic guifg=' . repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
+        exe 'hi markdownListItemItalic gui=italic guifg=' . repeat_fg
+        exe 'hi markdownListItemBold gui=bold guifg=' . repeat_fg
+        exe 'hi markdownListItemBoldItalic gui=bold,italic guifg=' . repeat_fg
 
         exe 'hi markdownBlockquote guifg=' . statement_fg
         exe 'hi markdownBlockquoteItalic gui=italic guifg=' . statement_fg
@@ -323,10 +327,10 @@ fu! s:styled_comments() abort "{{{2
         exe 'hi markdownCodeSpan guibg=' . guibg
 
         exe 'hi markdownListItem guifg=' . repeat_fg
-        exe 'hi markdownListCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
-        exe 'hi markdownListItalic cterm=italic guifg=' . repeat_fg
-        exe 'hi markdownListBold cterm=bold guifg=' . repeat_fg
-        exe 'hi markdownListBoldItalic cterm=bold,italic guifg=' . repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg=' . repeat_fg . ' guibg=' . guibg
+        exe 'hi markdownListItemItalic cterm=italic guifg=' . repeat_fg
+        exe 'hi markdownListItemBold cterm=bold guifg=' . repeat_fg
+        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg=' . repeat_fg
 
         exe 'hi markdownBlockquote guifg=' . statement_fg
         exe 'hi markdownBlockquoteCodeSpan guifg=' . statement_fg . ' guibg=' . guibg
@@ -345,10 +349,10 @@ fu! s:styled_comments() abort "{{{2
         exe 'hi markdownCodeSpan ctermbg=' . ctermbg
 
         exe 'hi markdownListItem ctermfg=' . repeat_fg
-        exe 'hi markdownListCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
-        exe 'hi markdownListItalic term=italic cterm=italic ctermfg=' . repeat_fg
-        exe 'hi markdownListBold term=bold cterm=bold ctermfg=' . repeat_fg
-        exe 'hi markdownListBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
+        exe 'hi markdownListItemCodeSpan ctermfg=' . repeat_fg . ' ctermbg=' . ctermbg
+        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg=' . repeat_fg
+        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg=' . repeat_fg
+        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg=' . repeat_fg
 
         exe 'hi markdownBlockquote ctermfg=' . statement_fg
         exe 'hi markdownBlockquoteCodeSpan ctermfg=' . statement_fg . ' ctermbg=' . ctermbg
