@@ -7628,13 +7628,12 @@ augroup syled_comments
     au!
 
     au FileType * if index(s:syled_comments_filetypes, expand('<amatch>')) >= 0
-        \ |     call lg#styled_comment#fold()
-        \ |     call lg#styled_comment#undo_ftplugin()
+        \ |     sil! call lg#styled_comment#fold()
+        \ |     sil! call lg#styled_comment#undo_ftplugin()
         \ | endif
 
     au Syntax * if index(s:syled_comments_filetypes, expand('<amatch>')) >= 0
-        \ |     call lg#styled_comment#syntax()
-        \ |     call lg#styled_comment#highlight()
+        \ |     sil! call lg#styled_comment#syntax()
         \ | endif
 augroup END
 
