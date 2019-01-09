@@ -298,69 +298,66 @@ fu! s:styled_comments() abort "{{{2
 
     " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
     if has('gui_running')
+        exe 'hi CommentCodeSpan guibg='.guibg.' guifg='.comment_fg
         exe 'hi markdownCodeSpan guibg='.guibg
 
+        exe 'hi CommentBold gui=bold guifg='.comment_fg
+        exe 'hi CommentBoldItalic gui=bold,italic guifg='.comment_fg
+        exe 'hi CommentItalic gui=italic guifg='.comment_fg
+
         exe 'hi markdownListItem guifg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
-        exe 'hi markdownListItemItalic gui=italic guifg='.repeat_fg
         exe 'hi markdownListItemBold gui=bold guifg='.repeat_fg
         exe 'hi markdownListItemBoldItalic gui=bold,italic guifg='.repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
+        exe 'hi markdownListItemItalic gui=italic guifg='.repeat_fg
 
         exe 'hi markdownBlockquote guifg='.statement_fg
-        exe 'hi markdownBlockquoteItalic gui=italic guifg='.statement_fg
         exe 'hi markdownBlockquoteBold gui=bold guifg='.statement_fg
         exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg='.statement_fg
         exe 'hi markdownBlockquoteCodeSpan guibg='.guibg.' guifg='.statement_fg
-
-        exe 'hi CommentCodeSpan guibg='.guibg.' guifg='.comment_fg
-
-        exe 'hi CommentItalic gui=italic guifg='.comment_fg
-        exe 'hi CommentBold gui=bold guifg='.comment_fg
-        exe 'hi CommentBoldItalic gui=bold,italic guifg='.comment_fg
+        exe 'hi markdownBlockquoteItalic gui=italic guifg='.statement_fg
 
     " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
     elseif &tgc
+        exe 'hi CommentCodeSpan guifg='.comment_fg.' guibg='.guibg
         exe 'hi markdownCodeSpan guibg='.guibg
 
-        exe 'hi markdownListItem guifg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
-        exe 'hi markdownListItemItalic cterm=italic guifg='.repeat_fg
-        exe 'hi markdownListItemBold cterm=bold guifg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg='.repeat_fg
-
-        exe 'hi markdownBlockquote guifg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan guifg='.statement_fg.' guibg='.guibg
-        exe 'hi markdownBlockquoteItalic cterm=italic guifg='.statement_fg
-        exe 'hi markdownBlockquoteBold cterm=bold guifg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg='.statement_fg
-
-        exe 'hi CommentCodeSpan guifg='.comment_fg.' guibg='.guibg
-
-        exe 'hi CommentItalic cterm=italic guifg='.comment_fg
         exe 'hi CommentBold cterm=bold guifg='.comment_fg
         exe 'hi CommentBoldItalic cterm=bold,italic guifg='.comment_fg
+        exe 'hi CommentItalic cterm=italic guifg='.comment_fg
+
+        exe 'hi markdownListItem guifg='.repeat_fg
+        exe 'hi markdownListItemBold cterm=bold guifg='.repeat_fg
+        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg='.repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
+        exe 'hi markdownListItemItalic cterm=italic guifg='.repeat_fg
+
+        exe 'hi markdownBlockquote guifg='.statement_fg
+        exe 'hi markdownBlockquoteBold cterm=bold guifg='.statement_fg
+        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg='.statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guifg='.statement_fg.' guibg='.guibg
+        exe 'hi markdownBlockquoteItalic cterm=italic guifg='.statement_fg
 
     " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
+        exe 'hi CommentCodeSpan ctermfg='.comment_fg.' ctermbg='.ctermbg
         exe 'hi markdownCodeSpan ctermbg='.ctermbg
 
-        exe 'hi markdownListItem ctermfg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan ctermfg='.repeat_fg.' ctermbg='.ctermbg
-        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg='.repeat_fg
-        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg='.repeat_fg
-
-        exe 'hi markdownBlockquote ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan ctermfg='.statement_fg.' ctermbg='.ctermbg
-        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg='.statement_fg
-
-        exe 'hi CommentCodeSpan ctermfg='.comment_fg.' ctermbg='.ctermbg
-
-        exe 'hi CommentItalic term=italic cterm=italic ctermfg='.comment_fg
         exe 'hi CommentBold term=bold cterm=bold ctermfg='.comment_fg
         exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg='.comment_fg
+        exe 'hi CommentItalic term=italic cterm=italic ctermfg='.comment_fg
+
+        exe 'hi markdownListItem ctermfg='.repeat_fg
+        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg='.repeat_fg
+        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg='.repeat_fg
+        exe 'hi markdownListItemCodeSpan ctermfg='.repeat_fg.' ctermbg='.ctermbg
+        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg='.repeat_fg
+
+        exe 'hi markdownBlockquote ctermfg='.statement_fg
+        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg='.statement_fg
+        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg='.statement_fg
+        exe 'hi markdownBlockquoteCodeSpan ctermfg='.statement_fg.' ctermbg='.ctermbg
+        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='.statement_fg
     endif
 endfu
 " }}}1

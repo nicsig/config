@@ -200,7 +200,6 @@ Plug 'lacygoill/vim-cmdline'
 Plug 'lacygoill/vim-column-object'
 Plug 'lacygoill/vim-comment'
 Plug 'lacygoill/vim-completion'
-Plug 'lacygoill/vim-conf'
 Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-fold'
 Plug 'lacygoill/vim-freekeys'
@@ -532,16 +531,20 @@ augroup my_colorscheme
 
     " What's the issue fixed by this autocommand?{{{
     "
-    "     $ echo 'word in *italic*' >/tmp/md.md
+    "     $ cat <<'EOF' >/tmp/markdown.snippets
+    "     snippet foo ""
+    "         text preceded by 4 leading spaces (!= 1 tab)
+    "     endsnippet
+    "     EOF
     "
-    "     $ vim /tmp/md.md
+    "     $ vim /tmp/markdown.snippets
     "     ]ol (change lightness)
     "
-    " `italic` is not in italic anymore (✘).
+    " The leading spaces are not highlighted anymore (✘).
     "}}}
     " Where does the issue come from?{{{
     "
-    " The `htmlItalic` HG is cleared when we change the colorscheme, because of `:hi clear`:
+    " The `snipLeadingSpaces` HG is cleared when we change the colorscheme, because of `:hi clear`:
     "
     "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
     "
@@ -550,10 +553,12 @@ augroup my_colorscheme
     " The issue doesn't affect linked HGs:
     "
     "     " ✔
-    "     hi [def] link SomeGroup OtherGroup
+    "     :hi [def] link SomeGroup OtherGroup
+    "     :hi clear
     "
     "     " ✘
-    "     hi SomeGroup term=... ctermfg=...
+    "     :hi SomeGroup term=... ctermfg=...
+    "     :hi clear
     "}}}
     au ColorScheme * call s:reinstall_cleared_hg()
 augroup END
@@ -2530,10 +2535,10 @@ call s:fuzzy_mappings()
 " To use `:FzBCommits` and `:FzCommits`, we first need to be in the working
 " tree of the repo:
 "
-"     - on which the current file belong
+"    - on which the current file belong
 "
-"     - in which we are interested;
-"       let's say, again, the one where the current file belong
+"    - in which we are interested;
+"      let's say, again, the one where the current file belong
 
 nno  <silent>  <space>fbc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzBCommits<cr>
 nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
@@ -3006,7 +3011,7 @@ nno  <silent>  <bar>x  :<c-u>call myfuncs#tmux_last_command()<cr>
 nno  <silent>  <bar>X  :<c-u>call myfuncs#tmux_current_command(getline('.'))<cr>
 
 " }}}3
-" -                   (prefix) {{{3
+" hyphen              (prefix) {{{3
 " -a  -8           ascii / bytes info {{{4
 
 " We remap `-a` to a function of the unicode.vim plugin which gives us more info
@@ -3136,8 +3141,9 @@ endfu
 
 " Works also for a CONTENTS file.
 "
-" Mnemonic:
-" Root (main) file of the directory.
+" Idea: Create a `CONTENTS.md` file in each of your wiki.
+" Use it as  a table of contents,  which briefly explains what each  page of the
+" wiki is about.
 
 nno  <silent>  -r  :<c-u>call <sid>edit_readme()<cr>
 
@@ -3194,7 +3200,7 @@ endfu
 nno  <silent>  -u  :<c-u>UndotreeShow<cr>
 
 " }}}3
-" +                   (prefix) {{{3
+" plus                (prefix) {{{3
 " +>    +<      split/join listing or long data {{{4
 
 " long data = dictionary, list, bulleted list
@@ -3520,7 +3526,13 @@ fu! s:fix_display() abort
     "}}}
     " We already run `:do Syntax` from an autocmd listening to `ColorScheme`.  Is it really useful here?{{{
     "
-    " It could be useful if we have a loaded buffer which is not displayed anywhere...
+    " This autocmd iterates over the buffers displayed in a window.
+    " Suppose  that  you change  the  colorscheme  while  a  buffer `B`  is  not
+    " displayed anywhere.
+    " The syntax plugin for `B` set the attributes of a custom HG `Foo`.
+    " When you change the colorscheme, `:hi clear` clears `Foo`.
+    " Now, suppose that you load `B` in a window.
+    " You'll realize that
     "}}}
     do Syntax
 
@@ -4553,6 +4565,8 @@ fu! s:plugins_to_commit() abort
     endif
 
     sil let output = systemlist('commit-these-vim-plugins.sh')
+    " we may have removed a plugin, but not executed `:Plugclean` yet
+    call filter(output, {i,v -> v !~# 'No such file or directory'})
     if output == []
         echom '[PluginsToCommit]: nothing to commit'
         return
