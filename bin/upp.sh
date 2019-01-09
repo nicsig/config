@@ -32,48 +32,6 @@
 #   ≈ 2 min   for zsh
 #}}}
 
-# What are the dependencies to compile zsh?{{{
-#
-# At the moment, you need:
-#
-#     $ sudo aptitude install autoconf checkinstall gcc git-core libncursesw5-dev make texinfo yodl
-#}}}
-# Where did you find the configuration options?{{{
-#
-# I read the INSTALL file:
-#         https://github.com/zsh-users/zsh/blob/master/INSTALL
-#
-# I also read this link:
-#         https://gist.github.com/nicoulaj/715855
-#
-# I also read how the ubuntu devs compiled `zsh-5.2`:
-#
-#     https://launchpad.net/ubuntu/+source/zsh
-#
-#     # link found by clicking on the button below “Latest upload”
-#     https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1
-#
-#     # link found by clicking on the button “amd64” in the section “Builds”
-#     https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1/+build/10653977
-#
-#     # link found by clicking on the button “buildlog”
-#     https://launchpadlibrarian.net/280509421/buildlog_ubuntu-yakkety-amd64.zsh_5.2-5ubuntu1_BUILDING.txt.gz
-#}}}
-# How to get more information about the configuration options?{{{
-#
-#     $ ./configure --help
-#}}}
-# How to check whether the compiled binary is working as expected?{{{
-#
-#     $ make check
-#}}}
-# What to do if the zsh manpages are not installed?{{{
-#
-# Try:
-#     sudo make install.info
-#     sudo make install.man
-#}}}
-
 # After updating Vim, in case of issue, restart it in a new shell!{{{
 #
 # Otherwise, there can be spurious bugs in the current session.
@@ -177,8 +135,18 @@ build() { #{{{2
     dpkg-buildpackage -uc -us -b
   else
     make
+    # What to do if the zsh manpages are not installed?{{{
+    #
+    # Try:
+    #     sudo make install.info
+    #     sudo make install.man
+    #}}}
   fi
 
+  # How to check whether the zsh compiled binary is working as expected?{{{
+  #
+  #     $ make check
+  #}}}
   # If you want to test the Vim binary, try sth like this:{{{
   #     xfce4-terminal -e 'make test' 2>/dev/null
   #
@@ -399,6 +367,32 @@ configure() { #{{{2
              -DENABLE_TESTS:BOOL=ON
 
   elif [[ "${PGM}" == 'zsh' ]]; then
+    # Where did you find the configuration options?{{{
+    #
+    # I read the INSTALL file:
+    #         https://github.com/zsh-users/zsh/blob/master/INSTALL
+    #
+    # I also read this link:
+    #         https://gist.github.com/nicoulaj/715855
+    #
+    # I also read how the ubuntu devs compiled `zsh-5.2`:
+    #
+    #     https://launchpad.net/ubuntu/+source/zsh
+    #
+    #     # link found by clicking on the button below “Latest upload”
+    #     https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1
+    #
+    #     # link found by clicking on the button “amd64” in the section “Builds”
+    #     https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1/+build/10653977
+    #
+    #     # link found by clicking on the button “buildlog”
+    #     https://launchpadlibrarian.net/280509421/buildlog_ubuntu-yakkety-amd64.zsh_5.2-5ubuntu1_BUILDING.txt.gz
+    #}}}
+    # How to get more information about the configuration options?{{{
+    #
+    #     $ ./configure --help
+    #}}}
+
     # TODO:{{{
     # Atm, these directories are empty:
     #
@@ -612,6 +606,15 @@ install() { #{{{2
   fi
 }
 
+install_dependencies() { #{{{2
+  if [[ "${PGM}" == 'vim' ]]; then
+    aptitude build-dep vim
+    aptitude install luajit libluajit-5.1-dev
+  elif [[ "${PGM}" == 'zsh' ]]; then
+    aptitude install autoconf checkinstall gcc git-core libncursesw5-dev make texinfo yodl
+  fi
+}
+
 main() { #{{{2
   check_we_are_root
 
@@ -633,6 +636,7 @@ EOF
   fi
 
   clean
+  install_dependencies
   configure
   build
   install
