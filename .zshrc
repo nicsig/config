@@ -3087,6 +3087,7 @@ zle -N edit-command-line
 # Atm, we simply add an autocmd to remove the leading dollar in front of a shell
 # command, which  we often  paste when  we copy some  code from  the web  or our
 # notes.
+# We also remove a possible indentation in front of `EOF`.
 # In the future, we could do more advanced things...
 #
 # ---
@@ -3142,7 +3143,7 @@ zle -N edit-command-line
 #
 # Yes, for the temporary filename to be passed.
 #}}}
-__sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call myfuncs#remove_leading_dollar()' "$@"
+__sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call myfuncs#fix_shell_cmd()' "$@"
 #            ├───────┘                 {{{
 #            └ man zshparam
 #              /PARAMETERS USED BY THE SHELL

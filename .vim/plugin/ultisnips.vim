@@ -119,7 +119,7 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-F17>'
 "
 " https://github.com/SirVer/ultisnips/issues/1017#issuecomment-452154595
 "}}}
-nno  <silent>  <c-g><tab>  :<c-u>sil! exe g:_uspy . ' UltiSnips_Manager._current_snippet_is_done()'<cr>
+ino  <silent>  <c-g><s-tab>  <c-r>=execute(g:_uspy . ' UltiSnips_Manager._current_snippet_is_done()', 'silent!')[-1]<cr>
 " TODO: Find a way to end the expansion of a snippet when we leave insert mode.{{{
 "
 " Hint: If you install a fire-once autocmd listening to InsertLeave,

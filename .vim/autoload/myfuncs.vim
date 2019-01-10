@@ -1125,11 +1125,22 @@ fu! myfuncs#remove_duplicate_lines(line1, line2) abort "{{{1
     return ''
 endfu
 
-fu! myfuncs#remove_leading_dollar() abort "{{{1
+fu! myfuncs#fix_shell_cmd() abort "{{{1
+    " remove a possible dollar sign in front of the command
     let pat = '^\%(\s*\n\s*\)*\zs\$'
     let lnum = search(pat)
     let text = substitute(getline(lnum), '^\s*\zs\$', '', '')
     call setline(lnum, text)
+
+    " remove possible indentation in front of `EOF`
+    let pat = '\C^\%(\s*EOF\)\n'
+    let lnum = search(pat)
+    let line = getline(lnum)
+    let indent = matchstr(line, '^\s*')
+    let range = '1/EOF/;/EOF/'
+    if !empty(indent)
+        exe range.'s/'.indent.'//e'
+    endif
 endfu
 
 fu! myfuncs#remove_tabs(line1, line2) abort "{{{1

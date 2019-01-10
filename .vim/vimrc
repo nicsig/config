@@ -3526,13 +3526,32 @@ fu! s:fix_display() abort
     "}}}
     " We already run `:do Syntax` from an autocmd listening to `ColorScheme`.  Is it really useful here?{{{
     "
-    " This autocmd iterates over the buffers displayed in a window.
-    " Suppose  that  you change  the  colorscheme  while  a  buffer `B`  is  not
-    " displayed anywhere.
-    " The syntax plugin for `B` set the attributes of a custom HG `Foo`.
-    " When you change the colorscheme, `:hi clear` clears `Foo`.
-    " Now, suppose that you load `B` in a window.
-    " You'll realize that
+    " Yes.
+    "
+    " For  performance  reason,  the  autocmd only  iterates  over  the  buffers
+    " *displayed* in a window.
+    "
+    " MWE:
+    "
+    "     $ cat <<'EOF' >>~/.vim/after/syntax/conf.vim
+    "     syn match confError /some error/
+    "     hi confError ctermbg=red
+    "     EOF
+    "
+    "     $ cat <<'EOF' >>/tmp/conf.conf
+    "     # some comment
+    "     some error
+    "     EOF
+    "
+    "     " press `]ol` to change the lightness/colorscheme
+    "     " make sure no `.conf` file is currently displayed in a window
+    "
+    "     :sp /tmp/conf.conf
+    "
+    " `some error` should be highlighted in red; it's not.
+    " The `confError` HG has been cleared when we pressed `]ol`.
+    " It has not been re-installed by  our autocmd, because there was no `.conf`
+    " file displayed anywhere.
     "}}}
     do Syntax
 
@@ -7388,6 +7407,9 @@ endfu
 " Add  spaces  around  all  concatenation  operators: it  makes  the  code  more
 " readable?
 "
+" Update: only between 2 variable names (because then, a confusion is possible).
+" Not between a string and a variable (no confusion is possible).
+"
 " 132 -
 " Remove all `==#`, `!=#`, `==?`, `!=?`.
 " Replace them with `==`, `!=`.
@@ -7491,17 +7513,6 @@ endfu
 " >     Updating a quickfix/location list asynchronously without interfering with another plugin
 "
 " 143 -
-"
-"     $ vim -Nu NONE
-"     :exe 'helpgrep vim' | exe 'helpgrep text' | exe 'helpgrep wont_be_found'
-"     :chi
-"
-"         No entries
-"
-" Shouldn't the last command print the quickfix stack?
-" Why does it tell me that the last quickfix list is empty?
-"
-" 144 -
 " Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
 " between `~/.vim/plugin` and `~/.vim/after/plugin/`?
 "
@@ -7523,16 +7534,16 @@ endfu
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
 "
-" 145 -
+" 144 -
 " Whenever you used `system()`, `systemlist()`, or  `:!` to run a shell command,
 " and it contained a  filename, make sure you used the  filename modo `:p`, `:S`
 " and `--`  to end the optional  arguments (useful in case  your filename begins
 " with a hyphen).
 "
-" 146 -
+" 145 -
 " Read: https://vimways.org/2018/vims-social-life/
 "
-" 147 -
+" 146 -
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
@@ -7540,86 +7551,6 @@ endfu
 " Btw:
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
-"
-" 148 -
-" When you  use a lookbehind for  a pattern the  maximum BYTE size of  which you
-" know, use this info to make the regex faster.
-" See `:h :syntime`  and `:h \@123<=`.
-" Note that this doesn't work for a lookafter.
-"
-" Document it.
-"
-" Theory:
-" Vim is unable to distinguish a pattern containing only literal characters from
-" a pattern containing metacharacters.
-" As a result, it  doesn't try to compute the size of what  you pass to `@<=` or
-" to `@<!`, and it  just tries to match at various  positions before the current
-" position.
-"
-" Also:
-" Consider this text:
-"
-"     𞹼foo𞹼bar𞹼baz𞹼
-"
-" And this regex:
-"
-"     \S\@1<=b
-"
-" You shouldn't find the 2 `b` characters preceded by a non-whitespace,
-" because `𞹼` weighs 4 bytes:
-"
-"     $ echo '𞹼' | xxd -p
-"     f09eb9bc0a~
-"
-" And you just limited the backtracking to 1 byte.
-" Why does it work?
-"
-" Theory:
-" The regex engine backtracks by characters not by bytes.
-" When you say:
-"
-" >     don't backtrack by more than 1 byte
-"
-" it backtracks by the least amount of text which weighs 1 byte or more.
-" That is 1 character.
-"
-" Consider this other text:
-"
-"     𞹼𞹼foo𞹼𞹼bar𞹼𞹼baz𞹼𞹼
-"
-" And this regex:
-"
-"     \%(𞹼𞹼\)\@5<=b
-"
-" It correctly finds the `b` characters.
-" Now, try this one:
-"
-"     \%(𞹼𞹼\)\@4<=b
-"
-" It doesn't find anything.
-" This is because `𞹼` weighs 4 bytes.
-" So the engine can backtrack to match the first `𞹼`, but not the second one.
-"
-" ---
-"
-" Currently, we've used `\S\@<1` several times in our syntax markdown plugin.
-" Did we make a mistake?
-"
-" Note that depending on  the style with which you try the text,  you may end up
-" with empty squares because there's no glyph in the fontface you're using.
-" It doesn't mean that there's no glyph for *all* styles, just for some of them.
-" Try them all (bold, italic, ...).
-"
-" Also:
-"
-"     \%(^#\)\@1<=
-"
-" Here, I use `1` but I wonder whether `^` stands for a newline, whose weight is
-" 1 byte.
-" Should we use `\@2<=` instead in such a case?
-"
-" 149 -
-" Finish reviewing/explaining `do Syntax` inside `s:fix_display()`.
 
 
 
