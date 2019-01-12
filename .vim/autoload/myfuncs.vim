@@ -1304,7 +1304,7 @@ fu! s:search_todo_text(dict) abort
         " … and which doesn't contain only the comment character:
         "
         "     ^\s*#\s*$    (example in a bash buffer)
-        let pat = '^\s*\C\V'.escape(get(split(getbufvar(bufnr, '&l:cms', ''),
+        let pat = '^\s*\C\V'.escape(get(split(getbufvar(bufnr, '&cms', ''),
         \                                     '%s'),
         \                               0, ''),
         \                           '\')
