@@ -31,7 +31,7 @@ noremap  <expr><silent><unique>  gk  <sid>vertical_jump_rhs(0)
 noremap  <expr><silent><unique>  gj  <sid>vertical_jump_rhs(1)
 
 fu! s:snr()
-    return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
 
 let s:snr = s:snr()
@@ -43,20 +43,7 @@ fu! s:vertical_jump_rhs(is_fwd) abort
         let mode = "\<c-v>\<c-v>"
     endif
 
-    " USE the variable `s:snr`. Do NOT use the output of `s:snr()`.{{{
-    "
-    " We're  going  to  install  a  wrapper,  `s:move()`,  to  make  the  motion
-    " repeatable.
-    "
-    " `s:move()` is defined in another script:  B
-    " For  some reason,  because of  this,  even though  `<sfile>` is  correctly
-    " expanded into the name of the  function `s:snr()`, `s:` is translated into
-    " the script id of B, instead of the script id of the current file.
-    "
-    " Not sure why.
-    " I haven't been able to reproduce without the custom wrapper.
-    "}}}
-    return printf(":\<c-u>call ".s:snr."vertical_jump_go(%d,%s)\<cr>",
+    return printf(":\<c-u>call ".s:snr()."vertical_jump_go(%d,%s)\<cr>",
     \             a:is_fwd, string(mode))
 endfu
 
@@ -80,9 +67,7 @@ fu! s:vertical_jump_go(is_fwd, mode) abort
     let &l:fen = fen_save
 
     " open just enough folds to see where we are
-    if a:mode is# 'n'
-        norm! zMzv
-    elseif index(['v', 'V', "\<c-v>"], a:mode) >= 0
+    if a:mode is# 'n' || index(['v', 'V', "\<c-v>"], a:mode) >= 0
         norm! zv
     endif
 endfu

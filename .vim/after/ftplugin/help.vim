@@ -29,7 +29,7 @@ fu! s:fold_text() abort "{{{1
 endfu
 
 fu! s:snr() "{{{1
-    return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
 
 " teardown {{{1
