@@ -7462,6 +7462,10 @@ endfu
 
 
 
+nno <c-g>D y$:echo <c-r>"
+
+
+
 let s:syled_comments_filetypes = [
     \ 'awk',
     \ 'conf',

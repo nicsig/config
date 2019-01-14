@@ -3229,6 +3229,28 @@ __complete_debug() {
 zle -N __complete_debug
 bindkey '^X?' __complete_debug
 
+# C-x C-k         kill-region {{{4
+
+# Usage:{{{
+#
+#     $ echo foo 'baz' bar
+#                ^
+#                cursor here
+#
+#     # press C-SPC to set the mark
+#
+#     $ echo foo 'baz' bar
+#                     ^
+#                     cursor moved here, so that the region covers the text 'baz'
+#
+#     # press C-x C-k to kill the region
+#     $ echo  foo bar~
+#
+#     # press C-d C-e SPC C-y
+#     $ echo foo bar 'baz'~
+#}}}
+bindkey '^X^K' kill-region
+
 # C-x C-t         fzf-file-widget {{{4
 #
 # By default, `fzf` rebinds `C-t` to one its function `fzf-file-widget`
