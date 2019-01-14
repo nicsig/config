@@ -205,7 +205,30 @@ endfu
 "
 " Why not `:noremap`?{{{
 "
-" For some reason `s:fts()` breaks the dot command.
+" `vim-sneak` doesn't support the repetition of something like `dfx`.
+"
+" MWE:
+"
+"     $ cat <<'EOF' >/tmp/file
+"     ghi/def/
+"     ghi/def/
+"     EOF
+"
+"     $ vim -Nu NORC --cmd 'set rtp^=~/.vim/plugged/vim-sneak' +'omap t <plug>Sneak_t' /tmp/file
+"
+"     ct/abc Esc
+"     abc/def/~
+"     ghi/def/~
+"
+"     ct/abc Esc
+"     abc/def/~
+"     ghi/def/~
+"
+"     j_.
+"     abc/def/~
+"     bcghi/def/~
+"
+" If you add `vim-repeat`, the result changes, but it's still broken.
 "}}}
 nnoremap  <expr><unique>  t   <sid>fts('t')
 nnoremap  <expr><unique>  T   <sid>fts('T')
