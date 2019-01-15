@@ -1,3 +1,7 @@
+if exists('g:no_after_plugin')
+    finish
+endif
+
 " Purpose:{{{
 "
 " Use this  file to remove a  command which you  never use and pollute  your tab

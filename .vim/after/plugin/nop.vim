@@ -1,3 +1,7 @@
+if exists('g:no_after_plugin')
+    finish
+endif
+
 " Purpose:{{{
 "
 " Use this file to disable some keys.
@@ -101,7 +105,7 @@ call s:cancel_prefix(['+', '-', '<space>','<bar>', 'U', 's', 'S'])
 "}}}
 ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
 
-" i_. {{{1
+" i_C-r_. {{{1
 
 " Sometimes, when leaving insert mode and pressing `SPC p` to format the current
 " paragraph, Vim inserts some random text.
@@ -109,7 +113,18 @@ ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
 " The random text seems to come from a register.
 " It may be the dot register.
 
-ino <c-r>. <nop>
+"     ino <c-r>. <nop>
+
+" Update:
+" Commented because it breaks the  repetition of things like `ctx hello` (change
+" till `x`); probably because of these lines:
+"
+"     let change = a:op !=? "c" ? "" : "\<c-r>.\<esc>"
+"     silent! call repeat#set(a:op."\<Plug>SneakRepeat".sneak#util#strlen(a:input).a:reverse.a:inclusive.(2*!empty(target)).a:input.target.change, a:count)
+"
+" In:
+"
+"     ~/.vim/plugged/vim-sneak/plugin/sneak.vim:241
 
 " C-z {{{1
 

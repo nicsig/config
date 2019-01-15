@@ -1,4 +1,4 @@
-if exists('g:loaded_quickhl') || stridx(&rtp, 'vim-quickhl') == -1
+if exists('g:loaded_quickhl') || stridx(&rtp, 'vim-quickhl') == -1 || exists('g:no_plugin')
     finish
 endif
 

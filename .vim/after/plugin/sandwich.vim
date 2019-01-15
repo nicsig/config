@@ -1,4 +1,4 @@
-if !exists('g:loaded_sandwich')
+if !exists('g:loaded_sandwich') || exists('g:no_after_plugin')
     finish
 endif
 

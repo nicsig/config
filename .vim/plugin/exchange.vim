@@ -1,4 +1,4 @@
-if exists('g:loaded_exchange') || stridx(&rtp, 'vim-exchange') == -1
+if exists('g:loaded_exchange') || stridx(&rtp, 'vim-exchange') == -1 || exists('g:no_plugin')
     finish
 endif
 

@@ -4,7 +4,7 @@
 " It doesn't  have a `plugin/` directory,  and it doesn't set  a global variable
 " when Vim starts up.
 "}}}
-if stridx(&rtp, 'vimtex') == -1
+if stridx(&rtp, 'vimtex') == -1 || exists('g:no_plugin')
     finish
 endif
 

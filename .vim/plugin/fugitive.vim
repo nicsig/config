@@ -1,4 +1,4 @@
-if exists('g:loaded_fugitive') || stridx(&rtp, 'vim-fugitive') == -1
+if exists('g:loaded_fugitive') || stridx(&rtp, 'vim-fugitive') == -1 || exists('g:no_plugin')
     finish
 endif
 

@@ -1,4 +1,4 @@
-if exists('g:loaded_undotree') || stridx(&rtp, 'undotree') == -1
+if exists('g:loaded_undotree') || stridx(&rtp, 'undotree') == -1 || exists('g:no_plugin')
     finish
 endif
 

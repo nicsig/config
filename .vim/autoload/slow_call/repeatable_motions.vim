@@ -168,8 +168,8 @@ endfu
 " `f` is not a sufficient information to successfully repeat `fx`.
 " 2 solutions:
 "
-"    1. save `x` to later repeat `fx`
-"    2. repeat `fx` by pressing Vim's default `;` motion
+"         1. save `x` to later repeat `fx`
+"         2. repeat `fx` by pressing Vim's default `;` motion
 "
 " The 1st solution will work with `tx` and `Tx`, but only the 1st time.
 " After that, the  cursor won't move, because  it will always be  stopped by the
@@ -200,49 +200,14 @@ endfu
 "     lg#motion#repeatable#make#is_repeating(',_;')
 "}}}
 
-" These mappings must be installed *before* `lg#motion#repeatable#make#all()` is
-" invoked to make the motions repeatable.
-"
-" Why not `:noremap`?{{{
-"
-" `vim-sneak` doesn't support the repetition of something like `dfx`.
-"
-" MWE:
-"
-"     $ cat <<'EOF' >/tmp/file
-"     ghi/def/
-"     ghi/def/
-"     EOF
-"
-"     $ vim -Nu NORC --cmd 'set rtp^=~/.vim/plugged/vim-sneak' +'omap t <plug>Sneak_t' /tmp/file
-"
-"     ct/abc Esc
-"     abc/def/~
-"     ghi/def/~
-"
-"     ct/abc Esc
-"     abc/def/~
-"     ghi/def/~
-"
-"     j_.
-"     abc/def/~
-"     bcghi/def/~
-"
-" If you add `vim-repeat`, the result changes, but it's still broken.
-"}}}
-nnoremap  <expr><unique>  t   <sid>fts('t')
-nnoremap  <expr><unique>  T   <sid>fts('T')
-nnoremap  <expr><unique>  f   <sid>fts('f')
-nnoremap  <expr><unique>  F   <sid>fts('F')
-nnoremap  <expr><unique>  ss  <sid>fts('s')
-nnoremap  <expr><unique>  SS  <sid>fts('S')
-
-xnoremap  <expr><unique>  t   <sid>fts('t')
-xnoremap  <expr><unique>  T   <sid>fts('T')
-xnoremap  <expr><unique>  f   <sid>fts('f')
-xnoremap  <expr><unique>  F   <sid>fts('F')
-xnoremap  <expr><unique>  ss  <sid>fts('s')
-xnoremap  <expr><unique>  SS  <sid>fts('S')
+" These mappings must be installed BEFORE `lg#motion#repeatable#make#all()`
+" is invoked to make the motions repeatable.
+noremap  <expr><unique>  t   <sid>fts('t')
+noremap  <expr><unique>  T   <sid>fts('T')
+noremap  <expr><unique>  f   <sid>fts('f')
+noremap  <expr><unique>  F   <sid>fts('F')
+noremap  <expr><unique>  ss  <sid>fts('s')
+noremap  <expr><unique>  SS  <sid>fts('S')
 
 fu! s:fts(cmd) abort
     " Why not `call feedkeys('zv', 'int')`?{{{
@@ -320,6 +285,18 @@ fu! s:fts(cmd) abort
     return ''
 endfu
 
+call lg#motion#repeatable#make#all({
+\        'mode':   '',
+\        'buffer': 0,
+\        'axis':   {'bwd': ',', 'fwd': ';'},
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'motions': [
+\                     {'bwd': 'F' ,  'fwd': 'f' },
+\                     {'bwd': 'SS',  'fwd': 'ss'},
+\                     {'bwd': 'T' ,  'fwd': 't' },
+\                   ],
+\ })
+
 " Make other motions repeatable {{{1
 
 " Rule: For a motion to be made repeatable, it must ALREADY be defined.{{{
@@ -393,30 +370,6 @@ call lg#motion#repeatable#make#all({
 \                     {'bwd': '[{',  'fwd': ']}'},
 \                     {'bwd': 'g%',  'fwd': '%' },
 \                     {'bwd': 'g,',  'fwd': 'g;'},
-\                   ],
-\ })
-
-call lg#motion#repeatable#make#all({
-\        'mode':   'n',
-\        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';'},
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': 'F' ,  'fwd': 'f' },
-\                     {'bwd': 'SS',  'fwd': 'ss'},
-\                     {'bwd': 'T' ,  'fwd': 't' },
-\                   ],
-\ })
-
-call lg#motion#repeatable#make#all({
-\        'mode':   'x',
-\        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';'},
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': 'F' ,  'fwd': 'f' },
-\                     {'bwd': 'SS',  'fwd': 'ss'},
-\                     {'bwd': 'T' ,  'fwd': 't' },
 \                   ],
 \ })
 

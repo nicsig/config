@@ -1,4 +1,4 @@
-if exists('g:loaded_limelight') || stridx(&rtp, 'limelight.vim') == -1
+if exists('g:loaded_limelight') || stridx(&rtp, 'limelight.vim') == -1 || exists('g:no_plugin')
     finish
 endif
 

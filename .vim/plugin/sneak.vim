@@ -1,4 +1,4 @@
-if exists('g:loaded_sneak') || stridx(&rtp, 'vim-sneak') == -1
+if exists('g:loaded_sneak') || stridx(&rtp, 'vim-sneak') == -1 || exists('g:no_plugin')
     finish
 endif
 

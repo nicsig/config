@@ -1,4 +1,4 @@
-if exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1
+if exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1 || exists('g:no_plugin')
     finish
 endif
 
