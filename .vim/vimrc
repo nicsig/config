@@ -1,4 +1,4 @@
-" OPTIONS_1 {{{1
+" Options 1 {{{1
 " Why this setting?{{{
 "
 " When we use gVim, we don't want `$VIMRUNTIME/menu.vim` to be sourced.
@@ -24,7 +24,7 @@
 "}}}
 set go=M
 
-" PLUGINS {{{1
+" Plugins {{{1
 " Disable plugins {{{2
 
 " Could I disable `netrw`?{{{
@@ -282,10 +282,9 @@ augroup END
 
 call plug#end()
 endif
-
 " }}}1
-" OPTIONS_2 {{{1
-" ENCODING {{{2
+" Options 2 {{{1
+" Encoding {{{2
 " Why should you leave this section at the top of our options configurations.{{{
 "
 " If for some reason (shell environment), 'encoding' = 'latin1', and we use an
@@ -318,7 +317,7 @@ set encoding=utf-8
 " encoding the keyboard produces and the display will understand.
 set termencoding=utf-8
 
-" FTPLUGINS + SYNTAX {{{2
+" Ftplugins + Syntax {{{2
 
 " Commented because we don't need this anymore.{{{
 "
@@ -355,13 +354,13 @@ set termencoding=utf-8
 "         syntax enable
 "     endif
 
-" GUI {{{2
+" Gui {{{2
 
 if has('gui_running')
     set guifont=DejaVu\ Sans\ Mono\ 20
 endif
 
-" ENVIRONMENT "{{{2
+" Environment "{{{2
 
 " TODO: We should probably remove this assignment.{{{
 "
@@ -2133,8 +2132,8 @@ set breakat+=)]}
 " allow `h` and `l` motion to move across lines
 set whichwrap=h,l
 " }}}1
-" MAPPINGS {{{1
-" NEW {{{2
+" Mappings {{{1
+" New {{{2
 
 fu! s:remember_new_mappings(some_lhs) abort
     for lhs in a:some_lhs
@@ -2154,7 +2153,7 @@ call s:remember_new_mappings([
     \ ['zs', '!s'],
     \ ])
 
-" FREE {{{2
+" Free {{{2
 
 " A key can be used as a prefix iff one of these conditions is true:
 "
@@ -2204,7 +2203,7 @@ call s:remember_new_mappings([
 "
 "    • search for 'not used' in the window opened by `:viu`
 
-" LEADER {{{2
+" Leader {{{2
 
 " If we install a  plugin which defines mappings using the  leader key, we don't
 " want any clash with one of  our existing mapping. So, we assign to `mapleader`
@@ -2224,7 +2223,7 @@ let mapleader = "\<s-f13>"
 " same thing for localleader
 let maplocalleader = "\<s-f14>"
 
-" COMMAND-LINE {{{2
+" Command-Line {{{2
 " C-r C-h       fuzzy search history {{{3
 
 " Why not C-r C-r?{{{
@@ -2246,7 +2245,7 @@ fu! s:insert_current_line() abort
     return substitute(getline('.'), '^\s*'.cml.'\s*:\=', '', '')
 endfu
 " }}}2
-" INSERT {{{2
+" Insert {{{2
 
 " Most of these mappings take care of not breaking undo sequence (C-g U).
 " It means we can repeat an edition with the dot command, even if we use them.
@@ -2432,7 +2431,7 @@ fu! s:indent_before_backslash() abort
 endfu
 
 " }}}2
-" NORMAL {{{2
+" Normal {{{2
 " SPC                 (prefix) {{{3
 " SPC                           za {{{4
 
@@ -3819,7 +3818,7 @@ xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
                    \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " }}}2
-" OBJECTS {{{2
+" Objects {{{2
 " i% {{{3
 
 " OLD CODE:{{{
@@ -4053,7 +4052,7 @@ xno  iS  is
 xno  aS  as
 
 " }}}2
-" SELECT {{{2
+" Select {{{2
 
 " DWIM:
 " move to left/right in select mode (useful for UltiSnips)
@@ -4064,7 +4063,7 @@ snor  <c-f>  <esc>i<right>
 " the cursor with C-d like in insert mode.
 snor  <c-d>  <esc>i<del>
 
-" TERMINAL {{{2
+" Terminal {{{2
 
 " In Vim, we can't use `esc` in the  lhs of a mapping, because any key producing
 " a  sequence of  keycodes  containing Esc,  would be  subject  to an  undesired
@@ -4104,7 +4103,7 @@ tno  <esc><esc>  <c-\><c-n>
 " The meta keysyms are disabled.
 " }}}
 "}}}
-" VISUAL {{{2
+" Visual {{{2
 " C-s {{{3
 
 " Search inside visual selection
@@ -4285,7 +4284,7 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 "                                                        then, join them
 
 " }}}1
-" COMMANDS {{{1
+" Commands {{{1
 " Warning: Here, do NOT create commands which are only relevant for a specific type of buffer. {{{2
 "
 " Those should be defined in a filetype plugin with the `-buffer` attribute.
@@ -4893,7 +4892,7 @@ com! -bar
 \            call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
 
 " }}}1
-" AUTOCMDS {{{1
+" Autocmds {{{1
 " Warning: If you need to write an autocmd listening to `BufWritePost`, put it BEFORE the one reloading our vimrc.{{{
 "
 " Otherwise, if the pattern is `$MYVIMRC`,  it won't work, probably because when
@@ -5552,7 +5551,7 @@ fu! s:trailing_whitespace(create_match) abort
     endif
 endfu
 " }}}1
-" TO_DO {{{1
+" To_Do {{{1
 
 "     *s/^\v%V"\s=\zs\d+\ze\s*-/\=submatch(0)-1/c
 "

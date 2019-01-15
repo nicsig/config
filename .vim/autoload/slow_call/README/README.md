@@ -4,18 +4,18 @@ You can use it to delay the call to functions installing some interface, if they
 are too slow to be processed during Vim's startup.
 For example:
 
-        • lg#motion#repeatable#make#all()
-        • operator#sandwich#set()
-        • submode#map()
+   • lg#motion#repeatable#make#all()
+   • operator#sandwich#set()
+   • submode#map()
 
 ##
 # Why should I put a guard in every script of this directory?
 
 If you're debugging your vimrc, you may temporarily disable a plugin.
 If  the plugin  you're disabling  provides  a function  called in  one of  those
-scripts, it will raise an error, because the function is not defined anywher.
+scripts, it will raise an error, because the function is not defined anywhere.
 
-# Are there alternatives to this guard?
+# Are there alternatives to the template of guard currently used?
 
 Yes, 3.
 
@@ -46,7 +46,7 @@ Yes, 3.
 1. relies on `vim-plug` being used.
 We may not use this plugin in the future.
 
-Also, when  we're debugging, we frequently  end up with a  minimal vimrc where
+    Also, when  we're debugging, we frequently  end up with a  minimal vimrc where
 `Plug` statements are replaced by `set rtp^=...` statements.
 In which case, `g:plugs` won't exist, but we may still want to load `vim-lg-lib`.
 
@@ -61,7 +61,7 @@ by another error...
 
 If an  autoloaded function hasn't already  been called, it hasn't  been sourced,
 and thus doesn't exist.
-But that does NOT mean it cannot exist (in the future).
+But that does *not* mean it cannot exist (in the future).
 
 ##
 # Can a conflict arise between a file in `~/.vim/autoload/` and the `autoload/` of a third-party plugin?
@@ -79,11 +79,11 @@ Then, you can't have this file:
 Because,  when a  dirvish  mapping  will call  one  of  its original  autoloaded
 function (`dirvish#func()`), Vim will:
 
-        1. iterate over the paths in 'rtp'
-        2. for each path, append `autoload/`
-        3. enter the resulting directory if it exists
-        4. look for a `dirvish.vim` file
-        5. look for a `func()` function inside this file
+   1. iterate over the paths in 'rtp'
+   2. for each path, append `autoload/`
+   3. enter the resulting directory if it exists
+   4. look for a `dirvish.vim` file
+   5. look for a `func()` function inside this file
 
 Since `~/.vim/` comes before `~/.vim/plugged/vim-dirvish/` in 'rtp',
 Vim will first find `~/.vim/autoload/dirvish.vim`.
@@ -104,7 +104,7 @@ For example, you can have these files:
         ~/.vim/autoload/foobar.vim
         ~/.vim/autoload/foo/bar.vim
 
-If, and only if, there's no function whose name match resp. the patterns:
+If, and only if, there's no function whose name matches resp. the patterns:
 
         foobar#.*()
         foo#bar#.*()
