@@ -7,13 +7,13 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +2 ~/Dropbox/wiki/vim/debug.md
+badd +2 ~/wiki/vim/debug.md
 badd +4 /tmp/vim.vim
 badd +1 /tmp/log
 argglobal
 silent! argdel *
 set stal=2
-edit ~/Dropbox/wiki/vim/debug.md
+edit ~/wiki/vim/debug.md
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1

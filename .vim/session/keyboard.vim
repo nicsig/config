@@ -8,10 +8,10 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +827 ~/Dropbox/wiki/keyboard/layout.md
+badd +827 ~/wiki/keyboard/layout.md
 argglobal
 silent! argdel *
-edit ~/Dropbox/wiki/keyboard/layout.md
+edit ~/wiki/keyboard/layout.md
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -37,7 +37,7 @@ exe s:l
 normal! zt
 457
 normal! 0
-lcd ~/Dropbox/wiki
+lcd ~/wiki
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

@@ -21,7 +21,7 @@
 "
 " Example:
 "        $ vim ~/.vim/ftdetect/notes.vim
-"          au BufRead $HOME/{Dropbox/wiki/,.wiki/}* setf markdown
+"          au BufRead $HOME/{wiki/,.wiki/}* setf markdown
 "
 " No need for an augroup, Vim would wrap the autocmd automatically.
 " No need to move the file in an `after/` subdirectory, Vim will look for

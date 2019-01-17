@@ -125,6 +125,7 @@ call plug#begin('~/.vim/plugged')
 " To Assimilate:
 Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
 Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
+Plug 'lacygoill/vim-autoread', {'branch': 'assimil'}
 Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-debug'
 Plug 'junegunn/vim-easy-align'
@@ -158,8 +159,8 @@ Plug 'lacygoill/vim-graph'
 "     ~/bin/entr-watch
 "
 " Try:
-"     % ( ls ~/Dropbox/wiki/web/practice/htdocs/*.html | entr entr-reload-browser Firefox &! )
-"     % vim ~/Dropbox/wiki/web/practice/htdocs/index.html
+"     % ( ls ~/wiki/web/practice/htdocs/*.html | entr entr-reload-browser Firefox &! )
+"     % vim ~/wiki/web/practice/htdocs/index.html
 "     open the file in firefox too, then edit the file in Vim, then watch the page in firefox
 "
 " Issue:
@@ -390,7 +391,7 @@ endif
 "     https://github.com/lvht/tagbar-markdown
 "}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
-let $MY_WIKI = $HOME.'/Dropbox/wiki'
+let $MY_WIKI = $HOME.'/wiki'
 
 " Why?{{{
 "
@@ -5792,8 +5793,8 @@ endfu
 " this way, we can move along long lines with ; and ,
 "
 " 21 -
-" integrate ~/Dropbox/wiki/diff.md into ~/Dropbox/wiki/vim/vim.md
-" or into ~/Dropbox/wiki/admin.md
+" integrate ~/wiki/diff.md into ~/wiki/vim/vim.md
+" or into ~/wiki/admin.md
 " yeah... maybe everything which is related to diff or vimdiff, put it inside
 " admin
 "
@@ -6649,7 +6650,7 @@ endfu
 " study ~/Dropbox/vim_plugins/fastfold.vim
 "
 " 79 -
-" in ~/Dropbox/wiki/vim/viml.md, look for the pattern `funcref()`.
+" in ~/wiki/vim/viml.md, look for the pattern `funcref()`.
 " there are 2 codes side-by-side.
 " they are separated with `┊` characters.
 " if you press `+sip` on the code, only the one on the left is sourced.
@@ -7419,6 +7420,14 @@ endfu
 "     https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
 " >     Updating a quickfix/location list asynchronously without interfering with another plugin
 "
+" Also, study these plugins:
+"
+"     https://github.com/yegappan/asyncmake (125 sloc)
+"     https://github.com/chrisbra/vim-autoread (145)
+"     https://github.com/foxik/vim-makejob (197)
+"     https://github.com/prabirshrestha/async.vim (243)
+"     https://github.com/metakirby5/codi.vim (747)
+"
 " 136 -
 " Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
 " between `~/.vim/plugin` and `~/.vim/after/plugin/`?
@@ -7458,10 +7467,19 @@ endfu
 " Btw:
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
+"
+" 140 -
+" We don't version control our pdfs in `~/wiki`.
+" Suppose one of our  notes has a link to a local pdf,  and we restore our notes
+" on a new machine; the link will be broken.
+" Improve `gx` so  that if it doesn't find  a pdf, it looks for  a `.tex` source
+" code, compile it into a pdf, and open it.
+" Also, make sure we do version control  the tex source code of all pdfs used in
+" links.
 
 
 
-nno <c-g>D y$:echo <c-r>"
+nno  <c-g>D     y$:echo <c-r>"
 
 
 

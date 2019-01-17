@@ -9,12 +9,12 @@ endif
 set shortmess=aoO
 badd +151 /usr/share/vim/vim80/syntax/awk.vim
 badd +1 ~/.vim/plugged/vim-awk/after/syntax/awk.vim
-badd +1 ~/Dropbox/wiki/awk/practice/histogram.awk
-badd +1 ~/Dropbox/wiki/awk/awk.md
+badd +1 ~/wiki/awk/practice/histogram.awk
+badd +1 ~/wiki/awk/awk.md
 argglobal
 silent! argdel *
 set stal=2
-edit ~/Dropbox/wiki/awk/awk.md
+edit ~/wiki/awk/awk.md
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
@@ -34,7 +34,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabedit ~/Dropbox/wiki/awk/practice/histogram.awk
+tabedit ~/wiki/awk/practice/histogram.awk
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1

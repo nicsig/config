@@ -9,7 +9,7 @@ endif
 set shortmess=aoO
 badd +1 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +193 ~/.vim/plugged/vim-debug/autoload/debug.vim
-badd +788 ~/Dropbox/wiki/vim/debug.md
+badd +788 ~/wiki/vim/debug.md
 argglobal
 silent! argdel *
 set stal=2
@@ -60,7 +60,7 @@ normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/Dropbox/wiki/vim/debug.md
+tabedit ~/wiki/vim/debug.md
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1

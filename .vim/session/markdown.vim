@@ -9,7 +9,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +191 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +1 ~/Dropbox/wiki/markdown/main.md
+badd +1 ~/wiki/markdown/main.md
 badd +1 ~/.vim/plugged/vim-markdown/ftplugin/markdown.vim
 argglobal
 silent! argdel *
@@ -65,7 +65,7 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
-edit ~/Dropbox/wiki/markdown/main.md
+edit ~/wiki/markdown/main.md
 set splitbelow splitright
 wincmd t
 set winminheight=0

@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +8 ~/Dropbox/wiki/vim/command.md
+badd +8 ~/wiki/vim/command.md
 badd +1 ~/Desktop/foo
 badd +38 ~/Desktop/file
 badd +1 ~/.vim/plugged/vim-unix/plugin/unix.vim
@@ -134,7 +134,7 @@ wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabedit ~/Dropbox/wiki/vim/command.md
+tabedit ~/wiki/vim/command.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split

@@ -10,12 +10,12 @@ set shortmess=aoO
 badd +1 ~/.bashrc
 badd +1 ~/.vim/plugged/vim-sh/after/syntax/sh.vim
 badd +1 ~/.vim/plugged/vim-awk/after/syntax/awk.vim
-badd +1 ~/Dropbox/wiki/awk/practice/histogram.awk
-badd +1 ~/Dropbox/wiki/vim/vim.md
+badd +1 ~/wiki/awk/practice/histogram.awk
+badd +1 ~/wiki/vim/vim.md
 argglobal
 silent! argdel *
 set stal=2
-edit ~/Dropbox/wiki/vim/vim.md
+edit ~/wiki/vim/vim.md
 set splitbelow splitright
 wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
@@ -79,7 +79,7 @@ normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabedit ~/Dropbox/wiki/awk/practice/histogram.awk
+tabedit ~/wiki/awk/practice/histogram.awk
 set splitbelow splitright
 wincmd _ | wincmd |
 split

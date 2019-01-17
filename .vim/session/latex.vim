@@ -7,11 +7,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Dropbox/wiki/latex/README/latex.md
-badd +1 ~/Dropbox/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex
+badd +1 ~/wiki/latex/README/latex.md
+badd +1 ~/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex
 argglobal
 silent! argdel *
-edit ~/Dropbox/wiki/latex/README/latex.md
+edit ~/wiki/latex/README/latex.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -38,7 +38,7 @@ normal! zt
 normal! 0
 wincmd w
 argglobal
-if bufexists('~/Dropbox/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex') | buffer ~/Dropbox/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex | else | edit ~/Dropbox/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex | endif
+if bufexists('~/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex') | buffer ~/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex | else | edit ~/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}

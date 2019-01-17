@@ -7,12 +7,12 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Dropbox/wiki/vim/async.md
+badd +1 ~/wiki/vim/async.md
 badd +8 ~/.vim/plugged/asyncmake/plugin/asyncmake.vim
 badd +1 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
 argglobal
 silent! argdel *
-edit ~/Dropbox/wiki/vim/async.md
+edit ~/wiki/vim/async.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split

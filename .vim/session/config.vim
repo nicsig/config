@@ -8,10 +8,10 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +33 ~/Dropbox/wiki/vim/package_rtp.md
+badd +33 ~/wiki/vim/package_rtp.md
 argglobal
 silent! argdel *
-edit ~/Dropbox/wiki/vim/package_rtp.md
+edit ~/wiki/vim/package_rtp.md
 set splitbelow splitright
 wincmd t
 set winminheight=0
