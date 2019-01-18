@@ -4930,11 +4930,15 @@ augroup my_cmdline_window
     " Purpose:{{{
     "
     " By default, `Tab` is mapped to `C-x C-v` in the command-line window.
-    " We want it to be mapped to whatever it is in a regular buffer (consistency).
-    " Atm, `Tab` allows us to expand  snippets, which could be handy even in the
-    " command-line window.
+    " This shadows our custom `Tab` mapping which can expand a snippet.
+    "
+    " This  local mapping  is not  installed in  the search  command-line window
+    " (`q/`, `q?`), which is why we use the pattern `:` instead of `*`.
+    "
+    " Note that  for some  reason, UltiSnips  fails to expand  a snippet  in the
+    " search command-line window.
     "}}}
-    au CmdWinEnter * call s:remap_tab_key()
+    au CmdWinEnter : sil! iunmap <buffer> <tab>
 
     au CmdWinEnter * nno  <buffer><nowait><silent>  q      :<c-u>q<cr>
     au CmdWinEnter * nno  <buffer><nowait><silent>  ZZ     <cr>
@@ -4958,17 +4962,6 @@ augroup my_cmdline_window
     au CmdWinLeave : call s:update_history()
     "              │
     "              └ only Ex command-line window
-augroup END
-
-fu! s:remap_tab_key() abort
-    if exists('s:tab_keymap')
-        exe 'ino  <buffer><nowait><silent>  <tab>  ' . s:tab_keymap
-    endif
-endfu
-
-augroup get_tab_keymap
-    au!
-    au VimEnter * let s:tab_keymap = maparg('<tab>', 'i')
 augroup END
 
 " If one day you want to add support for the search window (`q/`, `q?`), be aware that it's tricky.{{{

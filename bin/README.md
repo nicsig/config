@@ -9,3 +9,8 @@ So, we install here a more recent version:
 
         https://github.com/AlDanial/cloc/releases/
 
+# Where did you find the `NetalyzrCLI.jar` archive?
+
+https://sebsauvage.net/links/?r-awQg
+http://www.netalyzr.icsi.berkeley.edu/NetalyzrCLI.jar
+https://play.google.com/store/apps/details?id=edu.berkeley.icsi.netalyzr.android
