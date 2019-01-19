@@ -786,11 +786,11 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "                                          added by the 2nd non-nul argument
             "
             "                                MWE:
-            "                                :e /tmp/foo%bar
-            "                                :sil call system('echo '.shellescape(expand('%')).' >>/tmp/file')
-            "                                :sil call system('echo '.shellescape(expand('%'),1).' >>/tmp/file')
+            "                                :sp /tmp/foo\%bar
+            "                                :sil call system('echo '.shellescape(expand('%')).' >>/tmp/log')
+            "                                :sil call system('echo '.shellescape(expand('%'),1).' >>/tmp/log')
             "
-            "                                          $ cat /tmp/foo%bar
+            "                                          $ cat /tmp/log
             "                                              /tmp/foo%bar
             "                                              /tmp/foo\%bar
             "                                                      ^
