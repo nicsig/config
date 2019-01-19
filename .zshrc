@@ -1597,12 +1597,12 @@ hex2oct() change-base 16  8 "$1"
 hex2dec() change-base 16  A "$1"
 
 nv() { #{{{2
-#    │
-#    └ You want to prevent the  change of `IFS` from affecting the current shell?
-#      Ok. Then, use `local IFS`.
-#      Do NOT use parentheses to surround the  body of the function and create a
-#      subshell. It could cause an issue when we suspend then restart Vim.
-#           https://unix.stackexchange.com/a/445192/289772
+#    │
+#    └ You want to prevent the  change of `IFS` from affecting the current shell?
+# Ok. Then, use `local IFS`.
+# Do NOT  use parentheses  to surround  the body  of the  function and  create a
+# subshell. It could cause an issue when we suspend then restart Vim.
+#      https://unix.stackexchange.com/a/445192/289772
 
   emulate -L zsh
 

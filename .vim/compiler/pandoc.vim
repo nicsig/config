@@ -14,7 +14,21 @@ endif
 " file.
 "}}}
 " CompilerSet efm=
-CompilerSet mp=pandoc\ --\ %:p:S
+
+" Where could I add `--`?{{{
+"
+" Right in front of `%:p:S`.
+"}}}
+" Why would I do it?{{{
+"
+" To avoid an error in case the filename begins with a hyphen.
+"}}}
+" Why don't you do it then?{{{
+"
+" There's no need to.
+" We use `:p` which makes the filepath absolute, and thus begin with a `/`.
+"}}}
+CompilerSet mp=pandoc
     \\ -N
     \\ --pdf-engine=xelatex
     \\ --variable\ mainfont=\"DejaVu\ Sans\ Mono\"
@@ -23,4 +37,5 @@ CompilerSet mp=pandoc\ --\ %:p:S
     \\ --variable\ fontsize=12pt
     \\ --toc
     \\ -o\ %:p:r:S.pdf
+    \\ %:p:S
 

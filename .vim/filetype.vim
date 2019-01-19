@@ -81,7 +81,7 @@ augroup filetypedetect
     " Worse:
     "     vim zsh_foo.bar   >  :echo &ft  →  zsh
     "
-    " It comes from $VIMRUNTIME/filetype.vim:2735:
+    " It comes from $VIMRUNTIME/filetype.vim:2105:
     "
     "         au BufNewFile,BufRead zsh*,zlog*      call s:StarSetf('zsh')
     "}}}

@@ -5308,6 +5308,13 @@ fu! s:filter_special_file() abort
     endif
 endfu
 
+" Regenerate helptags {{{2
+
+augroup regenerate_helptags
+    au!
+    au BufWritePost ~/.vim/plugged/*/doc/*.txt exe 'helptags '.expand('<amatch>:p:h')
+augroup END
+
 " Reload config {{{2
 
 augroup source_files
@@ -7449,6 +7456,26 @@ endfu
 " and `--`  to end the optional  arguments (useful in case  your filename begins
 " with a hyphen).
 "
+" Update:
+" After adding  `--` to `'mp'`  in the  pandoc compiler plugin,  the compilation
+" failed:
+"
+"     CompilerSet mp=pandoc\ --\ %:p:S
+"                            ^^
+"
+" This was because we added it too early.
+" `--` should be written after all optional arguments.
+" Here, it was written before.
+" The solution was to move the input  filename from the beginning of the command
+" to the end; then, we can prefix it with `--`.
+" But we didn't  do it, because there was  no need to; `:p` makes  sure that the
+" filepath doesn't begin with a hyphen but with `/`.
+"
+" In  case  of an  issue  with  a compilation,  remember  you  can increase  the
+" verbosity to `4` and see what shell command is executed.
+" The latter will be written in `:messages`.
+" With this command, you can make further tests directly in a shell.
+"
 " 138 -
 " Read: https://vimways.org/2018/vims-social-life/
 "
@@ -7469,11 +7496,28 @@ endfu
 " code, compile it into a pdf, and open it.
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
+"
+" 141 -
+" Make a compilation with pandoc async.
+" Move the pandoc compiler plugin in `vim-markdown`?
+"
+" Update:
+" `:AsyncMake` fails, for two reasons:
+" - it forgot to expand the `:S` filename modifier
+"
+"         let s:flags = '<\=\%(:[p8~.htreS]\|:g\=s\(.\).\{-\}\1.\{-\}\1\)*\%(:S\)\='
+"                                                                         ^^^^^^^^^
+"
+" - `$ pandoc` fails to do its job when it's passed a quoted file argument
+"   and it's started by `job_start()`
+"
+"         :let job = job_start('pandoc -o /tmp/md.pdf ''/tmp/md.md''')
+"         :echo job_info(job).exitval
+"         1
 
 
 
 nno  <c-g>D     y$:echo <c-r>"
-
 
 
 let s:syled_comments_filetypes = [
