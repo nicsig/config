@@ -91,11 +91,12 @@ fu! colorscheme#customize() abort "{{{2
     "
     " Some colorschemes don't set up the `Normal` HG.
     " So, the value `bg` may not exist for all colorschemes.
-    " Example:
-    "       :colo default
-    "       E420: BG color unknown ~
+    "
+    "     :colo elflord
+    "     :hi EndOfBuffer ctermfg=bg
+    "     E420: BG color unknown ~
     "}}}
-    if execute('hi Normal') !~# 'cleared'
+    if execute('hi Normal') =~# 'ctermbg'
         if $DISPLAY is# ''
             hi EndOfBuffer ctermfg=bg
         else
