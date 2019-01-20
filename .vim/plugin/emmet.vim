@@ -155,8 +155,8 @@ fu! s:install_mappings() abort "{{{2
     "
     "     augroup my_emmet_install
     "         au!
-    "         au BufWinEnter * if index(['html', 'css'], &ft) >= 0 | EmmetInstall | endif
-    "         \ | exe 'au! my_emmet_install' | aug! my_emmet_install
+    "         au BufWinEnter * if index(['html', 'css'], &ft) >= 0 | sil! EmmetInstall | endif
+    "             \ | exe 'au! my_emmet_install' | aug! my_emmet_install
     "     augroup END
     "}}}
     " Why don't you lazy-load emmet?{{{

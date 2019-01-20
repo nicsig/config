@@ -229,10 +229,11 @@ if has('gui_running') || &t_Co != ''
         autocmd CursorMoved,CursorMovedI <buffer> call s:preview_color('.')
         autocmd CursorHold,CursorHoldI   <buffer> call s:reset_colors()
         " if we change the filetype/syntax of the buffer, the autocmd should be removed
-        autocmd CursorHold <buffer> if b:current_syntax !=# 'dircolors'
-        \ |                             exe 'au! my_dircolors_syntax'
-        \ |                             aug! my_dircolors_syntax
-        \ |                         endif
+        autocmd CursorHold <buffer>
+            \   if b:current_syntax isnot# 'dircolors'
+            \ |     exe 'au! my_dircolors_syntax'
+            \ |     aug! my_dircolors_syntax
+            \ | endif
     augroup END
 endif
 

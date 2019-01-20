@@ -227,9 +227,8 @@ fu! s:fts(cmd) abort
     "}}}
     augroup sneak_open_folds
         au!
-        au CursorMoved * exe 'norm! zv'
-            \ |          exe 'au! sneak_open_folds '
-            \ |          aug! sneak_open_folds
+        au CursorMoved * sil! exe 'norm! zv'
+            \ exe 'au! sneak_open_folds' | aug! sneak_open_folds
     augroup END
 
     " What's the purpose of this `if` conditional?{{{

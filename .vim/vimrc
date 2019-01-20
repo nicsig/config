@@ -252,10 +252,10 @@ Plug 'keith/tmux.vim'
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup. We delay them.
 fu! s:delay_slow_call() abort
-    runtime autoload/toggle_settings.vim
-    runtime! autoload/slow_call/*.vim
     au! delay_slow_call
     aug! delay_slow_call
+    runtime autoload/toggle_settings.vim
+    runtime! autoload/slow_call/*.vim
 endfu
 
 augroup delay_slow_call
@@ -1265,7 +1265,7 @@ if !has('gui_running') && has('vim_starting')
     "}}}
     augroup delay_lazy_redraw
         au!
-        au CursorHold,InsertEnter,CmdlineEnter * set lazyredraw
+        au CursorHold,InsertEnter,CmdlineEnter * sil! set lazyredraw
             \ | exe 'au! delay_lazy_redraw'
             \ | aug! delay_lazy_redraw
     augroup END
@@ -4378,7 +4378,7 @@ fu! s:diff_orig() abort
     augroup diff_orig_restore_settings
         au! * <buffer>
         au BufWipeOut <buffer> sil call save#toggle_auto(1)
-        \ |                    call timer_start(0, s:tmp_partial)
+            \ |                    call timer_start(0, s:tmp_partial)
     augroup END
 
     exe winnr('#').'windo diffthis'
@@ -4583,7 +4583,11 @@ fu! s:plugins_to_commit() abort
         return
     endif
 
-    sil let output = systemlist('commit-these-vim-plugins.sh')
+    let my_plugins = readfile($MYVIMRC)
+    call filter(my_plugins, {i,v -> v =~# '^Plug\s\+''lacygoill/'})
+    call map(my_plugins, {i,v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
+    let my_plugins = join(my_plugins)
+    sil let output = systemlist('commit-these-vim-plugins.sh '.my_plugins)
     " we may have removed a plugin, but not executed `:Plugclean` yet
     call filter(output, {i,v -> v !~# 'No such file or directory'})
     if output == []
@@ -6016,8 +6020,9 @@ endfu
                     " still, syntax highlighting would work better.
                     " less hack, no timer.
                     au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
-                    au filetype qf call s:ltag(2) | exe 'au! my_ltag' | aug! my_ltag
-                augroup end
+                    au FileType qf sil! call s:ltag(2)
+                        \ | exe 'au! my_ltag' | aug! my_ltag
+                augroup END
                 return ':ltag / | lw'.repeat("\<left>", 5)
             elseif a:step ==# 2
                 let pat = '|.\{-}|'
@@ -6452,9 +6457,9 @@ endfu
 "             endfor
 "             augroup reset_easy_number
 "                 au! * <buffer>
-"                 au insertleave <buffer> call s:easy_number()
-"                 \|                      au! reset_easy_number * <buffer>
-"             augroup end
+"                 au InsertLeave <buffer> call s:easy_number()
+"                     \ | au! reset_easy_number * <buffer>
+"             augroup END
 "         endif
 "         return ''
 "     endfu
@@ -6699,7 +6704,7 @@ endfu
 "
 " 81 -
 "
-" in   `vim-qf`,  maybe   we  could   reduce  the   number  of   invocations  to
+" In   `vim-qf`,  maybe   we  could   reduce  the   number  of   invocations  to
 " `s:setqflist()`:
 "
 "         call s:setqflist(list, action)
@@ -6707,8 +6712,8 @@ endfu
 "         →
 "         call s:setqflist([], action, {'items': list, 'title': 'hello'})
 "
-" in fact,  maybe we could  simplify the code  much more, because  using 'items'
-" doesn't alter the title. so, maybe there's no need to save/restore the latter:
+" In fact,  maybe we could  simplify the code  much more, because  using 'items'
+" doesn't alter the title. So, maybe there's no need to save/restore the latter:
 "
 "         call s:setqflist([], action, {'items': list})
 "

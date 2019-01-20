@@ -37,8 +37,10 @@ if exists('g:loaded_matchparen')
     augroup END
 
 else
-    noa DoMatchParen
+    " We remove the autocmd before `:DoMatchParen`, because if the latter raises
+    " an error, the function would abort, and our autocmd wouldn't be removed.
     au! default_cursor_moved
     aug! default_cursor_moved
+    noa DoMatchParen
 endif
 
