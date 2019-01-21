@@ -389,6 +389,30 @@ endif
 "     https://github.com/majutsushi/tagbar/wiki#markdown
 "     https://github.com/jszakmeister/markdown2ctags
 "     https://github.com/lvht/tagbar-markdown
+"
+"     http://docs.ctags.io/en/latest/extending.html
+"     https://gist.github.com/romainl/085b4db4a26a06ec7e16
+"     https://www.reddit.com/r/vim/comments/4d2fos/if_you_use_tags_whats_your_workflow_like/
+"
+" Update:
+"
+" Tryt this:
+"
+"     $ cat <<'EOF' >~/.ctags
+"     --langdef=markdown
+"     --langmap=markdown:.md
+"     --regex-markdown=/|(.*)|/\1/
+"     EOF
+"
+"     $ cd ~/wiki/vim/ ctags -R .
+"
+" Source:
+"
+"     https://stackoverflow.com/a/25742823/9780968
+"
+" Write `| foobar |` in one of your notes, and one line below write `foobar`.
+" Press `C-]` on `foobar`: the cursor jumps onto `| foobar |`.
+" But it doesn't work when `foobar` is above `| foobar |`, nor across files...
 "}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
 let $MY_WIKI = $HOME.'/wiki'
