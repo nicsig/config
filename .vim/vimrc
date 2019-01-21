@@ -2374,31 +2374,6 @@ ino  <expr>  <c-m>  <sid>c_m()
 
 ino  <c-q>  <c-e>
 
-" C-r  X          output of last eX command  {{{3
-
-" insert output of last eX command
-ino  <expr><silent>  <c-r>X  <sid>output_last_ex_command()
-
-fu! s:output_last_ex_command() abort
-    let paste_save = &paste
-    " enable 'paste' so that Vim  doesn't automatically add indentation when the
-    " output has multiple lines
-    set paste
-    call timer_start(0, {-> execute('set '.(paste_save ? '' : 'no').'paste')})
-    try
-        " We remove the first newline, so that we can insert the output of a command
-        " inline, and not on the next line.
-        return substitute(execute(histget(':')),'\n','','')
-    catch
-        " If the last command failed and produced an error, it will fail again.
-        " But we still want something to be inserted: the error message(s).
-        let messages = reverse(split(execute('messages'), '\n'))
-        let idx = match(messages, '^E\d\+')
-        call remove(messages, idx+1, -1)
-        return join(reverse(messages), "\n")
-    endtry
-endfu
-
 " C-s             save {{{3
 
 " I often type C-s in insert mode to save, and miss/forget the escape
