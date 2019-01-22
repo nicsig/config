@@ -1147,11 +1147,6 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     call cursor(a:line1, 1)
     while search("\t", 'cW', a:line2)
-        "              Why col('.')-1 and not col('.')?                                      ┐
-        "              We want to know how many cells a tab would occupy if it was displayed │
-        "              after the character which is BEFORE the cursor:     col('.')-1        │
-        "              Not after the character which is AFTER the cursor:  col('.')          │
-        "                                                                                    ├────────┐
         exe 'sil keepj keepp '.a:line1.','.a:line2.'s/\t/\=repeat(" ", strdisplaywidth("\t", col(".")-1))/e'
         "                                                                                                 │
         "                                                                               We can't use `g`. ┘
