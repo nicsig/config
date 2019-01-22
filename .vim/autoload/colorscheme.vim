@@ -64,7 +64,11 @@ fu! colorscheme#customize() abort "{{{2
     " `Conditional` (because this one is blue).
     "}}}
     exe 'hi Underlined term=underline cterm=underline gui=underline '
-        \ . substitute(matchstr(execute('hi Conditional'), 'xxx\zs.*'), 'links to.*', '', '')
+        \ . substitute(matchstr(execute('hi Conditional'), 'xxx\zs.*'), '\n\|links to.*', ' ', 'g')
+        "                                                                 │{{{
+        " If the width of the current window is too small,                ┘
+        " the output will be wrapped on several lines, which may break our code.
+        "}}}
 
     " Why changing `CursorLine`?{{{
     "
