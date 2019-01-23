@@ -11,10 +11,10 @@
 "
 " It contains a few errors:
 "
-"    • `:normal` instead of `normal!`
+"    - `:normal` instead of `normal!`
 "     (which causes an issue because of a custom mapping installed by `vim-search`)
 "
-"    • doesn't temporarily reset 'ww'
+"    - doesn't temporarily reset 'ww'
 "    (which causes an issue because we do `set ww=h,l` in our vimrc)
 "}}}
 

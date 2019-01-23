@@ -114,9 +114,9 @@ set bind-tty-special-chars Off
 #
 # readline provides several functions to modify the case of a word:
 #
-#         • M-c    capitalize
-#         • M-l    downcase
-#         • M-u    upcase
+#    * M-c    capitalize
+#    * M-l    downcase
+#    * M-u    upcase
 #
 # Unfortunately, we can't use some of  them because they're already used in tmux
 # / fzf.

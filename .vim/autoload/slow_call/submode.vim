@@ -104,8 +104,8 @@ call submode#map(       'change-indent', 'i', '',      '<', '<c-d>')
 " j  k   duplicate char below/above {{{1
 " Why these mappings? {{{
 "
-" • They are more consistent than the default ones.
-" • They are easier to repeat (via `vim-submode`).
+" - They are more consistent than the default ones.
+" - They are easier to repeat (via `vim-submode`).
 
 "}}}
 " What's the issue with the default ones ?{{{

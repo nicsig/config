@@ -432,13 +432,13 @@ fi
 #}}}
 # The link talks about data files. What are they?{{{
 #
-#     • trash
-#     • icons
-#     • viminfo
-#     • swap files
-#     • .desktop files
-#     • .keyring files
-#     • ...
+#    - trash
+#    - icons
+#    - viminfo
+#    - swap files
+#    - .desktop files
+#    - .keyring files
+#    - ...
 #}}}
 # user data files
 export XDG_DATA_HOME=$HOME/.local/share

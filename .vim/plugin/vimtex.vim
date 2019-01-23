@@ -32,8 +32,8 @@ endif
 "
 " We tweak it so that:
 "
-"     • the 'backend' key uses Vim's or Neovim's jobs
-"     • the 'executable' key matches the right name of the script
+"     - the 'backend' key uses Vim's or Neovim's jobs
+"     - the 'executable' key matches the right name of the script
 "}}}
 
 let g:vimtex_compiler_latexmk = {
@@ -113,9 +113,9 @@ let g:vimtex_quickfix_open_on_warning = 0
 "
 " Depending on the contents of a `.tex` file, Vim may set the filetype to:
 "
-"     • plain
-"     • context
-"     • latex
+"     - plain
+"     - context
+"     - latex
 "
 " I want 'latex' no matter what.
 " See: ft-tex-plugin

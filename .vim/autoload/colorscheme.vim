@@ -140,8 +140,8 @@ fu! s:user() abort "{{{2
     "
     " We use them in the status line to customize the appearance of:
     "
-    "     • the filename
-    "     • the modified flag
+    "     - the filename
+    "     - the modified flag
     "
     " We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
     " except for one: `reverse` (boolean flag).
@@ -168,8 +168,8 @@ fu! s:user() abort "{{{2
     if has('gui_running')
         " When 'termguicolors' is set, you set up:
         "
-        "    • the style  of a HG with the argument  `cterm`   , not `gui`
-        "    • the colors of a HG with the arguments `gui[fb]g`, not `cterm[fb]g`
+        "    - the style  of a HG with the argument  `cterm`   , not `gui`
+        "    - the colors of a HG with the arguments `gui[fb]g`, not `cterm[fb]g`
         "
         " IOW, 'tgc' has an effect on how you set up the COLORS of a HG, but not
         " its STYLE.

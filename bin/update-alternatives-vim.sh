@@ -71,9 +71,9 @@
 #
 # Show:
 #
-#    • all group of alternatives
-#    • the alternative they use
-#    • in which mode they are (manual / auto)
+#    - all group of alternatives
+#    - the alternative they use
+#    - in which mode they are (manual / auto)
 #}}}
 # Why does `update-alternatives` use an extra level of indirection?{{{
 # Why not a single symlink?
@@ -134,7 +134,7 @@ for name in "${names[@]}"; do
   #                     │
   #                     └─ to configure a link group:
   #
-  #                            • `--set`    is useful in a script
-  #                            • `--config` is useful on the command-line
+  #                            * `--set`    is useful in a script
+  #                            * `--config` is useful on the command-line
 done
 

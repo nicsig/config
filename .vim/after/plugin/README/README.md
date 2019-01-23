@@ -16,17 +16,17 @@ Use `autoload/` instead.
 
 You can use it to:
 
-        • customize third-party plugins after they have been sourced
+   - customize third-party plugins after they have been sourced
 
-              You could also use `~/.vim/plugin/`, to customize them before
-              they're sourced.
+       You could also use `~/.vim/plugin/`, to customize them before
+       they're sourced.
 
-        • directly execute some interface of the plugin
+   - directly execute some interface of the plugin
 
-              For this, you HAVE TO use `after/plugin/`, to be sure
-              the interface has been installed.
+       For this, you HAVE TO use `after/plugin/`, to be sure
+       the interface has been installed.
 
-              Btw, that's what the documentation of `Abolish.vim` recommends.
+       Btw, that's what the documentation of `Abolish.vim` recommends.
 
 ##
 # Guard
@@ -40,9 +40,9 @@ Otherwise, you may be able to reproduce a bug, that no one else will.
 
 Note that for the scripts which  are not associated with any third-party plugin:
 
-   • nop.vim
-   • matchparen_toggle.vim
-   • tidy_tab_completion.vim
+   - nop.vim
+   - matchparen_toggle.vim
+   - tidy_tab_completion.vim
 
 The only possible guard, is an ad-hoc one:
 

@@ -654,7 +654,7 @@ fu! myfuncs#long_data_join(type, ...) abort "{{{1
             return
         endif
 
-        let bullets = '[•*-]'
+        let bullets = '[-*+]'
         let join_bulleted_list = getline('.') =~# '^\s*'.bullets
 
         if join_bulleted_list
@@ -692,9 +692,9 @@ fu! myfuncs#long_data_split(type, ...) abort "{{{1
         " We use `strdisplaywidth()` because the indentation could contain tabs.
         let indent_lvl = strdisplaywidth(matchstr(line, '.\{-}\ze\S'))
         let indent_txt = repeat(' ', indent_lvl)
-        sil keepj keepp s/\m\ze\S/• /e
+        sil keepj keepp s/\m\ze\S/- /e
         let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
-        let l:Rep = {-> "\n".indent_txt.'• '}
+        let l:Rep = {-> "\n".indent_txt.'- '}
         sil exe 'keepj keepp s/'.pat.'/\=l:Rep()/ge'
     endif
 endfu
@@ -777,9 +777,9 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             " When you have a command whose arguments can contain special characters,
             " and you want to protect them from:
             "
-            "       • Vim       use `fnameescape(…)`
-            "       • the shell use `shellescape(…)`
-            "       • both      use `shellescape(…, 1)`
+            "       - Vim       use `fnameescape(…)`
+            "       - the shell use `shellescape(…)`
+            "       - both      use `shellescape(…, 1)`
             "                                       │
             "                                       └─ only needed after a `:!` command; not in `system(...)`
             "                                          `:!` is the only command to remove the backslashes
@@ -1704,14 +1704,14 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 
     " remove anything which is:
     "
-    "     • shorter than `min_length` characters
+    "     - shorter than `min_length` characters
     "
-    "     • longer than 30 characters;
+    "     - longer than 30 characters;
     "       probably not words;
     "       it  could be  for example  a long  sequence of  underscores used  to
     "       divide 2 sections of text
     "
-    "     • not containing any letter
+    "     - not containing any letter
 
     call filter(words, {i,v -> strchars(v) >= min_length && strchars(v) <= 30 && v =~ '\a'})
 
@@ -1728,14 +1728,14 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         " `abbrev_length` is the length of an abbreviation we could create for
         " a given word. Its value depends on the word:
         "
-        "   • if the word is 4 characters long, then the abbreviation should be
+        "   - if the word is 4 characters long, then the abbreviation should be
         "     2 characters long,
         "
-        "   • if the word ends with an 's', and the same word, without the ending
+        "   - if the word ends with an 's', and the same word, without the ending
         "     's', is also present, then the abbreviation should be 4 characters
         "     long (because it's probably a plural),
         "
-        "   • otherwise, by default, an abbreviation should be 3 characters long
+        "   - otherwise, by default, an abbreviation should be 3 characters long
 
         let abbrev_length = '(
             \     strchars(v:key) ==# 4

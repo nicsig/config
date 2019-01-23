@@ -234,8 +234,8 @@ fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions
 #
 # We need it for:
 #
-#     • the `list-prompt` style to work
-#     • the `menuselect` keymap to be available when we install key bindings.
+#    - the `list-prompt` style to work
+#    - the `menuselect` keymap to be available when we install key bindings.
 #}}}
 zmodload zsh/complist
 
@@ -302,8 +302,8 @@ compinit
 # The virtualbox package provides different commands.
 # Among them are:
 #
-#     • `vboxmanage` and `VBoxManage`
-#     • `vboxheadless` and `VBoxHeadless`
+#    - `vboxmanage` and `VBoxManage`
+#    - `vboxheadless` and `VBoxHeadless`
 #
 # Thanks to the  `zsh-completions` plugin, we have completions  for the commands
 # containing uppercase characters.
@@ -576,12 +576,12 @@ zstyle ':completion:*:warnings'     format $'No matches:\n%D'
 # When we don't name our group  (empty string), the completion system groups the
 # matches according to their tag:
 #
-#     • external command
-#     • builtin command
-#     • shell function
-#     • alias
-#     • parameter
-#     ...
+#    - external command
+#    - builtin command
+#    - shell function
+#    - alias
+#    - parameter
+#    ...
 #}}}
 # How could I group the matches of command names (not shell functions, parameters, ...) together?{{{
 #
@@ -885,11 +885,11 @@ fi
 #
 # When we try to cd into a directory:
 #
-#     • the completion menu offered by this plugin is more readable
-#       than the default one (a single column instead of several)
+#    - the completion menu offered by this plugin is more readable
+#      than the default one (a single column instead of several)
 #
-#     • we don't have to select an entry which could be far from our current position,
-#       instead we can fuzzy search it via its name
+#    - we don't have to select an entry which could be far from our current position,
+#      instead we can fuzzy search it via its name
 #}}}
 [[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
 . "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
@@ -1959,14 +1959,14 @@ truecolor() { #{{{2
   # To produce a specrum of colors,  they need to evolve in completely different
   # ways. So, we make:
   #
-  #     • `r` decrease from 255  (to make the specrum begin from very red)
-  #                  to     0  (to get most shades of red)
+  #    - `r` decrease from 255  (to make the specrum begin from very red)
+  #                 to     0  (to get most shades of red)
   #
-  #     • `b` increase from   0
-  #                  to   255
+  #    - `b` increase from   0
+  #                 to   255
   #
-  #     • `g`    increase from 0   to 255  (but faster than blue so that we produce more various colors)
-  #       then decrease from 255 to 0    (via `if (g > 255) g = 2*255 - g;`)
+  #    - `g`    increase from 0   to 255  (but faster than blue so that we produce more various colors)
+  #      then decrease from 255 to 0    (via `if (g > 255) g = 2*255 - g;`)
   #
   # Summary:
   #
@@ -2014,17 +2014,17 @@ unclutter_toggle() { #{{{2
     #                 │
     #                 │   `disown` removes the job from the list of active jobs of the shell:
     #                 │
-    #                 │     • the job can't be accessed via `%n`
-    #                 │     • it can't be resumed in the foreground
-    #                 │     • it can't be interrupted by sending a `SIGHUP` to the shell
+    #                 │     - the job can't be accessed via `%n`
+    #                 │     - it can't be resumed in the foreground
+    #                 │     - it can't be interrupted by sending a `SIGHUP` to the shell
     #                 │       because the latter won't relay it to the process
     #                 │
     #                 └ give me the control of the shell back
     #
     #                   `&` puts the process in the bg:
     #
-    #                       • make it halt if it tries to read its stdin
-    #                       • prevent the shell from waiting the process completion
+    #                       - make it halt if it tries to read its stdin
+    #                       - prevent the shell from waiting the process completion
     #
     # For more info about the difference between `&`, `disown`, `nohup`, see:
     #
@@ -2320,9 +2320,9 @@ alias ga='git add'
 #
 # Solutions:
 #
-#         • nno          cd :sil w<cr>
-#         • nno <silent> cd :w<cr>
-#         • commit without `rlwrap`
+#    - nno          cd :sil w<cr>
+#    - nno <silent> cd :w<cr>
+#    - commit without `rlwrap`
 #
 # We have several mechanisms to save a buffer (including an autocmd).
 # It's easier (and more future-proof) to just NOT use `rlwrap`.
@@ -3621,9 +3621,9 @@ bindkey '\e;' insert-last-word-forward
 
 # zle provides several functions to modify the case of a word:
 #
-#         • m-c    capitalize
-#         • m-l    downcase
-#         • m-u    upcase
+#    * m-c    capitalize
+#    * m-l    downcase
+#    * m-u    upcase
 #
 # Unfortunately, we can't use some of them because they're already used in tmux / fzf.
 # So, we want to use `M-u` as a prefix to change the case of a word.
@@ -4168,73 +4168,73 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # TODO:
 # ideas to improve our scripts:
 #
-#     • they should better handle errors
-#       (no stacktrace, show a human-readable message;
-#       take inspiration from `mv garb age`)
+#    - they should better handle errors
+#      (no stacktrace, show a human-readable message;
+#      take inspiration from `mv garb age`)
 #
-#     • usage when the script is called without arguments
+#    - usage when the script is called without arguments
 #
-#       Should we delegate this to a library function to avoid
-#       repeating always the same kind of code?
+#      Should we delegate this to a library function to avoid
+#      repeating always the same kind of code?
 #
-#     • use the output streams correctly
+#    - use the output streams correctly
 #
-#       Write error messages on stderr, not on stdout.
-#       This way, if you pipe the output of your script to another utility,
-#       and an error is raised, the message won't be sent to the utility.
-#       There's no sense piping an error message to anything.
-#       Same thing for a usage message (which can be seen as a special
-#       kind of error message).
-#       And if the user really wants to pipe the error message,
-#       they still can with `2>&1 |` (or `|&`).
+#      Write error messages on stderr, not on stdout.
+#      This way, if you pipe the output of your script to another utility,
+#      and an error is raised, the message won't be sent to the utility.
+#      There's no sense piping an error message to anything.
+#      Same thing for a usage message (which can be seen as a special
+#      kind of error message).
+#      And if the user really wants to pipe the error message,
+#      they still can with `2>&1 |` (or `|&`).
 #
-#     • An error message should always contain the name of the script/function
-#       which is executed:
+#    - An error message should always contain the name of the script/function
+#      which is executed:
 #
-#           script_name: error message
+#          script_name: error message
 #
-#       Example:
+#      Example:
 #
-#           $ mv x y
-#               → mv: cannot stat 'x': No such file or directory
-#                 ^^
+#          $ mv x y
+#              → mv: cannot stat 'x': No such file or directory
+#                ^^
 #
-#       This is useful when you execute it in a pipeline, because it allows you
-#       to immediately know from which simple command in the pipeline the error comes.
+#      This is useful when you execute it in a pipeline, because it allows you
+#      to immediately know from which simple command in the pipeline the error comes.
 #
-#       However, don't write the name literally.
-#       Use `$0` in  a function, and `$(basename  "$0")` in a script,  so that if
-#       you change  the name  of the script/function  later, the  message remains
-#       valid.
+#      However, don't write the name literally.
+#      Use `$0` in  a function, and `$(basename  "$0")` in a script,  so that if
+#      you change  the name  of the script/function  later, the  message remains
+#      valid.
 #
-#     • any error should be accompanied by an `exit` statement, so that:
+#    - any error should be accompanied by an `exit` statement, so that:
 #
-#           ./script.sh && echo 'success'
+#          ./script.sh && echo 'success'
 #
-#       doesn't print 'success' if the script fails.
+#      doesn't print 'success' if the script fails.
 #
-#       Use `exit 1` for a random error, `exit 64` for a usage message,
-#       `65` for bad user input, and `77` for not enough permission.
-#       See here for which code to use:
+#      Use `exit 1` for a random error, `exit 64` for a usage message,
+#      `65` for bad user input, and `77` for not enough permission.
+#      See here for which code to use:
 #
-#           https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
+#          https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
 #
-#       It's not an obligation to use this page, just a useful convention.
+#      It's not an obligation to use this page, just a useful convention.
 #
-#     • write a manpage for the script
+#    - write a manpage for the script
 #
-#     • split a long command using an array whose elements are arguments of the latter:
-#           https://unix.stackexchange.com/a/473257/289772
+#    - split a long command using an array whose elements are arguments of the latter:
+#          https://unix.stackexchange.com/a/473257/289772
 #
-#     • use  lowercase  characters for  variables/parameters,  and  uppercase  for
-#       environment variables
-#       It's just a convention suggested on page 74 of “from bash to z shell”.
-#       It's not really followed in this zshrc:
-#           http://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+#    - use  lowercase  characters for  variables/parameters,  and  uppercase  for
+#      environment variables
+#      It's just a convention suggested on page 74 of “from bash to z shell”.
+#      It's not really followed in this zshrc:
+#          http://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
 #
-#       It doesn't seem there's any convention in this file.
-#       Except that most of the time, the local variables in a function
-#       use lowercase characters.
+#      It doesn't seem there's any convention in this file.
+#      Except that most of the time, the local variables in a function
+#      use lowercase characters.
 #
 
 # TODO:

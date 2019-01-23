@@ -1,12 +1,12 @@
 # What are  the tools  useful to  accelerate the learning  of a  new programming
 # language?
 #
-#     • snippets engine (stay focused)
-#     • linter
-#     • formatter (stay consistent; enforce styleguide)
-#     • REPL/compiler (evaluate code to check it works)
-#     • integrated documentation
-#     • ?
+#    - snippets engine (stay focused)
+#    - linter
+#    - formatter (stay consistent; enforce styleguide)
+#    - REPL/compiler (evaluate code to check it works)
+#    - integrated documentation
+#    - ?
 
 
 

@@ -1,8 +1,8 @@
 # Design
 ## What are the two main parts making up `vim-sandwich`?
 
-        • operator-sandwich
-        • textobj-sandwich
+   - operator-sandwich
+   - textobj-sandwich
 
 ## Can they cooperate?   Can they be used independently?
 
@@ -10,27 +10,27 @@ Yes and yes.
 
 IOW:
 
-        • any object   provided by `textobj-sandwich`  can be composed with any operator
-        • any operator provided by `operator-sandwich` can be composed with any object
+   - any object   provided by `textobj-sandwich`  can be composed with any operator
+   - any operator provided by `operator-sandwich` can be composed with any object
 
 ##
 ## In which variables can any kind of recipe be stored? (from the highest priority to the lowest)   (3)
 
-        • b:sandwich_recipes
-        • g:sandwich#recipes
-        • g:sandwich#default_recipes
+   - b:sandwich_recipes
+   - g:sandwich#recipes
+   - g:sandwich#default_recipes
 
 ## In which variables can a recipe implementing an operator be stored?   (3)
 
-        • b:operator_sandwich_recipes
-        • g:operator#sandwich#recipes
-        • g:operator#sandwich#default_recipes
+   - b:operator_sandwich_recipes
+   - g:operator#sandwich#recipes
+   - g:operator#sandwich#default_recipes
 
 ## In which variables can a recipe implementing an object be stored?   (3)
 
-        • b:textobj_sandwich_recipes
-        • g:textobj#sandwich#recipes
-        • g:textobj#sandwich#default_recipes
+   - b:textobj_sandwich_recipes
+   - g:textobj#sandwich#recipes
+   - g:textobj#sandwich#default_recipes
 
 ##
 ## What's a magiccharacter?

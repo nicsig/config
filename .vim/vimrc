@@ -495,9 +495,9 @@ set backspace=indent,eol,start
 " The system  register register will  now have  a similar (although  not exactly
 " identical) behavior than the one of the unnamed:
 "
-"     • it will contain the text of the last changed register (like `"`)
+"     - it will contain the text of the last changed register (like `"`)
 "
-"     •  … except  if  the  last changed  register  was  changed by  a  command
+"     -  … except  if  the  last changed  register  was  changed by  a  command
 "       containing its explicit name:
 "
 "               "ayy
@@ -542,10 +542,10 @@ set backspace=indent,eol,start
 "
 " Nothing happens. The issue:
 "
-"         • does NOT come the fact that vim-surround forgets to temporarily resets 'cb';
+"         - does NOT come the fact that vim-surround forgets to temporarily resets 'cb';
 "           vim-surround does NOT forget it
 "
-"         • is fixed if you don't tweak 'cb' (set cb&vim)
+"         - is fixed if you don't tweak 'cb' (set cb&vim)
 "}}}
 " colorscheme {{{2
 
@@ -642,10 +642,10 @@ endfu
 
 " Why the guard?{{{
 "
-"     • there's no point reloading the colorscheme every time we source our
+"     - there's no point reloading the colorscheme every time we source our
 "       vimrc
 "
-"     • without a guard, every time we write the vimrc, the colorscheme would
+"     - without a guard, every time we write the vimrc, the colorscheme would
 "       be reloaded, which would make us lose syntax highlighting in
 "       a `freekeys` buffer, because of `:hi clear`:
 "
@@ -709,8 +709,8 @@ endif
 " When we move the cursor (hjkl wbe …) and Vim consumes a lot of cpu / is slow,
 " it can be for 2 reasons:
 "
-"         • we're inside a deep nested fold:  solution → open folds (zR)
-"         • 'showcmd' is enabled:             solution → disable it
+"         - we're inside a deep nested fold:  solution → open folds (zR)
+"         - 'showcmd' is enabled:             solution → disable it
 
 " Even though it can have an impact on performance, we enable 'showcmd',
 " because sometimes it's useful to see what we type. Also, it's useful to see
@@ -721,8 +721,8 @@ set showcmd
 " When we're in normal mode, some information can be displayed in the bar
 " which replaces the command-line:
 "
-"         • current mode                  don't want to see it
-"         • normal command being typed    DO    want to see it
+"         - current mode                  don't want to see it
+"         - normal command being typed    DO    want to see it
 
 set noshowmode
 
@@ -850,8 +850,8 @@ let &fillchars .= ',fold: '
 
 "                      ┌ recognize numbered lists
 "                      ├──────┐
-let &g:flp = '\m^\s*\%(\d\+[.)]\|[-*+•]\)\s\+'
-"                                ├────┘
+let &g:flp = '\m^\s*\%(\d\+[.)]\|[-*+]\)\s\+'
+"                                ├───┘
 "                                └ recognize unordered lists
 
 augroup my_default_formatlistpat
@@ -918,19 +918,19 @@ augroup END
 "
 " There's zero link between the two. This could confuse you:
 "
-"     setl com=f:•
+"     setl com=f:-
 "     let &l:flp = ''
 "
-"             • some very long line some very long line some very long line some very long line
-"             • another very long line another very long line another very long line another line
+"             - some very long line some very long line some very long line some very long line
+"             - another very long line another very long line another very long line another line
 "
 "     gwip
-"             • some very long line some very long line some very long line some
+"             - some very long line some very long line some very long line some
 "               very long line
-"             • another very long line another very long line another very long
+"             - another very long line another very long line another very long
 "               line another line
 "
-" It worked. Vim formatted the list as we wanted. But it's a side effect of `•`
+" It worked. Vim formatted the list as we wanted. But it's a side effect of `-`
 " being recognized as a comment leader, and using the `f` flag.
 " For a numbered list, you have to add the `n` flag in 'fo', and include the right
 " pattern in 'flp'. Why?
@@ -1094,10 +1094,10 @@ set expandtab
 "
 " When we hit:
 "
-"        • {count}>>
-"        • {count}<<
-"        • >{motion}
-"        • <{motion}
+"        - {count}>>
+"        - {count}<<
+"        - >{motion}
+"        - <{motion}
 "
 " ... on indented lines,  if 'sr' is enabled, the new  level of indentation will
 " be a multiple of `&sw`.
@@ -1105,8 +1105,8 @@ set expandtab
 " The current level of indentation is 2, and `&sw` is 4.
 " We hit `>>`:
 "
-"         • without `shiftround`, the new indent becomes 6
-"         • with    `shiftround`, the new indent becomes 4
+"         - without `shiftround`, the new indent becomes 6
+"         - with    `shiftround`, the new indent becomes 4
 "}}}
 " Why don't you enable 'sr' anymore?{{{
 "
@@ -1146,10 +1146,10 @@ set expandtab
 "
 " It controls the number of spaces added/removed when you hit:
 "
-"          • {count}>>
-"          • {count}<<
-"          • >{motion}
-"          • <{motion}
+"          - {count}>>
+"          - {count}<<
+"          - >{motion}
+"          - <{motion}
 "}}}
 set shiftwidth=4
 
@@ -1213,13 +1213,13 @@ set nojoinspaces
 "}}}
 " Why do you set it?{{{
 "
-" • Because of the previous description.
+" - Because of the previous description.
 "
-" • Setting this option prevents the screen to “flash” when we use a custom
+" - Setting this option prevents the screen to “flash” when we use a custom
 "   mapping which makes the cursor move far from its initial position, then
 "   come back. Example:  zv  *
 "
-" • junegunn, tpope, justinmk, blueyed,  mhinz ... they all  set this option.
+" - junegunn, tpope, justinmk, blueyed,  mhinz ... they all  set this option.
 "}}}
 " Is there any pitfall?{{{
 "
@@ -1396,12 +1396,12 @@ set sidescroll=5
 " Yes, it should whenever CursorHold is fired.
 " Because, in vim-term, we have:
 "
-"     • a custom autocmd executing `:checktime`
+"     - a custom autocmd executing `:checktime`
 "
 "          it will check whether the file has been changed
 "          outside the current Vim instance
 "
-"     • set 'autoread'
+"     - set 'autoread'
 "
 "          it will automatically reload the file if the file has been changed
 "          outside the current Vim instance
@@ -1521,7 +1521,7 @@ set nostartofline
 
 " You could temporarily reset 'swb' while:
 "
-"         • the qf window is opened; in a qf filetype plugin:
+"         - the qf window is opened; in a qf filetype plugin:
 "
 "                   if !exists('s:swb_save')
 "                       let s:swb_save = &swb
@@ -1530,7 +1530,7 @@ set nostartofline
 "
 "                   au BufWinLeave <buffer> let &swb = get(s:, 'swb_save', &swb) | unlet! s:swb_save
 "
-"         • when you execute some commands / mappings
+"         - when you execute some commands / mappings
 "
 "           you would need to create wrapper around default normal commands
 "           with a try conditional, and a finally clause, to empty 'swb'
@@ -1542,9 +1542,9 @@ set nostartofline
 "}}}
 "         Why don't we set it?{{{
 "
-"     • Too many issues.
-"     • I don't need it atm.
-"     • To give the focus to an already displayed buffer, there are alternatives:
+"     - Too many issues.
+"     - I don't need it atm.
+"     - To give the focus to an already displayed buffer, there are alternatives:
 "
 "           :FzWindows  (<space>fw)
 "           :drop       (:drop ~/**/*some_file)
@@ -1616,9 +1616,9 @@ set tags=./tags;
 "
 " It's probably due to the combination of two factors:
 "
-"         • vim-gutentags is enabled
+"         - vim-gutentags is enabled
 "
-"         • you have a tags file in a big directory containing many different
+"         - you have a tags file in a big directory containing many different
 "           projects
 "
 "           For example,  you may have  executed `$ ctags  -R` by accident  in a
@@ -1966,8 +1966,8 @@ set viminfo+=!
 
 " In visual-block mode, let us move the cursor on a cell where there's no character:
 "
-"         • in the middle of a tab
-"         • beyond the last char on a line
+"         - in the middle of a tab
+"         - beyond the last char on a line
 "
 " Useful to select a rectangle out of irregular (different lengths) lines.
 set virtualedit=block
@@ -1981,9 +1981,9 @@ set virtualedit=block
 "
 " We never want to see them:
 "
-"         • in a dirvish listing
-"         • on the command-line after a tab completion
-"         • in the output of `expand()`, `glob()`, `globpath()`
+"         - in a dirvish listing
+"         - on the command-line after a tab completion
+"         - in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 
 set wig&vim
@@ -2076,8 +2076,8 @@ set wildmode=full
 "
 " The key to press for Vim to start a wildcard expansion, from:
 "
-"     • the recording of a macro
-"     • the rhs of a mapping
+"     - the recording of a macro
+"     - the rhs of a mapping
 "}}}
 " What does the value `26` stand for?{{{
 "
@@ -2182,8 +2182,8 @@ call s:remember_new_mappings([
 
 " A key can be used as a prefix iff one of these conditions is true:
 "
-"           • it's useless for you (ex: U)
-"           • it's used as a prefix by default (ex: Z)
+"           - it's useless for you (ex: U)
+"           - it's used as a prefix by default (ex: Z)
 "
 " This means that you can NOT use `!` as a good prefix.
 " Not useless, and not a prefix by default, so it would lead to too many issues.
@@ -2205,28 +2205,28 @@ call s:remember_new_mappings([
 " See the first comment there for an explanation.
 
 
-"    • C-q is not used in insert mode (except for exiting a completion menu)
+"    - C-q is not used in insert mode (except for exiting a completion menu)
 "      we could supercharge  it to do something  else when we aren't  in a completion
 "      menu
 "
-"    • C-z has been disabled in visual mode
+"    - C-z has been disabled in visual mode
 "
 "      in insert mode, we use it as an “easier-to-type“ C-x C-p
 "
-"    • gh, gH, g C-h, gl, v_C-g
+"    - gh, gH, g C-h, gl, v_C-g
 "
-"    • @# has been mapped to g8, so g8 is free
+"    - @# has been mapped to g8, so g8 is free
 "
-"    • gy, gz
+"    - gy, gz
 "
-"    • PageUp PageDown
+"    - PageUp PageDown
 "
-"    • S-Tab (not Tab, because it would also affect C-i used for moving
+"    - S-Tab (not Tab, because it would also affect C-i used for moving
 "      inside the jumplist)
 "
-"    • C-_
+"    - C-_
 "
-"    • search for 'not used' in the window opened by `:viu`
+"    - search for 'not used' in the window opened by `:viu`
 
 " Leader {{{2
 
@@ -2896,8 +2896,8 @@ endfu
 
 " The default commands to add good / bad words in:
 "
-"     • a temporary list  use an uppercase character
-"     • a persistent list use only lowercase characters
+"     - a temporary list  use an uppercase character
+"     - a persistent list use only lowercase characters
 "
 "     ┌────────────┬──────────────┬──────────────┐
 "     │            │ mark         │ undo         │
@@ -3040,10 +3040,10 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : '∅')
 "
 " C-g does sth similar (:h ^g), but its output is:
 "
-"     • noisy
-"     • not colored
-"     • unable to expand `~`
-"     • relative to the working directory
+"     - noisy
+"     - not colored
+"     - unable to expand `~`
+"     - relative to the working directory
 
 " -p  -P           show filePath / :pwd {{{4
 
@@ -3720,10 +3720,10 @@ nno  <expr>  $  &virtualedit is# 'block' ? 'g$' : 'g_'
 " Why does the dot command changes its behavior when we hit `g$`.
 " According to :h g$, `g$` differs from `$` when:
 "
-"    • preceded with a count
-"    • on a wrapped line
-"    • on a line longer than the screen
-"    • if 'virtualedit' is enabled
+"    - preceded with a count
+"    - on a wrapped line
+"    - on a line longer than the screen
+"    - if 'virtualedit' is enabled
 "
 " Here, none of these conditions is met. So what happens?
 " Should I unmap `$` in normal mode?
@@ -4110,9 +4110,9 @@ tno  <esc><esc>  <c-\><c-n>
 " What difference with :*ilist! foobar ?
 " `:ilist`:
 "
-"     • searches in all included files. :g only in current buffer.
-"     • can ignore comment if we don't put a bang
-"     • automatically adds \<,\> around the pattern, if we don't surround it with slashes
+"     - searches in all included files. :g only in current buffer.
+"     - can ignore comment if we don't put a bang
+"     - automatically adds \<,\> around the pattern, if we don't surround it with slashes
 
 xno  <c-s>  <esc>:keepj keepp *g/\%V/#<left><left>
 
@@ -4182,8 +4182,8 @@ xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar())<cr>
 " v_b_I = Visual-block Insert
 " v_b_A = Visual-block Append
 "
-"         • Make |v_b_I| and |v_b_A| available in all kinds of Visual mode.
-"         • Adjust the selected area to be intuitive before doing blockwise insertion.
+"         - Make |v_b_I| and |v_b_A| available in all kinds of Visual mode.
+"         - Adjust the selected area to be intuitive before doing blockwise insertion.
 
 let s:niceblock_keys = {
     \   '$'    : {'v': 'g$h',      'V': '$',          "\<c-v>": '$'},
@@ -4260,12 +4260,12 @@ xno  g<c-j>  gJ
 
 " Difference compared to :JoinBlocks?:
 "
-"   • easier to use;  no need to position the cursor on
+"   - easier to use;  no need to position the cursor on
 "                     the first line of the 2nd block
 "                     no need to provide the nr of lines in a block
 "                     as an argument
 "
-"   • not repeatable; each time we call it, we must first visually select
+"   - not repeatable; each time we call it, we must first visually select
 "                     the lines (or provide an arbitrary range)
 "                     :JoinBlocks can be repeated simply by typing @:
 
@@ -4273,9 +4273,9 @@ xno  g<c-j>  gJ
 " How does `join_blocks()` work?
 " It mainly executes 3 commands:
 "
-"   • insert a literal ^A in front of all the lines in the 2nd block
-"   • join the 2 blocks
-"   • align the blocks using ^A as a delimiter
+"   - insert a literal ^A in front of all the lines in the 2nd block
+"   - join the 2 blocks
+"   - align the blocks using ^A as a delimiter
 
 xno  <silent>  mJ      :<c-u>call myfuncs#join_blocks(0)<cr>
 xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
@@ -4402,23 +4402,6 @@ com! -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
 
 com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 
-" Hex2Dec {{{2
-
-" This command converts numbers from hex to decimal (and the reverse with
-" a bang). It uses the shell command 'bc'. For example, if we type:
-"
-"     :Hex2Dec 2026
-"
-"         … sends to the shell:
-"
-"     $ echo "ibase=16;obase=A;2026" | bc
-"
-" And thus displays 8230.
-
-com! -bar -bang -nargs=1 Hex2Dec echo expand('`echo "ibase='.(<bang>0 ? 'A' : '16')
-\                                                 .';obase='.(<bang>0 ? '16' : 'A')
-\                                                 .';'.<q-args>.'" | bc`')
-
 " HlWeirdWhitespace {{{2
 
 " Why don't you use an autocmd instead?{{{
@@ -4487,9 +4470,9 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " The following command joins 2 blocks of lines.
 " To use it, you must:
 "
-"     • remove possible empty lines between the blocks
-"     • be on the 1st line of the 1st block
-"     • provide the nr of lines of a block as an argument to the command
+"     - remove possible empty lines between the blocks
+"     - be on the 1st line of the 1st block
+"     - provide the nr of lines of a block as an argument to the command
 "
 " After an initial join, you can repeat it with @:
 
@@ -4538,11 +4521,11 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 "
 " But, the contents of this line will constantly change. It will be successively:
 "
-"     • the 1st of the 2nd block
-"     • the 2nd one (after the 1st has been joined)
-"     • the 3rd one ("         2nd ")
-"     • the 4th one ("         3rd ")
-"     • the 5th one ("         4rd ")
+"     - the 1st of the 2nd block
+"     - the 2nd one (after the 1st has been joined)
+"     - the 3rd one ("         2nd ")
+"     - the 4th one ("         3rd ")
+"     - the 5th one ("         4rd ")
 "
 " Why `-j`, and not simply `j` ?
 " Because, when `:m` moves a line, the cursor doesn't stay where it is; it jumps
@@ -4786,11 +4769,11 @@ endfu
 " In reality,  it seems that  Vim puts a variable  inside a function  (and whose
 " scope is not explicit) inside `v:` only for a very narrow set of variables:
 "
-"     • count
-"     • errmsg
-"     • shell_error
-"     • this_session
-"     • version
+"     - count
+"     - errmsg
+"     - shell_error
+"     - this_session
+"     - version
 "
 " Source:
 "     https://github.com/Kuniwak/vint/issues/245#issuecomment-337296606
@@ -4972,8 +4955,8 @@ augroup END
 " It seems Vim merges both search history (/ + ?) in the window.
 " Also, in `~/.viminfo`, an entry corresponding to a:
 "
-"         • forward  search,  begins with  `?/`
-"         • backward search,  begins with  `? `  (note the space)
+"         - forward  search,  begins with  `?/`
+"         - backward search,  begins with  `? `  (note the space)
 "}}}
 fu! s:update_history() abort
     " update history of CURRENT session
@@ -5027,8 +5010,8 @@ endfu
 fu! s:make_missing_dir(file, buf) abort
     " Before creating a directory, make sure that the current buffer:
     "
-    "     • is not a special one    :h special-buffers
-    "     • is not a remote file    ftp://...
+    "     - is not a special one    :h special-buffers
+    "     - is not a remote file    ftp://...
     "
     " Found here:    http://stackoverflow.com/a/4294176
 
@@ -5227,11 +5210,11 @@ endif
 " The following autocmd  allows us to read  special files like a pdf  or an odt.
 " They use a few shell utilities as filter:
 "
-"       • antiword
-"       • odt2txt
-"       • pandoc
-"       • pdftotext
-"       • unrtf
+"       - antiword
+"       - odt2txt
+"       - pandoc
+"       - pdftotext
+"       - unrtf
 
 augroup filter_special_file
     au!
@@ -5571,9 +5554,9 @@ endfu
 "
 " 2 - solve the following pbs:
 "
-"    • join
-"    • delete
-"    • sort
+"    - join
+"    - delete
+"    - sort
 "
 " … every N lines.
 " Write a command implementing each solution.
@@ -6068,13 +6051,13 @@ endfu
 " It shows us a fondamental pb. How to prevent a command from taking too much
 " time? Here, we have a few solutions:
 "
-"    • try to guess by computing the nr of matches on a small range if it
+"    - try to guess by computing the nr of matches on a small range if it
 "      goes beyond a certain threshold, we could report to the user that
 "      there are too many matches
 "
 "      pb: most of the matches could be outside this small range
 "
-"    • refactor the code to use a while loop, and monitor the total time
+"    - refactor the code to use a while loop, and monitor the total time
 "      taken after each iteration
 "
 "      pb: the while loop seems 6 times slower overall, compared to `s///gen`
@@ -6177,10 +6160,10 @@ endfu
 " make  more   tests,  take  into   account  all  relevant   parameters  (8*2=16
 " environments), in vim and neovim:
 "
-"    • 'lz'
-"    • :redraw
-"    • <expr>
-"    • timer
+"    - 'lz'
+"    - :redraw
+"    - <expr>
+"    - timer
 "
 " once you're done:
 "
@@ -6223,9 +6206,9 @@ endfu
 " 47 -
 " we use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
-"    • iabbrev
-"    • pair-complete
-"    • titlecase
+"    - iabbrev
+"    - pair-complete
+"    - titlecase
 "
 " it's  reliable  for programming  languages  where  the  cml must  be  repeated
 " identically on every line of a  multi-line comment. what about the others (ex:
@@ -6541,44 +6524,44 @@ endfu
 " 70 -
 " play with (or document):
 "
-"    • 'filewinid' (location list property)
-"    • 'user_data' entry in completion item
-"    • 'varsofttabstop', 'vartabstop'
-"    • :h matchadd(), new `window` key in optional dictionary
-"    • :swapname
-"    • :unl[et] ${env-name} (:h :unlet-$)
-"    • appendbufline()
+"    - 'filewinid' (location list property)
+"    - 'user_data' entry in completion item
+"    - 'varsofttabstop', 'vartabstop'
+"    - :h matchadd(), new `window` key in optional dictionary
+"    - :swapname
+"    - :unl[et] ${env-name} (:h :unlet-$)
+"    - appendbufline()
 "
-"    • argc() + argv()
+"    - argc() + argv()
 "      in Vim, they can now access the global arglist and the local arglist of another window
 "
 "        https://github.com/vim/vim/releases/tag/v8.1.0493
 "
-"    • DiffUpdated
-"    • api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
-"    • cmdlinechanged
-"    • deletebufline()
-"    • diffupdate
-"    • dirchanged
-"    • exitpre
-"    • sourcepost
-"    • getcompletion('*', 'arglist')   +   com! -complete=arglist ...
-"    • getcwd(-1) return the global directory
-"    • gettagstack(), settagstack()
-"    • mode() (new output `n_ov`, `n_oV`, `n_oC-v`)
-"    • prompt-buffer
-"    • reg_recording() + reg_executing()
-"    • sign_define()
-"    • sign_getdefined()
-"    • sign_getplaced()
-"    • sign_place()
-"    • sign_undefined()
-"    • sign_unplace()
-"    • term_setansicolors(), term_getansicolors(), g:term_ansi_colors
-"    • term_setsize()
-"    • textchangedp
-"    • trim()
-"    • winlayout()
+"    - DiffUpdated
+"    - api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
+"    - cmdlinechanged
+"    - deletebufline()
+"    - diffupdate
+"    - dirchanged
+"    - exitpre
+"    - sourcepost
+"    - getcompletion('*', 'arglist')   +   com! -complete=arglist ...
+"    - getcwd(-1) return the global directory
+"    - gettagstack(), settagstack()
+"    - mode() (new output `n_ov`, `n_oV`, `n_oC-v`)
+"    - prompt-buffer
+"    - reg_recording() + reg_executing()
+"    - sign_define()
+"    - sign_getdefined()
+"    - sign_getplaced()
+"    - sign_place()
+"    - sign_undefined()
+"    - sign_unplace()
+"    - term_setansicolors(), term_getansicolors(), g:term_ansi_colors
+"    - term_setsize()
+"    - textchangedp
+"    - trim()
+"    - winlayout()
 "
 " 71 -
 " in `vim-window`, don't do this:
@@ -6666,20 +6649,20 @@ endfu
 " 79 -
 " feature requests:
 "
-"    • a function to detect the pager is active, to customize the mappings
+"    - a function to detect the pager is active, to customize the mappings
 "      interacting with the pager
 "
 "      would it be enough?
 "
-"    • :prof dump and :prof stop
+"    - :prof dump and :prof stop
 "       https://github.com/neovim/neovim/pull/2427
 "
-"    • being able to customize `c-k` when a dictionary completion is active
+"    - being able to customize `c-k` when a dictionary completion is active
 "      (same thing for other completions: c-t, c-d, c-l, ...)
 "
-"    • a function to get the owner/group of a file
+"    - a function to get the owner/group of a file
 "
-"    • adding an option to `getfsize()` to get a human readable result
+"    - adding an option to `getfsize()` to get a human readable result
 "
 " 80 -
 " To document.
@@ -6732,8 +6715,8 @@ endfu
 " update:
 " it probably has sth to do with these functions:
 "
-"    • fold#motion#go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
-"    • lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
+"    - fold#motion#go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
+"    - lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
 "
 " update:
 " it has to do with the `<silent>` argument in the mapping.
@@ -6773,10 +6756,10 @@ endfu
 "
 " also, make some cleaning in our mappings:
 "
-"    • x_gj      join lines
-"    • x_gc-j    join lines without inserting/removing spaces
-"    • x_mj      join two blocks
-"    • x_mc-j    join two blocks in reverse order
+"    - x_gj      join lines
+"    - x_gc-j    join lines without inserting/removing spaces
+"    - x_mj      join two blocks
+"    - x_mc-j    join two blocks in reverse order
 "
 " are they consistent?
 " could we make them easier to remember?
@@ -6821,9 +6804,9 @@ endfu
 " it's not consistent with how we use the preview window in other plugins.
 " instead, install these mappings:
 "
-"    • p preview tag under cursor
-"    • } preview next tag
-"    • { preview previous tag
+"    - p preview tag under cursor
+"    - } preview next tag
+"    - { preview previous tag
 "
 " 87 -
 " should we enable  'ttyfast'? it's useless with current terminal,  but could be
@@ -6885,16 +6868,16 @@ endfu
 " 93 -
 " develop a design to quickly handle a temp special buffer:
 "
-"    • layout
+"    - layout
 "
-"    • local settings & mappings
+"    - local settings & mappings
 "    think about using {, }, (, ), and maybe [[, ]]
 "
-"    • syntax highlighting
-"    • filetype detection
-"    • automatic population (persistent after `:e`)
-"    • proper path/name
-"    • handle multiple invocations (there should be always only 1 (updated) window)
+"    - syntax highlighting
+"    - filetype detection
+"    - automatic population (persistent after `:e`)
+"    - proper path/name
+"    - handle multiple invocations (there should be always only 1 (updated) window)
 "
 " if you want the buffer to be  reloadable, do not populate it directly from the
 " function called by a mapping.
@@ -7050,10 +7033,10 @@ endfu
 " 101 -
 " rethink the following mappings:
 "
-"    • gt, gT (could be better used to move the current tabpage, instead of >t, <t)
+"    - gt, gT (could be better used to move the current tabpage, instead of >t, <t)
 "    but what would we use to populate the location list with to_do's and fix_me's?
 "
-"    • zj (could be used to join a window to a tabpage, instead of c-n; symmetry with zt)
+"    - zj (could be used to join a window to a tabpage, instead of c-n; symmetry with zt)
 "
 " 102 -
 " in python files, we  can use multi-line comments with a  pair of triple double
@@ -7075,9 +7058,9 @@ endfu
 "
 " learn how to configure, use, integrate the following linters:
 "
-"    • pylint
-"    • pycodestyle
-"    • pydocstyle
+"    - pylint
+"    - pycodestyle
+"    - pydocstyle
 "
 " this command populates a default config file for `pylint`:
 "
@@ -7099,9 +7082,9 @@ endfu
 " we should use more abbreviations.
 " review the triggers:
 "
-"    • are they well chosen?
-"    • should you remove some of them?
-"    • should you add more?
+"    - are they well chosen?
+"    - should you remove some of them?
+"    - should you add more?
 "
 "         use `:wordfrequency`, but if you find a frequent word (like 'result'),
 "         it doesn't necessarily mean you should create an abbreviation just for
@@ -7200,9 +7183,9 @@ endfu
 " The repetition of an operation in visual mode is not consistent
 " with what Vim does:
 "
-"    • press `~` on a visual selection
-"    • move the cursor on another line
-"    • press .
+"    - press `~` on a visual selection
+"    - move the cursor on another line
+"    - press .
 "
 " Vim has recomputed a new visual selection with the same geometry
 " than the previous one.
@@ -7261,9 +7244,9 @@ endfu
 " Update:
 " We should probably define functions in our library (lg-lib), to:
 "
-"    • extract the comment leader
-"    • get a pattern to detect whether the current line is commented
-"    • return the commented version of a line (before pasting it somewhere)
+"    - extract the comment leader
+"    - get a pattern to detect whether the current line is commented
+"    - return the commented version of a line (before pasting it somewhere)
 "
 " 120 -
 " We have 4 plugins which use `repeat#set()`:
@@ -7278,8 +7261,8 @@ endfu
 "
 " Try to get rid of the call to the function, either by:
 "
-"    • submitting a bug report/PR
-"    • re-implementing the plugin
+"    - submitting a bug report/PR
+"    - re-implementing the plugin
 "
 " 121 -
 " Every  time you open a  window, be aware that  an error may be  raised because
@@ -7302,10 +7285,10 @@ endfu
 "
 " It's better because:
 "
-"   • more concise/readable
-"   • mention explicitly the third value 'baz'
+"   - more concise/readable
+"   - mention explicitly the third value 'baz'
 "   (before it was implicit/not mentioned at all)
-"   • easier to expand later if `var` can have more values
+"   - easier to expand later if `var` can have more values
 "
 " 123 -
 " Recently, when we try to push a commit and press enter after our username,

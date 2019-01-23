@@ -12,8 +12,8 @@
 
 # TODO: review this file:
 #
-#     • can we delete things?
-#     • is everything fully understood/explained?
+#    - can we delete things?
+#    - is everything fully understood/explained?
 
 # TODO: review ~/.inputrc
 

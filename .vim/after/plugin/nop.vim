@@ -200,10 +200,10 @@ endif
 "
 " We invoke `filter()` to ignore:
 "
-"         • the `<plug>` mappings (they can't be typed directly,
+"         - the `<plug>` mappings (they can't be typed directly,
 "           so they can't interfer in our work)
 "
-"         • [fFtT,;]
+"         - [fFtT,;]
 "           we ignore those because, contrary to  [sSzZ]  , they ARE consistent
 "}}}
 " How to find the mappings installed by `vim-sneak` in visual mode?{{{

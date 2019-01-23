@@ -104,10 +104,10 @@
 #
 # `item` can have, among other values:
 #
-#     • `di` for a directory
-#     • `fi` for a file
-#     • `ln` for a symlink
-#     • ...
+#    - `di` for a directory
+#    - `fi` for a file
+#    - `ln` for a symlink
+#    - ...
 #
 # `style` can have, among other values:
 #

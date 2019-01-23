@@ -17,8 +17,8 @@ let g:user_emmet_leader_key = '<c-g>'
 "
 " Issue1: Sometimes it's annoying:{{{
 "
-"    • write a url and press `C-g a`
-"    • expand this abbreviation:    #page>div.logo+ul#navigation>li*5>a{Item $}
+"    - write a url and press `C-g a`
+"    - expand this abbreviation:    #page>div.logo+ul#navigation>li*5>a{Item $}
 "}}}
 " Issue2: It can break `C-g N` (jump to previous point).{{{
 " The issue is in this function:

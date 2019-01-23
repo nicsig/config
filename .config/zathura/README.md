@@ -1,16 +1,16 @@
 Don't forget you can:
 
-        • navigate in the jumplist with C-o and C-i
-        • open the index with Tab
-        • collapse/expand all entries in the index with H/L
+   - navigate in the jumplist with C-o and C-i
+   - open the index with Tab
+   - collapse/expand all entries in the index with H/L
 
 # Mapppings
 
 You can install mappings in 3 modes:
 
-        • normal (default)
-        • fullscreen
-        • index (TOC accessed via Tab)
+   - normal (default)
+   - fullscreen
+   - index (TOC accessed via Tab)
 
 To do so, you need to pass  the optional argument `[fullscreen]` or `[index]` to
 the `:map` command. For more info:

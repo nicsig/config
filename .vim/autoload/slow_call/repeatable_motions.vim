@@ -119,10 +119,10 @@ endfu
 "
 " Besides, there are other arguments in favor of this choice:
 "
-"     • a path is a universal concept,  while an option tag is specific  to
+"     - a path is a universal concept,  while an option tag is specific  to
 "       documentation; its mapping  should be  easier to type
 "
-"     • a hypertext link,  or a heading, sounds  like something more important
+"     - a hypertext link,  or a heading, sounds  like something more important
 "}}}
 
 noremap  <expr>  <silent><unique>  [h  lg#motion#regex#rhs('path', 0)
@@ -235,8 +235,8 @@ fu! s:fts(cmd) abort
     "
     " This function can be called:
     "
-    "     •   directly from a  [ftFT]  mapping
-    "     • indirectly from a  [;,]    mapping
+    "     -   directly from a  [ftFT]  mapping
+    "     - indirectly from a  [;,]    mapping
     "       │
     "       └ move_again()  →  s:move()  →  fts()
     "

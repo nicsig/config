@@ -4,9 +4,9 @@ You can use it to delay the call to functions installing some interface, if they
 are too slow to be processed during Vim's startup.
 For example:
 
-   • lg#motion#repeatable#make#all()
-   • operator#sandwich#set()
-   • submode#map()
+   - lg#motion#repeatable#make#all()
+   - operator#sandwich#set()
+   - submode#map()
 
 ##
 # Why should I put a guard in every script of this directory?

@@ -10,20 +10,20 @@
 # Also, if possible, the script should configure it to get the same result as if
 # you had configured it interactively, like so:
 #
-#     • reduce the amount of time the typed keys are displayed (2.5s by default)
+#    - reduce the amount of time the typed keys are displayed (2.5s by default)
 #
-#     • enable 'persistent window'
+#    - enable 'persistent window'
 #
-#     •    select window/region
-#       >  click on the terminal
+#    -    select window/region
+#      >  click on the terminal
 #
-#         `screenkey` is automatically  placed at the bottom of  the terminal no
-#         matter where the latter is
+#        `screenkey` is automatically  placed at the bottom of  the terminal no
+#        matter where the latter is
 #
-#     •   modifiers mode
-#       > emacs
+#    -   modifiers mode
+#      > emacs
 #
-#        to display 'C-a' rather than 'Ctrl+a'
+#       to display 'C-a' rather than 'Ctrl+a'
 #}}}
 # TODO:
 # comment the code more thorougly

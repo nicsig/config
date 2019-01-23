@@ -29,19 +29,19 @@
 # TLDR:
 # you need a recent version of the Python interpreter, of pip, and a few Python modules:
 #
-#     • beautifulsoup4
-#     • lxml
-#     • numpy
-#     • pyqt5
-#     • requests
-#     • six
+#    - beautifulsoup4
+#    - lxml
+#    - numpy
+#    - pyqt5
+#    - requests
+#    - six
 #}}}
 
 # Warning: The original files were indented with tabs:{{{
 #
-#     • interSubs.lua
-#     • interSubs.py
-#     • interSubs_config.py
+#    - interSubs.lua
+#    - interSubs.py
+#    - interSubs_config.py
 #
 # If you re-download them, remove the tabs.
 #

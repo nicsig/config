@@ -10,10 +10,10 @@ By default, the `mpv` window probably inherits the aspect ratio of your screen.
 
 Let's assume that the color of each pixel is encoded with 4 numbers between 0-255:
 
-    • amount of light
-    • amount of red
-    • amount of green
-    • amount of blue
+   - amount of light
+   - amount of red
+   - amount of green
+   - amount of blue
 
 When you increase  the saturation, you increase the amount  of red/green/blue in
 each pixel.
@@ -27,11 +27,11 @@ each pixel.
 
 When you  increase the contrast:
 
-        • you increase the  amount of light emitted by each  pixel whose
-          original amount of light was between 0-127
+   - you increase the  amount of light emitted by each  pixel whose original
+     amount of light was between 0-127
 
-        • you decrease the  amount of light emitted by each  pixel whose
-          original amount of light was between 128-255
+   - you decrease the  amount of light emitted by each  pixel whose original
+     amount of light was between 128-255
 
 ---
 
@@ -72,8 +72,8 @@ subtitles, or entering fullscreen mode.
 
 It's used to:
 
-        • set an option during runtime (e.g. `speed` property vs `--speed` option)
-        • query arbitrary information  (e.g. `filename` property)
+   - set an option during runtime (e.g. `speed` property vs `--speed` option)
+   - query arbitrary information  (e.g. `filename` property)
 
 ---
 
@@ -102,11 +102,11 @@ it are displaying.
 
 But upscaling has a few drawbacks:
 
-        • it can't add more detail than is already present
+   - it can't add more detail than is already present
 
-        • it can produce visual artifacts (especially with fast-moving videos),
-          like the ringing artifact (looks like a “ghost”);
-          blurring and distortion are also possible
+   - it can produce visual artifacts (especially with fast-moving videos), like
+     the ringing artifact (looks like a “ghost”); blurring and distortion are
+     also possible
 
 ---
 

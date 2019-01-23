@@ -21,10 +21,10 @@
 ! NOTE:
 ! We can see that `DejaVu Sans Mono` support this glyph:
 !
-!         • start `gucharmap`
-!         • select `DejaVu Sans Mono`
-!         • select size `20`
-!         • search for the glyph (C-f)
+!    - start `gucharmap`
+!    - select `DejaVu Sans Mono`
+!    - select size `20`
+!    - search for the glyph (C-f)
 !
 ! It works in `xfce4-terminal` and in `guake`, so why not in `urxvt`?
 ! What's puzzling, is that `urxvt` is able to render other “exotic“ glyphs,
@@ -279,8 +279,8 @@ URxvt.url-launcher:  /usr/bin/firefox
 ! If you don't want URLs to be underlines, the following resource isn't enough.
 ! You also need to either:
 !
-!         • disable the perl extension `matcher` in `URxvt.perl-ext-common`
-!         • tweak the resource `URxvt.matcher.pattern.0`
+!    - disable the perl extension `matcher` in `URxvt.perl-ext-common`
+!    - tweak the resource `URxvt.matcher.pattern.0`
 URxvt.underlineURLs:  false
 URxvt.matcher.pattern.0:  urxvt_matcher_pattern_garbage
 

@@ -26,13 +26,13 @@ endif
 "
 " We could:
 "
-"         • submit a bug report:
+"         - submit a bug report:
 "
 "                 The plugin detection of surrounding characters should be improved.
 "                 If it can't, when `E65` occurs, the plugin should stop and show it to us.
 "                 Why doesn't that happen?
 "
-"         • try and tweak the definition of these recipes
+"         - try and tweak the definition of these recipes
 "
 "           IMHO, it's the best solution.
 "           We should have a minimum of global recipes.
@@ -46,7 +46,7 @@ endif
 "               - Define a minimum of recipes.
 "               - Make them relevant to the current filetype.
 "
-"         • let the recipes in, and disable the problematic operators:
+"         - let the recipes in, and disable the problematic operators:
 "
 "                 nno srb <nop>
 "                 xno sr  <nop>
