@@ -6356,9 +6356,12 @@ endfu
 " add syntax hl in toc menu, and make content more relevant in help toc
 "
 " 61 -
-" the toc  window may currently  be a little  too wide (see:  vim-qf, autoload/,
-" qf#open()). we could  compute the longest line,  and set the width  of the toc
-" window dynamically.
+" The toc  window may currently  be a little  too wide (see:  vim-qf, autoload/,
+" `qf#open()`). We could  compute the longest line:
+"
+"     echo max(map(range(1, line('$')), {i,v -> virtcol([v, '$'])}))
+"
+" and set the width of the toc window dynamically.
 "
 " 62 -
 " move every function called from several scripts inside `vim-lg-lib`:
@@ -7513,15 +7516,15 @@ augroup END
 
 " sessions to finish:
 "
-"    1. sandwich
-"    2. ultisnips
-"    3. markdown
-"    4. tag
-"    5. arglist (improve our arglist mappings)
-"    6. breakdown
-"    7. paragraph (master `$ par`)
-"    8. tree
-"    9. keyboard
+"    1.  sandwich
+"    2.  ultisnips
+"    3.  markdown
+"    4.  tag
+"    5.  arglist (improve our arglist mappings)
+"    6.  breakdown
+"    7.  paragraph (master `$ par`)
+"    8.  tree
+"    9.  keyboard
 "    10. systemd
 "    11. cron
 "    12. swap
