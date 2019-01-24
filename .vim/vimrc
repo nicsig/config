@@ -7340,6 +7340,14 @@ endfu
 " If yes, don't change the pattern.
 " If no, go ahead.
 "
+" Tip:
+" If you have another similar refactoring, with too many matches, write a custom
+" script.
+" Write a loop which search for the right pattern.
+" Every time it finds a match, make it inspect the syntax highlighting.
+" Use this info to ignore obvious false positives.
+" Collect the positions in a qfl.
+"
 " Pitfall:
 " Don't think that it's easy to remove sth like `getline('.')` or `append('.', text)`!
 " Watch this:
