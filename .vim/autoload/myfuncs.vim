@@ -6,7 +6,7 @@ fu! myfuncs#align_with_end(type) abort
     " length of text to align on the current line
     let text_length = strchars(matchstr(getline('.'), '\S.*$'))
     " length of the previous/next line
-    let neighbour_length = strchars(getline(line(".") + s:align_with_end_dir))
+    let neighbour_length = strchars(getline(line('.') + s:align_with_end_dir))
     exe 'left ' . (neighbour_length - text_length)
 endfu
 
@@ -998,7 +998,7 @@ fu! myfuncs#op_toggle_alignment(type) abort
         exe mark1.','.mark2.'right'
     endif
 endfu
-
+" }}}1
 fu! myfuncs#plugin_install(url) abort "{{{1
     let pattern =  '\vhttps?://github.com/(.{-})/(.*)/?'
     if a:url !~# pattern
@@ -1163,74 +1163,6 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     endwhile
     call winrestview(view)
 endfu
-
-" repeat {{{1
-
-" fu! myfuncs#repeat_set(sequence,...)
-"     let g:repeat_sequence = a:sequence
-"     let g:repeat_count = a:0 ? a:1 : v:count
-"     let g:repeat_tick = b:changedtick
-" endfu
-
-" fu! myfuncs#repeat_dot(cnt)
-"     try
-"         if g:repeat_tick ==# b:changedtick
-"             let c = g:repeat_count
-"             let cnt = (a:cnt ? a:cnt : (c ? c : ''))
-"             " No n flag, otherwise "\<plug>(...)" won't be interpreted as the
-"             " {rhs} of the mapping (typed literally)
-"             " FIXME: why the i flag?
-"             " maybe in case there are commands after the one calling
-"             " this function ; we want the "\<plug>(...)" to be typed immediately
-"             " not after the remaining commands from the mapping
-"             " still, hard time figuring out such a case...
-"             call feedkeys(g:repeat_sequence, 'i')
-"             " FIXME: why the n flag?
-"             call feedkeys(cnt, 'ni')
-"         else
-"             " dot has been remapped as a call to this function
-"             " but here it must be typed literally, not remapped to this
-"             " function, otherwise we're stuck in a loop
-"             " so we need the n flag
-"             call feedkeys((a:cnt ? a:cnt : '') . '.', 'ni')
-"         endif
-"     catch /^Vim(normal):/
-"         " It seems v:errmsg is not accessible from a function (undefined
-"         " variable), so return 'echoerr ' . v:errmsg is not possible
-"         return 'echoerr v:errmsg'
-"     endtry
-"     return ''
-" endfu
-
-" fu! myfuncs#repeat_wrap(command)
-"     let sync_test = (g:repeat_tick ==# b:changedtick)
-"     try
-"         exe 'norm! ' . a:command . 'zv'
-"     catch /.*/
-"         return "echoerr 'E21: Cannot make changes, modifiable is off'"
-"     endtry
-"     if sync_test
-"         let g:repeat_tick = b:changedtick
-"     endif
-"     return ''
-" endfu
-
-" let g:repeat_tick = -1
-" augroup repeatPlugin
-"     autocmd!
-"     autocmd BufLeave,BufWritePre,BufReadPre * let g:repeat_tick = (g:repeat_tick ==# b:changedtick || g:repeat_tick ==# 0) ? 0 : -1
-"     autocmd BufEnter,BufWritePost * if g:repeat_tick ==# 0|let g:repeat_tick = b:changedtick|endif
-" augroup END
-
-" nmap  .      <plug>(myfuncs_repeat_dot)
-" nmap  u      <plug>(myfuncs_repeat_undo)
-" nmap  U      <plug>(myfuncs_repeat_undo_line)
-" nmap  <c-r>  <plug>(myfuncs_repeat_redo)
-
-" nno  <silent>  <plug>(myfuncs_repeat_dot)        :<c-u>exe myfuncs#repeat_dot(v:count)<cr>
-" nno  <silent>  <plug>(myfuncs_repeat_undo)       :<c-u>exe myfuncs#repeat_wrap('u')<cr>
-" nno  <silent>  <plug>(myfuncs_repeat_undo_line)  :<c-u>exe myfuncs#repeat_wrap('U')<cr>
-" nno  <silent>  <plug>(myfuncs_repeat_redo)       :<c-u>exe myfuncs#repeat_wrap("\<Lt>C-R>")<cr>
 
 fu! myfuncs#search_internal_variables() abort "{{{1
     let view = winsaveview()
