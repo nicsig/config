@@ -2832,7 +2832,7 @@ endfu
 "}}}
 nno  <silent>  z=  :<c-u>set opfunc=<sid>my_z_equal<cr>g@l
 
-fu! s:my_z_equal(type) abort
+fu! s:my_z_equal(_) abort
     let spell_save = &l:spell
     try
         setl spell
@@ -2852,7 +2852,7 @@ fu! s:my_z_equal(type) abort
     catch
         return lg#catch_error()
     finally
-        call timer_start(0, {-> execute('let &l:spell = '.spell_save, '')})
+        call timer_start(0, {-> execute('let &l:spell = '.spell_save)})
     endtry
 endfu
 
@@ -6551,7 +6551,6 @@ endfu
 "    - exitpre
 "    - sourcepost
 "    - getcompletion('*', 'arglist')   +   com! -complete=arglist ...
-"    - getcwd(-1) return the global directory
 "    - gettagstack(), settagstack()
 "    - mode() (new output `n_ov`, `n_oV`, `n_oC-v`)
 "    - prompt-buffer
