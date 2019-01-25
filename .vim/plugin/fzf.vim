@@ -69,3 +69,22 @@ let g:fzf_files_options = '--preview "(highlight || bat {} || cat {}) 2>/dev/nul
 " `SPC ff`.
 "}}}
 
+" `:FzSnippets` prints the description of the snippets (✔), but doesn't use it when filtering the results (✘).{{{
+
+" The  issue  is  due to  `:FzSnippets`  which  uses  the  `-n 1`  option  in  the
+" `'options'` key of a dictionary.
+" To fix this, we replace `-n 1` with `-n ..`.
+" From `$ man fzf`:
+"
+"     /OPTIONS
+"     /Search mode
+"     -n, --nth=N[,..]
+"           Comma-separated list of field  index expressions for limiting search
+"           scope.  See FIELD INDEX EXPRESSION for the details.
+"
+"     /FIELD INDEX EXPRESSION
+"     ..     All the fields
+"}}}
+exe 'command! -bar -bang '.g:fzf_command_prefix.'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
+
+
