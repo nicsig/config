@@ -88,5 +88,8 @@ augroup filetypedetect
     au! BufRead,BufNewFile zsh.snippets setf snippets
 
     au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} setf help
+
+    " ~/.vim/after/ftplugin/nfo.vim
+    au! BufRead,BufNewFile *.nfo,*.NFO set ft=nfo
 augroup END
 

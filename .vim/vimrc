@@ -1,4 +1,5 @@
 " Options 1 {{{1
+
 " Why this setting?{{{
 "
 " When we use gVim, we don't want `$VIMRUNTIME/menu.vim` to be sourced.
@@ -22,7 +23,7 @@
 " syntax  or filetype  recognition (…;  the  `:syntax on`  and `:filetype  on`
 " commands load the menu too). `:filetype on` and `:syntax on` source menu.vim.
 "}}}
-set go=M
+set guioptions=M
 
 " Plugins {{{1
 " Disable plugins {{{2
@@ -88,7 +89,7 @@ let g:loaded_vimball      = 1
 if empty(glob('~/.vim/autoload/plug.vim'))
     sil !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
                 \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    au VimEnter * PlugInstall | source $MYVIMRC
+    autocmd VimEnter * PlugInstall | source $MYVIMRC
 endif
 
 " Disable shallow cloning.
@@ -738,7 +739,7 @@ set noruler
 " Without the  guard, when  you reload  the vimrc, the  fold titles  display the
 " comment leader.
 if has('vim_starting')
-    set cms=
+    set commentstring=
 endif
 
 " cpoptions {{{2
@@ -757,11 +758,11 @@ endif
 "     () world)
 " For the moment, we prefer that Vim doesn't ignore escaped parentheses:
 
-set cpo+=M
+set cpoptions+=M
 
 " the nr column (`'nu'`,  `'rnu'`) will be taken into account  to decide when to
 " wrap long lines
-set cpo+=n
+set cpoptions+=n
 
 " So instead we get:
 "     (hello \() world)
@@ -787,7 +788,7 @@ set cpo+=n
 "}}}
 if !has('nvim')
     " allow us to redo a yank command with the dot command
-    set cpo+=y
+    set cpoptions+=y
 endif
 
 " diffopt {{{2
@@ -1047,7 +1048,7 @@ fu! s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
 
-let &inex = s:snr().'inex()'
+let &includeexpr = s:snr().'inex()'
 
 fu! s:inex() abort
     let line = getline('.')
@@ -1428,7 +1429,7 @@ set sidescroll=5
 " set shm+=A
 
 " enable all sort of abbreviations
-set shm+=a
+set shortmess+=a
 
 " Don't print |ins-completion-menu| messages.  For example:
 "
@@ -1437,20 +1438,20 @@ set shm+=a
 "     - "The only match"
 "     - "Pattern not found"
 "     - "Back at original"
-set shm+=c
+set shortmess+=c
 
 " don't print the file info when editing a file, as if `:silent` was used
-set shm+=F
+set shortmess+=F
 
 " When starting Vim without any argument, we enter into an unnamed buffer
 " displaying a long message; hide this message.
-set shm+=I
+set shortmess+=I
 
 " don't print "search hit BOTTOM, continuing at TOP"
-set shm+=s
+set shortmess+=s
 
 " don't print "written" or "[w]" when writing a file
-set shm+=W
+set shortmess+=W
 
 " signcolumn {{{2
 
@@ -1941,7 +1942,7 @@ set ttimeoutlen=6
 "        ┌ nvim doesn't have this issue, and 'ttym' has been removed from it
 "        │
 if !has('nvim') && &term =~# '^\%(screen\|tmux\)'
-    set ttym=xterm2
+    set ttymouse=xterm2
 endif
 
 " updatetime {{{2
@@ -1974,7 +1975,7 @@ set virtualedit=block
 
 " wildignore(case) {{{2
 
-" Why tweaking `'wig'`?{{{
+" Why tweaking `'wildignore'`?{{{
 "
 " Some files can't be edited by Vim.
 " Or they shouldn't.
@@ -1986,24 +1987,24 @@ set virtualedit=block
 "         - in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 
-set wig&vim
+set wildignore&vim
 " lock files (example: ~/.gksu.lock)
-set wig+=*.lock
+set wildignore+=*.lock
 
 " vim temporary files
-set wig+=*.bak,*.swo,*.swp,*~
+set wildignore+=*.bak,*.swo,*.swp,*~
 
 " latex temporary files
-set wig+=*.aux,*.fdb_latexmk,*.fls,*/auxiliary/*,*/build/*
+set wildignore+=*.aux,*.fdb_latexmk,*.fls,*/auxiliary/*,*/build/*
 
 " password databases
-set wig+=*.kdb,*.kdbx
+set wildignore+=*.kdb,*.kdbx
 
 " media files (music, pictures, ...)
-set wig+=*.gif,*.jpeg,*.jpg,*.mp3,*.mp4,*.png
+set wildignore+=*.gif,*.jpeg,*.jpg,*.mp3,*.mp4,*.png
 
 " python objects/cache
-set wig+=*.pyc,*/__pycache__/*
+set wildignore+=*.pyc,*/__pycache__/*
 " Why not `*/__pycache__/**/*` ?{{{
 "
 " No need to. The depth of a python cache is 1.
@@ -2012,21 +2013,21 @@ set wig+=*.pyc,*/__pycache__/*
 
 " undo files
 "
-"                          ┌─ `*` can match any string/path
-"                          │  (including as many `/` as you want, but not a dot)
-"                          │
-let &wig .= ','.&undodir.'/*'
-let &wig .= ','.&undodir.'/*.*'
-let &wig .= ','.&undodir.'/*.*.*,'
-"                          │
-"                          └─ `*` can't match a dot, and the path of an
-"                              undofile often contains 1 or 2 dots
+"                                 ┌─ `*` can match any string/path
+"                                 │  (including as many `/` as you want, but not a dot)
+"                                 │
+let &wildignore .= ','.&undodir.'/*'
+let &wildignore .= ','.&undodir.'/*.*'
+let &wildignore .= ','.&undodir.'/*.*.*,'
+"                                 │
+"                                 └─ `*` can't match a dot, and the path of an
+"                                     undofile often contains 1 or 2 dots
 
 " Why don't you ignore archives?{{{
 "
-"     set wig+=*[^0-9].gz,*.rar,*.tar.*,*.zip
-"               ├────┘
-"               └ don't ignore man pages in `/usr/share/man/man1/`
+"     set wildignore+=*[^0-9].gz,*.rar,*.tar.*,*.zip
+"                      ├────┘
+"                      └ don't ignore man pages in `/usr/share/man/man1/`
 "
 " Some system files are stored in archives, logs for example.
 " When we inspect the contents of a directory in dirvish, I want to see them
@@ -2038,10 +2039,10 @@ let &wig .= ','.&undodir.'/*.*.*,'
 "
 "}}}
 
-set wig+=tags
+set wildignore+=tags
 
 " A file in a `.git/` directory.
-set wig+=*/.git/*
+set wildignore+=*/.git/*
 " If you see a `.git/` directory in dirvish, before tweaking this option, have a look at `fex#format_entries()`:{{{
 "
 "         ~/.vim/plugged/vim-fex/autoload/fex.vim:22
@@ -2064,15 +2065,16 @@ set wildignorecase
 set wildmenu
 
 " The value of 'wildmode' is a comma-separated list of (up to 4) parts.
-" Each part defines what happens when we press Tab (&wc) the 1st/2nd/3rd/4th time.
+" Each  part   defines  what   happens  when  we   press  Tab   (&wildchar)  the
+" 1st/2nd/3rd/4th time.
 set wildmode=full
 
-" What's 'wc'?{{{
+" What's `'wildchar'`?{{{
 "
 " The  key to  press for  Vim to  start a  wildcard expansion  (which opens  the
 " wildmenu).
 "}}}
-" What's 'wcm'?{{{
+" What's `'wildcharm'`?{{{
 "
 " The key to press for Vim to start a wildcard expansion, from:
 "
@@ -2083,7 +2085,7 @@ set wildmode=full
 "
 "     C-z
 "}}}
-" What does `set wcm=26` imply?{{{
+" What does `set wildcharm=26` imply?{{{
 "
 " When you want  Vim to start a wildcard  expansion, in the rhs of  a mapping or
 " while recording a macro, you'll have to write/press `C-z`, instead of Tab.
@@ -2096,7 +2098,7 @@ set wildmode=full
 "
 " Yes, you could write:
 "
-"     set wcm=9
+"     set wildcharm=9
 "}}}
 " Would it be better?{{{
 "
@@ -2125,8 +2127,8 @@ set wildmode=full
 " used to separate some texts.
 " They were not supposed to expand anything.
 "}}}
-set wc=9
-set wcm=26
+set wildchar=9
+set wildcharm=26
 
 " winaltkeys {{{2
 
@@ -2310,7 +2312,7 @@ fu! s:compact_whitespace() abort
     endif
     let cml = '\V'.matchstr(split(&l:cms, '%s')[0], '\S*').'\m'
 
-    if getline('.') =~# cml.'\s\s' && &ft isnot# 'markdown'
+    if getline('.') =~# cml.'\s\s' && &filetype isnot# 'markdown'
         let pat = '\s*'.cml.'\zs\s\+'
         let rep = ' '
     else
@@ -2401,7 +2403,7 @@ endfu
 ino  <silent>  <bslash>  <c-r>=<sid>indent_before_backslash()<cr>
 
 fu! s:indent_before_backslash() abort
-    if &ft isnot# 'vim'
+    if &filetype isnot# 'vim'
         return '\'
     endif
 
@@ -2467,7 +2469,7 @@ fu! s:repeat_last_edit_on_last_text() abort
     let last_text = substitute(last_text, '\\n$', '', '')
     let @/ = last_text
 
-    set hls
+    set hlsearch
     "               ┌ insert the previously inserted text and stop insert
     "          ┌────┤
     return "cgn\<c-@>"
@@ -3059,7 +3061,7 @@ fu! s:print_full_path() abort
 
     if fname is# ''
         echo '[No Name]'
-    elseif &bt is# 'quickfix'
+    elseif &buftype is# 'quickfix'
         echo w:quickfix_title
     else
         if fname[0] is# '/' || fname =~# '^\l\+://'
@@ -3331,7 +3333,7 @@ fu! s:jump_to_definition() abort
     try
         exe "norm! \<c-]>"
     catch /^Vim\%((\a\+)\)\=:E\%(426\|433\)/
-        if &ft isnot# 'help'
+        if &filetype isnot# 'help'
             norm! 1gd
             norm! zvzz
         endif
@@ -3406,14 +3408,14 @@ endfu
 
 fu! s:indent_without_shiftround(type) abort
     let op = (s:indent_without_shiftround_dir is# 'increase' ? '>>' : '<<')
-    let sr_save = &sr
+    let sr_save = &shiftround
     try
-        set sr
+        set shiftround
         exe 'norm! '.v:count1.op
     catch
         return lg#catch_error()
     finally
-        let &sr = sr_save
+        let &shiftround = sr_save
     endtry
 endfu
 
@@ -4337,10 +4339,10 @@ fu! s:doc(...) abort
     let url = 'http://devdocs.io/?q='
 
     let args = a:0 ==# 0
-           \ ?     url.&ft.' '.expand('<cword>')
+           \ ?     url . &filetype . ' ' . expand('<cword>')
            \ : a:0 ==# 1
-           \ ?     url.&ft.' '.a:1
-           \ :     url.join(a:000)
+           \ ?     url . &filetype . ' ' . a:1
+           \ :     url . join(a:000)
 
     sil! call system(cmd.' '.string(args))
 endfu
@@ -4356,22 +4358,22 @@ com! -bar DiffOrig echo s:diff_orig()
 
 fu! s:diff_orig() abort
     sil call save#toggle_auto(0)
-    let cole_save = &l:cole
-    setl cole=0
+    let cole_save = &l:conceallevel
+    setl conceallevel=0
 
     let tempfile = tempname().'/Original File'
     exe 'vnew '.tempfile
-    setl bt=nofile nobl noswf nowrap
+    setl buftype=nofile nobuflisted noswapfile nowrap
 
     sil 0r #
     $d_
-    setl noma ro
+    setl nomodifiable readonly
 
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
 
     diffthis
     nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-    let &ft = getbufvar('#', '&ft')
+    let &filetype = getbufvar('#', '&ft')
 
     let s:tmp_partial = function('s:diff_orig_restore_settings', [cole_save])
     augroup diff_orig_restore_settings
@@ -4384,8 +4386,8 @@ fu! s:diff_orig() abort
     return ''
 endfu
 
-fu! s:diff_orig_restore_settings(cole,_) abort
-    exe 'setl cole='.a:cole
+fu! s:diff_orig_restore_settings(conceallevel,_) abort
+    exe 'setl conceallevel='.a:conceallevel
     diffoff!
     norm! zvzz
     aug! diff_orig_restore_settings
@@ -4577,7 +4579,7 @@ fu! s:plugins_to_commit() abort
         return
     endif
 
-    call filter(output, {i,v -> v =~ '^\S'})
+    call filter(output, {i,v -> v =~# '^\S'})
     call map(output, {i,v -> glob($HOME.'/.vim/plugged/'.v.'/*', 0, 1)[0]})
     call map(output, {i,v -> {'filename': v, 'valid': 1}})
     call setqflist(output)
@@ -4740,7 +4742,7 @@ fu! s:retab(line1, line2, bang) abort
     if !a:bang
         exe 'sil keepj keepp '.a:line1.','.a:line2.'s:^\t\+:\=repeat(" ", &ts * len(submatch(0))):e'
     else
-        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:\v^( {'.&ts.'})+:\=repeat("\t", len(submatch(0))/&ts):e'
+        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:\v^( {' . &tabstop . '})+:\=repeat("\t", len(submatch(0))/&ts):e'
     endif
     call winrestview(view)
 endfu
@@ -5264,7 +5266,7 @@ fu! s:filter_special_file() abort
             return
         endif
 
-        setl ma noro
+        setl modifiable noreadonly
         " About: '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' -'{{{
         "                                                             │
         "                                                             └ write output on STDOUT, which is piped to `par`
@@ -5290,7 +5292,7 @@ fu! s:filter_special_file() abort
         "}}}
         sil exe ext2cmd[ext]
         let b:did_filter_special_file = 1
-        setl bt=nofile noma noswf ro
+        setl buftype=nofile nomodifiable noswapfile readonly
     endif
 endfu
 
@@ -5533,7 +5535,7 @@ fu! s:trailing_whitespace(create_match) abort
 
     elseif a:create_match
        \ && !exists('w:my_trailing_whitespace')
-       \ && index(s:NO_TRAILING_WHITESPACE_FT, &ft) ==# -1
+       \ && index(s:NO_TRAILING_WHITESPACE_FT, &filetype) ==# -1
         let w:my_trailing_whitespace = matchadd('Error', '\s\+$', -1)
     endif
 endfu
@@ -5633,7 +5635,7 @@ endfu
 "
 " 8 -
 "
-" créer des commandes pour fuzzy search la changeslist, et d'autres listes (via fzf).
+" créer des commandes pour fuzzy search la changelist, et d'autres listes (via fzf).
 "
 " 9 -
 "
@@ -6112,7 +6114,7 @@ endfu
 "         :cfilter! -other_plugins
 "
 " 36 -
-" Implement a global `:foldtoggle` command
+" Implement a global `:FoldToggle` command
 "
 " 37 -
 " refactor all our functions which populate the qfl to offload work to a single
@@ -7374,21 +7376,33 @@ endfu
 " is evaluated as a string.
 " Wouldn't we be happy to have a strict comparison in this case?
 "
+" Besides, the automatic conversion (string →  number) may be disabled in future
+" scripts: https://github.com/vim/vim/pull/3857
+"
 " 125 -
-" Remove `&l:` when it's not necessary?
+" - remove `&l:` when it's not necessary?  (or the opposite: add it everywhere?)
+" - use full name of commands and options?
+" - switch from 4 spaces to 2 spaces for indentation?
+"
+" These are complex refactorings, because there will probably be a lot of matches.
+" Try to write a custom command, which would refactor a script on-demand.
+" Use it from time to time on a plugin you want to improve.
+"
+" But don't fuck up the alignment of our diagrams.
+" So, before using your custom refactoring command, look for all the diagrams:
+"
+"     Vim /[─│]/j ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc
+"
+" And manually refactor everything you can around them.
+" Then, you  should be able to  use your refactoring command  wherever you want,
+" without breaking our diagrams.
 "
 " 126 -
-" Use full name of commands?
-"
-" 127 -
-" Switch from 4 spaces to 2 spaces for indentation?
-"
-" 128 -
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
 "
-" 129 -
+" 127 -
 " This mapping works in Vim, but not in Neovim:
 "
 "     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'int')})[-1]
@@ -7402,7 +7416,7 @@ endfu
 " But still, report it on Neovim's bug tracker.
 " Btw, it looks similar to another issue we opened.
 "
-" 130 -
+" 128 -
 "
 "     % hash | vipe
 "
@@ -7432,14 +7446,14 @@ endfu
 " When it sees a directory such as `~`, it should not search in it.
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
 "
-" 131 -
+" 129 -
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
 " Maybe  you should  use other  keys to  handle folds,  so that  you can  decide
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 132 -
+" 130 -
 " Read this:
 "
 "     https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
@@ -7453,7 +7467,7 @@ endfu
 "     https://github.com/prabirshrestha/async.vim (243)
 "     https://github.com/metakirby5/codi.vim (747)
 "
-" 133 -
+" 131 -
 " Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
 " between `~/.vim/plugin` and `~/.vim/after/plugin/`?
 "
@@ -7475,7 +7489,7 @@ endfu
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
 "
-" 134 -
+" 132 -
 " Whenever you used `system()`, `systemlist()`, or  `:!` to run a shell command,
 " and it  contained a filename, make  sure you used the  filename modifiers `:p`
 " and `:S`.
@@ -7489,10 +7503,10 @@ endfu
 "     ✔
 "     $ cmd /path/to/-some_file
 "
-" 135 -
+" 133 -
 " Read: https://vimways.org/2018/vims-social-life/
 "
-" 136 -
+" 134 -
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
@@ -7501,7 +7515,7 @@ endfu
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
 "
-" 137 -
+" 135 -
 " We don't version control our pdfs in `~/wiki`.
 " Suppose one of our  notes has a link to a local pdf,  and we restore our notes
 " on a new machine; the link will be broken.
@@ -7763,9 +7777,9 @@ fu! s:goyo_enter() abort
     set scrolloff=999
     set noshowcmd
 
-    let  s:goyo_cocu_save = &l:cocu
-    let  s:goyo_cole_save = &l:cole
-    setl cocu=nc cole=3
+    let  s:goyo_cocu_save = &l:concealcursor
+    let  s:goyo_cole_save = &l:conceallevel
+    setl concealcursor=nc conceallevel=3
 
     " FIXME:
     " need to find another way to change the shape of the cursor in Neovim
@@ -7816,8 +7830,8 @@ fu! s:goyo_leave() abort
     exe 'norm '.(s:cul_save ? '[' : ']').'oL'
     set  scrolloff=3
 
-    let &l:cocu = s:goyo_cocu_save
-    let &l:cole = s:goyo_cole_save
+    let &l:concealcursor = s:goyo_cocu_save
+    let &l:conceallevel = s:goyo_cole_save
     unlet! s:goyo_cocu_save s:goyo_cole_save
 
     let &t_EI = "\e[2 q"
