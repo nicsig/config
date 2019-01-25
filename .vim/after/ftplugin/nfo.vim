@@ -6,4 +6,4 @@
 " Source:
 " https://www.reddit.com/r/vim/comments/aj9ejv/view_nfo_files_with_vim/eetqozi/
 "}}}
-try | silent edit ++enc=cp437 | catch | endtry
+silent! edit ++enc=cp437
