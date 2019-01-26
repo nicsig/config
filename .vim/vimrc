@@ -2613,8 +2613,8 @@ nno  <expr><silent>  \p  myfuncs#block_select_paragraph()
 " g                   (prefix) {{{3
 " g^ g$       first/last tabpage {{{4
 
-nno  g^  :<c-u>1tabnext<cr>
-nno  g$  :<c-u>$tabnext<cr>
+nno <silent> g^  :<c-u>1tabnext<cr>
+nno <silent> g$  :<c-u>$tabnext<cr>
 
 " g c-v       select last edited text {{{4
 
@@ -7101,12 +7101,12 @@ endfu
 " sidebar/cheatsheet. show only the less well known at any given time.
 "
 " 105 -
-" atm, `:fzfiles` doesn't search hidden files/directories.
-" solution:
+" Atm, `:FzFiles` doesn't search hidden files/directories.
+" Solution:
 "
 "     let $fzf_default_command = 'ag --hidden --ignore .git -g ""'
 "
-" see also:
+" See also:
 "
 "     https://github.com/junegunn/fzf.vim/issues/226
 "
