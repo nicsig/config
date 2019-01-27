@@ -7273,7 +7273,6 @@ endfu
 " 120 -
 " Watch out for this anti-pattern:
 "
-"     " assume that `var` can only have 3 values ['foo', 'bar', 'baz']
 "     echo var is# 'foo'
 "         \ ?     1
 "         \ : var is# 'bar'
@@ -7282,13 +7281,18 @@ endfu
 "
 " You should rewrite the code like so:
 "
+"     " `var` can have the values `foo`, `bar` and `baz`
 "     echo {'foo': 1, 'bar': 2, 'baz': 3}[var]
+"
+" Or:
+"     " `var` can have the values `foo`, `bar` or something else
+"     echo get({'foo': 1, 'bar': 2}, var, 3)
 "
 " It's better because:
 "
 "   - more concise/readable
-"   - mention explicitly the third value 'baz'
-"   (before it was implicit/not mentioned at all)
+"   - mention explicitly the third value 'baz' in the first case
+"     (before it was implicit/not mentioned at all)
 "   - easier to expand later if `var` can have more values
 "
 " 121 -
