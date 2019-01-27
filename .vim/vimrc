@@ -1453,6 +1453,13 @@ set shortmess+=s
 " don't print "written" or "[w]" when writing a file
 set shortmess+=W
 
+" showbreak {{{2
+
+augroup my_showbreak
+    au!
+    au BufEnter,WinEnter * if &filetype is# 'markdown' | set showbreak= | else | set showbreak=↪ | endif
+augroup END
+
 " signcolumn {{{2
 
 " We want a margin between the left of the screen and the text.
@@ -7515,6 +7522,9 @@ endfu
 " code, compile it into a pdf, and open it.
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
+"
+" 135 -
+" Lines in man pages are too long.
 
 
 
@@ -7550,14 +7560,6 @@ augroup syled_comments
     au Syntax * if index(s:syled_comments_filetypes, expand('<amatch>')) >= 0
         \ |     sil! call lg#styled_comment#syntax()
         \ | endif
-augroup END
-
-
-
-augroup my_man_no_showbreak
-    au!
-    " TODO: lines are too long
-    au FileType man setl showbreak=
 augroup END
 
 
