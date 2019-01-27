@@ -282,7 +282,8 @@ fu! s:styled_comments() abort "{{{2
     hi link markdownIdDeclaration  Typedef
 
     hi link markdownCodeBlock           Comment
-    hi link markdownListItemCodeBlock   Comment
+    hi link markdownListItemCodeBlock   markdownCodeBlock
+    hi link markdownFencedCodeBlock     markdownCodeBlock
     hi link CommentListItemCodeSpan     markdownListItemCodeSpan
 
     hi link markdownListItemBlockquote  markdownBlockquote
