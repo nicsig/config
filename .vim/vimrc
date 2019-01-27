@@ -2142,9 +2142,6 @@ set winaltkeys=no
 " don't wrap long lines by default
 set nowrap
 
-" display a character in front of a wrapped line
-set showbreak=↪
-
 " a soft-wrapped line will be displayed with the same level of indentation as
 " the first one
 set breakindent
