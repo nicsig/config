@@ -7529,6 +7529,15 @@ endfu
 "
 " 135 -
 " Lines in man pages are too long.
+"
+" 136 -
+" Study this (Neovim):
+"     :help nvim_buf_set_virtual_text()
+"
+" Usage example:
+"     :call nvim_buf_set_virtual_text(bufnr('%'), 0, line('w0')-1, [[repeat(' ',max([4,80-strdisplaywidth(getline(line('w0')))])).'Fancy Status', 'Error']],{})
+"
+" Source: https://vi.stackexchange.com/a/18729/17449
 
 
 
@@ -7593,8 +7602,7 @@ augroup END
 "    20. async
 "    21. unix
 "    22. package
-"    23. cwd
-"    24. unix
+"    23. unix
 "
 " Once finished, get back to studying the terminal and latex.
 
