@@ -8,13 +8,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +40 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
+badd +505 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+badd +3027 ~/.vim/vimrc
+badd +35 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
 badd +762 ~/wiki/vim/highlighting.md
 badd +1103 ~/wiki/vim/qf.md
 badd +1850 ~/wiki/vim/syntax_hl.md
 badd +149 ~/wiki/vim/async.md
 badd +761 ~/wiki/vim/funcref.md
-badd +505 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 badd +590 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
 badd +8 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +15 ~/wiki/git.md
@@ -23,6 +24,7 @@ badd +47 /usr/local/share/vim/vim81/colors/README.txt
 argglobal
 %argdel
 set stal=2
+tabnew
 tabnew
 tabnew
 tabnew
@@ -327,20 +329,51 @@ setlocal fdn=20
 setlocal fen
 10
 normal! zo
-let s:l = 38 - ((6 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-38
+1
 normal! 0
 lcd ~/.vim/plugged/asyncmake
 wincmd w
-4wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabnext 5
+tabnext
+edit ~/.vim/vimrc
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+2166
+normal! zo
+2440
+normal! zo
+3019
+normal! zo
+3061
+normal! zo
+let s:l = 3064 - ((250 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+3064
+normal! 025|
+lcd ~/.vim
+tabnext 6
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

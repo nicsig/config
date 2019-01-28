@@ -3019,11 +3019,18 @@ nno  <silent>  <bar>X  :<c-u>call myfuncs#tmux_current_command(getline('.'))<cr>
 " hyphen              (prefix) {{{3
 " -a  -8           ascii / bytes info {{{4
 
-" We remap `-a` to a function of the unicode.vim plugin which gives us more info
-" about the  character under the  cursor. In particular, its unicode  name, html
-" entity (&entity_name; OR &#entity_number;), and digraph inside parentheses (if
-" there's one defined).
-nmap  -a  <plug>(UnicodeGA)
+" We remap `-a`  to a function of  the `unicode.vim` plugin which  gives us more
+" info about the character under the cursor.
+" In   particular,   its   unicode   name,   html   entity   (&entity_name;   OR
+" &#entity_number;), and digraph inside parentheses (if there's one defined).
+"
+" We also capture the  output of the command in the `o` register,  to be able to
+" dump it in a buffer.
+nno <silent> -a  :<c-u>call <sid>unicode_ga()<cr>
+fu! s:unicode_ga() abort
+    let @o = substitute(execute("norm \<plug>(UnicodeGA)", 'silent!'), '\s*$', '', '')
+    exe "norm \<plug>(UnicodeGA)"
+endfu
 
 " We remap `-8` to `g8` for consistency.
 nno  -8  g8
@@ -3054,7 +3061,15 @@ nno  -f  :<c-u>echohl Title <bar> echo '[filetype] '.(!empty(&ft) ? &ft : '∅')
 " -p  -P           show filePath / :pwd {{{4
 
 nno  -p  :<c-u>call <sid>print_full_path()<cr>
-nno  -P  :<c-u>pwd<cr>
+nno  <silent> -P  :<c-u>call <sid>print_cwd()<cr>
+
+fu! s:print_cwd() abort
+    let output = execute('pwd', 'silent!')[1:]
+    let @o = output
+    echohl Directory
+    echo output
+    echohl NONE
+endfu
 
 fu! s:print_full_path() abort
     echohl Title
@@ -3064,13 +3079,13 @@ fu! s:print_full_path() abort
     let fname = substitute(fname, '/$', '', '')
 
     if fname is# ''
-        echo '[No Name]'
+        let output = '[No Name]'
     elseif &buftype is# 'quickfix'
-        echo w:quickfix_title
+        let output = w:quickfix_title
     else
         if fname[0] is# '/' || fname =~# '^\l\+://'
             let resolved = resolve(fname)
-            echo resolved is# fname ? fname : fname.' -> '.resolved
+            let output = resolved is# fname ? fname : fname.' -> '.resolved
         else
             " Why is adding the current working directory sometimes necessary?{{{
             "
@@ -3081,9 +3096,12 @@ fu! s:print_full_path() abort
             "     :e foo/bar
             "     :echo expand('%:p')
             "}}}
-            echo getcwd().'/'.fname
+            let output = getcwd().'/'.fname
         endif
     endif
+
+    let @o = output
+    echo output
 
     echohl NONE
 endfu
@@ -6632,7 +6650,7 @@ endfu
 "     :h terminal.txt
 "
 " 76 -
-" in ~/wiki/vim/funcref.md, look for the pattern `funcref(`.
+" in `~/wiki/vim/funcref.md`, look for the pattern `funcref(`.
 " there are 2 codes side-by-side.
 " they are separated with `┊` characters.
 " if you press `+sip` on the code, only the one on the left is sourced.
@@ -6670,7 +6688,7 @@ endfu
 " If neovim is unable to suggest suggestions to fix spelling errors,
 " start it like this:
 "
-"         $ nvim -nu norc
+"         $ nvim -nu NORC
 "
 " write a word with a spelling error:
 "
@@ -6713,13 +6731,13 @@ endfu
 "
 " but, why does the issue occur with `![m`, but not with `![z`?
 "
-" update:
+" Update:
 " it probably has sth to do with these functions:
 "
 "    - fold#motion#go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
 "    - lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
 "
-" update:
+" Update:
 " it has to do with the `<silent>` argument in the mapping.
 " we need it in all modes except in operator-pending mode.
 " alternatively, we could include at the end of `lg#motion#regex#go()`:
@@ -6727,7 +6745,7 @@ endfu
 "         exe 'norm! '.line('.').'g'
 "
 " it would not make the cursor move, but it would make the command-line redrawn.
-" mwe:
+" MWE:
 "
 "         map  <silent>  ]g  :call search('pat')<cr>
 "             !]g → command-line not redrawn
@@ -6757,10 +6775,10 @@ endfu
 "
 " also, make some cleaning in our mappings:
 "
-"    - x_gj      join lines
-"    - x_gc-j    join lines without inserting/removing spaces
-"    - x_mj      join two blocks
-"    - x_mc-j    join two blocks in reverse order
+"    - x_gJ      join lines
+"    - x_g C-j   join lines without inserting/removing spaces
+"    - x_mJ      join two blocks
+"    - x_m C-j   join two blocks in reverse order
 "
 " are they consistent?
 " could we make them easier to remember?
@@ -7104,7 +7122,7 @@ endfu
 " Atm, `:FzFiles` doesn't search hidden files/directories.
 " Solution:
 "
-"     let $fzf_default_command = 'ag --hidden --ignore .git -g ""'
+"     let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git -g ""'
 "
 " See also:
 "
@@ -7296,22 +7314,6 @@ endfu
 "   - easier to expand later if `var` can have more values
 "
 " 121 -
-" Recently, when we try to push a commit and press enter after our username,
-" the terminal writes `^M` instead of a linefeed.
-" Next time it happens, try:
-"
-"     # check settings (`icrnl` should not be prefixed by `-`)
-"     $ stty -a
-"
-"     # fix tty
-"     $ stty icrnl
-"
-"     https://askubuntu.com/a/454663/867754
-"
-" Find what's causing the issue.
-" Is it something we do in Vim?
-"
-" 122 -
 " Add  spaces  around  all  concatenation  operators: it  makes  the  code  more
 " readable?
 "
@@ -7363,7 +7365,7 @@ endfu
 "                ^^^
 "     'some text('.'), other text'
 "                ^^^
-" 123 -
+" 122 -
 " Remove all `==#`, `!=#`, `==?`, `!=?`.
 " Replace them with `==`, `!=`.
 " The `#` and `?` is useless now.
@@ -7382,7 +7384,7 @@ endfu
 " Besides, the automatic conversion (string →  number) may be disabled in future
 " scripts: https://github.com/vim/vim/pull/3857
 "
-" 124 -
+" 123 -
 " - remove `&l:` when it's not necessary?  (or the opposite: add it everywhere?)
 " - use full name of commands and options?
 " - switch from 4 spaces to 2 spaces for indentation?
@@ -7400,12 +7402,12 @@ endfu
 " Then, you  should be able to  use your refactoring command  wherever you want,
 " without breaking our diagrams.
 "
-" 125 -
+" 124 -
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
 "
-" 126 -
+" 125 -
 " This mapping works in Vim, but not in Neovim:
 "
 "     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'int')})[-1]
@@ -7419,7 +7421,7 @@ endfu
 " But still, report it on Neovim's bug tracker.
 " Btw, it looks similar to another issue we opened.
 "
-" 127 -
+" 126 -
 "
 "     % hash | vipe
 "
@@ -7449,14 +7451,14 @@ endfu
 " When it sees a directory such as `~`, it should not search in it.
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
 "
-" 128 -
+" 127 -
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
 " Maybe  you should  use other  keys to  handle folds,  so that  you can  decide
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 129 -
+" 128 -
 " Read this:
 "
 "     https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
@@ -7470,7 +7472,7 @@ endfu
 "     https://github.com/prabirshrestha/async.vim (243)
 "     https://github.com/metakirby5/codi.vim (747)
 "
-" 130 -
+" 129 -
 " Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
 " between `~/.vim/plugin` and `~/.vim/after/plugin/`?
 "
@@ -7492,7 +7494,7 @@ endfu
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
 "
-" 131 -
+" 130 -
 " Whenever you used `system()`, `systemlist()`, or  `:!` to run a shell command,
 " and it  contained a filename, make  sure you used the  filename modifiers `:p`
 " and `:S`.
@@ -7506,10 +7508,10 @@ endfu
 "     ✔
 "     $ cmd /path/to/-some_file
 "
-" 132 -
+" 131 -
 " Read: https://vimways.org/2018/vims-social-life/
 "
-" 133 -
+" 132 -
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
@@ -7518,7 +7520,7 @@ endfu
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
 "
-" 134 -
+" 133 -
 " We don't version control our pdfs in `~/wiki`.
 " Suppose one of our  notes has a link to a local pdf,  and we restore our notes
 " on a new machine; the link will be broken.
@@ -7527,7 +7529,7 @@ endfu
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
 "
-" 135 -
+" 134 -
 " Study this (Neovim):
 "     :help nvim_buf_set_virtual_text()
 "
@@ -7536,7 +7538,7 @@ endfu
 "
 " Source: https://vi.stackexchange.com/a/18729/17449
 "
-" 136 -
+" 135 -
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
 
