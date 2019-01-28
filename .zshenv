@@ -239,6 +239,8 @@ export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
 #}}}
 export MYMANSECT="${MANSECT}"
 
+export MANWIDTH=80
+
 # Why this value?{{{
 #
 # It's recommended in `man par`.

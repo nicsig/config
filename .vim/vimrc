@@ -4572,7 +4572,7 @@ fu! s:plugins_to_commit() abort
     endif
 
     let my_plugins = readfile($MYVIMRC)
-    call filter(my_plugins, {i,v -> v =~# '^Plug\s\+''lacygoill/'})
+    call filter(my_plugins, {i,v -> v =~# '^\s*Plug\s\+''lacygoill/'})
     call map(my_plugins, {i,v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
     let my_plugins = join(my_plugins)
     sil let output = systemlist('commit-these-vim-plugins.sh '.my_plugins)
@@ -7528,9 +7528,6 @@ endfu
 " links.
 "
 " 135 -
-" Lines in man pages are too long.
-"
-" 136 -
 " Study this (Neovim):
 "     :help nvim_buf_set_virtual_text()
 "
@@ -7540,8 +7537,6 @@ endfu
 " Source: https://vi.stackexchange.com/a/18729/17449
 
 
-
-nno  <c-g>D     y$:echo <c-r>"
 
 
 let s:syled_comments_filetypes = [
