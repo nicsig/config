@@ -9,7 +9,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +505 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +3027 ~/.vim/vimrc
+badd +3078 ~/.vim/vimrc
 badd +35 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
 badd +762 ~/wiki/vim/highlighting.md
 badd +1103 ~/wiki/vim/qf.md
@@ -21,6 +21,7 @@ badd +8 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +15 ~/wiki/git.md
 badd +1 ~/Desktop/test.vim
 badd +47 /usr/local/share/vim/vim81/colors/README.txt
+badd +0 ~/.vim/plugged/vim-source/autoload/source.vim
 argglobal
 %argdel
 set stal=2
@@ -344,11 +345,17 @@ exe '4resize ' . ((&lines * 24 + 16) / 33)
 tabnext
 edit ~/.vim/vimrc
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -358,21 +365,38 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-2166
+5565
 normal! zo
-2440
-normal! zo
-3019
-normal! zo
-3061
-normal! zo
-let s:l = 3064 - ((250 * winheight(0) + 15) / 30)
+let s:l = 6073 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3064
-normal! 025|
+6073
+normal! 011|
 lcd ~/.vim
+wincmd w
+argglobal
+if bufexists('~/.vim/plugged/vim-source/autoload/source.vim') | buffer ~/.vim/plugged/vim-source/autoload/source.vim | else | edit ~/.vim/plugged/vim-source/autoload/source.vim | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-source
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 6
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
