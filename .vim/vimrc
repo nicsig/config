@@ -6018,38 +6018,38 @@ endfu
 " create a mapping to populate command-line with `:ltag /`, then open the
 " location window. ex:
 "
-        nno  <expr>  <c-g>t  <sid>ltag(1)
-        fu! s:ltag(step) abort
-            if a:step ==# 1
-                augroup my_ltag
-                    au!
-                    " why the timer?{{{
-                    "
-                    " if we cancel, or the search fails to find anything,
-                    " the fire-once autocmd will still be, wrongly, active.
-                    " we should make sure to remove it with a timer, after
-                    " a very short period of time.
-                    "}}}
-                    " still, syntax highlighting would work better.
-                    " less hack, no timer.
-                    au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
-                    au FileType qf sil! call s:ltag(2)
-                        \ | exe 'au! my_ltag' | aug! my_ltag
-                augroup END
-                return ':ltag / | lw'.repeat("\<left>", 5)
-            elseif a:step ==# 2
-                let pat = '|.\{-}|'
-                " FIXME:
-                " It works if we press `gt`, which invokes this function.
-                " But  if we  execute `:ltag`  manually, the  function won't  be
-                " invoked, and the conceal won't be applied.
-                " This brings an inconsistent user experience.
-                " Try to use a syntax highlighting file (inspiration: man plugin
-                " in neovim).
-                call qf#set_matches('vimrc:ltag', 'conceal', pat)
-                call qf#create_matches()
-            endif
-        endfu
+      nno  <expr>  <c-g>t  <sid>ltag(1)
+      fu! s:ltag(step) abort
+          if a:step ==# 1
+              augroup my_ltag
+                  au!
+                  " why the timer?{{{
+                  "
+                  " if we cancel, or the search fails to find anything,
+                  " the fire-once autocmd will still be, wrongly, active.
+                  " we should make sure to remove it with a timer, after
+                  " a very short period of time.
+                  "}}}
+                  " still, syntax highlighting would work better.
+                  " less hack, no timer.
+                  au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
+                  au FileType qf sil! call s:ltag(2)
+                      \ | exe 'au! my_ltag' | aug! my_ltag
+              augroup END
+              return ':ltag / | lw'.repeat("\<left>", 5)
+          elseif a:step ==# 2
+              let pat = '|.\{-}|'
+              " FIXME:
+              " It works if we press `gt`, which invokes this function.
+              " But  if we  execute `:ltag`  manually, the  function won't  be
+              " invoked, and the conceal won't be applied.
+              " This brings an inconsistent user experience.
+              " Try to use a syntax highlighting file (inspiration: man plugin
+              " in neovim).
+              call qf#set_matches('vimrc:ltag', 'conceal', pat)
+              call qf#create_matches()
+          endif
+      endfu
 "
 " Update:
 " it should probably be implemented as a cycle in `vim-cmdline`.
