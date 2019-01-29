@@ -109,6 +109,10 @@ stty -ixon
 # │  │       │ │         │
 # │  ├──────┐├┐├┐        ├─────────┐}}}
 PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
+#   │
+#   └ by prefixing the string with a dollar sign,
+#    we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
+#    otherwise, we would need to write `'\''`, which is less readable
 # TODO: add git branch in prompt{{{
 #
 #     # https://stackoverflow.com/a/12935606/9780968
@@ -2659,36 +2663,6 @@ alias vb_snapshot_list='VBoxManage snapshot ubuntu list'
 alias vb_snapshot_remove='vboxmanage snapshot ubuntu delete {snapname}'
 alias vb_snapshot_restore='vboxmanage snapshot ubuntu restorecurrent'
 alias vb_snapshot_take='vboxmanage snapshot ubuntu take {snapname} --description "my snapshot" --live'
-
-# vim {{{3
-
-# Rationale:{{{
-#
-# By default,  Neovim sets 'gcr', which  makes it send escape  sequences, to set
-# the shape of the cursor.
-# Those are not understood by our current xfce4-terminal.
-#
-# This is  not an  issue when  we start  `$ nvim`  with `vim-term`,  because the
-# latter correctly makes 'gcr' empty when we're in xfce4-terminal.
-# But it does become an issue when we start `$ nvim -Nu NONE`.
-#
-# Anyway, this is wrong, Neovim shouldn't do that:
-#     https://github.com/neovim/neovim/issues/6778#issuecomment-302945056
-#}}}
-alias nvim_none='nvim -Nu NONE +"set gcr="'
-
-# Rationale:{{{
-#
-# This alias is not meant to be executed as it is.
-# It's meant to be expanded on the command line (press `M-e`), then edited.
-# It's useful to remind us of all the options available when we're debugging Vim,
-# and we need to reproduce an issue with a minimal of configurations.
-#}}}
-alias vim_with_less_config=$'vim -Nu /tmp/vimrc --cmd \'filetype plugin indent on | syntax enable\' -U NONE -i NONE --noplugin'
-#                          │
-#                          └ by prefixing the string with a dollar sign,
-#                            we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
-#                            otherwise, we would need to write `'\''`, which is less readable
 
 # website_cwd {{{3
 

@@ -9,7 +9,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +505 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +3078 ~/.vim/vimrc
+badd +3704 ~/.vim/vimrc
 badd +35 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
 badd +762 ~/wiki/vim/highlighting.md
 badd +1103 ~/wiki/vim/qf.md
@@ -21,10 +21,12 @@ badd +8 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +15 ~/wiki/git.md
 badd +1 ~/Desktop/test.vim
 badd +47 /usr/local/share/vim/vim81/colors/README.txt
-badd +0 ~/.vim/plugged/vim-source/autoload/source.vim
+badd +716 ~/.vim/plugged/vim-snippets/UltiSnips/vim.snippets
+badd +1 /tmp/vimrc
 argglobal
 %argdel
 set stal=2
+tabnew
 tabnew
 tabnew
 tabnew
@@ -248,7 +250,10 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-3wincmd k
+wincmd _ | wincmd |
+split
+4wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd w
@@ -260,7 +265,8 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 22 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -330,18 +336,38 @@ setlocal fdn=20
 setlocal fen
 10
 normal! zo
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
+let s:l = 12 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+12
 normal! 0
+lcd ~/.vim/plugged/asyncmake
+wincmd w
+argglobal
+if bufexists('/usr/local/share/vim/vim81/doc/options.txt') | buffer /usr/local/share/vim/vim81/doc/options.txt | else | edit /usr/local/share/vim/vim81/doc/options.txt | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal nofen
+silent! normal! zE
+let s:l = 8702 - ((14 * winheight(0) + 11) / 22)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+8702
+normal! 015|
 lcd ~/.vim/plugged/asyncmake
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 22 + 16) / 33)
 tabnext
 edit ~/.vim/vimrc
 set splitbelow splitright
@@ -365,19 +391,63 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-5565
+28
 normal! zo
-let s:l = 6073 - ((0 * winheight(0) + 0) / 1)
+104
+normal! zo
+142
+normal! zo
+288
+normal! zo
+1917
+normal! zo
+2166
+normal! zo
+2440
+normal! zo
+2778
+normal! zo
+3690
+normal! zo
+3710
+normal! zo
+3852
+normal! zo
+3945
+normal! zo
+4097
+normal! zo
+4318
+normal! zo
+4628
+normal! zo
+4634
+normal! zo
+4913
+normal! zo
+4940
+normal! zo
+5184
+normal! zo
+5239
+normal! zo
+5303
+normal! zo
+5546
+normal! zo
+5572
+normal! zo
+let s:l = 3703 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-6073
-normal! 011|
+3703
+normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists('~/.vim/plugged/vim-source/autoload/source.vim') | buffer ~/.vim/plugged/vim-source/autoload/source.vim | else | edit ~/.vim/plugged/vim-source/autoload/source.vim | endif
-setlocal fdm=manual
+if bufexists('~/.vim/plugged/vim-snippets/UltiSnips/vim.snippets') | buffer ~/.vim/plugged/vim-snippets/UltiSnips/vim.snippets | else | edit ~/.vim/plugged/vim-snippets/UltiSnips/vim.snippets | endif
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -385,19 +455,77 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
+640
+normal! zo
+686
+normal! zo
+694
+normal! zo
+let s:l = 690 - ((56 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+690
+normal! 0
+lcd ~/.vim/plugged/vim-snippets
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext
+edit ~/.vim/plugged/vim-snippets/UltiSnips/vim.snippets
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+640
+normal! zo
+let s:l = 716 - ((7 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+716
+normal! 0
+lcd ~/.vim/plugged/vim-snippets
+wincmd w
+argglobal
+if bufexists('/tmp/vimrc') | buffer /tmp/vimrc | else | edit /tmp/vimrc | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
 let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim/plugged/vim-source
+lcd ~/.vim
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 6
+tabnext 7
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

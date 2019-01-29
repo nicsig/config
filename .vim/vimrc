@@ -172,7 +172,7 @@ Plug 'ludovicchabant/vim-gutentags'
 Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
 Plug 'foxik/vim-makejob'
 " the neovim `man` plugin is better
-" TODO: although it doesn't support our custom motions such as `]r`
+" TODO: although it doesn't support our custom motions such as `]r`, nor folding
 if !has('nvim')
     Plug 'lacygoill/vim-man'
 endif
