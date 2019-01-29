@@ -20,9 +20,11 @@ badd +8 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +15 ~/wiki/git.md
 badd +1 ~/Desktop/test.vim
 badd +47 /usr/local/share/vim/vim81/colors/README.txt
+badd +0 ~/.vim/vimrc
 argglobal
 %argdel
 set stal=2
+tabnew
 tabnew
 tabnew
 tabnew
@@ -269,7 +271,7 @@ setlocal fdn=20
 setlocal fen
 140
 normal! zo
-let s:l = 149 - ((1 * winheight(0) + 0) / 1)
+let s:l = 149 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -327,20 +329,44 @@ setlocal fdn=20
 setlocal fen
 10
 normal! zo
-let s:l = 16 - ((10 * winheight(0) + 12) / 24)
+let s:l = 13 - ((12 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-16
+13
 normal! 0
 lcd ~/.vim/plugged/asyncmake
 wincmd w
-4wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabnext 5
+tabnext
+edit ~/.vim/vimrc
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+tabnext 6
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

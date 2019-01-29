@@ -5658,9 +5658,10 @@ endfu
 " Maybe draw inspiration from here:
 " http://stackoverflow.com/a/12380693
 "
-" Autre lien intéressant:
+" Autres liens intéressants:
 " https://silly-bytes.blogspot.fr/2016/06/seamlessly-vim-tmux-windowmanager_24.html
-" Même raccourcis pour window manager, Tmux, vim
+" https://sunaku.github.io/tmux-select-pane.html
+" https://github.com/urbainvaes/vim-tmux-pilot
 "
 " 8 -
 "
