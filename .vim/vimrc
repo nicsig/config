@@ -6163,6 +6163,17 @@ endfu
 "
 " 40 -
 " https://github.com/chrisbra/vim_faq
+" We've  stopped  reading  at  `faq-4.3`,  because we  need  time  to  integrate
+" `:tselect` in our workflow.
+" Indeed there are many similar commands:
+"
+"    - `g]`
+"    - `g C-]`
+"    - `:stselect`
+"    - `:ptselect`
+"    - `:tjump`
+"    - `:stjump`
+"    - `:ptjump`
 "
 " 41 -
 " no need to check `if &bt  is# 'quickfix'` before applying conceal
