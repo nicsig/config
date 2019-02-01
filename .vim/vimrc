@@ -5806,7 +5806,7 @@ endfu
 " 20 -
 " when replicating plugin cheat40, automatically set last motion with:
 "
-"     sil! call lg#motion#repeatable#make#set_last_used(']s', {'bwd': ',', 'fwd': ';'})
+"     sil! call lg#motion#repeatable#make#set_last_used(']s')
 "
 " this way, we can move along long lines with ; and ,
 "

@@ -1188,7 +1188,7 @@ endfu
 fu! myfuncs#search_todo(where) abort "{{{1
     try
         sil noa exe 'lvim /\CFIX'.'ME\|TO'.'DO/j '.(a:where is# 'buffer' ? '%' : './**/*')
-        sil! call lg#motion#repeatable#make#set_last_used(']l', {'bwd': ',', 'fwd': ';'})
+        sil! call lg#motion#repeatable#make#set_last_used(']l')
     catch /^Vim\%((\a\+)\)\?:E480/
         echom 'no TO'.'DO or FIX'.'ME'
         return

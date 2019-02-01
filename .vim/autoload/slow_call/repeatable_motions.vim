@@ -197,7 +197,7 @@ endfu
 "
 " We'll give this information to the function via:
 "
-"     lg#motion#repeatable#make#is_repeating(',_;')
+"     lg#motion#repeatable#make#is_repeating()
 "}}}
 
 " These mappings must be installed BEFORE `lg#motion#repeatable#make#all()`
@@ -245,7 +245,7 @@ fu! s:fts(cmd) abort
     " before returning the  keys to press. In the other, it  doesn't need to ask
     " anything.
     "}}}
-    if lg#motion#repeatable#make#is_repeating(',_;')
+    if lg#motion#repeatable#make#is_repeating()
         let move_fwd = a:cmd =~# '\C[fts]'
         "                └ When we press `;` after `fx`, how is `a:cmd` obtained?{{{
         "
@@ -287,7 +287,6 @@ endfu
 call lg#motion#repeatable#make#all({
 \        'mode':   '',
 \        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': 'F' ,  'fwd': 'f' },
@@ -322,7 +321,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':    'n',
 \        'buffer':  0,
-\        'axis':    {'bwd': ',', 'fwd': ';'},
 \        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '!e',  'fwd': '!e'},
@@ -333,7 +331,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '<f'    ,  'fwd': '>f'},
@@ -348,7 +345,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   '',
 \        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': "['",  'fwd': "]'"},
@@ -376,7 +372,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
@@ -393,7 +388,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'axis':   {'bwd': 'z,', 'fwd': 'z;'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '<l'    ,  'fwd': '>l'},
@@ -404,7 +398,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   '',
 \        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[Z',  'fwd': ']Z'},
@@ -420,7 +413,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'axis':   {'bwd': '+,', 'fwd': '+;'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[e', 'fwd': ']e'},
@@ -431,7 +423,6 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'axis':   {'bwd': ',', 'fwd': ';', 'mode': 'n'},
 \        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[oB',  'fwd': ']oB'},
