@@ -8,29 +8,21 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +488 ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/repeatable/make.vim
 badd +505 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 badd +13 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
 badd +762 ~/wiki/vim/highlighting.md
 badd +1103 ~/wiki/vim/qf.md
-badd +1850 ~/wiki/vim/syntax_hl.md
-badd +149 ~/wiki/vim/async.md
+badd +816 ~/wiki/vim/syntax_hl.md
+badd +147 ~/wiki/vim/async.md
 badd +761 ~/wiki/vim/funcref.md
 badd +155 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
 badd +8 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +15 ~/wiki/git.md
 badd +1 ~/Desktop/test.vim
 badd +47 /usr/local/share/vim/vim81/colors/README.txt
-badd +23 ~/Dropbox/vim_plugins/repmo-vim/autoload/repmo.vim
-badd +11 ~/Dropbox/vim_plugins/repmo-vim/README.markdown
-badd +0 ~/.vim/plugged/vim-matchit/.git/index
-badd +0 ~/.vim/plugged/vim-breakdown/.git/index
-badd +0 ~/.vim/plugged/vim-breakdown/.git/COMMIT_EDITMSG
 argglobal
 %argdel
 set stal=2
-tabnew
-tabnew
 tabnew
 tabnew
 tabnew
@@ -130,7 +122,7 @@ normal! zo
 normal! zo
 313
 normal! zo
-let s:l = 505 - ((174 * winheight(0) + 13) / 26)
+let s:l = 505 - ((183 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -347,165 +339,12 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/asyncmake
 wincmd w
+4wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabnext
-edit ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/repeatable/make.vim
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 26 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-481
-normal! zo
-482
-normal! zo
-let s:l = 488 - ((472 * winheight(0) + 13) / 26)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-488
-normal! 042|
-lcd ~/.vim/plugged/vim-lg-lib
-wincmd w
-argglobal
-if bufexists('~/Dropbox/vim_plugins/repmo-vim/autoload/repmo.vim') | buffer ~/Dropbox/vim_plugins/repmo-vim/autoload/repmo.vim | else | edit ~/Dropbox/vim_plugins/repmo-vim/autoload/repmo.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-14
-normal! zo
-let s:l = 16 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-16
-normal! 035|
-lcd ~/Dropbox/vim_plugins/repmo-vim
-wincmd w
-argglobal
-if bufexists('~/Dropbox/vim_plugins/repmo-vim/README.markdown') | buffer ~/Dropbox/vim_plugins/repmo-vim/README.markdown | else | edit ~/Dropbox/vim_plugins/repmo-vim/README.markdown | endif
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-12
-normal! zo
-let s:l = 25 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-25
-normal! 048|
-lcd ~/Dropbox/vim_plugins/repmo-vim
-wincmd w
-exe '1resize ' . ((&lines * 26 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-tabnext
-edit ~/.vim/plugged/vim-matchit/.git/index
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-wincmd =
-argglobal
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim/plugged/vim-matchit
-wincmd w
-argglobal
-if bufexists('~/.vim/plugged/vim-breakdown/.git/index') | buffer ~/.vim/plugged/vim-breakdown/.git/index | else | edit ~/.vim/plugged/vim-breakdown/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
-lcd ~/.vim/plugged/vim-breakdown
-wincmd w
-argglobal
-if bufexists('~/.vim/plugged/vim-breakdown/.git/COMMIT_EDITMSG') | buffer ~/.vim/plugged/vim-breakdown/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-breakdown/.git/COMMIT_EDITMSG | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 8) / 16)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim/plugged/vim-breakdown/.git
-wincmd w
-3wincmd w
-wincmd =
-tabnext 7
+tabnext 5
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
@@ -518,6 +357,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
