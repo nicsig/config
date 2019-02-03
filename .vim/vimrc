@@ -7482,13 +7482,15 @@ endfu
 " and `:S`.
 "
 " Among other  things, `:p`  is useful  to prevent a  filename beginning  with a
-" hyphen from being interpreted as an option by the shell.
+" hyphen from being interpreted as an option by the shell:
 "
-"     ✘
 "     $ cmd -some_file
+"           ^
+"           ✘
 "
-"     ✔
 "     $ cmd /path/to/-some_file
+"                    ^
+"                    ✔
 "
 " 129 -
 " Read: https://vimways.org/2018/vims-social-life/
