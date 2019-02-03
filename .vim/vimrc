@@ -7526,7 +7526,6 @@ endfu
 
 
 
-
 let s:syled_comments_filetypes = [
     \ 'awk',
     \ 'conf',
