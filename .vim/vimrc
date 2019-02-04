@@ -6164,14 +6164,16 @@ endfu
 "
 " 40 -
 " https://github.com/chrisbra/vim_faq
-" We've  stopped  reading  at  `faq-4.3`,  because we  need  time  to  integrate
+" We've  stopped  reading  at  `faq-4.2`,  because we  need  time  to  integrate
 " `:tselect` in our workflow.
 " Indeed there are many similar commands:
 "
 "    - `g]`
-"    - `g C-]`
 "    - `:stselect`
+"    - `:tselect`
 "    - `:ptselect`
+"
+"    - `g C-]`
 "    - `:tjump`
 "    - `:stjump`
 "    - `:ptjump`
@@ -6612,7 +6614,7 @@ endfu
 "     https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 "
 " 73 -
-" read:
+" Read:
 "
 "     :h syntax.txt     (not that big once you remove part 4: :h syn-file-remarks
 "                        you're not supposed to read entirely anyway, only the ones
