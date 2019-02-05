@@ -178,7 +178,7 @@ if !has('nvim')
 endif
 Plug 'lacygoill/vim-markdown'
 Plug 'lacygoill/vim-matchit'
-Plug 'kana/vim-operator-user/', {'frozen': 1}
+Plug 'kana/vim-operator-user', {'frozen': 1}
 Plug 'lacygoill/potion'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
 Plug 'lacygoill/vim-repeat', {'branch': 'assimil'}
@@ -7032,6 +7032,9 @@ endfu
 " 96 -
 " extract the code dedicated to templates from `vim-unix`.
 " make it able to evaluate viml (i.e. dynamic templates).
+"
+" See here for inspiration:
+" https://github.com/aperezdc/vim-template
 "
 " 97 -
 " rethink the following mappings:
