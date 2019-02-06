@@ -301,9 +301,14 @@ fu! s:styled_comments() abort "{{{2
     let comment_fg = s:get_attributes('Comment').fg
     let statement_fg = s:get_attributes('Statement').fg
     let repeat_fg = s:get_attributes('Repeat').fg
+    let title_fg = s:get_attributes('Title').fg
 
     " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
     if has('gui_running')
+        exe 'hi TitleItalic gui=italic guifg='.title_fg
+        exe 'hi TitleBold gui=bold guifg='.title_fg
+        exe 'hi TitleBoldItalic gui=bold,italic guifg='.title_fg
+
         exe 'hi CommentCodeSpan guibg='.guibg.' guifg='.comment_fg
         exe 'hi markdownCodeSpan guibg='.guibg
 
@@ -325,6 +330,10 @@ fu! s:styled_comments() abort "{{{2
 
     " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
     elseif &tgc
+        exe 'hi TitleItalic cterm=italic guifg='.title_fg
+        exe 'hi TitleBold cterm=bold guifg='.title_fg
+        exe 'hi TitleBoldItalic cterm=bold,italic guifg='.title_fg
+
         exe 'hi CommentCodeSpan guifg='.comment_fg.' guibg='.guibg
         exe 'hi markdownCodeSpan guibg='.guibg
 
@@ -346,6 +355,10 @@ fu! s:styled_comments() abort "{{{2
 
     " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
+        exe 'hi TitleItalic term=italic cterm=italic ctermfg='.title_fg
+        exe 'hi TitleBold term=bold cterm=bold ctermfg='.title_fg
+        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='.title_fg
+
         exe 'hi CommentCodeSpan ctermfg='.comment_fg.' ctermbg='.ctermbg
         exe 'hi markdownCodeSpan ctermbg='.ctermbg
 

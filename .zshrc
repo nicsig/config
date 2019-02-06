@@ -2224,6 +2224,10 @@ alias api='sudo aptitude install'
 alias app='sudo aptitude purge'
 alias aps='aptitude show'
 
+# awk {{{3
+
+alias rawk='rlwrap awk'
+
 # bc {{{3
 
 alias bc='bc -q -l'
