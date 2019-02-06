@@ -8,10 +8,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +272 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+badd +77 ~/.vim/plugged/vim-source/autoload/source.vim
+badd +53 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 badd +17 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
 badd +762 ~/wiki/vim/highlighting.md
-badd +1381 ~/wiki/vim/qf.md
+badd +1393 ~/wiki/vim/qf.md
 badd +816 ~/wiki/vim/syntax_hl.md
 badd +60 ~/wiki/vim/async.md
 badd +761 ~/wiki/vim/funcref.md
@@ -20,9 +21,11 @@ badd +8 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +15 ~/wiki/git.md
 badd +1 ~/Desktop/test.vim
 badd +47 /usr/local/share/vim/vim81/colors/README.txt
+badd +38 ~/wiki/awk/awk.md
 argglobal
 %argdel
 set stal=2
+tabnew
 tabnew
 tabnew
 tabnew
@@ -46,7 +49,7 @@ setlocal fdn=20
 setlocal fen
 1
 normal! zo
-let s:l = 15 - ((14 * winheight(0) + 15) / 30)
+let s:l = 15 - ((6 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -116,18 +119,24 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
+47
+normal! zo
+48
+normal! zo
+59
+normal! zo
 69
 normal! zo
 110
 normal! zo
 313
 normal! zo
-let s:l = 505 - ((183 * winheight(0) + 13) / 26)
+let s:l = 53 - ((3 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-505
-normal! 0
+53
+normal! 054|
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -176,7 +185,7 @@ setlocal fdn=20
 setlocal fen
 113
 normal! zo
-let s:l = 155 - ((39 * winheight(0) + 14) / 28)
+let s:l = 155 - ((30 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -228,7 +237,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 762 - ((226 * winheight(0) + 14) / 28)
+let s:l = 762 - ((64 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -327,20 +336,73 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1381 - ((49 * winheight(0) + 12) / 24)
+let s:l = 1393 - ((93 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1381
+1393
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-4wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-tabnext 5
+tabnext
+edit ~/wiki/awk/awk.md
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+argglobal
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 45 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+45
+normal! 0
+lcd ~/wiki/awk
+wincmd w
+argglobal
+if bufexists('~/.vim/plugged/vim-source/autoload/source.vim') | buffer ~/.vim/plugged/vim-source/autoload/source.vim | else | edit ~/.vim/plugged/vim-source/autoload/source.vim | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+36
+normal! zo
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-source
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext 6
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

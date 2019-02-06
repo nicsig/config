@@ -3117,7 +3117,7 @@ zle -N edit-command-line
 #
 # Yes, for the temporary filename to be passed.
 #}}}
-__sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call myfuncs#fix_shell_cmd()' "$@"
+__sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call source#fix_shell_cmd()' "$@"
 #            ├───────┘                 {{{
 #            └ man zshparam
 #              /PARAMETERS USED BY THE SHELL
