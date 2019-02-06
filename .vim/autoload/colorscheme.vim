@@ -122,10 +122,10 @@ fu! colorscheme#customize() abort "{{{2
     if has('gui_running') && has('vim_starting')
         augroup delay_colorscheme_when_gvim_starts
             au!
-            au VimEnter * call s:tabline() | call s:user() | call s:styled_comments()
+            au VimEnter * call s:styled_comments() | call s:tabline() | call s:title() | call s:user()
         augroup END
     else
-        call s:tabline() | call s:user() | call s:styled_comments()
+        call s:styled_comments() | call s:tabline() | call s:title() | call s:user()
     endif
 endfu
 
@@ -135,6 +135,184 @@ fu! colorscheme#save_last_version() abort "{{{2
 endfu
 " }}}1
 " Core {{{1
+fu! s:styled_comments() abort "{{{2
+    " Why `Underlined`?{{{
+    "
+    " From `:h group-name`:
+    "
+    " > *Underlined       text that stands out, HTML links
+    "
+    " Also, that's what the default markdown syntax plugin uses to highlight the
+    " text of a link.
+    "}}}
+    hi link markdownLinkText   Underlined
+    " Why `Float`?{{{
+    "
+    " That's what the default markdown syntax plugin uses to highlight a url.
+    "}}}
+    hi link markdownUrl        Float
+    " Why `Type`?{{{
+    "
+    " That's what the help syntax plugin uses.
+    "}}}
+    hi link markdownOption     Type
+    " Why `Delimiter`?{{{
+    "
+    " It seems to be the most meaningful choice.
+    " From `:h group-name`:
+    "
+    " >     Delimiter character that needs attention
+    "}}}
+    hi link markdownPointer    Delimiter
+    hi link markdownTable      Structure
+    hi link markdownKey        Special
+    hi link markdownRule       Delimiter
+    " Why `Typedef`?{{{
+    "
+    " That's what the default markdown syntax plugin uses to highlight the id of
+    " a reference link.
+    "}}}
+    hi link markdownIdDeclaration  Typedef
+
+    hi link markdownCodeBlock           Comment
+    hi link markdownListItemCodeBlock   markdownCodeBlock
+    hi link markdownFencedCodeBlock     markdownCodeBlock
+    hi link CommentListItemCodeSpan     markdownListItemCodeSpan
+
+    hi link markdownListItemBlockquote  markdownBlockquote
+
+    " Where did you find these color codes?{{{
+    "
+    " I chose a color from the terminal palette:
+    "
+    "     $ palette
+    "
+    " And to get the hex equivalent of the decimal code, I used `$ gpick`.
+    "}}}
+    let guibg = &bg is# 'light' ? '#bcbcbc' : '#626262'
+    let ctermbg = &bg is# 'light' ? 250 : 241
+    let comment_fg = s:get_attributes('Comment').fg
+    let statement_fg = s:get_attributes('Statement').fg
+    let repeat_fg = s:get_attributes('Repeat').fg
+
+    " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
+    if has('gui_running')
+        exe 'hi CommentCodeSpan guibg='.guibg.' guifg='.comment_fg
+        exe 'hi markdownCodeSpan guibg='.guibg
+
+        exe 'hi CommentBold gui=bold guifg='.comment_fg
+        exe 'hi CommentBoldItalic gui=bold,italic guifg='.comment_fg
+        exe 'hi CommentItalic gui=italic guifg='.comment_fg
+
+        exe 'hi markdownListItem guifg='.repeat_fg
+        exe 'hi markdownListItemBold gui=bold guifg='.repeat_fg
+        exe 'hi markdownListItemBoldItalic gui=bold,italic guifg='.repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
+        exe 'hi markdownListItemItalic gui=italic guifg='.repeat_fg
+
+        exe 'hi markdownBlockquote guifg='.statement_fg
+        exe 'hi markdownBlockquoteBold gui=bold guifg='.statement_fg
+        exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg='.statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guibg='.guibg.' guifg='.statement_fg
+        exe 'hi markdownBlockquoteItalic gui=italic guifg='.statement_fg
+
+    " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
+    elseif &tgc
+        exe 'hi CommentCodeSpan guifg='.comment_fg.' guibg='.guibg
+        exe 'hi markdownCodeSpan guibg='.guibg
+
+        exe 'hi CommentBold cterm=bold guifg='.comment_fg
+        exe 'hi CommentBoldItalic cterm=bold,italic guifg='.comment_fg
+        exe 'hi CommentItalic cterm=italic guifg='.comment_fg
+
+        exe 'hi markdownListItem guifg='.repeat_fg
+        exe 'hi markdownListItemBold cterm=bold guifg='.repeat_fg
+        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg='.repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
+        exe 'hi markdownListItemItalic cterm=italic guifg='.repeat_fg
+
+        exe 'hi markdownBlockquote guifg='.statement_fg
+        exe 'hi markdownBlockquoteBold cterm=bold guifg='.statement_fg
+        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg='.statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guifg='.statement_fg.' guibg='.guibg
+        exe 'hi markdownBlockquoteItalic cterm=italic guifg='.statement_fg
+
+    " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
+    else
+        exe 'hi CommentCodeSpan ctermfg='.comment_fg.' ctermbg='.ctermbg
+        exe 'hi markdownCodeSpan ctermbg='.ctermbg
+
+        exe 'hi CommentBold term=bold cterm=bold ctermfg='.comment_fg
+        exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg='.comment_fg
+        exe 'hi CommentItalic term=italic cterm=italic ctermfg='.comment_fg
+
+        exe 'hi markdownListItem ctermfg='.repeat_fg
+        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg='.repeat_fg
+        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg='.repeat_fg
+        exe 'hi markdownListItemCodeSpan ctermfg='.repeat_fg.' ctermbg='.ctermbg
+        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg='.repeat_fg
+
+        exe 'hi markdownBlockquote ctermfg='.statement_fg
+        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg='.statement_fg
+        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg='.statement_fg
+        exe 'hi markdownBlockquoteCodeSpan ctermfg='.statement_fg.' ctermbg='.ctermbg
+        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='.statement_fg
+    endif
+endfu
+fu! s:tabline() abort "{{{2
+    " the purpose of this function is to remove the underline value from the HG
+    " TabLine
+
+    let attributes = {
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
+
+    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
+
+    let cmd = has('gui_running')
+          \ ?     'hi TabLine gui=none guifg=%s'
+          \ : &tgc
+          \ ?     'hi TabLine term=none cterm=none guifg=%s'
+          \ :     'hi TabLine term=none cterm=none ctermfg=%s'
+
+    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
+    " Tabline doesn't have any value in gui. In this case, executing the command
+    " will fail.
+    if attributes.fg is# ''
+        return
+    endif
+    exe printf(cmd, attributes.fg)
+endfu
+
+fu! s:title() abort "{{{2
+    " Purpose: We need some HGs to get the bold, italic, bold+italic styles in a markdown header.
+    let title_fg = s:get_attributes('Title').fg
+    if has('gui_running')
+        " In gVim, `seoul256` makes a markdown Title bold by default.
+        " It prevents us from using the bold style.
+        " So, we remove this attribute.
+        hi clear Title
+        exe 'hi Title guifg=' . title_fg
+
+        exe 'hi TitleItalic gui=italic guifg='.title_fg
+        exe 'hi TitleBold gui=bold guifg='.title_fg
+        exe 'hi TitleBoldItalic gui=bold,italic guifg='.title_fg
+
+    elseif &tgc
+        exe 'hi TitleItalic cterm=italic guifg='.title_fg
+        exe 'hi TitleBold cterm=bold guifg='.title_fg
+        exe 'hi TitleBoldItalic cterm=bold,italic guifg='.title_fg
+
+    else
+        exe 'hi TitleItalic term=italic cterm=italic ctermfg='.title_fg
+        exe 'hi TitleBold term=bold cterm=bold ctermfg='.title_fg
+        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='.title_fg
+    endif
+endfu
+
 fu! s:user() abort "{{{2
     " We're going to define 2 HGs: User1 and User2.{{{
     "
@@ -214,171 +392,6 @@ fu! s:user() abort "{{{2
     exe printf(cmd2, style2, todo_fg, attributes.bg)
 endfu
 
-fu! s:tabline() abort "{{{2
-    " the purpose of this function is to remove the underline value from the HG
-    " TabLine
-
-    let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
-        \ }
-
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
-
-    let cmd = has('gui_running')
-          \ ?     'hi TabLine gui=none guifg=%s'
-          \ : &tgc
-          \ ?     'hi TabLine term=none cterm=none guifg=%s'
-          \ :     'hi TabLine term=none cterm=none ctermfg=%s'
-
-    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
-    " Tabline doesn't have any value in gui. In this case, executing the command
-    " will fail.
-    if attributes.fg is# ''
-        return
-    endif
-    exe printf(cmd, attributes.fg)
-endfu
-
-fu! s:styled_comments() abort "{{{2
-    " Why `Underlined`?{{{
-    "
-    " From `:h group-name`:
-    "
-    " > *Underlined       text that stands out, HTML links
-    "
-    " Also, that's what the default markdown syntax plugin uses to highlight the
-    " text of a link.
-    "}}}
-    hi link markdownLinkText   Underlined
-    " Why `Float`?{{{
-    "
-    " That's what the default markdown syntax plugin uses to highlight a url.
-    "}}}
-    hi link markdownUrl        Float
-    " Why `Type`?{{{
-    "
-    " That's what the help syntax plugin uses.
-    "}}}
-    hi link markdownOption     Type
-    " Why `Delimiter`?{{{
-    "
-    " It seems to be the most meaningful choice.
-    " From `:h group-name`:
-    "
-    " >     Delimiter character that needs attention
-    "}}}
-    hi link markdownPointer    Delimiter
-    hi link markdownTable      Structure
-    hi link markdownKey        Special
-    hi link markdownRule       Delimiter
-    " Why `Typedef`?{{{
-    "
-    " That's what the default markdown syntax plugin uses to highlight the id of
-    " a reference link.
-    "}}}
-    hi link markdownIdDeclaration  Typedef
-
-    hi link markdownCodeBlock           Comment
-    hi link markdownListItemCodeBlock   markdownCodeBlock
-    hi link markdownFencedCodeBlock     markdownCodeBlock
-    hi link CommentListItemCodeSpan     markdownListItemCodeSpan
-
-    hi link markdownListItemBlockquote  markdownBlockquote
-
-    " Where did you find these color codes?{{{
-    "
-    " I chose a color from the terminal palette:
-    "
-    "     $ palette
-    "
-    " And to get the hex equivalent of the decimal code, I used `$ gpick`.
-    "}}}
-    let guibg = &bg is# 'light' ? '#bcbcbc' : '#626262'
-    let ctermbg = &bg is# 'light' ? 250 : 241
-    let comment_fg = s:get_attributes('Comment').fg
-    let statement_fg = s:get_attributes('Statement').fg
-    let repeat_fg = s:get_attributes('Repeat').fg
-    let title_fg = s:get_attributes('Title').fg
-
-    " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
-    if has('gui_running')
-        exe 'hi TitleItalic gui=italic guifg='.title_fg
-        exe 'hi TitleBold gui=bold guifg='.title_fg
-        exe 'hi TitleBoldItalic gui=bold,italic guifg='.title_fg
-
-        exe 'hi CommentCodeSpan guibg='.guibg.' guifg='.comment_fg
-        exe 'hi markdownCodeSpan guibg='.guibg
-
-        exe 'hi CommentBold gui=bold guifg='.comment_fg
-        exe 'hi CommentBoldItalic gui=bold,italic guifg='.comment_fg
-        exe 'hi CommentItalic gui=italic guifg='.comment_fg
-
-        exe 'hi markdownListItem guifg='.repeat_fg
-        exe 'hi markdownListItemBold gui=bold guifg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic gui=bold,italic guifg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
-        exe 'hi markdownListItemItalic gui=italic guifg='.repeat_fg
-
-        exe 'hi markdownBlockquote guifg='.statement_fg
-        exe 'hi markdownBlockquoteBold gui=bold guifg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan guibg='.guibg.' guifg='.statement_fg
-        exe 'hi markdownBlockquoteItalic gui=italic guifg='.statement_fg
-
-    " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
-    elseif &tgc
-        exe 'hi TitleItalic cterm=italic guifg='.title_fg
-        exe 'hi TitleBold cterm=bold guifg='.title_fg
-        exe 'hi TitleBoldItalic cterm=bold,italic guifg='.title_fg
-
-        exe 'hi CommentCodeSpan guifg='.comment_fg.' guibg='.guibg
-        exe 'hi markdownCodeSpan guibg='.guibg
-
-        exe 'hi CommentBold cterm=bold guifg='.comment_fg
-        exe 'hi CommentBoldItalic cterm=bold,italic guifg='.comment_fg
-        exe 'hi CommentItalic cterm=italic guifg='.comment_fg
-
-        exe 'hi markdownListItem guifg='.repeat_fg
-        exe 'hi markdownListItemBold cterm=bold guifg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
-        exe 'hi markdownListItemItalic cterm=italic guifg='.repeat_fg
-
-        exe 'hi markdownBlockquote guifg='.statement_fg
-        exe 'hi markdownBlockquoteBold cterm=bold guifg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan guifg='.statement_fg.' guibg='.guibg
-        exe 'hi markdownBlockquoteItalic cterm=italic guifg='.statement_fg
-
-    " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
-    else
-        exe 'hi TitleItalic term=italic cterm=italic ctermfg='.title_fg
-        exe 'hi TitleBold term=bold cterm=bold ctermfg='.title_fg
-        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='.title_fg
-
-        exe 'hi CommentCodeSpan ctermfg='.comment_fg.' ctermbg='.ctermbg
-        exe 'hi markdownCodeSpan ctermbg='.ctermbg
-
-        exe 'hi CommentBold term=bold cterm=bold ctermfg='.comment_fg
-        exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg='.comment_fg
-        exe 'hi CommentItalic term=italic cterm=italic ctermfg='.comment_fg
-
-        exe 'hi markdownListItem ctermfg='.repeat_fg
-        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan ctermfg='.repeat_fg.' ctermbg='.ctermbg
-        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg='.repeat_fg
-
-        exe 'hi markdownBlockquote ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan ctermfg='.statement_fg.' ctermbg='.ctermbg
-        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='.statement_fg
-    endif
-endfu
 " }}}1
 " Utilities {{{1
 fu! s:get_attributes(hg) abort "{{{2
