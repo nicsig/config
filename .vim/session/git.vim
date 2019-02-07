@@ -1,16 +1,14 @@
 let SessionLoad = 1
-if &cp | set nocp | endif
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
-silent tabonly
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
 badd +15 ~/wiki/git.md
 argglobal
-%argdel
+silent! argdel *
 edit ~/wiki/git.md
 set splitbelow splitright
 wincmd t
@@ -18,7 +16,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-argglobal
+arglocal
+silent! argdel *
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -37,12 +36,11 @@ normal! zt
 normal! 0
 lcd ~/wiki
 tabnext 1
-if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
+if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=1 shortmess=filnxtToOacFIsW
-set winminheight=1 winminwidth=1
+set winheight=1 winwidth=1 winminheight=1 winminwidth=1 shortmess=filnxtToOacFIsW
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)

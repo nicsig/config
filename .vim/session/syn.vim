@@ -8,10 +8,10 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +53 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+badd +784 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 badd +762 ~/wiki/vim/highlighting.md
 badd +816 ~/wiki/vim/syntax_hl.md
-badd +258 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
+badd +726 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
 badd +8 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +1 ~/Desktop/test.vim
 badd +47 /usr/local/share/vim/vim81/colors/README.txt
@@ -86,22 +86,18 @@ setlocal fdn=20
 setlocal fen
 47
 normal! zo
-48
-normal! zo
-59
-normal! zo
+47
+normal! zc
 69
 normal! zo
-110
+760
 normal! zo
-313
-normal! zo
-let s:l = 53 - ((52 * winheight(0) + 13) / 26)
+let s:l = 763 - ((20 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-53
-normal! 054|
+763
+normal! 07|
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -160,12 +156,12 @@ normal! zc
 normal! zo
 732
 normal! zo
-let s:l = 258 - ((0 * winheight(0) + 0) / 1)
+let s:l = 726 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-258
-normal! 0
+726
+normal! 019|
 lcd ~/.vim/plugged/vim-markdown
 wincmd w
 argglobal
@@ -283,6 +279,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
