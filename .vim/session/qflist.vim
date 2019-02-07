@@ -27,8 +27,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
+argglobal
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -54,8 +53,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
+argglobal
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -93,8 +91,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -111,8 +108,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists('~/wiki/vim/funcref.md') | buffer ~/wiki/vim/funcref.md | else | edit ~/wiki/vim/funcref.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -130,8 +126,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists('~/.vim/plugged/asyncmake/autoload/asyncmake.vim') | buffer ~/.vim/plugged/asyncmake/autoload/asyncmake.vim | else | edit ~/.vim/plugged/asyncmake/autoload/asyncmake.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -145,7 +140,7 @@ setlocal fen
 normal! zo
 10
 normal! zc
-let s:l = 17 - ((7 * winheight(0) + 0) / 1)
+let s:l = 17 - ((9 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -153,8 +148,7 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/asyncmake
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists('~/wiki/vim/qf.md') | buffer ~/wiki/vim/qf.md | else | edit ~/wiki/vim/qf.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -164,11 +158,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1393 - ((28 * winheight(0) + 12) / 24)
+let s:l = 1240 - ((34 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1393
+1240
 normal! 0
 lcd ~/wiki/vim
 wincmd w
