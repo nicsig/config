@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +500 ~/wiki/awk/awk.md
+badd +799 ~/wiki/awk/awk.md
 badd +1 ~/wiki/.git/index
 badd +0 ~/wiki/.git/COMMIT_EDITMSG
 argglobal
@@ -39,16 +39,14 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-493
+725
 normal! zo
-1008
-normal! zo
-let s:l = 498 - ((0 * winheight(0) + 0) / 1)
+let s:l = 799 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-498
-normal! 0
+799
+normal! 047|
 lcd ~/wiki/awk
 wincmd w
 argglobal
