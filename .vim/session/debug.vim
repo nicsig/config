@@ -12,8 +12,7 @@ badd +74 ~/wiki/debug.md
 badd +45 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +1 ~/.vim/plugged/vim-debug/autoload/debug.vim
 badd +1330 ~/wiki/vim/debug.md
-badd +0 ~/wiki/.git/index
-badd +0 ~/wiki/.git/COMMIT_EDITMSG
+badd +738 ~/wiki/algo.md
 argglobal
 %argdel
 set stal=2
@@ -109,19 +108,15 @@ edit ~/wiki/debug.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -131,57 +126,34 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
+let s:l = 68 - ((67 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
 68
-normal! zo
-let s:l = 76 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-76
 normal! 0
 lcd ~/wiki
 wincmd w
 argglobal
-if bufexists('~/wiki/.git/index') | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
-lcd ~/wiki
-wincmd w
-argglobal
-if bufexists('~/wiki/.git/COMMIT_EDITMSG') | buffer ~/wiki/.git/COMMIT_EDITMSG | else | edit ~/wiki/.git/COMMIT_EDITMSG | endif
-setlocal fdm=manual
-setlocal fde=0
+if bufexists('~/wiki/algo.md') | buffer ~/wiki/algo.md | else | edit ~/wiki/algo.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+let s:l = 389 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+389
 normal! 0
-lcd ~/wiki/.git
+lcd ~/wiki
 wincmd w
-3wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext 3
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
@@ -195,6 +167,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
