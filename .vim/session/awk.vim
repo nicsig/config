@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +131 ~/wiki/awk/awk.md
+badd +367 ~/wiki/awk/awk.md
 argglobal
 %argdel
 edit ~/wiki/awk/awk.md
@@ -27,11 +27,13 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 2304 - ((134 * winheight(0) + 15) / 31)
+349
+normal! zo
+let s:l = 355 - ((67 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2304
+355
 normal! 0
 lcd ~/wiki/awk
 tabnext 1
@@ -46,6 +48,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
