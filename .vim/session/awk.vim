@@ -9,8 +9,12 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +367 ~/wiki/awk/awk.md
+badd +0 ~/.config/weechat/script/rc.conf
 argglobal
 %argdel
+set stal=2
+tabnew
+tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
 wincmd t
@@ -29,14 +33,43 @@ setlocal fdn=20
 setlocal fen
 349
 normal! zo
-let s:l = 355 - ((67 * winheight(0) + 15) / 31)
+let s:l = 353 - ((65 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-355
+353
 normal! 0
 lcd ~/wiki/awk
-tabnext 1
+tabnext
+edit ~/.config/weechat/script/rc.conf
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+1
+normal! zo
+16
+normal! zo
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+tabnext 2
+set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -48,7 +81,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
