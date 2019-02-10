@@ -842,7 +842,7 @@ fi
 #     [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 #
 # As a result, some of your zsh key bindings may be overridden.
-# Including the 'transpose-chars' command bound to `C-t`.
+# Including the `transpose-chars` command bound to `C-t`.
 #}}}
 # But I want to!{{{
 #
