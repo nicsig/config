@@ -1129,6 +1129,19 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     call cursor(a:line1, 1)
     while search("\t", 'cW', a:line2)
+        " FIXME: `strdisplaywidth()` reports a wrong value when there's a multibyte character somewhere before the tab.{{{
+        "
+        " MWE:
+        "
+        " ∅	text
+        "  │
+        "  └ Tab
+        "
+        "     :echo strdisplaywidth("\t")
+        "     3~
+        "
+        " Here, it should be `5`.
+        "}}}
         exe 'sil keepj keepp '.a:line1.','.a:line2.'s/\t/\=repeat(" ", strdisplaywidth("\t", col(".")-1))/e'
         "                                                                                                 │
         "                                                                               We can't use `g`. ┘
