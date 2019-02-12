@@ -7522,6 +7522,17 @@ endfu
 
 
 
+" FIXME:
+" Sometimes, we have  a `E37` error catch by one of  our try conditional (coming
+" from a `:badd` command); I want to see from the error comes exactly.
+" Next time it occurs, press `!w`.
+augroup debug_badd
+    au!
+    au CursorHold * sil norm coD
+augroup END
+
+
+
 let s:syled_comments_filetypes = [
     \ 'awk',
     \ 'conf',

@@ -1128,32 +1128,53 @@ EOF
 
 ff_audio_extract() { #{{{2
   emulate -L zsh
-  if [[ $# -ne 2 ]]; then
+  if [[ $# -ne 3 ]]; then
     cat <<EOF >&2
-usage:    $0 <video file> <audio stream number>
+usage:    $0  <video file>  <audio stream number>  <output extension>
 EOF
     return 64
   fi
 
-  # name of output file{{{
-  #
-  # Maybe use  an extension  matching the  original codec,  the one  reported by
-  # `ffprobe`.
-  #}}}
-  local out='audio.aac'
+  local out="audio.$3"
   #       ┌ input file{{{
   #       │
   #       │       ┌ disable video recording (skip video)
   #       │       │
   #       │       │   ┌ copy the audio stream keeping the original codec
   #       │       │   │}}}
-  ffmpeg -i "$1" -vn -c:a copy -map 0:a:"$2" "${out}"
+  ffmpeg -i "$1" -vn -c:a copy -map "0:a:$2" "${out}"
   #                             │{{{
   #                             └ select the N-th (:"$2") audio stream
   #                               of the first input file (0:)
   #}}}
   if [[ $? -eq 0 ]]; then
     printf -- "The audio stream has been extracted in:  '%s'\n" "${out}"
+  fi
+}
+
+ff_video_extract() { #{{{2
+  emulate -L zsh
+  if [[ $# -ne 3 ]]; then
+    cat <<EOF >&2
+usage:    $0  <video file>  <video stream number>  <output extension>
+EOF
+    return 64
+  fi
+
+  local out="video.$3"
+  #       ┌ input file{{{
+  #       │
+  #       │       ┌ disable audio recording (skip audio)
+  #       │       │
+  #       │       │   ┌ copy the video stream keeping the original codec
+  #       │       │   │}}}
+  ffmpeg -i "$1" -an -c:v copy -map "0:v:$2" "${out}"
+  #                             │{{{
+  #                             └ select the N-th (:"$2") video stream
+  #                               of the first input file (0:)
+  #}}}
+  if [[ $? -eq 0 ]]; then
+    printf -- "The video stream has been extracted in:  '%s'\n" "${out}"
   fi
 }
 
@@ -1198,12 +1219,24 @@ ff_desktop_record() { #{{{2
                 >/dev/null 2>&1 &
 }
 
+ff_get_stream_info() { #{{{2
+  emulate -L zsh
+  if [[ $# -ne 1 ]]; then
+    cat <<EOF >&2
+usage:    $0  <file>
+EOF
+    return 64
+  fi
+
+  ffprobe "$1" |& grep -i stream
+}
+
 ff_mux_video_and_audio() { #{{{2
   emulate -L zsh
   if [[ $# -ne 3 ]]; then
     cat <<EOF >&2
-usage:    $0 <video file> <audio file> <name of the audio track>
-example:  $0 file.mkv audio.aac eng
+usage:    $0  <video file>  <audio file>  <name of the audio track>
+example:  $0  file.mkv  audio.aac  eng
 EOF
     return 64
   fi
@@ -1242,7 +1275,7 @@ ff_sub_extract() { #{{{2
   emulate -L zsh
   if [[ $# -eq 0 ]]; then
     cat <<EOF >&2
-usage:    $0 <video file> [<subtitle number>]
+usage:    $0  <video file>  [<subtitle number>]
 EOF
     return 64
   fi
@@ -1273,7 +1306,7 @@ ff_video_to_gif() { #{{{2
   emulate -L zsh
   if [[ $# -ne 2 ]]; then
     cat <<EOF >&2
-usage:    $0 <video file> <output.gif>
+usage:    $0  <video file>  <output.gif>
 EOF
     return 64
   fi
