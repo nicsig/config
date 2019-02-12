@@ -8,10 +8,10 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +362 ~/wiki/awk/awk.md
-badd +1 ~/Desktop/countries
-badd +3 /tmp/log
-badd +1132 ~/.vim/autoload/myfuncs.vim
+badd +2919 ~/wiki/awk/awk.md
+badd +7 ~/Desktop/countries
+badd +8 /tmp/log
+badd +0 ~/.vim/autoload/myfuncs.vim
 argglobal
 %argdel
 set stal=2
@@ -34,24 +34,21 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-2896
+2102
 normal! zo
-let s:l = 2940 - ((23 * winheight(0) + 15) / 30)
+let s:l = 2102 - ((1054 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2940
-normal! 0
+2102
+normal! 09|
 lcd ~/wiki/awk
 tabnext
 edit /tmp/log
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
@@ -59,8 +56,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -71,38 +67,16 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 19 - ((9 * winheight(0) + 0) / 1)
+let s:l = 8 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-19
+8
 normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
 if bufexists('~/.vim/autoload/myfuncs.vim') | buffer ~/.vim/autoload/myfuncs.vim | else | edit ~/.vim/autoload/myfuncs.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-1
-normal! zo
-1128
-normal! zo
-let s:l = 1141 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1141
-normal! 029|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists('/usr/local/share/vim/vim81/doc/eval.txt') | buffer /usr/local/share/vim/vim81/doc/eval.txt | else | edit /usr/local/share/vim/vim81/doc/eval.txt | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -110,9 +84,9 @@ setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
-setlocal nofen
+setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -120,10 +94,9 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-3wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -142,11 +115,11 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 7 - ((6 * winheight(0) + 15) / 30)
+let s:l = 2 - ((1 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-7
+2
 normal! 0
 lcd ~/.vim
 tabnext 2
@@ -162,6 +135,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

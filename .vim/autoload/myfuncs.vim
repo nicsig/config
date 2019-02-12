@@ -1137,6 +1137,7 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
         "  │
         "  └ Tab
         "
+        "     " the cursor is on the tab character
         "     :echo strdisplaywidth("\t")
         "     3~
         "
