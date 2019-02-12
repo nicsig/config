@@ -1131,6 +1131,8 @@ ff_audio_extract() { #{{{2
   if [[ $# -ne 3 ]]; then
     cat <<EOF >&2
 usage:    $0  <video file>  <audio stream number>  <output extension>
+example:  $0  file.mkv  0  mp3
+info:     the streams are indexed from 0
 EOF
     return 64
   fi
@@ -1154,14 +1156,20 @@ EOF
 
 ff_video_extract() { #{{{2
   emulate -L zsh
-  if [[ $# -ne 3 ]]; then
+  if [[ $# -ne 2 ]]; then
     cat <<EOF >&2
-usage:    $0  <video file>  <video stream number>  <output extension>
+usage:    $0  <video file>  <video stream number>
+example:  $0  file.mp4  0
+info:     the streams are indexed from 0
 EOF
     return 64
   fi
 
-  local out="video.$3"
+  # https://stackoverflow.com/a/965072/9780968
+  local filename=$(basename -- "$1")
+  local extension="${filename##*.}"
+  local out="video.${extension}"
+
   #       ┌ input file{{{
   #       │
   #       │       ┌ disable audio recording (skip audio)
@@ -1280,19 +1288,19 @@ EOF
     return 64
   fi
 
-  # We're going to extract the subtitles as an `.srt` file.  But what if the file contains a `.ass` subtitle stream?{{{
+  # We're going to extract the subtitles as an `.srt` file.  But what if the file contains an `.ass` subtitle stream?{{{
   #
   # It doesn't matter.
   # `ffmpeg` will do the extraction AND the conversion.
   #}}}
   local out='sub.srt'
-  ffmpeg -i "$1" -map 0:s:"$2" "${out}"
-  #                   │ │ │{{{
-  #                   │ │ └ select the N-th one
-  #                   │ │
-  #                   │ └ select a subtitle
-  #                   │
-  #                   └ select the first input file
+  ffmpeg -i "$1" -map "0:s:$2" "${out}"
+  #                    │ │ │{{{
+  #                    │ │ └ select the N-th one
+  #                    │ │
+  #                    │ └ select a subtitle
+  #                    │
+  #                    └ select the first input file
   #}}}
   if [[ $? -eq 0 ]]; then
     printf -- "The subtitles have been extracted in:  '%s'\n" "${out}"
