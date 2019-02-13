@@ -22,7 +22,10 @@
 # frozen. You have to restart `mpv` to get updated subtitles again.
 #}}}
 
-# If you have difficulties to make the script work, see this issue:{{{
+# If you have difficulties to make the script work:{{{
+# run `mpv` from the command-line, to see which module is missing.
+#
+# Also, see this issue:
 #
 #     https://github.com/oltodosel/interSubs/issues/9
 #
@@ -35,6 +38,35 @@
 #    - pyqt5
 #    - requests
 #    - six
+#    - soupsieve
+#
+# ---
+#
+# If  you have  issues to  install one  of those  modules, try  to find  them on
+# github. Example:
+#
+#     https://github.com/facelessuser/soupsieve
+#
+# Then, cd into the project, and run:
+#
+#     $ python3 -m pip install --user --upgrade .
+#
+# Note that sometimes, the installation fails because of a dependency.
+# In this case, install the dependency, then retry the original installation.
+#
+# For beautifulsoup4, don't dl from github; dl from here:
+#
+#     https://www.crummy.com/software/BeautifulSoup/bs4/download/
+#
+# ---
+#
+# If you have this error message:
+#
+#     No module named 'PyQt5.QtCore'
+#
+# Install `python3-pyqt5`:
+#
+#     $ api python3-pyqt5
 #}}}
 
 # Warning: The original files were indented with tabs:{{{

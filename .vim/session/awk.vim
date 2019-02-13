@@ -8,13 +8,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +2919 ~/wiki/awk/awk.md
-badd +7 ~/Desktop/countries
-badd +8 /tmp/log
+badd +2907 ~/wiki/awk/awk.md
+badd +2 ~/Desktop/countries
 argglobal
 %argdel
 set stal=2
-tabnew
 tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
@@ -33,38 +31,15 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 2183 - ((673 * winheight(0) + 15) / 30)
+2896
+normal! zo
+let s:l = 2897 - ((209 * winheight(0) + 6) / 13)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2183
+2897
 normal! 0
 lcd ~/wiki/awk
-tabnext
-edit /tmp/log
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 8 - ((7 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-8
-normal! 0
-lcd ~/.vim
 tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -90,7 +65,7 @@ normal! zt
 2
 normal! 0
 lcd ~/.vim
-tabnext 3
+tabnext 2
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
