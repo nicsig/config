@@ -2,6 +2,9 @@
 
 xkbcomp -I$HOME/.config/xkb $HOME/.config/xkb/map $DISPLAY
 
+killall xbindkeys
+xbindkeys -f "${HOME}/.config/xbindkeys/rc.conf"
+
 killall xcape
 xcape -e 'Control_L=Escape'
 xcape -e 'Control_R=Return'
