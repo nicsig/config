@@ -36,6 +36,17 @@ main() { #{{{1
   update_system "${LOGFILE}" 2>&1 | tee -a "${LOGFILE}"
 }
 
+run_until_it_succeeds() { #{{{1
+  i=0
+  until $@; do
+    sleep 1
+    i=$((i+1))
+    if [[ "$i" -gt 100 ]]; then
+      break
+    fi
+  done
+}
+
 update_system() { #{{{1
   # Why putting the month before the day?{{{
   #
@@ -247,8 +258,8 @@ pip
 
 EOF
 
-  python  -m pip install --upgrade --user pip
-  python3 -m pip install --upgrade --user pip
+  run_until_it_succeeds python  -m pip install --upgrade --user pip
+  run_until_it_succeeds python3 -m pip install --upgrade --user pip
 
   # https://stackoverflow.com/a/3452888/9780968
   # Knowing the current state of the packages could be useful to restore it later;{{{
@@ -271,6 +282,7 @@ update python2 packages
 
 EOF
 
+  # FIXME: `xargs` can't run a shell function, so it can't run `run_until_it_succeeds`
   python -m pip list --outdated --format=freeze \
     | grep -Ev '^(-e|#)' \
     | cut -d= -f1 \
