@@ -15,11 +15,17 @@ tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -29,15 +35,36 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-1131
-normal! zo
-let s:l = 1133 - ((97 * winheight(0) + 15) / 30)
+let s:l = 1083 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1133
-normal! 018|
+1083
+normal! 01|
 lcd ~/wiki/awk
+wincmd w
+argglobal
+if bufexists("~/.zshrc") | buffer ~/.zshrc | else | edit ~/.zshrc | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+739
+normal! zo
+let s:l = 825 - ((25 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+825
+normal! 0
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -65,8 +92,9 @@ normal! 0
 lcd ~/.vim
 tabnext 2
 set stal=1
-badd +2989 ~/wiki/awk/awk.md
+badd +1083 ~/wiki/awk/awk.md
 badd +1 ~/Desktop/countries
+badd +828 ~/.zshrc
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

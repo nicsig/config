@@ -822,6 +822,9 @@ if [[ -n "${DISPLAY}" ]]; then
   #           │  └ open with vim
   #           └ match by recent access only
 
+  alias j='fasd_cd -d'
+  unalias z
+
   bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (files and directories)
   # FIXME: press C-x C-d → the terminal closes
   bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
