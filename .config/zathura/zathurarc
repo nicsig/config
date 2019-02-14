@@ -20,6 +20,8 @@ map  [fullscreen]  A  adjust_window best-fit
 # }}}
 map                d  scroll half-down
 map  [fullscreen]  d  scroll half-down
+map                u  scroll half-up
+map  [fullscreen]  u  scroll half-up
 
 # toggle the fullscreen mode when `f` is pressed
 map                f  toggle_fullscreen
