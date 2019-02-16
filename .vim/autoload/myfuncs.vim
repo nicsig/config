@@ -1129,7 +1129,7 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     call cursor(a:line1, 1)
     while search("\t", 'cW', a:line2)
-        " FIXME: `strdisplaywidth()` reports a wrong value when there's a multibyte character somewhere before the tab.{{{
+        " FIXME: `strdisplaywidth()` reports a wrong value when there's a multi-byte character somewhere before the tab.{{{
         "
         " MWE:
         "

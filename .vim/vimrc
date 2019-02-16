@@ -3867,7 +3867,7 @@ xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 "
 "                                              getline('.')[col('.')-1]<cr>
 "
-"                                      … but it would not work for multibyte characters.
+"                                      … but it would not work for multi-byte characters.
 "}}}
 " Why don't we use the old code anymore?{{{
 "

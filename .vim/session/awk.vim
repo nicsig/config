@@ -30,7 +30,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1047 - ((151 * winheight(0) + 15) / 30)
+let s:l = 1047 - ((145 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -63,17 +63,11 @@ normal! zt
 normal! 0
 lcd ~/.vim
 tabnext
-edit ~/wiki/anki.md
+edit ~/wiki/anki/anki.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
@@ -81,9 +75,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -93,88 +85,41 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 19 - ((6 * winheight(0) + 0) / 1)
+let s:l = 90 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-19
-normal! 03|
-lcd ~/wiki
+90
+normal! 0
+lcd ~/wiki/anki
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-cwd/plugin/cwd.vim") | buffer ~/.vim/plugged/vim-cwd/plugin/cwd.vim | else | edit ~/.vim/plugged/vim-cwd/plugin/cwd.vim | endif
-setlocal fdm=marker
-setlocal fde=0
+if bufexists("~/wiki/anki/glossary.md") | buffer ~/wiki/anki/glossary.md | else | edit ~/wiki/anki/glossary.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-75
-normal! zo
-168
-normal! zo
-169
-normal! zo
-let s:l = 174 - ((0 * winheight(0) + 0) / 1)
+let s:l = 39 - ((38 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-174
-normal! 06|
-lcd ~/.vim/plugged/vim-cwd
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-cwd/.git/index") | buffer ~/.vim/plugged/vim-cwd/.git/index | else | edit ~/.vim/plugged/vim-cwd/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
+39
 normal! 0
-lcd ~/.vim/plugged/vim-cwd
+lcd ~/wiki/anki
 wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-cwd/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-cwd/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-cwd/.git/COMMIT_EDITMSG | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim/plugged/vim-cwd/.git
-wincmd w
-4wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 3
 set stal=1
 badd +1115 ~/wiki/awk/awk.md
-badd +174 ~/.vim/plugged/vim-cwd/plugin/cwd.vim
 badd +2 ~/Desktop/countries
-badd +19 ~/wiki/anki.md
-badd +0 ~/.vim/plugged/vim-cwd/.git/index
-badd +0 ~/.vim/plugged/vim-cwd/.git/COMMIT_EDITMSG
+badd +89 ~/wiki/anki/anki.md
+badd +1 ~/wiki/anki/glossary.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
