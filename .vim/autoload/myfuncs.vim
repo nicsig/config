@@ -1139,7 +1139,8 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     " Couldn't you use the pattern `\t`, and `virtcol('.')-1`?
     "
     " No, because `virtcol()` returns the *last* screen position occupied by the
-    " tab character; we need the *first* screen position.
+    " tab character;  for `virtcol('.')-1`  to work, we  would need  the *first*
+    " screen position.
     "}}}
     let pat = '\(.\)\t'
     let l:Rep = {-> submatch(1) . repeat(' ', strdisplaywidth("\t", virtcol('.')))}
