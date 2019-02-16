@@ -1126,38 +1126,24 @@ fu! myfuncs#remove_duplicate_lines(line1, line2) abort "{{{1
 endfu
 
 fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
-    let view = winsaveview()
-    call cursor(a:line1, 1)
-    while search("\t", 'cW', a:line2)
-        " FIXME: `strdisplaywidth()` reports a wrong value when there's a multi-byte character somewhere before the tab.{{{
-        "
-        " MWE:
-        "
-        " ∅	text
-        "  │
-        "  └ Tab
-        "
-        "     " the cursor is on the tab character
-        "     :echo strdisplaywidth("\t")
-        "     3~
-        "
-        " Here, it should be `5`.
-        "}}}
-        exe 'sil keepj keepp '.a:line1.','.a:line2.'s/\t/\=repeat(" ", strdisplaywidth("\t", col(".")-1))/e'
-        "                                                                                                 │
-        "                                                                               We can't use `g`. ┘
-        "
-        "                     Suppose there're several tabs on a line.
-        "                     `strdisplaywidth()` will return the right number of cells for the
-        "                     1st tab, but not for the next one.
-        "                     Indeed, the width of the 2nd tab depends on the number of cells occupied
-        "                     by the previous one. But the 1st substitution changed that number.
-        "                     The solution is to never perform more than one substitution on any given line.
-        "                     And repeat the substitution as many times as necessary.
-
-        call cursor(a:line1, 1)
-    endwhile
-    call winrestview(view)
+    let mods = 'sil keepj keepp'
+    let range = a:line1.','.a:line2
+    " Why not simply `\t`?{{{
+    "
+    " We need  the cursor to  be positioned on  the character *before*  the tab,
+    " because  `strdisplaywidth()` expects  the  screen column  position of  the
+    " latter.
+    "
+    " ---
+    "
+    " Couldn't you use the pattern `\t`, and `virtcol('.')-1`?
+    "
+    " No, because `virtcol()` returns the *last* screen position occupied by the
+    " tab character; we need the *first* screen position.
+    "}}}
+    let pat = '\(.\)\t'
+    let l:Rep = {-> submatch(1) . repeat(' ', strdisplaywidth("\t", virtcol('.')))}
+    exe mods . ' ' .range .'s/' . pat . '/\=l:Rep()/ge'
 endfu
 
 fu! myfuncs#search_internal_variables() abort "{{{1
