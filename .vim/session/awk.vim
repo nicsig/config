@@ -12,7 +12,6 @@ argglobal
 %argdel
 set stal=2
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -32,70 +31,13 @@ setlocal fdn=20
 setlocal fen
 27
 normal! zo
-let s:l = 43 - ((42 * winheight(0) + 15) / 30)
+let s:l = 41 - ((40 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-43
+41
 normal! 0
 lcd ~/wiki/awk
-tabnext
-edit ~/bin/upp.sh
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-128
-normal! zo
-548
-normal! zo
-let s:l = 623 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-623
-normal! 017|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/bin/update-alternatives-vim.sh") | buffer ~/bin/update-alternatives-vim.sh | else | edit ~/bin/update-alternatives-vim.sh | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim
-wincmd w
-2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -146,6 +88,7 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 2
@@ -153,8 +96,6 @@ set stal=1
 badd +17 ~/wiki/awk/awk.md
 badd +11 ~/Desktop/countries
 badd +4 /tmp/awk.awk
-badd +663 ~/bin/upp.sh
-badd +0 ~/bin/update-alternatives-vim.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -43,7 +43,7 @@
 #
 # man bash
 #     /SHELL BUILTIN COMMANDS
-#     /set command
+#     /^\s*set\>
 #}}}
 set -e
 # Don't eliminate `set -e`!{{{
@@ -276,15 +276,13 @@ clean() { #{{{2
     mkdir -p build
     cd build
 
-  elif [[ "${PGM}" == 'gawk' ]]; then
-    make distclean
-
   else
     # If  we've already  cleaned manually  the  repo, it's  possible that  `make
     # [dist]clean`, causes the error:
     #
     #     No rule to make target '[dist]clean'
-    # I don't know how to prevent these errors, so I d
+    #
+    # I don't know how to prevent these errors, so I temporarily disable `set -e`.
     set +e
     make clean
     make distclean
@@ -556,7 +554,7 @@ install() { #{{{2
   fi
 
   if [[ "${PGM}" == 'gawk' ]]; then
-    checkinstall --provides 'awk, gawk' --pkgname "${PGM}" --pkgversion "${VERSION}" -y
+    checkinstall --provides 'gawk,awk' --pkgname "${PGM}" --pkgversion "${VERSION}" -y
 
   # We don't have any version number for `mpv` (because `git describe` fails).
   elif [[ "${PGM}" == 'mpv' ]]; then
@@ -619,20 +617,20 @@ install() { #{{{2
 
   # TODO: maybe we could get rid of this script, and instead pass this argument to `checkinstall`:{{{
   #
-  #     --provides 'editor, \
-  #     eview, \
-  #     evim, \
-  #     ex, \
-  #     gview, \
-  #     gvim, \
-  #     gvimdiff, \
-  #     rgview, \
-  #     rgvim, \
-  #     rview, \
-  #     rvim, \
-  #     vi, \
-  #     view, \
-  #     vim, \
+  #     --provides 'editor,\
+  #     eview,\
+  #     evim,\
+  #     ex,\
+  #     gview,\
+  #     gvim,\
+  #     gvimdiff,\
+  #     rgview,\
+  #     rgvim,\
+  #     rview,\
+  #     rvim,\
+  #     vi,\
+  #     view,\
+  #     vim,\
   #     vimdiff'
   #}}}
   if [[ "${PGM}" == 'vim' ]]; then
