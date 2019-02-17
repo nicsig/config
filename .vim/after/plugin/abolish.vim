@@ -2,5 +2,4 @@ if exists(':Abolish') !=# 2 || exists('g:no_after_plugin')
     finish
 endif
 
-Abolish teh the
-
+Abolish {hte,teh} the

@@ -1127,7 +1127,7 @@ endfu
 
 fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let mods = 'sil keepj keepp'
-    let range = a:line1.','.a:line2
+    let range = a:line1 . ',' . a:line2
     " Why not simply `\t`?{{{
     "
     " We need  the cursor to  be positioned on  the character *before*  the tab,
@@ -1144,7 +1144,7 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     "}}}
     let pat = '\(.\)\t'
     let l:Rep = {-> submatch(1) . repeat(' ', strdisplaywidth("\t", virtcol('.')))}
-    exe mods . ' ' .range .'s/' . pat . '/\=l:Rep()/ge'
+    exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/ge'
 endfu
 
 fu! myfuncs#search_internal_variables() abort "{{{1
