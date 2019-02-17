@@ -30,25 +30,21 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 15 - ((14 * winheight(0) + 15) / 30)
+27
+normal! zo
+let s:l = 43 - ((42 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-15
-normal! 01|
+43
+normal! 0
 lcd ~/wiki/awk
 tabnext
-edit ~/.vim/plugged/vim-abolish/plugin/abolish.vim
+edit ~/bin/upp.sh
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
@@ -56,9 +52,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -68,56 +62,20 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-529
+128
 normal! zo
-530
+548
 normal! zo
-let s:l = 582 - ((0 * winheight(0) + 0) / 1)
+let s:l = 623 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-582
-normal! 0
-lcd ~/.vim/plugged/vim-abolish
-wincmd w
-argglobal
-if bufexists("~/.vim/after/plugin/abolish.vim") | buffer ~/.vim/after/plugin/abolish.vim | else | edit ~/.vim/after/plugin/abolish.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((1 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
+623
+normal! 017|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-abolish/.git/index") | buffer ~/.vim/plugged/vim-abolish/.git/index | else | edit ~/.vim/plugged/vim-abolish/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
-lcd ~/.vim/plugged/vim-abolish
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-abolish/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-abolish/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-abolish/.git/COMMIT_EDITMSG | endif
+if bufexists("~/bin/update-alternatives-vim.sh") | buffer ~/bin/update-alternatives-vim.sh | else | edit ~/bin/update-alternatives-vim.sh | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -127,27 +85,31 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim/plugged/vim-abolish/.git
+lcd ~/.vim
 wincmd w
-4wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -158,21 +120,41 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("/tmp/awk.awk") | buffer /tmp/awk.awk | else | edit /tmp/awk.awk | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 2 - ((1 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+2
+normal! 0
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 2
 set stal=1
-badd +1109 ~/wiki/awk/awk.md
-badd +1 ~/Desktop/countries
-badd +515 ~/.vim/plugged/vim-abolish/plugin/abolish.vim
-badd +0 ~/.vim/after/plugin/abolish.vim
-badd +0 ~/.vim/plugged/vim-abolish/.git/index
-badd +0 ~/.vim/plugged/vim-abolish/.git/COMMIT_EDITMSG
+badd +17 ~/wiki/awk/awk.md
+badd +11 ~/Desktop/countries
+badd +4 /tmp/awk.awk
+badd +663 ~/bin/upp.sh
+badd +0 ~/bin/update-alternatives-vim.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
