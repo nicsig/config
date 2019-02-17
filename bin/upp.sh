@@ -1,12 +1,18 @@
 #!/bin/bash
 # TODO: Install necessary dependencies? So that the script work even on a brand new machine…{{{
 #
-# For Vim:
+# For vim:
 #
 #     sudo vim /etc/apt/sources.list  →  duplicate, edit (deb → deb-src), uncomment a line
 #     sudo aptitude update
 #     sudo aptitude build-dep vim vim-gtk
 #     sudo aptitude install luajit libluajit-5.1-dev
+#
+# For gawk:
+#
+#     sudo vim /etc/apt/sources.list  →  duplicate, edit (deb → deb-src), uncomment a line
+#     sudo aptitude update
+#     sudo aptitude build-dep gawk
 #
 # For tmux:
 #
@@ -15,6 +21,9 @@
 # For weechat:
 #
 #     ???
+#
+# Find  a   way  to  automatically   uncomment  the  right  `deb-src`   line  in
+# `/etc/apt/sources.list`, so that `aptitude build-dep` works.
 #}}}
 # TODO: Handle ranger too?{{{
 #
@@ -292,7 +301,8 @@ clean() { #{{{2
 
 configure() { #{{{2
   if [[ "${PGM}" == 'gawk' ]]; then
-      ./bootstrap.sh && ./configure
+    # `--enable-mpfr` allows us to use the `-M` command-line option
+    ./bootstrap.sh && ./configure --enable-mpfr
 
   elif [[ "${PGM}" == 'vim' ]]; then
     # We could add the `--enable-autoservername` option,{{{
@@ -554,7 +564,7 @@ install() { #{{{2
   fi
 
   if [[ "${PGM}" == 'gawk' ]]; then
-    checkinstall --provides 'gawk,awk' --pkgname "${PGM}" --pkgversion "${VERSION}" -y
+    checkinstall --provides 'awk,gawk' --pkgname "${PGM}" --pkgversion "${VERSION}" -y
 
   # We don't have any version number for `mpv` (because `git describe` fails).
   elif [[ "${PGM}" == 'mpv' ]]; then
@@ -639,7 +649,10 @@ install() { #{{{2
 }
 
 install_dependencies() { #{{{2
-  if [[ "${PGM}" == 'vim' ]]; then
+  if [[ "${PGM}" == 'gawk' ]]; then
+    # useful to install `libmpfr-dev`, and be able to use the `-M` command-line option
+    aptitude build-dep gawk
+  elif [[ "${PGM}" == 'vim' ]]; then
     aptitude build-dep vim
     aptitude install luajit libluajit-5.1-dev
   elif [[ "${PGM}" == 'zsh' ]]; then

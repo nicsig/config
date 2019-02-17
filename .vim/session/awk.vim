@@ -15,11 +15,21 @@ tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -29,15 +39,64 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-27
+26
 normal! zo
-let s:l = 41 - ((40 * winheight(0) + 15) / 30)
+let s:l = 30 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-41
-normal! 0
+30
+normal! 08|
 lcd ~/wiki/awk
+wincmd w
+argglobal
+if bufexists("~/bin/upp.sh") | buffer ~/bin/upp.sh | else | edit ~/bin/upp.sh | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+2
+normal! zo
+137
+normal! zo
+302
+normal! zo
+557
+normal! zo
+let s:l = 648 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+648
+normal! 034|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/bin/update-alternatives-vim.sh") | buffer ~/bin/update-alternatives-vim.sh | else | edit ~/bin/update-alternatives-vim.sh | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+3wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -88,14 +147,15 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 2
+tabnext 1
 set stal=1
-badd +17 ~/wiki/awk/awk.md
+badd +28 ~/wiki/awk/awk.md
 badd +11 ~/Desktop/countries
-badd +4 /tmp/awk.awk
+badd +1 /tmp/awk.awk
+badd +633 ~/bin/upp.sh
+badd +116 ~/bin/update-alternatives-vim.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
