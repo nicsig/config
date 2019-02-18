@@ -303,7 +303,9 @@ clean() { #{{{2
 
 configure() { #{{{2
   if [[ "${PGM}" == 'gawk' ]]; then
-    # `--enable-mpfr` allows us to use the `-M` command-line option
+    # `--enable-mpfr` allows us to use the `-M` command-line option.
+    # Requires a package (`libmpfr4`?) which should be installed by
+    # `$ aptitude build-dep gawk`.
     ./bootstrap.sh && ./configure --enable-mpfr
 
   elif [[ "${PGM}" == 'vim' ]]; then
@@ -656,7 +658,6 @@ install() { #{{{2
 install_dependencies() { #{{{2
   aptitude install make checkinstall
 
-  # For gawk, this will allow us to add support for the `-M` command-line option.
   aptitude build-dep ${PGM}
 
   if [[ "${PGM}" == 'vim' ]]; then
