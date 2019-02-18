@@ -13,7 +13,6 @@ argglobal
 set stal=2
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -32,8 +31,7 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -52,8 +50,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/awk
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/bin/upp.sh") | buffer ~/bin/upp.sh | else | edit ~/bin/upp.sh | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -75,8 +72,7 @@ normal! zt
 normal! 03|
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/bin/update-alternatives-vim.sh") | buffer ~/bin/update-alternatives-vim.sh | else | edit ~/bin/update-alternatives-vim.sh | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -113,8 +109,7 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -132,8 +127,7 @@ normal! zt
 normal! 030|
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("/tmp/awk.awk") | buffer /tmp/awk.awk | else | edit /tmp/awk.awk | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -156,19 +150,12 @@ exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/wiki/shell/update-alternatives.md
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -177,117 +164,23 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-86
-normal! zo
 139
 normal! zo
-let s:l = 141 - ((0 * winheight(0) + 0) / 1)
+let s:l = 141 - ((140 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 141
 normal! 05|
 lcd ~/wiki/shell
-wincmd w
-arglocal
-%argdel
-if bufexists("~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim") | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-69
-normal! zo
-383
-normal! zo
-395
-normal! zo
-431
-normal! zo
-let s:l = 432 - ((3 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-432
-normal! 0
-lcd ~/.vim/plugged/vim-lg-lib
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit /tmp/file
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 2 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-2
-normal! 017|
-lcd ~/.vim
-wincmd w
-arglocal
-%argdel
-if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-1
-normal! zo
-312
-normal! zo
-let s:l = 362 - ((16 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-362
-normal! 0
-lcd ~/.vim
-wincmd w
-2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 4
+tabnext 3
 set stal=1
 badd +73 ~/wiki/awk/awk.md
 badd +11 ~/Desktop/countries
 badd +245 ~/wiki/shell/update-alternatives.md
-badd +2 /tmp/file
 badd +626 ~/bin/upp.sh
 badd +61 ~/bin/update-alternatives-vim.sh
 badd +1 /tmp/awk.awk
-badd +432 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +362 ~/.tmux.conf
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

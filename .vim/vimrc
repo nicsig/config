@@ -7535,6 +7535,7 @@ augroup END
 
 let s:syled_comments_filetypes = [
     \ 'awk',
+    \ 'c',
     \ 'conf',
     \ 'dircolors',
     \ 'gitconfig',
