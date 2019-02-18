@@ -633,6 +633,11 @@ install() { #{{{2
     # Note the order of the arguments `--verbose` and `--install`/`--set`.
     # `--verbose` should  come first because  it's an option,  while `--install`
     # and `--set` are commands.
+    # Why the `--slave` option?{{{
+    #
+    # So that when we run `$ man awk`, the gawk manpage is opened.
+    # Otherwise it would fail, because we don't have any manpage for awk.
+    #}}}
     update-alternatives --verbose --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
     --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
     update-alternatives --verbose --set awk /usr/local/bin/gawk
