@@ -65,7 +65,7 @@ setlocal fen
 normal! zo
 556
 normal! zo
-let s:l = 630 - ((0 * winheight(0) + 0) / 1)
+let s:l = 630 - ((17 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -85,7 +85,7 @@ setlocal fdn=20
 setlocal fen
 45
 normal! zo
-let s:l = 61 - ((16 * winheight(0) + 13) / 26)
+let s:l = 61 - ((13 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -214,29 +214,29 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 432
-normal! 011|
+normal! 01|
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 argglobal
-if bufexists("/tmp/conf.conf") | buffer /tmp/conf.conf | else | edit /tmp/conf.conf | endif
-setlocal fdm=marker
+if bufexists("~/.vim/plugged/vim-lg-lib/.git/index") | buffer ~/.vim/plugged/vim-lg-lib/.git/index | else | edit ~/.vim/plugged/vim-lg-lib/.git/index | endif
+setlocal fdm=syntax
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
-setlocal fdl=0
+setlocal fdl=1
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 5 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 09|
-lcd ~/.vim
+5
+normal! 0
+lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 argglobal
-if bufexists("/usr/local/share/vim/vim81/doc/syntax.txt") | buffer /usr/local/share/vim/vim81/doc/syntax.txt | else | edit /usr/local/share/vim/vim81/doc/syntax.txt | endif
+if bufexists("~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -244,16 +244,17 @@ setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
-setlocal nofen
+setlocal fen
 silent! normal! zE
-let s:l = 4266 - ((11 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-4266
-normal! 03|
-lcd ~/.vim
+1
+normal! 0
+lcd ~/.vim/plugged/vim-lg-lib/.git
 wincmd w
+4wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
@@ -324,19 +325,18 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 3 - ((2 * winheight(0) + 13) / 26)
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
+1
 normal! 0
 lcd ~/.vim
 wincmd w
-3wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
-tabnext 4
+tabnext 3
 set stal=1
 badd +73 ~/wiki/awk/awk.md
 badd +11 ~/Desktop/countries
@@ -346,9 +346,10 @@ badd +626 ~/bin/upp.sh
 badd +61 ~/bin/update-alternatives-vim.sh
 badd +1 /tmp/awk.awk
 badd +456 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +1 /tmp/conf.conf
 badd +404 ~/.tmux.conf
 badd +1 ~/.vim/after/syntax/tmux.vim
+badd +0 ~/.vim/plugged/vim-lg-lib/.git/index
+badd +0 ~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
