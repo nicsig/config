@@ -13,7 +13,6 @@ argglobal
 set stal=2
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -97,15 +96,19 @@ edit ~/bin/upp.sh
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 3 + 16) / 33)
-exe '2resize ' . ((&lines * 26 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -117,13 +120,13 @@ setlocal fdn=20
 setlocal fen
 137
 normal! zo
-574
+563
 normal! zo
-let s:l = 1 - ((0 * winheight(0) + 1) / 3)
+let s:l = 636 - ((40 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+636
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -137,26 +140,19 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+139
+normal! zo
+let s:l = 141 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 01|
+141
+normal! 035|
 lcd ~/wiki/shell
 wincmd w
-exe '1resize ' . ((&lines * 3 + 16) / 33)
-exe '2resize ' . ((&lines * 26 + 16) / 33)
-tabnext
-edit ~/bin/upp.sh
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
-setlocal fdm=marker
+if bufexists("/var/lib/dpkg/info/acl.postrm") | buffer /var/lib/dpkg/info/acl.postrm | else | edit /var/lib/dpkg/info/acl.postrm | endif
+setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -164,24 +160,27 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-137
-normal! zo
-254
-normal! zo
-let s:l = 278 - ((96 * winheight(0) + 15) / 30)
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-278
-normal! 03|
+1
+normal! 0
 lcd ~/.vim
-tabnext 4
+wincmd w
+3wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+tabnext 3
 set stal=1
 badd +1 ~/wiki/awk/awk.md
 badd +1 ~/Desktop/countries
-badd +260 ~/bin/upp.sh
+badd +264 ~/bin/upp.sh
 badd +1 /tmp/awk.awk
 badd +245 ~/wiki/shell/update-alternatives.md
+badd +0 /var/lib/dpkg/info/acl.postrm
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

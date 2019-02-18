@@ -630,6 +630,9 @@ install() { #{{{2
   fi
 
   if [[ "${PGM}" == 'awk' ]]; then
+    # Note the order of the arguments `--verbose` and `--install`/`--set`.
+    # `--verbose` should  come first because  it's an option,  while `--install`
+    # and `--set` are commands.
     update-alternatives --verbose --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
     --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
     update-alternatives --verbose --set awk /usr/local/bin/gawk
