@@ -27,6 +27,9 @@
 "
 " The  latter consumes  the  end of  the `tmuxComment`  region,  which makes  it
 " continue on the next line.
+"
+" Solution:
+" Redefine `tmuxComment` and give it the `keepend` attribute.
 "}}}
 let s:comment = matchstr(execute('syn list tmuxComment'), 'xxx\zs.*[^ \n]\ze\_s*links')
 syn clear tmuxComment
