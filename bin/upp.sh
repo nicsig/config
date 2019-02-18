@@ -1,29 +1,28 @@
 #!/bin/bash
-# TODO: Install necessary dependencies? So that the script work even on a brand new machine…{{{
+# TODO: Install necessary dependencies? So that the script work even on a brand new machine...{{{
 #
-# For vim:
+# Run:
 #
-#     sudo vim /etc/apt/sources.list  →  duplicate, edit (deb → deb-src), uncomment a line
-#     sudo aptitude update
-#     sudo aptitude build-dep vim vim-gtk
-#     sudo aptitude install luajit libluajit-5.1-dev
+#     $ sudo aptitude build-dep $PGM
 #
-# For gawk:
+# For this to work, you first need to edit `/etc/apt/sources.list`,
+# and uncomment:
 #
-#     sudo vim /etc/apt/sources.list  →  duplicate, edit (deb → deb-src), uncomment a line
-#     sudo aptitude update
-#     sudo aptitude build-dep gawk
+#     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted
 #
-# For tmux:
+# For weechat, you need to uncomment:
 #
-#     ???
+#     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) universe
 #
-# For weechat:
+# For Vim, you may need to run:
 #
-#     ???
+#     $ sudo aptitude build-dep vim vim-gtk
+#                                   ^^^^^^^
+#                                   does it make a difference? is it necessary?
 #
-# Find  a   way  to  automatically   uncomment  the  right  `deb-src`   line  in
-# `/etc/apt/sources.list`, so that `aptitude build-dep` works.
+# And maybe:
+#
+#     $ sudo aptitude install luajit libluajit-5.1-dev
 #}}}
 # TODO: Handle ranger too?{{{
 #

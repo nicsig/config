@@ -52,7 +52,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -89,20 +90,26 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/bin/upp.sh
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 26 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -112,16 +119,33 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-137
+2
 normal! zo
-563
-normal! zo
-let s:l = 639 - ((3 * winheight(0) + 0) / 1)
+let s:l = 6 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-639
-normal! 01|
+6
+normal! 018|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("/etc/apt/sources.list") | buffer /etc/apt/sources.list | else | edit /etc/apt/sources.list | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
@@ -144,7 +168,10 @@ normal! zt
 normal! 076|
 lcd ~/wiki/shell
 wincmd w
-wincmd =
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 26 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 tabnext
 edit /tmp/.understand_this
 set splitbelow splitright
@@ -177,8 +204,8 @@ badd +1 ~/Desktop/countries
 badd +264 ~/bin/upp.sh
 badd +1 /tmp/awk.awk
 badd +245 ~/wiki/shell/update-alternatives.md
-badd +100 man://gawk(1)
 badd +0 /tmp/.understand_this
+badd +0 /etc/apt/sources.list
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
