@@ -563,11 +563,8 @@ install() { #{{{2
     return
   fi
 
-  if [[ "${PGM}" == 'gawk' ]]; then
-    checkinstall --provides 'awk,gawk' --pkgname "${PGM}" --pkgversion "${VERSION}" -y
-
   # We don't have any version number for `mpv` (because `git describe` fails).
-  elif [[ "${PGM}" == 'mpv' ]]; then
+  if [[ "${PGM}" == 'mpv' ]]; then
     checkinstall --pkgname "${PGM}" -y
 
   else
@@ -625,32 +622,18 @@ install() { #{{{2
     #}}}
   fi
 
-  # TODO: maybe we could get rid of this script, and instead pass this argument to `checkinstall`:{{{
-  #
-  #     --provides 'editor,\
-  #     eview,\
-  #     evim,\
-  #     ex,\
-  #     gview,\
-  #     gvim,\
-  #     gvimdiff,\
-  #     rgview,\
-  #     rgvim,\
-  #     rview,\
-  #     rvim,\
-  #     vi,\
-  #     view,\
-  #     vim,\
-  #     vimdiff'
-  #}}}
-  if [[ "${PGM}" == 'vim' ]]; then
+  if [[ "${PGM}" == 'awk' ]]; then
+    update-alternatives --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
+    --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
+    update-alternatives --set awk /usr/local/bin/gawk
+  elif [[ "${PGM}" == 'vim' ]]; then
     "${HOME}/bin/update-alternatives-vim.sh"
   fi
 }
 
 install_dependencies() { #{{{2
   if [[ "${PGM}" == 'gawk' ]]; then
-    # useful to install `libmpfr-dev`, and be able to use the `-M` command-line option
+    # necessary to add support for the `-M` command-line option
     aptitude build-dep gawk
   elif [[ "${PGM}" == 'vim' ]]; then
     aptitude build-dep vim

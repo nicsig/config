@@ -2,40 +2,54 @@
 
 # Some definitions{{{
 #
-# `man update-alternatives` talks about `master` and `slave` links.
+# `$ man update-alternatives` talks about `master` and `slave` links.
 # Example:
 #
-#         $ update-alternatives --query editor
+#     $ update-alternatives --query awk
+#     Name: awk~
+#     Link: /usr/bin/awk~
+#     Slaves:~
+#      awk.1.gz /usr/share/man/man1/awk.1.gz~
+#      nawk /usr/bin/nawk~
+#      nawk.1.gz /usr/share/man/man1/nawk.1.gz~
+#     Status: manual~
+#     Best: /usr/local/bin/gawk~
+#     Value: /usr/local/bin/gawk~
 #
-#         Link: /usr/bin/editor~
-#         Slaves:~
-#          editor.1.gz /usr/share/man/man1/editor.1.gz~
-#          editor.fr.1.gz /usr/share/man/fr/man1/editor.1.gz~
-#          editor.it.1.gz /usr/share/man/it/man1/editor.1.gz~
-#          editor.ja.1.gz /usr/share/man/ja/man1/editor.1.gz~
-#          editor.pl.1.gz /usr/share/man/pl/man1/editor.1.gz~
-#          editor.ru.1.gz /usr/share/man/ru/man1/editor.1.gz~
-#         Status: manual~
-#         Best: /usr/bin/vim.gtk~
-#         Value: /usr/local/bin/vim~
+#     ...~
 #
-# `/usr/bin/editor` is the master link of the group.
-# (or is it `/etc/alternatives/editor`?)
-# `editor.1.gz` is a slave link.
-# (in which directory is it? /etc/alternatives/? /usr/share/man?)
+#     Alternative: /usr/local/bin/gawk~
+#     Priority: 60~
+#     Slaves:~
+#      awk.1.gz /usr/local/share/man/man1/gawk.1.gz~
+#
+# The master link of the group is:
+#
+#     /usr/bin/awk → /etc/alternatives/awk
+#
+# According to the `Value:` field, it currently points to `/usr/local/bin/gawk`.
+#
+# One slave link is:
+#
+#     /usr/share/man/man1/awk.1.gz → /etc/alternatives/awk.1.gz
+#
+# According to the `Slaves:` field of the `/usr/local/bin/gawk` alternative,
+# it currently points to `/usr/local/share/man/man1/gawk.1.gz`.
 #
 # Usually the slave links are for manpages.
 #
 # The master link determine how the slaves will be configured.
 #
-# Also, a master link and its slaves make up a _link group_.
+# Also, a master link and its slaves make up a *link group*.
 #}}}
 # Some useful commands{{{
 #
 #     $ update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1
 #
 # Add the  alternative `/usr/local/bin/vim` to  the group whose generic  name is
-# `editor`, with the priority 1.
+# `/usr/bin/editor`, with the priority 1.
+#
+# ---
 #
 #     $ update-alternatives --remove editor /usr/local/bin/vim
 #
@@ -43,9 +57,11 @@
 # If the link group contains slave links (usually for manpages), they're updated
 # or removed.
 #
+# ---
+#
 #     $ update-alternatives --set editor /usr/local/bin/vim
 #
-# Configure `/usr/local/bin/vim` to be THE alternative providing `editor`.
+# Configure `/usr/local/bin/vim` to be *the* alternative providing `editor`.
 #
 #     $ update-alternatives --config editor
 #
