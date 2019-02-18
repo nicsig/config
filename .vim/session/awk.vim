@@ -52,8 +52,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -90,8 +89,7 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/bin/upp.sh
 set splitbelow splitright
@@ -104,8 +102,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+wincmd =
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -119,12 +116,12 @@ setlocal fen
 normal! zo
 563
 normal! zo
-let s:l = 636 - ((0 * winheight(0) + 0) / 1)
+let s:l = 639 - ((3 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-636
-normal! 0
+639
+normal! 01|
 lcd ~/.vim
 wincmd w
 argglobal
@@ -137,32 +134,51 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-390
+286
 normal! zo
-let s:l = 437 - ((18 * winheight(0) + 14) / 28)
+let s:l = 292 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-437
-normal! 0
+292
+normal! 076|
 lcd ~/wiki/shell
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+wincmd =
 tabnext
+edit /tmp/.understand_this
 set splitbelow splitright
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-tabnext 4
+argglobal
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 8 - ((7 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+8
+normal! 038|
+lcd ~/wiki/shell
+tabnext 3
 set stal=1
 badd +1 ~/wiki/awk/awk.md
 badd +1 ~/Desktop/countries
 badd +264 ~/bin/upp.sh
 badd +1 /tmp/awk.awk
 badd +245 ~/wiki/shell/update-alternatives.md
+badd +100 man://gawk(1)
+badd +0 /tmp/.understand_this
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
