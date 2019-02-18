@@ -1,13 +1,10 @@
-" Purpose:
+" Purpose:{{{
 "
-" The tmux syntax plugin defines a comment like this:
-"
-"     syn region tmuxComment start=/#/ skip=/\\\@<!\\$/ end=/$/ contains=tmuxTodo
-"
-" FIXME: in a tmux file, if a commented code block precedes a command,
-" the command is highlighted as a comment.
+" If a commented code block precedes  an uncommented line, the latter is wrongly
+" highlighted as a comment.
 "
 " MWE:
+"
 "     $ cat <<'EOF' >/tmp/tmux.conf
 "     #     x
 "     set -s default-terminal tmux-256color
@@ -17,23 +14,20 @@
 "     :syn region tmuxComment start=/#/ end=/$/
 "     :syn region tmuxCommentCodeBlock matchgroup=Comment start=/# \{5,}/ end=/$/ keepend contained containedin=tmuxComment oneline
 "
-" I can reproduce the issue in a conf file, with a MWE.
-" But in practice, there's no issue in a conf file; so the issue must affect
-" all filetypes, but sth must fix it in most of them, except in tmux...
+" Explanation:
 "
-" Update:
-" The issue is that a comment in tmux is defined as a region whose end is `$`.
-" The latter is consumed by our codeblock.
-" If the  region defining a tmux  comment was defined with  `keepend`, there
-" would be no issue.
+" The tmux syntax plugin defines a comment like this:
 "
-" I think we have a fundamental issue every time we used `end=/$/` in this file...
-" Maybe also with sth like `.*` in a match...
+"     syn region tmuxComment start=/#/ skip=/\\\@<!\\$/ end=/$/ contains=tmuxTodo
 "
-" ---
+" We customize the comments by defining `tmuxCommentCodeBlock`.
 "
-" Also, why doesn't a comment codeblock work in a C file?
+"     syn region tmuxCommentCodeBlock matchgroup=Comment start=/# \{5,}/ end=/$/
+"     \ keepend contained containedin=tmuxComment oneline
 "
+" The  latter consumes  the  end of  the `tmuxComment`  region,  which makes  it
+" continue on the next line.
+"}}}
 let s:comment = matchstr(execute('syn list tmuxComment'), 'xxx\zs.*[^ \n]\ze\_s*links')
 syn clear tmuxComment
 exe 'syn region tmuxComment ' . s:comment . ' keepend'
