@@ -252,11 +252,18 @@ EOF
 }
 
 check_we_are_root() { #{{{2
+  # We need to be root.
+  #
+  #      ┌─ Effective User ID
+  #      │
+  #      │  0 is the EUID of the root user.
+  #      │
   if [[ "${EUID}" -ne 0 ]]; then
     cat <<EOF >&2
 Please run as root:
     sudo "$0" "${PGM}"
 EOF
+    # 77 = not sufficient permission
     exit 77
   fi
 }
@@ -623,11 +630,20 @@ install() { #{{{2
   fi
 
   if [[ "${PGM}" == 'awk' ]]; then
-    update-alternatives --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
+    update-alternatives --verbose --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
     --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
-    update-alternatives --set awk /usr/local/bin/gawk
+    update-alternatives --verbose --set awk /usr/local/bin/gawk
+
   elif [[ "${PGM}" == 'vim' ]]; then
-    "${HOME}/bin/update-alternatives-vim.sh"
+    # Vim can be invoked with any of these commands.
+    # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
+    typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)
+    for name in "${names[@]}"; do
+      # add our compiled Vim to each group of alternatives
+      update-alternatives --verbose --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
+      # set our compiled Vim to be the master link
+      update-alternatives --verbose --set "${name}" /usr/local/bin/vim
+    done
   fi
 }
 
