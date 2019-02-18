@@ -1,3 +1,9 @@
+" Purpose:
+"
+" The tmux syntax plugin defines a comment like this:
+"
+"     syn region tmuxComment start=/#/ skip=/\\\@<!\\$/ end=/$/ contains=tmuxTodo
+"
 " FIXME: in a tmux file, if a commented code block precedes a command,
 " the command is highlighted as a comment.
 "
@@ -28,6 +34,8 @@
 "
 " Also, why doesn't a comment codeblock work in a C file?
 "
+let s:comment = matchstr(execute('syn list tmuxComment'), 'xxx\zs.*[^ \n]\ze\_s*links')
 syn clear tmuxComment
-syn region tmuxComment start=/#/ skip=/\\\@<!\\$/ end=/$/  contains=tmuxTodo keepend
+exe 'syn region tmuxComment ' . s:comment . ' keepend'
+unlet! s:comment
 
