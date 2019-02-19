@@ -353,7 +353,7 @@ configure() { #{{{2
     ./update
 
   elif [[ "${PGM}" == 'tmux' ]]; then
-    # Why?{{{
+    # Why this `sed` command?{{{
     #
     # If you're installing tmux, you'll first need to edit `configure.ac`.
     #
@@ -368,9 +368,21 @@ configure() { #{{{2
     # It would be useful if `./configure` had an option for that...
     # I haven't found one in `./configure --help`.
     # So, I edit `configure.ac` manually.
-    #}}}
+    #
     # https://unix.stackexchange.com/a/469130/289772
-    sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac V
+    #}}}
+    # Ok, and why did you choose the regex `\S\+`?{{{
+    #
+    # nicm keeps changing the version reported by `$ tmux -V`.
+    # In the past, he has used `master`, `X.Y-rc`, and now it's `next-X.Y`.
+    # Have a look here:
+    #     https://github.com/tmux/tmux/commits/master/configure.ac
+    #
+    # Who knows what it will be tomorrow...
+    # So,  I use  the  least restrictive  regex  to match  as  many versions  as
+    # possible.
+    #}}}
+    sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac
     sh autogen.sh
     ./configure
 
