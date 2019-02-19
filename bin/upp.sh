@@ -370,7 +370,7 @@ configure() { #{{{2
     # So, I edit `configure.ac` manually.
     #}}}
     # https://unix.stackexchange.com/a/469130/289772
-    sed -i "/AC_INIT/s/next-[0-9.]\+/${VERSION}/" configure.ac
+    sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac V
     sh autogen.sh
     ./configure
 
