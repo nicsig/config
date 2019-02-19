@@ -13,7 +13,6 @@ argglobal
 set stal=2
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -33,11 +32,11 @@ setlocal fdn=20
 setlocal fen
 46
 normal! zo
-let s:l = 73 - ((7 * winheight(0) + 15) / 30)
+let s:l = 67 - ((20 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-73
+67
 normal! 0
 lcd ~/wiki/awk
 tabnext
@@ -52,8 +51,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -90,16 +88,21 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/wiki/shell/update-alternatives.md
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '2resize ' . ((&lines * 11 + 8) / 16)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -109,25 +112,21 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-1
+207
 normal! zo
-let s:l = 27 - ((20 * winheight(0) + 15) / 30)
+223
+normal! zo
+let s:l = 232 - ((5 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-27
-normal! 0
+232
+normal! 032|
 lcd ~/wiki/shell
-tabnext
-edit ~/bin/upp.sh
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
+wincmd w
 argglobal
-setlocal fdm=marker
+if bufexists("/tmp/vkKx051/477") | buffer /tmp/vkKx051/477 | else | edit /tmp/vkKx051/477 | endif
+setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -135,26 +134,25 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-132
-normal! zo
-304
-normal! zo
-356
-normal! zo
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 lcd ~/.vim
-tabnext 4
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 8) / 16)
+exe '2resize ' . ((&lines * 11 + 8) / 16)
+tabnext 3
 set stal=1
 badd +73 ~/wiki/awk/awk.md
-badd +11 ~/Desktop/countries
-badd +2 ~/wiki/shell/update-alternatives.md
 badd +1 /tmp/awk.awk
-badd +373 ~/bin/upp.sh
+badd +11 ~/Desktop/countries
+badd +232 ~/wiki/shell/update-alternatives.md
+badd +0 /tmp/vkKx051/477
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
