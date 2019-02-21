@@ -98,8 +98,9 @@ typeset -A URLS=( \
   [zsh]=git://git.code.sf.net/p/zsh/code \
   )
 
-[[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
-LOGFILE="${HOME}/log/$(basename "$0" .sh)-${PGM}.log"
+LOGDIR="${HOME}/log"
+[[ -d "${LOGDIR}" ]] || mkdir "${LOGDIR}"
+LOGFILE="${LOGDIR}/$(basename "$0" .sh)-${PGM}.log"
 
 # Sanitize input {{{1
 
@@ -640,30 +641,36 @@ install() { #{{{2
     #}}}
   fi
 
-  if [[ "${PGM}" == 'awk' ]]; then
+  if [[ "${PGM}" == 'awk' || "${PGM}" == 'vim' ]]; then
+    update-alternatives --get-selections >"${LOGDIR}/update-alternatives-get-selections.bak"
+
+    if [[ "${PGM}" == 'awk' ]]; then
     # Why the `--slave` option?{{{
     #
     # So that when we run `$ man awk`, the gawk manpage is opened.
     # Otherwise it would fail, because we don't have any manpage for awk.
     #}}}
-    update-alternatives --verbose \
+    update-alternatives --log "${LOGFILE}" \
       --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
       --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
-    # Note the order of the arguments `--verbose` and `--install`/`--set`.
-    # `--verbose` should  come first because  it's an option,  while `--install`
-    # and `--set` are commands.
-    update-alternatives --verbose --set awk /usr/local/bin/gawk
+    # Note the order of the arguments `--log` and `--install`/`--set`.
+    # `--log` should  come first because  it's an option, while  `--install` and
+    # `--set` are commands.
+    update-alternatives --log "${LOGFILE}" --set awk /usr/local/bin/gawk
 
-  elif [[ "${PGM}" == 'vim' ]]; then
-    # Vim can be invoked with any of these commands.
-    # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
-    typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)
-    for name in "${names[@]}"; do
-      # add our compiled Vim to each group of alternatives
-      update-alternatives --verbose --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
-      # set our compiled Vim to be the master link
-      update-alternatives --verbose --set "${name}" /usr/local/bin/vim
-    done
+    elif [[ "${PGM}" == 'vim' ]]; then
+      # Vim can be invoked with any of these commands.
+      # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
+      typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)
+      for name in "${names[@]}"; do
+        # add our compiled Vim to each group of alternatives
+        update-alternatives --log "${LOGFILE}" \
+          --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
+        # set our compiled Vim to be the master link
+        update-alternatives --log "${LOGFILE}" \
+          --set "${name}" /usr/local/bin/vim
+      done
+    fi
   fi
 }
 

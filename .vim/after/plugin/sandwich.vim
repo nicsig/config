@@ -70,6 +70,16 @@ fu! s:set_recipes() abort
     " Thus,  Vim has  to create  a  new reference  to  store the  result of  the
     " expression
     "}}}
+    " What's this `–`?{{{
+    "
+    " An en dash.
+    "
+    " https://english.stackexchange.com/a/2126/313834
+    " https://en.wikipedia.org/wiki/Dash#En_dash
+    " https://en.wikipedia.org/wiki/Dash#En_dash_versus_em_dash
+    " https://en.wikipedia.org/wiki/Whitespace_character#Hair_spaces_around_dashes
+    " https://tex.stackexchange.com/a/60038/169646
+    "}}}
     " Why the recipe for ['`', "'"]?{{{
     "
     " It's often used to quote some word in man pages.
@@ -84,6 +94,7 @@ fu! s:set_recipes() abort
     " FIXME: We  need  to repeat  the  last  recipe  twice, otherwise  it's  not
     " included in `g:sandwich#recipes`.
     let g:sandwich#recipes = g:sandwich#default_recipes
+                         \ + [{'buns': ['– ', ' –'], 'input': ['d']}]
                          \ + [{'buns': ['`', "'"], 'input': ['g']}]
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
