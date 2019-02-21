@@ -110,22 +110,18 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-121
-normal! zo
-135
-normal! zo
-let s:l = 124 - ((64 * winheight(0) + 15) / 30)
+let s:l = 141 - ((66 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-124
+141
 normal! 0
 lcd ~/wiki/shell
 tabnext 3
 set stal=1
-badd +3919 ~/wiki/awk/awk.md
-badd +11 ~/Desktop/countries
-badd +135 ~/wiki/shell/update-alternatives.md
+badd +1 ~/wiki/awk/awk.md
+badd +1 ~/Desktop/countries
+badd +147 ~/wiki/shell/update-alternatives.md
 badd +1 /tmp/awk.awk
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
@@ -138,7 +134,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
