@@ -114,12 +114,12 @@ setlocal fen
 normal! zo
 135
 normal! zo
-let s:l = 135 - ((71 * winheight(0) + 15) / 30)
+let s:l = 124 - ((64 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-135
-normal! 03|
+124
+normal! 0
 lcd ~/wiki/shell
 tabnext 3
 set stal=1
