@@ -115,10 +115,10 @@ indented with tabs, others with spaces).
 ##
 ## The plugin doesn't work!
 
-A module is probably missing; run `mpv` from the command-line, to see which one.
+A module is probably missing; run `mpv` from the command-line to see which one.
 
-You probably need a  more recent version of the Python  interpreter, of pip, and
-these Python modules:
+You probably  need a  more recent version  of the Python  interpreter –  and pip
+which should come with it – as well as these Python modules:
 
    - beautifulsoup4
    - lxml
@@ -204,13 +204,13 @@ version of `pyqt5` (5.12).
 
 ## How to translate a whole sentence?
 
-I think that's what the `f_deepl_translation` function is for.
+That's what the `f_deepl_translation` function is for.
 
 However, at the moment, it doesn't work:
 
     {'jsonrpc': '2.0', 'error': {'message': 'Too many requests.', 'code': 1042901}}
 
-It may be due to our IP being blacklisted by [deepl.com](https://www.deepl.com/translator).
+It may be due to our AS being blacklisted by [deepl.com](https://www.deepl.com/translator).
 
 Or maybe you need to subscribe to a pro account:
 

@@ -13,7 +13,6 @@ argglobal
 set stal=2
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -118,37 +117,12 @@ normal! zt
 1
 normal! 0
 lcd ~/wiki/shell
-tabnext
-edit ~/.config/mpv/scripts/README/interSubs.md
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 213 - ((55 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-213
-normal! 0
-lcd ~/.vim
-tabnext 4
+tabnext 3
 set stal=1
 badd +3919 ~/wiki/awk/awk.md
 badd +11 ~/Desktop/countries
 badd +3 ~/wiki/shell/update-alternatives.md
 badd +1 /tmp/awk.awk
-badd +202 ~/.config/mpv/scripts/README/interSubs.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
