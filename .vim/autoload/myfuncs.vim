@@ -1130,9 +1130,9 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let range = a:line1 . ',' . a:line2
     " Why not simply `\t`?{{{
     "
-    " We need  the cursor to  be positioned on  the character *before*  the tab,
-    " because  `strdisplaywidth()` expects  the  screen column  position of  the
-    " latter.
+    " We need  the cursor to be  positioned on the screen  position *before* the
+    " tab,  because  that's  what  `strdisplaywidth()`  expects  as  its  second
+    " argument.
     "
     " ---
     "
@@ -1142,9 +1142,13 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     " tab character;  for `virtcol('.')-1`  to work, we  would need  the *first*
     " screen position.
     "}}}
-    let pat = '\(.\)\t'
-    let l:Rep = {-> submatch(1) . repeat(' ', strdisplaywidth("\t", virtcol('.')))}
-    exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/ge'
+    let pat = '^\t\|\(.\)\t'
+    let l:Rep = {-> submatch(1) . repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.') ))}
+    let g = 0
+    while search("\t", 'n') && g < 999
+        exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/ge'
+        let g += 1
+    endwhile
 endfu
 
 fu! myfuncs#search_internal_variables() abort "{{{1

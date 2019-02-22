@@ -65,7 +65,7 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 11 - ((0 * winheight(0) + 0) / 1)
+let s:l = 11 - ((9 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -96,11 +96,21 @@ exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/wiki/shell/update-alternatives.md
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 26 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -110,19 +120,66 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 141 - ((66 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-141
+1
 normal! 0
 lcd ~/wiki/shell
+wincmd w
+argglobal
+if bufexists("~/.config/mpv/scripts/README.md") | buffer ~/.config/mpv/scripts/README.md | else | edit ~/.config/mpv/scripts/README.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+60
+normal! zo
+121
+normal! zo
+let s:l = 65 - ((35 * winheight(0) + 13) / 26)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+65
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.config/mpv/scripts/interSubs.py") | buffer ~/.config/mpv/scripts/interSubs.py | else | edit ~/.config/mpv/scripts/interSubs.py | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 2878 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+2878
+normal! 0
+lcd ~/.vim
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 26 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 tabnext 3
 set stal=1
-badd +1 ~/wiki/awk/awk.md
-badd +1 ~/Desktop/countries
-badd +147 ~/wiki/shell/update-alternatives.md
+badd +3919 ~/wiki/awk/awk.md
+badd +11 ~/Desktop/countries
+badd +3 ~/wiki/shell/update-alternatives.md
 badd +1 /tmp/awk.awk
+badd +1301 ~/.config/mpv/scripts/interSubs.py
+badd +25 ~/.config/mpv/scripts/README.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
