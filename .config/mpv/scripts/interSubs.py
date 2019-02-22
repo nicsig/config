@@ -1185,9 +1185,9 @@ class drawing_layer(QLabel):
 
         if config.outline_B:
                 def paintEvent(self, evt: QPaintEvent):
-                        # if not self.psuedo_line:
-                        #       self.psuedo_line = 1
-                        #       return
+                        if not self.psuedo_line:
+                                self.psuedo_line = 1
+                                # return
 
                         x = y = 0
                         y += self.fontMetrics().ascent()

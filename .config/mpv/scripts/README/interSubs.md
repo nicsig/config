@@ -17,6 +17,10 @@ If you wanted to use `F1` and `F2` instead:
     $ sed -i "s/keybinding\s*=\s*'F5'/keybinding = 'F1'/" interSubs.lua
     $ sed -i "s/keybinding\s*=\s*'F6'/keybinding = 'F2'/" interSubs.lua
 
+# How to make interSubs start automatically when I watch a video in a directory containing `XDCC` in its path?
+
+    $ sed -i "s/^autostart_in = {'.*'}/autostart_in = {'XDCC'}/" interSubs.lua
+
 # How to change the browser and the site opened when I left-click on a word?
 
 Edit `interSubs_config.py`, and replace this line:
@@ -55,9 +59,46 @@ A working value is:
             }
     '''
 
-# How to make interSubs start automatically when I watch a video in a directory containing `XDCC` in its path?
+# How to get the audio pronunciation of a word?
 
-    $ sed -i "s/^autostart_in = {'.*'}/autostart_in = {'XDCC'}/" interSubs.lua
+That's what the `f_listen` function is for.
+
+You can bind it to a key in `interSubs_config.py`.
+
+For example, to bind it to a right click:
+
+    mouse_buttons = [
+            ['RightButton',              'NoModifier',           'f_listen'],
+            ...
+
+---
+
+If it fails with this error:
+
+    Traceback (most recent call last):1%) A-V:  0.000
+      File "/home/user/.config/mpv/scripts/interSubs.py", line 1286, in mousePressEvent
+        exec('self.%s(event)' % mouse_action[2])
+      File "<string>", line 1, in <module>
+      File "/home/user/.config/mpv/scripts/interSubs.py", line 1302, in f_listen
+        listen(self.word, config.listen_via)
+      File "/home/user/.config/mpv/scripts/interSubs.py", line 675, in listen
+        gTTS(text = word, lang = config.lang_from, slow = False).save('/tmp/gtts_word.mp3')
+      File "/home/user/.config/mpv/scripts/interSubs.py", line 878, in save
+        self.write_to_fp(f)
+      File "/home/user/.config/mpv/scripts/interSubs.py", line 891, in write_to_fp
+        'tk' : self.token.calculate_token(part)}
+      File "/home/user/.config/mpv/scripts/interSubs.py", line 719, in calculate_token
+        seed = self._get_token_key()
+      File "/home/user/.config/mpv/scripts/interSubs.py", line 752, in _get_token_key
+        tkk_expr = re.search(".*?(TKK=.*?;)W.*?", line).group(1)
+    AttributeError: 'NoneType' object has no attribute 'group'
+    AV: 00:01:17 / 01:52:31 (1%) A-V:  0.000
+
+Set `listen_via` to `'forvo'`:
+
+    listen_via = 'forvo'
+
+<https://github.com/oltodosel/interSubs/issues/18>
 
 ##
 # Issues
@@ -148,54 +189,18 @@ Install `python3-pyqt5`:
 
 ## The subtitles get invisible when I start interSubs!
 
-Comment this block of code in `interSubs.py`:
+Try to update `pyqt5`.
+
+Or comment this `return` statement in `interSubs.py`:
 
     if not self.psuedo_line:
         self.psuedo_line = 1
         return
 
-Consider opening an issue.
+<https://github.com/oltodosel/interSubs/issues/17>
 
-## How to get the audio pronunciation of a word?
-
-That's what the `f_listen` function is for.
-
-You can bind it to a key in `interSubs_config.py`.
-
-For example, to bind it to a left click:
-
-    mouse_buttons = [
-            ['LeftButton',              'NoModifier',           'f_listen'],
-            ...
-
-However, at the moment, it doesn't work:
-
-    Traceback (most recent call last):1%) A-V:  0.000
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 1286, in mousePressEvent
-        exec('self.%s(event)' % mouse_action[2])
-      File "<string>", line 1, in <module>
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 1302, in f_listen
-        listen(self.word, config.listen_via)
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 675, in listen
-        gTTS(text = word, lang = config.lang_from, slow = False).save('/tmp/gtts_word.mp3')
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 878, in save
-        self.write_to_fp(f)
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 891, in write_to_fp
-        'tk' : self.token.calculate_token(part)}
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 719, in calculate_token
-        seed = self._get_token_key()
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 752, in _get_token_key
-        tkk_expr = re.search(".*?(TKK=.*?;)W.*?", line).group(1)
-    AttributeError: 'NoneType' object has no attribute 'group'
-    AV: 00:01:17 / 01:52:31 (1%) A-V:  0.000
-
-The issue is in the function `_get_token_key()` in `interSubs.py`
-
-    tkk_expr = re.search(".*?(TKK=.*?;)W.*?", line).group(1)
-
-The output of `re.search()` is `None`, so `.group(1)` refers to a non-existing capturing group.
-
-Consider opening an issue.
+The purpose of `return` is to get  rid of some flickering introduced by a recent
+version of `pyqt5` (5.12).
 
 ## How to translate a whole sentence?
 
@@ -206,8 +211,15 @@ However, at the moment, it doesn't work:
     {'jsonrpc': '2.0', 'error': {'message': 'Too many requests.', 'code': 1042901}}
 
 It may be due to our IP being blacklisted by [deepl.com](https://www.deepl.com/translator).
-Or i
+
+Or maybe you need to subscribe to a pro account:
+
 <https://www.deepl.com/pro.html#api>
+
+Or it may be related to one of these issues:
+
 <https://github.com/m9dfukc/deepl-alfred-workflow/issues/14#issuecomment-402965296>
 <https://github.com/vsetka/deepl-translator/issues/9>
+
+Don't open an issue: <https://github.com/oltodosel/interSubs/issues/19>
 
