@@ -14,6 +14,8 @@ set stal=2
 tabnew
 tabnew
 tabnew
+tabnew
+tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -127,7 +129,47 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-setlocal fdm=manual
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+159
+normal! zo
+let s:l = 174 - ((57 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+174
+normal! 0
+lcd ~/.vim
+tabnext
+edit ~/.config/mpv/scripts/interSubs.py
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
+wincmd w
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '4resize ' . ((&lines * 24 + 16) / 33)
+argglobal
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -135,21 +177,111 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 752 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+752
+normal! 017|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.config/mpv/scripts/interSubs_config.py") | buffer ~/.config/mpv/scripts/interSubs_config.py | else | edit ~/.config/mpv/scripts/interSubs_config.py | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 253 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+253
+normal! 060|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.config/mpv/scripts/interSubs.lua") | buffer ~/.config/mpv/scripts/interSubs.lua | else | edit ~/.config/mpv/scripts/interSubs.lua | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 10 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+10
+normal! 018|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.config/mpv/scripts/README/interSubs.md") | buffer ~/.config/mpv/scripts/README/interSubs.md | else | edit ~/.config/mpv/scripts/README/interSubs.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+159
+normal! zo
+let s:l = 196 - ((19 * winheight(0) + 12) / 24)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+196
 normal! 0
 lcd ~/.vim
-tabnext 4
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '4resize ' . ((&lines * 24 + 16) / 33)
+tabnext
+edit ~/Desktop/bug.md
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+1
+normal! zo
+let s:l = 38 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+38
+normal! 051|
+lcd ~/.vim
+tabnext 6
 set stal=1
 badd +3919 ~/wiki/awk/awk.md
 badd +11 ~/Desktop/countries
 badd +3 ~/wiki/shell/update-alternatives.md
 badd +1 /tmp/awk.awk
-badd +0 ~/.config/mpv/scripts/README/interSubs.md
+badd +253 ~/.config/mpv/scripts/interSubs_config.py
+badd +10 ~/.config/mpv/scripts/interSubs.lua
+badd +752 ~/.config/mpv/scripts/interSubs.py
+badd +105 ~/.config/mpv/scripts/README/interSubs.md
+badd +0 ~/Desktop/bug.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

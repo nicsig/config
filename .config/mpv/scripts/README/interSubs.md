@@ -55,6 +55,10 @@ A working value is:
             }
     '''
 
+# How to make interSubs start automatically when I watch a video in a directory containing `XDCC` in its path?
+
+    $ sed -i "s/^autostart_in = {'.*'}/autostart_in = {'XDCC'}/" interSubs.lua
+
 ##
 # Issues
 ## Which pitfall should I avoid after redownloading the plugin from github?
@@ -67,12 +71,13 @@ Otherwise, if you edit one of them later, you may introduce a line indented with
 spaces, and the python interpreter won't like the mix of indentation (some lines
 indented with tabs, others with spaces).
 
+##
 ## The plugin doesn't work!
 
 A module is probably missing; run `mpv` from the command-line, to see which one.
 
-You probably need a recent version of  the Python interpreter, of pip, and these
-Python modules:
+You probably need a  more recent version of the Python  interpreter, of pip, and
+these Python modules:
 
    - beautifulsoup4
    - lxml
@@ -91,20 +96,55 @@ Example:
 
 Then, cd into the project, and run:
 
-    $ python3 -m pip install --user --upgrade .
+    $ python3.X -m pip install --user --upgrade .
+              │
+              └ use the latest python release you've been able to install on your system;
+                do NOT simply use `python3`, unless it points to the most recent version
+                of a python interpreter available on your system
 
 Note that sometimes, the installation fails because of a dependency.
 In this case, install the dependency, then retry the original installation.
 
 For beautifulsoup4, don't dl from github; dl from here:
-
-    https://www.crummy.com/software/BeautifulSoup/bs4/download/
+<https://www.crummy.com/software/BeautifulSoup/bs4/download/>
 
 ---
 
 Also, see this issue:
 
     https://github.com/oltodosel/interSubs/issues/9
+
+### When I try to manually install/update the `lxml` module, an error is raised because of `Cython`!
+
+    $ git clone https://github.com/lxml/lxml
+    $ cd lxml
+    $ python3.X -m pip install --user --upgrade .
+    RuntimeError: ERROR: Trying to build without Cython, but pre-generated 'src/lxml/etree.c' is not available (pass --without-cython to ignore this error).~
+
+
+Install the python module `cython`:
+
+    $ cd ..
+    $ git clone https://github.com/cython/cython
+    $ cd cython
+    $ python3.X -m pip install --user --upgrade .
+
+Then, the packages `libxml2-dev` and `libxslt1-dev`:
+
+    # https://stackoverflow.com/a/15761014/9780968
+    $ sudo aptitude install libxml2-dev libxslt1-dev
+
+Finally, retry installing `lxml`:
+
+    $ cd ../lxml
+    $ python3.X -m pip install --user --upgrade .
+
+##
+## I have the error message: “No module named 'PyQt5.QtCore'”!
+
+Install `python3-pyqt5`:
+
+    $ api python3-pyqt5
 
 ## The subtitles get invisible when I start interSubs!
 
@@ -115,12 +155,6 @@ Comment this block of code in `interSubs.py`:
         return
 
 Consider opening an issue.
-
-## I have the error message: “No module named 'PyQt5.QtCore'”!
-
-Install `python3-pyqt5`:
-
-    $ api python3-pyqt5
 
 ## How to get the audio pronunciation of a word?
 
@@ -155,6 +189,12 @@ However, at the moment, it doesn't work:
     AttributeError: 'NoneType' object has no attribute 'group'
     AV: 00:01:17 / 01:52:31 (1%) A-V:  0.000
 
+The issue is in the function `_get_token_key()` in `interSubs.py`
+
+    tkk_expr = re.search(".*?(TKK=.*?;)W.*?", line).group(1)
+
+The output of `re.search()` is `None`, so `.group(1)` refers to a non-existing capturing group.
+
 Consider opening an issue.
 
 ## How to translate a whole sentence?
@@ -165,5 +205,9 @@ However, at the moment, it doesn't work:
 
     {'jsonrpc': '2.0', 'error': {'message': 'Too many requests.', 'code': 1042901}}
 
-Consider opening an issue.
+It may be due to our IP being blacklisted by [deepl.com](https://www.deepl.com/translator).
+Or i
+<https://www.deepl.com/pro.html#api>
+<https://github.com/m9dfukc/deepl-alfred-workflow/issues/14#issuecomment-402965296>
+<https://github.com/vsetka/deepl-translator/issues/9>
 

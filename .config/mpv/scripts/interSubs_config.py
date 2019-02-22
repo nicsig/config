@@ -250,7 +250,7 @@ hover_underline_thickness = 5
 	# f_save_word_to_file
 
 mouse_buttons = [
-	['LeftButton',		'NoModifier',		'f_deepl_translation'],
+	['LeftButton',		'NoModifier',		'f_show_in_browser'],
 	['RightButton',		'NoModifier',		'f_deepl_translation'],
 	['MiddleButton',	'NoModifier',		'f_auto_pause_options'],
 

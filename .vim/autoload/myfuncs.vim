@@ -1126,6 +1126,7 @@ fu! myfuncs#remove_duplicate_lines(line1, line2) abort "{{{1
 endfu
 
 fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
+    let view = winsaveview()
     let mods = 'sil keepj keepp'
     let range = a:line1 . ',' . a:line2
     " Why not simply `\t`?{{{
@@ -1149,6 +1150,7 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
         exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/ge'
         let g += 1
     endwhile
+    call winrestview(view)
 endfu
 
 fu! myfuncs#search_internal_variables() abort "{{{1

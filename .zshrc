@@ -1988,11 +1988,24 @@ sr_fzf() { #{{{2
 }
 
 tor() { #{{{2
-  # For some reason, we can't execute the `.desktop` file,
-  # if we are not in its directory.
+  # Why `cd ...`?  Why not running the desktop file with an absolute path?{{{
+  #
+  # Here's the shebang of the `.desktop` file:
+  #
+  #     #!/usr/bin/env ./Browser/execdesktop
+  #
+  # It will run a script with a relative path.
+  # So the current  directory matters; it must be where  we've installed the Tor
+  # browser.
+  #}}}
+  # If you want to add the tor browser to the application manu, run:{{{
+  #
+  #     $ cd ~/.local/bin/tor-browser_en-US/
+  #     $ ./start-tor-browser.desktop --register-app
+  #}}}
   cd ~/.local/bin/tor-browser_en-US/
   ./start-tor-browser.desktop
-  cd -
+  cd - >/dev/null
 }
 
 truecolor() { #{{{2
