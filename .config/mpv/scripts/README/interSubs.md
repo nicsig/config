@@ -198,31 +198,19 @@ They will be located in 2 directories:
     drwxrwxr-x  2 jean jean  4096 Feb 22 17:41 six-1.12.0-py3.7.egg-info~
     -rw-rw-r--  1 jean jean 32452 Feb 22 17:41 six.py~
 
-If the program for which you install a python module runs python3.7, you need to
-be sure that you installed the module for python3.7.
+#### What's the consequence of this?
 
----
+If the program for which you install a python module runs python3.X, you need to
+be sure that you installed the module for python3.X.
 
-If  you have  several python  interpreters,  you can  see  the whole  list –  in
-descreasing order of priority – with:
+#### Is it ok to use `python3 -m pip install ...` instead of `python3.X -m pip install ...`?
 
-    $ type -a python3
-    python3 is /usr/local/bin/python3~
-    python3 is /usr/bin/python3~
-    python3 is /bin/python3~
+It should be.
 
-The first  line contains the  path to  the binary which  is called when  you run
-`python3` without `.X`.
-Note that here, the compiled  interpreter was installed in `/usr/local/bin`, and
-it has priority over the default  one – in `/usr/bin` – because `/usr/local/bin`
-comes before `/usr/bin` in `$PATH`.
-
----
-
-I think you can  use `python3` with `-m pip install ...` as  long as it runs the
-latest python release you've been able to install on your system.
-Just  make  sure  that  if  your compiled  interpreter  has  been  installed  in
-`/usr/local/bin`, the latter comes before `/usr/bin` in `$PATH`.
+When you run `python3  -m pip install ...`, you install a  python module for the
+interpreter called by `$ python3`.
+The program which needs this module will  also call `$ python3` which should run
+the same interpreter.
 
 ##
 ## I have the error message: “No module named 'PyQt5.QtCore'”!
