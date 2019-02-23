@@ -198,7 +198,7 @@ They will be located in 2 directories:
     drwxrwxr-x  2 ... six-1.12.0-py3.7.egg-info~
     -rw-rw-r--  1 ... six.py~
 
-#### Why using `$ python3 -m pip install ...` instead of `$ python3.X -m pip install ...`?
+### Why using `$ python3 -m pip install ...` instead of `$ python3.X -m pip install ...`?
 
 To be sure that you install your library for the same interpreter that interSubs
 will run later.
