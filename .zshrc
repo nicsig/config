@@ -2609,7 +2609,7 @@ alias qmv='qmv --format=destination-only'
 
 # ranger {{{3
 
-alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; python ~/GitRepos/ranger/ranger.py -d'
+alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ~/.local/bin/ranger -d'
 
 # sudo {{{3
 

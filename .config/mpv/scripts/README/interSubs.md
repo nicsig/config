@@ -198,19 +198,19 @@ They will be located in 2 directories:
     drwxrwxr-x  2 ... six-1.12.0-py3.7.egg-info~
     -rw-rw-r--  1 ... six.py~
 
-#### What's the consequence of this?
+#### What should I pay attention to because of this?
 
 If the program for which you install a python module runs python3.X, you need to
 be sure that you installed the module for python3.X.
 
-#### Is it ok to use `python3 -m pip install ...` instead of `python3.X -m pip install ...`?
+#### Why using `$ python3 -m pip install ...` instead of `$ python3.X -m pip install ...`?
 
-It should be.
+To be sure that you install your  module for the same interpreter that interSubs
+will run later.
 
-When you run `python3  -m pip install ...`, you install a  python module for the
+When you run `$ python3 -m pip install ...`, you install a python module for the
 interpreter called by `$ python3`.
-The program which needs this module will  also call `$ python3` which should run
-the same interpreter.
+interSubs will *also* call `$ python3`, and so should run the same interpreter.
 
 ##
 ## I have the error message: “No module named 'PyQt5.QtCore'”!

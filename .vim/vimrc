@@ -3915,7 +3915,7 @@ fu! s:select_percent_object() abort
     " Maybe we could speed the process by storing the next 2 values in buffer-local
     " variables every time `FileType *` is fired. Not sure it's worth it.
     let opening_syms = map(split(&l:mps, ','), {i,v -> matchstr(v, '.')})
-    let closing_syms = map(split(&l:mps, ','), {i,v -> matchstr(v, '.$')})
+    let closing_syms = map(split(&l:mps, ','), {i,v -> matchstr(v, '.$')} )
     " check it is indeed in 'mps'
     if index(opening_syms, sym) < 0 && index(closing_syms, sym) < 0
         return

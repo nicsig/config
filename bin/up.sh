@@ -66,7 +66,7 @@ EOF
   update_mpv_completion_function
   update_pandoc_completion_function
   update_pip
-  update_git_programs 'https://github.com/ranger/ranger' "${HOME}/GitRepos/"
+  update_ranger
   update_texlive
   update_youtube_dl
   update_zsh_plugins
@@ -314,6 +314,20 @@ EOF
     | grep -Ev '^(-e|#)' \
     | cut -d= -f1 \
     | xargs -r -n1 python3 -m pip install --user --upgrade
+}
+
+update_ranger() { #{{{1
+  update_git_programs 'https://github.com/ranger/ranger' "${HOME}/GitRepos/"
+  cd "${HOME}/GitRepos/ranger"
+  # Why installing ranger as a pip package?{{{
+  #
+  # You could just  the script `ranger.py`, but you would  not have the manpages
+  # `ranger(1)` and `rifle()`.
+  #}}}
+  python3 -m pip install --user --upgrade .
+  # You may enhance ranger by installing some optional dependencies:
+  #
+  #     https://github.com/ranger/ranger#dependencies
 }
 
 update_texlive() { #{{{1

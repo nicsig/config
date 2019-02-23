@@ -64,10 +64,10 @@ fu! colorscheme#customize() abort "{{{2
     " `Conditional` (because this one is blue).
     "}}}
     exe 'hi Underlined term=underline cterm=underline gui=underline '
-        \ . substitute(matchstr(execute('hi Conditional'), 'xxx\zs.*'), '\n\|links to.*', ' ', 'g')
-        "                                                                 │{{{
-        " If the width of the current window is too small,                ┘
-        " the output will be wrapped on several lines, which may break our code.
+        \ . matchstr(split(execute('hi Conditional'), '\n')[0], 'xxx\zs.*')
+        "            │{{{
+        "            └ When we start Vim with `$ sudo vim`, the output of `execute('hi ...')`
+        "              contains 2 lines instead of 1 (the second line contains `Last set from ...`).
         "}}}
 
     " Why changing `CursorLine`?{{{

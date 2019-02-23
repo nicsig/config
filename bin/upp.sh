@@ -1,32 +1,4 @@
 #!/bin/bash
-# TODO: Install necessary dependencies? So that the script work even on a brand new machine...{{{
-#
-# Run:
-#
-#     $ sudo aptitude build-dep $PGM
-#
-# For this to work, you first need to edit `/etc/apt/sources.list`,
-# and uncomment:
-#
-#     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted
-#
-# For weechat, you need to uncomment:
-#
-#     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) universe
-#
-# For Vim, you may need to run:
-#
-#     $ sudo aptitude build-dep vim vim-gtk
-#                                   ^^^^^^^
-#                                   does it make a difference? is it necessary?
-#}}}
-# TODO: Handle ranger too?{{{
-#
-# It's useful  to install ranger as  a package, to get  the manpages (ranger(1),
-# rifle(1)).
-#}}}
-
-
 # How much time the compilation is expected to take?{{{
 #
 #   ≈ 13 min  for mpv
@@ -677,6 +649,24 @@ install() { #{{{2
 install_dependencies() { #{{{2
   aptitude install make checkinstall
 
+  # TODO: Make the script edit `/etc/apt/sources.list`. {{{
+  #
+  # And uncomment:
+  #
+  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted
+  #
+  # And run `$ sudo aptitude update`, so that `aptitude build-dep` works.
+  #
+  # For weechat, you need to uncomment:
+  #
+  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) universe
+  #
+  # For Vim, you may need to run:
+  #
+  #     $ sudo aptitude build-dep vim vim-gtk
+  #                                   ^^^^^^^
+  #                                   does it make a difference? is it necessary?
+  #}}}
   aptitude build-dep ${PGM}
 
   if [[ "${PGM}" == 'vim' ]]; then
