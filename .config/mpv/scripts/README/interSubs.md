@@ -137,11 +137,7 @@ Example:
 
 Then, cd into the project, and run:
 
-    $ python3.X -m pip install --user --upgrade .
-              │
-              └ use the latest python release you've been able to install on your system;
-                do NOT simply use `python3`, unless it points to the most recent version
-                of a python interpreter available on your system
+    $ python3 -m pip install --user --upgrade .
 
 Note that sometimes, the installation fails because of a dependency.
 In this case, install the dependency, then retry the original installation.
@@ -159,7 +155,7 @@ Also, see this issue:
 
     $ git clone https://github.com/lxml/lxml
     $ cd lxml
-    $ python3.X -m pip install --user --upgrade .
+    $ python3 -m pip install --user --upgrade .
     RuntimeError: ERROR: Trying to build without Cython, but pre-generated 'src/lxml/etree.c' is not available (pass --without-cython to ignore this error).~
 
 
@@ -168,7 +164,7 @@ Install the python module `cython`:
     $ cd ..
     $ git clone https://github.com/cython/cython
     $ cd cython
-    $ python3.X -m pip install --user --upgrade .
+    $ python3 -m pip install --user --upgrade .
 
 Then, the packages `libxml2-dev` and `libxslt1-dev`:
 
@@ -178,7 +174,55 @@ Then, the packages `libxml2-dev` and `libxslt1-dev`:
 Finally, retry installing `lxml`:
 
     $ cd ../lxml
-    $ python3.X -m pip install --user --upgrade .
+    $ python3 -m pip install --user --upgrade .
+
+### Which influence does the version of my python interpreter (e.g. `v3.5` vs `v3.7`) has over an installed module?
+
+It  determines  the  installation  location  of the  module,  and  which  python
+interpreter will be able to use the latter.
+
+Each python version has its own modules.
+For  example, if  you have  python3.5 and  python3.7, and  you've installed  the
+module `six` with both of them:
+
+    $ python3.5 -m pip install --user --upgrade six
+    $ python3.7 -m pip install --user --upgrade six
+
+They will be located in 2 directories:
+
+    $ ls -l ~/.local/lib/python3.5/site-packages | grep six
+    drwxrwxr-x  2 jean jean  4096 Feb 22 17:41 six-1.12.0-py3.5.egg-info~
+    -rw-rw-r--  1 jean jean 32452 Feb 22 17:41 six.py~
+
+    $ ls -l ~/.local/lib/python3.7/site-packages | grep six
+    drwxrwxr-x  2 jean jean  4096 Feb 22 17:41 six-1.12.0-py3.7.egg-info~
+    -rw-rw-r--  1 jean jean 32452 Feb 22 17:41 six.py~
+
+If the program for which you install a python module runs python3.7, you need to
+be sure that you installed the module for python3.7.
+
+---
+
+If  you have  several python  interpreters,  you can  see  the whole  list –  in
+descreasing order of priority – with:
+
+    $ type -a python3
+    python3 is /usr/local/bin/python3~
+    python3 is /usr/bin/python3~
+    python3 is /bin/python3~
+
+The first  line contains the  path to  the binary which  is called when  you run
+`python3` without `.X`.
+Note that here, the compiled  interpreter was installed in `/usr/local/bin`, and
+it has priority over the default  one – in `/usr/bin` – because `/usr/local/bin`
+comes before `/usr/bin` in `$PATH`.
+
+---
+
+I think you can  use `python3` with `-m pip install ...` as  long as it runs the
+latest python release you've been able to install on your system.
+Just  make  sure  that  if  your compiled  interpreter  has  been  installed  in
+`/usr/local/bin`, the latter comes before `/usr/bin` in `$PATH`.
 
 ##
 ## I have the error message: “No module named 'PyQt5.QtCore'”!

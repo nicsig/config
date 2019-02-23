@@ -13,6 +13,8 @@ argglobal
 set stal=2
 tabnew
 tabnew
+tabnew
+tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -21,7 +23,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -55,7 +58,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -65,7 +69,7 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 11 - ((9 * winheight(0) + 0) / 1)
+let s:l = 11 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -73,7 +77,8 @@ normal! zt
 normal! 030|
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("/tmp/awk.awk") | buffer /tmp/awk.awk | else | edit /tmp/awk.awk | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -101,9 +106,35 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 12 - ((11 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+12
+normal! 0
+lcd ~/wiki/shell
+tabnext
+edit ~/bin/upp.sh
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+arglocal
+%argdel
+setlocal fdm=marker
+setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -115,13 +146,42 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
+normal! 05|
+lcd ~/.vim
+tabnext
+edit ~/.config/mpv/scripts/README/interSubs.md
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+arglocal
+%argdel
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+179
+normal! zo
+let s:l = 187 - ((153 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+187
 normal! 0
-lcd ~/wiki/shell
-tabnext 3
+lcd ~/.vim
+tabnext 5
 set stal=1
-badd +3919 ~/wiki/awk/awk.md
+badd +1483 ~/wiki/awk/awk.md
 badd +11 ~/Desktop/countries
-badd +3 ~/wiki/shell/update-alternatives.md
+badd +12 ~/wiki/shell/update-alternatives.md
+badd +659 ~/bin/upp.sh
+badd +187 ~/.config/mpv/scripts/README/interSubs.md
 badd +1 /tmp/awk.awk
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
@@ -134,6 +194,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
