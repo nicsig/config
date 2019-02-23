@@ -115,10 +115,10 @@ indented with tabs, others with spaces).
 ##
 ## The plugin doesn't work!
 
-A module is probably missing; run `mpv` from the command-line to see which one.
+Run `mpv` from the command-line to get more information.
 
 You probably  need a  more recent version  of the Python  interpreter –  and pip
-which should come with it – as well as these Python modules:
+which should come with it – as well as these Python libraries:
 
    - beautifulsoup4
    - lxml
@@ -130,7 +130,7 @@ which should come with it – as well as these Python modules:
 
 ---
 
-If you have issues to install one of those modules, try to find them on github.
+If you have issues to install one of those libraries, try to find them on github.
 Example:
 
     https://github.com/facelessuser/soupsieve
@@ -151,7 +151,7 @@ Also, see this issue:
 
     https://github.com/oltodosel/interSubs/issues/9
 
-### When I try to manually install/update the `lxml` module, an error is raised because of `Cython`!
+### When I try to manually install/update the `lxml` library, an error is raised because of `Cython`!
 
     $ git clone https://github.com/lxml/lxml
     $ cd lxml
@@ -159,14 +159,14 @@ Also, see this issue:
     RuntimeError: ERROR: Trying to build without Cython, but pre-generated 'src/lxml/etree.c' is not available (pass --without-cython to ignore this error).~
 
 
-Install the python module `cython`:
+Install the python package `cython`:
 
     $ cd ..
     $ git clone https://github.com/cython/cython
     $ cd cython
     $ python3 -m pip install --user --upgrade .
 
-Then, the packages `libxml2-dev` and `libxslt1-dev`:
+Then, the deb packages `libxml2-dev` and `libxslt1-dev`:
 
     # https://stackoverflow.com/a/15761014/9780968
     $ sudo aptitude install libxml2-dev libxslt1-dev
@@ -176,14 +176,14 @@ Finally, retry installing `lxml`:
     $ cd ../lxml
     $ python3 -m pip install --user --upgrade .
 
-### Which influence does the version of my python interpreter (e.g. `v3.5` vs `v3.7`) has over an installed module?
+### Which influence does the version of my python interpreter (e.g. `v3.5` vs `v3.7`) has over an installed library?
 
-It  determines  the  installation  location  of the  module,  and  which  python
+It  determines  the installation  location  of  the  library, and  which  python
 interpreter will be able to use the latter.
 
-Each python version has its own modules.
+Each python version has its own libraries.
 For  example, if  you have  python3.5 and  python3.7, and  you've installed  the
-module `six` with both of them:
+library `six` with both of them:
 
     $ python3.5 -m pip install --user --upgrade six
     $ python3.7 -m pip install --user --upgrade six
@@ -200,16 +200,16 @@ They will be located in 2 directories:
 
 #### What should I pay attention to because of this?
 
-If the program for which you install a python module runs python3.X, you need to
-be sure that you installed the module for python3.X.
+If the program for  which you install a python library  runs python3.X, you need
+to be sure that you installed the library for python3.X.
 
 #### Why using `$ python3 -m pip install ...` instead of `$ python3.X -m pip install ...`?
 
-To be sure that you install your  module for the same interpreter that interSubs
+To be sure that you install your library for the same interpreter that interSubs
 will run later.
 
-When you run `$ python3 -m pip install ...`, you install a python module for the
-interpreter called by `$ python3`.
+When you run  `$ python3 -m pip  install ...`, you install a  python library for
+the interpreter called by `$ python3`.
 interSubs will *also* call `$ python3`, and so should run the same interpreter.
 
 ##

@@ -131,7 +131,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -143,13 +144,17 @@ setlocal fdn=20
 setlocal fen
 105
 normal! zo
-649
+277
 normal! zo
-let s:l = 660 - ((8 * winheight(0) + 0) / 1)
+401
+normal! zo
+678
+normal! zo
+let s:l = 403 - ((31 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-660
+403
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -165,18 +170,18 @@ setlocal fdn=20
 setlocal fen
 319
 normal! zo
-322
-normal! zo
-let s:l = 325 - ((0 * winheight(0) + 0) / 1)
+319
+normal! zc
+let s:l = 3 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-325
-normal! 03|
+3
+normal! 0
 lcd ~/.vim
 wincmd w
-2wincmd w
-wincmd =
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 tabnext
 edit ~/.config/mpv/scripts/README/interSubs.md
 set splitbelow splitright
@@ -186,22 +191,23 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fdm=manual
+setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 116 - ((115 * winheight(0) + 15) / 30)
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-116
+1
 normal! 0
 lcd ~/.vim
-tabnext 4
+tabnext 5
 set stal=1
 badd +1 ~/wiki/awk/awk.md
 badd +1 ~/Desktop/countries
@@ -209,7 +215,6 @@ badd +1 ~/wiki/shell/update-alternatives.md
 badd +660 ~/bin/upp.sh
 badd +1 ~/.config/mpv/scripts/README/interSubs.md
 badd +1 /tmp/awk.awk
-badd +1 man://ranger(1)
 badd +0 ~/bin/up.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
