@@ -67,7 +67,7 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 11 - ((0 * winheight(0) + 0) / 1)
+let s:l = 11 - ((9 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -191,21 +191,22 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-setlocal fdm=manual
-setlocal fde=0
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+201
+normal! zo
+let s:l = 218 - ((102 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+218
+normal! 043|
 lcd ~/.vim
 tabnext 5
 set stal=1
@@ -215,7 +216,7 @@ badd +1 ~/wiki/shell/update-alternatives.md
 badd +660 ~/bin/upp.sh
 badd +1 ~/.config/mpv/scripts/README/interSubs.md
 badd +1 /tmp/awk.awk
-badd +0 ~/bin/up.sh
+badd +1 ~/bin/up.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

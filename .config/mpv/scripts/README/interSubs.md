@@ -182,8 +182,8 @@ It  determines  the installation  location  of  the  library, and  which  python
 interpreter will be able to use the latter.
 
 Each python version has its own libraries.
-For  example, if  you have  python3.5 and  python3.7, and  you've installed  the
-library `six` with both of them:
+For example, if both python3.5 and  python3.7 are installed on your machine, and
+you've installed the library `six` with both of them:
 
     $ python3.5 -m pip install --user --upgrade six
     $ python3.7 -m pip install --user --upgrade six
@@ -198,11 +198,6 @@ They will be located in 2 directories:
     drwxrwxr-x  2 ... six-1.12.0-py3.7.egg-info~
     -rw-rw-r--  1 ... six.py~
 
-#### What should I pay attention to because of this?
-
-If the program for  which you install a python library  runs python3.X, you need
-to be sure that you installed the library for python3.X.
-
 #### Why using `$ python3 -m pip install ...` instead of `$ python3.X -m pip install ...`?
 
 To be sure that you install your library for the same interpreter that interSubs
@@ -211,6 +206,21 @@ will run later.
 When you run  `$ python3 -m pip  install ...`, you install a  python library for
 the interpreter called by `$ python3`.
 interSubs will *also* call `$ python3`, and so should run the same interpreter.
+
+---
+
+
+
+Even though the shebang of `interSubs.py` is:
+
+    #! /usr/bin/env python
+
+which, atm, runs  python2.7, interSubs runs `$  python3` because `interSubs.lua`
+contains this line:
+
+    # line 13
+    start_command = 'python3 "%s" "%s" "%s"'
+                           ^
 
 ##
 ## I have the error message: “No module named 'PyQt5.QtCore'”!
