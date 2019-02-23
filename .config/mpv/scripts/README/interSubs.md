@@ -191,12 +191,12 @@ module `six` with both of them:
 They will be located in 2 directories:
 
     $ ls -l ~/.local/lib/python3.5/site-packages | grep six
-    drwxrwxr-x  2 jean jean  4096 Feb 22 17:41 six-1.12.0-py3.5.egg-info~
-    -rw-rw-r--  1 jean jean 32452 Feb 22 17:41 six.py~
+    drwxrwxr-x  2 ... six-1.12.0-py3.5.egg-info~
+    -rw-rw-r--  1 ... six.py~
 
     $ ls -l ~/.local/lib/python3.7/site-packages | grep six
-    drwxrwxr-x  2 jean jean  4096 Feb 22 17:41 six-1.12.0-py3.7.egg-info~
-    -rw-rw-r--  1 jean jean 32452 Feb 22 17:41 six.py~
+    drwxrwxr-x  2 ... six-1.12.0-py3.7.egg-info~
+    -rw-rw-r--  1 ... six.py~
 
 #### What's the consequence of this?
 
