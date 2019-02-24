@@ -64,10 +64,10 @@ fu! colorscheme#customize() abort "{{{2
     " `Conditional` (because this one is blue).
     "}}}
     exe 'hi Underlined term=underline cterm=underline gui=underline '
-        \ . matchstr(split(execute('hi Conditional'), '\n')[0], 'xxx\zs.*')
-        "            │{{{
-        "            └ When we start Vim with `$ sudo vim`, the output of `execute('hi ...')`
-        "              contains 2 lines instead of 1 (the second line contains `Last set from ...`).
+        \ . substitute(split(execute('hi Conditional'), '\n')[0], '.*xxx\|links to.*', '', 'g')
+        "              │{{{
+        "              └ When we start Vim with `$ sudo vim`, the output of `execute('hi ...')`
+        "                contains 2 lines instead of 1 (the second line contains `Last set from ...`).
         "}}}
 
     " Why changing `CursorLine`?{{{
@@ -102,6 +102,13 @@ fu! colorscheme#customize() abort "{{{2
     "}}}
     if execute('hi Normal') =~# 'ctermbg'
         if $DISPLAY is# ''
+            " FIXME: In Neovim and in a console, the tildes are still visible.{{{
+            "
+            " And yet, the definition of `EndOfBuffer` is the same as in Vim:
+            "
+            "     hi EndOfBuffer
+            "     EndOfBuffer    xxx ctermfg=7~
+            "}}}
             hi EndOfBuffer ctermfg=bg
         else
             hi EndOfBuffer ctermfg=bg guifg=bg

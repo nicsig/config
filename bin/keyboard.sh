@@ -1,6 +1,6 @@
 #!/bin/bash
 
-xkbcomp -I$HOME/.config/xkb $HOME/.config/xkb/map $DISPLAY
+xkbcomp -I$HOME/.config/keyboard/xkb $HOME/.config/keyboard/xkb/map $DISPLAY
 
 killall xbindkeys
 xbindkeys -f "${HOME}/.config/xbindkeys/rc.conf"

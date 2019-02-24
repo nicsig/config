@@ -7243,6 +7243,15 @@ endfu
 "    - get a pattern to detect whether the current line is commented
 "    - return the commented version of a line (before pasting it somewhere)
 "
+" Update:
+"
+" I think we should not look at the comment leader to detect whether a line is commented.
+" Instead, maybe we should just look at the syntax item at the end of the line:
+"
+"     :echo synIDattr(synIDtrans(synID(line("."), col("$")-1, 1)), "name")
+"
+" Source: https://vi.stackexchange.com/a/18992/17449
+"
 " 115 -
 " We have 4 plugins which use `repeat#set()`:
 "

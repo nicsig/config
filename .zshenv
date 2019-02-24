@@ -312,16 +312,16 @@ export REPORTTIME=15
 #     sudo: no tty present and no askpass program specified
 #
 # According to the message, we need to specify an askpass program.
-# If you search 'askpass' in `$ man sudo`, you'll find the `-A` option (which we
+# If you search `askpass` in `$ man sudo`, you'll find the `-A` option (which we
 # use in our `vim-unix` plugin) and the `SUDO_ASKPASS` environment variable.
 #}}}
 # Where did you find this `/usr/lib/ssh/x11-ssh-askpass` file?{{{
 #
 #     $ dpkg -L ssh-askpass
 #}}}
-# Ok, and where did you find this `ssh-askpass` package?{{{
+# Ok, and where did you find this package?{{{
 #
-#     $ apt-file search askpass
+#     $ aptitude search '~daskpass'
 #}}}
 export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 
