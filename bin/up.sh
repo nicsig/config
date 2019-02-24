@@ -321,8 +321,8 @@ update_ranger() { #{{{1
   cd "${HOME}/GitRepos/ranger"
   # Why installing ranger as a pip package?{{{
   #
-  # You could just  the script `ranger.py`, but you would  not have the manpages
-  # `ranger(1)` and `rifle()`.
+  # You  could just  use  the  script `ranger.py`,  but  you  wouldn't have  the
+  # manpages `ranger(1)` and `rifle()`.
   #}}}
   python3 -m pip install --user --upgrade .
   # You may enhance ranger by installing some optional dependencies:

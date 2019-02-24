@@ -627,7 +627,7 @@ install() { #{{{2
       --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
     # Note the order of the arguments `--log` and `--install`/`--set`.
     # `--log` should  come first because  it's an option, while  `--install` and
-    # `--set` are commands.
+    # `--set` are subcommands.
     update-alternatives --log "${LOGFILE}" --set awk /usr/local/bin/gawk
 
     elif [[ "${PGM}" == 'vim' ]]; then
