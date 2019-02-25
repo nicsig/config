@@ -58,13 +58,14 @@ set -e
 # Init {{{1
 
 PGM="$1"
-SUPPORTED_PGMS=(gawk mpv tmux vim weechat zsh)
+SUPPORTED_PGMS=(gawk mpv tmux trans vim weechat zsh)
 GIT_REPOS="${HOME}/GitRepos/"
 
 typeset -A URLS=( \
   [gawk]=git://git.savannah.gnu.org/gawk.git \
   [mpv]=https://github.com/mpv-player/mpv-build \
   [tmux]=https://github.com/tmux/tmux \
+  [trans]=https://github.com/soimort/translate-shell \
   [vim]=https://github.com/vim/vim \
   [weechat]=https://github.com/weechat/weechat \
   [zsh]=git://git.code.sf.net/p/zsh/code \
@@ -84,7 +85,7 @@ if [[ -z "${PGM}" ]]; then
 #
 # How to negate a test with regular expressions?
 #     https://stackoverflow.com/a/7846318/9780968
-elif [[ ! 'gawk mpv tmux vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
+elif [[ ! 'gawk mpv tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
   printf -- '%s: the only programs this script can update are:\n' "$(basename "$0")" >&2
   # How to print array elements on separate lines?
   #     https://stackoverflow.com/a/15692004/9780968
@@ -455,7 +456,10 @@ download() { #{{{2
   # Even  if we didn't  edited this  file, it's still  a good practice  to stash
   # (there may be other file(s) that we edit).
   git stash
-  git checkout master
+  if [[ "${PGM}" != 'trans' ]]; then
+    # there's no master branch for trans (only a develop branch)
+    git checkout master
+  fi
   git pull
 }
 
@@ -473,6 +477,8 @@ get_version() { #{{{2
   elif [[ "${PGM}" == 'tmux' ]]; then
     # Don't add `--tags`! You would get the invalid “version” `to-merge`.
     VERSION="$(git describe --abbrev=0)"
+  elif [[ "${PGM}" == 'trans' ]]; then
+    VERSION="$(git describe)"
   else
     # Why `--tags`?{{{
     #
@@ -504,6 +510,9 @@ get_version() { #{{{2
   if [[ ${PGM} == 'gawk' ]]; then
     VERSION="${VERSION#*-}"
     VERSION="9:${VERSION%-*}"
+
+  elif [[ ${PGM} == 'trans' ]]; then
+    VERSION="${VERSION#v}"
 
   elif [[ ${PGM} == 'vim' ]]; then
     # What's this `9:`?{{{
@@ -660,6 +669,10 @@ install_dependencies() { #{{{2
   # For weechat, you need to uncomment:
   #
   #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) universe
+  #
+  # For trans, you need to uncomment:
+  #
+  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) multiverse
   #
   # For Vim, you may need to run:
   #

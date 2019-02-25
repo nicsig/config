@@ -1,5 +1,5 @@
 #compdef upp.sh
 
 local programs
-programs=(gawk mpv tmux vim weechat zsh)
+programs=(gawk mpv tmux trans vim weechat zsh)
 _values 'programs' ${programs}
