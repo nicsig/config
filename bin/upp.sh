@@ -456,8 +456,9 @@ download() { #{{{2
   # Even  if we didn't  edited this  file, it's still  a good practice  to stash
   # (there may be other file(s) that we edit).
   git stash
-  if [[ "${PGM}" != 'trans' ]]; then
-    # there's no master branch for trans (only a develop branch)
+  # check a master branch exists (trans has no master branch)
+  # https://stackoverflow.com/q/5167957/9780968
+  if git show-ref --verify --quiet refs/heads/master; then
     git checkout master
   fi
   git pull

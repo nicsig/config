@@ -14,7 +14,6 @@ set stal=2
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -34,13 +33,11 @@ setlocal fdn=20
 setlocal fen
 496
 normal! zo
-922
-normal! zo
-let s:l = 499 - ((46 * winheight(0) + 15) / 30)
+let s:l = 496 - ((49 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-499
+496
 normal! 0
 lcd ~/wiki/awk
 tabnext
@@ -62,7 +59,7 @@ setlocal fdn=20
 setlocal fen
 985
 normal! zo
-let s:l = 1005 - ((16 * winheight(0) + 15) / 30)
+let s:l = 1005 - ((7 * winheight(0) + 6) / 13)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -82,7 +79,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 11 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -111,7 +108,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 5) / 11)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -120,7 +117,7 @@ normal! 0
 lcd ~/.vim
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 11 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/Desktop/bug.md
 set splitbelow splitright
@@ -140,51 +137,20 @@ setlocal fdn=20
 setlocal fen
 1
 normal! zo
-let s:l = 40 - ((17 * winheight(0) + 15) / 30)
+let s:l = 43 - ((6 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-40
-normal! 05|
+43
+normal! 023|
 lcd ~/.vim
-tabnext
-edit ~/bin/upp.sh
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-106
-normal! zo
-658
-normal! zo
-661
-normal! zo
-let s:l = 675 - ((452 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-675
-normal! 071|
-lcd ~/.vim
-tabnext 5
+tabnext 4
 set stal=1
-badd +26 ~/wiki/awk/awk.md
+badd +450 ~/wiki/awk/awk.md
 badd +1014 ~/wiki/vim/string.md
-badd +1 ~/Desktop/countries
+badd +12 ~/Desktop/countries
 badd +1 /tmp/awk.awk
-badd +264 ~/bin/upp.sh
-badd +47 ~/Desktop/bug.md
+badd +0 ~/Desktop/bug.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -196,6 +162,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
