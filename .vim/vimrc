@@ -2869,35 +2869,6 @@ fu! s:my_zd(type) abort
     norm! zd
 endfu
 
-" zf {{{4
-
-" Why do you write these mappings wrapping around the builtin `zf` command?{{{
-"
-" They remove a possible superfluous comment leader:
-"
-"     " this is a comment " { { {
-"                         ^
-"                         ✘
-"
-" I can't find an example where Vim adds a superfluous comment leader...
-" So, I think we wrote these mappings because, in the past, we sometimes wrongly
-" added a superfluous comment leader.
-"}}}
-nno  <silent>  zf  :<c-u>set opfunc=<sid>my_zf<cr>g@
-xno  <silent>  zf  :<c-u>call <sid>my_zf('vis')<cr>
-
-fu! s:my_zf(type) abort
-    let cml = !empty(&l:cms) ? split(&l:cms, '%')[0] : ''
-    let pat = '^\s*\V'.escape(cml, '/\').'\m.*\zs\V'.escape(cml, '/\').'\m\ze\s*{'.'{{'
-    if a:type is# 'vis'
-        norm! '<V'>zf
-        sil! exe 'keepj keepp ''<s/'.pat.'//'
-    else
-        norm! '[zf']
-        sil! exe 'keepj keepp ''[s/'.pat.'//'
-    endif
-endfu
-
 " zg (&friends) {{{4
 
 " The default commands to add good / bad words in:
@@ -7547,6 +7518,7 @@ endfu
 " to exclude our custom groups via `@cMyCustomGroups`
 let s:syled_comments_filetypes = [
     \ 'awk',
+    \ 'c',
     \ 'conf',
     \ 'dircolors',
     \ 'gitconfig',
