@@ -1,4 +1,4 @@
-fu! s:fix() abort
+fu! s:fix_allbut() abort
     let groups = [
     \ 'cBlock',
     \ 'cBracket',
@@ -23,5 +23,5 @@ fu! s:fix() abort
     endfor
 endfu
 
-call s:fix()
+call s:fix_allbut()
 
