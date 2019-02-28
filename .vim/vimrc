@@ -7531,9 +7531,22 @@ endfu
 
 
 
+" TODO: to add `c`, you need to redefine some of those syntax groups:
+"
+"     cBlock
+"     cBracket
+"     cCppBracket
+"     cCppParen
+"     cDefine
+"     cMulti
+"     cParen
+"     cPreProc
+"
+" They may contain ALLBUT.
+" When that happens, the syntax group must be redefined in `after/syntax/c.vim`,
+" to exclude our custom groups via `@cMyCustomGroups`
 let s:syled_comments_filetypes = [
     \ 'awk',
-    \ 'c',
     \ 'conf',
     \ 'dircolors',
     \ 'gitconfig',
