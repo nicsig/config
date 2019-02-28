@@ -215,7 +215,6 @@ Plug 'lacygoill/vim-interactive-lists'
 Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-lg-lib'
 Plug 'lacygoill/vim-logevents'
-Plug 'lacygoill/vim-lua'
 Plug 'lacygoill/vim-math'
 Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-python'
@@ -7502,20 +7501,6 @@ endfu
 
 
 
-" TODO: to add `c`, you need to redefine some of those syntax groups:
-"
-"     cBlock
-"     cBracket
-"     cCppBracket
-"     cCppParen
-"     cDefine
-"     cMulti
-"     cParen
-"     cPreProc
-"
-" They may contain ALLBUT.
-" When that happens, the syntax group must be redefined in `after/syntax/c.vim`,
-" to exclude our custom groups via `@cMyCustomGroups`
 let s:syled_comments_filetypes = [
     \ 'awk',
     \ 'c',
@@ -7530,9 +7515,9 @@ let s:syled_comments_filetypes = [
     \ 'tex',
     \ 'tmux',
     \ 'vim',
-    \ 'xkb',
     \ 'xdefaults',
     \ 'xmodmap',
+    \ 'xkb',
     \ 'zsh',
     \ ]
 augroup syled_comments

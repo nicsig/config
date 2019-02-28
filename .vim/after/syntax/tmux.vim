@@ -31,7 +31,7 @@
 " Solution:
 " Redefine `tmuxComment` and give it the `keepend` attribute.
 "}}}
-let s:comment = matchstr(execute('syn list tmuxComment'), 'xxx\zs.*[^ \n]\ze\_s*links')
+let s:comment = matchstr(execute('syn list tmuxComment'), '\m\Cxxx\%(\s\+match\)\=\zs.*[^ \n]\ze\_s*links')
 syn clear tmuxComment
 exe 'syn region tmuxComment ' . s:comment . ' keepend'
 unlet! s:comment

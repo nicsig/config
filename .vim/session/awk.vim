@@ -14,6 +14,7 @@ set stal=2
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -125,16 +126,7 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-5wincmd k
-wincmd w
-wincmd w
-wincmd w
+2wincmd k
 wincmd w
 wincmd w
 wincmd t
@@ -144,10 +136,7 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 1 + 16) / 33)
-exe '5resize ' . ((&lines * 1 + 16) / 33)
-exe '6resize ' . ((&lines * 20 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -175,14 +164,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-23
-normal! zo
-let s:l = 25 - ((4 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-25
-normal! 020|
+1
+normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
@@ -195,48 +182,42 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-69
+81
 normal! zo
-128
+82
 normal! zo
-230
-normal! zo
-236
-normal! zo
-244
-normal! zo
-409
-normal! zo
-409
+82
 normal! zc
-let s:l = 240 - ((0 * winheight(0) + 0) / 1)
+81
+normal! zc
+let s:l = 83 - ((79 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-240
-normal! 035|
+83
+normal! 0
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
-argglobal
-if bufexists("~/.vim/after/syntax/c.vim") | buffer ~/.vim/after/syntax/c.vim | else | edit ~/.vim/after/syntax/c.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 2 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-2
-normal! 010|
-lcd ~/.vim
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+tabnext
+edit ~/.vim/plugged/vim-lg-lib/.git/index
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
 wincmd w
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+wincmd =
 argglobal
-if bufexists("~/.vim/plugged/vim-lg-lib/.git/index") | buffer ~/.vim/plugged/vim-lg-lib/.git/index | else | edit ~/.vim/plugged/vim-lg-lib/.git/index | endif
 setlocal fdm=syntax
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -245,17 +226,35 @@ setlocal fdl=1
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5
+1
 normal! 0
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG | endif
-setlocal fdm=manual
+if bufexists("~/.vim/plugged/vim-xkb/.git/index") | buffer ~/.vim/plugged/vim-xkb/.git/index | else | edit ~/.vim/plugged/vim-xkb/.git/index | endif
+setlocal fdm=syntax
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=1
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 3) / 7)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-xkb
+wincmd w
+argglobal
+if bufexists("fugitive:///home/jean/.vim/plugged/vim-xkb/.git//6f8e9b9905d250b0577688a995096594971f6337") | buffer fugitive:///home/jean/.vim/plugged/vim-xkb/.git//6f8e9b9905d250b0577688a995096594971f6337 | else | edit fugitive:///home/jean/.vim/plugged/vim-xkb/.git//6f8e9b9905d250b0577688a995096594971f6337 | endif
+setlocal fdm=syntax
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -263,34 +262,28 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 10) / 20)
+let s:l = 1 - ((0 * winheight(0) + 6) / 12)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim/plugged/vim-lg-lib/.git
+lcd ~/.vim
 wincmd w
-6wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 1 + 16) / 33)
-exe '5resize ' . ((&lines * 1 + 16) / 33)
-exe '6resize ' . ((&lines * 20 + 16) / 33)
-tabnext 4
+3wincmd w
+wincmd =
+tabnext 5
 set stal=1
 badd +38 ~/wiki/awk/awk.md
 badd +79 ~/Desktop/ask.md
 badd +12 ~/Desktop/countries
 badd +47 ~/wiki/c/c.md
 badd +1 /tmp/awk.awk
-badd +23 /tmp/c.c
-badd +824 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +2 ~/.vim/after/syntax/c.vim
+badd +21 /tmp/c.c
+badd +81 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 badd +0 ~/.vim/plugged/vim-lg-lib/.git/index
-badd +0 ~/.vim/plugged/vim-lg-lib/.git/COMMIT_EDITMSG
+badd +1 ~/.vim/plugged/vim-xkb/.git/index
+badd +0 fugitive:///home/jean/.vim/plugged/vim-xkb/.git//6f8e9b9905d250b0577688a995096594971f6337
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -302,6 +295,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
