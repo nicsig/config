@@ -28,9 +28,9 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 26 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -40,7 +40,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 15 - ((14 * winheight(0) + 13) / 26)
+let s:l = 15 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -76,25 +76,21 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-47
+49
 normal! zo
-47
-normal! zc
-69
+71
 normal! zo
-759
-normal! zo
-let s:l = 763 - ((3 * winheight(0) + 0) / 1)
+let s:l = 852 - ((802 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-763
-normal! 01|
+852
+normal! 0
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
-exe '1resize ' . ((&lines * 26 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
 edit ~/wiki/vim/syntax_hl.md
 set splitbelow splitright
@@ -147,7 +143,7 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 726
-normal! 01|
+normal! 0
 lcd ~/.vim/plugged/vim-markdown
 wincmd w
 argglobal
@@ -238,7 +234,7 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 754
-normal! 01|
+normal! 0
 lcd ~/wiki/vim
 wincmd w
 2wincmd w
@@ -246,14 +242,14 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 3
 set stal=1
-badd +2338 ~/wiki/vim/syntax_hl.md
-badd +1 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +762 ~/wiki/vim/highlighting.md
-badd +1 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +1 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
+badd +852 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+badd +816 ~/wiki/vim/syntax_hl.md
+badd +47 /usr/local/share/vim/vim81/colors/README.txt
+badd +15 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +1 ~/Desktop/test.vim
-badd +1 /usr/local/share/vim/vim81/colors/README.txt
-badd +1 ~/.vim/autoload/colorscheme.vim
+badd +726 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
+badd +262 ~/.vim/autoload/colorscheme.vim
+badd +754 ~/wiki/vim/highlighting.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -265,6 +261,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

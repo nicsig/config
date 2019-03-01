@@ -1,4 +1,9 @@
-setl cms=/*%s*/
+" Why not `/*%s*/`?{{{
+"
+" It would add too much complexity  in our syntax comment customizations, and in
+" `vim-comment`; not worth the effort.
+"}}}
+setl cms=//%s
 
 " teardown {{{1
 
