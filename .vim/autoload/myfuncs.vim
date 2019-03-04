@@ -347,12 +347,7 @@ fu! myfuncs#box_destroy(type) abort
     " remove empty lines
     sil! exe range.'-g/^\s*$/d_'
 
-    " Move the paragraph one line up, and one character left.
-    " Why?
-    " Because when we  create and destroy a box, the  contents doesn't come back
-    " where it was, it goes down one line, and right one character.
     call append(lnum1-1, [''])
-    sil exe (lnum1+1).",'}-s/^.//e"
 
     " position the cursor on the upper left corner of the paragraph
     exe 'norm! '.lnum1.'Gj_'
