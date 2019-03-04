@@ -2833,12 +2833,19 @@ endfu
 "     repeat the word replacement.  This works like "ciw",
 "     the good word and <Esc>.
 "}}}
-nno  <silent>  z=  :<c-u>set opfunc=<sid>my_z_equal<cr>g@l
+nno  <silent>  z=  :<c-u>call <sid>z_equal_save_count(v:count)<bar>set opfunc=<sid>z_equal<cr>g@l
 
-fu! s:my_z_equal(_) abort
+fu! s:z_equal_save_count(cnt) abort
+    let s:z_equal_count = a:cnt
+endfu
+
+fu! s:z_equal(_) abort
     let spell_save = &l:spell
     try
         setl spell
+        if s:z_equal_count
+            return feedkeys(s:z_equal_count . 'z=', 'in')
+        endif
         " Why not `norm! z=`?{{{
         "
         " We would not be  able to select an entry in  the menu, because `:norm`
