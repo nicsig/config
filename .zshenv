@@ -133,11 +133,11 @@ export LC_TIME=en_US.UTF-8
 # If you still see control characters, you can use `r` instead of `R`.
 # However, from `$ man less`:
 #
-#     Warning: when the -r option is used,  less cannot keep track of the actual
-#     appearance of the screen (since this depends on how the screen responds to
-#     each type of control character).
-#      Thus, various display  problems may result, such as long  lines being split
-#      in the wrong place.
+# > Warning: when the  -r option is used,  less cannot keep track  of the actual
+# > appearance of the  screen (since this depends on how  the screen responds to
+# > each type of control character).
+# >  Thus, various display  problems may result, such as long  lines being split
+# >  in the wrong place.
 #}}}
 # What does `S` mean?{{{
 #

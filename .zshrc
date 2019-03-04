@@ -2455,14 +2455,12 @@ alias iotop='iotop -o -P'
 
 # We can have syntax highlighting in the less pager:{{{
 #
-#         $ sudo aptitude install source-highlight
-#         $ cp /usr/share/source-highlight/src-hilite-lesspipe.sh ~/bin/src-hilite-lesspipe.sh
-#         $ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
-#         $ lessh ~/GitRepos/ranger/ranger.py
+#     $ sudo aptitude install source-highlight
+#     $ cp /usr/share/source-highlight/src-hilite-lesspipe.sh ~/bin/src-hilite-lesspipe.sh
+#     $ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
+#     $ lessh ~/GitRepos/ranger/ranger.py
 #
-# Source:
-#
-#         https://unix.stackexchange.com/a/139787/289772
+# Source: https://unix.stackexchange.com/a/139787/289772
 #}}}
 # FIXME: `lessh` is highlighted in red (as if it was executed a wrong command).{{{
 #
