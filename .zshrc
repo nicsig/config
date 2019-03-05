@@ -940,7 +940,7 @@ mpv_cfg() { "${=EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
 tmux_cfg() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
 vim_cfg() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
 w3m_cfg() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
-xbindkeys_cfg() { "${=EDITOR}" "${HOME}/.config/xbindkeys/rc.conf" ;}
+xbindkeys_cfg() { "${=EDITOR}" "${HOME}/.config/keyboard/xbindkeys.conf" ;}
 xmodmap_cfg() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
 zsh_cfg() { "${=EDITOR}" "${HOME}/.zshrc" ;}
 #              │{{{
@@ -2748,7 +2748,7 @@ alias what_is_my_ip='curl ifconfig.me'
 
 # xbindkeys {{{3
 
-alias xbindkeys_restart='killall xbindkeys; xbindkeys -f "${HOME}/.config/xbindkeys/rc.conf"'
+alias xbindkeys_restart='killall xbindkeys; xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"'
 
 # zsh_prof {{{3
 

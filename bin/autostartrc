@@ -39,9 +39,6 @@ unclutter -idle 2 &
 # I think the issue comes from it being started automatically.
 #}}}
 
-# xbindkeys
-xbindkeys -f "${HOME}/.config/xbindkeys/rc.conf"
-
 # Purpose:{{{
 #
 # Configure xterm. In  particular, make its  background identical to the  one in
