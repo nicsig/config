@@ -3,7 +3,7 @@
 xkbcomp -I$HOME/.config/keyboard/xkb $HOME/.config/keyboard/xkb/map $DISPLAY
 
 killall xbindkeys
-xbindkeys -f "${HOME}/.config/xbindkeys/rc.conf"
+xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"
 
 killall xcape
 xcape -e 'Control_L=Escape'
