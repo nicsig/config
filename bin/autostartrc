@@ -49,5 +49,5 @@ xbindkeys -f "${HOME}/.config/xbindkeys/rc.conf"
 #}}}
 xrdb -cpp "$(command -v cpp) -traditional-cpp" "${HOME}"/.Xresources
 
-"${HOME}/bin/keyboard.sh"
+"${HOME}/.config/keyboard/setup.sh"
 

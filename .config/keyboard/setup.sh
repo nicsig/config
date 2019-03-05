@@ -105,3 +105,5 @@ xset r rate 175 40
 #
 #    # Make the upper-left `²` key generate the modifier keysym `Mode_switch` when it's held.
 #    xmodmap -e 'keycode 49 = Mode_switch'
+#!/bin/bash
+

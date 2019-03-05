@@ -71,34 +71,13 @@ For example, to bind it to a right click:
             ['RightButton',              'NoModifier',           'f_listen'],
             ...
 
----
+# How to change the webservice used to prononce words?
 
-If it fails with this error:
+Edit `interSubs_config.py`, and assign one these values to `'forvo'`:
 
-    Traceback (most recent call last):1%) A-V:  0.000
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 1286, in mousePressEvent
-        exec('self.%s(event)' % mouse_action[2])
-      File "<string>", line 1, in <module>
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 1302, in f_listen
-        listen(self.word, config.listen_via)
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 675, in listen
-        gTTS(text = word, lang = config.lang_from, slow = False).save('/tmp/gtts_word.mp3')
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 878, in save
-        self.write_to_fp(f)
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 891, in write_to_fp
-        'tk' : self.token.calculate_token(part)}
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 719, in calculate_token
-        seed = self._get_token_key()
-      File "/home/user/.config/mpv/scripts/interSubs.py", line 752, in _get_token_key
-        tkk_expr = re.search(".*?(TKK=.*?;)W.*?", line).group(1)
-    AttributeError: 'NoneType' object has no attribute 'group'
-    AV: 00:01:17 / 01:52:31 (1%) A-V:  0.000
-
-Set `listen_via` to `'forvo'`:
-
-    listen_via = 'forvo'
-
-<https://github.com/oltodosel/interSubs/issues/18>
+   - gtts
+   - pons
+   - forvo
 
 ##
 # Issues

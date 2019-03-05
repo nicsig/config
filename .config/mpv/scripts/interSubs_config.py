@@ -35,7 +35,7 @@ number_of_translations = 4
 number_of_translations_to_save = 50
 
 # gtts|pons|forvo # gtts is google-text-to-speech
-listen_via = 'forvo'
+listen_via = 'gtts'
 
 # path to the offline dictionary
 tab_divided_dict_fname = '~/d/python_shit/mpv/scripts/z.dict'

@@ -7506,6 +7506,21 @@ endfu
 
 " '<,'>s/^---\n\n/## /c
 
+" https://github.com/clvv/fasd/wiki/Vim-Integration
+" Z - cd to recent / frequent directories
+com! -nargs=* JJ call s:jj(<f-args>)
+fu! s:jj(...) abort
+    let cmd = 'fasd -d -e printf'
+    for arg in a:000
+        let cmd = cmd . ' ' . arg
+    endfor
+    let path = system(cmd)
+    if isdirectory(path)
+        echo path
+        exe 'cd ' . fnameescape(path)
+    endif
+endfu
+
 
 
 let s:syled_comments_filetypes = [
