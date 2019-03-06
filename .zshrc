@@ -823,13 +823,13 @@ if [[ -n "${DISPLAY}" ]]; then
   #           └ match by recent access only
 
   alias j='fasd_cd -d'
-  unalias z
+  alias jj='fasd_cd -d -i'
+  unalias z zz
 
   bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (files and directories)
   # FIXME: press C-x C-d → the terminal closes
   bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
   bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
-
 fi
 
 # source fzf config
