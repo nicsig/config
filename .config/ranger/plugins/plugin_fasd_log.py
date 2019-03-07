@@ -1,9 +1,4 @@
-# Purpose:{{{
-#
-# fasd allows you  to quickly jump to recent files  and directories.
-# This plugin makes  ranger log files opened  from the latter, so  that fasd can
-# suggest them when you use your aliases like `o` (xdg-open) and `m` (mpv).
-#}}}
+# Purpose: Make ranger log all opened files for fasd.
 # Source: https://github.com/ranger/ranger/wiki/Integration-with-other-programs#fasd
 
 import ranger.api

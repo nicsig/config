@@ -57,6 +57,9 @@ class my_edit(Command):
         # content of the current directory.
         return self._tab_directory_content()
 
+# fasd integration
+# Usage:
+#     :j partial_dirname Enter
 # Source: https://github.com/ranger/ranger/wiki/Custom-Commands#visit-frequently-used-directories
 class j(Command):
     """

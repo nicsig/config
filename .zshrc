@@ -22,6 +22,21 @@ bindkey -e
 #         https://en.wikipedia.org/wiki/Software_flow_control
 #}}}
 stty -ixon
+# disable SIGQUIT signal
+# Why?{{{
+#
+# By default, the terminal driver interprets `C-\` as the order to send the
+# `SIGQUIT` signal to the foreground process.
+# The latter can react to this signal however it wants; usually, it quits:
+#
+#     $ sleep 100
+#     C-\
+#     ^\[1]    28832 quit (core dumped)  sleep 100~
+#
+# We disable  this signal, because we could  use `C-\` as a key  binding in some
+# application.
+#}}}
+stty quit undef
 
 # How to use one of the custom prompts available by default?{{{
 #
@@ -905,8 +920,7 @@ fi
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
 [[ -f ${HOME}/.shrc ]] && . "${HOME}/.shrc"
-# TODO:
-# Remove this once we've removed `~/.shrc`.
+# TODO: Remove this once we've removed `~/.shrc`.
 
 # Functions {{{1
 alias_is_it_free() { #{{{2

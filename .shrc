@@ -13,14 +13,27 @@
 # TODO:
 # It would be useful to be able to search for a pattern inside all configuration
 # files with `:vimgrep`. Including the ones for the shell.
-# We could create symlinks inside `~/.config` which would point to the config files
-# that we can't (easily) move, like `~/.bashrc` or `~/.tmux.conf`.
-# But there are still a lot of  irrelevant files in `~/.config` (cache of chrome
-# for example).  Think about a better way of grepping all config files.
 #
 # Update:
 # Pre-populate the command line with the filepaths (C-g v).
 # This implies that C-g v should be filetype-specific.
+#
+# Update:
+# Also, take inspiration  from that (maybe we could turn that  into a custom Vim
+# command):
+#
+#     $ cd
+#     # https://stackoverflow.com/a/8533413/9780968
+#     $ config ls-tree --full-tree -r --name-only HEAD >/tmp/listing
+#     $ vim -q <(xargs grep -RHIinos pattern </tmp/listing) +cw
+#
+# Alternative:
+#     $ cd
+#     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | xargs grep -RHIinos network) +cw
+#
+# You need to be in your home when you run xargs, because the paths output by
+# `$ config` are relative to it.
+# Find a way to get absolute paths, so that xargs work from anywhere.
 
 # TODO:
 # In your functions, try to create as few temporary files as you can.
