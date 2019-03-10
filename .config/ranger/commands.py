@@ -58,11 +58,14 @@ class my_edit(Command): #{{{1
         return self._tab_directory_content()
 # }}}1
 
-class fasd(Command): #{{{1
+# fasd {{{1
+
+# Source: https://github.com/ranger/ranger/wiki/Custom-Commands#visit-frequently-used-directories
+
+class fasd(Command):
     # fasd integration
     # Usage:
     #     :fasd partial_dirname Enter
-    # Source: https://github.com/ranger/ranger/wiki/Custom-Commands#visit-frequently-used-directories
     """
     :fasd
 
@@ -75,24 +78,22 @@ class fasd(Command): #{{{1
             directory = subprocess.check_output(["fasd", "-d"]+arg.split(), universal_newlines=True).strip()
             self.fm.cd(directory)
 
-class fzf_find(Command): #{{{1
-    # https://github.com/ranger/ranger/wiki/Custom-Commands#fzf-integration
-    """
-    :fzf_find
+# fzf_fasd {{{1
 
-    Find a file using fzf.
+class fzf_fasd(Command):
+    """
+    :fzf_fasd
+
+    Find a frecent file using fzf.
 
     With a prefix argument find only directories.
-    What's a prefix argument?
-    If the command is bound to `<key>`, and you press `123<key>`,
-    `123` is a prefix argument.
-
-    See: https://github.com/junegunn/fzf
     """
     def execute(self):
         import subprocess
         import os.path
-        command="fd -L " + ("-t d" if self.quantifier else "") + " -E /proc | fzf -m"
+        command='fasd ' \
+                + ('-d' if self.quantifier else '') \
+                + "| awk '{ print $2 }' | fzf -e -i --tac --no-sort"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:
@@ -100,10 +101,45 @@ class fzf_find(Command): #{{{1
             if os.path.isdir(fzf_file):
                 self.fm.cd(fzf_file)
             else:
-                self.fm.find_file(fzf_file)
+                self.fm.select_file(fzf_file)
 
-class mkcd(Command): #{{{1
-    # Source: https://github.com/ranger/ranger/wiki/Custom-Commands#mkcd-mkdir--cd
+# fzf_find {{{1
+
+# Source: https://github.com/ranger/ranger/wiki/Custom-Commands#fzf-integration
+
+class fzf_find(Command):
+    """
+    :fzf_find
+
+    Find a file using fzf.
+
+    With a prefix argument find only directories.
+    """
+    def execute(self):
+        import subprocess
+        import os.path
+        # Alternative using `$ fd`:{{{
+        #
+        #     command="fd -L " + ("-t d" if self.quantifier else "") + " -E /proc 2>/dev/null | fzf +m"
+        #}}}
+        command="find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune" \
+                + " -o " \
+                + ("-type d" if self.quantifier else "") \
+                + " -print 2>/dev/null | sed 1d | cut -b3- | fzf +m"
+        fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
+        stdout, stderr = fzf.communicate()
+        if fzf.returncode == 0:
+            fzf_file = os.path.abspath(stdout.rstrip('\n'))
+            if os.path.isdir(fzf_file):
+                self.fm.cd(fzf_file)
+            else:
+                self.fm.select_file(fzf_file)
+
+# mkcd {{{1
+
+# Source: https://github.com/ranger/ranger/wiki/Custom-Commands#mkcd-mkdir--cd
+
+class mkcd(Command):
     # If you only care about creating a directory (without entering it), you can run `:shell mkdir`, or simply `:mkdir`.{{{
     #
     # `:mkdir` works because it's defined in `commands_full.py`.
@@ -140,7 +176,9 @@ class mkcd(Command): #{{{1
         else:
             self.fm.notify("file/directory exists!", bad=True)
 
-class toggle_flat(Command): #{{{1
+# toggle_flat {{{1
+
+class toggle_flat(Command):
     """
     :toggle_flat
 

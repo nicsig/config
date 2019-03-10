@@ -1434,15 +1434,20 @@ fzf_clipboard() { #{{{2
   printf -- "$(greenclip print | fzf -e -i)" | xclip -selection clipboard
 }
 
+fzf_fasd() { #{{{2
+  emulate -L zsh
+  fasd | awk '{ print $2 }' | fzf -e -i --tac --no-sort
+}
+
 fzf_fd() { #{{{2
   emulate -L zsh
 
   #   ┌ follow symlinks
   #   │  ┌ show me only files
   #   │  │    ┌ exclude files from `/proc` (you can exclude other directories: `-E dir1 -E dir2 ...`)
-  #   │  │    │              ┌ let me select multiple entries with tab and shift-tab
-  #   │  ├─┐  ├─────┐        │
-  fd -L -t f -E /proc | fzf -m
+  #   │  │    │                          ┌ let me select multiple entries with tab and shift-tab
+  #   │  ├─┐  ├─────┐                    │
+  fd -L -t f -E /proc 2>/dev/null | fzf -m
 
   # Here's an alternative using `$ find`:
   #
