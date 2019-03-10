@@ -1436,18 +1436,59 @@ fzf_clipboard() { #{{{2
 
 fzf_fasd() { #{{{2
   emulate -L zsh
-  fasd | awk '{ print $2 }' | fzf -e -i --tac --no-sort
+  if [[ $# -ne 1 ]]; then
+    cat <<EOF >&2
+usage:    $0  <command>
+example:  $0  vim
+EOF
+    return 64
+  fi
+
+  local cmd="$1"
+  if ! command -v "${cmd}" >/dev/null 2>&1; then
+    printf -- "%s is not a command\n" "${cmd}"
+    return 65
+  fi
+
+  local chosen_path
+  chosen_path="$(fasd | awk '{ print $2 }' | fzf -e -i --tac --no-sort)"
+  if [[ "${chosen_path}" == '' ]]; then
+    return
+  fi
+
+  "${cmd}" "${chosen_path}"
 }
 
 fzf_fd() { #{{{2
   emulate -L zsh
+  if [[ $# -ne 1 ]]; then
+    cat <<EOF >&2
+usage:    $0  <command>
+example:  $0  vim
+EOF
+    return 64
+  fi
 
-  #   ┌ follow symlinks
-  #   │  ┌ show me only files
-  #   │  │    ┌ exclude files from `/proc` (you can exclude other directories: `-E dir1 -E dir2 ...`)
-  #   │  │    │                          ┌ let me select multiple entries with tab and shift-tab
-  #   │  ├─┐  ├─────┐                    │
-  fd -L -t f -E /proc 2>/dev/null | fzf -m
+  local cmd="$1"
+  if ! command -v "${cmd}" >/dev/null 2>&1; then
+    printf -- "%s is not a command\n" "${cmd}"
+    return 65
+  fi
+
+  local chosen_path
+  chosen_path="$(fd -L -t f -E tmp/undo -E /proc 2>/dev/null | fzf -m)"
+  #                 ├┘ ├──┘ ├─────────┘                            ├┘{{{
+  #                 │  │    │                                      └ let me select multiple entries
+  #                 │  │    │                                        with tab and shift-tab
+  #                 │  │    └ exclude files from a `tmp/undo` directory
+  #                 │  └ show me only files
+  #                 └ follow symlinks
+  #}}}
+  if [[ "${chosen_path}" == '' ]]; then
+    return
+  fi
+
+  "${cmd}" "${chosen_path}"
 
   # Here's an alternative using `$ find`:
   #
@@ -1529,6 +1570,12 @@ EOF
 
   local cmd="$1"
   local pat="$2"
+
+  if ! command -v "${cmd}" >/dev/null 2>&1; then
+    printf -- "%s is not a command\n" "${cmd}"
+    return 65
+  fi
+
   # do *not* use the variable name `path`; it would conflict with the tied array `path`,
   # which would prevent the next `command` from working
   local chosen_path
@@ -1563,12 +1610,7 @@ EOF
     return
   fi
 
-  if command -v "${cmd}" >/dev/null 2>&1; then
-    "${cmd}" "${chosen_path}"
-  else
-    printf -- "%s is not a command\n" "${cmd}"
-    return 65
-  fi
+  "${cmd}" "${chosen_path}"
 }
 #}}}2
 
