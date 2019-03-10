@@ -15,7 +15,7 @@ import os
 
 # Any class that is a subclass of "Command" will be integrated into ranger as a
 # command.  Try typing ":my_edit<ENTER>" in ranger!
-class my_edit(Command):
+class my_edit(Command): #{{{1
     # The so-called doc-string of the class will be visible in the built-in
     # help that is accessible by typing "?c" inside ranger.
     """:my_edit <filename>
@@ -45,7 +45,7 @@ class my_edit(Command):
             self.fm.notify("The given file does not exist!", bad=True)
             return
 
-        # This executes a function from ranger.core.acitons, a module with a
+        # This executes a function from ranger.core.actions, a module with a
         # variety of subroutines that can help you construct commands.
         # Check out the source, or run "pydoc ranger.core.actions" for a list.
         self.fm.edit_file(target_filename)
@@ -56,12 +56,13 @@ class my_edit(Command):
         # This is a generic tab-completion function that iterates through the
         # content of the current directory.
         return self._tab_directory_content()
+# }}}1
 
-# fasd integration
-# Usage:
-#     :j partial_dirname Enter
-# Source: https://github.com/ranger/ranger/wiki/Custom-Commands#visit-frequently-used-directories
-class j(Command):
+class fasd(Command): #{{{1
+    # fasd integration
+    # Usage:
+    #     :fasd partial_dirname Enter
+    # Source: https://github.com/ranger/ranger/wiki/Custom-Commands#visit-frequently-used-directories
     """
     :fasd
 
@@ -73,4 +74,90 @@ class j(Command):
         if arg:
             directory = subprocess.check_output(["fasd", "-d"]+arg.split(), universal_newlines=True).strip()
             self.fm.cd(directory)
+
+class fzf_find(Command): #{{{1
+    # https://github.com/ranger/ranger/wiki/Custom-Commands#fzf-integration
+    """
+    :fzf_find
+
+    Find a file using fzf.
+
+    With a prefix argument find only directories.
+    What's a prefix argument?
+    If the command is bound to `<key>`, and you press `123<key>`,
+    `123` is a prefix argument.
+
+    See: https://github.com/junegunn/fzf
+    """
+    def execute(self):
+        import subprocess
+        import os.path
+        command="fd -L " + ("-t d" if self.quantifier else "") + " -E /proc | fzf -m"
+        fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
+        stdout, stderr = fzf.communicate()
+        if fzf.returncode == 0:
+            fzf_file = os.path.abspath(stdout.rstrip('\n'))
+            if os.path.isdir(fzf_file):
+                self.fm.cd(fzf_file)
+            else:
+                self.fm.find_file(fzf_file)
+
+class mkcd(Command): #{{{1
+    # Source: https://github.com/ranger/ranger/wiki/Custom-Commands#mkcd-mkdir--cd
+    # If you only care about creating a directory (without entering it), you can run `:shell mkdir`, or simply `:mkdir`.{{{
+    #
+    # `:mkdir` works because it's defined in `commands_full.py`.
+    # `:shell mkdir` works because `mkdir` is a shell command.
+    #}}}
+    """
+    :mkcd <dirname>
+
+    Creates a directory with the name <dirname> and enters it.
+    """
+
+    def execute(self):
+        from os.path import join, expanduser, lexists
+        from os import makedirs
+        import re
+
+        dirname = join(self.fm.thisdir.path, expanduser(self.rest(1)))
+        if not lexists(dirname):
+            makedirs(dirname)
+
+            match = re.search('^/|^~[^/]*/', dirname)
+            if match:
+                self.fm.cd(match.group(0))
+                dirname = dirname[match.end(0):]
+
+            for m in re.finditer('[^/]+', dirname):
+                s = m.group(0)
+                if s == '..' or (s.startswith('.') and not self.fm.settings['show_hidden']):
+                    self.fm.cd(s)
+                else:
+                    ## We force ranger to load content before calling `scout`.
+                    self.fm.thisdir.load_content(schedule=False)
+                    self.fm.execute_console('scout -ae ^{}$'.format(s))
+        else:
+            self.fm.notify("file/directory exists!", bad=True)
+
+class toggle_flat(Command): #{{{1
+    """
+    :toggle_flat
+
+    Flattens or unflattens the directory view.
+
+    Warning: Don't run this in a big directory like `/`, `~` or `~/.vim`!
+    A few thousands files should be ok.
+    A few tens of thousands files will not (too slow to generate, too slow to navigate).
+    """
+
+    def execute(self):
+        if self.fm.thisdir.flat == 0:
+            self.fm.thisdir.unload()
+            self.fm.thisdir.flat = -1
+            self.fm.thisdir.load_content()
+        else:
+            self.fm.thisdir.unload()
+            self.fm.thisdir.flat = 0
+            self.fm.thisdir.load_content()
 

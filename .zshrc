@@ -780,38 +780,71 @@ if [[ -n "${DISPLAY}" ]]; then
   # As a workaround, we write them in a cache (`~/.fasd-init-zsh`), which we
   # update when fasd is more recent.
   fasd_cache="${HOME}/.fasd-init-zsh"
-  #     ┌ ~/bin/fasd is newer than ~/.fasd-init-zsh{{{
-  #     │                                           ┌ ~/.fasd-init-zsh is empty
+  #     ┌ ~/bin/fasd is newer than the cache{{{
+  #     │                                           ┌ the cache doesn't exist, or it's empty
   #     ├──────────────────────────────────────┐    ├──────────────────┐}}}
   if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
-    # Source a set of functions provided by fasd:{{{
+    # What does it do?{{{
     #
-    #     ┌───────────────────┬──────────────────────────────────────────────────────┐
-    #     │ posix-alias       │ define aliases that applies to all posix shells      │
-    #     ├───────────────────┼──────────────────────────────────────────────────────┤
-    #     │ zsh-hook          │ define _fasd_preexec and add it to zsh preexec array │
-    #     ├───────────────────┼──────────────────────────────────────────────────────┤
-    #     │ zsh-ccomp         │ zsh command mode completion definitions              │
-    #     ├───────────────────┼──────────────────────────────────────────────────────┤
-    #     │ zsh-ccomp-install │ setup command mode completion for zsh                │
-    #     ├───────────────────┼──────────────────────────────────────────────────────┤
-    #     │ zsh-wcomp         │ zsh word mode completion definitions                 │
-    #     ├───────────────────┼──────────────────────────────────────────────────────┤
-    #     │ zsh-wcomp-install │ setup word mode completion for zsh                   │
-    #     └───────────────────┴──────────────────────────────────────────────────────┘
+    # It writes some code in a cache.
+    # The code sets up:
     #
-    # Alternatively, to init fasd, we could use one of those lines:
+    #    - a command hook that executes on every command
+    #    - an advanced tab completion
     #
-    #     # generic code for any shell
-    #     $ eval "$(fasd --init auto)"
+    # The hook will  scan your commands' arguments and determine  if any of them
+    # refer to existing files or directories.
+    # If yes, fasd will add them to its database.
     #
-    #     # minimalist code for zsh (no tab completion)
-    #     $ eval "$(fasd --init posix-alias zsh-hook)"
-    #
-    # Source:
-    #       https://github.com/clvv/fasd#install
+    # See `$ man fasd` for more info.
     #}}}
-    fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install >| "${fasd_cache}"
+    # Why caching the code?{{{
+    #
+    # We use `fasd` as an external binary.
+    # Calling an external binary has some overhead.
+    # OTOH, sourcing some file has no overhead.
+    #}}}
+    # Where did you find the command?{{{
+    #
+    # Read the output of:
+    #
+    #     $ fasd --init auto
+    #
+    # Note the presence of an `eval` in the code.
+    # We don't use any `eval` to  avoid calling an external binary every time we
+    # start a shell.
+    # We source a cache instead.
+    #}}}
+    # What does each argument passed to `fasd` mean?{{{
+    #
+    #    ┌───────────────────┬──────────────────────────────────────────────────────┐
+    #    │ posix-alias       │ define aliases that applies to all posix shells      │
+    #    ├───────────────────┼──────────────────────────────────────────────────────┤
+    #    │ zsh-hook          │ define _fasd_preexec and add it to zsh preexec array │
+    #    ├───────────────────┼──────────────────────────────────────────────────────┤
+    #    │ zsh-ccomp         │ zsh command mode completion definitions              │
+    #    ├───────────────────┼──────────────────────────────────────────────────────┤
+    #    │ zsh-ccomp-install │ setup command mode completion for zsh                │
+    #    ├───────────────────┼──────────────────────────────────────────────────────┤
+    #    │ zsh-wcomp         │ zsh word mode completion definitions                 │
+    #    ├───────────────────┼──────────────────────────────────────────────────────┤
+    #    │ zsh-wcomp-install │ setup word mode completion for zsh                   │
+    #    └───────────────────┴──────────────────────────────────────────────────────┘
+    #}}}
+    fasd --init \
+      posix-alias \
+      zsh-hook \
+      zsh-ccomp \
+      zsh-ccomp-install \
+      zsh-wcomp \
+      zsh-wcomp-install >| "${fasd_cache}"
+      #                 │{{{
+      #                 └ >| word
+      # From `$ man zshmisc`:
+      #
+      # > Same  as >,  except that  the file  is truncated  to zero  length if  it
+      # > exists, even if CLOBBER is unset.
+      #}}}
   fi
   . "${fasd_cache}"
   unset fasd_cache
@@ -841,10 +874,9 @@ if [[ -n "${DISPLAY}" ]]; then
   alias jj='fasd_cd -d -i'
   unalias z zz
 
-  bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (files and directories)
-  # FIXME: press C-x C-d → the terminal closes
-  bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
-  bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
+  bindkey '^X^A' fasd-complete    # files and directories
+  bindkey '^X^D' fasd-complete-d  # only directories
+  bindkey '^X^F' fasd-complete-f  # only files
 fi
 
 # source fzf config
@@ -1393,6 +1425,7 @@ fix() { #{{{2
   printf -- '\ec'
   "${HOME}/bin/keyboard.sh"
 }
+#}}}2
 
 fzf_clipboard() { #{{{2
   emulate -L zsh
@@ -1400,6 +1433,139 @@ fzf_clipboard() { #{{{2
   # fuzzy find clipboard history
   printf -- "$(greenclip print | fzf -e -i)" | xclip -selection clipboard
 }
+
+fzf_fd() { #{{{2
+  emulate -L zsh
+
+  #   ┌ follow symlinks
+  #   │  ┌ show me only files
+  #   │  │    ┌ exclude files from `/proc` (you can exclude other directories: `-E dir1 -E dir2 ...`)
+  #   │  │    │              ┌ let me select multiple entries with tab and shift-tab
+  #   │  ├─┐  ├─────┐        │
+  fd -L -t f -E /proc | fzf -m
+
+  # Here's an alternative using `$ find`:
+  #
+  #     $ find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune \
+  #       -o -type f -print 2>/dev/null | sed 1d | cut -b3- | fzf -m
+  #
+  # Broken down:{{{
+  #
+  #    ┌──────────────────┬──────────────────────────────────────────────────────────┐
+  #    │ -L               │ follow symlinks                                          │
+  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
+  #    │ \( ... \) -prune │ don't descend into the directories matching `...`        │
+  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
+  #    │ -o -type f       │ print file paths                                         │
+  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
+  #    │ sed 1d           │ remove the first line matching the current directory `.` │
+  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
+  #    │ cut -b3-         │ remove the first 2 characters on each line matching `./` │
+  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
+  #    │ fzf -m           │ fuzzy search, allowing selection of multiple entries     │
+  #    └──────────────────┴──────────────────────────────────────────────────────────┘
+  #    ┌────────────────┬────────────────────────────┐
+  #    │ -path '*/\.*'  │ hidden entry               │
+  #    ├────────────────┼────────────────────────────┤
+  #    │ -fstype 'dev'  │ entry on a dev filesystem  │
+  #    ├────────────────┼────────────────────────────┤
+  #    │ -fstype 'proc' │ entry on a proc filesystem │
+  #    └────────────────┴────────────────────────────┘
+  #}}}
+  # Where did you find the code?{{{
+  #
+  # https://github.com/ranger/ranger/wiki/Custom-Commands#fzf-integration
+  #}}}
+  # What's the purpose of the `-prune`?{{{
+  #
+  # Ignore any file/directory which is:
+  #
+  #    - on a dev or proc filesystem
+  #    - hidden; directly (`~/path/to/.hidden_file`), or indirectly (`~/path/.to/hidden_file`)
+  #}}}
+  # What's the purpose of `-o` in `-o -type f`?{{{
+  #
+  # The previous item in the expression is `\(...\) -prune`.
+  #
+  # If a file path doesn't match `\(...\)`, we want to print it.
+  # But  if a  file  path doesn't  match `\(...\)`  then  `\(...\) -prune`  will
+  # evaluate to false, because:
+  #
+  #    1. it's equivalent to `\(...\) -a -prune`
+  #    2. `\(...\)` is false in this case
+  #    3. `-prune` is always true
+  #
+  # So we need another item which will be evaluated even if the previous one was
+  # false; hence, we need `-o`.
+  #}}}
+  # Is it equivalent to the previous `$ fd`?{{{
+  #
+  # No, but these two are:
+  #
+  #     $ fd -t f -L -I . | sort
+  #     $ find -L . -path '*/\.*' -prune -o -type f -print | cut -b3- | sort
+  #
+  # You can check it like so:
+  #
+  #     $ cd /etc
+  #     $ vimdiff =(find -L . -path '*/\.*' -prune -o -type f -print | cut -b3- | sort) =(fd -t f -L -I . | sort)
+  #}}}
+}
+
+fzf_locate() { #{{{2
+  emulate -L zsh
+  if [[ $# -ne 2 ]]; then
+    cat <<EOF >&2
+usage:    $0  <command>  <pattern>
+example:  $0  vim  vimrc
+EOF
+    return 64
+  fi
+
+  local cmd="$1"
+  local pat="$2"
+  # do *not* use the variable name `path`; it would conflict with the tied array `path`,
+  # which would prevent the next `command` from working
+  local chosen_path
+  chosen_path="$(/usr/bin/locate "${pat}" | "${HOME}/.fzf/bin/fzf")"
+  # Why?{{{
+  #
+  # It doesn't make sense to start a program if we don't provide it any path.
+  #
+  # ---
+  #
+  # Also, try this:
+  #
+  #     $ vim "$(locate vimrc | fzf)"
+  #
+  # Leave fzf by pressing Escape.
+  # Vim will be started with a noname buffer.
+  # Press `i` to enter insert mode.
+  # It may not work because of this command in `vim-term`:
+  #
+  #     call timer_start(10, {-> execute('checktime %', 'silent!')})
+  #                                                      ^^^^^^^
+  #                                                      hides warning message
+  #
+  # There's an warning  message asking a question, but because  of `silent!`, we
+  # can't see it.
+  #
+  # Interestingly, the issue disappears if you remove the quotes around `$()`:
+  #
+  #     $ vim $(locate vimrc | fzf)
+  #}}}
+  if [[ "${chosen_path}" == '' ]]; then
+    return
+  fi
+
+  if command -v "${cmd}" >/dev/null 2>&1; then
+    "${cmd}" "${chosen_path}"
+  else
+    printf -- "%s is not a command\n" "${cmd}"
+    return 65
+  fi
+}
+#}}}2
 
 grep_pdf() { #{{{2
   # Purpose:{{{
@@ -2145,7 +2311,7 @@ vim_recover() { #{{{2
   vim -r "$1" +"w /tmp/.${file}.recovered | e! | diffsp /tmp/.${file}.recovered"
   # If the recovered version of the file looks good, you still have to do this:
   #
-  #   $ mv recovered_file original_file
+  #     $ mv recovered_file original_file
 }
 
 vim_startup() { #{{{2
@@ -2348,6 +2514,10 @@ alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(t
 # session leader (`upstart` at the moment).
 #}}}
 alias dropbox_restart='killall dropbox; ( "${HOME}/.dropbox-dist/dropboxd" & )'
+
+# fast_cursor {{{3
+
+alias fast_cursor='xset r rate 175 40'
 
 # git {{{3
 

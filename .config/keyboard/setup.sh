@@ -1,26 +1,42 @@
 #!/bin/bash
 
-xkbcomp -I$HOME/.config/keyboard/xkb $HOME/.config/keyboard/xkb/map $DISPLAY
+[[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
+LOGFILE="${HOME}/log/keyboard_$(basename "$0" .sh).log"
 
-killall xbindkeys
-xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"
+main() {
+  cat <<EOF
 
-killall xcape
-xcape -e 'Control_L=Escape'
-xcape -e 'Control_R=Return'
+-----------
+$(date +%m-%d\ %H:%M)
+-----------
 
-# Purpose:{{{
-#
-# Make  the keypresses  faster and  the  delay between  a pause  and a  keypress
-# shorter.
-#
-# The default values are `500` and `20`.
-# To find the current values, execute `xset -q`.
-#
-#           ┌ delay before a keypress is sent to the application
-#           │   ┌ maximum number of times a key can be repeated per second
-#           │   │}}}
-xset r rate 175 40
+EOF
+
+  xkbcomp -I"${HOME}/.config/keyboard/xkb" "${HOME}/.config/keyboard/xkb/map" "${DISPLAY}"
+
+  killall xbindkeys
+  xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"
+
+  killall xcape
+  xcape -e 'Control_L=Escape'
+  xcape -e 'Control_R=Return'
+
+  # Purpose:{{{
+  #
+  # Make  the keypresses  faster and  the  delay between  a pause  and a  keypress
+  # shorter.
+  #
+  # The default values are `500` and `20`.
+  # To find the current values, execute `xset -q`.
+  #
+  #           ┌ delay before a keypress is sent to the application
+  #           │   ┌ maximum number of times a key can be repeated per second
+  #           │   │}}}
+  xset r rate 175 40
+}
+
+main 2>&1 | tee -a "${LOGFILE}"
+
 
 
 
@@ -105,5 +121,4 @@ xset r rate 175 40
 #
 #    # Make the upper-left `²` key generate the modifier keysym `Mode_switch` when it's held.
 #    xmodmap -e 'keycode 49 = Mode_switch'
-#!/bin/bash
 

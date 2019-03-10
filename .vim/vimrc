@@ -2879,18 +2879,18 @@ endfu
 
 " The default commands to add good / bad words in:
 "
-"     - a temporary list  use an uppercase character
-"     - a persistent list use only lowercase characters
+"    - a temporary list  use an uppercase character
+"    - a persistent list use only lowercase characters
 "
-"     ┌────────────┬──────────────┬──────────────┐
-"     │            │ mark         │ undo         │
-"     ├────────────┼──────┬───────┼──────┬───────┤
-"     │            │ good │ wrong │ good │ wrong │
-"     ├────────────┼──────┼───────┼──────┼───────┤
-"     │ persistent │ zg   │ zw    │ zug  │ zuw   │
-"     ├────────────┼──────┼───────┼──────┼───────┤
-"     │ temporary  │ zG   │ zW    │ zuG  │ zuW   │
-"     └────────────┴──────┴───────┴──────┴───────┘
+"    ┌────────────┬──────────────┬──────────────┐
+"    │            │ mark         │ undo         │
+"    ├────────────┼──────┬───────┼──────┬───────┤
+"    │            │ good │ wrong │ good │ wrong │
+"    ├────────────┼──────┼───────┼──────┼───────┤
+"    │ persistent │ zg   │ zw    │ zug  │ zuw   │
+"    ├────────────┼──────┼───────┼──────┼───────┤
+"    │ temporary  │ zG   │ zW    │ zuG  │ zuW   │
+"    └────────────┴──────┴───────┴──────┴───────┘
 "
 " For the moment, I  prefer to always add good / bad words  to a temporary list,
 " so that  my choices don't persist  across sessions. Therefore, I swap  all the
@@ -5438,15 +5438,15 @@ call s:mkspell()
 "}}}
 " A swapfile has been found, and the file has been loaded in readonly mode!  What should I do?{{{
 "
-" If you only need to read it, nothing. Just read it.
+" If you only need to read the file, nothing. Just read it.
 "
-" If you need to edit it, you have an issue.
+" If you need to edit the file, you have an issue.
 " Indeed, if  the autocmd hasn't  removed the swapfile,  it means the  latter is
 " more recent than the file (or has the same timestamp).
 "
-" So, it  could contain valuable  information, that  you need to  recover BEFORE
-" doing any further change (because this valuable information may radically alter
-" the change you intend to do).
+" So, it could  contain valuable information, that you need  to recover *before*
+" doing  any further  change (because  this valuable  information may  radically
+" alter the change you intend to do).
 "}}}
 " How do I recover the contents of a swapfile?{{{
 "
@@ -6578,6 +6578,9 @@ endfu
 " or disable swapfiles entirely:
 "
 "     set noswapfile
+"
+" Update:
+" I don't think you should disable swapfiles.
 "
 " 67 -
 " In  neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
