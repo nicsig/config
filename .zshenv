@@ -1,3 +1,15 @@
+# I've changed the value of a variable, but it doesn't take effect, even after restarting tmux!{{{
+#
+# Start a terminal from the whisker menu (Alt-F1).
+# From there, restart xbindkeys.
+#
+#     $ xbindkeys_restart
+#     $ killall xbindkeys_restart; xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"
+#
+# If the issue persists, this command may help the debugging:
+#     $ pstree -s -p $$
+#}}}
+
 # We could change the location of our `zsh` config files:{{{
 #
 #     export ZDOTDIR=~/.config/zsh
@@ -91,6 +103,8 @@ export BAT_STYLE=changes,grid,header
 export BAT_THEME='GitHub'
 
 export EDITOR='vim'
+
+export FZF_DEFAULT_OPTS='--bind change:top,alt-j:preview-page-down,alt-k:preview-page-up --inline-info'
 
 # infinite history
 #     https://unix.stackexchange.com/a/273929/289772

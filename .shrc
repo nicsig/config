@@ -114,6 +114,9 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
 
+# TODO: Maybe replace `ls++` with `exa`:
+# https://github.com/ogham/exa
+
 # ls folders only
 #
 # -1    list one file per line

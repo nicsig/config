@@ -93,7 +93,8 @@ class fzf_fasd(Command):
         import os.path
         command='fasd ' \
                 + ('-d' if self.quantifier else '') \
-                + "| awk '{ print $2 }' | fzf -e -i --tac --no-sort"
+                + " | awk '{ print $2 }'" \
+                + " | fzf -e -i --tac --no-sort --preview '(highlight -O ansi {} || cat {}) 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:
@@ -120,12 +121,13 @@ class fzf_find(Command):
         import os.path
         # Alternative using `$ fd`:{{{
         #
-        #     command="fd -L " + ("-t d" if self.quantifier else "") + " -E /proc 2>/dev/null | fzf +m"
+        #     command="fd -L " + ("-t d" if self.quantifier else "") + " -E /proc 2>/dev/null | fzf"
         #}}}
         command="find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune" \
                 + " -o " \
                 + ("-type d" if self.quantifier else "") \
-                + " -print 2>/dev/null | sed 1d | cut -b3- | fzf +m"
+                + " -print 2>/dev/null | sed 1d | cut -b3-" \
+                + " | fzf +m --preview '(highlight -O ansi {} || cat {}) 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:

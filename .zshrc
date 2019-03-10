@@ -1451,7 +1451,7 @@ EOF
   fi
 
   local chosen_path
-  chosen_path="$(fasd | awk '{ print $2 }' | fzf -e -i --tac --no-sort)"
+  chosen_path="$(fasd | awk '{ print $2 }' | fzf -e -i --tac --no-sort --preview '(highlight -O ansi {} || cat {}) 2>/dev/null')"
   if [[ "${chosen_path}" == '' ]]; then
     return
   fi
@@ -1476,7 +1476,8 @@ EOF
   fi
 
   local chosen_path
-  chosen_path="$(fd -L -t f -E tmp/undo -E /proc 2>/dev/null | fzf -m)"
+  # highlight -O ansi -l {}
+  chosen_path="$(fd -L -t f -E tmp/undo -E /proc 2>/dev/null | fzf -m --preview '(highlight -O ansi {} || cat {}) 2>/dev/null')"
   #                 ├┘ ├──┘ ├─────────┘                            ├┘{{{
   #                 │  │    │                                      └ let me select multiple entries
   #                 │  │    │                                        with tab and shift-tab
@@ -1579,7 +1580,7 @@ EOF
   # do *not* use the variable name `path`; it would conflict with the tied array `path`,
   # which would prevent the next `command` from working
   local chosen_path
-  chosen_path="$(/usr/bin/locate "${pat}" | "${HOME}/.fzf/bin/fzf")"
+  chosen_path="$(locate "${pat}" | fzf -m --preview '(highlight -O ansi {} || cat {}) 2>/dev/null')"
   # Why?{{{
   #
   # It doesn't make sense to start a program if we don't provide it any path.
@@ -2838,7 +2839,7 @@ alias qmv='qmv --format=destination-only'
 
 # ranger {{{3
 
-alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ~/.local/bin/ranger -d'
+alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ~/.local/bin/ranger'
 
 # sudo {{{3
 
