@@ -371,6 +371,7 @@ EOF
 update_zsh_plugins() { #{{{1
   local zsh_plugins_dir="${HOME}/.zsh/plugins/"
   [[ -d "${zsh_plugins_dir}" ]] || mkdir -p "${zsh_plugins_dir}"
+  update_git_programs 'https://github.com/andrewferrier/fzf-z'               "${zsh_plugins_dir}"
   update_git_programs 'https://github.com/zsh-users/zsh-completions'         "${HOME}/.zsh/"
   update_git_programs 'https://github.com/changyuheng/zsh-interactive-cd'    "${zsh_plugins_dir}"
   # FIXME: https://github.com/zsh-users/zsh-syntax-highlighting/issues/565

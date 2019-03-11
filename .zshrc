@@ -873,10 +873,6 @@ if [[ -n "${DISPLAY}" ]]; then
   alias j='fasd_cd -d'
   alias jj='fasd_cd -d -i'
   unalias z zz
-
-  bindkey '^X^A' fasd-complete    # files and directories
-  bindkey '^X^D' fasd-complete-d  # only directories
-  bindkey '^X^F' fasd-complete-f  # only files
 fi
 
 # source fzf config
@@ -895,38 +891,18 @@ fi
 # As a result, some of your zsh key bindings may be overridden.
 # Including the `transpose-chars` command bound to `C-t`.
 #}}}
-# But I want to!{{{
-#
-# Then you'll have to remove this line from your `~/.vimrc`:
-#
-#     :Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install ...'}
-#                                             ^^^^^^^^^^^^^^^^^^^^
-#                                             this invokes the fzf installer
-#                                             whenever there's an update
-#
-# You could also tweak the installer command by passing other arguments:
-#
-#     % ~/.fzf/install --all --no-bash --no-key-bindings
-#                                      ^^^^^^^^^^^^^^^^^
-#
-# The `~/.fzf.zsh` file will be generated without containing any line related to
-# key bindings.
-# In this case, don't forget to remove the old `~/.fzf.zsh` before invoking
-# the installer.
-# For more info about the options you can pass to the installer:
-#
-#     % ~/.fzf/install --help
-#}}}
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+[[ -f ${HOME}/.zsh/plugins/fzf-z/fzf-z.plugin.zsh ]] && . "${HOME}/.zsh/plugins/fzf-z/fzf-z.plugin.zsh"
 
 # https://github.com/zsh-users/zaw
 #
 # Usage:
 #
-#     1. Trigger zaw by pressing C-x ;
-#     2. select source and press Enter
-#     3. filter items with zsh patterns separated by spaces, use C-n, C-p and select one
-#     4. press enter key to execute default action, or Meta-enter to write one
+#    1. Trigger zaw by pressing C-x ;
+#    2. select source and press Enter
+#    3. filter items with zsh patterns separated by spaces, use C-n, C-p and select one
+#    4. press enter key to execute default action, or Meta-enter to write one
 #
 # TODO:
 # Read the whole readme. In particular the sections:
@@ -948,6 +924,9 @@ fi
 #}}}
 [[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
 . "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
+# TODO: It installs a keybinding on C-i (tab): zic-completion
+# But doing so, it overwrites a key binding from fzf: fzf-completion
+# Is it an issue?
 
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
@@ -1429,9 +1408,20 @@ fix() { #{{{2
 
 fzf_clipboard() { #{{{2
   emulate -L zsh
+  # TODO:
+  # Find a clipboard manager which you can configure to ignore some apps.
+  # Greenclip doesn't allow  you to do that  (you can but, for  some reason, its
+  # configuration is reset whenever you copy some text).
+  #
+  # See: https://wiki.archlinux.org/index.php/Clipboard#Managers
+  # (clipster seems the least bad...)
+  #
+  # Also, see “rofi bangs”: https://www.youtube.com/watch?v=kxJClZIXSnM
+  # It could be useful to have a central location from which we can fuzzy search
+  # the clipboard history, start apps, launch websearches for various engines...
 
   # fuzzy find clipboard history
-  printf -- "$(greenclip print | fzf)" | xclip -selection clipboard
+  #     xclip -selection clipboard <<<"$(greenclip print | fzf)"
 }
 
 fzf_fasd() { #{{{2
@@ -1457,102 +1447,6 @@ EOF
   fi
 
   "${cmd}" "${chosen_path}"
-}
-
-fzf_fd() { #{{{2
-  emulate -L zsh
-  if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage:    $0  <command>
-example:  $0  vim
-EOF
-    return 64
-  fi
-
-  local cmd="$1"
-  if ! command -v "${cmd}" >/dev/null 2>&1; then
-    printf -- "%s is not a command\n" "${cmd}"
-    return 65
-  fi
-
-  local chosen_path
-  # highlight -O ansi -l {}
-  chosen_path="$(fd -H -L -t f 2>/dev/null | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
-  #                 ├┘ ├──┘ ├─────────┘ {{{
-  #                 │  │    └ exclude files from a `tmp/undo` directory
-  #                 │  └ show me only files
-  #                 └ follow symlinks
-  #}}}
-  if [[ "${chosen_path}" == '' ]]; then
-    return
-  fi
-
-  "${cmd}" "${chosen_path}"
-
-  # Here's an alternative using `$ find`:
-  #
-  #     $ find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune \
-  #       -o -type f -print 2>/dev/null | sed 1d | cut -b3- | fzf
-  #
-  # Broken down:{{{
-  #
-  #    ┌──────────────────┬──────────────────────────────────────────────────────────┐
-  #    │ -L               │ follow symlinks                                          │
-  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
-  #    │ \( ... \) -prune │ don't descend into the directories matching `...`        │
-  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
-  #    │ -o -type f       │ print file paths                                         │
-  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
-  #    │ sed 1d           │ remove the first line matching the current directory `.` │
-  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
-  #    │ cut -b3-         │ remove the first 2 characters on each line matching `./` │
-  #    └──────────────────┴──────────────────────────────────────────────────────────┘
-  #    ┌────────────────┬────────────────────────────┐
-  #    │ -path '*/\.*'  │ hidden entry               │
-  #    ├────────────────┼────────────────────────────┤
-  #    │ -fstype 'dev'  │ entry on a dev filesystem  │
-  #    ├────────────────┼────────────────────────────┤
-  #    │ -fstype 'proc' │ entry on a proc filesystem │
-  #    └────────────────┴────────────────────────────┘
-  #}}}
-  # Where did you find the code?{{{
-  #
-  # https://github.com/ranger/ranger/wiki/Custom-Commands#fzf-integration
-  #}}}
-  # What's the purpose of the `-prune`?{{{
-  #
-  # Ignore any file/directory which is:
-  #
-  #    - on a dev or proc filesystem
-  #    - hidden; directly (`~/path/to/.hidden_file`), or indirectly (`~/path/.to/hidden_file`)
-  #}}}
-  # What's the purpose of `-o` in `-o -type f`?{{{
-  #
-  # The previous item in the expression is `\(...\) -prune`.
-  #
-  # If a file path doesn't match `\(...\)`, we want to print it.
-  # But  if a  file  path doesn't  match `\(...\)`  then  `\(...\) -prune`  will
-  # evaluate to false, because:
-  #
-  #    1. it's equivalent to `\(...\) -a -prune`
-  #    2. `\(...\)` is false in this case
-  #    3. `-prune` is always true
-  #
-  # So we need another item which will be evaluated even if the previous one was
-  # false; hence, we need `-o`.
-  #}}}
-  # Is it equivalent to the previous `$ fd`?{{{
-  #
-  # No, but these two are:
-  #
-  #     $ fd -t f -L -I . | sort
-  #     $ find -L . -path '*/\.*' -prune -o -type f -print | cut -b3- | sort
-  #
-  # You can check it like so:
-  #
-  #     $ cd /etc
-  #     $ vimdiff =(find -L . -path '*/\.*' -prune -o -type f -print | cut -b3- | sort) =(fd -t f -L -I . | sort)
-  #}}}
 }
 
 fzf_locate() { #{{{2
@@ -3200,6 +3094,25 @@ ignore_short_or_failed_cmds() {
 #                 └ replace 'z' with the key you want
 #}}}
 
+# fzf {{{2
+
+# The default key binding to jump in a child directory is `M-c`.
+# Too hard to type; let's try `M-j` instead.
+bindkey -r '\ec'
+bindkey '\ej' fzf-cd-widget
+
+# The default key binding to search in the history of commands is `C-r`.
+# To be  consistent with how we fuzzy  search Ex history in Vim,  remove it, and
+# re-bind the function to `C-r C-h`.
+# Note: we can now use `C-r` as a prefix for various key bindings.
+bindkey -r '^R'
+bindkey '^R^H' fzf-history-widget
+
+# The default key binding to complete a file under the current directory is `C-t`.
+# It overrides the shell `transpose-chars` function.
+bindkey '^X^F' fzf-file-widget
+bindkey '^T' transpose-chars
+
 # Delete {{{2
 
 # The delete key doesn't work in zsh.
@@ -3302,21 +3215,6 @@ zle -N __quote_big_word
 #       widget.
 bindkey '^Q' __quote_big_word
 
-# C-r C-h    fzf-history-widget {{{3
-
-# The default key binding to search in the history of commands is `C-r`.
-# Remove it, and re-bind the function to `C-r C-h`.
-bindkey -r '^R'
-# Why?{{{
-#
-# On Vim's command line, we can't use `C-r`, nor `C-r C-r`.
-# So, we use `C-r C-h`.
-# To stay consistent, we do the same in the shell.
-#
-# Besides, we can now use `C-r` as a prefix for various key bindings.
-#}}}
-bindkey '^R^H' fzf-history-widget
-
 # C-u        backward-kill-line {{{3
 
 # By default, C-u deletes the whole line (kill-whole-line).
@@ -3325,15 +3223,6 @@ bindkey '^R^H' fzf-history-widget
 bindkey '^U' backward-kill-line
 
 # C-x        (prefix) {{{3
-# C-x SPC         magic-space {{{4
-
-# Why don't you simply use 'SPC' instead of 'C-x SPC'?{{{
-#
-# We already bind `__abbrev_expand` to SPC.
-#}}}
-# perform history expansion and insert a space
-bindkey '^X ' magic-space
-
 # C-x C-e         edit-command-line {{{4
 
 autoload -Uz edit-command-line
@@ -3509,15 +3398,6 @@ bindkey '^X?' __complete_debug
 #     $ echo foo bar 'baz'~
 #}}}
 bindkey '^X^K' kill-region
-
-# C-x C-t         fzf-file-widget {{{4
-#
-# By default, `fzf` rebinds `C-t` to one its function `fzf-file-widget`
-# It overrides the shell transpose-chars function.
-# We restore it, and rebind the fzf function to `C-x C-t`.
-
-bindkey '^X^T' fzf-file-widget
-bindkey '^T' transpose-chars
 
 # C-x C-r         re-source zshrc {{{4
 
@@ -3720,7 +3600,6 @@ zle -N __fancy_ctrl_z
 bindkey '^Z' __fancy_ctrl_z
 # }}}2
 # META {{{2
-
 # M-[!$/@~]    _bash_complete-word {{{3
 
 # What's this “unnamed” function?{{{

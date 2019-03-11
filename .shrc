@@ -19,21 +19,23 @@
 # This implies that C-g v should be filetype-specific.
 #
 # Update:
-# Also, take inspiration  from that (maybe we could turn that  into a custom Vim
-# command):
+# Also, take inspiration from that:
 #
-#     $ cd
 #     # https://stackoverflow.com/a/8533413/9780968
 #     $ config ls-tree --full-tree -r --name-only HEAD >/tmp/listing
+#     $ sed -i "s:^:$HOME/:" /tmp/listing
 #     $ vim -q <(xargs grep -RHIinos pattern </tmp/listing) +cw
 #
 # Alternative:
-#     $ cd
-#     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | xargs grep -RHIinos network) +cw
+#     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs grep -RHIinos pattern) +cw
 #
-# You need to be in your home when you run xargs, because the paths output by
-# `$ config` are relative to it.
-# Find a way to get absolute paths, so that xargs work from anywhere.
+# You need `$ sed`, because the paths  output by `$ git ls-tree` are relative to
+# the root of the repo, which here is your home.
+# But if you're not in your home, the relative paths will be interpreted wrongly by `$ vim -q`.
+#
+# We could turn that into a custom Vim command (`:GrepCfg`):
+#
+#     :cexpr system('/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}" ls-tree --full-tree -r --name-only HEAD \| sed "s:^:${HOME}/:" \| xargs grep -RHIinos pat') | cw
 
 # TODO:
 # In your functions, try to create as few temporary files as you can.

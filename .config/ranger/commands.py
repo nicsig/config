@@ -119,16 +119,8 @@ class fzf_fd(Command):
     def execute(self):
         import subprocess
         import os.path
-        # Alternative using `$ find`:{{{
-        #
-        #     command="find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune" \
-        #             + " -o " \
-        #             + ("-type d" if self.quantifier else "") \
-        #             + " -print 2>/dev/null | sed 1d | cut -b3-" \
-        #             + " | fzf -e --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
-        #}}}
-        command="fd -H -L " \
-                + ("-t d" if self.quantifier else "") \
+        command="fd --hidden --follow " \
+                + ("--type d" if self.quantifier else "--type f") \
                 + " 2>/dev/null" \
                 + " | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)

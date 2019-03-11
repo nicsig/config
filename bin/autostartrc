@@ -10,10 +10,6 @@ mkdir -p /run/user/$UID/tmp
 # dropbox
 "${HOME}/.dropbox-dist/dropboxd" &
 
-# We have a high memory consumption issue.
-# Is greenclip the cause of it?
-#     greenclip daemon &
-
 # redshift
 redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
 

@@ -1,5 +1,8 @@
 # I've changed the value of a variable, but it doesn't take effect, even after restarting tmux!{{{
 #
+# I can't  reproduce this issue, atm,  but it happened once in  the past; here's
+# how I fixed it.
+#
 # Start a terminal from the whisker menu (Alt-F1).
 # From there, restart xbindkeys.
 #
@@ -76,16 +79,16 @@ export MY_ENVIRONMENT_HAS_BEEN_SET=yes
 #}}}
 # What values can I include in it?{{{
 #
-#     ┌─────────┬───────────────────────────────────────────────────┐
-#     │ changes │ indicators about lines added/removed              │
-#     │         │ in a modified file in a git repo                  │
-#     ├─────────┼───────────────────────────────────────────────────┤
-#     │ grid    │ lines separating the text from the header/numbers │
-#     ├─────────┼───────────────────────────────────────────────────┤
-#     │ header  │ filename                                          │
-#     ├─────────┼───────────────────────────────────────────────────┤
-#     │ numbers │ lines addresses                                   │
-#     └─────────┴───────────────────────────────────────────────────┘
+#    ┌─────────┬───────────────────────────────────────────────────┐
+#    │ changes │ indicators about lines added/removed              │
+#    │         │ in a modified file in a git repo                  │
+#    ├─────────┼───────────────────────────────────────────────────┤
+#    │ grid    │ lines separating the text from the header/numbers │
+#    ├─────────┼───────────────────────────────────────────────────┤
+#    │ header  │ filename                                          │
+#    ├─────────┼───────────────────────────────────────────────────┤
+#    │ numbers │ lines addresses                                   │
+#    └─────────┴───────────────────────────────────────────────────┘
 #
 # There're other values (like auto, full, plain), see `man $bat`.
 #}}}
@@ -106,11 +109,21 @@ export EDITOR='vim'
 
 # https://github.com/junegunn/fzf#environment-variables
 # https://github.com/junegunn/fzf#respecting-gitignore
+export FZF_DEFAULT_COMMAND='fd --hidden --follow --type f'
+export FZF_ALT_C_COMMAND='fd --hidden --follow --type d'
+export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+
 export FZF_DEFAULT_OPTS='--exact --inline-info --bind change:top,alt-j:preview-page-down,alt-k:preview-page-up'
-export FZF_DEFAULT_COMMAND='fd -H -L -t f'
+# https://github.com/andrewferrier/fzf-z/blob/c36f93f89f7e78308bce1056e9672cad77dd8993/fzfz#L15
+export FZF_ALT_C_OPTS="${FZF_DEFAULT_OPTS} --preview='tree -C -L 2 -x --noreport --dirsfirst {} | head -\$LINES'"
+export FZF_CTRL_R_OPTS=$FZF_DEFAULT_OPTS
+export FZF_CTRL_T_OPTS=$FZF_DEFAULT_OPTS
+
+# https://github.com/andrewferrier/fzf-z
+export FZFZ_RECENT_DIRS_TOOL='fasd'
 
 # infinite history
-#     https://unix.stackexchange.com/a/273929/289772
+# https://unix.stackexchange.com/a/273929/289772
 export HISTFILE="${HOME}/.zsh_history"
 export HISTSIZE=999999999
 export SAVEHIST=$HISTSIZE
