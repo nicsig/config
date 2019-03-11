@@ -1477,10 +1477,8 @@ EOF
 
   local chosen_path
   # highlight -O ansi -l {}
-  chosen_path="$(fd -L -t f -E tmp/undo -E /proc 2>/dev/null | fzf -m --preview '(highlight -O ansi {} || cat {}) 2>/dev/null')"
-  #                 ├┘ ├──┘ ├─────────┘                            ├┘{{{
-  #                 │  │    │                                      └ let me select multiple entries
-  #                 │  │    │                                        with tab and shift-tab
+  chosen_path="$(fd -L -t f -E tmp/undo -E /proc 2>/dev/null | fzf --preview '(highlight -O ansi {} || cat {}) 2>/dev/null')"
+  #                 ├┘ ├──┘ ├─────────┘ {{{
   #                 │  │    └ exclude files from a `tmp/undo` directory
   #                 │  └ show me only files
   #                 └ follow symlinks
@@ -1494,7 +1492,7 @@ EOF
   # Here's an alternative using `$ find`:
   #
   #     $ find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune \
-  #       -o -type f -print 2>/dev/null | sed 1d | cut -b3- | fzf -m
+  #       -o -type f -print 2>/dev/null | sed 1d | cut -b3- | fzf
   #
   # Broken down:{{{
   #
@@ -1508,8 +1506,6 @@ EOF
   #    │ sed 1d           │ remove the first line matching the current directory `.` │
   #    ├──────────────────┼──────────────────────────────────────────────────────────┤
   #    │ cut -b3-         │ remove the first 2 characters on each line matching `./` │
-  #    ├──────────────────┼──────────────────────────────────────────────────────────┤
-  #    │ fzf -m           │ fuzzy search, allowing selection of multiple entries     │
   #    └──────────────────┴──────────────────────────────────────────────────────────┘
   #    ┌────────────────┬────────────────────────────┐
   #    │ -path '*/\.*'  │ hidden entry               │
@@ -1580,7 +1576,7 @@ EOF
   # do *not* use the variable name `path`; it would conflict with the tied array `path`,
   # which would prevent the next `command` from working
   local chosen_path
-  chosen_path="$(locate "${pat}" | fzf -m --preview '(highlight -O ansi {} || cat {}) 2>/dev/null')"
+  chosen_path="$(locate "${pat}" | fzf --preview '(highlight -O ansi {} || cat {}) 2>/dev/null')"
   # Why?{{{
   #
   # It doesn't make sense to start a program if we don't provide it any path.

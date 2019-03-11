@@ -127,7 +127,7 @@ class fzf_find(Command):
                 + " -o " \
                 + ("-type d" if self.quantifier else "") \
                 + " -print 2>/dev/null | sed 1d | cut -b3-" \
-                + " | fzf +m --preview '(highlight -O ansi {} || cat {}) 2>/dev/null'"
+                + " | fzf --preview '(highlight -O ansi {} || cat {}) 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:
