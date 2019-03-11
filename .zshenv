@@ -107,7 +107,7 @@ export EDITOR='vim'
 # https://github.com/junegunn/fzf#environment-variables
 # https://github.com/junegunn/fzf#respecting-gitignore
 export FZF_DEFAULT_OPTS='--exact --inline-info --bind change:top,alt-j:preview-page-down,alt-k:preview-page-up'
-export FZF_DEFAULT_COMMAND='fd -H -L -t f -E .git -E /proc -E tmp/undo'
+export FZF_DEFAULT_COMMAND='fd -H -L -t f'
 
 # infinite history
 #     https://unix.stackexchange.com/a/273929/289772

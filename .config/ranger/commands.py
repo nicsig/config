@@ -129,7 +129,7 @@ class fzf_fd(Command):
         #}}}
         command="fd -H -L " \
                 + ("-t d" if self.quantifier else "") \
-                + " -E .git -E /proc -E tmp/undo 2>/dev/null" \
+                + " 2>/dev/null" \
                 + " | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()

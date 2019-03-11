@@ -1477,7 +1477,7 @@ EOF
 
   local chosen_path
   # highlight -O ansi -l {}
-  chosen_path="$(fd -H -L -t f -E .git -E /proc -E tmp/undo 2>/dev/null | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
+  chosen_path="$(fd -H -L -t f 2>/dev/null | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
   #                 ├┘ ├──┘ ├─────────┘ {{{
   #                 │  │    └ exclude files from a `tmp/undo` directory
   #                 │  └ show me only files
