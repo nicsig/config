@@ -94,7 +94,7 @@ class fzf_fasd(Command):
         command='fasd ' \
                 + ('-d' if self.quantifier else '') \
                 + " | awk '{ print $2 }'" \
-                + " | fzf -e --tac --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
+                + " | fzf --tac --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:
@@ -104,30 +104,33 @@ class fzf_fasd(Command):
             else:
                 self.fm.select_file(fzf_file)
 
-# fzf_find {{{1
+# fzf_fd {{{1
 
 # Source: https://github.com/ranger/ranger/wiki/Custom-Commands#fzf-integration
 
-class fzf_find(Command):
+class fzf_fd(Command):
     """
-    :fzf_find
+    :fzf_fd
 
-    Find a file using fzf.
+    Find a file using fd and fzf.
 
     With a prefix argument find only directories.
     """
     def execute(self):
         import subprocess
         import os.path
-        # Alternative using `$ fd`:{{{
+        # Alternative using `$ find`:{{{
         #
-        #     command="fd -L " + ("-t d" if self.quantifier else "") + " -E /proc 2>/dev/null | fzf"
+        #     command="find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune" \
+        #             + " -o " \
+        #             + ("-type d" if self.quantifier else "") \
+        #             + " -print 2>/dev/null | sed 1d | cut -b3-" \
+        #             + " | fzf -e --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         #}}}
-        command="find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune" \
-                + " -o " \
-                + ("-type d" if self.quantifier else "") \
-                + " -print 2>/dev/null | sed 1d | cut -b3-" \
-                + " | fzf -e --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
+        command="fd -H -L " \
+                + ("-t d" if self.quantifier else "") \
+                + " -E .git -E /proc -E tmp/undo 2>/dev/null" \
+                + " | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:

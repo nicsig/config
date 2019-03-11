@@ -1431,7 +1431,7 @@ fzf_clipboard() { #{{{2
   emulate -L zsh
 
   # fuzzy find clipboard history
-  printf -- "$(greenclip print | fzf -e)" | xclip -selection clipboard
+  printf -- "$(greenclip print | fzf)" | xclip -selection clipboard
 }
 
 fzf_fasd() { #{{{2
@@ -1451,7 +1451,7 @@ EOF
   fi
 
   local chosen_path
-  chosen_path="$(fasd | awk '{ print $2 }' | fzf -e --tac --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
+  chosen_path="$(fasd | awk '{ print $2 }' | fzf --tac --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
   if [[ "${chosen_path}" == '' ]]; then
     return
   fi
@@ -1477,7 +1477,7 @@ EOF
 
   local chosen_path
   # highlight -O ansi -l {}
-  chosen_path="$(fd -L -t f -E tmp/undo -E /proc 2>/dev/null | fzf -e --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
+  chosen_path="$(fd -H -L -t f -E .git -E /proc -E tmp/undo 2>/dev/null | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
   #                 ├┘ ├──┘ ├─────────┘ {{{
   #                 │  │    └ exclude files from a `tmp/undo` directory
   #                 │  └ show me only files
@@ -1576,7 +1576,7 @@ EOF
   # do *not* use the variable name `path`; it would conflict with the tied array `path`,
   # which would prevent the next `command` from working
   local chosen_path
-  chosen_path="$(locate "${pat}" | fzf -e --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
+  chosen_path="$(locate "${pat}" | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
   # Why?{{{
   #
   # It doesn't make sense to start a program if we don't provide it any path.
@@ -2199,11 +2199,8 @@ shellcheck_wiki() { #{{{2
 
 sr_fzf() { #{{{2
   emulate -L zsh
-  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf -e)"
-  #     ├─────────────────────────────────────────────┘   ├─────┘   ├────┘{{{
-  #     │                                                 │         └ search the pattern input by the user
-  #     │                                                 │           exactly (disable fuzzy matching)
-  #     │                                                 │           -e` = `--exact` exact-match
+  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf)"
+  #     ├─────────────────────────────────────────────┘   ├─────┘ {{{
   #     │                                                 │
   #     │                                                 └ sort numerically
   #     └ remove empty lines in
