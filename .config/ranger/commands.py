@@ -94,7 +94,7 @@ class fzf_fasd(Command):
         command='fasd ' \
                 + ('-d' if self.quantifier else '') \
                 + " | awk '{ print $2 }'" \
-                + " | fzf -e -i --tac --no-sort --preview '(highlight -O ansi {} || cat {}) 2>/dev/null'"
+                + " | fzf -e -i --tac --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:
@@ -127,7 +127,7 @@ class fzf_find(Command):
                 + " -o " \
                 + ("-type d" if self.quantifier else "") \
                 + " -print 2>/dev/null | sed 1d | cut -b3-" \
-                + " | fzf --preview '(highlight -O ansi {} || cat {}) 2>/dev/null'"
+                + " | fzf --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:
