@@ -4170,15 +4170,15 @@ augroup install_escape_mapping_in_terminal
         " The meta keysyms are disabled.
                 " }}}
         au TerminalOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
-        au TerminalOpen * call s:unmap_escape_mapping_in_terminal()
+        au TerminalOpen * call s:unmap_escape_mapping_for_fzf()
     else
         au TermOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
-        au TermOpen * call s:unmap_escape_mapping_in_terminal()
+        au TermOpen * call s:unmap_escape_mapping_for_fzf()
     endif
 augroup END
 
-fu! s:unmap_escape_mapping_in_terminal() abort
-    augroup unmap_escape_mapping_in_terminal
+fu! s:unmap_escape_mapping_for_fzf() abort
+    augroup unmap_escape_mapping_for_fzf
         au! * <buffer>
         " Do *not* use `sil` instead of `sil!`!{{{
         "
@@ -4207,7 +4207,7 @@ fu! s:unmap_escape_mapping_in_terminal() abort
             \ | endif
         " Do *not* clear the autocmd!{{{
         "
-        "     \ | exe 'au! unmap_escape_mapping_in_terminal * <buffer>'
+        "     \ | exe 'au! unmap_escape_mapping_for_fzf * <buffer>'
         "
         " For  some reason,  the  mapping would  still be  installed  in an  fzf
         " terminal buffer.
