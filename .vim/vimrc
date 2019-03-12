@@ -127,6 +127,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
 Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
 Plug 'lacygoill/vim-autoread', {'branch': 'assimil'}
+Plug 'lacygoill/vim-cheat40', {'branch': 'assimil'}
 Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-debug'
 Plug 'junegunn/vim-easy-align'
@@ -2179,7 +2180,6 @@ endfu
 
 call s:remember_new_mappings([
     \ ['-e', '!e'],
-    \ ['g?', '!m'],
     \ ['zs', '!s'],
     \ ])
 
