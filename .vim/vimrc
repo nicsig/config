@@ -4105,43 +4105,105 @@ snor  <c-d>  <esc>i<del>
 
 " Terminal {{{2
 
+" Why do you install a mapping whose lhs is `Esc Esc`?{{{
+"
 " In Vim, we can't use `esc` in the  lhs of a mapping, because any key producing
 " a  sequence of  keycodes  containing Esc,  would be  subject  to an  undesired
-" remapping (m-b, m-f, left, right, …).
+" remapping (m-b, m-f, left, right, ...).
 "
-" Example:  `M-b`  produce Escape  (go to  Terminal-Normal mode)  + b  (one word
-" backward). We DO  want to go one  word backward, but  we also want to  stay in
-" Terminal-Job mode.
+" Example:
+" `M-b` produce Escape (go to Terminal-Normal mode) + b (one word backward).
+" We *do* want to go one word backward, but we also want to stay in Terminal-Job
+" mode.
+"}}}
+" Why do you use an autocmd and buffer-local mappings?{{{
 "
-" Neovim doesn't suffer from this issue.
+" When fzf opens a terminal buffer, we don't want our mapping to be installed.
+"
+" Otherwise, we need to press Escape twice,  then press q; that's 3 keys instead
+" of one single Escape.
+" Besides, we get an ugly red highlighting due to our custom match we install to
+" better spot trailing whitespace.
+"
+" So, we  need our `Esc  Esc` mapping in all  terminal buffers, except  the ones
+" whose filetype is fzf; that's why we use a buffer-local mapping.
+"
+" The filetype of  a terminal buffer happens *after* the  terminal is opened, so
+" we need to  install a buffer-local autocmd which removes  the mapping when the
+" filetype is set to fzf.
+"}}}
+" Do you need to do all of that in Neovim too?{{{
+"
+" No, Neovim doesn't suffer from this issue.
+"
 " So, to  go from Terminal-Job mode  to Terminal-Normal mode, we  could use this
 " mapping:
 "
-"         exe 'tno '.(has('nvim') ? '<esc>' : '<esc><esc>').' <c-\><c-n>'
+"     exe 'tno <buffer> '.(has('nvim') ? '<esc>' : '<esc><esc>').' <c-\><c-n>'
 "
-" But  I prefer to  stay consistent. Double Escape in  Vim → double  escape in
-" neovim.
-" TODO:
-" Find a  way to send  an Escape  key to the  foreground program running  in the
-" terminal. Maybe something like this:
+" But I  prefer to  stay consistent:  double Escape  in Vim  → double  escape in
+" Neovim.
+"}}}
+
+" TODO: Find a way to send an Escape key to the foreground program running in the terminal.{{{
+"
+" Maybe something like this:
 "
 "         exe "set <m-[>=\e["
 "         tno  <m-[>  <esc>
 "
 " It doesn't work, but you get the idea.
-tno  <esc><esc>  <c-\><c-n>
+"}}}
 
-" Do NOT add this mapping:  tno  <esc>:  <c-\><c-n>:{{{
-"
-" Why?
-"
-"     z<      open a terminal
-"     Esc :   enter command-line
-"     Esc     get back to terminal normal mode
-"     z>      close terminal
-"
-" The meta keysyms are disabled.
-" }}}
+augroup install_escape_mapping_in_terminal
+    au!
+    if !has('nvim')
+        " Do *not* install this mapping:  `tno  <buffer>  <esc>:  <c-\><c-n>:`{{{
+        "
+        " Watch:
+        "
+        "     z<      open a terminal
+        "     Esc :   enter command-line
+        "     Esc     get back to terminal normal mode
+        "     z>      close terminal
+        "
+        " The meta keysyms are disabled.
+                " }}}
+        au TerminalOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
+        au TerminalOpen * call s:unmap_escape_mapping_in_terminal()
+    else
+        au TermOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
+        au TermOpen * call s:unmap_escape_mapping_in_terminal()
+    endif
+augroup END
+
+fu! s:unmap_escape_mapping_in_terminal() abort
+    augroup unmap_escape_mapping_in_terminal
+        au! * <buffer>
+        " Do *not* use `sil` instead of `sil!`!{{{
+        "
+        " The first time fzf opens a terminal, everything works fine.
+        " But for some reason, the next times, an error occurs from:
+        "
+        "     ~/.vim/plugged/fzf.vim/plugin/fzf.vim
+        "
+        "     Swapfile detected, opening read-only:   /home/user/.vim/enew~
+        "     Error detected while processing FileType Autocommands for "fzf":~
+        "     E31: No such mapping~
+        "     Error detected while processing function <SNR>48_history:~
+        "     line    7:~
+        "     E171: Missing :endif~
+        "}}}
+        au FileType fzf sil! tunmap <buffer> <esc><esc>
+        " Do *not* clear the autocmd!{{{
+        "
+        "     \ | exe 'au! unmap_escape_mapping_in_terminal * <buffer>'
+        "
+        " For  some reason,  the  mapping would  still be  installed  in an  fzf
+        " terminal buffer.
+        "}}}
+    augroup END
+endfu
 "}}}
 " Visual {{{2
 " C-s {{{3
@@ -5500,10 +5562,10 @@ endfu
 " Terminal {{{2
 
 augroup my_terminal
-    if has('nvim')
-        au TermOpen * call s:setup_neovim_terminal()
-    else
+    if !has('nvim')
         au TerminalOpen  *  call s:setup_vim_terminal()
+    else
+        au TermOpen * call s:setup_neovim_terminal() | startinsert
     endif
 augroup END
 
@@ -5557,8 +5619,6 @@ endfu
 " Trailing whitespace in red but not in insert mode, and not if the filetype
 " is in the list:
 let s:NO_TRAILING_WHITESPACE_FT = ['', 'git', 'help', 'qf']
-" TODO: Prevent a match from being added in an fzf buffer.
-" For some reason, adding 'fzf' in this list doesn't work.
 
 augroup trailing_whitespace
     au!

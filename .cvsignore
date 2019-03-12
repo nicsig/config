@@ -7,32 +7,31 @@
 #
 # Whatever path is contained in the value of `core.excludesfile`:
 #
-#       $ git config --global core.excludesfile
+#     $ git config --global core.excludesfile
 #
 # By default, it should be:
 #
-#       ~/.config/git/ignore
+#     ~/.config/git/ignore
 #}}}
 # Ok, so why do you use `~/.cvsignore` instead of this default path?{{{
 #
 # That's what tpope recommends in the README file for pathogen.
 #
-#     > I'll teach you how to ignore tags globally:
+# > I'll teach you how to ignore tags globally:
 #
 #     $ git config --global core.excludesfile '~/.cvsignore'
 #     $ echo tags >> ~/.cvsignore
 #
-#     > While any filename will work, I've chosen to follow the ancient
-#     > tradition of .cvsignore because utilities like rsync use it, too.
+# > While any filename will work, I've chosen to follow the ancient tradition of
+# > .cvsignore because utilities like rsync use it, too.
 #
-# Source:
-#
-#     https://github.com/tpope/vim-pathogen
+# Source: https://github.com/tpope/vim-pathogen
 #}}}
 # Some of your globs don't begin with a star. Does Git add one automatically?{{{
 #
 # No.
 # If there's no star, it simply means we don't need one.
+#
 # Example:
 #
 #     .DS_Store
@@ -44,7 +43,7 @@
 #}}}
 # Where did you find the code for all these sections?{{{
 #
-#     https://github.com/github/gitignore/tree/master/Global
+# https://github.com/github/gitignore/tree/master/Global
 #}}}
 
 # Ansible {{{1

@@ -85,6 +85,5 @@ let g:fzf_files_options = '--preview "(highlight || bat {} || cat {}) 2>/dev/nul
 "     /FIELD INDEX EXPRESSION
 "     ..     All the fields
 "}}}
-exe 'command! -bar -bang '.g:fzf_command_prefix.'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
-
+exe 'com! -bar -bang '.g:fzf_command_prefix.'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
 
