@@ -4126,11 +4126,8 @@ snor  <c-d>  <esc>i<del>
 " better spot trailing whitespace.
 "
 " So, we  need our `Esc  Esc` mapping in all  terminal buffers, except  the ones
-" whose filetype is fzf; that's why we use a buffer-local mapping.
-"
-" The filetype of  a terminal buffer happens *after* the  terminal is opened, so
-" we need to  install a buffer-local autocmd which removes  the mapping when the
-" filetype is set to fzf.
+" whose filetype  is fzf; that's why  we use a buffer-local  mapping, and that's
+" why we remove it in an autocmd listening to `FileType fzf`.
 "}}}
 " Do you need to do all of that in Neovim too?{{{
 "
@@ -4149,8 +4146,8 @@ snor  <c-d>  <esc>i<del>
 "
 " Maybe something like this:
 "
-"         exe "set <m-[>=\e["
-"         tno  <m-[>  <esc>
+"     exe "set <m-[>=\e["
+"     tno  <m-[>  <esc>
 "
 " It doesn't work, but you get the idea.
 "}}}
@@ -4170,50 +4167,26 @@ augroup install_escape_mapping_in_terminal
         " The meta keysyms are disabled.
                 " }}}
         au TerminalOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
-        au TerminalOpen * call s:unmap_escape_mapping_for_fzf()
     else
         au TermOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
-        au TermOpen * call s:unmap_escape_mapping_for_fzf()
     endif
 augroup END
 
-fu! s:unmap_escape_mapping_for_fzf() abort
-    augroup unmap_escape_mapping_for_fzf
-        au! * <buffer>
-        " Do *not* use `sil` instead of `sil!`!{{{
-        "
-        " The first time fzf opens a terminal, everything works fine.
-        " But for some reason, the next times, an error occurs from:
-        "
-        "     ~/.vim/plugged/fzf.vim/plugin/fzf.vim
-        "
-        "     Swapfile detected, opening read-only:   /home/user/.vim/enew~
-        "     Error detected while processing FileType Autocommands for "fzf":~
-        "     E31: No such mapping~
-        "     Error detected while processing function <SNR>48_history:~
-        "     line    7:~
-        "     E171: Missing :endif~
-        "}}}
-        au FileType fzf sil! tunmap <buffer> <esc><esc>
-        " Why?{{{
-        "
-        " It's useful when we press `C-\ C-n` instead of `Escape`.
-        " In  that  case,  the  fzf  window  doesn't  close,  and  the  trailing
-        " whitespace are highglighted which is distracting.
-        "}}}
-        au FileType fzf if exists('w:my_trailing_whitespace')
-            \ |     call matchdelete(w:my_trailing_whitespace)
-            \ |     unlet w:my_trailing_whitespace
-            \ | endif
-        " Do *not* clear the autocmd!{{{
-        "
-        "     \ | exe 'au! unmap_escape_mapping_for_fzf * <buffer>'
-        "
-        " For  some reason,  the  mapping would  still be  installed  in an  fzf
-        " terminal buffer.
-        "}}}
-    augroup END
-endfu
+augroup remove_escape_mapping_for_fzf
+    au!
+    au FileType fzf tunmap <buffer> <esc><esc>
+
+    " Why?{{{
+    "
+    " It's useful when we press `C-\ C-n` instead of `Escape`.
+    " In that  case, the fzf window  doesn't close, and the  trailing whitespace
+    " are highglighted which is distracting.
+    "}}}
+    au FileType fzf if exists('w:my_trailing_whitespace')
+        \ |     call matchdelete(w:my_trailing_whitespace)
+        \ |     unlet w:my_trailing_whitespace
+        \ | endif
+augroup END
 "}}}
 " Visual {{{2
 " C-s {{{3
