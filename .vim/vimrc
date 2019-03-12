@@ -4195,6 +4195,16 @@ fu! s:unmap_escape_mapping_in_terminal() abort
         "     E171: Missing :endif~
         "}}}
         au FileType fzf sil! tunmap <buffer> <esc><esc>
+        " Why?{{{
+        "
+        " It's useful when we press `C-\ C-n` instead of `Escape`.
+        " In  that  case,  the  fzf  window  doesn't  close,  and  the  trailing
+        " whitespace are highglighted which is distracting.
+        "}}}
+        au FileType fzf if exists('w:my_trailing_whitespace')
+            \ |     call matchdelete(w:my_trailing_whitespace)
+            \ |     unlet w:my_trailing_whitespace
+            \ | endif
         " Do *not* clear the autocmd!{{{
         "
         "     \ | exe 'au! unmap_escape_mapping_in_terminal * <buffer>'
