@@ -1441,7 +1441,7 @@ EOF
   fi
 
   local chosen_path
-  chosen_path="$(fasd | awk '{ print $2 }' | fzf --tac --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
+  chosen_path="$(fasd -lR | fzf --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null')"
   if [[ "${chosen_path}" == '' ]]; then
     return
   fi
