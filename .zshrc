@@ -3190,6 +3190,19 @@ bindkey '\e[Z' reverse-menu-complete
 
 bindkey '^ ' set-mark-command
 
+# C-^        previous_directory {{{3
+# cycle between current dir and old dir
+__previous_directory() {
+  emulate -L zsh
+  # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
+  # so, no need to check it's not empty
+  cd -
+  # refresh the prompt so that it reflects the new working directory
+  zle reset-prompt
+}
+zle -N __previous_directory
+bindkey '^^' __previous_directory
+
 # C-q        quote_big_word {{{3
 
 # useful to quote a url which contains special characters
@@ -3842,19 +3855,6 @@ __normalize_command_line() {
 }
 zle -N __normalize_command_line
 bindkey '\em' __normalize_command_line
-
-# M-o           previous_directory (Old) {{{3
-# cycle between current dir and old dir
-__previous_directory() {
-  emulate -L zsh
-  # contrary to bash, zsh sets `$OLDPWD` immediately when we start a shell
-  # so, no need to check it's not empty
-  cd -
-  # refresh the prompt so that it reflects the new working directory
-  zle reset-prompt
-}
-zle -N __previous_directory
-bindkey '\eo' __previous_directory
 
 # M-Z           fuZzy-select-output {{{3
 

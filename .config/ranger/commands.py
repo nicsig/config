@@ -91,10 +91,10 @@ class fzf_fasd(Command):
     def execute(self):
         import subprocess
         import os.path
-        command='fasd ' \
+        command='fasd -R' \
                 + ('-d' if self.quantifier else '') \
                 + " | awk '{ print $2 }'" \
-                + " | fzf --tac --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
+                + " | fzf --no-sort --preview '{ highlight -O ansi {} || cat {} ;} 2>/dev/null'"
         fzf = self.fm.execute_command(command, universal_newlines=True, stdout=subprocess.PIPE)
         stdout, stderr = fzf.communicate()
         if fzf.returncode == 0:
