@@ -9,7 +9,7 @@ M:$HOME/wiki/bc.md
 N:$HOME/.vim/doc/misc/notes
 P:$HOME/.vim/pythonx/snippet_helpers.py
 S:$HOME/wiki/shell/shell.md
-T:$HOME/wiki/terminal/
+T:$HOME/wiki/tmux/tmux.md
 U:$HOME/wiki/urxvt.md
 V:$HOME/wiki/vim/
 W:$HOME/wiki/warez.md

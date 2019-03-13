@@ -3221,11 +3221,10 @@ __quote_big_word() {
 }
 zle -N __quote_big_word
 #    │
-#    └─ -N widget [ function ]
-#       Create a user-defined widget. When the new widget is invoked
-#       from within the editor, the specified shell function is called.
-#       If no function name is specified, it defaults to the same name as the
-#       widget.
+#    └ -N widget [ function ]
+# Create a user-defined  widget. When the new widget is invoked  from within the
+# editor, the specified shell function is called.
+# If no function name is specified, it defaults to the same name as the widget.
 bindkey '^Q' __quote_big_word
 
 # C-u        backward-kill-line {{{3
@@ -3297,8 +3296,7 @@ zle -N edit-command-line
 #
 #     https://sourceforge.net/p/zsh/code/ci/ef20425381e83ebd5a10c2ab270a347018371162/log/?path=/Functions/Zle/edit-command-line
 #
-# Source:
-#     https://unix.stackexchange.com/a/485467/289772
+# Source: https://unix.stackexchange.com/a/485467/289772
 #}}}
 # Is `"$@"` necessary?{{{
 #
