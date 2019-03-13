@@ -951,6 +951,29 @@ cdt() { #{{{2
   cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
 }
 
+cs() { #{{{2
+# Do *not* name the function `cheat`!{{{
+#
+# If you do, when you'll press Tab to get completions, a weird bug happens.
+# Vim is not started properly, and you have to kill it with `$ kill vim Tab`.
+# It's probably due to: `~/.zsh/zsh-completions/src/_cheat`
+#
+# Besides,  we'll probably read our  cheatsheets frequently, so the  shorter the
+# name of the function the better.
+#}}}
+  # TODO:  write a  completion function.
+  # For the candidates, use the output of `$ fd cheat.txt ~/wiki`.
+  emulate -L zsh
+  if [[ $# -ne 1 ]]; then
+    cat <<EOF >&2
+usage:    $0  <theme>
+example:  $0  tmux
+EOF
+    return 64
+  fi
+  vim +"Cheat $1"
+}
+
 # *_cfg {{{2
 
 #                                                        ┌ https://stackoverflow.com/a/7507068/9780968
