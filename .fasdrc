@@ -1,0 +1,2 @@
+# uncomment to debug fasd
+# _FASD_SINK="${HOME}/.fasd.log"
