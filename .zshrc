@@ -413,6 +413,7 @@ have() {
   (( ${+commands[$1]} )) && have=yes
 }
 bash_source ~/.zsh/my-completions/_pandoc
+bash_source ~/.zsh/my-completions/_tldr
 
 # Why removing the alias `run-help`?{{{
 #
