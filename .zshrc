@@ -2995,8 +2995,10 @@ cmds_to_ignore_in_history=(
   rm
   rmdir
   sleep
+  tldr
   touch
   tp
+  vimdiff
   web
 )
 
@@ -3041,11 +3043,11 @@ ignore_these_cmds() {
     # Why `2` instead of `1`?{{{
     #
     # `1` = the command is removed from the history of the session,
-    #     as soon as you execute another command
+    # as soon as you execute another command
     #
     # `2` = the command is still in the history of the session,
-    #     even after executing another command,
-    #     so you can retrieve it by pressing M-p or C-p
+    # even after executing another command,
+    # so you can retrieve it by pressing M-p or C-p
     #}}}
     return 2
   else
@@ -3063,9 +3065,9 @@ ignore_short_or_failed_cmds() {
   #                             ┌ ignore non-recognized commands
   #                             ├─────────┐
   if [[ "${#1}" -le 6 ]] || [[ "$?" == 127 ]]; then
-    return 2
-  else
     return 0
+  else
+    return 2
   fi
 }
 
