@@ -3078,6 +3078,15 @@ ignore_short_or_failed_cmds() {
 #                 │
 #                 └ replace 'z' with the key you want
 #}}}
+# How to set the position of the cursor in a key binding using the `-s` flag (`bindkey -s`)?{{{
+#
+# Write `\e123^B` at  the end of the rhs, to position  the cursor 123 characters
+# before the end of the line.
+#
+# Example:
+#
+#     bindkey -s '^Xr' '^A^Kfor f in *; do echo mv \"$f\" \"${f}\";done\e7^B'
+#}}}
 
 # fzf {{{2
 # How can I rebind the fzf widget to fuzzy search the history of commands:{{{
@@ -3168,7 +3177,7 @@ bindkey '\e[Z' reverse-menu-complete
 #          but when we press `S-Tab`, the terminal receives the keycodes `escape + [ + Z`
 #          so we use them in the lhs of our key binding
 
-# CTRL {{{2
+# Ctrl {{{2
 # C-SPC      set-mark-command {{{3
 
 bindkey '^ ' set-mark-command
@@ -3216,7 +3225,8 @@ _fzf_snippet_main_widget() {
   else
     local selected
     if selected=$(cat ${HOME}/.config/zsh-snippet/*.txt |
-      sed -e "s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /" \
+      sed -e '/^$\|^#/d' \
+          -e "s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /" \
           -e "s/\s*\(#\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
       fzf --bind 'tab:down,btab:up' --height=80% --ansi -q "${LBUFFER}"); then
       LBUFFER=$(sed 's/\s*#.*//' <<<"${selected}")
@@ -3279,6 +3289,15 @@ bindkey '^Q' __quote_big_word
 bindkey '^U' backward-kill-line
 
 # C-x        (prefix) {{{3
+
+# NOTE: It seems we can't bind anything to `C-x C-c`, because `C-c` is interpreted as
+# an interrupt signal sent to kill the foreground process. Even if hit after `C-x`.
+#
+# It's probably  done by the terminal  driver. Maybe we could disable  this with
+# `stty` (the  output of  `stty -a` contains  `intr = ^C`),  but it  wouldn't be
+# wise, because it's too important.
+# We would need to find a way to disable it only after `C-x`.
+
 # C-x C-e         edit-command-line {{{4
 
 autoload -Uz edit-command-line
@@ -3472,60 +3491,24 @@ zle -N __reread_zshrc
 bindkey '^X^R' __reread_zshrc
 
 # C-x C-s         reexecute-with-sudo {{{4
-#
+
 # re-execute last command with higher privileges
-#
-#                       ┌ preserve some variables in current environment
-#                       │
 bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
-#                               │
-#                               └ make sure `PATH` is preserved, in case `-E` didn't
-#
+#        │               │      │{{{
+#        │               │      └ make sure `PATH` is preserved, in case `-E` didn't
+#        │               │
+#        │               └ preserve some variables in current environment
+#        │
+#        └ interpret the arguments as strings of characters
+#          without `-s`, `sudo` would be interpreted as the name of a zle widget
+#}}}
+
 # Alternative:
 #     bindkey -s '^Xs' 'sudo !!^M'
 #
 # The 1st command is more powerul,  because it should escalate the privilege for
-# the whole command line.
+# the whole command-line.
 # Sometimes, `sudo` fails because it doesn't affect a redirection.
-
-# C-x c           snippet-compare {{{4
-
-# Quickly compare the output of 2 commands.
-# Useful when we want to see the effect of a flag/option on a command,
-# or the difference between 2 similar commands (df vs dfc).
-# Mnemonics: c for compare
-
-# NOTE:
-# It seems we can't bind anything to `C-x C-c`, because `C-c` is interpreted as
-# an interrupt signal sent to kill the foreground process. Even if hit after `C-x`.
-# It's probably done by the terminal driver. Maybe we could disable this with
-# `stty` (the output of `stty -a` contains `intr = ^C`), but it wouldn't be
-# wise, because it's too important.
-# We would need to find a way to disable it only after `C-x`.
-
-# Why `=()` instead of `<()`?{{{
-#
-# `<()` asks the shell to open a special file (e.g. `/proc/13319/fd/11`).
-# Sometimes, however, you need a regular file, not a special file.
-# That's because  the special  files are  streams of data,  which when  read are
-# forgotten.
-# Some commands need  to be able to  go backwards and read earlier  parts of the
-# file.
-# This is called a seek operation.
-# To  get around  this problem,  zsh provides  the substitution  `=(cmd)`, which
-# creates a regular file (in `/tmp`) to hold the output of `cmd`.
-# This  regular file  is  removed  automatically as  soon  as  the main  command
-# finishes.
-#
-# Also, the  temporary file created by  `<()` is read-only which  is annoying if
-# you have to modify it.
-# The one created  by `=()` is a  regular file, that you can  change without any
-# warning.
-#}}}
-bindkey -s '^Xc' 'vimdiff =() =()\e5^B'
-#        │
-#        └ interpret the arguments as strings of characters
-#          without `-s`, `vimdiff` would be interpreted as the name of a zle widget
 
 # C-x D           end-of-list {{{4
 
@@ -3574,29 +3557,6 @@ bindkey '^Xh' run-help
 #     "^[!" is _bash_complete-word
 #}}}
 bindkey '^XH' describe-key-briefly
-
-# C-x r           snippet-rename {{{4
-
-# TODO: What about this alias alternative:{{{
-#
-#     alias snip_rename='for f in *; do echo mv "$f" "${f}";done'
-#
-# Pro:
-# You don't have to find a new free keysequence for every snippet.
-# You can use the `snip` keyword as a prefix so that the tab completion
-# menu shows you all your snippets.
-# A sequence of commands is displayed one command per line: it's more readable.
-#
-# Con:
-# You have to expand your snippet by pressing `M-e`.
-# You can't control the cursor position.
-# A sequence of commands is displayed one command per line: it's harder to edit.
-#}}}
-alias snip_rename='for f in *; do echo mv "$f" "${f}";done'
-bindkey -s '^Xr' '^A^Kfor f in *; do echo mv \"$f\" \"${f}\";done\e7^B'
-#                                    │
-#                                    └ print the command to let us review it
-#                                      before doing anything
 
 # }}}3
 # C-z        fancy_ctrl_z {{{3
@@ -3654,7 +3614,7 @@ zle -N __fancy_ctrl_z
 # no process has the control of the terminal.
 bindkey '^Z' __fancy_ctrl_z
 # }}}2
-# META {{{2
+# Meta {{{2
 # M-[!$/@~]    _bash_complete-word {{{3
 
 # What's this “unnamed” function?{{{
@@ -3903,9 +3863,8 @@ bindkey '\em' __normalize_command_line
 # insert an entry from the output of the previous command,
 # selecting it with fuzzy search
 bindkey -s '\eZ' '$(!!|fzf)'
-
 # }}}2
-# MENUSELECT {{{2
+# Menuselect {{{2
 # Warning: I've disabled all key bindings using a printable character.{{{
 #
 # It's annoying  to type a  key expecting a character  to be inserted,  while in
