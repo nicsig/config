@@ -36,16 +36,15 @@ You can try.
 Write its contents in a file here, then source it from `~/.zshrc`.
 
 That's what we did for pandoc.
-It works thanks to these lines in `~/.zshrc` in `~/.zshrc`:
+It works thanks to these lines in `~/.zshrc`:
 
-        autoload -Uz bashcompinit
-        bashcompinit
+    autoload -Uz bashcompinit
+    bashcompinit
 
 Note that  whether it succeeds  or not depends on  which features does  the bash
 function rely on.
 
-Source:
-        https://unix.stackexchange.com/a/417143/289772
+Source: <https://unix.stackexchange.com/a/417143/289772>
 
 ##
 # Documentation

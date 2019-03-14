@@ -893,8 +893,6 @@ fi
 #}}}
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-[[ -f ${HOME}/.zsh/plugins/fzf-z/fzf-z.plugin.zsh ]] && . "${HOME}/.zsh/plugins/fzf-z/fzf-z.plugin.zsh"
-
 # https://github.com/zsh-users/zaw
 #
 # Usage:
@@ -2829,43 +2827,6 @@ alias vb='VBoxManage'
 # Useful to access the settings of a VM, from the GUI, while it's shut down.
 alias vb_start='virtualbox &!'
 
-# Why don't you rename `vb_vm_save_state` into `vb_vm_shutdown`?{{{
-#
-# That's not what it really does.
-# From VB point of view, the VM has not been shut down.
-# Because  of this,  some  settings  can't be  accessed  from  the GUI  (example
-# advanced network settings).
-#
-# So, I find the word “shutdown” deceiving.
-# If you really want to shut down the VM, execute from the guest:
-#
-#     $ shutdown -P now
-#}}}
-alias vb_vm_delete='vboxmanage unregistervm ubuntu --delete'
-alias vb_vm_pause='vboxmanage controlvm ubuntu pause'
-alias vb_vm_resume='vboxmanage controlvm ubuntu resume'
-alias vb_vm_save_state='vboxmanage controlvm ubuntu savestate'
-alias vb_vm_show_cfg='vboxmanage showvminfo ubuntu'
-alias vb_vm_start='vboxmanage startvm ubuntu'
-
-# Some of these aliases contain `{swapname}`. They won't work, because you need the name of a real snapshot!{{{
-#
-# Yes, but we won't execute these aliases.
-# We'll expand them by pressing `M-e`.
-#}}}
-# Why do write `{snapname}` instead of `<snapname>`?{{{
-#
-# `<snapname>` causes an issue if the token is at the end of the command.
-#
-#     zsh: parse error near `\n'
-#}}}
-alias vb_snapshot_edit='VBoxManage snapshot ubuntu edit {snapname} --name "new name" --description "new description"'
-alias vb_snapshot_info='VBoxManage snapshot ubuntu showvminfo {snapname}'
-alias vb_snapshot_list='VBoxManage snapshot ubuntu list'
-alias vb_snapshot_remove='vboxmanage snapshot ubuntu delete {snapname}'
-alias vb_snapshot_restore='vboxmanage snapshot ubuntu restorecurrent'
-alias vb_snapshot_take='vboxmanage snapshot ubuntu take {snapname} --description "my snapshot" --live'
-
 # website_cwd {{{3
 
 # Usage:{{{
@@ -3225,6 +3186,67 @@ __previous_directory() {
 zle -N __previous_directory
 bindkey '^^' __previous_directory
 
+# C-g        (prefix) {{{3
+
+# To use `C-g` as a prefix, we need to remove the function to which it's bound by default.
+# Otherwise, when  we press `C-g  C-<key>`, if we  aren't quick enough  to press
+# `C-<key>`, zsh would simply cancel the command.
+bindkey -r '^G'
+
+# C-g C-[gf]    snippets {{{4
+
+# TODO: fully understand/comment the code
+
+# Adapted From: https://github.com/liangguohuan/fzf-marker
+# Itself Inspired By: https://github.com/pindexis/marker.git
+
+# Usage:
+# Press `C-g C-g` to choose a snippet if there's no `{{` on the cmdline.
+# Press `C-g C-g` to jump to the first tabstop and remove its default value.
+# Press `C-g  C-f` to jump to  the first tabstop and “reveal”  its default value
+# (remove the `{{` and `}}`).
+
+FZF_SNIPPET_COMMAND_COLOR='\x1b[38;5;33m'
+FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;7m'
+
+# snippet selection
+_fzf_snippet_main_widget() {
+  if grep -q -P "{{" <<<"${BUFFER}"; then
+    _fzf_snippet_placeholder
+  else
+    local selected
+    if selected=$(cat ${HOME}/.config/zsh-snippet/*.txt |
+      sed -e "s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /" \
+          -e "s/\s*\(#\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
+      fzf --bind 'tab:down,btab:up' --height=80% --ansi -q "${LBUFFER}"); then
+      LBUFFER=$(sed 's/\s*#.*//' <<<"${selected}")
+    fi
+    zle redisplay
+  fi
+}
+
+_fzf_snippet_placeholder() {
+  local strp pos placeholder
+  strp=$(grep -Z -P -b -o "\{\{[^\{\}]+\}\}" <<<"${BUFFER}")
+  strp=$(head -1 <<<"${strp}")
+  pos=$(cut -d ":" -f1 <<<"${strp}")
+  placeholder=${strp#*:}
+  if [[ -n "$1" ]]; then
+    BUFFER=$(echo -E ${BUFFER} | sed -e "s/{{//" -e "s/}}//")
+    CURSOR=$((${pos} + ${#placeholder} - 4))
+  else
+    BUFFER=$(echo -E ${BUFFER} | sed "s/${placeholder}//")
+    CURSOR=pos
+  fi
+}
+
+_fzf_snippet_placeholder_widget() { _fzf_snippet_placeholder "defval" }
+
+zle -N _fzf_snippet_main_widget
+zle -N _fzf_snippet_placeholder_widget
+bindkey '^G^G' _fzf_snippet_main_widget
+bindkey '^G^F' _fzf_snippet_placeholder_widget
+# }}}3
 # C-q        quote_big_word {{{3
 
 # useful to quote a url which contains special characters

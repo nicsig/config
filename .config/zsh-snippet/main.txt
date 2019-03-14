@@ -1,0 +1,12 @@
+vboxmanage unregistervm {{ubuntu}} --delete
+vboxmanage controlvm {{ubuntu}} pause
+vboxmanage controlvm {{ubuntu}} resume
+vboxmanage controlvm {{ubuntu}} savestate
+vboxmanage showvminfo {{ubuntu}}
+vboxmanage startvm {{ubuntu}}
+vboxmanage snapshot {{ubuntu}} edit {{snapname}} --name "{{new name}}" --description "{{new description}}"
+vboxmanage snapshot {{ubuntu}} showvminfo {{snapname}}
+vboxmanage snapshot {{ubuntu}} list
+vboxmanage snapshot {{ubuntu}} delete {{snapname}}
+vboxmanage snapshot {{ubuntu}} restorecurrent
+vboxmanage snapshot {{ubuntu}} take {{snapname}} --description "{{my snapshot}}" --live

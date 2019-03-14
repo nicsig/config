@@ -463,6 +463,14 @@ if [[ "${TERM}" == "xterm" ]]; then
   fi
 fi
 
+# Configure the colors and styles of the output of `$ tldr`.
+export TLDR_HEADER='green bold'
+export TLDR_QUOTE='italic'
+# You can configure it further with these variables:
+#     TLDR_DESCRIPTION
+#     TLDR_CODE
+#     TLDR_PARAM
+
 # directories relative to which various kinds of user-specific files should be written
 # For more info, see:{{{
 #
