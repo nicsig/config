@@ -5601,7 +5601,7 @@ endfu
 
 " Trailing whitespace in red but not in insert mode, and not if the filetype
 " is in the list:
-let s:NO_TRAILING_WHITESPACE_FT = ['', 'git', 'help', 'qf']
+let s:NO_TRAILING_WHITESPACE_FT = ['', 'fzf', 'git', 'help', 'qf']
 
 augroup trailing_whitespace
     au!

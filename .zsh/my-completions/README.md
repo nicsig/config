@@ -1,5 +1,5 @@
 # Usage
-## What's the purpose of this folder?
+## What's the purpose of this directory?
 
 It contains our custom completion functions.
 

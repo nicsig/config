@@ -1,2 +1,24 @@
+# Level of "fuzziness" when doing fuzzy matching.
+# More precisely,  the number of  characters that can  be skipped to  generate a
+# match.
+# Set to empty or 0 to disable fuzzy matching.
+_FASD_FUZZY=2
+
+# Make fasd ignore some commands.
+# The default value is 'fasd ls echo'.
+# Why do you add `touch`?{{{
+#
+# When you run `$  touch` to create a file, fasd  doesn't register anything into
+# its database, because the file doesn't exist yet.
+# But if you run it on an existing file, fasd will register it.
+# I don't like that, because I suspect  I sometimes run `$ touch` on an existing
+# file while studying some shell concept.
+#}}}
+_FASD_IGNORE='fasd ls echo touch'
+
+# uncomment to disable fasd
+#     _FASD_RO=1
+
 # uncomment to debug fasd
-# _FASD_SINK="${HOME}/.fasd.log"
+#     _FASD_SINK="${HOME}/.fasd.log"
+

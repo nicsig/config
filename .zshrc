@@ -856,19 +856,19 @@ if [[ -n "${DISPLAY}" ]]; then
   # More generally, maybe we should remove any cache from time to time.
   #}}}
 
-  alias m='f -e mpv'
-  #           │
-  #           └ look for a file and open it with `mpv`
+  alias m='fasd -f -e mpv'
+  #                 │
+  #                 └ look for a file and open it with `mpv`
 
-  alias o='a -e xdg-open'
-  #           │
-  #           └ open with `xdg-open`
+  alias o='fasd -a -e xdg-open'
+  #                 │
+  #                 └ open with `xdg-open`
 
-  alias v='f -t -e vim -b viminfo'
-  #           │  │      │
-  #           │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
-  #           │  └ open with vim
-  #           └ match by recent access only
+  alias v='fasd -f -t -e vim -b viminfo'
+  #                 │  │      │
+  #                 │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
+  #                 │  └ open with vim
+  #                 └ match by recent access only
 
   alias j='fasd_cd -d'
   alias jj='fasd_cd -d -i'
@@ -3025,6 +3025,7 @@ cmds_to_ignore_in_history=(
   exit
   fg
   imv
+  j
   jobs
   ls
   man
@@ -3118,18 +3119,16 @@ ignore_short_or_failed_cmds() {
 #}}}
 
 # fzf {{{2
+# How can I rebind the fzf widget to fuzzy search the history of commands:{{{
+#
+#     bindkey -r '^R'
+#     bindkey 'your key' fzf-history-widget
+#}}}
 
 # The default key binding to jump in a child directory is `M-c`.
 # Too hard to type; let's try `M-j` instead.
 bindkey -r '\ec'
 bindkey '\ej' fzf-cd-widget
-
-# The default key binding to search in the history of commands is `C-r`.
-# To be  consistent with how we fuzzy  search Ex history in Vim,  remove it, and
-# re-bind the function to `C-r C-h`.
-# Note: we can now use `C-r` as a prefix for various key bindings.
-bindkey -r '^R'
-bindkey '^R^H' fzf-history-widget
 
 # The default key binding to complete a file under the current directory is `C-t`.
 # It overrides the shell `transpose-chars` function.

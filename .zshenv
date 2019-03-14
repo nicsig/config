@@ -119,9 +119,6 @@ export FZF_ALT_C_OPTS="${FZF_DEFAULT_OPTS} --preview='tree -C -L 2 -x --noreport
 export FZF_CTRL_R_OPTS=$FZF_DEFAULT_OPTS
 export FZF_CTRL_T_OPTS=$FZF_DEFAULT_OPTS
 
-# https://github.com/andrewferrier/fzf-z
-export FZFZ_RECENT_DIRS_TOOL='fasd'
-
 # infinite history
 # https://unix.stackexchange.com/a/273929/289772
 export HISTFILE="${HOME}/.zsh_history"
@@ -310,7 +307,16 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 #               └ boolean and numerics options (probably)
 #}}}
 
-export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/GitRepos:${HOME}/wiki:/run/user/${UID}
+# Why don't you set `CDPATH`?{{{
+#
+# In the past, we assigned it this value:
+#
+#     export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/GitRepos:${HOME}/wiki:/run/user/${UID}
+#
+# But I don't like the fact that it makes `cd` somewhat unpredictable.
+# Besides, the `j` alias (provided by the fasd plugin) serves a similar purpose,
+# but does it in a much more powerful way.
+#}}}
 # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
 export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 # add man pages for `texlive` and `dasht`
