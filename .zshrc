@@ -392,10 +392,12 @@ bashcompinit
 #
 #     https://web.archive.org/web/20180404080213/http://zshwiki.org/home/convert/bash
 #}}}
-# Are they necessary here? {{{
+# Are they really necessary? {{{
 #
-# Not for `pandoc` but  they could be in a future update, and  they could be for
-# other bash completion functions.
+# It depends.
+# They don't seem necessary for `pandoc`, at least atm.
+# They're not strictly necessary for `tldr`,  but without them, for some reason,
+# you would need to press Tab twice to get the completion menu.
 #}}}
 # TODO: Autoload the functions.
 bash_source() {

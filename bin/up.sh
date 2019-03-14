@@ -367,17 +367,6 @@ EOF
     # https://github.com/raylee/tldr#installation
     curl -Lso "${HOME}/bin/tldr" 'https://raw.githubusercontent.com/raylee/tldr/master/tldr'
     chmod +x "${HOME}/bin/tldr"
-
-    # TODO: Install and update a completion function for zsh.{{{
-    #
-    # You can get one for bash by writing this command in `~/.bashrc`:
-    #
-    #     complete -W "$(tldr 2>/dev/null --list)" tldr
-    #
-    # It  seems  a  very  simple  command,   so  it  should  work  in  zsh  too,
-    # thanks   to   `bashcompinit`   –   provided   that   you   write   it   in
-    # `~/.zsh/my-completions/_tldr` – but in practice it doesn't.
-    #}}}
 }
 
 update_youtube_dl() { #{{{1
