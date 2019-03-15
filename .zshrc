@@ -2425,7 +2425,20 @@ zsh_sourced_files() { #{{{2
   sed -i '/^+/!d' "${logfile}"
   "${EDITOR}" "${logfile}"
 }
+#}}}2
 
+_fzf_compgen_dir() { #{{{2
+  # Use `fd`  instead of  the default  `find` command to  generate the  list for
+  # directory completion.
+  #    - `$1` is the base path to start traversal
+  #    - see `~/.fzf/shell/completion.zsh` for the details
+  fd --hidden --follow --type d . "$1"
+}
+
+_fzf_compgen_path() { #{{{2
+  # Use `fd` instead of the default `find` command for listing path candidates.
+  fd --hidden --follow . "$1"
+}
 # }}}1
 # Aliases {{{1
 # regular {{{2
@@ -4178,6 +4191,113 @@ setopt RM_STAR_SILENT
 # Because  if  you  refer  to  a  function in  the  value  of  a  variable  (ex:
 # `precmd_functions`), and it doesn't exist yet, it may raise an error.
 #}}}
+
+# What's `$TERM` inside a terminal, by default?{{{
+#
+# In many terminals, including xfce-terminal, guake, konsole:
+#
+#     $TERM = xterm
+#
+# Yeah, they lie about their identity to the programs they run.
+#
+# In urxvt:
+#
+#     $TERM = rxvt-unicode-256color
+#
+# urxvt tells the truth.
+#}}}
+# Where is the configuration file for a terminal?{{{
+#
+# xfce-terminal and guake don't seem to have one.
+# However, you may find a way to  configure how they advertise themselves to the
+# programs they run, like this:
+#
+#     1. right-click
+#     2. preferences
+#     3. compatibility
+#
+# urxvt uses ~/.Xresources.
+#}}}
+# Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
+#
+# For the  colorschemes of programs to  be displayed correctly in  the terminal,
+# `$TERM` must contain '-256color'.
+# Otherwise, the programs  will assume the terminal is only  able to interpret a
+# limited amount  of escape  sequences used  to encode 8  colors, and  they will
+# restrict themselves to a limited palette.
+#}}}
+# Ok, but why do it in this file?{{{
+#
+# The configuration  of `$TERM` should  happen only in a  terminal configuration
+# file.
+# But for xfce4-terminal, I haven't found one.
+# So, we must try to detect the identity of the terminal from here.
+#}}}
+# How to detect we're in an xfce terminal?{{{
+#
+# If you look at  the output of `env` and search for  'terminal' or 'xfce4', you
+# should find `COLORTERM` whose value is set to 'xfce4-terminal'.
+# We're going to use it to detect an xfce4 terminal.
+#}}}
+# Is it enough?{{{
+#
+# No, watch this:
+#
+#   1. start xfce4-terminal
+#   2. $ tmux (start server)
+#   3. $ echo $TERM  →  tmux-256color  ✔
+#
+#   4. start another xfce4-terminal
+#   5. $ tmux (connect to running server)
+#   6. $ echo $TERM  →  xterm-256color  ✘
+#
+# We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
+# server.
+# Because the latter will already have set `$TERM` to 'tmux-256color' (thanks to
+# the  option 'default-terminal'  in `~/.tmux.conf`),  which is  one of  the few
+# valid value ({screen|tmux}[-256color]).
+#
+# One way to be sure that we're not connected to Tmux , is to check that `$TERM`
+# is set to 'xterm'.
+# That's the default value set by xfce4-terminal.
+#
+# ---
+#
+# Update:
+# The reason given earlier is not valid anymore.
+# Since tmux 2.1, `default-terminal` is a server option.
+# The reason was valid before that, when `default-terminal` was a session option.
+#
+# Still, I  think it's a  good idea to set  `$TERM` to `xterm-256color`  only if
+# it's currently set to `xterm`.
+#}}}
+# Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
+#
+#     if [[ "${TERM}" == "xterm" ]]; then
+#         if [[ -n "${COLORTERM}" ]]; then
+#             if [[ "${COLORTERM}" == "gnome-terminal" || "${COLORTERM}" == "xfce-terminal" ]]; then
+#                 TERM=xterm-256color
+#             fi
+#         elif [[ -n "${VTE_VERSION}" ]]; then
+#             TERM=xterm-256color
+#         fi
+#     fi
+#
+# Source:
+# https://github.com/romainl/Apprentice/wiki/256-colors-and-you
+#}}}
+# Why don't you export it in `~/.zshenv`?{{{
+#
+# It  worked in  the past,  but it  doesn't work  anymore in  an xfce  terminal,
+# because when `~/.zshenv` is sourced, `TERM` and `COLORTERM` are not set yet.
+#}}}
+if [[ "${TERM}" == 'xterm' ]]; then
+  if [[ "${COLORTERM}" == 'xfce4-terminal' || -n "${KONSOLE_PROFILE_NAME}" ]]; then
+  #                                           ├──────────────────────────┘{{{
+  #                                           └ to also detect the Konsole terminal}}}
+    export TERM=xterm-256color
+  fi
+fi
 
 # It doesn't seem necessary to export the variable.
 # `precmd_functions` is a variable specific to the zsh shell.

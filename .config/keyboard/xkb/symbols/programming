@@ -19,6 +19,10 @@
 // }}}
 partial alphanumeric_keys
     xkb_symbols "special_chars" {
+    // I often  press `Shift+oe` ('oe'  is produced by  the key at  the top-left
+    // corner of the keyboard) by accident, instead of `Shift+&`, when I want to
+    // insert a `1`; fix this by making `Shift+oe` produce `1`.
+    key <TLDE> { [ oe, 1, oe, OE ] };
     key <AE02> { [ eacute, 2, less, Eacute ] };
     key <AE03> { [ quotedbl, 3, greater ] };
     key <AD01> { [ a, A, bar ] };

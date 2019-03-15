@@ -67,7 +67,8 @@ fi
 
 export MY_ENVIRONMENT_HAS_BEEN_SET=yes
 
-# configure `$ bat`
+# bat {{{1
+
 # Where can I download `$ bat`?{{{
 #
 #     https://github.com/sharkdp/bat/releases
@@ -105,7 +106,11 @@ export BAT_STYLE=changes,grid,header
 #}}}
 export BAT_THEME='GitHub'
 
+# editor {{{1
+
 export EDITOR='vim'
+
+# fzf {{{1
 
 # https://github.com/junegunn/fzf#environment-variables
 # https://github.com/junegunn/fzf#respecting-gitignore
@@ -119,7 +124,10 @@ export FZF_ALT_C_OPTS="${FZF_DEFAULT_OPTS} --preview='tree -C -L 2 -x --noreport
 export FZF_CTRL_R_OPTS=$FZF_DEFAULT_OPTS
 export FZF_CTRL_T_OPTS=$FZF_DEFAULT_OPTS
 
+# controls the number of lines occupied by fzf when we press sth like `C-x C-f`
 export FZF_TMUX_HEIGHT=40%
+
+# history {{{1
 
 # infinite history
 # https://unix.stackexchange.com/a/273929/289772
@@ -127,8 +135,12 @@ export HISTFILE="${HOME}/.zsh_history"
 export HISTSIZE=999999999
 export SAVEHIST=$HISTSIZE
 
+# locale {{{1
+
 # to get the name of the day/month in english
 export LC_TIME=en_US.UTF-8
+
+# less {{{1
 
 # What does this variable do?{{{
 #
@@ -195,10 +207,14 @@ export LESS=iMRS+G
 #}}}
 eval "$(lesspipe)"
 
+# ls {{{1
+
 # Ask  `dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
 # `$LS_COLORS`.
 # The latter controls the colors in the output of `ls --color`.
 eval "$(dircolors "${HOME}/.dircolors")"
+
+# man {{{1
 
 # use Neovim as default man pager
 # Why don't you use Vim like before?{{{
@@ -270,6 +286,8 @@ export MYMANSECT="${MANSECT}"
 
 export MANWIDTH=80
 
+# par {{{1
+
 # Why this value?{{{
 #
 # It's recommended in `man par`.
@@ -309,6 +327,8 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 #               └ boolean and numerics options (probably)
 #}}}
 
+# path {{{1
+
 # Why don't you set `CDPATH`?{{{
 #
 # In the past, we assigned it this value:
@@ -333,14 +353,20 @@ export PATH=${HOME}/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/Gi
 #             in a virtual console.
 #}}}
 
+# pdf {{{1
+
 # Choose which program should be used to open pdf documents.
 # Useful for `texdoc`.
 export PDFVIEWER=zathura
+
+# REPORTTIME {{{1
 
 # When a command take more than a few seconds, print some timing statistics at
 # the end of it, so that we can know how much it took exactly.
 # The report can be formatted with `TIMEFMT` (man zshparam).
 export REPORTTIME=15
+
+# sudo {{{1
 
 # Purpose:{{{
 #
@@ -363,107 +389,7 @@ export REPORTTIME=15
 #}}}
 export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 
-# What's `$TERM` inside a terminal, by default?{{{
-#
-# In many terminals, including xfce-terminal, guake, konsole:
-#
-#     $TERM = xterm
-#
-# Yeah, they lie about their identity to the programs they run.
-#
-# In urxvt:
-#
-#     $TERM = rxvt-unicode-256color
-#
-# urxvt tells the truth.
-#}}}
-# Where is the configuration file for a terminal?{{{
-#
-# xfce-terminal and guake don't seem to have one.
-# However, you may find a way to  configure how they advertise themselves to the
-# programs they run, like this:
-#
-#     1. right-click
-#     2. preferences
-#     3. compatibility
-#
-# urxvt uses ~/.Xresources.
-#}}}
-# Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
-#
-# For the  colorschemes of programs to  be displayed correctly in  the terminal,
-# `$TERM` must contain '-256color'.
-# Otherwise, the programs  will assume the terminal is only  able to interpret a
-# limited amount  of escape  sequences used  to encode 8  colors, and  they will
-# restrict themselves to a limited palette.
-#}}}
-# Ok, but why do it in this file?{{{
-#
-# The configuration  of `$TERM` should  happen only in a  terminal configuration
-# file.
-# But for xfce4-terminal, I haven't found one.
-# So, we must try to detect the identity of the terminal from here.
-#}}}
-# How to detect we're in an xfce terminal?{{{
-#
-# If you look at  the output of `env` and search for  'terminal' or 'xfce4', you
-# should find `COLORTERM` whose value is set to 'xfce4-terminal'.
-# We're going to use it to detect an xfce4 terminal.
-#}}}
-# Is it enough?{{{
-#
-# No, watch this:
-#
-#   1. start xfce4-terminal
-#   2. $ tmux (start server)
-#   3. $ echo $TERM  →  tmux-256color  ✔
-#
-#   4. start another xfce4-terminal
-#   5. $ tmux (connect to running server)
-#   6. $ echo $TERM  →  xterm-256color  ✘
-#
-# We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
-# server.
-# Because the latter will already have set `$TERM` to 'tmux-256color' (thanks to
-# the  option 'default-terminal'  in `~/.tmux.conf`),  which is  one of  the few
-# valid value ({screen|tmux}[-256color]).
-#
-# One way to be sure that we're not connected to Tmux , is to check that `$TERM`
-# is set to 'xterm'.
-# That's the default value set by xfce4-terminal.
-#
-# ---
-#
-# Update:
-# The reason given earlier is not valid anymore.
-# Since tmux 2.1, `default-terminal` is a server option.
-# The reason was valid before that, when `default-terminal` was a session option.
-#
-# Still, I  think it's a  good idea to set  `$TERM` to `xterm-256color`  only if
-# it's currently set to `xterm`.
-#}}}
-# Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
-#
-#     if [[ "${TERM}" == "xterm" ]]; then
-#         if [[ -n "${COLORTERM}" ]]; then
-#             if [[ "${COLORTERM}" == "gnome-terminal" || "${COLORTERM}" == "xfce-terminal" ]]; then
-#                 TERM=xterm-256color
-#             fi
-#         elif [[ -n "${VTE_VERSION}" ]]; then
-#             TERM=xterm-256color
-#         fi
-#     fi
-#
-# Source:
-# https://github.com/romainl/Apprentice/wiki/256-colors-and-you
-#}}}
-if [[ "${TERM}" == "xterm" ]]; then
-  if [[ "${COLORTERM}" == "xfce4-terminal" || -n "${KONSOLE_PROFILE_NAME}" ]]; then
-  #                                           ├──────────────────────────┘{{{
-  #                                           └ to also detect the Konsole terminal}}}
-    export TERM=xterm-256color
-  fi
-fi
+# tldr {{{1
 
 # Configure the colors and styles of the output of `$ tldr`.
 export TLDR_HEADER='green bold'
@@ -472,6 +398,8 @@ export TLDR_QUOTE='italic'
 #     TLDR_DESCRIPTION
 #     TLDR_CODE
 #     TLDR_PARAM
+
+# XDG_* {{{1
 
 # directories relative to which various kinds of user-specific files should be written
 # For more info, see:{{{
@@ -504,6 +432,8 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                      └ should exist on any OS using systemd
 #                        not sure about the others
 #}}}
+
+# remove duplicates in PATH &others {{{1
 
 # Purpose:{{{
 #
@@ -637,11 +567,11 @@ export XDG_RUNTIME_DIR=/run/user/$UID
         # There's no need to.
         # During  the first  iteration, `rebuild`  is  empty and  thus can't  be
         # matched by `*:entry:*`
-        # During the second iteration, `rebuild`  contains sth like ':foo' (yes,
+        # During the second iteration, `rebuild`  contains sth like `:foo` (yes,
         # the previous iteration has added an  extra colon at the beginning), so
         # there's no need to add a colon.
-        # During the  third iteration,  `rebuild` contains sth  like ':foo:bar',
-        # then  ':foo:bar:baz'  and  so  on. There's   always  a  colon  at  the
+        # During the  third iteration,  `rebuild` contains sth  like `:foo:bar`,
+        # then  `:foo:bar:baz`  and  so  on. There's   always  a  colon  at  the
         # beginning.
         # }}}
         case "${rebuild}": in
@@ -655,12 +585,12 @@ export XDG_RUNTIME_DIR=/run/user/$UID
           #     entry = bar
           #     rebuild = foo:barbar:baz
           #
-          # And we want to check whether  'bar' is an entry of 'foo:barbar:baz',
-          # we can't compare the latter to just '*bar*'.
-          # It would result  in a positive match, and 'bar'  would not be added,
-          # because the algo would wrongly think  that 'bar' is already an entry
+          # And we want to check whether  `bar` is an entry of `foo:barbar:baz`,
+          # we can't compare the latter to just `*bar*`.
+          # It would result  in a positive match, and `bar`  would not be added,
+          # because the algo would wrongly think  that `bar` is already an entry
           # of `rebuild`.
-          # In  reality, 'bar'  only matches  a substring  of an  entry, and  so
+          # In  reality, `bar`  only matches  a substring  of an  entry, and  so
           # should be added.
           #}}}
           *:"${entry}":*) ;;
