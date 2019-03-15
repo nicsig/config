@@ -119,6 +119,8 @@ export FZF_ALT_C_OPTS="${FZF_DEFAULT_OPTS} --preview='tree -C -L 2 -x --noreport
 export FZF_CTRL_R_OPTS=$FZF_DEFAULT_OPTS
 export FZF_CTRL_T_OPTS=$FZF_DEFAULT_OPTS
 
+export FZF_TMUX_HEIGHT=40%
+
 # infinite history
 # https://unix.stackexchange.com/a/273929/289772
 export HISTFILE="${HOME}/.zsh_history"

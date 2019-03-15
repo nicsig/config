@@ -3243,7 +3243,7 @@ _fzf_snippet_main_widget() {
       sed -e '/^$\|^#/d' \
           -e "s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /" \
           -e "s/\s*\(#\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
-      fzf --bind 'tab:down,btab:up' --height=80% --ansi -q "${LBUFFER}"); then
+      fzf --bind 'tab:down,btab:up' --height=${FZF_TMUX_HEIGHT:-40%} --reverse --ansi -q "${LBUFFER}"); then
       LBUFFER=$(sed 's/\s*#.*//' <<<"${selected}")
     fi
     zle redisplay
