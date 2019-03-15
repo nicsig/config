@@ -392,9 +392,8 @@ bashcompinit
 #
 #     https://web.archive.org/web/20180404080213/http://zshwiki.org/home/convert/bash
 #}}}
-# Are they really necessary? {{{
+# Are they really necessary for us now? {{{
 #
-# It depends.
 # They don't seem necessary for `pandoc`, at least atm.
 # They're not strictly necessary for `tldr`,  but without them, for some reason,
 # you would need to press Tab twice to get the completion menu.
@@ -975,23 +974,37 @@ EOF
   vim +"Cheat $1"
 }
 
-# *_cfg {{{2
+# cfg_* {{{2
 
 #                                                        ┌ https://stackoverflow.com/a/7507068/9780968
 #                                                        │
-autostart_cfg() { "${=EDITOR}" "${HOME}/bin/autostartrc" ;}
-bash_cfg() { "${=EDITOR}" "${HOME}/.bashrc" ;}
-conky_rings_cfg() { "${=EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
-conky_system_cfg() { "${=EDITOR}" "${HOME}/.conky/system.lua" ;}
-conky_time_cfg() { "${=EDITOR}" "${HOME}/.conky/time.lua" ;}
-firefox_cfg() { "${=EDITOR}" "${HOME}/.mozilla/firefox/*.default/chrome/userContent.css" ;}
-mpv_cfg() { "${=EDITOR}" "${HOME}/.config/mpv/input.conf" ;}
-tmux_cfg() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
-vim_cfg() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
-w3m_cfg() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
-xbindkeys_cfg() { "${=EDITOR}" "${HOME}/.config/keyboard/xbindkeys.conf" ;}
-xmodmap_cfg() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
-zsh_cfg() { "${=EDITOR}" "${HOME}/.zshrc" ;}
+cfg_autostart() { "${=EDITOR}" "${HOME}/bin/autostartrc" ;}
+cfg_bash() { "${=EDITOR}" -o "${HOME}/.bashrc" "${HOME}/.bashenv" "${HOME}/.bash_profile" ;}
+cfg_conky_rings() { "${=EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
+cfg_conky_system() { "${=EDITOR}" "${HOME}/.conky/system.lua" ;}
+cfg_conky_time() { "${=EDITOR}" "${HOME}/.conky/time.lua" ;}
+cfg_fasd() { "${=EDITOR}" "${HOME}/.fasdrc" ;}
+cfg_fd() { "${=EDITOR}" "${HOME}/.fdignore" ;}
+cfg_firefox() { "${=EDITOR}" ${HOME}/.mozilla/firefox/*.default/chrome/userContent.css ;}
+cfg_git() { "${=EDITOR}" -o "${HOME}/.config/git/config" "${HOME}/.cvsignore" ;}
+cfg_htop() { "${=EDITOR}" "${HOME}/.config/htop/htoprc" ;}
+cfg_intersubs() { "${=EDITOR}" -o "${HOME}/.config/mpv/scripts/interSubs.lua" "${HOME}/.config/mpv/scripts/interSubs.py" "${HOME}/.config/mpv/scripts/interSubs_config.py" ;}
+cfg_keyboard() { "${=EDITOR}" -o ${HOME}/.config/keyboard/* ;}
+cfg_kitty() { "${=EDITOR}" "${HOME}/.config/kitty.conf" ;}
+cfg_latexmk() { "${=EDITOR}" "${HOME}/.config/latexmk/latexmkrcl" ;}
+cfg_mpv() { "${=EDITOR}" -o "${HOME}/.config/mpv/input.conf" "${HOME}/.config/mpv/mpv.conf" ;}
+cfg_newsboat() { "${=EDITOR}" -o "${HOME}/.config/newsboat/config" "${HOME}/.config/newsboat/urls" ;}
+cfg_ranger() { "${=EDITOR}" "${HOME}/.config/ranger/rc.conf" ;}
+cfg_readline() { "${=EDITOR}" "${HOME}/.inputrc" ;}
+cfg_surfraw() { "${=EDITOR}" -o "${HOME}/.config/surfraw/bookmarks" "${HOME}/.config/surfraw/conf" ;}
+cfg_tmux() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
+cfg_vim() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
+cfg_w3m() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
+cfg_xbindkeys() { "${=EDITOR}" "${HOME}/.config/keyboard/xbindkeys.conf" ;}
+cfg_xfce_terminal() { "${=EDITOR}" "${HOME}/.config/xfce4/terminal/terminal.rc" ;}
+cfg_xmodmap() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
+cfg_zathura() { "${=EDITOR}" "${HOME}/.config/zathura/zathurarc" ;}
+cfg_zsh() { "${=EDITOR}" -o "${HOME}/.zshrc" "${HOME}/.zshenv" ;}
 #              │{{{
 #              └ Suppose that we export a value containing a whitespace:
 #
@@ -1009,6 +1022,7 @@ zsh_cfg() { "${=EDITOR}" "${HOME}/.zshrc" ;}
 #     man zshexpn
 #     /${=spec}
 #}}}
+cfg_zsh_snippet() { "${=EDITOR}" -o ${HOME}/.config/zsh-snippet/*.txt ;}
 
 checkinstall_what_have_i_installed() { #{{{2
   emulate -L zsh
@@ -1527,6 +1541,17 @@ EOF
 
   "${cmd}" "${chosen_path}"
 }
+
+fzf_sr() { #{{{2
+  emulate -L zsh
+  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf)"
+  #     ├─────────────────────────────────────────────┘   ├─────┘ {{{
+  #     │                                                 │
+  #     │                                                 └ sort numerically
+  #     └ remove empty lines in
+  #       the bookmark file
+  #}}}
+}
 #}}}2
 
 grep_pdf() { #{{{2
@@ -1653,7 +1678,7 @@ EOF
   diff -U $(wc -l <"$1") "$1" "$2" | grep '^-' | sed 's/^-//g'
 }
 
-key_check() { #{{{2
+gpg_key_check() { #{{{2
   emulate -L zsh
   if [[ $# -lt 2 ]]; then
     cat <<EOF >&2
@@ -2115,17 +2140,6 @@ shellcheck_wiki() { #{{{2
   xdg-open "https://github.com/koalaman/shellcheck/wiki/SC$1"
 }
 
-sr_fzf() { #{{{2
-  emulate -L zsh
-  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf)"
-  #     ├─────────────────────────────────────────────┘   ├─────┘ {{{
-  #     │                                                 │
-  #     │                                                 └ sort numerically
-  #     └ remove empty lines in
-  #       the bookmark file
-  #}}}
-}
-
 tor() { #{{{2
   # Why `cd ...`?  Why not running the desktop file with an absolute path?{{{
   #
@@ -2433,10 +2447,6 @@ alias bc='bc -q -l'
 #             │
 #             └ do not print the welcome message
 
-# bookmarks {{{3
-
-alias bookmarks='vim +"setl nowrap" ~/.config/surfraw/bookmarks'
-
 # cd {{{3
 
 alias ..='cd ..'
@@ -2562,7 +2572,7 @@ alias grep='grep --color=auto'
 
 # grml {{{3
 
-alias grml='vim <(curl -LSs https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc)'
+alias grml='vim <(curl -Ls https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc)'
 
 # iconv {{{3
 
@@ -2687,7 +2697,7 @@ alias net_watch='nethogs enp3s0'
 #     noaliases  → 'aliases' is ENabled
 #     chaselinks → 'chaselinks' is DISabled
 # }}}
-# Why do I need to reverse the reading in the right buffer? {{{
+# Why do I need to reverse the meaning of the info I read in the right buffer? {{{
 #
 # Because the meaning of the output of `unsetopt` is:
 #
@@ -2750,7 +2760,7 @@ alias qmv='qmv --format=destination-only'
 
 # ranger {{{3
 
-alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ~/.local/bin/ranger'
+alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ranger'
 
 # sudo {{{3
 

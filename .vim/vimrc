@@ -4368,6 +4368,11 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 "                                                     └─ first, reverse the order of the blocks
 "                                                        then, join them
 
+" p           paste without yanking selection in unnamed register {{{3
+
+" If you want the original behavior, press `P` instead.
+" By default, `x_p` and `x_P` do the same thing.
+xno <expr> p '"_d"' . v:register . 'p'
 " }}}1
 " Commands {{{1
 " Warning: Here, do NOT create commands which are only relevant for a specific type of buffer. {{{2

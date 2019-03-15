@@ -1,16 +1,16 @@
-for f in *; do echo mv "${{f}}" "${{{f}}}";done
+for f in *; do echo mv "${{f}}" "${{{f}}}";done # rename bunch of files
 
-vboxmanage unregistervm {{ubuntu}} --delete
-vboxmanage controlvm {{ubuntu}} pause
-vboxmanage controlvm {{ubuntu}} resume
-vboxmanage controlvm {{ubuntu}} savestate
-vboxmanage showvminfo {{ubuntu}}
-vboxmanage startvm {{ubuntu}}
-vboxmanage snapshot {{ubuntu}} edit {{snapname}} --name "{{new name}}" --description "{{new description}}"
-vboxmanage snapshot {{ubuntu}} showvminfo {{snapname}}
-vboxmanage snapshot {{ubuntu}} list
-vboxmanage snapshot {{ubuntu}} delete {{snapname}}
-vboxmanage snapshot {{ubuntu}} restorecurrent
-vboxmanage snapshot {{ubuntu}} take {{snapname}} --description "{{my snapshot}}" --live
+vboxmanage unregistervm {{ubuntu}} --delete # delete VM
+vboxmanage controlvm {{ubuntu}} pause # pause VM
+vboxmanage controlvm {{ubuntu}} resume # resume VM
+vboxmanage controlvm {{ubuntu}} savestate # save state of VM
+vboxmanage showvminfo {{ubuntu}} # show config of VM
+vboxmanage startvm {{ubuntu}} # start VM
+vboxmanage snapshot {{ubuntu}} edit {{snapname}} --name "{{new name}}" --description "{{new description}}" # edit snapshot of VM
+vboxmanage snapshot {{ubuntu}} showvminfo {{snapname}} # show info about snapshot of VM
+vboxmanage snapshot {{ubuntu}} list # list snapshots of VM
+vboxmanage snapshot {{ubuntu}} delete {{snapname}} # delete snapshot of VM
+vboxmanage snapshot {{ubuntu}} restorecurrent # restore snapshot of VM
+vboxmanage snapshot {{ubuntu}} take {{snapname}} --description "{{my snapshot}}" --live # take snapshot of VM
 
-vimdiff =({{cmd1}}) =({{cmd2}})
+vimdiff =({{cmd1}}) =({{cmd2}}) # compare output of 2 commands
