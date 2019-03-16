@@ -198,8 +198,8 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
 #
 # To do so, we need to:
 #
-#       1. create the named directory `~xdcc`
-#       2. refer to it in a(ny) command
+#    1. create the named directory `~xdcc`
+#    2. refer to it in a(ny) command
 #}}}
 # Could we use another command instead of `:`?{{{
 #
@@ -209,10 +209,10 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
 #
 # From `man zshbuiltins`:
 #
-# : [ arg ... ]
+# > : [ arg ... ]
 #
-#      This  command  does  nothing,  although  normal  argument  expansions  is
-#      performed which may have effects on shell parameters.
+# >      This  command  does  nothing,  although  normal  argument  expansions  is
+# >      performed which may have effects on shell parameters.
 #}}}
 xdcc=~/Downloads/XDCC/
 : ~xdcc

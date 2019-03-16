@@ -62,6 +62,7 @@ SUPPORTED_PGMS=(gawk mpv tmux trans vim weechat zsh)
 GIT_REPOS="${HOME}/GitRepos/"
 
 typeset -A URLS=( \
+  [ansifilter]=https://gitlab.com/saalen/ansifilter.git \
   [gawk]=git://git.savannah.gnu.org/gawk.git \
   [jumpapp]=https://github.com/mkropat/jumpapp \
   [mpv]=https://github.com/mpv-player/mpv-build \
@@ -91,7 +92,7 @@ if [[ -z "${PGM}" ]]; then
 # Every time we add or remove a program in the array URLS, we must do the same here.
 # Find a way to extract the keys of the array and concatenate them.
 #}}}
-elif [[ ! 'gawk jumpapp mpv tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
+elif [[ ! 'ansifilter gawk jumpapp mpv tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
   printf -- '%s: the only programs this script can update are:\n' "$(basename "$0")" >&2
   # How to print array elements on separate lines?
   #     https://stackoverflow.com/a/15692004/9780968
@@ -522,7 +523,7 @@ get_version() { #{{{2
     VERSION="${VERSION#*-}"
     VERSION="9:${VERSION%-*}"
 
-  elif [[ "${PGM}" == 'trans' || "${PGM}" == 'jumpapp' || "${PGM}" = 'weechat' ]]; then
+  elif [[ "${PGM}" == 'ansifilter' || "${PGM}" == 'jumpapp' || "${PGM}" == 'trans' || "${PGM}" = 'weechat' ]]; then
     # for `dpkg  -i mpv_*.deb` to success  later, the version number  must begin
     # with a digit
     VERSION="${VERSION#v}"
@@ -581,19 +582,35 @@ install() { #{{{2
     sudo dpkg -i jumpapp*all.deb
 
   else
+    # It seems that checkinstall sometimes ignores `--pkgversion`.{{{
+    #
+    # Try to run this command to install ansifilter:
+    #
+    #     $ checkinstall --pkgname ansifilter --pkgversion 2.13 -y
+    #
+    # Then, run `$ aptitude show ansifilter` to get the version of the installed package.
+    #
+    # It won't match what you provided to checkinstall.
+    #
+    # ---
+    #
+    # Maybe it's not an issue.
+    # Maybe  `--pkgversion` only  resets  the package  version  when no  version
+    # number is assigned by default by the makefile.
+    #}}}
     checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" -y
     #                                 │
     #                                 └ don't overwrite my package
     #                                   with an old version from the official repositories
     #                                   when I execute `aptitude safe-upgrade`
-    # Why can `aptitude` overwrite our compiled package?{{{
+    # Why can aptitude overwrite our compiled package?{{{
     #
     # It seems that the packages from the priority of the official repositories is 500.
     # While the priority of our compiled package is only 100.
     #
-    # So, when  `aptitude` finds several versions  of the same package,  it checks
+    # So, when  aptitude finds several versions  of the same package,  it checks
     # their version to decide which one is the newer one.
-    # By default, `checkinstall` uses the current date as the package version:
+    # By default, checkinstall uses the current date as the package version:
     #
     #     20180914
     #
