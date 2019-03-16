@@ -2585,7 +2585,7 @@ alias grep='grep --color=auto'
 
 # grml {{{3
 
-alias grml='vim <(curl -Ls https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc)'
+alias grml='vim =(curl -Ls https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc)'
 
 # iconv {{{3
 

@@ -63,6 +63,7 @@ GIT_REPOS="${HOME}/GitRepos/"
 
 typeset -A URLS=( \
   [gawk]=git://git.savannah.gnu.org/gawk.git \
+  [jumpapp]=https://github.com/mkropat/jumpapp \
   [mpv]=https://github.com/mpv-player/mpv-build \
   [tmux]=https://github.com/tmux/tmux \
   [trans]=https://github.com/soimort/translate-shell \
@@ -85,7 +86,12 @@ if [[ -z "${PGM}" ]]; then
 #
 # How to negate a test with regular expressions?
 #     https://stackoverflow.com/a/7846318/9780968
-elif [[ ! 'gawk mpv tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
+#
+# TODO: There's a duplication of code here; remove it.{{{
+# Every time we add or remove a program in the array URLS, we must do the same here.
+# Find a way to extract the keys of the array and concatenate them.
+#}}}
+elif [[ ! 'gawk jumpapp mpv tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
   printf -- '%s: the only programs this script can update are:\n' "$(basename "$0")" >&2
   # How to print array elements on separate lines?
   #     https://stackoverflow.com/a/15692004/9780968
@@ -112,6 +118,10 @@ build() { #{{{2
     # I don't use `-j` because it would probably consume too much cpu.
     # I'm ok with a building process which takes more time (≈ 12 min).
     dpkg-buildpackage -uc -us -b
+
+  elif [[ "${PGM}" == 'jumpapp' ]]; then
+    make deb
+
   else
     make
     # What to do if the zsh manpages are not installed?{{{
@@ -508,14 +518,16 @@ get_version() { #{{{2
     VERSION="$(git describe --tags --abbrev=0)"
   fi
 
-  if [[ ${PGM} == 'gawk' ]]; then
+  if [[ "${PGM}" == 'gawk' ]]; then
     VERSION="${VERSION#*-}"
     VERSION="9:${VERSION%-*}"
 
-  elif [[ ${PGM} == 'trans' ]]; then
+  elif [[ "${PGM}" == 'trans' || "${PGM}" == 'jumpapp' || "${PGM}" = 'weechat' ]]; then
+    # for `dpkg  -i mpv_*.deb` to success  later, the version number  must begin
+    # with a digit
     VERSION="${VERSION#v}"
 
-  elif [[ ${PGM} == 'vim' ]]; then
+  elif [[ "${PGM}" == 'vim' ]]; then
     # What's this `9:`?{{{
     #
     # Atm, the  Vim packages in the  offical repositories have a  version number
@@ -542,12 +554,7 @@ get_version() { #{{{2
     #}}}
     VERSION="9:${VERSION#v}"
 
-  elif [[ ${PGM} == 'weechat' ]]; then
-    # for `dpkg  -i mpv_*.deb` to success  later, the version number  must begin
-    # with a digit
-    VERSION="${VERSION#v}"
-
-  elif [[ ${PGM} == 'zsh' ]]; then
+  elif [[ "${PGM}" == 'zsh' ]]; then
     # for `checkinstall` to success later, the  version number must begin with a
     # digit
     VERSION="${VERSION#zsh-}"
@@ -567,6 +574,11 @@ install() { #{{{2
   # We don't have any version number for `mpv` (because `git describe` fails).
   if [[ "${PGM}" == 'mpv' ]]; then
     checkinstall --pkgname "${PGM}" -y
+
+  elif [[ "${PGM}" == 'jumpapp' ]]; then
+    # Can't use `checkinstall`, because:
+    #     make: *** No rule to make target 'install'.  Stop.
+    sudo dpkg -i jumpapp*all.deb
 
   else
     checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" -y
