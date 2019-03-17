@@ -93,5 +93,10 @@ augroup filetypedetect
 
     " ~/.vim/after/ftplugin/nfo.vim
     au! BufRead,BufNewFile *.nfo,*.NFO set ft=nfo
+
+    " rofi config files
+    " > Rofi themes use the .rasi file extension. The format is similar to .css.
+    " Source: https://github.com/DaveDavenport/rofi/wiki/Themes
+    au! BufRead,BufNewFile *.rasi set ft=css
 augroup END
 

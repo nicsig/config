@@ -44,6 +44,14 @@ partial alphanumeric_keys
     key <AB04> { [ v, V, v ] };
     key <AB05> { [ b, B, asciitilde ] };
     key <SPCE> { [ space, space, underscore, NoSymbol ] };
+    // Necessary for xcape to translate `Control_R` into `Return`.{{{
+    //
+    // `xcape` can  *not* translate a keysym  k1 into another one k2,  if no key
+    // produces k2.
+    //
+    // To choose a keycode producing k2, read `$ xmodmap -pke`, and look for an unused one.
+    // Atm, 253 seems a good one; I doubt I'll use it anywhere in the future.
+    //}}}
     key <I253> { [ Return ] };
 };
 

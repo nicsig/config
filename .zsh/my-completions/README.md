@@ -79,19 +79,19 @@ For more info:
 
 ##
 # Todo
-
-These 2 completion functions give too many suggestions:
-
-    _ppa_what_can_i_install
-    _ppa_what_have_i_installed
+## `_ppa_what_can_i_install` and `_ppa_what_have_i_installed` give too many suggestions.
 
 We don't use the i386 cpu architecture.
 
 ---
 
-        $ ppa_what_can_i_install google Tab
-            → ∅
+    $ ppa_what_can_i_install google Tab
+        → ∅
 
-        $ ppa_what_have_i_installed google Tab
-            → ∅
+    $ ppa_what_have_i_installed google Tab
+        → ∅
+
+## Improve the completion function `_cs` to get the names of the cheatsheets dynamically.
+
+For the candidates, use the output of `$ fd cheat.txt ~/wiki`.
 

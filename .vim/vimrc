@@ -7569,6 +7569,7 @@ let s:syled_comments_filetypes = [
     \ 'awk',
     \ 'c',
     \ 'conf',
+    \ 'css',
     \ 'dircolors',
     \ 'gitconfig',
     \ 'lua',

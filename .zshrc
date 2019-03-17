@@ -875,6 +875,8 @@ if [[ -n "${DISPLAY}" ]]; then
   alias j='fasd_cd -d'
   alias jj='fasd_cd -d -i'
   unalias z zz
+
+  bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 fi
 
 # source fzf config
@@ -961,8 +963,6 @@ cs() { #{{{2
 # Besides,  we'll probably read our  cheatsheets frequently, so the  shorter the
 # name of the function the better.
 #}}}
-  # TODO:  write a  completion function.
-  # For the candidates, use the output of `$ fd cheat.txt ~/wiki`.
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
@@ -1287,7 +1287,7 @@ ff_desktop_record() { #{{{2
   ffmpeg -draw_mouse 1                     \
          -f x11grab                        \
          -framerate 25                     \
-         -video_size "1920x1080"           \
+         -video_size '1920x1080'           \
          -i :0.0                           \
          -y                                \
                 /tmp/recording_desktop.mkv \
@@ -1440,7 +1440,6 @@ fix() { #{{{2
   tput rs3
   clear
   printf -- '\ec'
-  "${HOME}/bin/keyboard.sh"
 }
 #}}}2
 
@@ -2995,7 +2994,7 @@ alias -s pdf=zathura
 # zsh provides a hook function `zshaddhistory` which can be used for that.
 # If `zshaddhistory_functions` contains  the name of a function  which returns a
 # non-zero value, the command is not saved in the history file.
-zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
+# zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
 
 # The shell allows newlines to separate array elements.
 # So,  an array  assignment can  be split  over multiple  lines without  putting
@@ -3130,7 +3129,7 @@ bindkey '\ej' fzf-cd-widget
 
 # The default key binding to complete a file under the current directory is `C-t`.
 # It overrides the shell `transpose-chars` function.
-bindkey '^X^F' fzf-file-widget
+bindkey '^X^T' fzf-file-widget
 bindkey '^T' transpose-chars
 
 # Delete {{{2
@@ -3555,7 +3554,7 @@ bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
 #}}}
 bindkey '^XD' end-of-list
 
-# C-x h           run-help {{{4
+# C-x H           run-help {{{4
 
 # What's this “run-help”?{{{
 #
@@ -3573,9 +3572,9 @@ bindkey '^XD' end-of-list
 #
 # For more info, see `man zshzle`.
 #}}}
-bindkey '^Xh' run-help
+bindkey '^XH' run-help
 
-# C-x H           describe-key-briefly {{{4
+# C-x h           describe-key-briefly {{{4
 
 # Usage:{{{
 #
@@ -3584,7 +3583,7 @@ bindkey '^Xh' run-help
 #
 #     "^[!" is _bash_complete-word
 #}}}
-bindkey '^XH' describe-key-briefly
+bindkey '^Xh' describe-key-briefly
 
 # }}}3
 # C-z        fancy_ctrl_z {{{3
