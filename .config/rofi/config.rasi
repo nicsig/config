@@ -7,8 +7,8 @@
 /* Why the star? *//*{{{*/
 
 /* It matches any element path. */
-/* As a result, `* {...}` is the global properties section. */
-/* The global properties section denotes the defaults for each element. */
+/* As a result, `* {...}` is the **global** properties section. */
+/* The latter specifies the defaults for each element. */
 
 /* *//*}}}*/
 /* Don't move this section. Leave it at the top! *//*{{{*/
@@ -41,6 +41,11 @@
 /* Why the hash symbol? *//*{{{*/
 
 /* It denotes a sub-section. */
+
+/* *//*}}}*/
+/* What's “window”? *//*{{{*/
+
+/* The name of a widget. */
 
 /* *//*}}}*/
 #window {
