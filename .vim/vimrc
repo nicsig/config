@@ -2566,6 +2566,36 @@ imap  <c-g>m  <plug>(fzf-maps-i)
 xmap  mm      <plug>(fzf-maps-x)
 omap  m       <plug>(fzf-maps-o)
 
+" g                             websearch {{{4
+
+" Why don't you use your shell script anymore?{{{
+"
+" It depends on tmux.
+" It opens a whole new window which is distracting.
+" It consumes a precious tmux key binding (easy-to-type tmux key bindings are not that numerous).
+" It's brittle; it needs to properly set `LC_ALL`, some weird redirections, and a sleep...
+" It can't escape special shell characters such as `*`, so sometimes a search may fail.
+" ...
+"
+" If you need to read it, it's there: `~/bin/bash/search-engine.sh`.
+"}}}
+nno  <silent>  <space>g  :<c-u>call <sid>websearch()<cr>
+
+fu! s:websearch() abort
+    let dir = $HOME . '/.vim/tmp'
+    let file = dir . '/websearch'
+    let max_history = 100
+    if !isdirectory(dir)
+        call mkdir(dir, 'p', '0700')
+    endif
+    " make sure the history doesn't exceed `max_history` entries
+    let lines = readfile($HOME . '/.vim/tmp/websearch')
+    if len(lines) > max_history
+        call writefile(lines[len(lines) - max_history : ], file)
+    endif
+    exe 'sp ' . file
+endfu
+
 " s S                           saiw  saiW{{{4
 
 nmap  <space>s  saiw

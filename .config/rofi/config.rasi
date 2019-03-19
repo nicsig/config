@@ -1,3 +1,29 @@
+configuration {
+  /* Change default key binding *//*{{{*/
+
+  /* This re-binds a key to complete the input text with the currently selected item. */
+  /* By default, `Ctrl-SPC` does that, but `Tab` seems more intuitive. */
+  /* *//*}}}*/
+  kb-row-select: "Tab";
+  /* Change another key binding *//*{{{*/
+
+  /* This re-binds a key to select the next item. */
+  /* By default, `Tab` does that, but we've just used it, so we need to find another key. */
+  /* Let's simply exchange the keys for now (`Tab` ↔ `Ctrl-SPC`). */
+
+  /* --- */
+
+  /* Note that  even if  you don't intend  to press `Ctrl-SPC`  to select  the next */
+  /* item, you still need to install this key binding. */
+  /* Otherwise, rofi will complain that: */
+
+  /* > There is already a binding matching 'Tab' */
+
+  /* and the previous binding (the one we really want) won't be installed. */
+  /*   *//*}}}*/
+  kb-row-tab: "Control+space";
+}
+
 /* Where did you find this theme? *//*{{{*/
 
 /* https://github.com/DaveDavenport/rofi-themes/blob/master/Official%20Themes/paper-float.rasi */
@@ -34,8 +60,8 @@
     /*                   ├┘ *//*{{{*/
     /*                   └ no transparency  */
     /*}}}*/
-    anchor: north;
     location: center;
+    font: "DejaVu Sans Mono 20";
 }
 
 /* Why the hash symbol? *//*{{{*/
@@ -161,7 +187,8 @@
 }
 #textbox-prompt-colon {
     expand:     false;
-    str:        ":";
+    str:        " >";
     margin:     0px 0.3em 0em 0em ;
     text-color: @normal-foreground;
 }
+

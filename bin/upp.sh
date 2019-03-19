@@ -255,10 +255,8 @@ clean() { #{{{2
   #   │ which will cause the script to exit prematurely
   #   │
   #   │ `-f` asks `rm` to ignore nonexistent files
-  #   │
-  #   │             ┌ don't quote: we want the globbing to happen
-  #   │             │}}}
-  rm -f backup*.tgz ${PGM}*.deb
+  #   │ }}}
+  rm -f backup*.tgz "${PGM}"*.deb
 
   if [[ "${PGM}" == 'weechat' ]]; then
     # Clean last `$ cmake` command:
@@ -454,14 +452,6 @@ configure() { #{{{2
 download() { #{{{2
   aptitude install git
 
-  [[ -d "${GIT_REPOS}" ]] || mkdir -p "${GIT_REPOS}"
-  cd "${GIT_REPOS}"
-
-  if [[ ! -d "${PGM}" ]]; then
-    git clone "${URLS[${PGM}]}" "${PGM}"
-  fi
-  cd "${PGM}"
-
   # We edit the file `configure.ac` for tmux.
   # This edit must be stashed before going on.
   # Even  if we didn't  edited this  file, it's still  a good practice  to stash
@@ -473,6 +463,16 @@ download() { #{{{2
     git checkout master
   fi
   git pull
+}
+
+enter_directory() { #{{{2
+  [[ -d "${GIT_REPOS}" ]] || mkdir -p "${GIT_REPOS}"
+  cd "${GIT_REPOS}"
+
+  if [[ ! -d "${PGM}" ]]; then
+    git clone "${URLS[${PGM}]}" "${PGM}"
+  fi
+  cd "${PGM}"
 }
 
 get_version() { #{{{2
@@ -710,7 +710,7 @@ install_dependencies() { #{{{2
   #                                   ^^^^^^^
   #                                   does it make a difference? is it necessary?
   #}}}
-  aptitude build-dep ${PGM}
+  aptitude build-dep "${PGM}"
 
   if [[ "${PGM}" == 'vim' ]]; then
     # `build-dep vim` is not enough to enable Vim's lua interface.
@@ -729,6 +729,7 @@ $(date +%m-%d\ %H:%M)
 
 EOF
 
+  enter_directory
   download
   get_version
 

@@ -1540,17 +1540,6 @@ EOF
 
   "${cmd}" "${chosen_path}"
 }
-
-fzf_sr() { #{{{2
-  emulate -L zsh
-  sr "$(sed '/^$/d' "${HOME}/.config/surfraw/bookmarks" | sort -n | fzf)"
-  #     ├─────────────────────────────────────────────┘   ├─────┘ {{{
-  #     │                                                 │
-  #     │                                                 └ sort numerically
-  #     └ remove empty lines in
-  #       the bookmark file
-  #}}}
-}
 #}}}2
 
 grep_pdf() { #{{{2
