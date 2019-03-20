@@ -190,6 +190,7 @@ Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'tpope/vim-speeddating'
 Plug 'lacygoill/vim-submode', {'branch': 'assimil'}
+Plug 'lacygoill/vim-tmux', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
 Plug 'lacygoill/vim-unix'
 
@@ -248,7 +249,6 @@ Plug 'lervag/vimtex'
 " Other:
 Plug 'mbbill/undotree'
 Plug 'chrisbra/unicode.vim'
-Plug 'keith/tmux.vim'
 
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup. We delay them.

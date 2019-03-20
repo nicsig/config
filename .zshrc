@@ -47,15 +47,15 @@ stty quit undef
 #
 # To choose a theme, use these commands:
 #
-#     ┌─────────────────────┬──────────────────────────┐
-#     │ prompt -l           │ list available themes    │
-#     ├─────────────────────┼──────────────────────────┤
-#     │ prompt -p           │ preview available themes │
-#     ├─────────────────────┼──────────────────────────┤
-#     │ prompt <your theme> │ enable a theme           │
-#     ├─────────────────────┼──────────────────────────┤
-#     │ prompt off          │ no theme                 │
-#     └─────────────────────┴──────────────────────────┘
+#    ┌─────────────────────┬──────────────────────────┐
+#    │ prompt -l           │ list available themes    │
+#    ├─────────────────────┼──────────────────────────┤
+#    │ prompt -p           │ preview available themes │
+#    ├─────────────────────┼──────────────────────────┤
+#    │ prompt <your theme> │ enable a theme           │
+#    ├─────────────────────┼──────────────────────────┤
+#    │ prompt off          │ no theme                 │
+#    └─────────────────────┴──────────────────────────┘
 #}}}
 # Why a newline in the prompt?{{{
 #
@@ -63,7 +63,45 @@ stty quit undef
 # filepath.
 #}}}
 
-# How does `%(?..[%?] )` work?{{{
+# What's `PS1`?{{{
+#
+# A variable which can be used to set the left prompt.
+#}}}
+# Why this dollar sign?{{{
+#
+# By prefixing the string  with a dollar sign, you can  include single quotes by
+# escaping them  (man [bash|zshmisc]  > QUOTING); otherwise,  you would  need to
+# write `'\''`, which is less readable
+#}}}
+# What's `%F{blue}`?{{{
+#
+# It sets the color to blue.
+#
+#     $ man zshmisc
+#     /SIMPLE PROMPT ESCAPES
+#     /Shell state
+#}}}
+# What's `%~`?{{{
+#
+# It inserts the path to the current working directory.
+#
+# `$HOME` is replaced with `~`.
+# And the path to a named directory is replaced with its name;
+# if the result is shorter and if you've referred to it in a command at least once.
+#
+#     man zshparam
+#     /PARAMETERS USED BY THE SHELL
+#}}}
+# What's `%f`?{{{
+#
+# It resets the color.
+#}}}
+# What's `%(?..[%?] )`?{{{
+#
+# It adds an indicator showing whether the last command succeeded ($?).
+#
+#     man zshmisc
+#     /CONDITIONAL SUBSTRINGS IN PROMPTS
 #
 # The syntax of a conditional substring in a prompt is:
 #
@@ -94,40 +132,11 @@ stty quit undef
 #       └ was the exit status of the last command 0?
 #         (without any number, zsh assumes 0)
 #}}}
-# ┌ set left prompt{{{
-# │
-# │   man zshzle
-# │   > CHARACTER HIGHLIGHTING
-# │
-# │  ┌ set the color to blue
-# │  │
-# │  │   man zshmisc
-# │  │   > SIMPLE PROMPT ESCAPES
-# │  │   > Shell state
-# │  │
-# │  │       ┌ current workding directory
-# │  │       │
-# │  │       │ replace $HOME with a tilde,
-# │  │       │ and in a path prefixed by a named directory,
-# │  │       │ replace the latter with the name
-# │  │       │ (if the result is shorter and if you've referred to it in a command at least once)
-# │  │       │
-# │  │       │   man zshparam
-# │  │       │   > PARAMETERS USED BY THE SHELL
-# │  │       │
-# │  │       │ ┌ reset the color
-# │  │       │ │
-# │  │       │ │         ┌ Add an indicator showing whether the last command succeeded ($?):
-# │  │       │ │         │
-# │  │       │ │         │     man zshmisc
-# │  │       │ │         │     > CONDITIONAL SUBSTRINGS IN PROMPTS
-# │  │       │ │         │
-# │  ├──────┐├┐├┐        ├─────────┐}}}
-PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
-#   │
-#   └ by prefixing the string with a dollar sign,
-#    we can include single quotes by escaping them (man [bash|zshmisc] > QUOTING);
-#    otherwise, we would need to write `'\''`, which is less readable
+# Why is there a no-break space at the end?{{{
+#
+# We use it to move to the start of the previous prompts with a tmux key binding.
+#}}}
+PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
 # TODO: add git branch in prompt{{{
 #
 #     # https://stackoverflow.com/a/12935606/9780968
@@ -556,11 +565,11 @@ add-zsh-hook chpwd chpwd_recent_dirs
 #}}}
 # How to start/stop using a new foreground color?  Background color?{{{
 #
-#     ┌──────────────┬──────────────────┐
-#     │ %F{123}...%f │ Foreground color │
-#     ├──────────────┼──────────────────┤
-#     │ %K{123}...%k │ bacKground color │
-#     └──────────────┴──────────────────┘
+#    ┌──────────────┬──────────────────┐
+#    │ %F{123}...%f │ Foreground color │
+#    ├──────────────┼──────────────────┤
+#    │ %K{123}...%k │ bacKground color │
+#    └──────────────┴──────────────────┘
 #}}}
 
 # zstyle ':completion:*:paths' ambiguous false
@@ -711,6 +720,18 @@ zstyle ':completion:*' completer _expand _complete _correct _approximate
 zstyle ':completion:*' menu select=2
 # not sure, but the first part of the next command probably makes completion
 # case-insensitive:    https://unix.stackexchange.com/q/185537/232487
+# TODO: Sometimes, it doesn't work as I would want.{{{
+#
+# For   example,  suppose   I  have   the   directory  `lol/`   and  the   movie
+# `The.Lego.Movie.2.1080p.HDRip.X264.AC3-EVO.mkv`:
+#     $ mpv lego Tab
+#     →
+#     $ mpv lol
+# However:
+#     $ mpv the Tab
+#     →
+#     $ mpv The.Lego.Movie.2.1080p.HDRip.X264.AC3-EVO.mkv
+#}}}
 zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
 zstyle ':completion:*' menu select=long
 zstyle ':completion:*' use-compctl false

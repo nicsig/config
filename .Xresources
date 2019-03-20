@@ -256,6 +256,12 @@ Xft.lcdfilter:  lcddefault
 ! It underlines arbitrary patterns and make them clickable.
 ! By default, it's used to make URLs clickable.
 !}}}
+! What does `confirm-paste` do?{{{
+!
+! It prompts before allowing any paste with a newline character.
+! It can protect from attacks such as this one:
+!     https://thejh.net/misc/website-terminal-copy-paste
+!}}}
 URxvt.perl-ext-common:  default,\
 selection-to-clipboard,\
 -searchable-scrollback,\
