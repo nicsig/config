@@ -20,7 +20,7 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=MygVim
+Name=gVim
 Icon=
 Exec=gvim -f --remote-silent-tab %F
 NoDisplay=
