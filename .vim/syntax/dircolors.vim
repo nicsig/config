@@ -1,33 +1,28 @@
-" I copied the contents of this file from:
+" Where did you get the code of this syntax plugin?{{{
 "
 "     $VIMRUNTIME/syntax/dircolors.vim
+"}}}
+" Why don't you use the default syntax plugin?{{{
 "
-" I use this file just to wrap the autocmds at the end inside an augroup.
-" Without the augroup, they are duplicated every time we reload a `dircolors`
-" file. MWE:
+" Some autocmds are not wrapped in an augroup.
+" Without the  augroup, they are duplicated  every time we reload  a `dircolors`
+" file.
+"
+" MWE:
 "
 "     $ vim ~/.dircolors
 "     :e
 "     50@:
 "
-"     Try to move up until the end of the file, the cursor may experience some
-"     slowdown when it reaches lines containing colored text;
-"     if it's not the case, repeat `:e` + `50@:`. Once enough autocmds have
-"     piled up, Vim will slow down a lot.
+" Try to move up until the end of the file.
+" The  cursor may  experience some  slowdown  when it  reaches lines  containing
+" colored text; if it's not the case, repeat `:e` + `50@:`.
+" Once enough autocmds have piled up, Vim will slow down a lot.
+"}}}
 
-
-" Vim syntax file
-" Language:        dircolors(1) input file
-" Maintainer:      Jan Larres <jan@majutsushi.net>
-" Previous Maintainer: Nikolai Weibull <now@bitwi.se>
-" Latest Revision: 2013-08-17
-
-if exists("b:current_syntax")
+if exists('b:current_syntax')
     finish
 endif
-
-let s:cpo_save = &cpo
-set cpo&vim
 
 syntax keyword dircolorsTodo    FIXME TODO XXX NOTE contained
 
@@ -237,7 +232,5 @@ if has('gui_running') || &t_Co != ''
     augroup END
 endif
 
-let b:current_syntax = "dircolors"
+let b:current_syntax = 'dircolors'
 
-let &cpo = s:cpo_save
-unlet s:cpo_save

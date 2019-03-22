@@ -51,6 +51,17 @@ endif
 " Do the same work for C-n, C-p, and C-h, j, k, l
 
 
+" C-w g[hjkl] (tradewinds) {{{1
+
+call submode#enter_with('foobar', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-h)')
+call submode#enter_with('foobar', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-j)')
+call submode#enter_with('foobar', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-k)')
+call submode#enter_with('foobar', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-l)')
+call submode#map(       'foobar', 'n', 'r',       'h', '<plug>(tradewinds-h)')
+call submode#map(       'foobar', 'n', 'r',       'j', '<plug>(tradewinds-j)')
+call submode#map(       'foobar', 'n', 'r',       'k', '<plug>(tradewinds-k)')
+call submode#map(       'foobar', 'n', 'r',       'l', '<plug>(tradewinds-l)')
+
 " schlepp {{{1
 
 "                                        ┌─ recursive (remap {rhs})

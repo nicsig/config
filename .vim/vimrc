@@ -192,6 +192,7 @@ Plug 'tpope/vim-speeddating'
 Plug 'lacygoill/vim-submode', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmux', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
+Plug 'andymass/vim-tradewinds'
 Plug 'lacygoill/vim-unix'
 
 " Done:
@@ -2566,7 +2567,125 @@ imap  <c-g>m  <plug>(fzf-maps-i)
 xmap  mm      <plug>(fzf-maps-x)
 omap  m       <plug>(fzf-maps-o)
 
-" g                             websearch {{{4
+" g                             goyo {{{4
+
+xno  <silent>  <space>g<space>  :<c-u>call <sid>clear_view()<cr>
+
+fu! s:clear_view() abort
+    if   getline(line("'<")-1) =~# '^\s*$' && line("'<") > 1
+    \ || getline(line("'>")+1) =~# '^\s*$' && line("'>") < line('$')
+        " collapse empty lines
+        keepj keepp '<?^\S?+s/^\%(\_s*\n\)\+//
+        keepj keepp '>+s/^\%(\_s*\n\)\+//
+        " the mark set on the start of  the selection has been moved to the next line;
+        " restore it
+        '<-mark <
+    else
+        " add empty lines to clear the view
+        let cnt = winheight(0)/2
+        call append(line("'<")-1, repeat([''], cnt))
+        call append(line("'>"), repeat([''], cnt))
+    endif
+    norm! '<zz
+endfu
+
+nno  <silent>  <space>gg  :<c-u>let g:my_goyo_without_syntax_hl = 1
+                          \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+
+nno  <silent>  <space>gG :<c-u>let g:my_goyo_without_syntax_hl = 0
+                         \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+
+fu! s:goyo_enter() abort
+    sil !tmux set status off
+    " FIXME:
+    " If we have 2 panes in the same window, and Vim is one of them, when we
+    " start goyo mode, we only see half of the screen. We probably need to
+    " resize the Tmux pane from the plugin, earlier.
+    sil !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
+    let s:cul_save = &l:cul
+    norm ]oL
+    set scrolloff=999
+    set noshowcmd
+
+    let  s:goyo_cocu_save = &l:concealcursor
+    let  s:goyo_cole_save = &l:conceallevel
+    setl concealcursor=nc conceallevel=3
+
+    " FIXME:
+    " need to find another way to change the shape of the cursor in Neovim
+    if !has('nvim')
+        let &t_EI = "\e[4 q"
+        exe "norm! r\e"
+    endif
+
+    let pos = getcurpos()
+    " The new window created by `:tab sp` inherits the window-local options of
+    " the original window. But `:tab sp` doesn't fire `BufWinEnter` so we lose
+    " our position in the changelist.
+    "
+    " FIXME: We should  use the function `s:restore_change_position()`  but it's
+    " local to `vim-window`.
+    sil! exe 'norm! '.(exists('b:my_change_position') ? '99g;' : '99g,')
+        \ .(b:my_change_position - 1) .'g,'
+    call setpos('.', pos)
+
+    if get(g:, 'my_goyo_without_syntax_hl', 1)
+        let syntax_groups = [
+            \ 'Conditional',
+            \ 'Delimiter',
+            \ 'Function',
+            \ 'Identifier',
+            \ 'MatchParen',
+            \ 'Number',
+            \ 'Operator',
+            \ 'PreProc',
+            \ 'Special',
+            \ 'Statement',
+            \ 'String',
+            \ 'Type',
+            \ 'snipSnippet',
+            \ ]
+
+        for group in syntax_groups
+            exe 'hi '.group.' term=NONE cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=NONE guibg=NONE'
+        endfor
+    endif
+    Limelight
+endfu
+
+fu! s:goyo_leave() abort
+    sil !tmux set status on
+    sil !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
+    set  showcmd
+    exe 'norm '.(s:cul_save ? '[' : ']').'oL'
+    set  scrolloff=3
+
+    let &l:concealcursor = s:goyo_cocu_save
+    let &l:conceallevel = s:goyo_cole_save
+    unlet! s:goyo_cocu_save s:goyo_cole_save
+
+    let &t_EI = "\e[2 q"
+
+    exe "norm! r\e"
+
+    exe 'colo '.g:colors_name
+    Limelight!
+endfu
+
+augroup my_goyo
+    au!
+    " FIXME:
+    " If we use `nested`, `:NoMatchParen` doesn't work.
+    " It doesn't work, even if we type the command later, while in goyo mode.
+    " Why?
+    " Should we get rid of `nested` in the 2nd autocmd (GoyoLeave)?
+    " Why do we need `nested` anyway?
+
+    au User GoyoEnter        call s:goyo_enter()
+    au User GoyoLeave nested call s:goyo_leave()
+augroup END
+
+" i                             ixquick {{{4
 
 " Why don't you use your shell script anymore?{{{
 "
@@ -2579,7 +2698,7 @@ omap  m       <plug>(fzf-maps-o)
 "
 " If you need to read it, it's there: `~/bin/bash/search-engine.sh`.
 "}}}
-nno  <silent>  <space>g  :<c-u>call <sid>websearch()<cr>
+nno  <silent>  <space>i  :<c-u>call <sid>websearch()<cr>
 
 fu! s:websearch() abort
     let dir = $HOME . '/.vim/tmp'
@@ -2774,7 +2893,6 @@ nno  <expr>  gQ ":\e".execute('ToggleEditingCommands 0', 'silent!').'gQ'
 
 nno  <silent>  gt  :<c-u>call myfuncs#search_todo('buffer')<cr>
 nno  <silent>  gT  :<c-u>call myfuncs#search_todo('project')<cr>
-
 "}}}3
 " m                   (prefix) {{{3
 " m/  m?         put current location in loclist {{{4
@@ -7602,6 +7720,7 @@ let s:syled_comments_filetypes = [
     \ 'css',
     \ 'dircolors',
     \ 'gitconfig',
+    \ 'html',
     \ 'lua',
     \ 'python',
     \ 'readline',
@@ -7611,7 +7730,6 @@ let s:syled_comments_filetypes = [
     \ 'tmux',
     \ 'vim',
     \ 'xdefaults',
-    \ 'xmodmap',
     \ 'xkb',
     \ 'zsh',
     \ ]
@@ -7814,104 +7932,6 @@ endfu
 "     ino <c-g>c <c-r>=string(eval(input('Calculate: ')))<cr>
 "     ino <c-g>c <c-r>=eval(input('Calculate: '))<cr>
 
-
-" don't use `<space>g`, I press it by accident too often
-nno  <silent>  <space>G  :<c-u>let g:my_goyo_without_syntax_hl = 1
-                        \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
-                        " \ <bar> norm coz<cr>
-
-nno  <silent>  <space><c-g>  :<c-u>let g:my_goyo_without_syntax_hl = 0
-                            \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
-
-fu! s:goyo_enter() abort
-    sil !tmux set status off
-    " FIXME:
-    " If we have 2 panes in the same window, and Vim is one of them, when we
-    " start goyo mode, we only see half of the screen. We probably need to
-    " resize the Tmux pane from the plugin, earlier.
-    sil !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
-    let s:cul_save = &l:cul
-    norm ]oL
-    set scrolloff=999
-    set noshowcmd
-
-    let  s:goyo_cocu_save = &l:concealcursor
-    let  s:goyo_cole_save = &l:conceallevel
-    setl concealcursor=nc conceallevel=3
-
-    " FIXME:
-    " need to find another way to change the shape of the cursor in Neovim
-    if !has('nvim')
-        let &t_EI = "\e[4 q"
-        exe "norm! r\e"
-    endif
-
-    let pos = getcurpos()
-    " The new window created by `:tab sp` inherits the window-local options of
-    " the original window. But `:tab sp` doesn't fire `BufWinEnter` so we lose
-    " our position in the changelist.
-    "
-    " FIXME: We should  use the function `s:restore_change_position()`  but it's
-    " local to `vim-window`.
-    sil! exe 'norm! '.(exists('b:my_change_position') ? '99g;' : '99g,')
-        \ .(b:my_change_position - 1) .'g,'
-    call setpos('.', pos)
-
-    if get(g:, 'my_goyo_without_syntax_hl', 1)
-        let syntax_groups = [
-            \ 'Conditional',
-            \ 'Delimiter',
-            \ 'Function',
-            \ 'Identifier',
-            \ 'MatchParen',
-            \ 'Number',
-            \ 'Operator',
-            \ 'PreProc',
-            \ 'Special',
-            \ 'Statement',
-            \ 'String',
-            \ 'Type',
-            \ 'snipSnippet',
-            \ ]
-
-        for group in syntax_groups
-            exe 'hi '.group.' term=NONE cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=NONE guibg=NONE'
-        endfor
-    endif
-    Limelight
-endfu
-
-fu! s:goyo_leave() abort
-    sil !tmux set status on
-    sil !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
-    set  showcmd
-    exe 'norm '.(s:cul_save ? '[' : ']').'oL'
-    set  scrolloff=3
-
-    let &l:concealcursor = s:goyo_cocu_save
-    let &l:conceallevel = s:goyo_cole_save
-    unlet! s:goyo_cocu_save s:goyo_cole_save
-
-    let &t_EI = "\e[2 q"
-
-    exe "norm! r\e"
-
-    exe 'colo '.g:colors_name
-    Limelight!
-endfu
-
-augroup my_goyo
-    au!
-    " FIXME:
-    " If we use `nested`, `:NoMatchParen` doesn't work.
-    " It doesn't work, even if we type the command later, while in goyo mode.
-    " Why?
-    " Should we get rid of `nested` in the 2nd autocmd (GoyoLeave)?
-    " Why do we need `nested` anyway?
-
-    au User GoyoEnter        call s:goyo_enter()
-    au User GoyoLeave nested call s:goyo_leave()
-augroup END
 
 nno  <silent>  coj  :<c-u>call <sid>nofrils()<cr>
 
