@@ -2569,14 +2569,16 @@ omap  m       <plug>(fzf-maps-o)
 
 " g                             goyo {{{4
 
-xno  <silent>  <space>g<space>  :<c-u>call <sid>clear_view()<cr>
+xno  <silent>  <space>gg  :<c-u>call <sid>clear_view()<cr>
 
 fu! s:clear_view() abort
-    if   getline(line("'<")-1) =~# '^\s*$' && line("'<") > 1
-    \ || getline(line("'>")+1) =~# '^\s*$' && line("'>") < line('$')
+    let should_collapse =
+        \    line("'<") > 2 && getline(line("'<")-1) =~# '^\s*$' && getline(line("'<")-2) =~# '^\s*$'
+        \ && line("'>") < line('$') - 1 && getline(line("'>")+1) =~# '^\s*$' && getline(line("'>")+2) =~# '^\s*$'
+    if should_collapse
         " collapse empty lines
-        keepj keepp '<?^\S?+s/^\%(\_s*\n\)\+//
-        keepj keepp '>+s/^\%(\_s*\n\)\+//
+        keepj keepp '<?^\S?+s/^\%(\_s*\n\)\+/\r/e
+        keepj keepp '>+s/^\%(\_s*\n\)\+/\r/e
         " the mark set on the start of  the selection has been moved to the next line;
         " restore it
         '<-mark <
@@ -2586,7 +2588,7 @@ fu! s:clear_view() abort
         call append(line("'<")-1, repeat([''], cnt))
         call append(line("'>"), repeat([''], cnt))
     endif
-    norm! '<zz
+    norm! '<zt
 endfu
 
 nno  <silent>  <space>gg  :<c-u>let g:my_goyo_without_syntax_hl = 1

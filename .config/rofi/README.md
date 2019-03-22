@@ -152,7 +152,6 @@
 
 Rofi Advanced Style Information
 
-
 # Where can I find information to customize a `.rasi` file?
 
 See `$ man rofi-theme`.
