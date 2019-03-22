@@ -6,7 +6,7 @@
 " for `cmusrc` files.
 
 " We need the correct value for the `gq` operator to work properly.
-setl cms=#%s
+setl cms=#\ %s
 
 " Teardown {{{1
 

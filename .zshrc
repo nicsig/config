@@ -1017,6 +1017,7 @@ cfg_mpv() { "${=EDITOR}" -o "${HOME}/.config/mpv/input.conf" "${HOME}/.config/mp
 cfg_newsboat() { "${=EDITOR}" -o "${HOME}/.config/newsboat/config" "${HOME}/.config/newsboat/urls" ;}
 cfg_ranger() { "${=EDITOR}" "${HOME}/.config/ranger/rc.conf" ;}
 cfg_readline() { "${=EDITOR}" "${HOME}/.inputrc" ;}
+cfg_snippet_zsh() { "${=EDITOR}" -o ${HOME}/.config/zsh-snippet/*.txt ;}
 cfg_surfraw() { "${=EDITOR}" -o "${HOME}/.config/surfraw/bookmarks" "${HOME}/.config/surfraw/conf" ;}
 cfg_tmux() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
 cfg_vim() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
@@ -1043,7 +1044,6 @@ cfg_zsh() { "${=EDITOR}" -o "${HOME}/.zshrc" "${HOME}/.zshenv" ;}
 #     man zshexpn
 #     /${=spec}
 #}}}
-cfg_zsh_snippet() { "${=EDITOR}" -o ${HOME}/.config/zsh-snippet/*.txt ;}
 
 checkinstall_what_have_i_installed() { #{{{2
   emulate -L zsh
@@ -3239,7 +3239,7 @@ bindkey '^^' __previous_directory
 # `C-<key>`, zsh would simply cancel the command.
 bindkey -r '^G'
 
-# C-g C-[gf]    snippets {{{4
+# C-g C-g    snippets {{{4
 
 # TODO: fully understand/comment the code
 
@@ -3249,7 +3249,7 @@ bindkey -r '^G'
 # Usage:
 # Press `C-g C-g` to choose a snippet if there's no `{{` on the cmdline.
 # Press `C-g C-g` to jump to the first tabstop and remove its default value.
-# Press `C-g  C-f` to jump to  the first tabstop and “reveal”  its default value
+# Press `C-g  g` to  jump to the  first tabstop and  “reveal” its  default value
 # (remove the `{{` and `}}`).
 
 FZF_SNIPPET_COMMAND_COLOR='\x1b[38;5;33m'
@@ -3292,7 +3292,7 @@ _fzf_snippet_placeholder_widget() { _fzf_snippet_placeholder "defval" }
 zle -N _fzf_snippet_main_widget
 zle -N _fzf_snippet_placeholder_widget
 bindkey '^G^G' _fzf_snippet_main_widget
-bindkey '^G^F' _fzf_snippet_placeholder_widget
+bindkey '^Gg' _fzf_snippet_placeholder_widget
 # }}}3
 # C-q        quote_big_word {{{3
 

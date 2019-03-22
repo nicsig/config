@@ -674,6 +674,41 @@ install() { #{{{2
     update-alternatives --log "${LOGFILE}" --set awk /usr/local/bin/gawk
 
     elif [[ "${PGM}" == 'vim' ]]; then
+
+      # What's this `gvim.desktop`?{{{
+      #
+      # A file installed by the Vim package.
+      # It describes which files Vim can open in the line ‘MimeType=’.
+      #}}}
+      # What does this command do?{{{
+      #
+      # It parses the default `gvim.desktop` to build and run a command such as:
+      #
+      #     $ xdg-mime default gvim.desktop text/english text/plain text/x-makefile ...
+      #
+      # In effect, it makes gVim the default program to open various types of text files.
+      # This matters when using `$ xdg-open` or double-clicking on the icon of a
+      # file in a GUI file manager.
+      #}}}
+      # Is it needed?{{{
+      #
+      # Once  the `gvim.desktop`  file is  installed, it  doesn't make  gVim the
+      # default program for text files.
+      # It just informs the system that gVim *can* open some of them.
+      #
+      # ---
+      #
+      # Besides, I'm not  sure, but after installing Neovim,  it's possible that
+      # the latter becomes the default program to open some text files.
+      #
+      # Btw, the default `nvim.desktop` file lists the same types of files.
+      #
+      # For the moment, I prefer gVim to be the default.
+      #}}}
+      grep -i 'mimetype' /usr/local/share/applications/gvim.desktop \
+        | sed 's/mimetype=//i; s/;/ /g' \
+        | xargs xdg-mime default gvim.desktop
+
       # Vim can be invoked with any of these commands.
       # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
       typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)

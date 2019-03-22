@@ -10,7 +10,8 @@ vboxmanage snapshot {{ubuntu}} edit {{snapname}} --name "{{new name}}" --descrip
 vboxmanage snapshot {{ubuntu}} showvminfo {{snapname}} # show info about snapshot of VM
 vboxmanage snapshot {{ubuntu}} list # list snapshots of VM
 vboxmanage snapshot {{ubuntu}} delete {{snapname}} # delete snapshot of VM
-vboxmanage snapshot {{ubuntu}} restorecurrent # restore snapshot of VM
+vboxmanage snapshot {{ubuntu}} restorecurrent # restore current snapshot of VM
+vboxmanage snapshot {{ubuntu}} restore {{snapname}} # restore arbitrary snapshot of VM
 vboxmanage snapshot {{ubuntu}} take {{snapname}} --description "{{my snapshot}}" --live # take snapshot of VM
 
 vimdiff =({{cmd1}}) =({{cmd2}}) # compare output of 2 commands

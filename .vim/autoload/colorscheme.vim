@@ -63,12 +63,25 @@ fu! colorscheme#customize() abort "{{{2
     " So, we reset the  HG with the `underline` style, and the  colors of the HG
     " `Conditional` (because this one is blue).
     "}}}
-    exe 'hi Underlined term=underline cterm=underline gui=underline '
+    let cmd = 'hi Underlined term=underline cterm=underline gui=underline '
         \ . substitute(split(execute('hi Conditional'), '\n')[0], '.*xxx\|links to.*', '', 'g')
         "              │{{{
         "              └ When we start Vim with `$ sudo vim`, the output of `execute('hi ...')`
         "                contains 2 lines instead of 1 (the second line contains `Last set from ...`).
         "}}}
+
+    " Why this second substitution?{{{
+    "
+    " When starting Vim in debug mode `$ vim -D ...`, this error is raised:
+    "     E416: missing equal sign: line 123: hi Conditional
+    "
+    " This is because, in this particular case, the value of `cmd` contains noise at the end:
+    "
+    "     hi Underlined term=underline cterm=underline gui=underline line 15: hi Conditional
+    "                                                                ^^^^^^^^^^^^^^^^^^^^^^^
+    "}}}
+    let cmd = substitute(cmd, 'line\s\+\d\+:.*', '', '')
+    exe cmd
 
     " Why changing `CursorLine`?{{{
     "

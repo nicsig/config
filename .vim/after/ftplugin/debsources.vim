@@ -1,4 +1,4 @@
-setl cms=#%s
+setl cms=#\ %s
 
 " Teardown {{{1
 
