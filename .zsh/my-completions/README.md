@@ -13,21 +13,33 @@ function, must be named `_foo`.
 
 ## Can I write a completion function for an alias?  A function?  For a script?
 
-Not for an alias.
-But you can for a script and a shell function.
+You can write one for a script and a shell function.
 
----
+For an alias, simply run this:
 
-TODO:
+    $ compdef myalias=myfunc
 
-You can customize the completion of an alias in bash:
+For example:
 
-    $ alias vtex="vim --servername VIM"
-    $ complete -f -X '!*.tex' vtex
-    $ vtex Tab
-        → only suggests `.tex` files
+                                         don't forget the underscore
+                                         v
+    $ cat <<'EOF' >~/.zsh/my-completions/_func
+    #compdef func
 
-How to do the same in zsh?
+    local programs
+    programs=(mpv vim zsh)
+    _values 'programs' ${programs}
+    EOF
+
+    $ compdef foo=func
+                  ^
+                  no underscore
+
+    $ foo Tab
+    mpv vim zsh~
+
+For more info:
+<https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command>
 
 ## Can I write use a bash completion function?
 

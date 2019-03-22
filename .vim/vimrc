@@ -4644,6 +4644,20 @@ endfu
 
 com! -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
 
+" FormatManpage {{{2
+
+com! -bar -range=%  FormatManpage  call s:format_manpage(<line1>, <line2>)
+
+fu! s:format_manpage(line1, line2) abort
+    let range = a:line1 . ',' . a:line2
+    " create folds
+    exe 'sil keepj keepp ' . range . 's/^\u\+/# &/e'
+    " titlecase headers
+    exe 'sil keepj keepp ' . range . 's/\%(^#.*\)\@<=\(\u\)\(\u\+\)/\1\L\2/ge'
+    " make sure there's an empty line between a header and the next non-empty line
+    exe range . 'g/^#.*\n.*\S/call append(".", "")'
+endfu
+
 " GotoChar {{{2
 
 com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
@@ -4787,20 +4801,6 @@ com! -bar -bang -nargs=1 JoinBlocks
 \ |                                 let &l:fen = 0
 \ |                                 exe "keepp .,.+<args>-1g/^/''+<args>m.|-j<bang>"
 \ |                                 let &l:fen = 1
-
-" ManpageFormat {{{2
-
-com! -bar -range=%  ManpageFormat  call s:manpage_format(<line1>, <line2>)
-
-fu! s:manpage_format(line1, line2) abort
-    let range = a:line1 . ',' . a:line2
-    " create folds
-    exe 'sil keepj keepp ' . range . 's/^\u\+/# &/e'
-    " titlecase headers
-    exe 'sil keepj keepp ' . range . 's/\%(^#.*\)\@<=\(\u\)\(\u\+\)/\1\L\2/ge'
-    " make sure there's an empty line between a header and the next non-empty line
-    exe range . 'g/^#.*\n.*\S/call append(".", "")'
-endfu
 
 " OnlySelection {{{2
 
