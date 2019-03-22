@@ -4662,6 +4662,53 @@ endfu
 
 com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 
+" GrepCfg {{{2
+
+" Description:{{{
+"
+" Search for a pattern inside all our configuration files, in our config repo.
+"
+" ---
+"
+" The basic idea is to get the list of files in our config repo with:
+"
+"     # https://stackoverflow.com/a/8533413/9780968
+"     $ config ls-tree --full-tree --name-only HEAD -r >/tmp/listing
+"
+" Make the paths absolute:
+"
+"     $ sed -i "s:^:$HOME/:" /tmp/listing
+"
+" Feed them to `$ grep` via `$ xargs`, and in turn feed the result to `$ vim` via `-q`:
+"
+"     $ vim -q <(xargs grep -RHIinos pattern </tmp/listing) +cw
+"
+" In one single command:
+"
+"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs grep -RHIinos pattern) +cw
+"
+" We need `$ sed`,  because the paths output by `$ git  ls-tree` are relative to
+" the root of the repo, which here is our home.
+" But if we're not  in our home, the relative paths  will be interpreted wrongly
+" by `$ vim -q`.
+"}}}
+com! -bar -nargs=1 GrepCfg call s:grep_cfg(<q-args>)
+fu! s:grep_cfg(pat) abort
+    let cmd = [
+              \ 'git',
+              \     '--git-dir="${HOME}/.cfg/"',
+              \     '--work-tree="${HOME}"',
+              \ 'ls-tree',
+              \     '--full-tree',
+              \     '--name-only HEAD',
+              \     '-r',
+              \ '| sed "s:^:${HOME}/:"',
+              \ '| xargs grep -RHIinos',
+              \ a:pat,
+              \ ]
+    cgetexpr system(join(cmd)) | cw
+endfu
+
 " HlWeirdWhitespace {{{2
 
 " Why don't you use an autocmd instead?{{{

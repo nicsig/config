@@ -11,33 +11,6 @@
 
 
 # TODO:
-# It would be useful to be able to search for a pattern inside all configuration
-# files with `:vimgrep`. Including the ones for the shell.
-#
-# Update:
-# Pre-populate the command line with the filepaths (C-g v).
-# This implies that C-g v should be filetype-specific.
-#
-# Update:
-# Also, take inspiration from that:
-#
-#     # https://stackoverflow.com/a/8533413/9780968
-#     $ config ls-tree --full-tree -r --name-only HEAD >/tmp/listing
-#     $ sed -i "s:^:$HOME/:" /tmp/listing
-#     $ vim -q <(xargs grep -RHIinos pattern </tmp/listing) +cw
-#
-# Alternative:
-#     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs grep -RHIinos pattern) +cw
-#
-# You need `$ sed`, because the paths  output by `$ git ls-tree` are relative to
-# the root of the repo, which here is your home.
-# But if you're not in your home, the relative paths will be interpreted wrongly by `$ vim -q`.
-#
-# We could turn that into a custom Vim command (`:GrepCfg`):
-#
-#     :cexpr system('/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}" ls-tree --full-tree -r --name-only HEAD \| sed "s:^:${HOME}/:" \| xargs grep -RHIinos pat') | cw
-
-# TODO:
 # In your functions, try to create as few temporary files as you can.
 # Maybe you could eliminate some of them, using process redirection:
 #
@@ -88,7 +61,6 @@ tnvr() {
 }
 
 # Alias {{{1
-# others {{{2
 
 #              ┌ --no-group in a long listing, don't print group names
 #              │┌ like -l, but do not list owner
