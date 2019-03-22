@@ -1,22 +1,3 @@
-# What's the influence of the argument `-f` for gVim? {{{
-#
-# It's used in the default `/usr/local/share/applications/gvim.desktop`.
-# Here's what the helps says about it (`:h -f`):
-#
-# > "-f" should be used when gvim is started by a program that will wait for the
-# > edit session to finish (e.g., mail or readnews).
-# }}}
-# Why `--remote-tab-silent`?{{{
-#
-# `tab` will make gVim use one tabpage per file.
-#
-# `remote` will make gVim try to open the file(s) in a running server if there's
-# one.
-#
-# `silent` will prevent gVim from complaining if no server is running:
-# > E247: no registered server named "GVIM"
-# A local gVim process will be started.
-#}}}
 [Desktop Entry]
 Name=gVim
 GenericName=Text Editor
@@ -95,6 +76,25 @@ Comment[wa]=Asspougnî des fitchîs tecses
 Comment[zh_CN]=编辑文本文件
 Comment[zh_TW]=編輯文字檔
 TryExec=gvim
+# What's the influence of the argument `-f` for gVim? {{{
+#
+# It's used in the default `/usr/local/share/applications/gvim.desktop`.
+# Here's what the helps says about it (`:h -f`):
+#
+# > "-f" should be used when gvim is started by a program that will wait for the
+# > edit session to finish (e.g., mail or readnews).
+# }}}
+# Why `--remote-tab-silent`?{{{
+#
+# `tab` will make gVim use one tabpage per file.
+#
+# `remote` will make gVim try to open the file(s) in a running server if there's
+# one.
+#
+# `silent` will prevent gVim from complaining if no server is running:
+# > E247: no registered server named "GVIM"
+# A local gVim process will be started.
+#}}}
 Exec=gvim -f --remote-silent-tab %F
 Terminal=false
 Type=Application
