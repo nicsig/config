@@ -1,7 +1,7 @@
 #compdef sr
 
 local path_prefixes
-path_prefixes=("${HOME}"/.config/surfraw/elvi/ /usr/lib/surfraw/)
+path_prefixes=("${HOME}"/.config/surfraw/elvi/ /usr/local/lib/surfraw/)
 _arguments '1:elvi:_files -W path_prefixes' && return 0
 #                          │{{{
 #                          └ From `man zshcompsys`:

@@ -2107,6 +2107,8 @@ EOF
     fi
   done
 }
+
+compdef ppa_what_have_i_installed=ppa_what_can_i_install
 #}}}2
 
 # script variables {{{2
@@ -2160,7 +2162,7 @@ tor() { #{{{2
   # So the current  directory matters; it must be where  we've installed the Tor
   # browser.
   #}}}
-  # If you want to add the tor browser to the application manu, run:{{{
+  # If you want to add the tor browser to the application menu, run:{{{
   #
   #     $ cd ~/.local/bin/tor-browser_en-US/
   #     $ ./start-tor-browser.desktop --register-app
