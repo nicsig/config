@@ -1,4 +1,5 @@
 #compdef ppa_what_can_i_install
 
+# https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-completion-functions-using-_arguments
 _arguments '1:ppa:_values /var/lib/apt/lists/*_Packages' && return 0
 

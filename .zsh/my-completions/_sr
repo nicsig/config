@@ -1,15 +1,25 @@
 #compdef sr
 
-local path_prefixes
-path_prefixes=("${HOME}"/.config/surfraw/elvi/ /usr/local/lib/surfraw/)
-_arguments '1:elvi:_files -W path_prefixes' && return 0
-#                          │{{{
-#                          └ From `man zshcompsys`:
+# https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-completion-functions-using-_alternative
+_alternative \
+  "elvi:engines:($(fd '.*' ~/.config/surfraw/elvi /usr/local/lib/surfraw | sed 's:.*/::'))" && return 0
+
+# Old Code Kept For Educational Purpose:{{{
+#
+#     local path_prefixes
+#     path_prefixes=("${HOME}"/.config/surfraw/elvi/ /usr/local/lib/surfraw/)
+
+# https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-completion-functions-using-_arguments
+#
+#     _arguments '1:elvi:_files -W path_prefixes' && return 0
+#                                │
+#                                └ From `man zshcompsys`:
 #
 # Specifies  path prefixes  that are  to  be prepended  to the  string from  the
 # command line  to generate  the filenames  but that should  not be  inserted as
 # completions nor shown in completion listings.
-
+#
 # Here, paths  may be the name  of an array  parameter, a literal list  of paths
 # enclosed in parentheses or an absolute pathname.
 #}}}
+

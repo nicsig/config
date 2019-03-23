@@ -325,6 +325,20 @@ compinit
 # Otherwise, no.
 #}}}
 
+# What do these commands do?{{{
+#
+# A command of the form:
+#
+#     compdef foo=bar
+#
+# tells zsh to complete `foo` like it would complete `bar`.
+#
+# For more info, see:
+#
+#     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command
+#}}}
+compdef ppa_what_have_i_installed=ppa_what_can_i_install
+compdef surfraw=sr
 # Why?{{{
 #
 # The virtualbox package provides different commands.
@@ -338,9 +352,6 @@ compinit
 # But we don't have completions for the commands written exclusively in lowercase.
 # So, we tell zsh to complete the  lowercase commands like it would complete the
 # uppercase ones.
-# For more info, see:
-#
-#     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command
 #}}}
 compdef vboxmanage=VBoxManage
 compdef vboxheadless=VBoxHeadless
@@ -2107,8 +2118,6 @@ EOF
     fi
   done
 }
-
-compdef ppa_what_have_i_installed=ppa_what_can_i_install
 #}}}2
 
 # script variables {{{2
