@@ -8,7 +8,7 @@ _alternative \
 #
 #     local path_prefixes
 #     path_prefixes=("${HOME}"/.config/surfraw/elvi/ /usr/local/lib/surfraw/)
-
+#
 # https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-completion-functions-using-_arguments
 #
 #     _arguments '1:elvi:_files -W path_prefixes' && return 0
@@ -21,5 +21,11 @@ _alternative \
 #
 # Here, paths  may be the name  of an array  parameter, a literal list  of paths
 # enclosed in parentheses or an absolute pathname.
+#}}}
+# Why don't you use it anymore?{{{
+#
+# The candidates were printed in green  and followed by an asterisk, because the
+# files are executable scripts.
+# I didn't like that; it's noise.
 #}}}
 

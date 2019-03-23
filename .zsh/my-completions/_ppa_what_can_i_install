@@ -1,5 +1,17 @@
 #compdef ppa_what_can_i_install
 
+# https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-completion-functions-using-_alternative
+_alternative \
+  "cheats:cheatsheets:($(fd '.*_Packages' /var/lib/apt/lists | sed '/-i386_Packages/d'))" && return 0
+
+# Old Code Kept For Educational Purpose:{{{
+#
 # https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#writing-completion-functions-using-_arguments
-_arguments '1:ppa:_values /var/lib/apt/lists/*_Packages' && return 0
+#     _arguments '1:ppa:_values /var/lib/apt/lists/*_Packages' && return 0
+# }}}
+# Why don't you use it anymore?{{{
+#
+# Each candidate was present twice, one for the i386 architecture, the other for amd64.
+# We don't use the i386 cpu architecture; it's noise.
+#}}}
 

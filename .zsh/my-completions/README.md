@@ -89,21 +89,3 @@ For more info:
 
         https://unix.stackexchange.com/a/2184/289772
 
-##
-# Todo
-## `_ppa_what_can_i_install` and `_ppa_what_have_i_installed` give too many suggestions.
-
-We don't use the i386 cpu architecture.
-
----
-
-    $ ppa_what_can_i_install google Tab
-        → ∅
-
-    $ ppa_what_have_i_installed google Tab
-        → ∅
-
-## Improve the completion function `_cs` to get the names of the cheatsheets dynamically.
-
-For the candidates, use the output of `$ fd cheat.txt ~/wiki`.
-
