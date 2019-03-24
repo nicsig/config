@@ -1,3 +1,14 @@
+# All those bookmarks can be used by `surfraw`:{{{
+#
+#     $ sr how_to_pirate_ebook
+#         ^
+#         no elvi
+#}}}
+# You can find default bookmarks provided as examples by the surfraw package here:{{{
+#
+#     /etc/xdg/surfraw/bookmarks
+#}}}
+
 naming_variables    https://cseducators.stackexchange.com/questions/4594/how-can-we-teach-good-naming-practice-for-students-learning-java # cse # good_practice
 
 how_to_update_fork  https://gist.github.com/CristinaSolana/1885435 # git

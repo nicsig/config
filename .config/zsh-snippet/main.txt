@@ -1,5 +1,12 @@
 for f in *; do echo mv "${{f}}" "${{{f}}}";done # rename bunch of files
 
+gpg --verify {{file.tar.xz.sig}} {{file.tar.xz}}
+gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
+
+strace -o {{/tmp/log}} {{cmd}} # run a command, and trace the new process
+strace -o {{/tmp/log}} -p $(pidof {{cmd}}) # trace an existing process; run `less +F /tmp/log` to read it
+strace -o {{/tmp/log}} -e trace={file|open|read} {{cmd}} # trace a command, but only some system calls
+
 vboxmanage unregistervm {{ubuntu}} --delete # delete VM
 vboxmanage controlvm {{ubuntu}} pause # pause VM
 vboxmanage controlvm {{ubuntu}} resume # resume VM

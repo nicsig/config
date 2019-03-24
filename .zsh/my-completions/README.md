@@ -85,7 +85,5 @@ Remove `~/.zcompdump`, and restart a shell, or execute:
           └ command found here:
                   https://github.com/zsh-users/zsh-completions#manual-installation
 
-For more info:
-
-        https://unix.stackexchange.com/a/2184/289772
+For more info: <https://unix.stackexchange.com/a/2184/289772>
 

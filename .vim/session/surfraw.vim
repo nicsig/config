@@ -12,35 +12,8 @@ argglobal
 %argdel
 set stal=2
 tabnew
-tabnew
 tabrewind
-edit ~/wiki/awk/awk.md
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-1
-normal! zo
-let s:l = 38 - ((3 * winheight(0) + 6) / 13)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-38
-normal! 0
-lcd ~/wiki/awk
-tabnext
-edit ~/Desktop/countries
+edit ~/.config/surfraw/conf
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -52,27 +25,8 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 12 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-12
-normal! 011|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("/tmp/awk.awk") | buffer /tmp/awk.awk | else | edit /tmp/awk.awk | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -81,18 +35,40 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+1
+normal! zo
+let s:l = 10 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+10
+normal! 020|
 lcd ~/.vim
 wincmd w
+argglobal
+if bufexists("~/wiki/surfraw.md") | buffer ~/wiki/surfraw.md | else | edit ~/wiki/surfraw.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+22
+normal! zo
+let s:l = 36 - ((35 * winheight(0) + 14) / 29)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+36
+normal! 0
+lcd ~/wiki
+wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext
-edit ~/backup.sh
+edit ~/bin/upp.sh
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -100,7 +76,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-setlocal fdm=manual
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -108,26 +84,28 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+121
+normal! zo
+581
+normal! zo
+let s:l = 634 - ((47 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+634
+normal! 01|
 lcd ~/.vim
-tabnext 3
+tabnext 2
 set stal=1
-badd +1 ~/backup.sh
-badd +12 ~/Desktop/countries
-badd +38 ~/wiki/awk/awk.md
-badd +1 /tmp/awk.awk
+badd +10 ~/.config/surfraw/conf
+badd +634 ~/bin/upp.sh
+badd +36 ~/wiki/surfraw.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOacFIsW
-set winminheight=1 winminwidth=1
+set winheight=1 winwidth=1 shortmess=filnxtToOacFIsW
+set winminheight=0 winminwidth=0
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)

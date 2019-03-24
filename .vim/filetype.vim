@@ -89,7 +89,7 @@ augroup filetypedetect
 
     au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} setf help
 
-    au! BufRead,BufNewFile .gitignore setf conf
+    au! BufRead,BufNewFile .gitignore,~/.config/surfraw/bookmarks setf conf
 
     " ~/.vim/after/ftplugin/nfo.vim
     au! BufRead,BufNewFile *.nfo,*.NFO setf nfo

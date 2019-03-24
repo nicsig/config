@@ -3290,10 +3290,18 @@ _fzf_snippet_placeholder() {
   pos=$(cut -d ":" -f1 <<<"${strp}")
   placeholder=${strp#*:}
   if [[ -n "$1" ]]; then
-    BUFFER=$(echo -E ${BUFFER} | sed -e "s/{{//" -e "s/}}//")
+    BUFFER=$(echo -E ${BUFFER} | sed -e 's/{{//' -e 's/}}//')
     CURSOR=$((${pos} + ${#placeholder} - 4))
   else
-    BUFFER=$(echo -E ${BUFFER} | sed "s/${placeholder}//")
+    # Why `C-a` as the delimiter in the sed command?{{{
+    #
+    # We don't know what will be in the placeholder.
+    # It  contains user  data, i.e. whatever  we write in  the placeholder  of a
+    # snippet.
+    # If it contains a slash, then we can't use a slash for the delimiter.
+    # `C-a` should never appear in a snippet, therefore we can safely use it here.
+    #}}}
+    BUFFER=$(echo -E ${BUFFER} | sed "s${placeholder}")
     CURSOR=pos
   fi
 }
@@ -4459,8 +4467,30 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #         ^
 #         put whatever pattern you want to refactor
 
+# TODO: Think about how better leveraging our zsh history.
+#
+# For example, whenever you press `C-r` several times to retrieve the same old command,
+# immediately consider adding it to our zsh snippets in `~/.config/zsh-snippet/`.
+#
+# Also, try  to build a  script or Vim  command to remove  as much noise  in the
+# history.
+#
+# Also, try to build  an awk script to extract relevant info;  like what are the
+# most used  commands. Act upon this info,  write scripts or snippets  to reduce
+# the invocation of these commands.
+#
+# Also, take the habit  of prefixing your commands with a  space when you're not
+# sure  they work. Otherwise,  you  may  end up  with  broken  commands in  your
+# history.  Those are not interesting, and may be even dangerous.
+
 # TODO:
 # ideas to improve our scripts:
+#
+#    - When a script bugs several times, immediately consider adding a DEBUG variable
+#      set by default to 0.
+#      Then, write `printf` statements in the most useful locations, to get debugging info.
+#      Guard those statements by checking the value of `DEBUG`.
+#      Have a look at what we did in upp.sh.
 #
 #    - they should better handle errors
 #      (no stacktrace, show a human-readable message;
