@@ -94,6 +94,9 @@ fu! s:set_recipes() abort
     " FIXME: We  need  to repeat  the  last  recipe  twice, otherwise  it's  not
     " included in `g:sandwich#recipes`.
     let g:sandwich#recipes = g:sandwich#default_recipes
+                         \ + [{'buns': ['\e[3m', '\e[0m'], 'input': ['si']}]
+                         \ + [{'buns': ['\e[1m', '\e[0m'], 'input': ['sb']}]
+                         \ + [{'buns': ['\e[1;3m', '\e[0m'], 'input': ['sB']}]
                          \ + [{'buns': ['– ', ' –'], 'input': ['d']}]
                          \ + [{'buns': ['`', "'"], 'input': ['g']}]
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]

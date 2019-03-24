@@ -1,0 +1,64 @@
+The `par` package  in this directory adds support for  multibyte characters, and
+double-width characters.
+
+
+To install it, execute:
+
+        $ sudo gdebi par_1.52-4_amd64.deb
+
+Don't forget to correctly set the $LANG environment variable to tell `par` which
+encoding you want.
+
+
+With this version, you can reformat a text like :
+
+/***********************/
+/* English is a West Germanic language heavily influenced, in */
+/* comparison with other Germanic languages, by French and Latin. */
+/* On appelle français (et française au féminin) les habitants de la France */
+/*  */
+/* [ Ανήκει επίσης στο βαλκανικό γλωσσικό δεσμό. ] */
+/* [   ] */
+/* [ Русский язык — язык русских, государственный язык России и ] */
+/* [ Белоруссии, ранее — язык межнационального общения СССР ] */
+/*  */
+/* اللغة العربية هي لغة سامية، مشتقة عن السريانية (نسب */
+/* ة الى سورية) والآرامية والعبرية و الأكادية، و هي لغة العرب، سكان شبه الجزيرة */
+/*                           */
+/*************************/
+
+Into:
+
+/******************************************************************************/
+/* English is a West Germanic language heavily influenced, in comparison with */
+/* other Germanic  languages, by French  and Latin.  On appelle  français (et */
+/* française au féminin) les habitants de la France                           */
+/*                                                                            */
+/* [ Ανήκει επίσης στο βαλκανικό γλωσσικό δεσμό.                            ] */
+/* [                                                                        ] */
+/* [ Русский язык — язык русских, государственный язык России и Белоруссии, ] */
+/* [ ранее — язык межнационального общения СССР                             ] */
+/*                                                                            */
+/* اللغة العربية هي لغة سامية، مشتقة عن السريانية (نسب ة الى سورية) والآرامية */
+/* والعبرية و الأكادية، و هي لغة العرب، سكان شبه الجزيرة                      */
+/*                                                                            */
+/******************************************************************************/
+
+
+Here is a table listing the files in this directory and their purpose:
+
+    ┌────────────────────────┬───────────────────────┐
+    │ Patch file             │ par-1.52-i18n.4.patch │
+    ├────────────────────────┼───────────────────────┤
+    │ Patched sources        │ par-1.52-i18n.4.tgz   │
+    ├────────────────────────┼───────────────────────┤
+    │ Patched Debian package │ par_1.52-4_amd64.deb  │
+    └────────────────────────┴───────────────────────┘
+
+
+Source:
+http://sysmic.org/dotclear/index.php?post/2006/06/22/55-add-multibyte-characters-support-in-par
+
+I found this link via:
+https://en.wikipedia.org/wiki/Par_(command)
+

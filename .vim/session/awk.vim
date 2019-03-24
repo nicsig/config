@@ -32,7 +32,7 @@ setlocal fdn=20
 setlocal fen
 1
 normal! zo
-let s:l = 38 - ((3 * winheight(0) + 6) / 13)
+let s:l = 38 - ((3 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -92,7 +92,7 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
-edit ~/backup.sh
+edit ~/wiki/awk/sed.md
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -100,28 +100,28 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-setlocal fdm=manual
-setlocal fde=0
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim
+lcd ~/wiki/awk
 tabnext 3
 set stal=1
-badd +1 ~/backup.sh
-badd +12 ~/Desktop/countries
 badd +38 ~/wiki/awk/awk.md
+badd +12 ~/Desktop/countries
 badd +1 /tmp/awk.awk
+badd +7 man://ed(1)
+badd +1 ~/wiki/awk/sed.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
