@@ -1,3 +1,4 @@
 #!/usr/bin/sed -f
 
-# Description:
+# Purpose:
+# Usage:

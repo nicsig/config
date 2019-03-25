@@ -7788,6 +7788,7 @@ let s:syled_comments_filetypes = [
     \ 'lua',
     \ 'python',
     \ 'readline',
+    \ 'sed',
     \ 'sh',
     \ 'snippets',
     \ 'tex',

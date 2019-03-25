@@ -5,4 +5,3 @@ endif
 if getline(1) =~# '???'
     setf ???
 endif
-
