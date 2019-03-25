@@ -182,7 +182,12 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 14
-normal! 0105|
+let s:c = 105 - ((78 * winwidth(0) + 42) / 84)
+if s:c > 0
+  exe 'normal! ' . s:c . '|zs' . 105 . '|'
+else
+  normal! 0105|
+endif
 lcd ~/.vim
 wincmd w
 argglobal
@@ -213,8 +218,8 @@ exe '4resize ' . ((&lines * 1 + 16) / 33)
 exe '5resize ' . ((&lines * 25 + 16) / 33)
 tabnext 2
 set stal=1
-badd +34 ~/wiki/rofi.md
 badd +14 ~/.config/rofi/scripts/sh.sh
+badd +34 ~/wiki/rofi.md
 badd +154 ~/.config/rofi/README.md
 badd +95 ~/.config/rofi/config.rasi
 badd +43 ~/.config/rofi/scripts/bangs.sh
