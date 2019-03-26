@@ -21,7 +21,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -51,7 +52,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -69,7 +71,8 @@ normal! zt
 normal! 011|
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("/tmp/awk.awk") | buffer /tmp/awk.awk | else | edit /tmp/awk.awk | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -94,13 +97,7 @@ edit ~/wiki/awk/glossary.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
@@ -108,10 +105,9 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
-argglobal
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -128,7 +124,8 @@ normal! zt
 normal! 0
 lcd ~/wiki/awk
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/wiki/awk/sed.md") | buffer ~/wiki/awk/sed.md | else | edit ~/wiki/awk/sed.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -140,7 +137,7 @@ setlocal fdn=20
 setlocal fen
 321
 normal! zo
-let s:l = 325 - ((0 * winheight(0) + 0) / 1)
+let s:l = 325 - ((27 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -148,57 +145,16 @@ normal! zt
 normal! 0
 lcd ~/wiki/awk
 wincmd w
-argglobal
-if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
-lcd ~/wiki/awk
-wincmd w
-argglobal
-if bufexists("~/wiki/.git/COMMIT_EDITMSG") | buffer ~/wiki/.git/COMMIT_EDITMSG | else | edit ~/wiki/.git/COMMIT_EDITMSG | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/wiki/.git
-wincmd w
-4wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 3
 set stal=1
 badd +214 ~/wiki/awk/awk.md
 badd +12 ~/Desktop/countries
 badd +268 ~/wiki/awk/glossary.md
 badd +4 /tmp/awk.awk
-badd +333 ~/wiki/awk/sed.md
-badd +0 ~/wiki/.git/index
-badd +0 ~/wiki/.git/COMMIT_EDITMSG
+badd +325 ~/wiki/awk/sed.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -210,6 +166,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
