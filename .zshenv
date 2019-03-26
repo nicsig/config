@@ -124,7 +124,7 @@ export FZF_ALT_C_OPTS="${FZF_DEFAULT_OPTS} --preview='tree -C -L 2 -x --noreport
 export FZF_CTRL_R_OPTS=$FZF_DEFAULT_OPTS
 export FZF_CTRL_T_OPTS=$FZF_DEFAULT_OPTS
 
-# controls the number of lines occupied by fzf when we press sth like `C-x C-f`
+# controls the number of lines occupied by fzf when we press sth like `M-j`
 export FZF_TMUX_HEIGHT=40%
 
 # history {{{1

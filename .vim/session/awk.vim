@@ -13,7 +13,6 @@ argglobal
 set stal=2
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -50,8 +49,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 18 + 16) / 33)
-exe '2resize ' . ((&lines * 11 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -62,7 +61,7 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 12 - ((0 * winheight(0) + 9) / 18)
+let s:l = 12 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -80,7 +79,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 5 - ((1 * winheight(0) + 5) / 11)
+let s:l = 5 - ((4 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -88,14 +87,20 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 18 + 16) / 33)
-exe '2resize ' . ((&lines * 11 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/wiki/awk/glossary.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
@@ -103,7 +108,9 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '4resize ' . ((&lines * 24 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -133,26 +140,35 @@ setlocal fdn=20
 setlocal fen
 321
 normal! zo
-let s:l = 333 - ((36 * winheight(0) + 14) / 28)
+let s:l = 325 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-333
+325
 normal! 0
 lcd ~/wiki/awk
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit ~/.zshrc
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
-setlocal fdm=marker
+if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
+setlocal fdm=syntax
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=1
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 5 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
+normal! 0
+lcd ~/wiki/awk
+wincmd w
+argglobal
+if bufexists("~/wiki/.git/COMMIT_EDITMSG") | buffer ~/wiki/.git/COMMIT_EDITMSG | else | edit ~/wiki/.git/COMMIT_EDITMSG | endif
+setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -160,32 +176,29 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-3120
-normal! zo
-3228
-normal! zo
-3246
-normal! zo
-3253
-normal! zo
-3291
-normal! zo
-let s:l = 3296 - ((0 * winheight(0) + 0) / 1)
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3296
-normal! 03|
-lcd ~/.vim
-tabnext 4
+1
+normal! 0
+lcd ~/wiki/.git
+wincmd w
+4wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '4resize ' . ((&lines * 24 + 16) / 33)
+tabnext 3
 set stal=1
 badd +214 ~/wiki/awk/awk.md
-badd +4 /tmp/awk.awk
 badd +12 ~/Desktop/countries
 badd +268 ~/wiki/awk/glossary.md
-badd +294 ~/wiki/awk/sed.md
-badd +3343 ~/.zshrc
-badd +135 man://grep(1)
+badd +4 /tmp/awk.awk
+badd +333 ~/wiki/awk/sed.md
+badd +0 ~/wiki/.git/index
+badd +0 ~/wiki/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

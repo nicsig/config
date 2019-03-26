@@ -1,3 +1,5 @@
+xset r rate 175 40 # fix slow cursor
+
 for f in *; do echo cp "${{f}}" "${{{f}.bak}}";done # backup files
 
 gpg --verify {{file.tar.xz.sig}} {{file.tar.xz}}
