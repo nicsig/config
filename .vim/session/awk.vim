@@ -13,21 +13,14 @@ argglobal
 set stal=2
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -37,42 +30,13 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-1498
-normal! zo
-3426
-normal! zo
-let s:l = 3490 - ((0 * winheight(0) + 0) / 1)
+let s:l = 224 - ((47 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3490
+224
 normal! 0
 lcd ~/wiki/awk
-wincmd w
-argglobal
-if bufexists("~/wiki/awk/glossary.md") | buffer ~/wiki/awk/glossary.md | else | edit ~/wiki/awk/glossary.md | endif
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-69
-normal! zo
-237
-normal! zo
-let s:l = 237 - ((84 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-237
-normal! 0
-lcd ~/wiki/awk
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -85,8 +49,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 18 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 argglobal
 setlocal fdm=manual
 setlocal fde=0
@@ -97,7 +61,7 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 12 - ((0 * winheight(0) + 0) / 1)
+let s:l = 12 - ((0 * winheight(0) + 9) / 18)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -115,30 +79,34 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 3 - ((2 * winheight(0) + 14) / 28)
+let s:l = 5 - ((1 * winheight(0) + 5) / 11)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
+5
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 18 + 16) / 33)
+exe '2resize ' . ((&lines * 11 + 16) / 33)
 tabnext
-edit ~/wiki/awk/sed.md
+edit ~/wiki/awk/glossary.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -148,68 +116,34 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-202
-normal! zo
-let s:l = 208 - ((37 * winheight(0) + 14) / 28)
+let s:l = 13 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-208
+13
 normal! 0
 lcd ~/wiki/awk
 wincmd w
 argglobal
-if bufexists("~/wiki/awk/examples/sedawk2progs/ch02/nameState.sed") | buffer ~/wiki/awk/examples/sedawk2progs/ch02/nameState.sed | else | edit ~/wiki/awk/examples/sedawk2progs/ch02/nameState.sed | endif
-setlocal fdm=marker
-setlocal fde=0
+if bufexists("~/wiki/awk/sed.md") | buffer ~/wiki/awk/sed.md | else | edit ~/wiki/awk/sed.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 297 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+297
 normal! 0
 lcd ~/wiki/awk
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabnext
-edit ~/.vim/plugged/vim-awk/.git/index
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-wincmd =
 argglobal
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
-lcd ~/.vim/plugged/vim-awk
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-awk/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-awk/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-awk/.git/COMMIT_EDITMSG | endif
+if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -218,27 +152,26 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim/plugged/vim-awk/.git
+lcd ~/wiki/awk
 wincmd w
-2wincmd w
-wincmd =
-tabnext 4
+3wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+tabnext 3
 set stal=1
-badd +3490 ~/wiki/awk/awk.md
+badd +214 ~/wiki/awk/awk.md
+badd +4 /tmp/awk.awk
 badd +12 ~/Desktop/countries
-badd +208 ~/wiki/awk/sed.md
-badd +237 ~/wiki/awk/glossary.md
-badd +1 /tmp/awk.awk
-badd +19 ~/wiki/awk/examples/sedawk2progs/ch02/nameState.sed
-badd +0 ~/.vim/plugged/vim-awk/.git/index
-badd +0 ~/.vim/plugged/vim-awk/.git/COMMIT_EDITMSG
+badd +268 ~/wiki/awk/glossary.md
+badd +294 ~/wiki/awk/sed.md
+badd +0 ~/wiki/.git/index
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

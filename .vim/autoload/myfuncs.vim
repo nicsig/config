@@ -1256,33 +1256,33 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
         let is_pane_still_open = index(open_panes, s:pane_id) >= 0
         if !is_pane_still_open
             " the pane should be closed, but better be safe
-            sil call system('tmux kill-pane -t %'.s:pane_id)
+            sil call system('tmux kill-pane -t '.s:pane_id)
             unlet! s:pane_id
         endif
     endif
 
     if !exists('s:pane_id')
-        sil let s:pane_id = systemlist(
+        sil let s:pane_id = system(
             \ 'tmux split-window -c '.shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
-            \ )[0]
+            \ )[:-2]
     endif
 
-    sil let pane_current_path = systemlist("tmux list-panes -F '#{pane_current_path}__::__#D'")
-    call filter(pane_current_path, {i,v -> v =~# '\m\C'.s:pane_id.'$'})
-    let pane_current_path = substitute(get(pane_current_path, 0, ''), '__::__.\{-}$', '', '')
+    let delim = '__::__'
+    sil let pane_current_path = systemlist('tmux list-panes -F "#{pane_current_path}"' . delim . '"#D"')
+    call filter(pane_current_path, {i,v -> v =~# '\m\C' . delim . s:pane_id . '$'})
+    let pane_current_path = substitute(get(pane_current_path, 0, ''), delim . '.\{-}$', '', '')
 
     " Make sure the working directory of the pane matches the one we want.
     if a:0 && (a:1 isnot# pane_current_path)
-        " `-l` disables key name lookup.
-        " So, if the command contains `C-m`, tmux will send it literally to the shell.
-        " Without `-l`, it would be translated into a CR.
-        let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape('cd '.shellescape(a:1))
-                   \ . ' && tmux send-keys -t '.s:pane_id.' C-m'
-        sil call system(tmux_cmd)
+        call s:tmux_run_this_shell_cmd('cd '.shellescape(a:1))
     endif
 
-    " TODO:
-    " Better comment these commands.
+    call s:tmux_run_this_shell_cmd(a:cmd)
+endfu
+
+fu! s:tmux_run_this_shell_cmd(cmd) abort
+    " TODO: Better comment these commands.{{{
+    "
     " See the function `s:fixstr()` in `vim-tmuxify` for an explanation.
     "
     " Extract this function inside a dedicated plugin.
@@ -1290,11 +1290,15 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
     " Improve the reliability of the code by merging this PR:
     "
     "     https://github.com/jebaum/vim-tmuxify/pull/28
+    "}}}
     let cmd = substitute(a:cmd, '\t', ' ', 'g')
     let cmd = substitute(cmd, '\\\s\+$', '\', '')
     let cmd = cmd[-1:] is# ';' ? cmd[:-2].'\;' : cmd
 
-    let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape(cmd)
+    " `-l` disables key name lookup.
+    " So, if the command contains `C-m`, tmux will send it literally to the shell.
+    " Without `-l`, it would be translated into a CR.
+    let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape(a:cmd)
                \ . ' && tmux send-keys -t '.s:pane_id.' C-m'
     sil call system(tmux_cmd)
     " The `-d`  in `tmux split-window ...`  means “do NOT give  focus“, so don't
@@ -1302,14 +1306,64 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
 endfu
 
 fu! myfuncs#tmux_last_command() abort
-    sil! update
+    if !exists('$TMUX')
+        echo 'requires Tmux'
+        return
+    endif
 
-    let cmds = [
-        \ 'last-pane',
-        \ 'send-keys C-l Up Enter',
-        \ 'last-pane',
-        \ ]
-    sil call system(join(map(cmds, {i,v -> 'tmux '.v.';'})))
+    sil! update
+    let number_of_panes = system('tmux display-message -p "#{window_panes}"')[:-2]
+    " If there's only one pane, we want to:
+    "    - open one
+    "    - grab the command following the first `Usage:` in the file
+    "    - run it in the newly opened pane
+    if number_of_panes == 1
+        let lnum = s:get_usage_lnum()
+        let cmd = matchstr(getline(lnum), '\$\zs.*')
+        if empty(cmd)
+            return
+        endif
+
+        sil let s:pane_id =
+            \ system('tmux split-window -d -h -p 30 -c ' . shellescape(expand('%:p:h')) . ' -PF "#D"')[:-2]
+        call s:tmux_run_this_shell_cmd(cmd)
+
+        augroup tmux_last_cmd_close_pane
+            au!
+            " close the tmux pane when we quit Vim, if we didn't close it already
+            au VimLeave * call s:tmux_last_cmd_close_pane()
+        augroup END
+
+    " If  there're more than two  panes, we just  want to re-run the  last shell
+    " command in the previous pane.
+    else
+        let cmds = [
+            \ 'last-pane',
+            \ 'send-keys C-l Up Enter',
+            \ 'last-pane',
+            \ ]
+        sil call system(join(map(cmds, {i,v -> 'tmux '.v.';'})))
+    endif
+endfu
+
+fu! s:get_usage_lnum() abort
+    let pos = getcurpos()
+    call cursor(1,1)
+    let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S\+')
+    " Note that we don't exclude the whitespace which follows the `$` shell prompt.
+    " This will make sure that when the command is run, zsh doesn't log it in its history.
+    let lnum = search(cml . '\s*Usage:\_.\{-}\zs\$', 'n')
+    call setpos('.', pos)
+    return lnum
+endfu
+
+fu! s:tmux_last_cmd_close_pane() abort
+    try
+        sil call system('tmux kill-pane -t '.s:pane_id)
+        unlet! s:pane_id
+    catch
+        return lg#catch_error()
+    endtry
 endfu
 
 " tmux-navigator {{{1

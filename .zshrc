@@ -3268,6 +3268,7 @@ FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;7m'
 
 # snippet selection
 _fzf_snippet_main_widget() {
+  emulate -L zsh
   if grep -q -P "{{" <<<"${BUFFER}"; then
     _fzf_snippet_placeholder
   else
@@ -3276,7 +3277,7 @@ _fzf_snippet_main_widget() {
       sed -e '/^$\|^#/d' \
           -e "s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /" \
           -e "s/\s*\(#\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
-      fzf --bind 'tab:down,btab:up' --height=${FZF_TMUX_HEIGHT:-40%} --reverse --ansi -q "${LBUFFER}"); then
+      fzf --height=${FZF_TMUX_HEIGHT:-40%} --reverse --ansi -q "${LBUFFER}"); then
       LBUFFER=$(sed 's/\s*#.*//' <<<"${selected}")
     fi
     zle redisplay
@@ -3284,8 +3285,10 @@ _fzf_snippet_main_widget() {
 }
 
 _fzf_snippet_placeholder() {
+  emulate -L zsh
   local strp pos placeholder
-  strp=$(grep -Z -P -b -o "\{\{[^\{\}]+\}\}" <<<"${BUFFER}")
+  echo "$BUFFER" >/tmp/debug
+  strp=$(grep -Z -P -b -o "\{\{.+?\}\}" <<<"${BUFFER}")
   strp=$(head -1 <<<"${strp}")
   pos=$(cut -d ":" -f1 <<<"${strp}")
   placeholder=${strp#*:}
@@ -3293,15 +3296,51 @@ _fzf_snippet_placeholder() {
     BUFFER=$(echo -E ${BUFFER} | sed -e 's/{{//' -e 's/}}//')
     CURSOR=$((${pos} + ${#placeholder} - 4))
   else
-    # Why `C-a` as the delimiter in the sed command?{{{
+    # What's `A`?{{{
+    #
+    # A variable storing the delimiter used in the next sed command.
+    #}}}
+    # What value do you assign it?{{{
+    #
+    # A literal ‘C-a’.
+    #}}}
+    # Why this particular value?{{{
     #
     # We don't know what will be in the placeholder.
-    # It  contains user  data, i.e. whatever  we write in  the placeholder  of a
+    # It will contain user data, i.e. whatever  we write in the placeholder of a
     # snippet.
     # If it contains a slash, then we can't use a slash for the delimiter.
     # `C-a` should never appear in a snippet, therefore we can safely use it here.
     #}}}
-    BUFFER=$(echo -E ${BUFFER} | sed "s${placeholder}")
+    # Why don't you use this simpler assignment `A="\001"`?{{{
+    #
+    # It wouldn't work.
+    # The sequence of characters `\001` would not be translated into a literal ‘C-a’.
+    #
+    # MWE:
+    #     func() {
+    #       A="$(tr 'x' '\001' <<<'x')"
+    #       echo "s${A}bar${A}${A}" | od -t c
+    #       sed "s${A}bar${A}${A}" <<<'foo bar baz'
+    #     }
+    #     $ func
+    #     0000000   s 001   b   a   r 001 001  \n~
+    #     0000010~
+    #     foo  baz~
+    #
+    #     func() {
+    #       A="\001"
+    #       echo "s${A}bar${A}${A}" | od -t c
+    #       sed "s${A}bar${A}${A}" <<<'foo bar baz'
+    #     }
+    #     $ func
+    #     0000000   s   \   0   0   1   b   a   r   \   0   0   1   \   0   0   1~
+    #     0000020  \n~
+    #     0000021~
+    #     foo bar baz~
+    #}}}
+    A="$(tr 'x' '\001' <<<'x')"
+    BUFFER=$(echo -E ${BUFFER} | sed "s${A}${placeholder}${A}${A}")
     CURSOR=pos
   fi
 }
