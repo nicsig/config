@@ -51,72 +51,18 @@ git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}" commit -m 'update'
 git --git-dir="${HOME}/.cfg" --work-tree="${HOME}" ls-tree --full-tree --name-only HEAD -r | sed "s:^:$HOME/:" | xargs -I'{}' rsync -ahPuzR --delete --stats --exclude='.git*' '{}' "${DEST}"
 
 # Vim plugins
-plugins=( \
-  asyncmake \
-  goyo.vim \
-  limelight.vim \
-  potion \
-  vim-abolish \
-  vim-autoread \
-  vim-awk \
-  vim-brackets \
-  vim-breakdown \
-  vim-bullet-list \
-  vim-capslock \
-  vim-cheat40 \
-  vim-cmdline \
-  vim-column-object \
-  vim-comment \
-  vim-completion \
-  vim-cwd \
-  vim-debug \
-  vim-draw \
-  vim-exchange \
-  vim-fex \
-  vim-fold \
-  vim-freekeys \
-  vim-gitcommit \
-  vim-gitconfig \
-  vim-graph \
-  vim-gx \
-  vim-help \
-  vim-hydra \
-  vim-iabbrev \
-  vim-interactive-lists \
-  vim-latex \
-  vim-lg-lib \
-  vim-logevents \
-  vim-markdown \
-  vim-matchit \
-  vim-math \
-  vim-par \
-  vim-python \
-  vim-qf \
-  vim-quickhl \
-  vim-readline \
-  vim-reorder \
-  vim-repeat \
-  vim-save \
-  vim-schlepp \
-  vim-search \
-  vim-selection-ring \
-  vim-session \
-  vim-sh \
-  vim-snippets \
-  vim-source \
-  vim-stacktrace \
-  vim-statusline \
-  vim-submode \
-  vim-term \
-  vim-titlecase \
-  vim-tmux \
-  vim-tmuxify \
-  vim-toggle-settings \
-  vim-unix \
-  vim-vim \
-  vim-window \
-  vim-xkb \
-)
+vimrc="$(sed "/^Plug\s*'lacygoill/!d; s:Plug\s*'lacygoill/\|'.*::g" ~/.vim/vimrc)"
+# Do *not* quote `vimrc`!{{{
+#
+#     IFS=' ' read -r -a plugins <<< "$vimrc"
+#                                    ^      ^
+#                                    ✘      ✘
+#
+# For some reason, it would break the code.
+# The array `plugins` would contain only the first vim plugin.
+#}}}
+# How to split a string into an array: https://stackoverflow.com/a/10586169/9780968
+IFS=' ' read -r -a plugins <<< $vimrc
 for plugin in "${plugins[@]}"; do
   rsync -ahPuzR --delete --stats --exclude='.git*' "${HOME}/.vim/plugged/${plugin}" "${DEST}"
 done
