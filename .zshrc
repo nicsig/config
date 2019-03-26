@@ -4740,14 +4740,6 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # before/after others.
 
 # TODO:
-# I can't create a symlink for `~/.zsh_history` pointing to a file in
-# Dropbox. So, for the moment, I do the opposite: a symlink in Dropbox to the
-# file in ~. Once we get rid of Dropbox, version control all zsh config files,
-# including the history (good idea? sensible data?).
-# If it's not a good idea, then configure a cron job to automatically make
-# a backup of the history on a 2nd hard drive.
-
-# TODO:
 # When we clone a git repo, it would be useful to automatically cd into it.
 # Install a hook to do that.
 # Read `man zshcontrib`, section `Manipulating Hook Functions`.
