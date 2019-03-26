@@ -132,11 +132,16 @@ stty quit undef
 #       └ was the exit status of the last command 0?
 #         (without any number, zsh assumes 0)
 #}}}
-# Why is there a no-break space at the end?{{{
+# Why this weird percent sign at the end?{{{
 #
 # We use it to move to the start of the previous prompts with a tmux key binding.
+#
+# Do *not* use a no-break space instead.
+# If you copy the command, paste it  in your notes without removing the no-break
+# space, then try to “source” it with `+s`, it won't work because the space will
+# be considered as being part of the command name.
 #}}}
-PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n%% '
+PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
 # TODO: add git branch in prompt{{{
 #
 #     # https://stackoverflow.com/a/12935606/9780968
@@ -2505,21 +2510,6 @@ alias dl_sub_en='subliminal download -l en'
 alias dl_sub_fr='subliminal download -l fr'
 
 alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
-
-# dropbox_restart {{{3
-
-# Why the subshell?{{{
-#
-# To avoid the job being terminated when  we exit the shell where we execute the
-# alias.
-# When we  start the job  from a subshell,  it's immediately re-parented  to the
-# session leader (`upstart` at the moment).
-#}}}
-alias dropbox_restart='killall dropbox; ( "${HOME}/.dropbox-dist/dropboxd" & )'
-
-# fast_cursor {{{3
-
-alias fast_cursor='xset r rate 175 40'
 
 # git {{{3
 

@@ -3090,7 +3090,32 @@ nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/' .
 
 " |c         execute the Compiler {{{4
 
-nno  <silent>  <bar>c  :<c-u>sil make! <bar> redraw! <bar> cw<cr>
+" Why `:silent`?{{{
+"
+" To avoid a hit-enter prompt.
+"}}}
+" Why `:redraw!`?{{{
+"
+" To erase artifacts which appears because of `:silent`.
+"}}}
+" Why `:lmake` instead of `:make`?{{{
+"
+" Most of the time, we compile a single file, not a whole project.
+" It makes more sense to use a location list, and not pollute the qf stack.
+"}}}
+" Why no `:lw` at the end?{{{
+"
+" There's no need to.
+" `vim-qf` installs an autocmd which takes care of that.
+"}}}
+" Do *not* install a `<bar>c` mapping in a filetype plugin to set the compiler and then compile.{{{
+"
+" Unless you have to, because it requires some special handling.
+"
+" Instead, simply set the compiler in the filetype plugin with `:compiler foo`.
+" This global `<bar>c` mapping will then use the right compiler.
+"}}}
+nno  <silent>  <bar>c  :<c-u>update <bar> sil lmake! <bar> redraw!<cr>
 
 " |g         grep word under cursor / visual selection {{{4
 
