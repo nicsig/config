@@ -3269,7 +3269,7 @@ FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;7m'
 # snippet selection
 _fzf_snippet_main_widget() {
   emulate -L zsh
-  if grep -q -P "{{" <<<"${BUFFER}"; then
+  if grep -q -P '{{' <<<"${BUFFER}"; then
     _fzf_snippet_placeholder
   else
     local selected
@@ -3287,7 +3287,13 @@ _fzf_snippet_main_widget() {
 _fzf_snippet_placeholder() {
   emulate -L zsh
   local strp pos placeholder
-  echo "$BUFFER" >/tmp/debug
+  # What's `+?`?{{{
+  #
+  # A non-greedy `+` quantifier.
+  # It's the equivalent of `\{-}` in Vim.
+  # We can  use it here thanks  to grep's `-P` option  which allows us to  use a
+  # PCRE regex.
+  #}}}
   strp=$(grep -Z -P -b -o "\{\{.+?\}\}" <<<"${BUFFER}")
   strp=$(head -1 <<<"${strp}")
   pos=$(cut -d ":" -f1 <<<"${strp}")

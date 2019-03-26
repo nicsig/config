@@ -13,6 +13,7 @@ argglobal
 set stal=2
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -94,10 +95,7 @@ edit ~/wiki/awk/glossary.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
@@ -105,8 +103,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -134,17 +131,28 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 297 - ((0 * winheight(0) + 0) / 1)
+321
+normal! zo
+let s:l = 333 - ((36 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-297
+333
 normal! 0
 lcd ~/wiki/awk
 wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext
+edit ~/.zshrc
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
-if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
-setlocal fdm=manual
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -152,26 +160,32 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+3120
+normal! zo
+3228
+normal! zo
+3246
+normal! zo
+3253
+normal! zo
+3291
+normal! zo
+let s:l = 3296 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
-lcd ~/wiki/awk
-wincmd w
-3wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
-tabnext 3
+3296
+normal! 03|
+lcd ~/.vim
+tabnext 4
 set stal=1
 badd +214 ~/wiki/awk/awk.md
 badd +4 /tmp/awk.awk
 badd +12 ~/Desktop/countries
 badd +268 ~/wiki/awk/glossary.md
 badd +294 ~/wiki/awk/sed.md
-badd +0 ~/wiki/.git/index
+badd +3343 ~/.zshrc
+badd +135 man://grep(1)
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
