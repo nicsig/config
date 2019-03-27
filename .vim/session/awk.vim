@@ -32,12 +32,12 @@ setlocal fdn=20
 setlocal fen
 4381
 normal! zo
-let s:l = 4396 - ((444 * winheight(0) + 15) / 30)
+let s:l = 4401 - ((448 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-4396
-normal! 05|
+4401
+normal! 065|
 lcd ~/wiki/awk
 tabnext
 edit ~/Desktop/countries
@@ -118,12 +118,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 408 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+408
+normal! 01|
 lcd ~/wiki/awk
 wincmd w
 argglobal
@@ -136,11 +136,11 @@ setlocal fdl=1
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 6 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+6
 normal! 0
 lcd ~/wiki/awk
 wincmd w
@@ -169,11 +169,11 @@ exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext 3
 set stal=1
-badd +224 ~/wiki/awk/awk.md
+badd +4401 ~/wiki/awk/awk.md
 badd +12 ~/Desktop/countries
 badd +4 /tmp/awk.awk
-badd +311 ~/wiki/awk/sed.md
-badd +1 ~/wiki/.git/index
+badd +1 ~/wiki/awk/sed.md
+badd +0 ~/wiki/.git/index
 badd +0 ~/wiki/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

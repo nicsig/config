@@ -641,6 +641,15 @@ install() { #{{{2
     #
     # Once you've implemented a solution, test it against surfraw.
     # Right now, checkinstall does not install the latter.
+    #
+    # ---
+    #
+    # Update:
+    # Here's a first attempt to replace `%{name}` with `weechat`:
+    #
+    #     $ sed '/^%define\s\+name/{s/.*\s//; h; s/^/%define name /}; /^Name:/{G; s/^\(Name:\s\+\)%{name}\n\(\w\+\)/\1\2/}' weechat.spec
+    #
+    # It's a bit long, maybe we could improve the code...
     #}}}
     if [[ "${DEBUG}" -ne 0 ]]; then
       echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" -y >>"${DEBUG_LOGFILE}"
