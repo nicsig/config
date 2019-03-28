@@ -439,7 +439,23 @@ have() {
   (( ${+commands[$1]} )) && have=yes
 }
 bash_source ~/.zsh/my-completions/_pandoc
-bash_source ~/.zsh/my-completions/_tldr
+# TODO: Sourcing this completion function is too slow. Find a way to make it faster.{{{
+#
+# It's slow because it runs an external process:
+#
+#     tldr 2>/dev/null --list
+#
+# We should cache the output in a file, and ask the completion function to read it.
+# It's ok for the completion function to be slightly slow when we press Tab after `$ tldr`.
+# It is *not* ok for the sourcing of the function to be slow, because it affects
+# every zsh start.
+#
+# Update:
+# The completion still works, even though we've commented the next line.
+# However, we have to press Tab twice, instead of once.
+# How is that possible?
+#}}}
+#     bash_source ~/.zsh/my-completions/_tldr
 
 # Why removing the alias `run-help`?{{{
 #

@@ -13,7 +13,6 @@ argglobal
 set stal=2
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/awk.md
 set splitbelow splitright
@@ -109,101 +108,19 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-495
-normal! zo
-let s:l = 4 - ((3 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-4
-normal! 0
-lcd ~/wiki/awk
-tabnext
-edit /tmp/sed.sed
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 21 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-21
-normal! 0
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.vim/after/indent/sed.vim") | buffer ~/.vim/after/indent/sed.vim | else | edit ~/.vim/after/indent/sed.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-19
-normal! zo
-let s:l = 16 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-16
-normal! 046|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("/usr/local/share/vim/vim81/doc/indent.txt") | buffer /usr/local/share/vim/vim81/doc/indent.txt | else | edit /usr/local/share/vim/vim81/doc/indent.txt | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal nofen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim
-wincmd w
-3wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 26 + 16) / 33)
-tabnext 4
+lcd ~/wiki/awk
+tabnext 3
 set stal=1
 badd +4401 ~/wiki/awk/awk.md
 badd +12 ~/Desktop/countries
-badd +8 ~/wiki/awk/sed.md
-badd +16 /tmp/sed.sed
+badd +2 ~/wiki/awk/sed.md
 badd +4 /tmp/awk.awk
-badd +2 ~/.vim/after/indent/sed.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -215,7 +132,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
