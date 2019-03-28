@@ -108,18 +108,20 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+586
+normal! zo
+let s:l = 589 - ((59 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+589
 normal! 0
 lcd ~/wiki/awk
 tabnext 3
 set stal=1
-badd +4401 ~/wiki/awk/awk.md
-badd +12 ~/Desktop/countries
-badd +2 ~/wiki/awk/sed.md
+badd +1 ~/wiki/awk/awk.md
+badd +1 ~/Desktop/countries
+badd +591 ~/wiki/awk/sed.md
 badd +4 /tmp/awk.awk
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

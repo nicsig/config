@@ -4706,11 +4706,11 @@ com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 " Feed them to `$ grep` via `$ xargs`, and in turn feed the result to `$ vim` via `-q`:
 "
-"     $ vim -q <(xargs grep -RHIinos pattern </tmp/listing) +cw
+"     $ vim -q <(xargs grep -RHIins pattern </tmp/listing) +cw
 "
 " In one single command:
 "
-"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs grep -RHIinos pattern) +cw
+"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs grep -RHIins pattern) +cw
 "
 " We need `$ sed`,  because the paths output by `$ git  ls-tree` are relative to
 " the root of the repo, which here is our home.
@@ -4728,8 +4728,8 @@ fu! s:grep_cfg(pat) abort
               \     '--name-only HEAD',
               \     '-r',
               \ '| sed "s:^:${HOME}/:"',
-              \ '| xargs grep -RHIinos',
-              \ a:pat,
+              \ '| xargs grep -RHIins',
+              \ shellescape(a:pat),
               \ ]
     cgetexpr system(join(cmd)) | cw
 endfu
@@ -6889,6 +6889,7 @@ endfu
 "     :h sign.txt
 "     :h channel.txt
 "     :h pattern.txt
+"     :h indent.txt
 "
 "     :h textprop.txt
 "     :h diff.txt
@@ -7983,12 +7984,12 @@ fu! s:restore_last_qfl() abort
     " If there's already a qfl on the stack, or if there's no qfl to restore, don't try to restore anything.
     " How could there already be a qfl on the stack?{{{
     "
-    "     $ grep -RHIinos network /etc
+    "     $ grep -RHIins network /etc
     "     $ vim -q <(!!)
     "
-    "     $ grep -RHIinos network /etc | vim -q /dev/stdin
+    "     $ grep -RHIins network /etc | vim -q /dev/stdin
     "
-    "     $ grep -RHIinos network /etc >/tmp/log
+    "     $ grep -RHIins network /etc >/tmp/log
     "     $ vim -q /tmp/log
     "
     "     $ vim +'vimgrep /pat/ %' file

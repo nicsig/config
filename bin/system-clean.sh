@@ -94,7 +94,7 @@ EOF
   esac
 
   deborphan -a --ignore-suggests --no-show-section >orphans_list
-  orphan="$(sort  orphans_list orphans_ignored | uniq -u | head -n1)"
+  orphan="$(sort -u orphans_list orphans_ignored | head -n1)"
 
 done
 
