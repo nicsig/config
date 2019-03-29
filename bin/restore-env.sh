@@ -1,5 +1,32 @@
 #!/bin/bash
 
+# TODO: Finish reading this: https://www.atlassian.com/git/tutorials/dotfiles
+#
+# Understand the commands which are given to restore our config on a new machine:
+#
+#     $ echo ".cfg" >> .gitignore
+#     $ git clone --bare https://github.com/lacygoill/config/ $HOME/.cfg
+#     $ alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+#     $ config checkout
+#
+#     # The previous command will probably have failed because of conflicts
+#     # between some files in the repo and some pre-installed files.
+#     # The next command moves the problematic pre-installed files in a backup directory.
+#     # Unfortunately, it will probably also fail.
+#     # You'll need to create one or two directories inside the backup directory,
+#     # to reproduce the path of some files...
+#     # Then, the command will succeed.
+#     $ mkdir -p .config-backup && \
+#       config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | \
+#       xargs -I{} mv {} .config-backup/{}
+#
+#     # this time it should work
+#     $ config checkout
+#
+#     $ config config --local status.showUntrackedFiles no
+
+
+
 # TODO: empêcher APT de mettre les paquets en cache :
 # http://lehollandaisvolant.net/linux/checklist/#aptitude-cache
 
@@ -13,6 +40,14 @@
 # TODO: restore system files backed up in:
 #
 #     ~/.config/etc
+
+# TODO: disable  automatic updates  (they're especially annoying  in a  VM; they
+# must be equally annoying in a live OS)
+#
+# https://askubuntu.com/a/1057463/867754
+#
+#     $ sudo systemctl disable --now apt-daily{,-upgrade}.{timer,service}
+#     $ sudo dpkg-reconfigure -plow unattended-upgrades
 
 # System files {{{1
 
@@ -64,19 +99,11 @@ ExecStartPre=/usr/bin/setterm -background white -foreground black -store
 ExecStartPre=/usr/bin/clear
 EOF
 
-# Removal of some deb packages {{{1
-
-# Note that removing `update-notifier` will cause `aptitude` to remove `xubuntu-desktop`.{{{
-#
-# Which is ok.
-# From `aptitude show xubuntu-desktop`:
-#
-#     It is safe to remove this package if some of the desktop system packages are not desired.
-#}}}
-aptitude purge whoopsie update-notifier
-
 # Installation of some deb packages {{{1
-aptitude install aptitude \
+
+apt-get install aptitude
+
+aptitude install \
   checkinstall \
   conky-all \
   curl \
@@ -142,6 +169,16 @@ printf -- '\nCreate the directory ~/.zsh/completion\n' &&
 printf -- '\nInstalilng zsh-syntax-highlighting\n'
 git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${HOME}/GitRepos/zsh-syntax-highlighting"
 
+# Removal of some deb packages {{{1
+
+# Note that removing `update-notifier` will cause `aptitude` to remove `xubuntu-desktop`.{{{
+#
+# Which is ok.
+# From `aptitude show xubuntu-desktop`:
+#
+#     It is safe to remove this package if some of the desktop system packages are not desired.
+#}}}
+aptitude purge whoopsie update-notifier
 
 # Set default applications {{{1
 
@@ -167,16 +204,21 @@ xdg-mime default mpv.desktop video/mp4
 
 # Symlinks creation {{{1
 
+cd "${HOME}"/.mozilla/firefox/*.default
+[[ ! -d 'chrome' ]] && mkdir chrome
+cp ~/.config/home/user/.mozilla/firefox/xxx.default/chrome/userContent.css ~/.mozilla/firefox/*.default/chrome/userContent.css
+
 printf -- "\nCreating symlinks pointing to config files in the Dropbox directory.\n"
 
 cd "${HOME}"
 dpath="${HOME}/Dropbox/conf"
 
-ln -sfn "${dpath}/bin" bin  # l'option -f force la création du lien symbolique même si un élément de même nom existe déjà
-        # -n : dans le cas où la cible est un dossier, si un élément de même nom que le lien existe déjà,
-        #      on se retrouve avec un lien symbolique à l'intérieur du dossier
-        #      -n = --no-dereference   empêche ce comportement
-        # malheureusement ne semble pas fonctionner... Pk ?
+ln -sfn "${dpath}/bin" bin
+# l'option -f force la création du lien symbolique même si un élément de même nom existe déjà
+# -n : dans le cas où la cible est un dossier, si un élément de même nom que le lien existe déjà,
+#on se retrouve avec un lien symbolique à l'intérieur du dossier
+#-n = --no-dereference   empêche ce comportement
+# malheureusement ne semble pas fonctionner... Pk ?
 
 ln -sfn "${dpath}/bash_aliases" .bash_aliases
 ln -sfn "${dpath}/cheat" .cheat
@@ -211,9 +253,4 @@ ln -sfn "${dpath}/zsh_aliases" .zsh_aliases
 ln -sfn "${dpath}/zshrc" .zshrc
 ln -sfn "${dpath}/zsh_aliases" .zsh_aliases
 ln -sfn "${dpath}/zsh/" .zsh/
-
-cd "${HOME}"/.mozilla/firefox/*.default
-# si le dossier chrome n'existe pas on le crée
-[[ ! -d 'chrome' ]] && mkdir chrome
-ln -sfn "$dpath"/userContent.css ./chrome/userContent.css
 
