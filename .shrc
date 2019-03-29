@@ -47,7 +47,7 @@ alias web='WWW_HOME=new.startpage.com w3m'
 alert() {
   notify-send --urgency=low \
     -i $([[ "$?" -eq 0 ]] && printf -- 'terminal\n' || printf -- 'error\n') \
-    "$(history | tail -n1 | sed -e 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
+    "$(history | tail -n1 | sed 's/^\s*[0-9]\+\s*// ; s/[;&|]\s*alert$//')"
 }
 
 img_w3m() {

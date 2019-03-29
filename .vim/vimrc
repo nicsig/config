@@ -3226,7 +3226,9 @@ nno  <silent> -P  :<c-u>call <sid>print_cwd()<cr>
 
 fu! s:print_cwd() abort
     let @o = execute('pwd', 'silent!')[1:]
-    echohl Directory
+    let def = matchstr(execute('hi Directory'), 'xxx\zs.*')
+    exe 'hi BoldDirectory cterm=bold gui=bold' . def
+    echohl BoldDirectory
     echo @o
     echohl NONE
 endfu
@@ -4717,8 +4719,19 @@ com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 " But if we're not  in our home, the relative paths  will be interpreted wrongly
 " by `$ vim -q`.
 "}}}
-com! -bar -nargs=1 GrepCfg call s:grep_cfg(<q-args>)
+" Usage:{{{
+"
+"     :GrepCfg '\<sed\>'
+"
+" Note the usage of quotes around the pattern.
+" We could get rid of them if  we defined the command with `<q-args>`, but doing
+" so would introduce an inconsistency between `:GrepCfg` and `$ grep`.
+" We use  quotes around a pattern after  `$ grep`, so we should do  the same for
+" `:GrepCfg`.
+"}}}
+com! -bar -nargs=1 GrepCfg call s:grep_cfg(<args>)
 fu! s:grep_cfg(pat) abort
+    let pat = shellescape(a:pat)
     let cmd = [
               \ 'git',
               \     '--git-dir="${HOME}/.cfg/"',
@@ -4729,9 +4742,10 @@ fu! s:grep_cfg(pat) abort
               \     '-r',
               \ '| sed "s:^:${HOME}/:"',
               \ '| xargs grep -RHIins',
-              \ shellescape(a:pat),
+              \ pat,
               \ ]
     cgetexpr system(join(cmd)) | cw
+    call setqflist([], 'a', {'title': ':GrepCfg ' . pat})
 endfu
 
 " HlWeirdWhitespace {{{2
@@ -4969,7 +4983,7 @@ fu! s:plugins_update() abort
     runtime spell/cleanadd.vim
 
     " Install `wfrench` package. Useful for dictionary completion.
-    if expand('`aptitude show wfrench | sed -n "2p"`') =~? 'state:\s*not\s\+installed'
+    if expand('`aptitude show wfrench | grep "^State"`') =~? 'state:\s*not\s\+installed'
         echom 'Need to install the wfrench package for the french dictionary.'
         let password = inputsecret('Enter sudo password:')."\n"
         echo system('sudo -S aptitude install wfrench', password)

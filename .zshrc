@@ -1747,11 +1747,8 @@ loc() { #{{{2
 
   emulate -L zsh
   #               ┌ 'foo bar' → 'foo.*bar'
-  #               │                         ┌ ( → \(
-  #               │                         │                ┌ | → \|
-  #               │                         │                │                 ┌ ) → \)
-  #               ├──────┐                  ├───────┐        ├───────┐         ├───────┐
-  keywords=$(sed 's/ /.*/g' <<< "$@" | sed 's:(:\\(:g'| sed 's:|:\\|:g' | sed 's:):\\):g')
+  #               ├──────┐
+  keywords=$(sed 's/ /.*/g' <<< "$@" | sed 's:(:\\(:g; s:|:\\|:g; s:):\\):g')
   locate -ir "${keywords}" | vim -R --not-a-term -
   #       ││
   #       │└ search for a basic regexp (not a literal string)
@@ -2335,8 +2332,8 @@ vim_startup() { #{{{2
   vim --startuptime "${tmp}" \
       +'q' startup_vim_file \
       && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' \
-      +'sil 7,$!sort -k2' \
-      +'$' "${tmp}"
+      +'sil 7,$!sort -rnk2' \
+      "${tmp}"
 }
 #}}}2
 
@@ -2347,11 +2344,8 @@ xev_terse() { #{{{2
   # KeyPress events, and not about the other ones (like KeyRelease).
   #}}}
   xev | sed -n '/^KeyPress/,/^$/p'
-  #          │  ├───────────────┘
-  #          │  └ print every line between a line beginning with `KeyPress` and an empty line
-  #          │
-  #          └ don't print everything you read,
-  #            only what I explicitly ask you (with the p[rint] command)
+  #             ├───────────────┘
+  #             └ print every line between a line beginning with `KeyPress` and an empty line
 }
 
 xev_terse_terse() { #{{{2
@@ -3280,9 +3274,9 @@ _fzf_snippet_main_widget() {
   else
     local selected
     if selected=$(cat ${HOME}/.config/zsh-snippet/*.txt |
-      sed -e '/^$\|^#/d' \
-          -e "s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /" \
-          -e "s/\s*\(#\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
+      sed "/^$\|^#/d
+           s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /
+           s/\s*\(#\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
       fzf --height=${FZF_TMUX_HEIGHT:-40%} --reverse --ansi -q "${LBUFFER}"); then
       LBUFFER=$(sed 's/\s*#.*//' <<<"${selected}")
     fi
@@ -3305,7 +3299,7 @@ _fzf_snippet_placeholder() {
   pos=$(cut -d ":" -f1 <<<"${strp}")
   placeholder=${strp#*:}
   if [[ -n "$1" ]]; then
-    BUFFER=$(echo -E ${BUFFER} | sed -e 's/{{//' -e 's/}}//')
+    BUFFER=$(echo -E ${BUFFER} | sed 's/{{//; s/}}//')
     CURSOR=$((${pos} + ${#placeholder} - 4))
   else
     # What's `A`?{{{

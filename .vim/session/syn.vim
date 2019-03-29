@@ -76,9 +76,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-46
-normal! zo
-let s:l = 167 - ((106 * winheight(0) + 13) / 26)
+let s:l = 167 - ((156 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -104,9 +102,9 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 26 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -116,7 +114,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 24 - ((23 * winheight(0) + 13) / 26)
+let s:l = 24 - ((23 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -136,7 +134,7 @@ setlocal fdn=20
 setlocal fen
 202
 normal! zo
-let s:l = 726 - ((17 * winheight(0) + 0) / 1)
+let s:l = 726 - ((22 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -160,21 +158,9 @@ normal! zo
 normal! zo
 51
 normal! zo
-51
-normal! zc
-139
+157
 normal! zo
-1
-normal! zc
-144
-normal! zo
-145
-normal! zo
-156
-normal! zo
-166
-normal! zo
-let s:l = 262 - ((0 * winheight(0) + 0) / 1)
+let s:l = 262 - ((137 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -182,9 +168,9 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 26 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
 edit /usr/local/share/vim/vim81/colors/README.txt
 set splitbelow splitright
@@ -227,12 +213,14 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+536
+normal! zo
+let s:l = 556 - ((46 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+556
+normal! 011|
 lcd ~/wiki/vim
 wincmd w
 2wincmd w
@@ -240,14 +228,14 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 3
 set stal=1
-badd +167 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +1778 ~/wiki/vim/syntax_hl.md
-badd +1 /usr/local/share/vim/vim81/colors/README.txt
-badd +1 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
+badd +24 ~/wiki/vim/syntax_hl.md
+badd +47 /usr/local/share/vim/vim81/colors/README.txt
+badd +15 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
 badd +1 ~/Desktop/test.vim
-badd +1 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +1 ~/.vim/autoload/colorscheme.vim
-badd +754 ~/wiki/vim/highlighting.md
+badd +167 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+badd +726 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
+badd +262 ~/.vim/autoload/colorscheme.vim
+badd +197 ~/wiki/vim/highlighting.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

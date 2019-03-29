@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#TODO empêcher APT de mettre les paquets en cache :
+# TODO: empêcher APT de mettre les paquets en cache :
 # http://lehollandaisvolant.net/linux/checklist/#aptitude-cache
 
-#TODO configuration des programmes se lançant automatiquement au démarrage
+# TODO: configuration des programmes se lançant automatiquement au démarrage
 
-#TODO ajout des PPAs
+# TODO: add PPAs (or better yet, get rid of all PPAs in your current installation)
 
-#TODO suppression des fichiers / dossiers  avant leur remplacement par des liens
-# symboliques # car l'option -n de ln ne semble pas fonctionner
+# TODO:  suppression des  fichiers /  dossiers avant  leur remplacement  par des
+# liens symboliques, car l'option `-n` de `$ ln` ne semble pas fonctionner
 
 # TODO: restore system files backed up in:
 #
@@ -142,19 +142,28 @@ printf -- '\nCreate the directory ~/.zsh/completion\n' &&
 printf -- '\nInstalilng zsh-syntax-highlighting\n'
 git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${HOME}/GitRepos/zsh-syntax-highlighting"
 
-# Dropbox {{{1
 
-printf -- '\nInstalling dropbox: https://www.dropbox.com/install?os=lnx\n'
+# Set default applications {{{1
 
-# download dropbox
-#     https://www.dropbox.com/install
-cd "${HOME}" && wget -O - 'https://www.dropbox.com/download?plat=lnx.x86_64' | tar xzf -
-# start the daemon
-"${HOME}/.dropbox-dist/dropboxd"
-
-# si dropbox ne tourne pas le script s'arrête
-# parce qu'on va créer des liens symboliques pointant vers dropbox
-[[ ! "$(pidof dropbox)" ]] && exit 1
+# How to set the default application to open a particular type of file?{{{
+#
+#     # get the mime type of the file
+#     $ xdg-mime query filetype some_file.mp4
+#     video/mp4~
+#
+#     # get the current default application used to handle this mime type
+#     $ xdg-mime query default <previous mime type>
+#     parole.desktop~
+#
+#     # if you want mpv to be the new default, first make sure it has a .desktop file
+#     $ locate -r '.*mpv.*.desktop'
+#
+#     # use it to set mpv as the new default application to open mp4 files
+#     $ xdg-mime default mpv.desktop video/mp4 ...
+#                                              ├─┘
+#                                              └ you can write several mime types
+#}}}
+xdg-mime default mpv.desktop video/mp4
 
 # Symlinks creation {{{1
 

@@ -18,3 +18,28 @@ Click on:
 
 Select your theme.
 
+# It doesn't persist after a reboot!
+
+Read this: <https://forum.xfce.org/viewtopic.php?id=11997>
+
+---
+
+Try this:
+
+   1. log out of Xfce
+   2. switch over to text console (Ctrl+Alt+F1)
+   3. delete the contents of `~/.cache/sessions`
+   4. log back in again via the GUI
+
+---
+
+Or this:
+
+   1. Settings
+   2. Session and Startup
+   3. General
+   4. tick “Automatically save session on logout”
+
+Then restart, and see whether the theme persists.
+If it does, untick “Automatically save session on logout” and restart again.
+

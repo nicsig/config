@@ -46,10 +46,10 @@ cd "${DIR}"
 # Use the filenames in the snippy directory as menu entries.
 # Get the menu selection from the user.
 FILE=$(find . -type f | sed 's:\./::' | /usr/bin/dmenu "${DMENU_ARGS}")
-#      |                |               |
-#      |                |               +-- ask user to choose entry in dmenu
-#      |                +-- remove leading `./` from path
-#      +-- list files in the snippy directory (recursively; any depth)
+#      │                │               │
+#      │                │               └ ask user to choose entry in dmenu
+#      │                └ remove leading `./` from path
+#      └ list files in the snippy directory (recursively; any depth)
 
 if [[ -f "${DIR}/${FILE}" ]]; then
   # Put the contents of the selected file into the paste buffer.

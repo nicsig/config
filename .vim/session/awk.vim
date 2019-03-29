@@ -14,32 +14,6 @@ set stal=2
 tabnew
 tabnew
 tabrewind
-edit ~/wiki/awk/awk.md
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-4381
-normal! zo
-let s:l = 4401 - ((18 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-4401
-normal! 065|
-lcd ~/wiki/awk
-tabnext
 edit ~/Desktop/countries
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -63,31 +37,31 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 12 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-12
-normal! 011|
+1
+normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("/tmp/awk.awk") | buffer /tmp/awk.awk | else | edit /tmp/awk.awk | endif
-setlocal fdm=marker
-setlocal fde=0
+if bufexists("~/wiki/awk/awk.md") | buffer ~/wiki/awk/awk.md | else | edit ~/wiki/awk/awk.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 5 - ((4 * winheight(0) + 14) / 28)
+let s:l = 2066 - ((12 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5
+2066
 normal! 0
-lcd ~/.vim
+lcd ~/wiki/awk
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
@@ -108,21 +82,84 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-586
+16
 normal! zo
-let s:l = 589 - ((59 * winheight(0) + 15) / 30)
+let s:l = 20 - ((19 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-589
-normal! 0
+20
+normal! 043|
 lcd ~/wiki/awk
+tabnext
+edit ~/bin/restore-env.sh
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+17
+normal! zo
+17
+normal! zc
+67
+normal! zo
+67
+normal! zc
+168
+normal! zo
+let s:l = 202 - ((11 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+202
+normal! 055|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.config/Trolltech.conf") | buffer ~/.config/Trolltech.conf | else | edit ~/.config/Trolltech.conf | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 52 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+52
+normal! 0
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 tabnext 3
 set stal=1
-badd +1 ~/wiki/awk/awk.md
 badd +1 ~/Desktop/countries
-badd +591 ~/wiki/awk/sed.md
-badd +4 /tmp/awk.awk
+badd +14 ~/wiki/awk/sed.md
+badd +114 ~/wiki/awk/awk.md
+badd +105 ~/bin/restore-env.sh
+badd +0 ~/.config/Trolltech.conf
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -28,7 +28,7 @@
 #}}}
 # The current value of `$LS_COLORS` is unreadable! How to make it more readable?{{{
 #
-#         $ echo $LS_COLORS | sed -e 's/:/\n/g'
+#         $ echo $LS_COLORS | sed 's/:/\n/g'
 #}}}
 # But it's still unreadable!{{{
 #
