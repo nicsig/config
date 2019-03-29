@@ -12,6 +12,7 @@ argglobal
 %argdel
 set stal=2
 tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -81,20 +82,53 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-16
+346
 normal! zo
-let s:l = 40 - ((14 * winheight(0) + 15) / 30)
+let s:l = 347 - ((59 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-40
-normal! 016|
+347
+normal! 0
 lcd ~/wiki/awk
-tabnext 2
+tabnext
+edit ~/bin/restore-env.sh
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+172
+normal! zo
+172
+normal! zc
+183
+normal! zo
+183
+normal! zc
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+tabnext 3
 set stal=1
 badd +1 ~/Desktop/countries
-badd +67 ~/wiki/awk/sed.md
+badd +96 ~/wiki/awk/sed.md
 badd +114 ~/wiki/awk/awk.md
+badd +1 ~/bin/restore-env.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
