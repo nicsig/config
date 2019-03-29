@@ -103,8 +103,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -124,16 +124,16 @@ normal! zo
 normal! zc
 168
 normal! zo
-let s:l = 202 - ((11 * winheight(0) + 14) / 28)
+let s:l = 202 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 202
-normal! 055|
+normal! 040|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.config/Trolltech.conf") | buffer ~/.config/Trolltech.conf | else | edit ~/.config/Trolltech.conf | endif
+if bufexists("~/.mozilla/firefox/wmlfvrvz.default/chrome/userContent.css") | buffer ~/.mozilla/firefox/wmlfvrvz.default/chrome/userContent.css | else | edit ~/.mozilla/firefox/wmlfvrvz.default/chrome/userContent.css | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -143,23 +143,24 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 52 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-52
+1
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 3
 set stal=1
 badd +1 ~/Desktop/countries
 badd +14 ~/wiki/awk/sed.md
 badd +114 ~/wiki/awk/awk.md
-badd +105 ~/bin/restore-env.sh
-badd +0 ~/.config/Trolltech.conf
+badd +202 ~/bin/restore-env.sh
+badd +0 ~/.mozilla/firefox/wmlfvrvz.default/chrome/userContent.css
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

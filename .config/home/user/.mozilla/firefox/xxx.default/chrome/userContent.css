@@ -1,0 +1,7 @@
+/* input fields in firefox with a dark theme are not readable */
+/* https://superuser.com/a/762694/913143 */
+input, textarea {
+   color:#222 !important;
+   background-color:#fff !important;
+}
+
