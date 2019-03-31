@@ -5868,13 +5868,20 @@ augroup trailing_whitespace
     au!
     au WinEnter,InsertLeave * call s:trailing_whitespace(1)
     au InsertEnter          * call s:trailing_whitespace(0)
+    " An undesirable match will be installed in a help buffer, even if we include `help` in s:NO_TRAILING_WHITESPACE_FT.{{{
+    "
+    " Try `:h 'list`, and you'll see it.
+    " This is because when `WinEnter` is fired, `&filetype` has not been correctly set yet.
+    "
+    " So, we must make sure to remove this match with an additional autocmd.
+    "}}}
+    au FileType help call s:trailing_whitespace(0)
 augroup END
 
 fu! s:trailing_whitespace(create_match) abort
     if !a:create_match && exists('w:my_trailing_whitespace')
         call matchdelete(w:my_trailing_whitespace)
         unlet w:my_trailing_whitespace
-
     elseif a:create_match
        \ && !exists('w:my_trailing_whitespace')
        \ && index(s:NO_TRAILING_WHITESPACE_FT, &filetype) ==# -1

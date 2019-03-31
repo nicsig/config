@@ -22,3 +22,14 @@ _FASD_IGNORE='fasd ls echo touch'
 # uncomment to debug fasd
 #     _FASD_SINK="${HOME}/.fasd.log"
 
+# Ignore the case.
+_FASD_NOCASE=1
+# For this option to work, we've merged this PR: https://github.com/clvv/fasd/pull/104
+#
+# We've also merged these PRs:
+#     # run `j never_visited`; the shell exits with the error code 1 after the PR
+#     https://github.com/clvv/fasd/pull/75
+#     https://github.com/clvv/fasd/pull/99
+#
+# TODO: merge other interesting PRs.
+

@@ -26,16 +26,16 @@
 #     $ config config --local status.showUntrackedFiles no
 
 # TODO: If you use a dark theme, some input fields in firefox are unreadable.
+#
 # In the past, we used a custom `userContent.css` file in `~/.mozilla/firefox/xxxxxxxx.default/chrome/`.
 # I've found a better solution.
 # Enter `about:config` in the url bar.
-# Right-click, and select the fields `new`, then `String`.
+# Right-click anywhere, and select the entries `new`, then `String`.
 # Give the name `widget.content.gtk-theme-override` to the new string.
-# Assign it the value `Adwaita`.
+# Assign it the value `Adwaita`, or any installed light gtk3 theme name.
 # For more info, see:
 #
 #     https://askubuntu.com/a/1037112/867754
-#     https://bugzilla.mozilla.org/show_bug.cgi?id=519763
 #     https://bugzilla.mozilla.org/show_bug.cgi?id=1283086
 #
 # Find a way to automate this setting from a shell command.

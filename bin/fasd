@@ -54,6 +54,7 @@ fasd() {
           [ -z "$_FASD_VIMINFO" ] && _FASD_VIMINFO="$HOME/.viminfo"
           [ -z "$_FASD_RECENTLY_USED_XBEL" ] && \
             _FASD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
+          [ -z "$_FASD_NOCASE" ] && _FASD_NOCASE=0
 
           if [ -z "$_FASD_AWK" ]; then
             # awk preferences
@@ -91,7 +92,7 @@ fasd_cd() {
     fasd "\$@"
   else
     local _fasd_ret="\$(fasd -e 'printf %s' "\$@")"
-    [ -z "\$_fasd_ret" ] && return
+    [ -z "\$_fasd_ret" ] && return 1
     [ -d "\$_fasd_ret" ] && cd "\$_fasd_ret" || printf %s\\n "\$_fasd_ret"
   fi
 }
@@ -115,7 +116,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
+  { fasd --proc \$(fasd --sanitize "\$2") } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
@@ -421,6 +422,8 @@ $(fasd --backend $each)"
         s@ @[^|]*@g;s/\$$/|/')"
       bre='^[^|]*'"$bre"'[^|/]*|'
       local _ret="$(printf %s\\n "$_fasd_data" | grep "$bre")"
+      # force no case matching for default matching
+      [ "$_FASD_NOCASE" = 1 ] && _ret="$(printf %s\\n "$_fasd_data" | grep -i "$bre")"
       [ "$_ret" ] && _ret="$(printf %s\\n "$_ret" | while read -r line; do
         [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
       done)"

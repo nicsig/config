@@ -1141,8 +1141,15 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let pat = '^\t\|\(.\)\t'
     let l:Rep = {-> submatch(1) . repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.') ))}
     let g = 0
+    " I think we need the loop because there may be several tabs consecutively.{{{
+    "
+    " If that happens, a single substitution would fail to replace all of them, for
+    " the same reason that the pattern `.w` fails to match both `w` in `zww`.
+    " The regex  engine moves after  the end of a  match, before trying  to find
+    " another one.  In the process, it may skip a tab.
+    "}}}
     while search("\t", 'n') && g < 999
-        exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/ge'
+        exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/e'
         let g += 1
     endwhile
     call winrestview(view)

@@ -4538,6 +4538,10 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #     \ + [{'buns': ['\e[1;3m', '\e[0m'], 'input': ['sB']}]
 #
 # Try to give the files a dedicated filetype, and conceal the escape sequences.
+#
+# Update:
+# Use fzf to fuzzy search through all tldr files.
+# Same thing for the cheatsheets.
 
 # TODO: Think about how better leveraging our zsh history.
 #
