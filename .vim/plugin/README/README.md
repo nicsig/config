@@ -50,21 +50,23 @@ See the comment at the top of `nop.vim` for an explanation.
 # Guard
 ## Why should I write guards in the scripts of this directory?
 
-        1. they shouldn't be sourced twice by accident
+   1. they shouldn't be sourced twice by accident
 
-        2. they shouldn't be sourced if the plugin they configure has been
-           disabled while we debug some issue (`$ vim -Nu /tmp/vimrc`)
+   2. they shouldn't be sourced if the plugin they configure has been disabled
+      while we debug some issue (`$ vim -Nu /tmp/vimrc`)
 
 ## Which template should I follow?
 
-           ┌ don't source the script twice
-           │
-           │                         ┌ source it only if the plugin is enabled
-           │                         │
-           ├────────────────────┐    ├───────────────────────────┐
-        if exists('g:loaded_...') || stridx(&rtp, 'vim-...') == -1
-            finish
-        endif
+       ┌ don't source the script twice
+       │
+       │                         ┌ source it only if the plugin is enabled
+       │                         │
+       │                         │                                ┌ don't source if I'm debugging
+       │                         │                                │ with `$ vim -Nu NORC`
+       ├────────────────────┐    ├───────────────────────────┐    ├───────────────────┐
+    if exists('g:loaded_...') || stridx(&rtp, 'vim-...') == -1 || exists('g:no_plugin')
+        finish
+    endif
 
 Note that the  name of the plugin  does not necessarily begin  with 'vim-', it's
 just a widely adopted convention.

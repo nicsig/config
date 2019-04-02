@@ -2175,6 +2175,7 @@ EOF
 #}}}2
 
 shellcheck_wiki() { #{{{2
+  # Purpose: Get more information about an error found by shellcheck.
   xdg-open "https://github.com/koalaman/shellcheck/wiki/SC$1"
 }
 
@@ -3661,7 +3662,7 @@ bindkey '^Xh' describe-key-briefly
 
 # }}}3
 # C-z        fancy_ctrl_z {{{3
-#
+
 # FIXME:
 # I can't bring a suspended process to the foreground anymore.
 # MWE:

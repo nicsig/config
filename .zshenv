@@ -342,7 +342,22 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
 export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 # add man pages for `texlive` and `dasht`
-export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/man:${MANPATH}
+# What's the default value of `$MANPATH`?{{{
+#
+# It's empty on my system atm.
+#}}}
+# Why do you put a colon at the end?{{{
+#
+# When `$MANPATH` contains  an empty component, for every  `<path>/bin` which is
+# in your `$PATH`, `$ man` will also look for manpages in `<path>/share/man`:
+#
+#     https://askubuntu.com/a/633924/867754
+#
+# This means that since  we have `~/bin` in our `$PATH`, `$  man` will look into
+# `~/share/man`; IOW, this allows us to install manpages locally (!= system-wide
+# in `/usr/share/man`).
+#}}}
+export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/man:${MANPATH}:
 # add the `texlive` and `dasht` binaries to our path
 export PATH=${HOME}/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/GitRepos/dasht/bin
 #           ├───────┘{{{

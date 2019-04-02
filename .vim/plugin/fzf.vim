@@ -2,6 +2,8 @@ if exists('g:loaded_fzf') || stridx(&rtp, 'fzf.vim') == -1 || exists('g:no_plugi
     finish
 endif
 
+" For more information about the available settings, read `:h fzf` *and* `:h fzf-vim`.
+
 " Why must I put the config of fzf.vim in this directory instead of `~/.vim/after/plugin/`?{{{
 "
 " We want all the commands installed by the plugin to be prefixed by `Fz`:
@@ -50,35 +52,15 @@ let g:fzf_buffers_jump = 1
 
 let g:fzf_command_prefix = 'Fz'
 
-" Preview the contents of the selected result in the output of `:Files`.{{{
+" `:FzAg` considers the path component prefixing the lines when searching for our query.  We don't want that.{{{
 "
-" Needs the shell pgm `$ coderay`.
-" Install it with:
-"
-"       $ gem install coderay
+" So, we pass the `-d: -n 4..` options to `$ fzf`.
+" We exclude from the search the first, second and third fields (path, line, column).
+" See: https://www.reddit.com/r/vim/comments/b88ohz/fzf_ignore_directoryfilename_while_searching/ejwn384/
 "}}}
-" Why do you use `bat` instead of `coderay` like before?{{{
-"
-" From `https://github.com/junegunn/fzf.vim/pull/712#issuecomment-432990824`:
-"
-"      It's  a  little hard  for  me  to imagine  that  someone  installed bat  or
-"      highlight would still want to use  slower – or less "modern" – alternatives
-"      like coderay or rougify.
-"}}}
-let g:fzf_files_options = '--preview "(highlight || bat {} || cat {}) 2>/dev/null | head -'.&lines.'"'
-" TODO: The documentation doesn't mention `g:fzf_files_options` anymore.{{{
-"
-" It can still be used, but the help was changed in this commit:
-"
-"     https://github.com/junegunn/fzf.vim/commit/2eaff049464e7b8304401dd4d79c86a4b0c4ed6c
-"
-" Now, it gives this command:
-"     com! -bang -nargs=? -complete=dir Files
-"       \ call fzf#vim#files(<q-args>, fzf#vim#with_preview(), <bang>0)
-"
-" I've tried it, but it doesn't display any preview for the files, when we press
-" `SPC ff`.
-"}}}
+exe 'com! -bar -bang '.g:fzf_command_prefix.'Ag call fzf#vim#ag(<q-args>, fzf#vim#with_preview({"options": "-d: -n 4.."}, "right"), <bang>0)'
+
+exe 'com! -bang -nargs=? -complete=dir '.g:fzf_command_prefix.'Files call fzf#vim#files(<q-args>, fzf#vim#with_preview("right:50%"), <bang>0)'
 
 " `:FzSnippets` prints the description of the snippets (✔), but doesn't use it when filtering the results (✘).{{{
 

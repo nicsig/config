@@ -814,42 +814,6 @@ fu! s:op_grep_get_qfl(pat) abort
     sil return systemlist(&grepprg.' '.shellescape(a:pat).' 2>/dev/null')
 endfu
 
-fu! myfuncs#op_incremental_yank(type) abort "{{{2
-    let cb_save  = &cb
-    let sel_save = &selection
-    try
-        set cb-=unnamed cb-=unnamedplus
-        set selection=inclusive
-
-        if a:type is# 'char'
-            norm! `[v`]y
-        elseif a:type is# 'line'
-            norm! '[V']y
-        elseif a:type is# 'block'
-            exe "norm! `[\<c-v>`]y"
-        elseif a:type is# 'vis'
-            norm! gvy
-        else
-            return
-        endif
-
-        " Append (flag 'a') what we just copied (unnamed register @")
-        " inside register 'z',
-        " and set its type to be the same as the one of the unnamed register
-        call setreg('z', @".(a:type is# 'char' ? ' ' : ''), 'a'.getregtype('"'))
-
-        " Copy the  'z' register  inside the  unnamed register,  so that  we can
-        " paste it directly with p instead of "zp
-        call setreg('"', @z, getregtype('z'))
-
-    catch
-        return lg#catch_error()
-    finally
-        let &cb  = cb_save
-        let &sel = sel_save
-    endtry
-endfu
-
 " op_replace_without_yank {{{2
 
 " This function is called directly from our `dr` and `drr` mappings.
@@ -1138,20 +1102,23 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     " tab character;  for `virtcol('.')-1`  to work, we  would need  the *first*
     " screen position.
     "}}}
+    " If you want to preserve a tab used to indent a line, use this pattern instead:
+    "     let pat = '\%(^\s*\)\@!\&\(.\)\t'
     let pat = '^\t\|\(.\)\t'
     let l:Rep = {-> submatch(1) . repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.') ))}
-    let g = 0
-    " I think we need the loop because there may be several tabs consecutively.{{{
+    " We need the loop because there may be several tabs consecutively.{{{
     "
     " If that happens, a single substitution would fail to replace all of them, for
     " the same reason that the pattern `.w` fails to match both `w` in `zww`.
     " The regex  engine moves after  the end of a  match, before trying  to find
     " another one.  In the process, it may skip a tab.
+    "
+    " If a line contains 8 tabs, the first iteration will replace the tabs 1, 3, 5 and 7.
+    " The second iteration will replace the tabs 2, 4, 6 and 8.
     "}}}
-    while search("\t", 'n') && g < 999
-        exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/e'
-        let g += 1
-    endwhile
+    for i in [1,2]
+        exe mods . ' ' . range .'s/' . pat . '/\=l:Rep()/ge'
+    endfor
     call winrestview(view)
 endfu
 

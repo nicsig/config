@@ -42,7 +42,8 @@ set guioptions=M
 "}}}
 " Why don't you do it?{{{
 "
-" It would break the `:Gbrowse` command provided by `vim-fugitive` and `vim-rhubarb`.
+" `let  g:loaded_netrw`   would  break   the  `:Gbrowse`  command   provided  by
+" `vim-fugitive` and `vim-rhubarb`.
 " If the file you're working on is hosted on GitHub, `:Gbrowse` lets you read it
 " in your webbrowser.
 "
@@ -1670,7 +1671,28 @@ augroup tags_vimrc
     exe 'au BufWritePost '.resolve($HOME.'/.vim/autoload/myfuncs.vim')
     \ . ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
 
-    au! BufWritePost .zshrc sil call system('source '.expand('%:p:S'))
+    " Don't source the zshrc automatically.{{{
+    "
+    " This would work:
+    "
+    "     au! BufWritePost .zshrc sil call system('source '.expand('%:p:S'))
+    "
+    " But I'm concerned that after editing the zshrc and doing some experiments,
+    " we end up in a shell  whose state is really weird, producing hard-to-debug
+    " issues.
+    " If that happens, we may have an issue in Vim.
+    " We'll restart Vim, and the issue will probably persist.
+    " But we won't necessarily think about starting Vim from a new shell.
+    " We often work in Vim from the same shell for hours.
+    "
+    " I don't like that.
+    " Leave the shell alone.
+    " We already have the habit to open a new shell whenever we edit the zshrc anyway.
+    "
+    " Fucking the vimrc is ok, because we have a mapping to restart Vim.
+    " Fucking the zshrc is *not* ok, because we don't have any such mapping.
+    " At best, we can open a new shell, but not reset the current one.
+    "}}}
 augroup END
 
 " temporary files:  undo, swap, backup {{{2
@@ -3398,21 +3420,6 @@ nno  <silent>  +t   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
 xno  <silent>  +t   :<c-u>call myfuncs#op_trim_ws('vis')<cr>
 nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '.v:count1.'g@_'<cr>
 
-" +y  (+yc)     incremental yank (clear) {{{4
-
-nno  <silent>  +y   :<c-u>set opfunc=myfuncs#op_incremental_yank<cr>g@
-xno  <silent>  +y   :<c-u>call myfuncs#op_incremental_yank('vis')<cr>
-nno  <silent>  +yy  :<c-u>set opfunc=myfuncs#op_incremental_yank<bar>exe 'norm! '.v:count1.'g@_'<cr>
-
-nno  <silent>  +yc  :<c-u>call <sid>clear_z()<cr>
-
-fu! s:clear_z() abort
-    let [@z, @+] = ['', '']
-    sil! put
-    sil! undo
-    echo 'z register: cleared'
-endfu
-
 " }}}3
 " CR / Tab / Shift / Control / Meta {{{3
 " CR                  move cursor on 80/100 column {{{4
@@ -3809,12 +3816,23 @@ fu! s:fix_macro() abort
     norm! 1|0f'
 endfu
 
-" ""                  easier access to system register  {{{3
+" ""                  easier access to system register (and clean paste in mardown) {{{3
 
-" We don't tweak 'cb' anymore, because it causes too many issues.
+" We don't tweak `'cb'` anymore, because it causes too many issues.
+" We use a mapping instead.
+" We also leverage  this mapping to replace  some characters after a  paste in a
+" markdown file; e.g. `’` → `'`.
 
-nno  ""  "+
-xno  ""  "+
+nno <expr> "" <sid>easy_and_custom_paste()
+xno "" "+
+
+fu! s:easy_and_custom_paste() abort
+    if &ft is# 'markdown'
+        let @+ = substitute(@+, '’', "'", 'g')
+        let @+ = substitute(@+, '\w\zs \ze, \w', '', 'g')
+    endif
+    return '"+'
+endfu
 
 " { }                 move by paragraphs {{{3
 
@@ -6834,7 +6852,10 @@ endfu
 "    - 'filewinid' (location list property)
 "    - 'user_data' entry in completion item
 "    - 'varsofttabstop', 'vartabstop'
-"    - :h matchadd(), new `window` key in optional dictionary
+"
+"    - :h matchadd(), new `window` key in optional dictionary;
+"       see also new window ID argument to matchdelete(), clearmatches(), getmatches() and setmatches()
+"
 "    - :swapname
 "    - :unl[et] ${env-name} (:h :unlet-$)
 "    - appendbufline()
@@ -7823,7 +7844,7 @@ endfu
 
 
 
-let s:syled_comments_filetypes = [
+let s:styled_comments_filetypes = [
     \ 'awk',
     \ 'c',
     \ 'conf',
@@ -7845,15 +7866,15 @@ let s:syled_comments_filetypes = [
     \ 'xkb',
     \ 'zsh',
     \ ]
-augroup syled_comments
+augroup styled_comments
     au!
 
-    au FileType * if index(s:syled_comments_filetypes, expand('<amatch>')) >= 0
+    au FileType * if index(s:styled_comments_filetypes, expand('<amatch>')) >= 0
         \ |     sil! call lg#styled_comment#fold()
         \ |     sil! call lg#styled_comment#undo_ftplugin()
         \ | endif
 
-    au Syntax * if index(s:syled_comments_filetypes, expand('<amatch>')) >= 0
+    au Syntax * if index(s:styled_comments_filetypes, expand('<amatch>')) >= 0
         \ |     sil! call lg#styled_comment#syntax()
         \ | endif
 augroup END
