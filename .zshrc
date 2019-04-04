@@ -2627,7 +2627,11 @@ alias iconv_no_accent='iconv -f utf8 -t ascii//TRANSLIT'
 
 # info {{{3
 
-alias info='info --vi-keys'
+# `--vi-keys` = use vi-like and less-like key bindings.
+# `--init-file` = Read key bindings and variable settings from INIT-FILE
+# instead of the .infokey file in your home directory.
+# https://www.gnu.org/software/texinfo/manual/info-stnd/html_node/Invoking-Info.html#g_t_002d_002dinit_002dfile
+alias info='info --vi-keys --init-file=~/.config/.infokey'
 
 # iotop {{{3
 
@@ -3270,7 +3274,7 @@ FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;7m'
 # snippet selection
 _fzf_snippet_main_widget() {
   emulate -L zsh
-  if grep -q -P '{{' <<<"${BUFFER}"; then
+  if grep -q '{{' <<<"${BUFFER}"; then
     _fzf_snippet_placeholder
   else
     local selected

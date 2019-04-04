@@ -673,7 +673,7 @@ if has('vim_starting')
         " startup),  so if  you decide  to  use viminfo,  you'll have  to delay  the
         " loading of the colorscheme until VimEnter:
         "
-        "      au VimEnter * nested call s:set_colorscheme()
+        "      au VimEnter * ++nested call s:set_colorscheme()
         "                  │
         "                  └─ the autocmds need to nest, so that when we set the colorscheme,
         "                     `ColorScheme` is fired, and our customizations are sourced
@@ -2380,7 +2380,7 @@ fu! s:c_m() abort
 
     if getline('.') =~ '^\s*\V'.escape(cml, '\').'\v\s*$'
         " We can't invoke `setline()` immediately, because of `<expr>`.
-        call timer_start(0, { -> setline('.', '') })
+        call timer_start(0, {-> setline('.', '')})
         return ''
 
         " OLD:
@@ -2706,7 +2706,7 @@ augroup my_goyo
     " Why do we need `nested` anyway?
 
     au User GoyoEnter        call s:goyo_enter()
-    au User GoyoLeave nested call s:goyo_leave()
+    au User GoyoLeave ++nested call s:goyo_leave()
 augroup END
 
 " i                             ixquick {{{4
@@ -3443,7 +3443,7 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
                        \ ?     '<cr>'
                        \ :     ':<c-u>'.getbufvar('%', 'cr_command', 'norm! 80<bar>').'<cr>'
 "                                 │
-"                                 └── important, otherwise, if we hit a nr
+"                                 └ important, otherwise, if we hit a nr
 "                                 (e.g. 42) by accident before `CR`, it would do:    :42norm! 100|
 "                                 which would move the cursor 42 lines below the
 "                                 current one
@@ -4758,7 +4758,7 @@ fu! s:grep_cfg(pat) abort
               \     '--full-tree',
               \     '--name-only HEAD',
               \     '-r',
-              \ '| sed "s:^:${HOME}/:"',
+              \ '| sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"',
               \ '| xargs grep -RHIins',
               \ pat,
               \ ]
@@ -5418,7 +5418,7 @@ augroup END
 
 " augroup DefaultExtension
 "     au!
-"     au BufNewFile * nested call s:default_extension(expand('<afile>:p'))
+"     au BufNewFile * ++nested call s:default_extension(expand('<afile>:p'))
 " augroup END
 
 " fu! s:default_extension(buffer) abort
@@ -5477,10 +5477,11 @@ augroup wipe_noname_buffers
     " We have to wait a little bit, to be sure that the last noname buffer we've
     " closed is really hidden.
     "
-    " An alternative would be to call an intermediary function which would install
-    " a fire-once autocmd listening to BufEnter (this event happens right after
-    " BufHidden). At that moment, we could be sure the last hidden noname buffer
-    " is really hidden. And the autocmd would just have to call `s:wipe_noname()`.
+    " An  alternative would  be to  call  an intermediary  function which  would
+    " install a one-shot autocmd listening to BufEnter (this event happens right
+    " after BufHidden).
+    " At that moment, we  could be sure the last hidden  noname buffer is really
+    " hidden. And the autocmd would just have to call `s:wipe_noname()`.
 "}}}
     au BufHidden * call timer_start(0, {-> s:wipe_noname()})
 augroup END
@@ -6333,15 +6334,15 @@ endfu
           if a:step ==# 1
               augroup my_ltag
                   au!
-                  " why the timer?{{{
+                  " Why the timer?{{{
                   "
-                  " if we cancel, or the search fails to find anything,
-                  " the fire-once autocmd will still be, wrongly, active.
-                  " we should make sure to remove it with a timer, after
-                  " a very short period of time.
+                  " If  we cancel,  or the  search fails  to find  anything, the
+                  " one-shot autocmd will still be, wrongly, active.
+                  " We should make sure to remove  it with a timer, after a very
+                  " short period of time.
                   "}}}
-                  " still, syntax highlighting would work better.
-                  " less hack, no timer.
+                  " Still, syntax highlighting would work better.
+                  " Less hack, no timer.
                   au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
                   au FileType qf sil! call s:ltag(2)
                       \ | exe 'au! my_ltag' | aug! my_ltag
@@ -7837,6 +7838,7 @@ endfu
 " 127 -
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
+
 
 
 

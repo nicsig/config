@@ -150,8 +150,8 @@ fu! s:install_mappings() abort "{{{2
     " When a  filetype plugin is sourced,  it seems the interface  of the plugin
     " would  be finally  installed (contrary  to  when the  current function  is
     " sourced).
-    " Or you could install a fire-once autocmd to slightly delay the execution
-    " of `:EmmetInstall`:
+    " Or you could install a one-shot autocmd to slightly delay the execution of
+    " `:EmmetInstall`:
     "
     "     augroup my_emmet_install
     "         au!

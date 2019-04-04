@@ -122,7 +122,7 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-F17>'
 ino  <silent>  <c-g><s-tab>  <c-r>=execute(g:_uspy . ' UltiSnips_Manager._current_snippet_is_done()', 'silent!')[-1]<cr>
 " TODO: Find a way to end the expansion of a snippet when we leave insert mode.{{{
 "
-" Hint: If you install a fire-once autocmd listening to InsertLeave,
+" Hint: If you install a one-shot autocmd listening to InsertLeave,
 " it will work, but you won't be able to jump to the 2nd tabstop of a snippet.
 " It may be because our custom Tab mapping manually invokes `UltiSnips#ExpandSnippet()`.
 "}}}

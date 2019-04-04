@@ -26,3 +26,7 @@ vboxmanage snapshot {{ubuntu}} restore {{snapname}} # restore arbitrary snapshot
 vboxmanage snapshot {{ubuntu}} take {{snapname}} --description "{{my snapshot}}" --live # take snapshot of VM
 
 vimdiff =({{cmd1}}) =({{cmd2}}) # compare output of 2 commands
+
+xdg-mime query filetype {{file}} # get the mimetype of a file
+xdg-mime query default {{mimetype}} # get the default application which handles a particular type of data
+xdg-mime default {{app.desktop}} {{mimetype}} # set the default application which handles a particular type of data

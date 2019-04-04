@@ -1,0 +1,53 @@
+# This file customizes the default key bindings in `$ info`.
+# https://www.gnu.org/software/texinfo/manual/info-stnd/html_node/Custom-Key-Bindings.html#Custom-Key-Bindings
+
+# Where can I find the name of the commands which can be used in the rhs of the key bindings?{{{
+#
+# Run `$ info`, and invoke `get-help-window` (currently bound to `C-h`).
+# Scroll down until you find either of these lines:
+#
+#     Commands available in Info windows:
+#     Commands available in the echo area:
+#}}}
+
+#info
+g       beginning-of-node
+G       end-of-node
+j       next-line
+k       prev-line
+l       forward-char
+h       backward-char
+
+\kd     down-line
+^e      down-line
+\ku     up-line
+^y      up-line
+
+^d      scroll-half-screen-down
+^u      scroll-half-screen-up
+^t      history-node
+
+^n      next-node
+^p      prev-node
+u       up-node
+t       top-node
+]h      move-to-next-xref
+[h      move-to-prev-xref
+
+zj      split-window
+Zo      keep-one-window
+^w^w    next-window
+Z=      tile-windows
+
+n       search-next
+N       search-previous
+
+^m      select-reference-this-line
+
+^c      abort-key
+
+^h      get-help-window
+
+:q      quit
+ZZ      quit
+
