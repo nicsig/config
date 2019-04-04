@@ -4298,7 +4298,7 @@ setopt RM_STAR_SILENT
 #}}}
 # Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
 #
-# For the  colorschemes of programs to  be displayed correctly in  the terminal,
+# For the color  schemes of programs to be displayed  correctly in the terminal,
 # `$TERM` must contain '-256color'.
 # Otherwise, the programs  will assume the terminal is only  able to interpret a
 # limited amount  of escape  sequences used  to encode 8  colors, and  they will

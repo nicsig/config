@@ -1248,7 +1248,7 @@ https://vi.stackexchange.com/questions/2009/how-do-i-make-vim-look-in-a-set-of-d
 
 
 
-colorscheme
+color scheme
 https://vi.stackexchange.com/questions/6780/how-do-i-preserve-my-colorscheme-when-i-sudo-to-root
 https://vi.stackexchange.com/questions/8575/neovim-default-colors-dont-match-vims
 https://vi.stackexchange.com/questions/8607/how-do-putty-kitty-ansi-colors-affect-vim-colorschemes/
@@ -1535,7 +1535,7 @@ search and replace
 
     :%s/<br>\n<br>/\r<\/p>\r<p>/g - replace br with p
 
-    :color - show current colorscheme
+    :color - show current color scheme
 
 :%TOhtml - generate HTML page that looks like the current view
 

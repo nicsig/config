@@ -31,8 +31,7 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -49,8 +48,7 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/Desktop/test.vim") | buffer ~/Desktop/test.vim | else | edit ~/Desktop/test.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -68,8 +66,7 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim") | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -108,8 +105,7 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -126,8 +122,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-markdown/syntax/markdown.vim") | buffer ~/.vim/plugged/vim-markdown/syntax/markdown.vim | else | edit ~/.vim/plugged/vim-markdown/syntax/markdown.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -147,8 +142,7 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-markdown
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/autoload/colorscheme.vim") | buffer ~/.vim/autoload/colorscheme.vim | else | edit ~/.vim/autoload/colorscheme.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -189,10 +183,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
+wincmd =
+argglobal
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -210,38 +202,52 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
-if bufexists("~/wiki/vim/highlighting.md") | buffer ~/wiki/vim/highlighting.md | else | edit ~/wiki/vim/highlighting.md | endif
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+argglobal
+if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
+setlocal fdm=marker
+setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+296
+normal! zo
+559
+normal! zo
+689
+normal! zo
+2190
+normal! zo
+2463
+normal! zo
+3682
+normal! zo
+3711
+normal! zo
+3718
+normal! zo
+let s:l = 1 - ((0 * winheight(0) + 8) / 17)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
-normal! 01|
-lcd ~/wiki/vim
+normal! 0
+lcd ~/.vim
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+wincmd =
 tabnext 3
 set stal=1
 badd +1 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
-badd +1 ~/wiki/vim/syntax_hl.md
+badd +3737 ~/.vim/vimrc
+badd +2445 ~/wiki/vim/syntax_hl.md
 badd +1 /usr/local/share/vim/vim81/colors/README.txt
 badd +1 ~/Desktop/test.vim
-badd +506 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+badd +1 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 badd +1 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +1 ~/.vim/autoload/colorscheme.vim
-badd +556 ~/wiki/vim/highlighting.md
+badd +394 ~/.vim/autoload/colorscheme.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

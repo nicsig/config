@@ -11,7 +11,7 @@ fu! colorscheme#set() abort "{{{2
     "}}}
     let g:seoul256_srgb = 1
 
-    let seoul_bg = get(g:, 'my_last_colorscheme', 253)
+    let seoul_bg = get(g:, 'my_last_color_scheme', 253)
     if seoul_bg >= 233 && seoul_bg <= 239
         " What's this `g:seoul256_background`?{{{
         "
@@ -53,7 +53,7 @@ fu! colorscheme#customize() abort "{{{2
     hi! link SpecialKey Special
 
     " the `VertSplit`  HG set  by seoul256  has a dark  background which  is too
-    " visible in the light colorscheme, and not enough in the dark one
+    " visible in the light color scheme, and not enough in the dark one
     hi! link VertSplit Normal
 
     " `Underlined` is meant to be used to highlight html links.{{{
@@ -85,7 +85,7 @@ fu! colorscheme#customize() abort "{{{2
 
     " Why changing `CursorLine`?{{{
     "
-    " The  attributes set  by our  colorscheme make  the cursorline  not visible
+    " The attributes  set by our  color scheme  make the cursorline  not visible
     " enough.
     "}}}
     " Why `ctermbg=NONE` and `guibg=NONE`?{{{
@@ -106,8 +106,8 @@ fu! colorscheme#customize() abort "{{{2
     " hide the EndOfBuffer char (~) by changing its ctermfg attribute (ctermfg=bg)
     " Why this `:if` guard?{{{
     "
-    " Some colorschemes don't set up the `Normal` HG.
-    " So, the value `bg` may not exist for all colorschemes.
+    " Some color schemes don't set up the `Normal` HG.
+    " So, the value `bg` may not exist for all color schemes.
     "
     "     :colo elflord
     "     :hi EndOfBuffer ctermfg=bg
@@ -140,7 +140,7 @@ fu! colorscheme#customize() abort "{{{2
     " ('StatusLine', 'TabLine', ...), are not (correctly) defined yet.
     "}}}
     if has('gui_running') && has('vim_starting')
-        augroup delay_colorscheme_when_gvim_starts
+        augroup delay_color_scheme_when_gvim_starts
             au!
             au VimEnter * call s:styled_comments() | call s:tabline() | call s:title() | call s:user()
         augroup END
@@ -150,7 +150,7 @@ fu! colorscheme#customize() abort "{{{2
 endfu
 
 fu! colorscheme#save_last_version() abort "{{{2
-    let line = 'let g:my_last_colorscheme = '.get(g:, 'seoul256_current_bg', 253)
+    let line = 'let g:my_last_color_scheme = '.get(g:, 'seoul256_current_bg', 253)
     call writefile([line], $HOME.'/.vim/colors/my/last_version.vim')
 endfu
 " }}}1
@@ -390,7 +390,7 @@ fu! s:user() abort "{{{2
         "                                         so, we use `%s` everywhere
     endif
 
-    " For some  colorschemes (default, darkblue,  ...), some values used  in the
+    " For some color  schemes (default, darkblue, ...), some values  used in the
     " command which is going to be executed may be empty.
     " If that happens, the command will fail:
     "

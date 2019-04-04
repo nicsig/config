@@ -556,9 +556,9 @@ set backspace=indent,eol,start
 "
 "         - is fixed if you don't tweak 'cb' (set cb&vim)
 "}}}
-" colorscheme {{{2
+" color scheme {{{2
 
-augroup my_colorscheme
+augroup my_color_scheme
     au!
     au ColorScheme * call colorscheme#customize()
 
@@ -577,7 +577,7 @@ augroup my_colorscheme
     "}}}
     " Where does the issue come from?{{{
     "
-    " The `snipLeadingSpaces` HG is cleared when we change the colorscheme, because of `:hi clear`:
+    " The `snipLeadingSpaces` HG is cleared when we change the color scheme, because of `:hi clear`:
     "
     "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
     "
@@ -601,7 +601,7 @@ fu! s:reinstall_cleared_hg() abort
     "
     " Suppose you have two windows, one with a python buffer, and the other with
     " a markdown buffer.
-    " You change the colorscheme while in the python buffer.
+    " You change the color scheme while in the python buffer.
     " The HGs whose attributes are defined in `$VIMRUNTIME/syntax/html.vim` will
     " be cleared, which may have an effect  on the rendering of some text in the
     " markdown buffer.
@@ -651,24 +651,24 @@ endfu
 
 " Why the guard?{{{
 "
-"     - there's no point reloading the colorscheme every time we source our
-"       vimrc
+"    - there's no point reloading the color scheme every time we source our
+"      vimrc
 "
-"     - without a guard, every time we write the vimrc, the colorscheme would
-"       be reloaded, which would make us lose syntax highlighting in
-"       a `freekeys` buffer, because of `:hi clear`:
+"    - without a guard, every time we write the vimrc, the color scheme would
+"      be reloaded, which would make us lose syntax highlighting in
+"      a `freekeys` buffer, because of `:hi clear`:
 "
-"               ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
+"         ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
 "}}}
 if has('vim_starting')
-    " In a console, we want a readable colorscheme.
+    " In a console, we want a readable color scheme.
     if $DISPLAY is# ''
         colo morning
     else
         " What's the purpose of this call?{{{
         "
-        " We want to memorize somewhere the  last version of the colorscheme we used
-        " (atm it's expressed by an ANSI code: 233 … 239, 252 … 256).
+        " We want to memorize somewhere the  last version of the color scheme we
+        " used (atm it's expressed by an ANSI code: 233 … 239, 252 … 256).
         "}}}
         " Is there an alternative?{{{
         "
@@ -677,7 +677,7 @@ if has('vim_starting')
         "
         " Note that  when the vimrc  is read, the viminfo  hasn't been read  yet (:h
         " startup),  so if  you decide  to  use viminfo,  you'll have  to delay  the
-        " loading of the colorscheme until VimEnter:
+        " loading of the color scheme until VimEnter:
         "
         "      au VimEnter * ++nested call s:set_colorscheme()
         "                  │
@@ -688,11 +688,11 @@ if has('vim_starting')
         "}}}
         " Why don't you use the alternative?{{{
         "
-        " The  alternative requires that  we delay  the sourcing of  the colorscheme
-        " until VimEnter. Besides, the colorscheme executes `:hi clear` which removes
-        " any custom HG we may have defined.
+        " The  alternative requires  that we  delay  the sourcing  of the  color
+        " scheme until  VimEnter. Besides, the colorscheme executes  `:hi clear`
+        " which removes any custom HG we may have defined.
         "
-        " So, if we delay the colorscheme, we must redefine all our custom HGs.
+        " So, if we delay the color scheme, we must redefine all our custom HGs.
         "
         " But, I can't know in advance all the custom HGs currently defined.
         " It depends on the files which have been read during Vim startup.
@@ -701,9 +701,9 @@ if has('vim_starting')
         " will have been installed to apply the italic style on the text between two
         " asterisks. We need to avoid clearing it right after Vim has been started.
         "}}}
-        au my_colorscheme VimLeavePre * call colorscheme#save_last_version()
+        au my_color_scheme VimLeavePre * call colorscheme#save_last_version()
 
-        " try to restore the exact version of the last colorscheme used
+        " try to restore the exact version of the last color scheme used
         let s:file = $HOME.'/.vim/colors/my/last_version.vim'
         if filereadable(s:file)
             exe 'so '.s:file
@@ -3708,10 +3708,10 @@ fu! s:fix_display() abort
     " update title in folds
     do BufWinEnter
 
-    " Re-install HGs which may have been cleared after changing the colorscheme.{{{
+    " Re-install HGs which may have been cleared after changing the color scheme.{{{
     "
     " Remember that to change the brightness  of `seoul-256`, in effect, we *do*
-    " change the colorscheme.
+    " change the color scheme.
     " Also, note  that `do Syntax` will  only re-install a HG  if its attributes
     " are defined in a syntax plugin which is sourced for the current buffer.
     "}}}
@@ -3734,7 +3734,7 @@ fu! s:fix_display() abort
     "     some error
     "     EOF
     "
-    "     " press `]ol` to change the lightness/colorscheme
+    "     " press `]ol` to change the lightness / color scheme
     "     " make sure no `.conf` file is currently displayed in a window
     "
     "     :sp /tmp/conf.conf

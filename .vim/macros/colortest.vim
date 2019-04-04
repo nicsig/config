@@ -1,6 +1,6 @@
 " Purpose:{{{
 "
-" If you're  writing a colorscheme,  you may want  to see which  combinations of
+" If you're writing  a color scheme, you  may want to see  which combinations of
 " colors (foreground + background) are the most readable/nice.
 " This script should display the ones which are use the most often.
 " For more info, see `:h 06.3`.
