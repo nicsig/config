@@ -153,11 +153,7 @@ fu! s:install_mappings() abort "{{{2
     " Or you could install a one-shot autocmd to slightly delay the execution of
     " `:EmmetInstall`:
     "
-    "     augroup my_emmet_install
-    "         au!
-    "         au BufWinEnter * if index(['html', 'css'], &ft) >= 0 | sil! EmmetInstall | endif
-    "             \ | exe 'au! my_emmet_install' | aug! my_emmet_install
-    "     augroup END
+    "     au BufWinEnter * ++once if index(['html', 'css'], &ft) >= 0 | sil! EmmetInstall | endif
     "}}}
     " Why don't you lazy-load emmet?{{{
     "

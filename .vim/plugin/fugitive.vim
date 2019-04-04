@@ -11,11 +11,7 @@ augroup END
 
 fu! s:glog_conceal(when) abort
     if a:when is# 'on_quickfixcmdpost'
-        augroup my_glog_conceal
-            au!
-            au QuickFixCmdPost * sil! call s:glog_conceal('now')
-                \ | exe 'au! my_glog_conceal' | aug! my_glog_conceal
-        augroup END
+        au QuickFixCmdPost * ++once sil! call s:glog_conceal('now')
     else
         call qf#set_matches('my_fugitive:glog_conceal', 'Conceal', 'location')
         call qf#create_matches()

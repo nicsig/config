@@ -225,11 +225,7 @@ fu! s:fts(cmd) abort
     " `feedkeys('zv', 'int')` would IMMEDIATELY press `zv` (✘).
     " The autocmd also presses `zv`, but only after a motion has occurred (✔).
     "}}}
-    augroup sneak_open_folds
-        au!
-        au CursorMoved * sil! exe 'norm! zv'
-            \ exe 'au! sneak_open_folds' | aug! sneak_open_folds
-    augroup END
+    au CursorMoved * ++once sil! exe 'norm! zv'
 
     " What's the purpose of this `if` conditional?{{{
     "

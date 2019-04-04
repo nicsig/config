@@ -278,10 +278,16 @@ augroup delay_slow_call
     " the lazy-loaded  interface has  been installed, maybe  try to  add another
     " event to the autocmd.
     "}}}
-    au CursorHold,InsertEnter  *  call s:delay_slow_call()
+    " Why don't you use `++once`?{{{
+    "
+    " It wouldn't work.
+    " When one of these 2 autocmds is fired, it needs to remove itself *and* the
+    " other autocmd; `++once` can do the first part but not the second one.
+    "}}}
+    au CursorHold,InsertEnter * call s:delay_slow_call()
     " Do NOT call the function when we enter debug mode (>).
     " It could raise spurious errors when we debug Vim (`$ vim -D`).
-    au CmdlineEnter  :,/,\?,@  call s:delay_slow_call()
+    au CmdlineEnter :,/,\?,@ call s:delay_slow_call()
 augroup END
 
 call plug#end()
@@ -1290,12 +1296,7 @@ if !has('gui_running') && has('vim_starting')
     " so that the statusline  is correctly drawn even if we  press `:` very fast
     " after (Neo)Vim has been started.
     "}}}
-    augroup delay_lazy_redraw
-        au!
-        au CursorHold,InsertEnter,CmdlineEnter * sil! set lazyredraw
-            \ | exe 'au! delay_lazy_redraw'
-            \ | aug! delay_lazy_redraw
-    augroup END
+    au CursorHold,InsertEnter,CmdlineEnter * ++once sil! set lazyredraw
 endif
 
 " match (showmatch / matchtime) {{{2
@@ -5548,38 +5549,16 @@ fu! s:filetype_linter(action) abort
     endif
 endfu
 
-" Man pages {{{2
-
-" We want to use Vim as a pager to read man pages in bash.
-" To do so, we need to set the filetype when the buffer is a man page,
-" so that ~/.vim/after/ftplugin/man.vim is loaded.
-" When we open a man page, $MAN_PN is set with the name of the page (ex:
-" man(1)).
-" We can test its value to know if Vim has been launched to read a man page.
-if !empty($MAN_PN)
-    augroup man_pages
-        au!
-        " Why do we use an autocmd, instead of just writing the command:
-        " setl ft=man | file $MAN_PN directly ?
-        " Because it would be too soon, the buffer wouldn't be loaded yet.
-        " We have to wait for the standard input to have been read completely.
-        "
-        " Why an augroup? Probably not necessary, but don't like an autocmd
-        " outside an augroup.
-        au StdinReadPost * setl ft=man
-    augroup END
-endif
-
 " Read special files {{{2
 
 " The following autocmd  allows us to read  special files like a pdf  or an odt.
 " They use a few shell utilities as filter:
 "
-"       - antiword
-"       - odt2txt
-"       - pandoc
-"       - pdftotext
-"       - unrtf
+"    - antiword
+"    - odt2txt
+"    - pandoc
+"    - pdftotext
+"    - unrtf
 
 augroup filter_special_file
     au!
@@ -6344,8 +6323,7 @@ endfu
                   " Still, syntax highlighting would work better.
                   " Less hack, no timer.
                   au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
-                  au FileType qf sil! call s:ltag(2)
-                      \ | exe 'au! my_ltag' | aug! my_ltag
+                  au FileType qf ++once sil! call s:ltag(2)
               augroup END
               return ':ltag / | lw'.repeat("\<left>", 5)
           elseif a:step ==# 2
@@ -6787,11 +6765,7 @@ endfu
 "                 exe 'ino  <buffer>  '.l:key.'  '.i
 "                 let i += 1
 "             endfor
-"             augroup reset_easy_number
-"                 au! * <buffer>
-"                 au InsertLeave <buffer> call s:easy_number()
-"                     \ | au! reset_easy_number * <buffer>
-"             augroup END
+"             au InsertLeave <buffer> ++once call s:easy_number()
 "         endif
 "         return ''
 "     endfu
