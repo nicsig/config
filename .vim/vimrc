@@ -634,6 +634,11 @@ fu! s:reinstall_cleared_hg() abort
     " For each  of them,  if it  has never  seen the  filetype of  the displayed
     " buffer, it reloads its syntax plugin.
     "}}}
+    " If I have several buffers with the same filetype, don't I need to fire `Syntax` for each of them?{{{
+    "
+    " No.
+    " To re-install the cleared HGs, you just need to reload the syntax plugin once.
+    "}}}
     let orig_winid = win_getid()
     let seen = {}
     for info in getwininfo()
@@ -1894,6 +1899,16 @@ set timeoutlen=3000
 "       1. insert sth wrong
 "       2. hit escape
 "       3. hit u (undo)    →    M-u: uppercase next word
+" TODO: When you set this option, the contents of a recording is weird.{{{
+"
+"     $ vim -Nu NONE +'set ttimeoutlen=6'
+"     qqq
+"     qq A Esc q
+"     :echo @q
+"     A^[<80><fd>a~
+"
+" Can it cause any issue?
+"}}}
 set ttimeoutlen=6
 " the lower the value, the less risk there is for keys manually typed to be
 " interpreted as a keycode
@@ -3989,10 +4004,28 @@ nno  M  zMzvzz
 
 " J        gJ         join without moving {{{3
 
-nno  <silent>  J  @="mzJ`z"<cr>
+" Why don't you use `@=` to make our custom `J` support a count?{{{
+"
+" Yeah, in the past we installed this:
+"
+"     nno  <silent>  J  @="m'J``"<cr>
+"
+" But I raises an issue when you replay a macro with `@@` which contains `J`:
+"
+"     $ printf 'ab\ncd\nef\ngh\nij\nkl' | vim -Nu NONE +'nno J  @="J"<cr>' -
+"     qq A, Esc J q
+"     j @q
+"     j @@
+"
+" You should get `ij, kl` in the last line, but instead you'll get `ij kl`.
+"
+" I think that's  because when you replay  a macro with `@@`, the  last macro is
+" redefined by `@=`.
+"}}}
+nno <expr> J "m'" . v:count1 . 'J``'
 
 " gJ doesn't insert or remove any spaces
-nno  <silent>  gJ  @="mzgJ`z"<cr>
+nno <expr> gJ "m'" . v:count1 . 'gJ``'
 
 " Q        q {{{3
 
@@ -4760,9 +4793,15 @@ fu! s:grep_cfg(pat) abort
               \     '--name-only HEAD',
               \     '-r',
               \ '| sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"',
-              \ '| xargs grep -RHIins',
+              \ '| xargs grep -HIins',
               \ pat,
               \ ]
+    " TODO: How to get the column position?{{{
+    "
+    " We could pass the  `-b` option to `$ grep`, but it would  give us the byte
+    " offset from the start of the file.
+    " We need the character offset from the start of the line.
+    "}}}
     cgetexpr system(join(cmd)) | cw
     call setqflist([], 'a', {'title': ':GrepCfg ' . pat})
 endfu
@@ -6824,6 +6863,8 @@ endfu
 " 64 -
 " play with (or document):
 "
+"    - `:scriptversion`; https://github.com/vim/vim/commit/558ca4ae55096f8763ab8515a304cda9c57f18a7
+"
 "    - 'filewinid' (location list property)
 "    - 'user_data' entry in completion item
 "    - 'varsofttabstop', 'vartabstop'
@@ -6848,6 +6889,7 @@ endfu
 "    - dirchanged
 "    - exitpre
 "    - sourcepost
+"    - complete_info(); https://github.com/vim/vim/commit/fd133323d4e1cc9c0e61c0ce357df4d36ea148e3
 "    - getcompletion('*', 'arglist')   +   com! -complete=arglist ...
 "    - gettagstack(), settagstack()
 "    - mode() (new output `n_ov`, `n_oV`, `n_oC-v`)
@@ -6859,6 +6901,7 @@ endfu
 "    - sign_place()
 "    - sign_undefined()
 "    - sign_unplace()
+"    - str2list() and list2str()
 "    - term_setansicolors(), term_getansicolors(), g:term_ansi_colors
 "    - term_setsize()
 "    - textchangedp
@@ -7634,6 +7677,16 @@ endfu
 "                ^^^
 "     'some text('.'), other text'
 "                ^^^
+"
+" Update:
+" Don't replace `.` with ` . `, replace it with `..`.
+" See:
+" https://github.com/vim/vim/commit/0f248b006c2574abc00c9aa7886d8f33620eb822
+"
+" And from `:h expr5`:
+" > For String concatenation ".." is preferred, since "." is ambiguous, it is also
+" > used for |Dict| member access and floating point numbers.
+"
 " 114 -
 " Remove all `==#`, `!=#`, `==?`, `!=?`.
 " Replace them with `==`, `!=`.

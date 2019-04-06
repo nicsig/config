@@ -531,7 +531,7 @@ get_version() { #{{{2
     VERSION="$(git describe --tags --abbrev=0)"
   fi
 
-  if [[ "${PGM}" == 'gawk' ]] || [[ "${PGM}" == 'surfraw' ]]; then
+  if [[ "${PGM}" == 'gawk' || "${PGM}" == 'surfraw' ]]; then
     VERSION="${VERSION#*-}"
     VERSION="9:${VERSION%-*}"
 

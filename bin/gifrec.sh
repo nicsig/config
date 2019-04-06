@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Alternative: https://github.com/nbedos/termtosvg
+
 # Output file is:    /tmp/gif.gif
 
 # TODO: screenkey{{{
@@ -109,7 +111,7 @@ get_geometry() { #{{{2
 
 main() { #{{{2
   get_geometry
-  start_recording "${@}"
+  start_recording "$@"
   stop_everything
   maybe_close_panes
   encode_to_gif
@@ -189,5 +191,5 @@ if [[ -z "$@" ]]; then
   exit 64
 fi
 
-main "${@}"
+main "$@"
 

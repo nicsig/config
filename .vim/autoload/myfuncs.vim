@@ -618,8 +618,8 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
             sil exe end_first_block.'put'
         endif
 
-        sil exe mods.range_second_block."s/^/\<c-a>/e"
-        sil exe mods.range_first_block .'g/^/'.(end_first_block + 1).'m.|-j'
+        sil exe mods . range_second_block . "s/^/\<c-a>/e"
+        sil exe mods . range_first_block  . 'g/^/' . (end_first_block + 1) . 'm.|-j'
 
         sil exe "*!column -s '\<c-a>' -t"
 

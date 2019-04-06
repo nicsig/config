@@ -1,6 +1,9 @@
 # This file customizes the default key bindings in `$ info`.
 # https://www.gnu.org/software/texinfo/manual/info-stnd/html_node/Custom-Key-Bindings.html#Custom-Key-Bindings
 
+# You can learn some basic motions from this link:
+# http://www.informit.com/articles/article.aspx?p=597697&seqNum=8
+
 # Where can I find the name of the commands which can be used in the rhs of the key bindings?{{{
 #
 # Run `$ info`, and invoke `get-help-window` (currently bound to `C-h`).
@@ -51,3 +54,10 @@ N       search-previous
 :q      quit
 ZZ      quit
 
+=d      redraw-display
+
+# repeat the last search started by `i`
+;       next-index-match
+
+H       global-prev-node
+L       global-next-node

@@ -1766,6 +1766,39 @@ logout() { #{{{2
   loginctl terminate-session "${session}"
 }
 
+man_pdf() { #{{{2
+  emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+  usage: $0 <command name>
+EOF
+    return 64
+  fi
+  manpage="$(locate $1 | sed -n "\%share/man/man[^/]*/$1\.%p")"
+  # There may be several pages:{{{
+  #
+  #     $ locate printf | sed -n "\%share/man/man[^/]*/printf\.%p"
+  #     /usr/share/man/man1/printf.1.gz~
+  #     /usr/share/man/man3/printf.3.gz~
+  #
+  # In that case, grab the first.
+  #
+  # This explains how to split a string where a newline is:
+  # https://stackoverflow.com/a/19772067/9780968
+  #}}}
+  read manpage <<<"${manpage}"
+  if [[ -z "${manpage}" ]]; then
+    printf -- 'no manpage was found for %s\n' "$1"
+    return 65
+  fi
+  # For the `--mode` option, see: https://unix.stackexchange.com/a/462383/289772
+  groff -man -Tpdf <(zcat "${manpage}") | zathura --mode fullscreen -
+  #      │{{{
+  #      └ shorthand for `-m man`
+  #        include the macro package `man`
+  #}}}
+}
+
 man_zsh() { #{{{2
   emulate -L zsh
   # Purpose:{{{
@@ -2506,7 +2539,16 @@ alias ..5='cd ../../../../..'
 
 # df {{{3
 
-alias df=dfc
+# I want colors too!{{{
+#
+# Use `$ dfc`.
+#}}}
+alias df='df -h -x tmpfs -T'
+#             │  ├─────┘  │{{{
+#             │  │        └ print filesystem type (e.g. ext4)
+#             │  └ exclude filesystems of type devtmpfs
+#             └ human-readable sizes
+#}}}
 
 # dirs {{{3
 
@@ -2631,7 +2673,7 @@ alias iconv_no_accent='iconv -f utf8 -t ascii//TRANSLIT'
 # `--init-file` = Read key bindings and variable settings from INIT-FILE
 # instead of the .infokey file in your home directory.
 # https://www.gnu.org/software/texinfo/manual/info-stnd/html_node/Invoking-Info.html#g_t_002d_002dinit_002dfile
-alias info='info --vi-keys --init-file=~/.config/.infokey'
+alias info='info --vi-keys --init-file=~/.config/infokey'
 
 # iotop {{{3
 
@@ -3007,7 +3049,7 @@ alias -s gif=ristretto
 alias -s {epub,mobi}=ebook-viewer
 alias -s {md,markdown,txt,html,css}=vim
 alias -s odt=libreoffice
-alias -s pdf=zathura
+alias -s pdf="${PDFVIEWER}"
 # }}}1
 # Hooks {{{1
 
