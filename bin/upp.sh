@@ -652,9 +652,9 @@ install() { #{{{2
     # It's a bit long, maybe we could improve the code...
     #}}}
     if [[ "${DEBUG}" -ne 0 ]]; then
-      echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" -y >>"${DEBUG_LOGFILE}"
+      echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null -y >>"${DEBUG_LOGFILE}"
     fi
-    checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" -y
+    checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null -y
     #                                 │
     #                                 └ don't overwrite my package
     #                                   with an old version from the official repositories
@@ -804,8 +804,27 @@ install_dependencies() { #{{{2
   aptitude build-dep "${PGM}"
 
   if [[ "${PGM}" == 'vim' ]]; then
-    # `build-dep vim` is not enough to enable Vim's lua interface.
-    aptitude install luajit libluajit-5.1-dev
+    # `build-dep vim` is not enough{{{
+    #
+    # Actually it seems it does nothing.
+    # Is it because we don't uncomment the right lines in `/etc/apt/sources.list`?
+    #}}}
+    # In case of a missing dependency, see:
+    # https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+    # TODO: Should we also install:{{{
+    #
+    #    - libgtk2.0-dev
+    #    - libx11-dev
+    #    - libxpm-dev
+    #    - libxt-dev
+    # ?
+    #}}}
+    aptitude install libncurses5-dev \
+      luajit libluajit-5.1-dev \
+      libperl-dev \
+      python-dev \
+      python3-dev \
+      ruby-dev
   fi
 }
 

@@ -7868,7 +7868,6 @@ endfu
 
 
 
-
 " '<,'>s/^---\n\n/## /c
 
 
@@ -7883,6 +7882,7 @@ let s:styled_comments_filetypes = [
     \ 'gitconfig',
     \ 'html',
     \ 'lua',
+    \ 'nroff',
     \ 'python',
     \ 'readline',
     \ 'sed',

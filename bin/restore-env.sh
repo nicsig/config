@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# TODO: install terminal descriptions in our home
+#             ┌ (--location) if the page has moved to a different location,
+#             │              redo the request on the new place
+#             │
+#             │┌ write output to a local file named like the remote file we get
+#             ││
+#     $ curl -LO http://invisible-island.net/datafiles/current/terminfo.src.gz
+#     $ gunzip terminfo.src.gz
+#     $ tic -x terminfo.src
+#
+# Or maybe we should rely on `up.sh` to do that?
+# Or maybe we should version control `~/.terminfo/` (`$ config` would restore them)?
+
 # TODO: Finish reading this: https://www.atlassian.com/git/tutorials/dotfiles
 #
 # Understand the commands which are given to restore our config on a new machine:

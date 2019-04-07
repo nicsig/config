@@ -41,7 +41,7 @@ For example:
 For more info:
 <https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command>
 
-## Can I write use a bash completion function?
+## Can I use a bash completion function?
 
 You can try.
 
@@ -62,11 +62,11 @@ Source: <https://unix.stackexchange.com/a/417143/289772>
 # Documentation
 ## Where can I get more info on how to write my own completion function?
 
-        https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org
-        https://github.com/zsh-users/zsh/blob/master/Etc/completion-style-guide
+<https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org>
+<https://github.com/zsh-users/zsh/blob/master/Etc/completion-style-guide>
 
-        https://unix.stackexchange.com/a/366565/232487
-        https://github.com/chrisallenlane/cheat/blob/master/cheat/autocompletion/cheat.zsh
+<https://unix.stackexchange.com/a/366565/232487>
+<https://github.com/chrisallenlane/cheat/blob/master/cheat/autocompletion/cheat.zsh>
 
 ##
 # Issues
@@ -80,10 +80,10 @@ system hasn't performed a new scan.
 
 Remove `~/.zcompdump`, and restart a shell, or execute:
 
-        $ rm -f ~/.zcompdump; compinit
-          ├──────────────────────────┘
-          └ command found here:
-                  https://github.com/zsh-users/zsh-completions#manual-installation
+    $ rm -f ~/.zcompdump; compinit
+      ├──────────────────────────┘
+      └ command found here:
+              https://github.com/zsh-users/zsh-completions#manual-installation
 
 For more info: <https://unix.stackexchange.com/a/2184/289772>
 

@@ -4565,7 +4565,7 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # Inside, write the most useful invocations of `mycmd`.
 # Extract them from your notes (e.g. strace.md).
 # Your notes should not contains shortcuts (that's better for a cheatsheet),
-# nor should they contain one-liner answers (those should be in a tldr file).
+# Nor should they contain one-liner answers (those should be in a tldr file).
 # Why?
 # Because, these information would be quicker to access that way.
 #
@@ -4589,6 +4589,9 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # Update:
 # Use fzf to fuzzy search through all tldr files.
 # Same thing for the cheatsheets.
+#
+# Update:
+# Write your files in a `tldr/` subdirectory, and use markdown (for folding).
 
 # TODO: Think about how better leveraging our zsh history.
 #
@@ -4656,7 +4659,7 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #
 #    - any error should be accompanied by an `exit` statement, so that:
 #
-#          ./script.sh && echo 'success'
+#         ./script.sh && echo 'success'
 #
 #      doesn't print 'success' if the script fails.
 #
