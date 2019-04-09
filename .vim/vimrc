@@ -983,55 +983,37 @@ let g:ft_ignore_pat = '\.\%(Z\|gz\|bz2\|zip\|tgz\|log\)$'
 
 " :grep {{{2
 
-" --vimgrep =
-"
-"         --column
-"         --nocolor
-"         --nogroup
-"
-" … and displays multiple matches on a single line
+" Define rg as the program to call when using the Ex commands: `:[l]grep[add]`.
 
-" Define `ag` as the program to call when using the Ex commands:
-"         :[l]grep[add]
-
-"                 ┌─ don't group all matches in a same file in a single result
-"                 │  instead, prepend the filename in front of each match
-"                 │
-"                 │                                    ┌─ print column number
-"                 │                                    │
-set grepprg=ag\ --nogroup\ --nocolor\ --ignore-case\ --column\ --vimgrep\ -f
-"                                                                │         │
-"               when several matches are found on the same line, ┘         │
-"               report each of them in a dedicated entry                   │
-"               like the `g` flag for `:vimgrep`                           │
-"                                                                          │
-"                                                          follow symlinks ┘
+" What's `-i`?{{{
 "
-"     Suppose we're looking for `pat` under current directory:
-"             $ ag pat .
+" `--ignore-case`
+" }}}
+"     `-L`?{{{
 "
-"     If `pat` is in `link`, which is a symlink pointing to the real file
-"     outside the current directory, ag won't find it, unless we tell it to
-"     follow symlinks.
+" `--follow`
 "
-" How to ignore a file?{{{
-"
-" Use the `--ignore` option.
-" Example:
-"
-"         ag...\ --ignore\ mthesaur.txt
+" Follow symbolic links.
 "}}}
-
-" Define how the output of ag must be parsed:
+"     `--vimgrep`?{{{
 "
-"               ┌─ filename
-"               │  ┌─ line nr
-"               │  │  ┌─ column nr
-"               │  │  │  ┌─ error message
+" It disables the color codes in the output (⇔ `--color never`).
+" It prevents the matches from being grouped by file (⇔ `--no-heading`).
+" It  shows every  match on  its  own line,  including line  numbers and  column
+" numbers.
+"}}}
+set grepprg=rg\ -i\ -L\ --vimgrep\ 2>/dev/null
+
+" Define how the output of rg must be parsed:
+"
+"               ┌ filename
+"               │  ┌ line nr
+"               │  │  ┌ column nr
+"               │  │  │  ┌ error message
 "               │  │  │  │
 set grepformat=%f:%l:%c:%m,%f:%l:%m
 "   │
-"   └─ default value:  %f:%l:%m,%f:%l%m,%f  %l%m
+"   └ default value:  %f:%l:%m,%f:%l%m,%f  %l%m
 
 " hidden {{{2
 
@@ -2551,16 +2533,16 @@ nno  <silent>  <space>an  :<c-u>arglocal %<cr>
 fu! s:fuzzy_mappings() abort
 
     let fuzzy_mappings = {
-                         \ 'a' : 'Ag',
                          \ 'bt': 'BTags',
                          \ 'f' : 'Files',
                          \ 'gf': 'GFiles',
                          \ 'gc': 'GFiles?',
-                         \ 'ht': 'Helptags',
+                         \ 'h' : 'Helptags',
                          \ 'l' : 'Buffers',
                          \ 'm' : 'Maps',
                          \ 'M' : 'Marks',
                          \ 'r' : 'History',
+                         \ 'R' : 'Rg',
                          \ 's' : 'Snippets',
                          \ 't' : 'Tags',
                          \ 'w' : 'Windows',
@@ -3113,7 +3095,6 @@ fu! s:repeatable_spell_commands(type) abort
         \ : toupper(last_char))
     exe 'norm! '.cmd
 endfu
-
 " }}}3
 " |                   (prefix) {{{3
 " |C  |F     open html file in firefox/chrome {{{4
@@ -3256,6 +3237,128 @@ endfu
 "     - not colored
 "     - unable to expand `~`
 "     - relative to the working directory
+
+" -d               show documentation ($ info, $ man, :h) {{{4
+
+nno <silent> -d :<c-u>call <sid>show_doc()<cr>
+
+" TODO: Develop this mapping.{{{
+"
+" It could be used  to get more interactivity in our markdown  notes, and in our
+" comments.
+"
+" Think about it: we use some markup everywhere.
+" That gives Vim the ability to get some understanding of what we write.
+" Leverage this understanding; make Vim interact with what it recognizes.
+"
+" For example, all those:
+"
+"     see `blah blah`
+"
+" should require a minimum amout of effort.
+" `blah blah` should be processed by a single smart mapping, capable of reacting
+" differently depending on the text.
+"}}}
+fu! s:show_doc() abort
+    let line = getline('.')
+    let cmd_pat = '\C\s*\%($\s*\zs\%(info\|man\)\|\zs:h\)\s.*'
+    let codespan = s:get_codespan(line, cmd_pat)
+    let codeblock = s:get_codeblock(line, cmd_pat)
+    if codespan isnot# '' && codeblock isnot# ''
+        " TODO: finish
+        echo 'not implemented yet'
+        return
+    elseif codespan is# '' && codeblock isnot# ''
+        let cmd = codeblock
+    elseif codespan isnot# '' && codeblock is# ''
+        let cmd = codespan
+    elseif codespan is# '' && codeblock is# ''
+        echo 'no documentation command to run'
+        return
+    endif
+    let pat = '^\(info\|man\)'
+    let l:Rep = {m -> m[1] is# 'info' ? 'Info' : 'Man'}
+    let cmd = substitute(cmd, pat, l:Rep, '')
+    if cmd =~# '/'
+        let [cmd, topics] = [matchstr(cmd, '.\{-}\ze\s*/'), matchstr(cmd, '/.*')]
+        let cmd = substitute(cmd, '|.*', '', '')
+        if topics =~# '[^ \\]/'
+            echohl ErrorMsg
+            " Example:{{{
+            "
+            "     $ man cmd /search/this
+            "                      ^
+            "                      ✘
+            "
+            "     $ man cmd /search\/this
+            "                      ^
+            "                      ✔
+            "}}}
+            echom 'One of your search contains an unescaped slash; escape it'
+            echohl NONE
+            return
+        endif
+        exe cmd
+        " Don't make the cursor move if the previous command failed.
+        " Don't try to catch an error; `:Man not_a_cmd` doesn't raise a real error.
+        if index(['info', 'man'], &ft) == -1
+            return
+        endif
+        try
+            let topics = map(split(topics, '\\\@<!/'),
+                \ {i,v -> matchstr(v, '.*\s\@<!')})
+            " TODO: Should we remove this line?{{{
+            " What if  we need to  search for  an uppercase word,  which appears
+            " somewhere in the middle of a line (!= section header)?
+            "
+            " If  you remove  it, prefix  the  anchor `^`  in front  of all  the
+            " section headers used in a search of a `$ man` command.
+            "}}}
+            call map(topics, {i,v -> toupper(v) is# v ? '^' . v : v})
+            for topic in topics
+                exe '/' . topic
+            endfor
+            if tolower(topic) is# topic
+                let @/ = topic
+            endif
+        catch /^Vim\%((\a\+)\)\=:E\%(486\)/
+            echohl ErrorMsg
+            echom v:exception
+            echohl NONE
+        endtry
+    else
+        let cmd = substitute(cmd, '|.*', '', '')
+        exe cmd
+    endif
+endfu
+
+fu! s:get_codespan(line, cmd_pat) abort
+    let col = col('.')
+    " Why 2 branches?{{{
+    "
+    " The  codespan could start *after*  the cursor (1st branch),  or *from* the
+    " cursor (2nd branch).
+    " The second branch allows you to press  the mapping the cursor being on the
+    " first backtick of a codespan (but not on the second one).
+    "}}}
+    let pat = '`[^`]*\%' . col . 'c[^`]\+`\|\%' . col . 'c`.\{-}`'
+    let codespan = matchstr(a:line, pat)
+    let codespan = substitute(codespan, '^`\|`$', '', 'g')
+    let codespan = matchstr(codespan, '^' . a:cmd_pat)
+    return codespan
+endfu
+
+fu! s:get_codeblock(line, cmd_pat) abort
+    if &ft is# 'markdown'
+        let cml = ''
+    else
+        let cml = matchstr(get(split(&l:cms, '%s', 1), 0, ''), '\S*')
+    endif
+    let n = &ft is# 'markdown' ? 4 : 5
+    let pat = '^\s*\V' . escape(cml, '\') . '\m \{' . n . '}'
+    let codeblock = matchstr(a:line, pat . a:cmd_pat)
+    return codeblock
+endfu
 
 " -p  -P           show filePath / :pwd {{{4
 
@@ -4085,7 +4188,6 @@ nno  <silent>  yM   :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
                    \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
 xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
                    \ <bar> call myfuncs#op_yank_matches('vis')<cr>
-
 " }}}2
 " Objects {{{2
 " i% {{{3
@@ -4617,22 +4719,32 @@ xno <expr> P '"_d"' . v:register . 'P'
 
 " CGrep / LGrep {{{2
 
-" :Grep /  :LGrep grep  for a  pattern below  the cwd  using the  external shell
-" program defined by the option 'grepprg'.
-" At the moment, it's `$ ag`.
-" Usage:
-"         CGrep pat
-"
-" Don't type:
-"         CGrep pat .
-"                   │
-"                   └─ ✘ current directory
-"                        our  command  would include  `  .`  inside the  pattern
-"                        literally (because  of `shellescape() which  quotes the
-"                        whole argument`)
+" Grep for a pattern below the cwd.
 
-com! -nargs=+  CGrep  call myfuncs#op_grep('Ex', <q-args>, 0)
-com! -nargs=+  LGrep  call myfuncs#op_grep('Ex', <q-args>, 1)
+" Usage: `:CGrep 'pat' file ...` (like `$ grep`).
+
+" I have an improvement idea!  I just need to tweak the definitions of the commands...{{{
+"
+" Ok, but remember:
+"
+"    1. The new synopsis should be identical to the one of `$ grep`.
+"
+"       I.e.:
+"       It should allow us to pass a quoted pattern, or an unquoted one.
+"       It should allow us to pass the files/directories which we want to grep.
+"
+"    2. If you hesitate between several implementations, have a look at how Tpope
+"       implemented `:CFind` in `vim-eunuch`.
+"}}}
+" How to search for a pattern containing a single quote?{{{
+"
+" Like with `$ grep`.
+" For example, if you want to grep `a'b"c`, run:
+"
+"     :CGrep 'a'\''b"c'
+"}}}
+com! -nargs=1 CGrep call myfuncs#op_grep('Ex', <q-args>, 0)
+com! -nargs=1 LGrep call myfuncs#op_grep('Ex', <q-args>, 1)
 
 " CheckHealth {{{2
 
@@ -4760,11 +4872,11 @@ com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 " Feed them to `$ grep` via `$ xargs`, and in turn feed the result to `$ vim` via `-q`:
 "
-"     $ vim -q <(xargs grep -RHIins pattern </tmp/listing) +cw
+"     $ vim -q <(xargs rg --vimgrep -i -L pattern </tmp/listing) +cw
 "
 " In one single command:
 "
-"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs grep -RHIins pattern) +cw
+"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs rg -i -L --vimgrep pattern) +cw
 "
 " We need `$ sed`,  because the paths output by `$ git  ls-tree` are relative to
 " the root of the repo, which here is our home.
@@ -4864,6 +4976,20 @@ endfu
 " A filename can contain whitespace.
 "}}}
 com! -bar -nargs=+ -complete=buffer InAButNotInB call myfuncs#in_A_not_in_B(<f-args>)
+
+" Info {{{2
+
+com! -bar -nargs=* Info call s:info(<q-args>)
+
+fu! s:info(topic) abort
+    new
+    exe '.!info ' . a:topic
+    if bufname('%') is# ''
+        " We need to be able to recognize an info buffer (e.g. in `s:show_doc()`).
+        setf info
+        nno <buffer><nowait><silent> q :<c-u>q<cr>
+    endif
+endfu
 
 " IsPrime {{{2
 
@@ -5006,27 +5132,25 @@ com! -bar -nargs=1 PluginGlobalVariables call myfuncs#plugin_global_variables(<q
 
 " We already have `:CGrep`, so why `:PQ`?{{{
 "
-"                                                                 ┌ TODO: sure? To confirm.
-"                                                                 │
-"                                                                 │ I think so, because we use `:cgetexpr`,
-"                                                                 │ and not `:grep`.
-"                                                                 │
-" `:CGrep` (and `|g`) relies on the value of 'grepprg' (and 'efm' !!).
+" `:CGrep` (and `|g`) relies on `$ rg` and `'efm'` (because we use `:cgetexpr`).
 " `:PQ` gives us more control on the grep program.
-" For example, it allows us to pass the argument `-w` to `$ ag`:
+" For example, it allows us to pass the argument `-w` to `$ rg`:
 "
-"        ┌────────────────┬────────────────────────────────────────┐
-"        │ :CGrep     pat │ search any `pat` using   'grepprg'     │
-"        ├────────────────┼────────────────────────────────────────┤
-"        │ :PQ ag     pat │ search any `pat` using   `$ ag`        │
-"        ├────────────────┼────────────────────────────────────────┤
-"        │ :PQ ag -w  pat │ search a whole word `pat` using `$ ag` │
-"        └────────────────┴────────────────────────────────────────┘
-"                 -w --word-regexp
-"                        Only match whole words.
+"    ┌─────────────────────────┬──────────────────────────────────────────────────────┐
+"    │ :CGrep              pat │ search any `pat` using   `$ ripgrep --vimgrep -i -L` │
+"    ├─────────────────────────┼──────────────────────────────────────────────────────┤
+"    │ :PQ ag    --vimgrep pat │ search any `pat` using   `$ ag --vimgrep`            │
+"    ├─────────────────────────┼──────────────────────────────────────────────────────┤
+"    │ :PQ ag -w --vimgrep pat │ search a whole word `pat` using `$ ag -w --vimgrep`  │
+"    └─────────────────────────┴──────────────────────────────────────────────────────┘
+"             -w --word-regexp
+"             Only match whole words.
 "}}}
 com! -bar -nargs=1 PA exe myfuncs#populate_list('arglist',  <q-args>)
 com!      -nargs=1 PQ exe myfuncs#populate_list('quickfix', <q-args>)
+" TODO: Maybe we should remove `:PQ` and use our `g` cycle instead (C-g g).
+" It seems they do the same thing, but `:PQ` “hides” the real command, while our
+" cycle populates the command-line with it.
 
 " PI    Plugin Install {{{2
 
@@ -6069,15 +6193,15 @@ endfu
 " completion methods manually?
 "
 " 10 -
-" Why `:FzAg!` + `foobar` (in interactive mode) gives much more results than
-" `:FzAg! foobar`?
-" More generally, I don't know how `:ag` and `$ ag` interpret metacharacters.
+" Why `:FzRg!` + `foobar` (in interactive mode) gives much more results than
+" `:FzRg! foobar`?
+" More generally, I don't know how `:Rg` and `$ rg` interpret metacharacters.
 " Make some tests, read doc.
-" Example: compare `:FzAg! foo.*bar` and `:FzAg!` + `foo.*bar`
+" Example: compare `:FzRg! foo.*bar` and `:FzRg!` + `foo.*bar`
 "
-" I think `:FzAg! pattern` does not fuzzy search pattern, it performs
+" I think `:FzRg! pattern` does not fuzzy search pattern, it performs
 " a standard search (not fuzzy).
-" OTOH, `:FzAg!` + `pattern` performs a live fuzzy search.
+" OTOH, `:FzRg!` + `pattern` performs a live fuzzy search.
 "
 " 11 -
 " extract big chunks of code from `myfuncs.vim` into separate plugins.
@@ -6866,47 +6990,53 @@ endfu
 "    - `:scriptversion`; https://github.com/vim/vim/commit/558ca4ae55096f8763ab8515a304cda9c57f18a7
 "
 "    - 'filewinid' (location list property)
+"    - :swapname
+"    - :unl[et] ${env-name} (:h :unlet-$)
+"
 "    - 'user_data' entry in completion item
-"    - 'varsofttabstop', 'vartabstop'
+"    - `CompleteChanged` event
+"    - complete_info(); https://github.com/vim/vim/commit/fd133323d4e1cc9c0e61c0ce357df4d36ea148e3
+"    - `TextChangedP` event
+"
+"    - `'varsofttabstop'`, `'vartabstop'`
 "
 "    - :h matchadd(), new `window` key in optional dictionary;
 "       see also new window ID argument to matchdelete(), clearmatches(), getmatches() and setmatches()
 "
-"    - :swapname
-"    - :unl[et] ${env-name} (:h :unlet-$)
 "    - appendbufline()
+"    - deletebufline()
 "
 "    - argc() + argv()
 "      in Vim, they can now access the global arglist and the local arglist of another window
 "
 "        https://github.com/vim/vim/releases/tag/v8.1.0493
 "
-"    - DiffUpdated
+"    - `DiffUpdated` event
 "    - api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
-"    - cmdlinechanged
-"    - deletebufline()
-"    - diffupdate
-"    - dirchanged
-"    - exitpre
-"    - sourcepost
-"    - complete_info(); https://github.com/vim/vim/commit/fd133323d4e1cc9c0e61c0ce357df4d36ea148e3
+"    - `CmdlineChanged` event
+"    - `DiffUpdated` event
+"    - `DirChanged` event
+"    - `ExitPre` event
+"    - `SourcePost` event
 "    - getcompletion('*', 'arglist')   +   com! -complete=arglist ...
 "    - gettagstack(), settagstack()
 "    - mode() (new output `n_ov`, `n_oV`, `n_oC-v`)
 "    - prompt-buffer
 "    - reg_recording() + reg_executing()
+"
 "    - sign_define()
 "    - sign_getdefined()
 "    - sign_getplaced()
 "    - sign_place()
 "    - sign_undefined()
 "    - sign_unplace()
+"
 "    - str2list() and list2str()
 "    - term_setansicolors(), term_getansicolors(), g:term_ansi_colors
 "    - term_setsize()
-"    - textchangedp
 "    - trim()
 "    - winlayout()
+"    - winnr(): new argument `{N}[hjkl]`
 "
 " 65 -
 " in `vim-window`, don't do this:
@@ -7865,6 +7995,10 @@ endfu
 " 127 -
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
+"
+" 128 -
+" Maybe  make `= SPC` comment  the added lines (above  and below) if we're  on a
+" commented line.
 
 
 
@@ -8055,12 +8189,12 @@ fu! s:restore_last_qfl() abort
     " If there's already a qfl on the stack, or if there's no qfl to restore, don't try to restore anything.
     " How could there already be a qfl on the stack?{{{
     "
-    "     $ grep -RHIins network /etc
+    "     $ rg --vimgrep -i -L network /etc
     "     $ vim -q <(!!)
     "
-    "     $ grep -RHIins network /etc | vim -q /dev/stdin
+    "     $ rg --vimgrep -i -L network /etc | vim -q /dev/stdin
     "
-    "     $ grep -RHIins network /etc >/tmp/log
+    "     $ rg --vimgrep -i -L network /etc >/tmp/log
     "     $ vim -q /tmp/log
     "
     "     $ vim +'vimgrep /pat/ %' file

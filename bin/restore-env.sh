@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: make sure rg is re-installed (ripgrep)
+
 # TODO: install terminal descriptions in our home
 #             ┌ (--location) if the page has moved to a different location,
 #             │              redo the request on the new place

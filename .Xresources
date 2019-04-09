@@ -137,10 +137,7 @@ URxvt.scrollBar:  false
 ! Scroll with `M-j` and `M-k`, instead of `S-PgDown` and `S-PgUp`.
 ! Where is the syntax `URxvt.keysym.<sym>: command: ...` documented?{{{
 !
-!     $ man urxvt
-!     /RESOURCES
-!     /keysym.sym: action
-!     /command:STRING
+!     $ man urxvt /RESOURCES /keysym.sym: action /command:STRING
 !}}}
 ! Where is the sequence `\033]720;1\007` documented?{{{
 !
@@ -163,9 +160,7 @@ URxvt.scrollBar:  false
 !
 ! Source:
 !
-!     $ man 7 urxvt
-!     /RXVT-UNICODE TECHNICAL REFERENCE
-!     /XTerm Operating System Commands
+!     $ man 7 urxvt /RXVT-UNICODE TECHNICAL REFERENCE /XTerm Operating System Commands
 !}}}
 ! Why did you comment these lines?{{{
 !
@@ -187,9 +182,7 @@ URxvt.scrollBar:  false
 !
 ! Source:
 !
-!     $ man 7 urxvt
-!     /RXVT-UNICODE/URXVT FREQUENTLY ASKED QUESTIONS
-!     /Terminal Configuration
+!     $ man 7 urxvt /RXVT-UNICODE\/URXVT FREQUENTLY ASKED QUESTIONS /Terminal Configuration
 !
 ! By default, its size is limited to 1000 lines.
 !}}}

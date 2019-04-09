@@ -720,23 +720,18 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             norm! gvy
         endif
 
-        if a:type is# 'Ex'
-            let [pat, is_loclist] = [a:1, a:2]
-
+        let cmd = 'rg 2>/dev/null --vimgrep -i -L ' . (a:0 ? a:1 : @")
+        let use_loclist = a:0 ? a:2 : 0
+        if a:type is# 'Ex' && use_loclist
             " Why `:lgetexpr` instead of `:lgrep!`?{{{
             "
-            " The latter shows us the output of the shell command (`$ ag …`).
+            " The latter shows us the output of the shell command (`$ ag ...`).
             " This makes the screen “flash”, which is distracting.
             "
             " `:lgetexpr` executes the shell command silently.
             "}}}
-            if is_loclist
-                lgetexpr s:op_grep_get_qfl(pat)
-                call setloclist(0, [], 'a', {'title': &grepprg.' '.pat.' .'})
-            else
-                cgetexpr s:op_grep_get_qfl(pat)
-                call setqflist([], 'a', {'title': &grepprg.' '.pat.' .'})
-            endif
+            sil lgetexpr system(cmd)
+            call setloclist(0, [], 'a', {'title': cmd})
         else
             " Old Interesting Alternative:{{{
             "
@@ -762,9 +757,10 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "     │ shellescape(@",1) │ 'foo;ls' │ 'that'\''s' │ 'foo\%bar' │
             "     └───────────────────┴──────────┴─────────────┴────────────┘
             "
-            " `fnameescape()` would not protect `;`. The shell would interpret the
-            " semicolon as the end of the `$ grep` command, and would execute the rest
-            " as another command. This can be dangerous:
+            " `fnameescape()` would not protect `;`.
+            " The shell would interpret the semicolon as the end of the `$ grep`
+            " command, and would execute the rest as another command.
+            " This can be dangerous:
             "
             "     foo;rm -rf
             "
@@ -772,23 +768,26 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             " When you have a command whose arguments can contain special characters,
             " and you want to protect them from:
             "
-            "       - Vim       use `fnameescape(…)`
-            "       - the shell use `shellescape(…)`
-            "       - both      use `shellescape(…, 1)`
-            "                                       │
-            "                                       └─ only needed after a `:!` command; not in `system(...)`
-            "                                          `:!` is the only command to remove the backslashes
-            "                                          added by the 2nd non-nul argument
+            "    - Vim       use `fnameescape(…)`
+            "    - the shell use `shellescape(…)`
+            "    - both      use `shellescape(…, 1)`
+            "                                   │
+            "                                   └─ only needed after a `:!` command; not in `system(...)`
+            "                                      `:!` is the only command to remove the backslashes
+            "                                      added by the 2nd non-nul argument
             "
-            "                                MWE:
-            "                                :sp /tmp/foo\%bar
-            "                                :sil call system('echo '.shellescape(expand('%')).' >>/tmp/log')
-            "                                :sil call system('echo '.shellescape(expand('%'),1).' >>/tmp/log')
+            "                             MWE:
+            "                             :sp /tmp/foo\%bar
+            "                             :sil call system('echo '.shellescape(expand('%')).' >>/tmp/log')
+            "                             :sil call system('echo '.shellescape(expand('%'),1).' >>/tmp/log')
             "
-            "                                          $ cat /tmp/log
-            "                                              /tmp/foo%bar
-            "                                              /tmp/foo\%bar
-            "                                                      ^
+            "                                       $ cat /tmp/log
+            "                                           /tmp/foo%bar
+            "                                           /tmp/foo\%bar
+            "                                                   ^
+            "
+            " ---
+            "
             " Update:
             " If the argument  which can contain special characters  is the name
             " of  the current  file,  you  can use  the  filename modifier  `:S`
@@ -797,8 +796,8 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             " `:S` must be the last modifier, and it can work with other special
             " characters such as `#` or `<cfile>`.
             "}}}
-            cgetexpr s:op_grep_get_qfl(@")
-            call setqflist([], 'a', {'title': &grepprg.' '.@".' .'})
+            sil cgetexpr system(cmd)
+            call setqflist([], 'a', {'title': cmd})
         endif
 
     catch
@@ -808,10 +807,6 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
         let &sel = sel_save
         call call('setreg', reg_save)
     endtry
-endfu
-
-fu! s:op_grep_get_qfl(pat) abort
-    sil return systemlist(&grepprg.' '.shellescape(a:pat).' 2>/dev/null')
 endfu
 
 " op_replace_without_yank {{{2
@@ -1038,14 +1033,21 @@ endfu
 fu! myfuncs#populate_list(list, cmd) abort "{{{1
     if a:list is# 'quickfix'
         " The output of the shell command passed to `:PQ` must be recognized by Vim.
-        " It must match a value in 'efm'.
-        " Example:
+        " And it must match a value in `'efm'`.
+        " Examples:
         "         :PQ find /etc -name '*.conf'                    ✘
         "         :PQ grep -IRn foobar ~/.vim | grep -v backup    ✔
-        " cgetexpr systemlist(a:cmd)
+
+        " Why `:cgetfile` and not `:cexpr`?{{{
+        "
+        " It suffers from an issue regarding a possible pipe in the shell command.
+        " You  have to  escape  it, which  is  inconsistent with  how  a bar  is
+        " interpreted by Vim in other contexts.
+        "
+        " I don't want to remember this quirk.
+        "}}}
         sil call system(a:cmd.' >/tmp/my_cfile')
         cgetfile /tmp/my_cfile
-
         call setqflist([], 'a', {'title': a:cmd})
 
     elseif a:list is# 'arglist'

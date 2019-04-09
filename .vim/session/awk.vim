@@ -55,14 +55,14 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-1191
+3308
 normal! zo
-let s:l = 1214 - ((3 * winheight(0) + 14) / 28)
+let s:l = 3352 - ((13 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1214
-normal! 029|
+3352
+normal! 050|
 lcd ~/wiki/awk
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -116,17 +116,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-45
-normal! zo
-65
-normal! zo
-95
-normal! zo
-let s:l = 149 - ((0 * winheight(0) + 0) / 1)
+let s:l = 17 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-149
+17
 normal! 0
 lcd ~/wiki/man
 wincmd w
@@ -140,11 +134,13 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 102 - ((26 * winheight(0) + 14) / 28)
+163
+normal! zo
+let s:l = 164 - ((49 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-102
+164
 normal! 0
 lcd ~/wiki/man
 wincmd w
@@ -154,10 +150,10 @@ exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 3
 set stal=1
 badd +1 ~/Desktop/countries
-badd +13 ~/wiki/awk/sed.md
-badd +104 ~/wiki/man/man.md
-badd +1214 ~/wiki/awk/awk.md
-badd +121 ~/wiki/man/examples/pathfind.1
+badd +1 ~/wiki/awk/sed.md
+badd +145 ~/wiki/man/examples/pathfind.1
+badd +386 ~/wiki/awk/awk.md
+badd +164 ~/wiki/man/man.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

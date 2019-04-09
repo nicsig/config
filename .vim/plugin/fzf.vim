@@ -52,13 +52,35 @@ let g:fzf_buffers_jump = 1
 
 let g:fzf_command_prefix = 'Fz'
 
-" `:FzAg` considers the path component prefixing the lines when searching for our query.  We don't want that.{{{
+" How do I toggle the preview window?{{{
 "
-" So, we pass the `-d: -n 4..` options to `$ fzf`.
-" We exclude from the search the first, second and third fields (path, line, column).
+" Press `?`.
+" If you want to use another key:
+"
+"     fzf#vim#with_preview("right:50%:hidden", "?")
+"                                               ^
+"                                               change this
+"}}}
+" Where did you find this command?{{{
+"
+" For the most part, at the end of `:h fzf-vim-advanced-customization`.
+"
+" We've also tweaked it to make fzf ignore the first three fields when filtering.
+" That is the file path, the line number, and the column number.
+" More specifically, we pass to `fzf#vim#with_preview()` this dictionary:
+"
+"     {"options": "--delimiter=: --nth=4.."}
+"
+" Which, in turn, pass `--delimiter: --nth=4..` to `$ fzf`.
+"
 " See: https://www.reddit.com/r/vim/comments/b88ohz/fzf_ignore_directoryfilename_while_searching/ejwn384/
 "}}}
-exe 'com! -bar -bang '.g:fzf_command_prefix.'Ag call fzf#vim#ag(<q-args>, fzf#vim#with_preview({"options": "-d: -n 4.."}, "right"), <bang>0)'
+exe 'com! -bang -nargs=* ' . g:fzf_command_prefix . 'Rg
+  \ call fzf#vim#grep(
+  \   "rg 2>/dev/null --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview({"options": "--delimiter=: --nth=4.."}, "up:60%")
+  \           : fzf#vim#with_preview({"options": "--delimiter=: --nth=4.."}, "right:50%:hidden", "?"),
+  \   <bang>0)'
 
 exe 'com! -bang -nargs=? -complete=dir '.g:fzf_command_prefix.'Files call fzf#vim#files(<q-args>, fzf#vim#with_preview("right:50%"), <bang>0)'
 

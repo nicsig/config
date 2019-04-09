@@ -3,7 +3,7 @@
 # What's this `_arguments` function?{{{
 #
 #     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#main-utility-functions-for-overall-completion
-#     $ man zshcompsys > /_arguments
+#     $ man zshcompsys /_arguments
 #}}}
 # What's its signature?{{{
 #
@@ -20,7 +20,7 @@
 #}}}
 # Where did you find it?{{{
 #
-#     $ man zshcompsys > /n:message:action
+#     $ man zshcompsys /n:message:action
 #}}}
 # How did you get this list of archive extensions?{{{
 #

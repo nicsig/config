@@ -77,9 +77,7 @@ stty quit undef
 #
 # It sets the color to blue.
 #
-#     $ man zshmisc
-#     /SIMPLE PROMPT ESCAPES
-#     /Shell state
+#     $ man zshmisc /SIMPLE PROMPT ESCAPES /Shell state
 #}}}
 # What's `%~`?{{{
 #
@@ -1485,8 +1483,8 @@ fix() { #{{{2
   # A Reset String.
   #
   #     $ man -Kw rs1
-  #     $ man infocmp (/rs1)
-  #     $ man tput (/rs1)
+  #     $ man infocmp /rs1
+  #     $ man tput /rs1
   #}}}
   tput rs1
   tput rs2
@@ -2065,9 +2063,7 @@ __catch_signal_usr1() {
 # exiting job is displayed, is NOT a new prompt.
 # So `precmd()` is not executed in this case.
 #
-# For more info: `$ man zshmisc`
-#                  SPECIAL FUNCTIONS
-#                  Hook Functions
+# For more info: `$ man zshmisc /SPECIAL FUNCTIONS /Hook Functions`
 #}}}
 # Why do you use it?{{{
 #
@@ -2841,6 +2837,10 @@ alias qmv='qmv --format=destination-only'
 # ranger {{{3
 
 alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ranger'
+
+# rg {{{3
+
+alias rg='rg 2>/dev/null --vimgrep -i -L'
 
 # sudo {{{3
 
@@ -3691,7 +3691,7 @@ bindkey '^XD' end-of-list
 #     2. looks for a help page for the command name on the current command line (in case it's a builtin)
 #     3. if it doesn't find one, it invokes `$ man`
 #
-# For more info, see `man zshzle`.
+# For more info, see `$ man zshzle`.
 #}}}
 bindkey '^XH' run-help
 
@@ -4592,6 +4592,9 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 #
 # Update:
 # Write your files in a `tldr/` subdirectory, and use markdown (for folding).
+#
+# Update:
+# Install a mapping (`-D`?) to get a tldr window when you press it on a command name.
 
 # TODO: Think about how better leveraging our zsh history.
 #

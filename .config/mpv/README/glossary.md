@@ -77,12 +77,13 @@ It's used to:
 
 ---
 
-You can find the list of all available properties in `$ man mpv` (COMMAND
-INTERFACE > Property list).
+You can find the list of all available properties in:
+
+    $ man mpv /COMMAND INTERFACE /Property list
 
 ---
 
-In `$ man mpv` (COMMAND INTERFACE > property expansion), a property name is
+In  `$ man  mpv  /COMMAND INTERFACE  /property expansion`,  a  property name  is
 annotated with RW to indicate whether it's generally writable.
 
 # What does “upscaling” mean?
