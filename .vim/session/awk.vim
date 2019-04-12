@@ -13,6 +13,9 @@ argglobal
 set stal=2
 tabnew
 tabnew
+tabnew
+tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -84,13 +87,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-422
-normal! zo
-let s:l = 446 - ((4 * winheight(0) + 15) / 30)
+let s:l = 1585 - ((182 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-446
+1585
 normal! 0
 lcd ~/wiki/awk
 tabnext
@@ -116,12 +117,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 17 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-17
-normal! 0
+1
+normal! 027|
 lcd ~/wiki/man
 wincmd w
 argglobal
@@ -134,26 +135,184 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-163
+320
 normal! zo
-let s:l = 164 - ((49 * winheight(0) + 14) / 28)
+let s:l = 99 - ((98 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-164
+99
 normal! 0
 lcd ~/wiki/man
 wincmd w
-2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 3
+tabnext
+edit ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+38
+normal! zo
+58
+normal! zo
+101
+normal! zo
+let s:l = 106 - ((36 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+106
+normal! 011|
+lcd ~/.vim/plugged/vim-cmdline
+wincmd w
+argglobal
+if bufexists("~/Dropbox/vim_plugins/vimrc_grepper.vim") | buffer ~/Dropbox/vim_plugins/vimrc_grepper.vim | else | edit ~/Dropbox/vim_plugins/vimrc_grepper.vim | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 5 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
+normal! 02|
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+tabnext
+edit ~/wiki/vim/ex.md
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/wiki/vim
+tabnext
+edit ~/.vim/plugged/vim-debug/.git/index
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+wincmd =
+argglobal
+setlocal fdm=syntax
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=1
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-debug
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-fex/.git/index") | buffer ~/.vim/plugged/vim-fex/.git/index | else | edit ~/.vim/plugged/vim-fex/.git/index | endif
+setlocal fdm=syntax
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=1
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 5 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
+normal! 0
+lcd ~/.vim/plugged/vim-fex
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 6) / 13)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-fex/.git
+wincmd w
+3wincmd w
+wincmd =
+tabnext 6
 set stal=1
 badd +1 ~/Desktop/countries
+badd +124 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 badd +1 ~/wiki/awk/sed.md
-badd +145 ~/wiki/man/examples/pathfind.1
+badd +1 ~/wiki/man/examples/pathfind.1
 badd +386 ~/wiki/awk/awk.md
-badd +164 ~/wiki/man/man.md
+badd +99 ~/wiki/man/man.md
+badd +34 ~/Dropbox/vim_plugins/vimrc_grepper.vim
+badd +1 ~/wiki/vim/ex.md
+badd +0 ~/.vim/plugged/vim-debug/.git/index
+badd +0 ~/.vim/plugged/vim-fex/.git/index
+badd +0 ~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

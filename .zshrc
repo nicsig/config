@@ -1108,6 +1108,13 @@ cmdfu() { #{{{2
   #              > emulate
   #}}}
 
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+  usage: $0 <keyword>
+EOF
+    return 64
+  fi
+
   # Purpose: {{{
   #
   # Look up keywords on `www.commandlinefu.com`.
@@ -4558,6 +4565,8 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # noa vim //gj /home/jean/Dropbox/conf/bin/**/*.sh ~/.shrc ~/.bashrc ~/.zshrc ~/.zshenv ~/.vim/plugged/vim-snippets/UltiSnips/sh.snippets | cw
 #         ^
 #         put whatever pattern you want to refactor
+
+# TODO: Add a preview window for our zsh snippets. Like what we did with `:Rg`.
 
 # TODO: Implement your own version of the `tldr` command.
 #

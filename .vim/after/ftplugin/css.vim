@@ -22,10 +22,9 @@ let b:mc_chain = [
 
 " Teardown {{{1
 
-let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
-    \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
-    \   setl sw<
+    \ | setl sw<
     \ | set fp< kp<
     \ | unlet! b:mc_chain
     \ "

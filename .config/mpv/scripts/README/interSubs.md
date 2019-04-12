@@ -71,7 +71,7 @@ For example, to bind it to a right click:
             ['RightButton',              'NoModifier',           'f_listen'],
             ...
 
-# How to change the webservice used to prononce words?
+# How to change the webservice used to pronounce words?
 
 Edit `interSubs_config.py`, and assign one these values to `'forvo'`:
 

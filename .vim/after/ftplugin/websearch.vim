@@ -14,10 +14,9 @@ nmap <buffer><nowait><silent>  ZZ    <cr>
 
 " teardown {{{1
 
-let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
-    \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
-    \   setl cul< swf<
+    \ | setl cul< swf<
     \ | unlet! b:url
     \ | exe 'au! my_websearch * <buffer>'
     \ | exe 'nunmap <buffer> q'

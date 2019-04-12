@@ -6,6 +6,7 @@
 #    - formatter (stay consistent; enforce styleguide)
 #    - REPL/compiler (evaluate code to check it works)
 #    - integrated documentation
+#    pizza
 #    - ?
 
 

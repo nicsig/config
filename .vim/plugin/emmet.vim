@@ -175,10 +175,9 @@ fu! s:install_mappings() abort "{{{2
 endfu
 
 fu! s:set_undo_ftplugin() abort "{{{2
-    let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
-        \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+    let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
         \ . "
-        \   exe 'iunmap <buffer> <c-g>,'
+        \ | exe 'iunmap <buffer> <c-g>,'
         \ | exe 'iunmap <buffer> <c-g>;'
         \ | exe 'iunmap <buffer> <c-g><c-u>'
         \ | exe 'iunmap <buffer> <c-g>s'

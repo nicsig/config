@@ -3264,15 +3264,11 @@ fu! s:show_doc() abort
     let cmd_pat = '\C\s*\%($\s*\zs\%(info\|man\)\|\zs:h\)\s.*'
     let codespan = s:get_codespan(line, cmd_pat)
     let codeblock = s:get_codeblock(line, cmd_pat)
-    if codespan isnot# '' && codeblock isnot# ''
-        " TODO: finish
-        echo 'not implemented yet'
-        return
-    elseif codespan is# '' && codeblock isnot# ''
+    if codespan is# '' && codeblock isnot# ''
         let cmd = codeblock
     elseif codespan isnot# '' && codeblock is# ''
         let cmd = codespan
-    elseif codespan is# '' && codeblock is# ''
+    else
         echo 'no documentation command to run'
         return
     endif
@@ -3305,14 +3301,13 @@ fu! s:show_doc() abort
             return
         endif
         try
-            let topics = map(split(topics, '\\\@<!/'),
-                \ {i,v -> matchstr(v, '.*\s\@<!')})
+            let topics = map(split(topics, '\\\@<!/'), {i,v -> matchstr(v, '.*\s\@<!')})
             " TODO: Should we remove this line?{{{
             " What if  we need to  search for  an uppercase word,  which appears
             " somewhere in the middle of a line (!= section header)?
             "
-            " If  you remove  it, prefix  the  anchor `^`  in front  of all  the
-            " section headers used in a search of a `$ man` command.
+            " If you  remove it, use  the anchor `^`  to prefix all  the section
+            " headers used in a search of a `$ man` command.
             "}}}
             call map(topics, {i,v -> toupper(v) is# v ? '^' . v : v})
             for topic in topics
@@ -3333,31 +3328,31 @@ fu! s:show_doc() abort
 endfu
 
 fu! s:get_codespan(line, cmd_pat) abort
-    let col = col('.')
-    " Why 2 branches?{{{
-    "
-    " The  codespan could start *after*  the cursor (1st branch),  or *from* the
-    " cursor (2nd branch).
-    " The second branch allows you to press  the mapping the cursor being on the
-    " first backtick of a codespan (but not on the second one).
-    "}}}
-    let pat = '`[^`]*\%' . col . 'c[^`]\+`\|\%' . col . 'c`.\{-}`'
-    let codespan = matchstr(a:line, pat)
-    let codespan = substitute(codespan, '^`\|`$', '', 'g')
-    let codespan = matchstr(codespan, '^' . a:cmd_pat)
-    return codespan
+   let col = col('.')
+   " Why 2 branches?{{{
+   "
+   " The  codespan could start *after*  the cursor (1st branch),  or *from* the
+   " cursor (2nd branch).
+   " The second branch allows you to press  the mapping the cursor being on the
+   " first backtick of a codespan (but not on the second one).
+   "}}}
+   let pat = '`[^`]*\%' . col . 'c[^`]\+`\|\%' . col . 'c`.\{-}`'
+   let codespan = matchstr(a:line, pat)
+   let codespan = substitute(codespan, '^`\|`$', '', 'g')
+   let codespan = matchstr(codespan, '^' . a:cmd_pat)
+   return codespan
 endfu
 
 fu! s:get_codeblock(line, cmd_pat) abort
-    if &ft is# 'markdown'
-        let cml = ''
-    else
-        let cml = matchstr(get(split(&l:cms, '%s', 1), 0, ''), '\S*')
-    endif
-    let n = &ft is# 'markdown' ? 4 : 5
-    let pat = '^\s*\V' . escape(cml, '\') . '\m \{' . n . '}'
-    let codeblock = matchstr(a:line, pat . a:cmd_pat)
-    return codeblock
+   if &ft is# 'markdown'
+       let cml = ''
+   else
+       let cml = matchstr(get(split(&l:cms, '%s', 1), 0, ''), '\S*')
+   endif
+   let n = &ft is# 'markdown' ? 4 : 5
+   let pat = '^\s*\V' . escape(cml, '\') . '\m \{' . n . '}'
+   let codeblock = matchstr(a:line, pat . a:cmd_pat)
+   return codeblock
 endfu
 
 " -p  -P           show filePath / :pwd {{{4
@@ -4162,6 +4157,10 @@ nno  Y  y$
 xno  <expr>  Y  '$"'.v:register.'y'
 
 " yc / yC    ym / yM      yank comments / Code  matching / non-matching lines {{{3
+
+" TODO: Make these mappings support any register.
+" For example, `""myC` in  visual mode should yank the code  of the selection in
+" the `+` register (not the unnamed one).
 
 " comments
 nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
@@ -7088,6 +7087,9 @@ endfu
 "     :h if_lua.txt
 "     :h if_pyth.txt
 "     :h terminal.txt
+"
+"     :h vim-differences (Neovim only)
+"     and all the links from this page, in particular `:h API`
 "
 " 69 -
 " in `~/wiki/vim/funcref.md`, look for the pattern `funcref(`.
