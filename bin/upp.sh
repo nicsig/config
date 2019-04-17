@@ -25,6 +25,9 @@
 DEBUG=0
 DEBUG_LOGFILE=/tmp/debug
 
+# TODO: Add python (+ruby?) integration for Neovim.
+# And maybe use update-alternatives to make Neovim our default editor in the future.
+
 # exit upon error{{{
 #
 # man bash
@@ -885,12 +888,12 @@ xdg_mime_default() { #{{{2
       #
       # ---
       #
-      # Besides, I'm not  sure, but after installing Neovim,  it's possible that
-      # the latter becomes the default program to open some text files.
-      #
       # Btw, the default `nvim.desktop` file lists the same types of files.
-      #
       # For the moment, I prefer gVim to be the default.
+      # In the  future, you may  choose Nvim instead;  in that case,  parse this
+      # file instead (found with `$ locate nvim.desktop`):
+      #
+      #     /usr/local/share/applications/nvim.desktop
       #}}}
       grep -i 'mimetype' /usr/local/share/applications/gvim.desktop \
         | sed 's/mimetype=//i; s/;/ /g' \

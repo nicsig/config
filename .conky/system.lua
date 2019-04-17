@@ -77,11 +77,14 @@ conky.config = {
 
 -- -- System information using conky capabilities
 
+-- TODO: We use `$ sensors | awk '/Package id/{print $4}'` to get the cpu temperature. Is it reliable?
+-- There are many temperatures in the output of `$ sensors`. Which one should we extract?
+
 conky.text = [[
 ${voffset -10}
-${font Ubuntu:bold:size=18}${color3}SYSTÈME ${hr 2}
+${font Ubuntu:bold:size=18}${color3}SYSTEM ${hr 2}
 ${voffset 0}
-${offset 15}${font Ubuntu:normal:size=18}${color1}T° cpu${alignc}${color4}${execi 10 sensors|grep -i physical|cut -d' ' -f5}
+${offset 15}${font Ubuntu:normal:size=18}${color1}T° cpu${alignc}${color4}${execi 10 sensors | awk '/Package id/{print $4}'}
 ${offset 15}${font Ubuntu:normal:size=18}${color1}Uptime${alignc}$color4$uptime
 
 ${offset 140}${font Ubuntu:bold:size=18}${color3}CPU${voffset -30}

@@ -8056,14 +8056,8 @@ endfu
 " Then, see whether it fixes the issue.
 "
 " 130 -
-"
-"     $ nvim -Nu NONE +'colo evening'
-"
-" Type `:help` on the command-line, then press Tab.
-" The cursor is weird: 1 light-brown cell + 2 white cells.
-" Insert `a`: the cursor is still weird (1 light-brown cell + 1 white cell).
-" Insert `b`: the cursor is still weird (1 light-brown cell).
-" Insert `c`: the cursor is back to normal (1 black cell).
+" Press `K` on the `call()` function.
+" It opens the help page for the `:call` command.
 
 
 
