@@ -8,12 +8,15 @@
 #   ≈ 2 min   for zsh
 #}}}
 
-# After updating Vim, in case of issue, restart it in a new shell!{{{
+# Nvim: If a network connection fails during the compilation, the latter will also fail.{{{
+# In that case, re-try a compilation (now or a bit later).
+#}}}
+# Vim: After an update, in case of an issue, restart Vim in a new shell!{{{
 #
 # Otherwise, there can be spurious bugs in the current session.
 # To avoid them, start Vim from a NEW shell.
 #}}}
-# Do *not* compile tmux from a commit which has not been checked by travis!{{{
+# Tmux: Do *not* compile from a commit which has not been checked by travis!{{{
 #
 # This kind of commit doesn't have a `autogen.sh` file.
 # And I think that `$ git describe` fails on such a commit...
@@ -65,7 +68,7 @@ set -e
 # Init {{{1
 
 PGM="$1"
-SUPPORTED_PGMS=(gawk mpv tmux trans vim weechat zsh)
+SUPPORTED_PGMS=(ansifilter gawk jumpapp mpv nvim tmux trans surfraw vim weechat zsh)
 GIT_REPOS="${HOME}/GitRepos/"
 
 typeset -A URLS=( \
@@ -73,6 +76,7 @@ typeset -A URLS=( \
   [gawk]=git://git.savannah.gnu.org/gawk.git \
   [jumpapp]=https://github.com/mkropat/jumpapp \
   [mpv]=https://github.com/mpv-player/mpv-build \
+  [nvim]=https://github.com/neovim/neovim \
   [tmux]=https://github.com/tmux/tmux \
   [trans]=https://github.com/soimort/translate-shell \
   [surfraw]=https://gitlab.com/surfraw/Surfraw \
@@ -99,8 +103,12 @@ if [[ -z "${PGM}" ]]; then
 # TODO: There's a duplication of code here; remove it.{{{
 # Every time we add or remove a program in the array URLS, we must do the same here.
 # Find a way to extract the keys of the array and concatenate them.
+#
+# ---
+#
+# There's also a duplication of code in the definition of `SUPPORTED_PGMS`.
 #}}}
-elif [[ ! 'ansifilter gawk jumpapp mpv surfraw tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
+elif [[ ! 'ansifilter gawk jumpapp mpv nvim surfraw tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
   printf -- '%s: the only programs this script can update are:\n' "$(basename "$0")" >&2
   # How to print array elements on separate lines?
   #     https://stackoverflow.com/a/15692004/9780968
@@ -119,6 +127,33 @@ elif [[ ! 'ansifilter gawk jumpapp mpv surfraw tmux trans vim weechat zsh' =~ (^
 fi
 
 # Functions {{{1
+main() { #{{{2
+  cat <<EOF
+
+-----------
+$(date +%m-%d\ %H:%M)
+-----------
+
+EOF
+
+  download
+  get_version
+
+  if [[ "${PGM}" == 'vim' ]]; then
+    check_vim_version_is_correct
+  elif [[ "${PGM}" == 'tmux' ]]; then
+    check_tmux_version_is_correct
+  fi
+
+  clean
+  install_dependencies
+  configure
+  build
+  install
+  update_alternatives
+  xdg_mime_default
+}
+
 build() { #{{{2
   if [[ "${PGM}" == 'mpv' ]]; then
     aptitude install devscripts equivs
@@ -130,6 +165,22 @@ build() { #{{{2
 
   elif [[ "${PGM}" == 'jumpapp' ]]; then
     make deb
+
+  elif [[ "${PGM}" == 'nvim' ]]; then
+    make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS=-DENABLE_JEMALLOC=OFF
+    #                                    ├─────────────────────────────────────┘{{{
+    #                                    └ necessary to be able to use `checkinstall` later
+    #
+    # https://github.com/neovim/neovim/issues/2364#issuecomment-113966180
+    # https://github.com/serverwentdown/env/commit/a05a31733443fcb0979fecf18f2aa8e9e2722c7c
+    #
+    # TODO:
+    # What do we lose by disabling jemalloc?
+    # Are we going to suffer from a noticeable performance hit?
+    # I could  be wrong,  but after  reading this  (and because  Neovim is  probably a
+    # single-threaded process) I don't think so:
+    # https://stackoverflow.com/a/1624744/9780968
+    #}}}
 
   else
     make
@@ -462,8 +513,15 @@ configure() { #{{{2
 }
 
 download() { #{{{2
-  aptitude install git
+  [[ -d "${GIT_REPOS}" ]] || mkdir -p "${GIT_REPOS}"
+  cd "${GIT_REPOS}"
 
+  aptitude install git
+  if [[ ! -d "${PGM}" ]]; then
+    git clone "${URLS[${PGM}]}" "${PGM}"
+  fi
+
+  cd "${PGM}"
   # We edit the file `configure.ac` for tmux.
   # This edit must be stashed before going on.
   # Even  if we didn't  edited this  file, it's still  a good practice  to stash
@@ -474,17 +532,18 @@ download() { #{{{2
   if git show-ref --verify --quiet refs/heads/master; then
     git checkout master
   fi
+  # To prevent this kind of error:{{{
+  #
+  #     error: The following untracked working tree files would be overwritten by merge:~
+  #       path/to/file~
+  #       ...~
+  #     Please move or remove them before you merge.~
+  #     Aborting~
+  #
+  # Source: https://stackoverflow.com/a/8362346/9780968
+  #}}}
+  git clean -d -f .
   git pull
-}
-
-enter_directory() { #{{{2
-  [[ -d "${GIT_REPOS}" ]] || mkdir -p "${GIT_REPOS}"
-  cd "${GIT_REPOS}"
-
-  if [[ ! -d "${PGM}" ]]; then
-    git clone "${URLS[${PGM}]}" "${PGM}"
-  fi
-  cd "${PGM}"
 }
 
 get_version() { #{{{2
@@ -498,6 +557,8 @@ get_version() { #{{{2
   #}}}
   if [[ "${PGM}" == 'gawk' ]]; then
     VERSION="$(git describe --tags)"
+  elif [[ "${PGM}" == 'nvim' ]]; then
+    VERSION="$(git describe)"
   elif [[ "${PGM}" == 'tmux' ]]; then
     # Don't add `--tags`! You would get the invalid “version” `to-merge`.
     VERSION="$(git describe --abbrev=0)"
@@ -540,7 +601,7 @@ get_version() { #{{{2
     # with a digit
     VERSION="${VERSION#v}"
 
-  elif [[ "${PGM}" == 'vim' ]]; then
+  elif [[ "${PGM}" == 'vim' || "${PGM}" == 'nvim' ]]; then
     # What's this `9:`?{{{
     #
     # Atm, the  Vim packages in the  offical repositories have a  version number
@@ -670,11 +731,7 @@ install() { #{{{2
     #
     #     20180914
     #
-    # Such a number should exceed any version from a package in the default repo.
-    #}}}
-    # Why don't you use a simpler version, like `9999`?{{{
-    #
-    # It would cause an issue for Vim:
+    # This would cause an issue for Vim:
     #
     #     $ apt-cache policy vim
     #     vim:
@@ -706,72 +763,11 @@ install() { #{{{2
     #      trying to overwrite '/usr/share/man/man1/zshmodules.1.gz', which is also in package myzsh 999-1
     #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)
     #}}}
-  fi
 
-  if [[ "${PGM}" == 'awk' || "${PGM}" == 'vim' ]]; then
-    update-alternatives --get-selections >"${LOGDIR}/update-alternatives-get-selections.bak"
-
-    if [[ "${PGM}" == 'awk' ]]; then
-    # Why the `--slave` option?{{{
-    #
-    # So that when we run `$ man awk`, the gawk manpage is opened.
-    # Otherwise it would fail, because we don't have any manpage for awk.
-    #}}}
-    update-alternatives --log "${LOGFILE}" \
-      --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
-      --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
-    # Note the order of the arguments `--log` and `--install`/`--set`.
-    # `--log` should  come first because  it's an option, while  `--install` and
-    # `--set` are subcommands.
-    update-alternatives --log "${LOGFILE}" --set awk /usr/local/bin/gawk
-
-    elif [[ "${PGM}" == 'vim' ]]; then
-
-      # What's this `gvim.desktop`?{{{
-      #
-      # A file installed by the Vim package.
-      # It describes which files Vim can open in the line ‘MimeType=’.
-      #}}}
-      # What does this command do?{{{
-      #
-      # It parses the default `gvim.desktop` to build and run a command such as:
-      #
-      #     $ xdg-mime default gvim.desktop text/english text/plain text/x-makefile ...
-      #
-      # In effect, it makes gVim the default program to open various types of text files.
-      # This matters when using `$ xdg-open` or double-clicking on the icon of a
-      # file in a GUI file manager.
-      #}}}
-      # Is it needed?{{{
-      #
-      # Once  the `gvim.desktop`  file is  installed, it  doesn't make  gVim the
-      # default program for text files.
-      # It just informs the system that gVim *can* open some of them.
-      #
-      # ---
-      #
-      # Besides, I'm not  sure, but after installing Neovim,  it's possible that
-      # the latter becomes the default program to open some text files.
-      #
-      # Btw, the default `nvim.desktop` file lists the same types of files.
-      #
-      # For the moment, I prefer gVim to be the default.
-      #}}}
-      grep -i 'mimetype' /usr/local/share/applications/gvim.desktop \
-        | sed 's/mimetype=//i; s/;/ /g' \
-        | xargs xdg-mime default gvim.desktop
-
-      # Vim can be invoked with any of these commands.
-      # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
-      typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)
-      for name in "${names[@]}"; do
-        # add our compiled Vim to each group of alternatives
-        update-alternatives --log "${LOGFILE}" \
-          --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
-        # set our compiled Vim to be the master link
-        update-alternatives --log "${LOGFILE}" \
-          --set "${name}" /usr/local/bin/vim
-      done
+    if [[ ${PGM} == 'nvim' ]]; then
+      # By default, when you run `$ man man`, the manpage is not prettified like
+      # it is when you run `:Man man` from a Neovim instance; let's fix that:
+      sed -i.bak '/function! man#init_pager()/ {/endfunction/s//do <nomodeline> man BufReadCmd/}' /usr/local/share/nvim/runtime/autoload/man.vim
     fi
   fi
 }
@@ -825,39 +821,92 @@ install_dependencies() { #{{{2
       python-dev \
       python3-dev \
       ruby-dev
+  elif [[ "${PGM}" == 'nvim' ]]; then
+    aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
   fi
 }
 
-main() { #{{{2
-  check_we_are_root
+update_alternatives(){ #{{{2
+  if [[ "${PGM}" == 'awk' || "${PGM}" == 'vim' ]]; then
+    update-alternatives --get-selections >"${LOGDIR}/update-alternatives-get-selections.bak"
 
-  cat <<EOF
+    if [[ "${PGM}" == 'awk' ]]; then
+    # Why the `--slave` option?{{{
+    #
+    # So that when we run `$ man awk`, the gawk manpage is opened.
+    # Otherwise it would fail, because we don't have any manpage for awk.
+    #}}}
+    update-alternatives --log "${LOGFILE}" \
+      --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
+      --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
+    # Note the order of the arguments `--log` and `--install`/`--set`.
+    # `--log` should  come first because  it's an option, while  `--install` and
+    # `--set` are subcommands.
+    update-alternatives --log "${LOGFILE}" --set awk /usr/local/bin/gawk
 
------------
-$(date +%m-%d\ %H:%M)
------------
+    elif [[ "${PGM}" == 'vim' ]]; then
+      # Vim can be invoked with any of these commands.
+      # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
+      typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)
+      for name in "${names[@]}"; do
+        # add our compiled Vim to each group of alternatives
+        update-alternatives --log "${LOGFILE}" \
+          --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
+        # set our compiled Vim to be the master link
+        update-alternatives --log "${LOGFILE}" \
+          --set "${name}" /usr/local/bin/vim
+      done
+    fi
 
-EOF
-
-  enter_directory
-  download
-  get_version
-
-  if [[ "${PGM}" == 'vim' ]]; then
-    check_vim_version_is_correct
-  elif [[ "${PGM}" == 'tmux' ]]; then
-    check_tmux_version_is_correct
   fi
-
-  clean
-  install_dependencies
-  configure
-  build
-  install
+}
+xdg_mime_default() { #{{{2
+  if [[ "${PGM}" == 'vim' ]]; then
+      # What's this `gvim.desktop`?{{{
+      #
+      # A file installed by the Vim package.
+      # It describes which files Vim can open in the line ‘MimeType=’.
+      #}}}
+      # What does this command do?{{{
+      #
+      # It parses the default `gvim.desktop` to build and run a command such as:
+      #
+      #     $ xdg-mime default gvim.desktop text/english text/plain text/x-makefile ...
+      #
+      # In effect, it makes gVim the default program to open various types of text files.
+      # This matters when using `$ xdg-open` or double-clicking on the icon of a
+      # file in a GUI file manager.
+      #}}}
+      # Is it needed?{{{
+      #
+      # Once  the `gvim.desktop`  file is  installed, it  doesn't make  gVim the
+      # default program for text files.
+      # It just informs the system that gVim *can* open some of them.
+      #
+      # ---
+      #
+      # Besides, I'm not  sure, but after installing Neovim,  it's possible that
+      # the latter becomes the default program to open some text files.
+      #
+      # Btw, the default `nvim.desktop` file lists the same types of files.
+      #
+      # For the moment, I prefer gVim to be the default.
+      #}}}
+      grep -i 'mimetype' /usr/local/share/applications/gvim.desktop \
+        | sed 's/mimetype=//i; s/;/ /g' \
+        | xargs xdg-mime default gvim.desktop
+  fi
 }
 
 # }}}1
 # Execution {{{1
 
+# Why do you check the root privileges outside `main()`?{{{
+#
+# Suppose the logfile is owned by root.
+# `tee` will report an error, before `check_we_are_root` tells us to restart the
+# script as root; this is noise.
+#}}}
+check_we_are_root
 main "$1" 2>&1 | tee -a "${LOGFILE}"
 

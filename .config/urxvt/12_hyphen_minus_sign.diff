@@ -1,0 +1,31 @@
+Description: Don't use hyphens as minus signs
+Forwarded: no
+Author: Ryan Kavanagh <ryanakca@kubuntu.org>
+Origin: vendor
+Reviewed-By: Ryan Kavanagh <ryanakca@kubuntu.org>
+Last-Updated: 2011-03-11
+
+--- a/doc/rxvt.7.pod
++++ b/doc/rxvt.7.pod
+@@ -2019,7 +2019,7 @@ example - anybody out there who needs th
+ 
+ =begin table
+ 
+-	B<< C<h> >>	Bold/italic implies high intensity (see option B<-is>)
++	B<< C<h> >>	Bold/italic implies high intensity (see option B<\-is>)
+ 	B<< C<l> >>	Font styles have no effect on intensity (Compile styles)
+ 
+ =end table
+--- a/doc/rxvtc.1.pod
++++ b/doc/rxvtc.1.pod
+@@ -37,8 +37,8 @@ to @@RXVT_NAME@@c, like this:
+ 
+    #!/bin/sh
+    @@RXVT_NAME@@c "$@"
+-   if [ $? -eq 2 ]; then
+-      @@RXVT_NAME@@d -q -o -f
++   if [ $? \-eq 2 ]; then
++      @@RXVT_NAME@@d \-q \-o \-f
+       @@RXVT_NAME@@c "$@"
+    fi
+ 

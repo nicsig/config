@@ -558,6 +558,38 @@ set backspace=indent,eol,start
 "}}}
 " color scheme {{{2
 
+" Be sure to enable `'termguicolors'` *before* sourcing the color scheme.
+" We need to inspect the value of  the option to decide how to properly set some
+" custom HGs.
+
+" My current version of xfce4-terminal doesn't support true color.
+"
+" FIXME:
+" We should use a whitelist, not a blacklist.
+"
+" Atm,  the only  terminals which  I  can install  and support  true color,  are
+" Konsole, gnome-terminal and a recent version of urxvt (compiled from source).
+" I know how  to detect Konsole, but not gnome-terminal  (there's no environment
+" variable we could inspect).
+" If I need to detect urxvt, how would I do it? {{{
+"
+" Inspect `$COLORTERM`:
+"
+"     " this guard will prevent the code from being run in urxvt
+"     if $COLORTERM isnot# 'rxvt-xpm'
+"         ...
+"     endif
+"}}}
+if $COLORTERM isnot# 'xfce4-terminal'
+    set termguicolors
+    if !has('nvim')
+        " In Vim, if `$TERM` is not  'xterm', Vim won't automatically set 't_8f'
+        " nor 't_8b'.  We need to do it manually. See: :h xterm-true-color.
+        let &t_8f = "\e[38;2;%lu;%lu;%lum"
+        let &t_8b = "\e[48;2;%lu;%lu;%lum"
+    endif
+endif
+
 augroup my_color_scheme
     au!
     au ColorScheme * call colorscheme#customize()
@@ -1823,28 +1855,6 @@ if !isdirectory(&backupdir)
     call mkdir(&backupdir, 'p', 0700)
 endif
 
-" termguicolors {{{2
-
-" Enable true color when supported.
-
-" My current version of urxvt and xfce4-terminal don't support true color.
-"
-" FIXME:
-" We should use a whitelist, not a blacklist.
-"
-" Atm,  the  only  terminals  which  I  can  install  and  support  true  color,
-" are  Konsole  and  gnome-terminal. I  know  how to  detect  Konsole,  but  not
-" gnome-terminal (there's no environment variable we could inspect).
-if $COLORTERM isnot# 'rxvt-xpm' && $COLORTERM isnot# 'xfce4-terminal'
-    set termguicolors
-    if !has('nvim')
-        " In Vim, if `$TERM` is not  'xterm', Vim won't automatically set 't_8f'
-        " nor 't_8b'.  We need to do it manually. See: :h xterm-true-color.
-        let &t_8f = "\e[38;2;%lu;%lu;%lum"
-        let &t_8b = "\e[48;2;%lu;%lu;%lum"
-    endif
-endif
-
 " thesaurus {{{2
 
 " It is possible to replace the word before the cursor by a synonym.
@@ -2157,6 +2167,7 @@ set wildmode=full
 "}}}
 set wildchar=9
 set wildcharm=26
+" FIXME: Giving a different value to `'wcm'` breaks our `M-n` mapping in command-line mode (vim-readline).
 
 " winaltkeys {{{2
 
@@ -2790,12 +2801,10 @@ nno  <expr><silent>  \p  myfuncs#block_select_paragraph()
 nno <silent> g^  :<c-u>1tabnext<cr>
 nno <silent> g$  :<c-u>$tabnext<cr>
 
-" g c-v       select last edited text {{{4
+" gV  g C-v   select last changed text {{{4
 
-"                ┌─ Visually select
-" Mnemonic:    c-v
-"              └─ the Changed text
 nno  g<c-v>  `[v`]
+nno  gV      '[V']
 
 " g SPC       break line {{{4
 
@@ -3684,7 +3693,6 @@ nno  <silent>  <m-m>  :<c-u>noh <bar> call <sid>where_are_my_matches()<cr>
 
 nno  <m-n>  ]'
 nno  <m-p>  ['
-
 " }}}3
 " >>                  indent without 'shiftround' {{{3
 
@@ -4917,6 +4925,36 @@ fu! s:grep_cfg(pat) abort
     call setqflist([], 'a', {'title': ':GrepCfg ' . pat})
 endfu
 
+" H {{{2
+
+com! -bar -complete=help -nargs=* H call s:help(<q-args>, <q-mods>)
+cnorea <expr> h getcmdtype() is# ':' && getcmdpos() == 1 ? 'h' : 'H'
+fu! s:help(topic, mods) abort
+    try
+        if a:mods is# 'tab'
+            exe 'tab h ' . a:topic
+            return
+        endif
+        let is_valid_topic = !empty(getcompletion(a:topic, 'help'))
+        " We don't want  the layout to be changed (split,  new tabpage), if `:h`
+        " is going to fail; in this case,  we just want the error message, which
+        " will be properly handled by the catch clause.
+        if ! is_valid_topic
+            exe 'h ' . a:topic
+        endif
+        let no_help_window = index(map(tabpagebuflist(), {i,v -> getbufvar(v, '&ft')}), 'help') == -1
+        if no_help_window
+            exe 'h ' . a:topic
+        else
+            exe 'sp | h ' . a:topic
+        endif
+    catch
+        echohl ErrorMsg
+        echom v:exception
+        echohl NONE
+    endtry
+endfu
+
 " HlWeirdWhitespace {{{2
 
 " Why don't you use an autocmd instead?{{{
@@ -5834,6 +5872,9 @@ augroup source_files
     " Still, don't do it.
     "}}}
     au BufWritePost  $MYVIMRC  exe 'source '.expand('<afile>:p')
+    if has('nvim')
+        au BufWritePost  ~/.vim/vimrc  exe 'source '.expand('<afile>:p')
+    endif
 augroup END
 
 " Standard Input {{{2
@@ -8001,6 +8042,28 @@ endfu
 " 128 -
 " Maybe  make `= SPC` comment  the added lines (above  and below) if we're  on a
 " commented line.
+"
+" 129 -
+" Press `-P` in Neovim.
+" The cwd is printed in the middle of the command-line, instead of being at the left.
+" The issue is due to `execute()` being used in a function.
+" You could fix this now by adding `:redraw` before `:echo`.
+" But we would need to do this in several other places.
+" For the moment, wait for this PR to be merged:
+"
+"     https://github.com/neovim/neovim/pull/9338
+"
+" Then, see whether it fixes the issue.
+"
+" 130 -
+"
+"     $ nvim -Nu NONE +'colo evening'
+"
+" Type `:help` on the command-line, then press Tab.
+" The cursor is weird: 1 light-brown cell + 2 white cells.
+" Insert `a`: the cursor is still weird (1 light-brown cell + 1 white cell).
+" Insert `b`: the cursor is still weird (1 light-brown cell).
+" Insert `c`: the cursor is back to normal (1 black cell).
 
 
 
@@ -8148,10 +8211,7 @@ fu! s:save_last_qfl() abort
     "                ┌ the size of the qf stack is limited to 10
     "                │
     while counter <= 10
-        " TODO: once Neovim supports the 'size' property, remove `len(getqflist())`.
-        let size = !has('nvim')
-            \ ?     get(getqflist({'size': 0}), 'size', 0)
-            \ :     len(getqflist())
+        let size = get(getqflist({'size': 0}), 'size', 0)
 
         " Saving and restoring a long qfl takes too much time.
         " And if the qfl is empty, we don't  want to look for another qfl in the
@@ -8212,7 +8272,7 @@ fu! s:restore_last_qfl() abort
     " This is  especially true if the  two qfl which  end on the stack  are very
     " similar, which happens when you're refining an 'efm'.
     "}}}
-    if !has('nvim') && getqflist({'size':0}).size || !empty(getqflist())
+    if get(getqflist({'size':0}), 'size', 0)
     \ || empty(get(get(g:, 'MY_LAST_QFL', {}), 'qfl', []))
         return
     endif

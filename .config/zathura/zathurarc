@@ -128,15 +128,15 @@ set abort-clear-search true
 # Set of flags.
 # Each flag stands for a GUI element which must be displayed:
 #
-#     ┌─────┬──────────────────────────┐
-#     │ 'c' │ command-line             │
-#     ├─────┼──────────────────────────┤
-#     │ 's' │ statusbar                │
-#     ├─────┼──────────────────────────┤
-#     │ 'h' │ the horizontal scrollbar │
-#     ├─────┼──────────────────────────┤
-#     │ 'v' │ vertical scrollbar       │
-#     └─────┴──────────────────────────┘
+#    ┌─────┬──────────────────────────┐
+#    │ 'c' │ command-line             │
+#    ├─────┼──────────────────────────┤
+#    │ 's' │ statusbar                │
+#    ├─────┼──────────────────────────┤
+#    │ 'h' │ the horizontal scrollbar │
+#    ├─────┼──────────────────────────┤
+#    │ 'v' │ vertical scrollbar       │
+#    └─────┴──────────────────────────┘
 #}}}
 set guioptions ''
 

@@ -36,14 +36,16 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-90
+84
 normal! zo
-let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+92
+normal! zo
+let s:l = 96 - ((95 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+96
+normal! 06|
 lcd ~/wiki/vim
 wincmd w
 argglobal
@@ -74,11 +76,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 148 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-148
+1
 normal! 0
 lcd ~/.vim/plugged/asyncmake
 wincmd w
@@ -100,7 +102,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
