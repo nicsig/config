@@ -282,18 +282,18 @@ setlocal fdn=20
 setlocal fen
 17
 normal! zo
-let s:l = 48 - ((23 * winheight(0) + 14) / 28)
+let s:l = 44 - ((9 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-48
+44
 normal! 07|
 lcd ~/wiki
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
-edit ~/.zsh/my-completions/_zathura
+edit ~/wiki/urxvt.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -304,27 +304,9 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 05|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.zsh/my-completions/README.md") | buffer ~/.zsh/my-completions/README.md | else | edit ~/.zsh/my-completions/README.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -333,20 +315,40 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-91
+43
 normal! zo
-92
+311
 normal! zo
 let s:l = 94 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 94
+normal! 025|
+lcd ~/wiki
+wincmd w
+argglobal
+if bufexists("~/patches/urxvt/00-font-width-fix.patch") | buffer ~/patches/urxvt/00-font-width-fix.patch | else | edit ~/patches/urxvt/00-font-width-fix.patch | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 7
 set stal=1
 badd +1 ~/Desktop/countries
@@ -359,8 +361,8 @@ badd +99 ~/wiki/man/man.md
 badd +168 ~/Dropbox/vim_plugins/vimrc_grepper.vim
 badd +75 ~/wiki/admin/compiling.md
 badd +49 ~/wiki/zathura.md
-badd +29 ~/.zsh/my-completions/_zathura
-badd +0 ~/.zsh/my-completions/README.md
+badd +0 ~/wiki/urxvt.md
+badd +0 ~/patches/urxvt/00-font-width-fix.patch
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
