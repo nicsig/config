@@ -2622,11 +2622,20 @@ fu! s:clear_view() abort
     norm! '<zt
 endfu
 
-nno  <silent>  <space>gg  :<c-u>let g:my_goyo_without_syntax_hl = 1
-                          \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+" If you have weird thick borders around the window (especially visible in a light colorscheme):{{{
+"
+" You need to temporarily disable `'tgc'`, before running `:Goyo`.
+" The  issue is specific  to urxvt. I can't  reproduce in other  terminals, like
+" xterm and st.
+"}}}
+nno  <silent>  <space>gg  :<c-u>call <sid>goyo_start(1)<cr>
+nno  <silent>  <space>gG  :<c-u>call <sid>goyo_start(0)<cr>
 
-nno  <silent>  <space>gG :<c-u>let g:my_goyo_without_syntax_hl = 0
-                         \ <bar> exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')<cr>
+fu! s:goyo_start(without_syntax_hl) abort
+    let s:goyo_without_syntax_hl = a:without_syntax_hl
+    " If you don't disable `'tgc'`, some weird borders around the window are displayed.
+    exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')
+endfu
 
 fu! s:goyo_enter() abort
     sil !tmux set status off
@@ -2640,8 +2649,8 @@ fu! s:goyo_enter() abort
     set scrolloff=999
     set noshowcmd
 
-    let  s:goyo_cocu_save = &l:concealcursor
-    let  s:goyo_cole_save = &l:conceallevel
+    let s:goyo_cocu_save = &l:concealcursor
+    let s:goyo_cole_save = &l:conceallevel
     setl concealcursor=nc conceallevel=3
 
     " FIXME:
@@ -2662,7 +2671,7 @@ fu! s:goyo_enter() abort
         \ .(b:my_change_position - 1) .'g,'
     call setpos('.', pos)
 
-    if get(g:, 'my_goyo_without_syntax_hl', 1)
+    if get(s:, 'goyo_without_syntax_hl', 1)
         let syntax_groups = [
             \ 'Conditional',
             \ 'Delimiter',
@@ -3661,10 +3670,13 @@ nno  <c-g><c-g>  <c-g>
 " C-np                move across tab pages {{{4
 
 nno  <silent>  <c-p>  :<c-u>tabprevious<cr>
-nno  <silent>  <c-n>  :<c-u>call <sid>move_across_tabpages(v:count)<cr>
+nno  <silent>  <c-n>  :<c-u>call <sid>move_across_tab_pages(v:count)<cr>
 
-fu! s:move_across_tabpages(cnt) abort
-    " If the  mapping received a count,  move the current window  to the tabpage
+nno  <silent>  <<c-n>  :<c-u>call <sid>move_across_tab_pages(tabpagenr()-1)<cr>
+nno  <silent>  ><c-n>  :<c-u>call <sid>move_across_tab_pages(tabpagenr()+1)<cr>
+
+fu! s:move_across_tab_pages(cnt) abort
+    " If the mapping received  a count, move the current window  to the tab page
     " whose number matches this count.
     if a:cnt
         let bufnr = bufnr('%')
@@ -8054,10 +8066,6 @@ endfu
 "     https://github.com/neovim/neovim/pull/9338
 "
 " Then, see whether it fixes the issue.
-"
-" 130 -
-" Press `K` on the `call()` function.
-" It opens the help page for the `:call` command.
 
 
 

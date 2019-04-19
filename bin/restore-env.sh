@@ -160,6 +160,10 @@ aptitude install \
 #     $ comm -23 <(aptitude search '~i !~M' -F '%p' | sed "s/ *$//" | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
 #
 # https://askubuntu.com/a/492343/867754
+# Also,  read the  book  “The Debian  Administrator's  Handbook”, section  6.2.2
+# Installing and Removing.
+# It  contains a  tip entitled  “TIP Installing the  same selection  of packages
+# several times”, which does exactly what we want.
 
 # Installation of some git repos {{{1
 

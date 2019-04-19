@@ -87,3 +87,19 @@ Remove `~/.zcompdump`, and restart a shell, or execute:
 
 For more info: <https://unix.stackexchange.com/a/2184/289772>
 
+##
+# Todo
+## Better understand `_zathura`.
+
+I've copied it from `/usr/share/zsh/functions/Completion/X/_zathura`, because it
+didn't suggest epub files.
+But we've installed a zathura plugin (zathura-pdf-mupdf) which allows us to do that.
+
+So, after the `for pf ...` loop, I've added this line:
+
+    supported_filetypes+="epub"
+
+It works, but I don't understand the rest of the code.
+
+Document/refactor it.
+
