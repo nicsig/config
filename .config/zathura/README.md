@@ -1,40 +1,24 @@
-Don't forget you can:
-
-   - navigate in the jumplist with C-o and C-i
-   - open the index with Tab
-   - collapse/expand all entries in the index with H/L
-
 # Mapppings
-
-You can install mappings in 3 modes:
+## What are the modes that zathura can recognize in a mapping?
 
    - normal (default)
    - fullscreen
    - index (TOC accessed via Tab)
 
-To do so, you need to pass  the optional argument `[fullscreen]` or `[index]` to
-the `:map` command. For more info:
+### How to use one in a mapping?
 
-        :man zathurarc
-        /Mode
+Pass the optional argument `[fullscreen]` or `[index]` to the `:map` command.
 
 Example:
 
-        map  [fullscreen]  f  toggle_fullscreen
+    map [fullscreen] f toggle_fullscreen
 
-# Add support for more type of files
+For more info, `$ man zathurarc /Mode`.
 
-Go to mime settings, and choose zathura to open `.djvu` files.
-Then, install this plugin:
+##
+## Am I in fullscreen mode when I press Alt-F10?
 
-        sudo aptitude install zathura-djvu
+No.
 
-Do the same for `.ps` and `.cb` files:
-
-                                      ┌ PostScript support for zathura
-                                      │
-        sudo aptitude install zathura-ps
-        sudo aptitude install zathura-cb
-                                      │
-                                      └ comic book archive support for zathura
+From the point of view of zathura, you're not in fullscreen mode.
 

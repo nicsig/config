@@ -3210,8 +3210,10 @@ bindkey '^T' transpose-chars
 # Delete {{{2
 
 # The delete key doesn't work in zsh.
-# Fix it.
+# Fix it in urxvt.
 bindkey  '\e[3~'  delete-char
+# Fix it in suckless terminal.
+bindkey  '\e[P'  delete-char
 
 # S-Tab {{{2
 

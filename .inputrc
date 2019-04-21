@@ -27,16 +27,20 @@ set bell-style none
 # when we type a closing parentheses, don't make the cursor jump to the opening one
 set blink-matching-paren off
 
-# Prevent multi-line pasted text in bash from being automatically executed.
-# Only supported in readline v7/bash 4.4.
-set enable-bracketed-paste on
-
 # complete filenames case insensitively when hitting Tab
 set completion-ignore-case on
 
 # don't echo a character corresponding to a signal generated from the keyboard
 # e.g.: ^C
 set echo-control-characters off
+
+# Prevent multi-line pasted text in bash from being automatically executed.
+# Only supported in readline v7/bash 4.4.
+set enable-bracketed-paste on
+
+# Fix delete key in the suckless terminal.
+# https://git.suckless.org/st/file/FAQ.html#l56
+set enable-keypad on
 
 # expand tilde in a filepath when we hit Tab
 set expand-tilde on

@@ -766,12 +766,6 @@ install() { #{{{2
     #      trying to overwrite '/usr/share/man/man1/zshmodules.1.gz', which is also in package myzsh 999-1
     #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)
     #}}}
-
-    if [[ ${PGM} == 'nvim' ]]; then
-      # By default, when you run `$ man man`, the manpage is not prettified like
-      # it is when you run `:Man man` from a Neovim instance; let's fix that:
-      sed -i.bak '/function! man#init_pager()/ {/endfunction/s//do <nomodeline> man BufReadCmd/}' /usr/local/share/nvim/runtime/autoload/man.vim
-    fi
   fi
 }
 

@@ -17,6 +17,8 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -61,7 +63,7 @@ setlocal fdn=20
 setlocal fen
 3308
 normal! zo
-let s:l = 4486 - ((1036 * winheight(0) + 14) / 28)
+let s:l = 4486 - ((356 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -88,7 +90,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1585 - ((242 * winheight(0) + 15) / 30)
+let s:l = 1585 - ((13 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -138,7 +140,7 @@ setlocal fdn=20
 setlocal fen
 320
 normal! zo
-let s:l = 99 - ((98 * winheight(0) + 14) / 28)
+let s:l = 99 - ((23 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -201,7 +203,7 @@ normal! zo
 normal! zc
 172
 normal! zo
-let s:l = 172 - ((171 * winheight(0) + 14) / 28)
+let s:l = 172 - ((37 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -228,17 +230,15 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-102
-normal! zo
-let s:l = 104 - ((32 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-104
-normal! 034|
+1
+normal! 0
 lcd ~/wiki/vim
 tabnext
-edit ~/wiki/admin/compiling.md
+edit ~/.tmux.conf
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -252,26 +252,30 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fdm=marker
+setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-123
+1
 normal! zo
-let s:l = 130 - ((0 * winheight(0) + 0) / 1)
+2
+normal! zo
+142
+normal! zo
+let s:l = 173 - ((4 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-130
+173
 normal! 0
-lcd ~/wiki/admin
+lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/wiki/zathura.md") | buffer ~/wiki/zathura.md | else | edit ~/wiki/zathura.md | endif
+if bufexists("~/wiki/st.md") | buffer ~/wiki/st.md | else | edit ~/wiki/st.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -280,20 +284,20 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-17
+15
 normal! zo
-let s:l = 44 - ((9 * winheight(0) + 14) / 28)
+let s:l = 38 - ((21 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-44
-normal! 07|
+38
+normal! 014|
 lcd ~/wiki
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
-edit ~/wiki/urxvt.md
+edit ~/.inputrc
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -307,28 +311,57 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fdm=marker
+setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-43
+22
 normal! zo
-311
-normal! zo
-let s:l = 94 - ((0 * winheight(0) + 0) / 1)
+let s:l = 41 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-94
-normal! 025|
-lcd ~/wiki
+41
+normal! 0
+lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/patches/urxvt/00-font-width-fix.patch") | buffer ~/patches/urxvt/00-font-width-fix.patch | else | edit ~/patches/urxvt/00-font-width-fix.patch | endif
+if bufexists("~/.zshrc") | buffer ~/.zshrc | else | edit ~/.zshrc | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+3174
+normal! zo
+3210
+normal! zo
+let s:l = 3217 - ((702 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+3217
+normal! 0
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext
+edit ~/Desktop/google.light.txt
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -338,31 +371,84 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 32 - ((18 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+32
+normal! 03|
+lcd ~/.vim
+tabnext
+edit ~/.Xresources
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 5 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
 normal! 0
 lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-term/plugin/term.vim") | buffer ~/.vim/plugged/vim-term/plugin/term.vim | else | edit ~/.vim/plugged/vim-term/plugin/term.vim | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+21
+normal! zo
+let s:l = 21 - ((3 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+21
+normal! 0
+lcd ~/.vim/plugged/vim-term
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 7
+tabnext 9
 set stal=1
 badd +1 ~/Desktop/countries
+badd +169 ~/.tmux.conf
 badd +1585 ~/wiki/awk/sed.md
 badd +2 ~/wiki/man/examples/pathfind.1
 badd +124 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 badd +96 ~/wiki/vim/ex.md
+badd +41 ~/.inputrc
+badd +32 ~/Desktop/google.light.txt
+badd +5 ~/.Xresources
 badd +4486 ~/wiki/awk/awk.md
 badd +99 ~/wiki/man/man.md
 badd +168 ~/Dropbox/vim_plugins/vimrc_grepper.vim
-badd +75 ~/wiki/admin/compiling.md
-badd +49 ~/wiki/zathura.md
-badd +0 ~/wiki/urxvt.md
-badd +0 ~/patches/urxvt/00-font-width-fix.patch
+badd +170 ~/wiki/st.md
+badd +3217 ~/.zshrc
+badd +539 ~/.vim/plugged/vim-term/plugin/term.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

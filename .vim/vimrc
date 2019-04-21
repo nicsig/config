@@ -1419,15 +1419,15 @@ set sidescroll=5
 " Yes, it should whenever CursorHold is fired.
 " Because, in vim-term, we have:
 "
-"     - a custom autocmd executing `:checktime`
+"    - a custom autocmd executing `:checktime`
 "
-"          it will check whether the file has been changed
-"          outside the current Vim instance
+"        it will check whether the file has been changed
+"        outside the current Vim instance
 "
-"     - set 'autoread'
+"    - set 'autoread'
 "
-"          it will automatically reload the file if the file has been changed
-"          outside the current Vim instance
+"        it will automatically reload the file if the file has been changed
+"        outside the current Vim instance
 "}}}
 " What happens if I edit a file in a 2nd Vim instance, get back to the 1st, and change it before `CursorHold`?{{{
 "
@@ -1455,11 +1455,11 @@ set shortmess+=a
 
 " Don't print |ins-completion-menu| messages.  For example:
 "
-"     - "-- XXX completion (YYY)"
-"     - "match 1 of 2"
-"     - "The only match"
-"     - "Pattern not found"
-"     - "Back at original"
+"    - "-- XXX completion (YYY)"
+"    - "match 1 of 2"
+"    - "The only match"
+"    - "Pattern not found"
+"    - "Back at original"
 set shortmess+=c
 
 " don't print the file info when editing a file, as if `:silent` was used
@@ -1479,7 +1479,13 @@ set shortmess+=W
 
 augroup my_showbreak
     au!
-    au BufEnter,WinEnter * if &filetype is# 'markdown' | set showbreak= | else | set showbreak=↪ | endif
+    " FIXME: Suppose we reset the option in a man buffer.
+    " Then we temporarily visit another window, and we come back to our man buffer.
+    " The autocmd will set the option; it shouldn't. It should restore the original value.
+    " Solution:
+    " Make `cob` create a buffer-local variable used as a flag.
+    " And make the autocmd inspect this flag to decide whether set or reset the option.
+    au BufEnter,WinEnter * if &ft is# 'markdown' | set showbreak= | else | set showbreak=↪ | endif
 augroup END
 
 " signcolumn {{{2
@@ -1627,14 +1633,14 @@ set tagcase=smart
 "
 " Explanation:
 "
-"       ┌─────────┬──────────────────────────────────────────────────────────────┐
-"       │ ./tags; │ file in the directory of the CURRENT FILE, then              │
-"       │         │ in its parent directory, then in the parent of the parent    │
-"       │         │ and so on, recursively                                       │
-"       ├─────────┼──────────────────────────────────────────────────────────────┤
-"       │ tags;   │ file in the WORKING DIRECTORY, then in its parent directory, │
-"       │         │ then in the parent of the parent and so on, recursively      │
-"       └─────────┴──────────────────────────────────────────────────────────────┘
+"    ┌─────────┬──────────────────────────────────────────────────────────────┐
+"    │ ./tags; │ file in the directory of the CURRENT FILE, then              │
+"    │         │ in its parent directory, then in the parent of the parent    │
+"    │         │ and so on, recursively                                       │
+"    ├─────────┼──────────────────────────────────────────────────────────────┤
+"    │ tags;   │ file in the WORKING DIRECTORY, then in its parent directory, │
+"    │         │ then in the parent of the parent and so on, recursively      │
+"    └─────────┴──────────────────────────────────────────────────────────────┘
 "
 " The value of 'tags' influence commands such as `:tj` and `:ltag`.
 " But also, tag completion in insert mode.
@@ -1646,17 +1652,17 @@ set tags=./tags;
 "
 " It's probably due to the combination of two factors:
 "
-"         - vim-gutentags is enabled
+"    - vim-gutentags is enabled
 "
-"         - you have a tags file in a big directory containing many different
-"           projects
+"    - you have a tags file in a big directory containing many different
+"      projects
 "
-"           For example,  you may have  executed `$ ctags  -R` by accident  in a
-"           wrong directory, such as `~/.vim` or `~/.vim/plugged`.
+"      For example,  you may have  executed `$ ctags  -R` by accident  in a
+"      wrong directory, such as `~/.vim` or `~/.vim/plugged`.
 "
-"           Or maybe it  was executed by `vim-gutentags`  because you accidently
-"           created  a git  repo (via  something like  `git {add|commit|push}`),
-"           where you shouldn't have.
+"      Or maybe it  was executed by `vim-gutentags`  because you accidently
+"      created  a git  repo (via  something like  `git {add|commit|push}`),
+"      where you shouldn't have.
 "
 " `vim-gutentags` appends the global value  of 'tags' to the buffer-local value,
 " for buffers inside a git repo.
@@ -3965,6 +3971,7 @@ fu! s:easy_and_custom_paste() abort
         let @+ = substitute(@+, '’', "'", 'g')
         let @+ = substitute(@+, '\w\zs \ze, \w', '', 'g')
     endif
+    let @+ = substitute(@+, '٪', '$', 'g')
     return '"+'
 endfu
 

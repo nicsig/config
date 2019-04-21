@@ -1,15 +1,20 @@
 # Mappings {{{1
 
 # Adjust the width of the document to occupy the whole width of the window.
+
 map                a  adjust_window width
 map  [fullscreen]  a  adjust_window width
-#      └──────────┤
-#                 └ optional argument, to install the mapping in fullscreen mode
-#                   in addition to the normal mode (see README)
+#    ├──────────┘
+#    └ optional argument, to install the mapping in fullscreen mode
+#      in addition to the normal mode (see README)
 
 # Adjust the width of the document to best fit the window.
 map                A  adjust_window best-fit
 map  [fullscreen]  A  adjust_window best-fit
+
+# toggle “night” mode (C like in Vim's `coC`)
+map                C  recolor
+map  [fullscreen]  C  recolor
 
 # Purpose: {{{
 #
@@ -22,6 +27,11 @@ map                d  scroll half-down
 map  [fullscreen]  d  scroll half-down
 map                u  scroll half-up
 map  [fullscreen]  u  scroll half-up
+
+# Tip: press `=` before or after `D` to get a sense of which new zoom size you need
+# for two pages to be fully visible side-by-side.
+map                D  toggle_page_mode
+map  [fullscreen]  D  toggle_page_mode
 
 # toggle the fullscreen mode when `f` is pressed
 map                f  toggle_fullscreen
@@ -92,7 +102,7 @@ set notification-error-fg '#9B1300'
 set notification-error-bg '#DBD6D1'
 
 # statusbar
-#         StatusLine guifg=#9A7372 guibg=#DFDEBD
+# Taken from Vim, `:hi StatusLine`
 set statusbar-bg '#9A7372'
 set statusbar-fg '#DFDEBD'
 
