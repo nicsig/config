@@ -6101,8 +6101,8 @@ let s:NO_TRAILING_WHITESPACE_FT = ['', 'fzf', 'git', 'help', 'qf']
 
 augroup trailing_whitespace
     au!
-    au WinEnter,InsertLeave * call s:trailing_whitespace(1)
-    au InsertEnter          * call s:trailing_whitespace(0)
+    au VimEnter,WinEnter,InsertLeave * call s:trailing_whitespace(1)
+    au InsertEnter * call s:trailing_whitespace(0)
     " An undesirable match will be installed in a help buffer, even if we include `help` in s:NO_TRAILING_WHITESPACE_FT.{{{
     "
     " Try `:h 'list`, and you'll see it.

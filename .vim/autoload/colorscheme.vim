@@ -295,11 +295,14 @@ fu! s:tabline() abort "{{{2
 
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
 
-    let cmd = has('gui_running')
-          \ ?     'hi TabLine gui=none guifg=%s'
-          \ : &tgc
-          \ ?     'hi TabLine term=none cterm=none gui=none guifg=%s'
-          \ :     'hi TabLine term=none cterm=none gui=none ctermfg=%s'
+    if has('gui_running')
+        let cmd = 'hi TabLine gui=none guifg=%s'
+    elseif &tgc
+        let attr = has('nvim') ? 'gui' : 'cterm'
+        let cmd = 'hi TabLine term=none '.attr.'=none guifg=%s'
+    else
+        let cmd = 'hi TabLine term=none cterm=none gui=none ctermfg=%s'
+    endif
 
     " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
     " Tabline doesn't have any value in gui. In this case, executing the command
@@ -325,9 +328,10 @@ fu! s:title() abort "{{{2
         exe 'hi TitleBoldItalic gui=bold,italic guifg='.title_fg
 
     elseif &tgc
-        exe 'hi TitleItalic cterm=italic gui=italic guifg='.title_fg
-        exe 'hi TitleBold cterm=bold gui=bold guifg='.title_fg
-        exe 'hi TitleBoldItalic cterm=bold,italic gui=bold,italic guifg='.title_fg
+        let attr = has('nvim') ? 'gui' : 'cterm'
+        exe 'hi TitleItalic '.attr.'=italic guifg='.title_fg
+        exe 'hi TitleBold '.attr.'=bold guifg='.title_fg
+        exe 'hi TitleBoldItalic '.attr.'=bold,italic guifg='.title_fg
 
     else
         exe 'hi TitleItalic term=italic cterm=italic ctermfg='.title_fg
@@ -371,8 +375,9 @@ fu! s:user() abort "{{{2
         let cmd2 = 'hi User2 gui=%s guifg=%s guibg=%s'
 
     elseif &tgc
-        let cmd1 = 'hi User1 cterm=%s gui=%s guifg=%s guibg=%s'
-        let cmd2 = 'hi User2 cterm=%s gui=%s guifg=%s guibg=%s'
+        let attr = has('nvim') ? 'gui' : 'cterm'
+        let cmd1 = 'hi User1 '.attr.'=%s guifg=%s guibg=%s'
+        let cmd2 = 'hi User2 '.attr.'=%s guifg=%s guibg=%s'
 
     else
         let cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
@@ -399,15 +404,14 @@ fu! s:user() abort "{{{2
     let style1 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? '' : 'reverse')
     if style1 is# '' | return | endif
 
-    exe printf(cmd1, style1, style1, attributes.fg, attributes.bg)
+    exe printf(cmd1, style1, attributes.fg, attributes.bg)
 
     let style2 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? 'reverse' : '')
     if style2 is# '' | return | endif
 
     let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
-    exe printf(cmd2, style2, style2, todo_fg, attributes.bg)
+    exe printf(cmd2, style2, todo_fg, attributes.bg)
 endfu
-
 " }}}1
 " Utilities {{{1
 fu! s:get_attributes(hg) abort "{{{2
