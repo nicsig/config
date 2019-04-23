@@ -1,100 +1,27 @@
-! TODO:
-! Learn how to start the urxvt daemon.
+! The syntax highlighting of a multi-line list item in a comment is wrong in this file.{{{
+!
+! This is because of `keepend`:
+!
+!     :syn list xdefaultsComment
+!     xdefaultsComment xxx match /^!.*$/  keepend contains=xdefaultsTodo,@Spell~
+!                                         ^^^^^^^
+! I don't care atm, but if you do later, then redefine the item without `keepend`:
+!
+!     :syn clear xdefaultsComment
+!     :syn match xdefaultsComment /^!.*$/  contains=xdefaultsTodo,@Spell
+!}}}
+
+*.allowWindowOps:  true
+! URxvt {{{1
+
+! TODO: Learn how to start the urxvt daemon.
 ! It  would  reduce the  memory  footprint  when  we  temporarily open  2  urxvt
 ! terminals.
 
-
-! TODO:
-! Read all of this:
+! TODO: Read all of this:
 ! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.7.pod
 
-
-! URXVT config
-! FIXME:
-! Some unicode characters are not rendered at all. Ex, euler number:
-!
-!         𝑒
-!
-! Google: urxvt unicode character missing
-! Also, read `man urxvt` and search for `font`.
-!
-! NOTE:
-! We can see that `DejaVu Sans Mono` support this glyph:
-!
-!    - start `gucharmap`
-!    - select `DejaVu Sans Mono`
-!    - select size `20`
-!    - search for the glyph (C-f)
-!
-! It works in `xfce4-terminal` and in `guake`, so why not in `urxvt`?
-! What's puzzling, is that `urxvt` is able to render other “exotic“ glyphs,
-! like `ᵢ`.
-!
-! Solution:
-! Install another font:
-!         api xfonts-terminus
-!
-! And use it:
-!
-!       URxvt.font:             xft:Terminus:pixelsize=20:antialias=false
-!       URxvt.boldFont:         xft:Terminus:bold:pixelsize=20:antialias=false
-!
-! Problem:
-! How to use `DejaVu Sans Mono`, and `Terminus` as a fallback?
-! This doesn't work:
-!                                                             ┌ necessary?
-!                                                          ┌──┤
-!       URxvt.font:           xft:DejaVu Sans Mono:size=20,xft:Terminus:size=20
-!       URxvt.boldFont:       xft:DejaVu Sans Mono:bold:size=20,xft:Terminus:bold:size=20
-!
-! Read this:
-! https://forums.gentoo.org/viewtopic-t-783140-start-0-postdays-0-postorder-asc-highlight-urxvt.html
-! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.7.pod#How_does_rxvt_unicode_choose_fonts
-!
-! I tried this:
-!
-!         1. copy this file:
-!                 https://github.com/muennich/urxvt-perls/blob/master/keyboard-select
-!
-!            … inside ~/.urxvt/ext/
-!
-!         2. start urxvt like this:
-!
-!                 urxvt -fn  'xft:DejaVu Sans Mono:size=20,xft:Terminus:size=20' \
-!                       -fi  'xft:DejaVu Sans Mono:italic:size=20,xft:Terminus:italic:size=20' \
-!                       -fb  'xft:DejaVu Sans Mono:bold:size=20,xft:Terminus:bold:size=20' \
-!                       -fbi 'xft:DejaVu Sans Mono:bold:italic:size=20,xft:Terminus:bold:italic:size=20'
-!
-! Doesn't work.
-! Even though I chose a size for the  2nd font which is not greater than the one
-! of the base font:
-!
-!         The only limitation is  that none of the fonts may  be larger than the
-!         base font, as the base font  defines the terminal character cell size,
-!         which must be the same due to the way terminals work.
-!
-! Maybe `urxvt` doesn't recognize that the glyph is not supported and so doesn't
-! try to use  the 2nd font? If so,  maybe we should just create  a mapping which
-! would toggle the font on-the-fly?
-!
-! Update:
-!
-! Try:    C-v U 1d434 Esc
-!         C-v U 1d435 Esc
-!         …
-!
-! Some characters are correctly rendered, but not others.
-!
-! Update:
-!
-! Now they all fail …
-
-
-! TODO:
-! read ~/.vim/plugged/seoul256.vim/urxvt/seoul256-light
-
-! TODO:
-! In `vim-readline` we could install this mapping:
+! TODO: In `vim-readline` we could install this mapping:{{{
 !
 !         exe "set <m-y>=\e[99~"
 !         ino  <expr><unique>  <m-y>  readline#yank('i', 1)
@@ -116,23 +43,70 @@
 ! Update:
 ! It would break the keys in other programs.
 ! For example, M-y wouldn't work in the shell anymore.
+!}}}
 
-! choose a font
-URxvt.font:            xft:DejaVu Sans Mono:size=20
-URxvt.boldFont:        xft:DejaVu Sans Mono:bold:size=20
-
-URxvt.ItalicFont:      xft:DejaVu Sans Mono:italic:size=20
-URxvt.boldItalicFont:  xft:DejaVu Sans Mono:bold:italic:size=20
-
-! set `$TERM` correctly
+! set the font
+! Why `,xft:Symbola`?{{{
 !
-! It's not needed atm, because the package I installed seems to already set it
-! correctly, but if we install a new package in the future, better be safe than
-! sorry.
-URxvt.termName:  rxvt-unicode-256color
+! We specify a fallback font in case a character can't be displayed in DejaVu.
+! Without it, the euler number `𝑒` can't be displayed.
+!}}}
+!     Is it enough?{{{
+!
+! No.
+! Certain characters, such as ``, are still not displayed.
+!
+! Try also to read this page in a Vim buffer:
+! https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-demo.txt
+! You'll notice that the characters below this line are not displayed:
+!
+!     Proverbs in the Amharic language:
+!
+! If that bothers you, you can add more fallback fonts.
+!}}}
+!     Where can I find a solution?{{{
+!
+! Google: “urxvt unicode character missing”
+! First result: https://github.com/powerline/fonts/issues/176
+!
+! Also, see `$ man urxvt /font`.
+!}}}
+
+! How to check whether a character can be displayed by a given font?{{{
+!
+!    - run `$ gucharmap`
+!    - select your font (e.g. `DejaVu Sans Mono`)
+!    - select a size (e.g. `20`, which seems equivalent to `pixelsize=27`)
+!    - search for the glyph (C-f)
+!
+! Note that it doesn't mean that urxvt will be able to display the character.
+! urxvt has its own specific issues.
+! It's just a  necessary – but not enough  – condition, for urxvt to  be able to
+! display a character.
+!}}}
+! Can I use Terminus as a fallback font?{{{
+!
+! In theory, it should work because it's able to display the euler number:
+!
+!     $ sudo aptitude install xfonts-terminus
+!
+!     URxvt.font:  xft:Terminus:pixelsize=27
+!
+! In practice, it doesn't work, and I don't know why:
+!
+!     URxvt.font:  xft:DejaVu Sans Mono:pixelsize=27,xft:Terminus
+!}}}
+URxvt.font:            xft:DejaVu Sans Mono:pixelsize=27,xft:Symbola
+URxvt.boldFont:        xft:DejaVu Sans Mono:bold:pixelsize=27,xft:Symbola:bold
+
+URxvt.ItalicFont:      xft:DejaVu Sans Mono:italic:pixelsize=27,xft:Symbola:italic
+URxvt.boldItalicFont:  xft:DejaVu Sans Mono:bold:italic:pixelsize=27,xft:Symbola:bold:italic
+
+! set `$TERM`
+URxvt.termName: rxvt-unicode-256color
 
 ! disable scrollbar
-URxvt.scrollBar:  false
+URxvt.scrollBar: false
 
 ! Scroll with `M-j` and `M-k`, instead of `S-PgDown` and `S-PgUp`.
 ! Where is the syntax `URxvt.keysym.<sym>: command: ...` documented?{{{
@@ -188,13 +162,10 @@ URxvt.scrollBar:  false
 !}}}
 
 ! default geometry
-
-!                ┌ a little bigger than $COLUMNS
-!                │
-URxvt.geometry:  121x35
-!                    │
-!                    └  a little bigger than $LINES
-
+URxvt.geometry: 121x35
+!               │   │
+!               │   └ a little bigger than $LINES
+!               └ a little bigger than $COLUMNS
 
 Xft.dpi:        96
 Xft.antialias:  true
@@ -203,8 +174,6 @@ Xft.hinting:    true
 Xft.hintstyle:  hintslight
 Xft.autohint:   false
 Xft.lcdfilter:  lcddefault
-
-
 
 ! URxvt.perl-ext-common: default,matcher
 ! URxvt.url-launcher: /usr/bin/xdg-open
@@ -216,8 +185,6 @@ Xft.lcdfilter:  lcddefault
 ! URxvt.matcher.rend.0: Uline Bold fg5
 !
 ! URxvt.colorUL: #4682b4
-
-
 
 ! Perl extensions
 ! Warning:{{{
@@ -255,7 +222,7 @@ Xft.lcdfilter:  lcddefault
 ! It can protect from attacks such as this one:
 !     https://thejh.net/misc/website-terminal-copy-paste
 !}}}
-URxvt.perl-ext-common:  default,\
+URxvt.perl-ext-common: default,\
 selection-to-clipboard,\
 -searchable-scrollback,\
 pasta,\
@@ -264,45 +231,44 @@ keyboard-select,\
 confirm-paste,\
 clipboard-osc
 
-*.allowWindowOps:  true
-! xterm.VT100.allowWindowOps:  true
+*allowWindowOps: true
+! XTerm.VT100.allowWindowOps:  true
 
-! temporarily disabled, we need to find another key to not shadow `M-u` (readline capitalize)
-! besides, the next key binding can't work because we don't have any url-select extension
-! inside    /usr/lib/urxvt/perl/    nor inside    ~/.urxvt/ext/
+! Temporarily disabled.
+! We need to find another key to not shadow `M-u` (readline capitalize) besides,
+! the next key binding can't work because we don't have any url-select extension
+! inside `/usr/lib/urxvt/perl/` nor inside `~/.urxvt/ext/`.
 !
 !     URxvt.keysym.M-u:     perl:url-select:select_next
 !     URxvt.keysym.M-u:     perl:searchable-scrollback
-URxvt.url-launcher:  /usr/bin/firefox
+URxvt.url-launcher: /usr/bin/firefox
 
 ! If you don't want URLs to be underlines, the following resource isn't enough.
 ! You also need to either:
 !
 !    - disable the perl extension `matcher` in `URxvt.perl-ext-common`
 !    - tweak the resource `URxvt.matcher.pattern.0`
-URxvt.underlineURLs:  false
-URxvt.matcher.pattern.0:  urxvt_matcher_pattern_garbage
+URxvt.underlineURLs: false
+URxvt.matcher.pattern.0: urxvt_matcher_pattern_garbage
 
-URxvt.matcher.button:  1
-URxvt.keysym.M-Escape:  perl:keyboard-select:activate
-URxvt.keysym.Control-Shift-V:  perl:pasta:paste
+URxvt.matcher.button: 1
+URxvt.keysym.M-Escape: perl:keyboard-select:activate
+URxvt.keysym.Control-Shift-V: perl:pasta:paste
 ! Comment this if you don't want copy when text is selected
-URxvt.clipboard.autocopy:  true
+URxvt.clipboard.autocopy: true
 
 ! disable picture insert mode and ISO 14755 mode
 ! these modes prevent us from pasting with C-S-v
 !
 !     https://wilmer.gaa.st/blog/archives/36-rxvt-unicode-and-ISO-14755-mode.html#c289
 
-URxvt.iso14755:  false
-URxvt.iso14755_52:  false
+URxvt.iso14755: false
+URxvt.iso14755_52: false
 
+! Xterm {{{1
 
-
-! XTERM
-
-! $TERM should be `xterm-256color`, so that our programs use the full palette of
-! the terminal
+! `$TERM` should be `xterm-256color`, so that  our programs use the full palette
+! of the terminal
 XTerm*termName: xterm-256color
 
 ! Make key bindings using the meta modifier work.
@@ -313,8 +279,8 @@ XTerm*termName: xterm-256color
 XTerm*metaSendsEscape: true
 
 ! font (face and size)
-xterm*faceName: DejaVu Sans Mono
-xterm*faceSize: 20
+XTerm*faceName: DejaVu Sans Mono
+XTerm*faceSize: 20
 
 ! TODO:
 ! We  can paste some  text selected  in firefox by  pressing down shift  and the
@@ -323,97 +289,96 @@ xterm*faceSize: 20
 
 ! Let us paste the system clipboard via C-S-v.
 !     https://unix.stackexchange.com/a/225076/277716
-xterm*VT100.Translations: #override \
+XTerm*VT100.Translations: #override \
                  Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
                  Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
 
+! Colors (for all X programs) {{{1
 
-
-! COLORS (for all X programs)
-
-! don't choose the closest match in the palette for a true color
+! don't choose the closest match in the palette for a true color{{{
 !
 ! Source:
 !
-!     http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
-!     CSI Pm m  Character Attributes (SGR).
-!
-!     If  xterm  is  compiled  with   direct-color  support,  and  the  resource
-!     directColor is  true, then rather  than choosing the closest  match, xterm
-!     asks the X server to directly render a given color.
+! > http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
+! > CSI Pm m  Character Attributes (SGR).
+! >
+! > If  xterm  is  compiled  with   direct-color  support,  and  the  resource
+! > directColor is  true, then rather  than choosing the closest  match, xterm
+! > asks the X server to directly render a given color.
 !
 ! Also useful for xterm to use the colors defined in this file.
 ! Without enabling  `directColor`, xterm  chooses a  black background  no matter
 ! what we we set up here.
+!}}}
 directColor: true
 
-
-! To find a good palette, look here:
+! To find a good palette, look here: https://terminal.sexy/
 !
-!     https://terminal.sexy/
-!
-! When you want  to export a scheme,  you have to select the  export tab, BUT
-! ALSO to click on the export button.
+! When you  want to  export a  scheme, you have  to select  the export  tab, but
+! *also* to click on the export button.
 
-
-
-! NOTE:
-! If you prefer to use the same colors used by seoul256:
-!
-!         ~/.vim/plugged/seoul256.vim/urxvt/seoul256-light
-!
 ! Warning:
 ! The syntax highlighting applied by the `zsh-syntax-highlighting` plugin
 ! may override some of these colors for some tokens.
 ! Atm, it's the case for the double/single quoted strings. They aren't colored
 ! by the yellow defined in this file.
 
+! The values are mostly copied from the google light color scheme (cf. terminal.sexy).
 
-! google light
-!
-! special
 ! output of commands
-*.foreground:   #373b41
+*foreground: #373b41
 
 ! terminal background
-! value taken from `bespin` light palette
-*.background:   #dbd6d1
+! value copied from `bespin` light palette
+*background: #dbd6d1
 
 ! If you change the color here, make sure to also change it in:
 !
-!         ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
+!     ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
 !
-! … in `s:colorscheme()`.
-*.cursorColor:  #373b41
+! ... in `s:colorscheme()`.
+*cursorColor: #373b41
+! Color of the character under the cursor.{{{
+!
+! From `$ man urxvt /cursorColor2`:
+!
+! > cursorColor2: colour
+! >     Use the specified colour for the colour of the cursor text. For
+! >     this to take effect, cursorColor must also be specified. The
+! >     default is to use the background colour.
+!
+! Value copied from: `~/.vim/plugged/seoul256.vim/urxvt/seoul256-light`
+!}}}
+URxvt*cursorColor2: #dadada
 
 ! black
-*.color0:  #1d1f21
-*.color8:  #969896
+*color0:  #1d1f21
+*color8:  #969896
 
 ! red
-*.color1:  #cc342b
-*.color9:  #cc342b
+*color1:  #cc342b
+*color9:  #cc342b
 
 ! green
-*.color2:   #198844
-*.color10:  #198844
+*color2:  #198844
+*color10: #198844
 
 ! yellow
-! Taken from:    ~/.vim/plugged/seoul256.vim/urxvt/seoul256-light
-*.color3:   #af8760
-*.color11:  #d8865f
+! Values copied from: `~/.vim/plugged/seoul256.vim/urxvt/seoul256-light`
+*color3:  #af8760
+*color11: #d8865f
 
 ! blue
-*.color4:   #3971ed
-*.color12:  #3971ed
+*color4:  #3971ed
+*color12: #3971ed
 
 ! magenta
-*.color5:   #a36ac7
-*.color13:  #a36ac7
+*color5:  #a36ac7
+*color13: #a36ac7
 
 ! cyan
-*.color6:   #3971ed
-*.color14:  #3971ed
+*color6:  #3971ed
+*color14: #3971ed
 
 ! white
 ! If you must change `color7`, choose a readable color.{{{
@@ -425,5 +390,20 @@ directColor: true
 !
 !     $ pygmentize ~/bin/python/xkbmapd.py
 !}}}
-*.color7:   #808080
-*.color15:  #ffffff
+*color7:  #808080
+*color15: #ffffff
+
+! color of bold text{{{
+!
+! From `$ man urxvt /colorBD`
+!
+! > colorBD: colour
+! >     Use the specified colour to display bold or italic characters when
+! >     the foreground colour is the default. If font styles are not
+! >     available (Compile styles) and this option is unset, reverse video
+! >     is used instead.
+!
+! Value copied from: `~/.vim/plugged/seoul256.vim/urxvt/seoul256-light`
+!}}}
+URxvt*colorBD: #3a3a3a
+

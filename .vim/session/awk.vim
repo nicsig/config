@@ -16,9 +16,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
-tabnew
-tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -63,7 +60,7 @@ setlocal fdn=20
 setlocal fen
 3308
 normal! zo
-let s:l = 4486 - ((356 * winheight(0) + 14) / 28)
+let s:l = 4486 - ((1034 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -140,7 +137,7 @@ setlocal fdn=20
 setlocal fen
 320
 normal! zo
-let s:l = 99 - ((23 * winheight(0) + 14) / 28)
+let s:l = 99 - ((82 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -199,16 +196,14 @@ setlocal fdn=20
 setlocal fen
 50
 normal! zo
-50
-normal! zc
-172
+69
 normal! zo
-let s:l = 172 - ((37 * winheight(0) + 14) / 28)
+let s:l = 134 - ((23 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-172
-normal! 030|
+134
+normal! 0
 lcd ~/.vim
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -230,11 +225,15 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+17
+normal! zo
+30
+normal! zo
+let s:l = 30 - ((29 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+30
 normal! 0
 lcd ~/wiki/vim
 tabnext
@@ -242,7 +241,10 @@ edit ~/.tmux.conf
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
@@ -250,7 +252,8 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -264,14 +267,12 @@ setlocal fen
 normal! zo
 2
 normal! zo
-142
-normal! zo
-let s:l = 173 - ((4 * winheight(0) + 0) / 1)
+let s:l = 169 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-173
-normal! 0
+169
+normal! 01|
 lcd ~/.vim
 wincmd w
 argglobal
@@ -284,84 +285,18 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-15
+6
 normal! zo
-let s:l = 38 - ((21 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-38
-normal! 014|
+1
+normal! 0
 lcd ~/wiki
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit ~/.inputrc
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-22
-normal! zo
-let s:l = 41 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-41
-normal! 0
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.zshrc") | buffer ~/.zshrc | else | edit ~/.zshrc | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-3174
-normal! zo
-3210
-normal! zo
-let s:l = 3217 - ((702 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-3217
-normal! 0
-lcd ~/.vim
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit ~/Desktop/google.light.txt
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
+if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -370,85 +305,31 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 32 - ((18 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-32
-normal! 03|
-lcd ~/.vim
-tabnext
-edit ~/.Xresources
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
+1
 normal! 0
-lcd ~/.vim
+lcd ~/wiki
 wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-term/plugin/term.vim") | buffer ~/.vim/plugged/vim-term/plugin/term.vim | else | edit ~/.vim/plugged/vim-term/plugin/term.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-21
-normal! zo
-let s:l = 21 - ((3 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-21
-normal! 0
-lcd ~/.vim/plugged/vim-term
-wincmd w
-2wincmd w
+3wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 9
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+tabnext 6
 set stal=1
 badd +1 ~/Desktop/countries
-badd +169 ~/.tmux.conf
-badd +1585 ~/wiki/awk/sed.md
-badd +2 ~/wiki/man/examples/pathfind.1
-badd +124 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
-badd +96 ~/wiki/vim/ex.md
-badd +41 ~/.inputrc
-badd +32 ~/Desktop/google.light.txt
-badd +5 ~/.Xresources
+badd +1 ~/wiki/awk/sed.md
+badd +1 ~/wiki/man/examples/pathfind.1
+badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
+badd +1 ~/wiki/vim/ex.md
+badd +1 ~/.tmux.conf
 badd +4486 ~/wiki/awk/awk.md
 badd +99 ~/wiki/man/man.md
-badd +168 ~/Dropbox/vim_plugins/vimrc_grepper.vim
-badd +170 ~/wiki/st.md
-badd +3217 ~/.zshrc
-badd +539 ~/.vim/plugged/vim-term/plugin/term.vim
+badd +134 ~/Dropbox/vim_plugins/vimrc_grepper.vim
+badd +110 ~/wiki/st.md
+badd +0 ~/wiki/.git/index
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

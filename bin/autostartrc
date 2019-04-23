@@ -10,19 +10,46 @@ mkdir -p /run/user/$UID/tmp
 # redshift
 redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
 
-# Warning:{{{
+# Why don't you use unclutter anymore?{{{
 #
-# `unclutter` interferes with the `interSubs` script which allows us to read the
+# It  interfered  with the  `interSubs`  script  which  allows  us to  read  the
 # translation of subtitles.
 #
-# Besides, it may cause issues in the future:
+# In the past, we used a shell function to toggle the process:
+#
+#     unclutter_toggle() {
+#       emulate -L zsh
+#       local pid
+#       pid="$(pgrep unclutter)"
+#       if [[ -n "${pid}" ]]; then
+#         kill "${pid}"
+#       else
+#         unclutter -idle 2 & disown
+#       fi
+#     }
+#
+# But it's too cumbersome to remember to use it.
+#
+# ---
+#
+# Besides, unclutter could cause other issues:
 #
 #     https://wiki.archlinux.org/index.php/unclutter#Known_bugs
 #
-# If it happens, it  may be difficult to debug, because  `unclutter` seems to be
-# an unimportant program, so I tend to forget its existence easily.
+# ---
+#
+# Finally:
+#
+# > ... the unclutter source code is terrible, so I wrote xbanish.
+#
+# And indeed the source code of xbanish is shorter.
+# Use `$ apt-get source` to get the source code of unclutter.
 #}}}
-unclutter -idle 2 &
+# Where can I find this program?{{{
+#
+# https://github.com/jcs/xbanish
+#}}}
+xbanish &
 
 # Why don't you start `urxvt` anymore?{{{
 #

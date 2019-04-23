@@ -2,7 +2,7 @@
 
 set rtp^=~/.vim
 set rtp+=~/.vim/after
-" Do NOT do this `ln -s ~/.vim/after ~/.config/nvim/after`!{{{
+" Do *not* do this `ln -s ~/.vim/after ~/.config/nvim/after`!{{{
 "
 " Neovim automatically includes `~/.config/nvim/after` in the rtp.
 "
@@ -15,13 +15,13 @@ set rtp+=~/.vim/after
 " Summary:
 " one of them work as expected, but not both:
 "
-"         :set rtp+=~/.vim/after
-"         $ ln -s ~/.vim/after ~/.config/nvim/after
+"     :set rtp+=~/.vim/after
+"     $ ln -s ~/.vim/after ~/.config/nvim/after
 "}}}
 
 " What does it do?{{{
 "
-" It adds to 'pp':
+" It adds to `'pp'`:
 "
 "     ~/.fzf
 "     ~/.vim              because we've manually added it to 'rtp' just before
@@ -41,9 +41,9 @@ let &packpath = &rtp
 "
 " Because of this, `:CheckHealth` contains the following message:
 "
-"     - INFO: Multiple python2 executables found.  Set `g:python_host_prog` to avoid surprises.
-"     - INFO: Executable: /usr/bin/python2
-"     - INFO: Other python executable: /bin/python2
+"    - INFO: Multiple python2 executables found.  Set `g:python_host_prog` to avoid surprises.
+"    - INFO: Executable: /usr/bin/python2
+"    - INFO: Other python executable: /bin/python2
 "
 " To get rid of the message, we explicitly tell Neovim which path it must use
 " to invoke the python2 interpreter.

@@ -236,26 +236,28 @@ fu! s:styled_comments() abort "{{{2
         exe 'hi markdownBlockquoteCodeSpan guibg='.guibg.' guifg='.statement_fg
         exe 'hi markdownBlockquoteItalic gui=italic guifg='.statement_fg
 
-    " the only relevant attributes in a truecolor terminal are `cterm`, `guifg` and `guibg`
+    " the only relevant attributes in a truecolor terminal are `guifg`, `guibg`,
+    " and `cterm` (Vim) or `gui` (Neovim)
     elseif &tgc
         exe 'hi CommentCodeSpan guifg='.comment_fg.' guibg='.guibg
         exe 'hi markdownCodeSpan guibg='.guibg
 
-        exe 'hi CommentBold cterm=bold guifg='.comment_fg
-        exe 'hi CommentBoldItalic cterm=bold,italic guifg='.comment_fg
-        exe 'hi CommentItalic cterm=italic guifg='.comment_fg
+        let attr = has('nvim') ? 'gui' : 'cterm'
+        exe 'hi CommentBold '.attr.'=bold guifg='.comment_fg
+        exe 'hi CommentBoldItalic '.attr.'=bold,italic guifg='.comment_fg
+        exe 'hi CommentItalic '.attr.'=italic guifg='.comment_fg
 
         exe 'hi markdownListItem guifg='.repeat_fg
-        exe 'hi markdownListItemBold cterm=bold guifg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg='.repeat_fg
+        exe 'hi markdownListItemBold '.attr.'=bold guifg='.repeat_fg
+        exe 'hi markdownListItemBoldItalic '.attr.'=bold,italic guifg='.repeat_fg
         exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
-        exe 'hi markdownListItemItalic cterm=italic guifg='.repeat_fg
+        exe 'hi markdownListItemItalic '.attr.'=italic guifg='.repeat_fg
 
         exe 'hi markdownBlockquote guifg='.statement_fg
-        exe 'hi markdownBlockquoteBold cterm=bold guifg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg='.statement_fg
+        exe 'hi markdownBlockquoteBold '.attr.'=bold guifg='.statement_fg
+        exe 'hi markdownBlockquoteBoldItalic '.attr.'=bold,italic guifg='.statement_fg
         exe 'hi markdownBlockquoteCodeSpan guifg='.statement_fg.' guibg='.guibg
-        exe 'hi markdownBlockquoteItalic cterm=italic guifg='.statement_fg
+        exe 'hi markdownBlockquoteItalic '.attr.'=italic guifg='.statement_fg
 
     " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
@@ -279,6 +281,7 @@ fu! s:styled_comments() abort "{{{2
         exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='.statement_fg
     endif
 endfu
+
 fu! s:tabline() abort "{{{2
     " the purpose of this function is to remove the underline value from the HG
     " TabLine
@@ -295,8 +298,8 @@ fu! s:tabline() abort "{{{2
     let cmd = has('gui_running')
           \ ?     'hi TabLine gui=none guifg=%s'
           \ : &tgc
-          \ ?     'hi TabLine term=none cterm=none guifg=%s'
-          \ :     'hi TabLine term=none cterm=none ctermfg=%s'
+          \ ?     'hi TabLine term=none cterm=none gui=none guifg=%s'
+          \ :     'hi TabLine term=none cterm=none gui=none ctermfg=%s'
 
     " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
     " Tabline doesn't have any value in gui. In this case, executing the command
@@ -322,9 +325,9 @@ fu! s:title() abort "{{{2
         exe 'hi TitleBoldItalic gui=bold,italic guifg='.title_fg
 
     elseif &tgc
-        exe 'hi TitleItalic cterm=italic guifg='.title_fg
-        exe 'hi TitleBold cterm=bold guifg='.title_fg
-        exe 'hi TitleBoldItalic cterm=bold,italic guifg='.title_fg
+        exe 'hi TitleItalic cterm=italic gui=italic guifg='.title_fg
+        exe 'hi TitleBold cterm=bold gui=bold guifg='.title_fg
+        exe 'hi TitleBoldItalic cterm=bold,italic gui=bold,italic guifg='.title_fg
 
     else
         exe 'hi TitleItalic term=italic cterm=italic ctermfg='.title_fg
@@ -338,8 +341,8 @@ fu! s:user() abort "{{{2
     "
     " We use them in the status line to customize the appearance of:
     "
-    "     - the filename
-    "     - the modified flag
+    "    - the filename
+    "    - the modified flag
     "
     " We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
     " except for one: `reverse` (boolean flag).
@@ -364,38 +367,31 @@ fu! s:user() abort "{{{2
     call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
 
     if has('gui_running')
-        " When 'termguicolors' is set, you set up:
-        "
-        "    - the style  of a HG with the argument  `cterm`   , not `gui`
-        "    - the colors of a HG with the arguments `gui[fb]g`, not `cterm[fb]g`
-        "
-        " IOW, 'tgc' has an effect on how you set up the COLORS of a HG, but not
-        " its STYLE.
-        let cmd1 = 'hi User1  gui=%s  guifg=%s  guibg=%s'
-        let cmd2 = 'hi User2  gui=%s  guifg=%s  guibg=%s'
+        let cmd1 = 'hi User1 gui=%s guifg=%s guibg=%s'
+        let cmd2 = 'hi User2 gui=%s guifg=%s guibg=%s'
 
     elseif &tgc
-        let cmd1 = 'hi User1  cterm=%s  guifg=%s  guibg=%s'
-        let cmd2 = 'hi User2  cterm=%s  guifg=%s  guibg=%s'
+        let cmd1 = 'hi User1 cterm=%s gui=%s guifg=%s guibg=%s'
+        let cmd2 = 'hi User2 cterm=%s gui=%s guifg=%s guibg=%s'
 
     else
-        let cmd1 = 'hi User1  cterm=%s ctermfg=%s ctermbg=%s'
-        let cmd2 = 'hi User2  cterm=%s ctermfg=%s ctermbg=%s'
-        "                                       │
-        "                                       └ yes, you could use `%d`
-        "                                         but you couldn't use `%d` for `guifg`
-        "                                         nor `%x`
-        "                                         nor `%X`
-        "                                         only `%s`
-        "                                         so, we use `%s` everywhere
+        let cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
+        let cmd2 = 'hi User2 cterm=%s ctermfg=%s ctermbg=%s'
+        "                                      │
+        "                                      └ yes, you could use `%d`
+        "                                        but you couldn't use `%d` for `guifg`
+        "                                        nor `%x`
+        "                                        nor `%X`
+        "                                        only `%s`
+        "                                        so, we use `%s` everywhere
     endif
 
     " For some color  schemes (default, darkblue, ...), some values  used in the
     " command which is going to be executed may be empty.
     " If that happens, the command will fail:
     "
-    "     Error detected while processing function <SNR>18_set_user_hg:
-    "     E421: Color name or number not recognized: ctermfg= ctermbg=
+    "     Error detected while processing function <SNR>18_set_user_hg:~
+    "     E421: Color name or number not recognized: ctermfg= ctermbg=~
     if attributes.fg is# '' || attributes.bg is# ''
         return
     endif
@@ -403,13 +399,13 @@ fu! s:user() abort "{{{2
     let style1 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? '' : 'reverse')
     if style1 is# '' | return | endif
 
-    exe printf(cmd1, style1, attributes.fg, attributes.bg)
+    exe printf(cmd1, style1, style1, attributes.fg, attributes.bg)
 
     let style2 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? 'reverse' : '')
     if style2 is# '' | return | endif
 
     let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
-    exe printf(cmd2, style2, todo_fg, attributes.bg)
+    exe printf(cmd2, style2, style2, todo_fg, attributes.bg)
 endfu
 
 " }}}1

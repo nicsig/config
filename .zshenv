@@ -327,7 +327,7 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 #               └ boolean and numerics options (probably)
 #}}}
 
-# path {{{1
+# PATH {{{1
 
 # Why don't you set `CDPATH`?{{{
 #
@@ -359,14 +359,60 @@ export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 #}}}
 export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/man:${MANPATH}:
 # add the `texlive` and `dasht` binaries to our path
-export PATH=${HOME}/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/GitRepos/dasht/bin
-#           ├───────┘{{{
-#           └ We don't need to add this for a non-login shell,
-#             because it's included by default.
-#             Maybe because of /etc/skel/.profile:20 ...
-#             However, we DO need to add it when zsh is started as a login shell
-#             in a virtual console.
+# Aren't `~/bin` and `~/.local/bin` already in `$PATH` by default?{{{
+#
+# Yes they are.
 #}}}
+#     How to find the first ancestor of my shell whose `$PATH` contains them?{{{
+#
+# Run this:
+#
+#     $ pstree -s -p $$
+#     systemd(1)───lightdm(934)───lightdm(997)───upstart(1006)───tmux: server(1642)───zsh(9687)───pstree(9733)~
+#
+# Then run:
+#
+#     $ sed 's/\x0/\n/g' /proc/PID/environ | grep ^PATH
+#                              ^^^
+#                              pid of an ancestor process
+#
+# You'll notice that the first process whose `$PATH` contains those directories is upstart.
+#}}}
+#     What put them there?{{{
+#
+# If you inspect `/proc/UPSTART_PID/cmdline`, you'll read:
+#
+#     $ cat /proc/1006/cmdline
+#     /sbin/upstart --user~
+#
+# From `$ man upstart /--user`:
+#
+# > --user Starts  in user mode, as used for user sessions. Upstart will be
+# >        run as an unprivileged user, reading  configuration  files  from
+# >        configuration locations as per roughly XDG Base Directory Speci‐
+# >        fication. See init(5) for further details.
+#
+# I think that because of `--user`, the upstart process reads `~/.profile` which contains:
+#
+#     # set PATH so it includes user's private bin directories
+#     PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+#
+# `~/.profile` is – probably – initially copied from:
+#
+#     /etc/skel/.profile
+#}}}
+#     But if they're already there by default, why add them here again?{{{
+#
+# They would be missing when zsh is started as a login shell in a virtual console.
+# Indeed, in that case:
+#
+#     $ pstree -s -p $$
+#     systemd(1)---login(8518)---zsh(8579)---pstree(8900)~
+#
+# The shell  has only 2 ancestors,  none of which has a  PATH containing `~/bin`
+# nor `~/.local/bin`.
+#}}}
+export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/GitRepos/dasht/bin
 
 # pdf {{{1
 

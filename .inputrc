@@ -38,8 +38,29 @@ set echo-control-characters off
 # Only supported in readline v7/bash 4.4.
 set enable-bracketed-paste on
 
-# Fix delete key in the suckless terminal.
+# What does it do?{{{
+#
+# From `$ man 3 readline /enable-keypad`:
+#
+# > When set to On, readline will try  to enable the application keypad when it is
+# > called.  Some systems need this to enable the arrow keys.
+#
+# By default, when readline is called, the terminal is in normal mode.
+# But  when  `enable-keypad` is  set,  readline  makes  the terminal  enter  the
+# application mode temporarily.
+#
+# For more info about normal vs application mode:
+# http://invisible-island.net/xterm/xterm.faq.html#xterm_arrows
+# http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-PC-Style-Function-Keys
+#
+# For more  info about  the delete  key issue, see  our comments  in `~/.zshrc`,
+# somewhere around the key binding which invokes `delete-char`.
+#}}}
+#   Why do you do this?{{{
+#
+# It's necessary to fix the delete key in the suckless terminal.
 # https://git.suckless.org/st/file/FAQ.html#l56
+#}}}
 set enable-keypad on
 
 # expand tilde in a filepath when we hit Tab

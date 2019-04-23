@@ -2238,6 +2238,19 @@ tor() { #{{{2
 
 truecolor() { #{{{2
   emulate -L zsh
+  # How to interpret the output?{{{
+  #
+  # You should see either
+  #
+  #    - cells randomly|non- colored,
+  #      (the terminal doesn't support true color)
+  #
+  #    - colors from red to blue, with a *non*-smooth gradient
+  #      (the terminal partially supports true color)
+  #
+  #    - colors from red to blue, with a smooth gradient
+  #      (the terminal fully supports true color)
+  #}}}
 
   local i r g b
 
@@ -2278,49 +2291,6 @@ truecolor() { #{{{2
     printf -- '\e[48;2;%d;%d;%dm \e[0m' "$r" "$g" "$b"
   done
   printf -- '\n'
-}
-
-unclutter_toggle() { #{{{2
-  # Purpose:{{{
-  #
-  # `unclutter` interferes with `~/.config/mpv/scripts/interSubs.py`.
-  #
-  # Besides, it may cause issues in the future:
-  #
-  #     https://wiki.archlinux.org/index.php/unclutter#Known_bugs
-  #
-  # We  need  an easy  way  to  toggle the  program  when  watching movies  with
-  # interactive subtitles.
-  #}}}
-  emulate -L zsh
-  local pid
-  pid="$(pgrep unclutter)"
-  if [[ -n "${pid}" ]]; then
-    kill "${pid}"
-  else
-    unclutter -idle 2 & disown
-    #                 │ │{{{
-    #                 │ └ don't interrupt the process if we close the shell
-    #                 │
-    #                 │   `disown` removes the job from the list of active jobs of the shell:
-    #                 │
-    #                 │     - the job can't be accessed via `%n`
-    #                 │     - it can't be resumed in the foreground
-    #                 │     - it can't be interrupted by sending a `SIGHUP` to the shell
-    #                 │       because the latter won't relay it to the process
-    #                 │
-    #                 └ give me the control of the shell back
-    #
-    #                   `&` puts the process in the bg:
-    #
-    #                       - make it halt if it tries to read its stdin
-    #                       - prevent the shell from waiting the process completion
-    #
-    # For more info about the difference between `&`, `disown`, `nohup`, see:
-    #
-    #     https://unix.stackexchange.com/a/148698/289772
-    #}}}
-  fi
 }
 
 var_what_have_you() { #{{{2
@@ -3209,11 +3179,151 @@ bindkey '^T' transpose-chars
 
 # Delete {{{2
 
-# The delete key doesn't work in zsh.
-# Fix it in urxvt.
-bindkey  '\e[3~'  delete-char
-# Fix it in suckless terminal.
-bindkey  '\e[P'  delete-char
+# The delete key doesn't work in zsh. Let's fix it.
+# The sequence is hard-coded. I don't like that, because it may not be portable across different environments.{{{
+#
+# If you want sth more portable, you could try this:
+#
+#     autoload zkbd
+#     [[ ! -f "${HOME}/.zkbd/${TERM}" ]] && zkbd
+#     . "${HOME}/.zkbd/${TERM}"
+#     [[ -n ${key[Delete]} ]] && bindkey "${key[Delete]}" delete-char
+#
+# This calls the zkbd utility – documented at `$ man zshcontrib /zkbd`.
+#
+# The first time the code  is run in a new terminal, it will  ask you to press a
+# few keys.
+#
+# If you  can't find  one of the  key that  it asks, don't  worry; it  will just
+# ignore this key in the next generated file.
+# After that, it will generate the file `~/.zkbd/YOUR_TERM-:0.0`.
+# Rename it in `~/.zkbd/YOUR_TERM`.
+#
+# The next times the code is run, it will simply source the generated file.
+# You may then use `${key[Delete]}` to reference the Delete key in a bindkey command.
+#
+# Issue: How to reliably detect the identity of the terminal?
+# In tmux, `$TERM` always contains `tmux-256color`.
+# You could use `$COLORTERM`, but there's no guarantee it will work for any terminal.
+# For example, gnome-terminal, st, and xterm do not set this variable.
+#}}}
+bindkey '\e[3~' delete-char
+
+# The previous key binding is enough to fix the delete key in most terminals.
+# But not in st. For the latter, we also need this:
+if [[ -n "${DISPLAY}" ]]; then
+  zle-line-init() { echoti smkx }
+  zle-line-finish() { echoti rmkx }
+  zle -N zle-line-init
+  zle -N zle-line-finish
+fi
+# What does it do?{{{
+#
+# It temporarily turns on the “application” mode.
+#}}}
+#   What's that application mode?{{{
+#
+# The terminal is in “normal mode” when you are on the shell's command-line, and
+# in “application mode” when you are in a TUI application such as Vim.
+# Depending on the mode you're in, a function key (performing an action, and not
+# associated to any glyph) sends a different escape sequence.
+#
+# The Vim's help and the terminfo documentation use another terminology.
+# They   call   the  application   mode,   resp.   keypad  transmit   mode   and
+# keyboard_transmit mode.
+#
+# For more info:
+# http://invisible-island.net/xterm/xterm.faq.html#xterm_arrows
+# http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-PC-Style-Function-Keys
+#
+# See also:
+#
+#     $ man terminfo /smkx
+#     :h t_ks
+#}}}
+#     When I inspect the escape sequence sent by a function key, it's the same in both modes!{{{
+#
+# It doesn't change because of our custom configuration.
+# To see a difference:
+#
+#    - if you're in zsh, comment out the four previous lines
+#    - if you're in bash, comment out the following line in `~/.inputrc`:
+#
+#         set enable-keypad on
+#}}}
+
+# Why the guard?{{{
+#
+# A virtual console has no `smkx` capability:
+#
+#     $ infocmp linux | grep smkx
+#     ''~
+#
+# So, the code would raise this error:
+#
+#     zle-line-init:echoti: no such terminfo capability: smkx~
+#}}}
+
+# Why do we need this for st, but not for the other terminals?{{{
+#
+# When  you press  the  delete key,  most  terminals  react as  if  you were  in
+# application  mode. That is,  they emit  the  string stored  in the  capability
+# `kdch1` (Keyboard Delete 1 CHaracter).
+#
+#     $ infocmp -x | grep kdch1
+#     ... kdch1=\E[3~,~
+#               ^^^^^
+#
+# I don't  know why  they do  that, because,  as I  understand it,  the terminal
+# should not be in  application mode when you press the delete  key outside of a
+# TUI application.
+#
+# Anyway, st is different.
+# It  correctly emits `kdch1`  *iff* you're  in application mode;  otherwise, it
+# emits `dch1`.
+#
+# ---
+#
+# Here's how you can check this.
+# In urxvt:
+#
+#     $ cat
+#     SUPPR
+#     ^[[3~~
+#     C-c
+#
+#     $ tput smkx
+#     $ cat
+#     SUPPR
+#     ^[[3~~
+#     C-c
+#
+#     $ tput rmkx
+#
+# In st:
+#
+#     $ cat
+#     SUPPR
+#     ^[[P~
+#     C-c
+#
+#     $ tput smkx
+#     $ cat
+#     SUPPR
+#     ^[[3~~
+#     C-c
+#
+#     $ tput rmkx
+#}}}
+# What are these `zle-line-init()` and `zle-init-finish()` functions?{{{
+#
+# The first function is executed every time the line editor is started to read a
+# new line of input.
+# The  second function  is  executed every  time the  line  editor has  finished
+# reading a new line of input.
+#
+# See `$ man zshzle /zle-line-init`
+#}}}
 
 # S-Tab {{{2
 
@@ -3278,7 +3388,7 @@ __reverse_menu_complete_or_list_files() {
 bindkey '\e[Z' reverse-menu-complete
 #        ├──┘
 #        └ the shell doesn't seem to recognize the keysym `S-Tab`
-#          but when we press `S-Tab`, the terminal receives the keycodes `escape + [ + Z`
+#          but when we press `S-Tab`, the terminal receives the escape sequence `escape + [ + Z`
 #          so we use them in the lhs of our key binding
 
 # Ctrl {{{2
@@ -4435,6 +4545,16 @@ fi
 # precmd_functions=(__restart_vim)
 
 # Syntax Highlighting {{{1
+
+# The colors are different in a Vim or Nvim terminal.{{{
+#
+# That's because they use a different palette.
+# For example, atm, we use the color 168 to highlight function names.
+# Run `$  palette` in your regular  terminal, then start gpick  and position the
+# cursor on the color 168.
+# Repeat the process, but this time run `$ palette` in (N)Vim's terminal.
+# Compare the hexcodes: they'll be different.
+#}}}
 
 # customize default syntax highlighting
 #

@@ -418,22 +418,43 @@ configure() { #{{{2
     #
     #         https://github.com/vim/vim/pull/2317#issue-273094230
     #}}}
+    # FIXME: We can't run python3.{{{
+    #
+    #     $ vim -Nu NONE
+    #     :py3 ""
+    #     E448: Could not load library function PySlice_AdjustIndices~
+    #     E263: Sorry, this command is disabled, the Python library could not be loaded.~
+    #
+    # It doesn't seem to have anything to do with our `./configure` command.
+    # I made a test in a Vim with  a simplified command in Ubuntu 18.04 (VM) and
+    # `:py3` works fine.  While the same command fails on our current system.
+    #
+    # Anyway, since:
+    #
+    #    - the issue can't be reproduced on 18.04
+    #    - the issue can't be reproduced in Nvim
+    #    - we only rely on python2 for our plugins
+    #    - if you really need python3, removing `--enable-pythoninterp` fixes the issue
+    #
+    # it's not a big deal.
+    # When you reinstall the OS, just make sure you can run `:py3 ""`.
+    #}}}
     ./configure --enable-cscope                                                      \
                 --enable-fail-if-missing                                             \
                 --enable-gui=gtk3                                                    \
                 --enable-luainterp=dynamic                                           \
                 --enable-multibyte                                                   \
-                --enable-perlinterp=yes                                              \
-                --enable-python3interp=yes                                           \
-                --enable-pythoninterp=yes                                            \
+                --enable-perlinterp=dynamic                                          \
+                --enable-python3interp=dynamic                                       \
+                --enable-pythoninterp=dynamic                                        \
                 --enable-rubyinterp=dynamic                                          \
                 --enable-terminal                                                    \
                 --prefix=/usr/local                                                  \
                 --with-compiledby=user                                               \
                 --with-features=huge                                                 \
                 --with-luajit                                                        \
-                --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu/ \
-                --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu/
+                --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu  \
+                --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
 
   # If you want the online documentation, add this option:{{{
   #

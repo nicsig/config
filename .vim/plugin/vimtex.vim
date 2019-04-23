@@ -113,11 +113,11 @@ let g:vimtex_quickfix_open_on_warning = 0
 "
 " Depending on the contents of a `.tex` file, Vim may set the filetype to:
 "
-"     - plain
-"     - context
-"     - latex
+"    - plain
+"    - context
+"    - tex
 "
-" I want 'latex' no matter what.
+" I want 'tex' no matter what.
 " See: ft-tex-plugin
 "}}}
 let g:tex_flavor = 'latex'

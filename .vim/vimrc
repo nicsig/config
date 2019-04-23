@@ -2379,10 +2379,10 @@ endfu
 " :h i_ctrl-g_u
 
 fu! s:c_m() abort
-    " If the completion menu is active, we want `Enter` to validate the item
-    " currently selected.
+    " If the  completion menu is  active, we want  `Enter` to validate  the item
+    " currently selected, and try another completion.
     if pumvisible()
-        return "\<c-y>"
+        return "\<c-y>\<c-r>=completion#snippet_or_complete(1)\<cr>"
     endif
 
     " If we hit Enter on a commented line with nothing in it, we want to
@@ -2490,9 +2490,9 @@ xno  <space><space>  za
 " Solution:
 " install a mapping which:
 "
-"         1. puts the last changed text in the search register
-"         2. cuts its next occurrence
-"         3. inserts the previously inserted text and stop insert
+"    1. puts the last changed text in the search register
+"    2. cuts its next occurrence
+"    3. inserts the previously inserted text and stop insert
 
 " After `<space>.`  has been pressed,  you can repeat  with `.`, <space>  is not
 " needed anymore.
@@ -2625,7 +2625,7 @@ fu! s:clear_view() abort
         call append(line("'<")-1, repeat([''], cnt))
         call append(line("'>"), repeat([''], cnt))
     endif
-    norm! '<zt
+    norm! '<zz
 endfu
 
 " If you have weird thick borders around the window (especially visible in a light colorscheme):{{{
@@ -4703,13 +4703,13 @@ xno  g<c-j>  gJ
 " Difference compared to :JoinBlocks?:
 "
 "   - easier to use;  no need to position the cursor on
-"                     the first line of the 2nd block
-"                     no need to provide the nr of lines in a block
-"                     as an argument
+"                     the first line of the 2nd block
+"                     no need to provide the nr of lines in a block
+"                     as an argument
 "
 "   - not repeatable; each time we call it, we must first visually select
-"                     the lines (or provide an arbitrary range)
-"                     :JoinBlocks can be repeated simply by typing @:
+"                     the lines (or provide an arbitrary range)
+"                     :JoinBlocks can be repeated simply by typing @:
 
 
 " How does `join_blocks()` work?
@@ -4919,7 +4919,22 @@ com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 " We use  quotes around a pattern after  `$ grep`, so we should do  the same for
 " `:GrepCfg`.
 "}}}
-com! -bar -nargs=1 GrepCfg call s:grep_cfg(<args>)
+" Do *not* use `-bar`!{{{
+"
+" It  would force  you  to  double a  backslash  in front  of  a  bar, which  is
+" inconsistent with `$ grep`:
+"
+"     " with `-bar`
+"     :GrepCfg 'hello\\|world'
+"                    ^
+"                    ✘
+"
+"     " without `-bar`
+"     :GrepCfg 'hello\|world'
+"                    ^
+"                    ✔
+"}}}
+com! -nargs=1 GrepCfg call s:grep_cfg(<args>)
 fu! s:grep_cfg(pat) abort
     let pat = shellescape(a:pat)
     let cmd = [
