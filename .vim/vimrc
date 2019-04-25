@@ -5923,13 +5923,10 @@ endfu
 " You would  need to  invoke `shellescape()`,  and I  wonder whether  that would
 " always be enough to protect any weird yanked text.
 "
-" Besides, it would add a trailing newline.
-" And I don't know how to get rid of it:
+"     call system('printf -- ' . shellescape(@+) . ' | xclip -selection clipboard')
 "
-"     call system('echo ' . shellescape(@+) . ' | xclip -selection clipboard')
-"
-" Currently, we avoid  this trailing newline by passing the  second argument `b`
-" to `writefile()`.
+" You would need `$ printf` instead of  `$ echo`, because the latter would add a
+" trailing newline.
 "}}}
 
 "     Why doesn't it affect urxvt?{{{

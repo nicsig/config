@@ -31,8 +31,7 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -50,8 +49,7 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/wiki/awk/awk.md") | buffer ~/wiki/awk/awk.md | else | edit ~/wiki/awk/awk.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -81,8 +79,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
+argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -112,8 +109,7 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -130,8 +126,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/man
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/wiki/man/man.md") | buffer ~/wiki/man/man.md | else | edit ~/wiki/man/man.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -167,8 +162,7 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
+argglobal
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -191,8 +185,7 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-cmdline
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/Dropbox/vim_plugins/vimrc_grepper.vim") | buffer ~/Dropbox/vim_plugins/vimrc_grepper.vim | else | edit ~/Dropbox/vim_plugins/vimrc_grepper.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -224,8 +217,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
+argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -253,8 +245,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
+argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -277,7 +268,10 @@ edit ~/.vim/vimrc
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
@@ -285,9 +279,9 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+argglobal
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -300,16 +294,17 @@ setlocal fen
 normal! zo
 5864
 normal! zo
-let s:l = 5989 - ((0 * winheight(0) + 0) / 1)
+5921
+normal! zo
+let s:l = 5921 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5989
+5921
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.config/keyboard/xbindkeys.conf") | buffer ~/.config/keyboard/xbindkeys.conf | else | edit ~/.config/keyboard/xbindkeys.conf | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -319,17 +314,39 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 105 - ((10 * winheight(0) + 14) / 28)
+107
+normal! zo
+let s:l = 106 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-105
-normal! 019|
+106
+normal! 09|
 lcd ~/.vim
 wincmd w
-2wincmd w
+argglobal
+if bufexists("~/bin/sh.sh") | buffer ~/bin/sh.sh | else | edit ~/bin/sh.sh | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+3wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext 7
 set stal=1
 badd +1 ~/Desktop/countries
@@ -338,11 +355,12 @@ badd +2 ~/wiki/man/examples/pathfind.1
 badd +111 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 badd +96 ~/wiki/vim/ex.md
 badd +136 ~/wiki/st.md
-badd +248 ~/.vim/vimrc
+badd +5986 ~/.vim/vimrc
 badd +4486 ~/wiki/awk/awk.md
 badd +99 ~/wiki/man/man.md
 badd +134 ~/Dropbox/vim_plugins/vimrc_grepper.vim
-badd +105 ~/.config/keyboard/xbindkeys.conf
+badd +117 ~/.config/keyboard/xbindkeys.conf
+badd +0 ~/bin/sh.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
