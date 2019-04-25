@@ -123,3 +123,10 @@ about how to activate it.
 The shell snippets to generate the quickfix lines will almost certainly choke on
 filenames with exotic characters (like newlines).
 
+##
+# Todo
+
+We should not version control youtube-dl.
+It's a binary, so there's nothing to compare between 2 different versions.
+And it's big, so it probably dramatically increases the size of the repo.
+
