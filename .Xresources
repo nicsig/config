@@ -187,16 +187,19 @@ Xft.lcdfilter:  lcddefault
 ! URxvt.colorUL: #4682b4
 
 ! Perl extensions
-! Warning:{{{
+! Be careful about the syntax of the next line. {{{
 !
 ! There should be no spaces between the names of the plugins.
-! In particulare, no spaces between a comma and a backslash,
-! and no spaces between a beginning of line and the name of a plugin.
+! In  particular, no  spaces between  a  comma and  a backslash,  and no  spaces
+! between a beginning of line and the name of a plugin.
 !}}}
+
 ! Where are all these extensions located?{{{
 !
-!     /usr/lib/urxvt/perl/
+!     /usr/local/lib/urxvt/perl/
+!     ~/.urxvt/ext/
 !}}}
+
 ! What does `selection-to-clipboard` do?{{{
 !
 ! It puts the selection into the system clipboard.
@@ -216,11 +219,44 @@ Xft.lcdfilter:  lcddefault
 ! It underlines arbitrary patterns and make them clickable.
 ! By default, it's used to make URLs clickable.
 !}}}
-! What does `confirm-paste` do?{{{
+
+! Why don't you use `confirm-paste` anymore?{{{
 !
-! It prompts before allowing any paste with a newline character.
-! It can protect from attacks such as this one:
+! In theory, it's a good protection from attacks such as this one:
+!
 !     https://thejh.net/misc/website-terminal-copy-paste
+!
+! It prompts before allowing any multi-line paste.
+! In practice, it's often annoying.
+!
+! Besides, there's another way to deal with this issue:
+! enable the bracketed paste mode in your shell.
+!}}}
+
+! What does `pasta` do?{{{
+!
+! We invoke it from `C-S-v`, thanks to this line:
+!
+!     URxvt.keysym.Control-Shift-V: perl:pasta:paste
+!
+! It allows us to paste the clipboard.
+!
+! You could also try these lines:
+!
+!     XTerm*VT100.Translations: #override \
+!                      Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
+!                      Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
+!
+! Copied from here:
+!
+!     https://unix.stackexchange.com/a/225076/277716
+!
+! But the  benefit of the  perl script,  is that you  can paste the  text you've
+! yanked from a Vim instance which you've quit.
+!}}}
+!   Where did you find it?{{{
+!
+! https://wiki.gentoo.org/wiki/Rxvt-unicode#Copy.2FPaste_and_URL_handling
 !}}}
 URxvt.perl-ext-common: default,\
 selection-to-clipboard,\
@@ -228,7 +264,6 @@ selection-to-clipboard,\
 pasta,\
 matcher,\
 keyboard-select,\
-confirm-paste,\
 clipboard-osc
 
 *allowWindowOps: true
@@ -253,9 +288,10 @@ URxvt.matcher.pattern.0: urxvt_matcher_pattern_garbage
 
 URxvt.matcher.button: 1
 URxvt.keysym.M-Escape: perl:keyboard-select:activate
+! TODO:
+! We can  paste some text  selected in firefox by  pressing shift and  the mouse
+! wheel; how to do the same with a key binding which doesn't involve the mouse?
 URxvt.keysym.Control-Shift-V: perl:pasta:paste
-! Comment this if you don't want copy when text is selected
-URxvt.clipboard.autocopy: true
 
 ! disable picture insert mode and ISO 14755 mode
 ! these modes prevent us from pasting with C-S-v
@@ -281,17 +317,6 @@ XTerm*metaSendsEscape: true
 ! font (face and size)
 XTerm*faceName: DejaVu Sans Mono
 XTerm*faceSize: 20
-
-! TODO:
-! We  can paste some  text selected  in firefox by  pressing down shift  and the
-! mouse wheel.
-! How to do the same with a key binding which doesn't involve the mouse?
-
-! Let us paste the system clipboard via C-S-v.
-!     https://unix.stackexchange.com/a/225076/277716
-XTerm*VT100.Translations: #override \
-                 Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
-                 Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
 
 ! Colors (for all X programs) {{{1
 

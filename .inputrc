@@ -34,8 +34,39 @@ set completion-ignore-case on
 # e.g.: ^C
 set echo-control-characters off
 
-# Prevent multi-line pasted text in bash from being automatically executed.
-# Only supported in readline v7/bash 4.4.
+# Prevent multi-line text, pasted in bash, from being run automatically.
+# It doesn't work!{{{
+#
+# Make sure that your bash version > 4.4, and that your readline version > 7.
+#}}}
+#   Our current bash is too old!  Why don't you update it?{{{
+#
+# Yes, I know, our current bash on Ubuntu 16.04 is 4.3.
+# I tried  to compile  bash 5.0, but  after installing it,  some of  our scripts
+# produced weird warning messages; sometimes the output was completely wrong.
+#
+# If you look  at the patches in  the source package (`$  apt-get source bash`),
+# you'll see that the maintainer applies a lot of them.
+# It's not easy to compile a perfectly working bash.
+# And bash is essential; it must work perfectly.
+#
+# Don't try to compile. Last  time we tried, we broke the  package, and the only
+# way to reinstall it, was to remove a bunch of files:
+#
+#     $ sudo rm /var/lib/dpkg/info/bash*
+#
+# ---
+#
+# Why not compiling  into `/usr/local/` (which is what happens  by default btw),
+# and thus avoid `/bin/bash`?
+# We  could  keep  the latter  for  the  scripts,  and  use the  former  for  an
+# interactive usage...
+#
+# Yes, but because of the difference of version, it would bring an inconsistency
+# between what  we try  in an  interactive shell,  and what  we experiment  in a
+# script; this would lead to too much confusion.
+# Besides, what's the point of using a possibly *broken* interactive bash?
+#}}}
 set enable-bracketed-paste on
 
 # What does it do?{{{

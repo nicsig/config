@@ -2,7 +2,7 @@ sudo dpkg -i --force-overwrite {{package}}.deb # force package installation
 
 for f in *; do echo cp "${{f}}" "${{{f}.bak}}";done # backup files
 
-gpg --verify {{file.tar.xz.sig}} {{file.tar.xz}}
+gpg --verify {{file.tar.xz}}.sig {{file.tar.xz}}
 gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
 groff -man -Tascii {{program}}.man # check formatting of a manual page

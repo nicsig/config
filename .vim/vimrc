@@ -838,39 +838,40 @@ endif
 
 " diffopt {{{2
 
-" Start diff mode with vertical splits (unless explicitly specified otherwise).
-set diffopt+=vertical
-
 " Turn off diff mode automatically for a buffer which becomes hidden.
 set diffopt+=hiddenoff
 
-if !has('nvim')
-    " The “patience” algorithm gives more readable diffs.
-    " Why isn't patience the default?{{{
-    "
-    " The default algorithm is “myers”.
-    "
-    " 1. patience is slower:
-    "
-    "     https://marc.info/?l=git&m=133103975225142&w=2
-    "
-    " 2.
-    " > Myers has  been the universal  default diff  algorithm for so  long that
-    " > enabling an alternative algorithm by default in a low-level component of
-    " > our world (Git, Vim, etc.) could cause issues down the line.
-    "
-    " Source:
-    "         https://www.reddit.com/r/vim/comments/a26phr/the_power_of_diff_vimways_124/eavzmke/
-    "}}}
-    set diffopt+=algorithm:patience
+" ignore all white space changes
+set diffopt+=iwhiteall
 
-    " Use the indent heuristic for the internal diff library.
-    " Again, this gives more readable diffs.
-    set diffopt+=indent-heuristic
-    " For more info, see:
-    "
-    "     https://vimways.org/2018/the-power-of-diff/
-endif
+" Start diff mode with vertical splits (unless explicitly specified otherwise).
+set diffopt+=vertical
+
+" The “patience” algorithm gives more readable diffs.
+" Why isn't patience the default?{{{
+"
+" The default algorithm is “myers”.
+"
+" 1. patience is slower:
+"
+"     https://marc.info/?l=git&m=133103975225142&w=2
+"
+" 2. besides:
+"
+" > Myers has  been the universal  default diff  algorithm for so  long that
+" > enabling an alternative algorithm by default in a low-level component of
+" > our world (Git, Vim, etc.) could cause issues down the line.
+"
+" Source: https://www.reddit.com/r/vim/comments/a26phr/the_power_of_diff_vimways_124/eavzmke/
+"}}}
+set diffopt+=algorithm:patience
+
+" Use the indent heuristic for the internal diff library.
+" Again, this gives more readable diffs.
+set diffopt+=indent-heuristic
+" For more info, see:
+"
+"     https://vimways.org/2018/the-power-of-diff/
 
 " display {{{2
 
@@ -3347,7 +3348,13 @@ fu! s:show_doc() abort
         endtry
     else
         let cmd = substitute(cmd, '|.*', '', '')
-        exe cmd
+        try
+            exe cmd
+        catch
+            echohl ErrorMsg
+            echom v:exception
+            echohl NONE
+        endtry
     endif
 endfu
 
@@ -3377,6 +3384,31 @@ fu! s:get_codeblock(line, cmd_pat) abort
    let pat = '^\s*\V' . escape(cml, '\') . '\m \{' . n . '}'
    let codeblock = matchstr(a:line, pat . a:cmd_pat)
    return codeblock
+endfu
+
+" -h               shell command help {{{4
+
+nno <silent> -h :<c-u>call <sid>shell_command_help()<cr>
+xno <silent> -h :<c-u>call <sid>shell_command_help('vis')<cr>
+
+fu! s:shell_command_help(...) abort
+    let reg_save = [getreg('"'), getregtype('"')]
+    try
+        if a:0
+            norm! gvy
+            let cmd = @"
+        else
+            let cmd = matchstr(getline('.'), '^\s*\$\s*\zs.*')
+            if cmd is# ''
+                echo 'no shell command on this line'
+                return
+            endif
+        endif
+        let @o = system('ch ' . cmd)
+        echo @o
+    finally
+        call setreg('"', reg_save[0], reg_save[1])
+    endtry
 endfu
 
 " -p  -P           show filePath / :pwd {{{4
@@ -3967,6 +3999,13 @@ nno <expr> "" <sid>easy_and_custom_paste()
 xno "" "+
 
 fu! s:easy_and_custom_paste() abort
+    " We manipulate the `+` register in case we're going to paste it.
+    " But what if we're going to yank some text into it?{{{
+    "
+    " Our manipulation won't have any effect.
+    " Whatever  we're going  to yank  will overwrite  the old  (and manipulated)
+    " register.
+    "}}}
     if &ft is# 'markdown'
         let @+ = substitute(@+, '’', "'", 'g')
         let @+ = substitute(@+, '\w\zs \ze, \w', '', 'g')
@@ -5439,6 +5478,45 @@ endfu
 
 com! -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | exe '.!bc' | -j
 
+" Tldr {{{2
+
+com! -bar -nargs=1 Tldr call s:tldr(<q-args>)
+
+fu! s:tldr(shellcmd) abort
+    let out = systemlist('tldr ' . a:shellcmd)[:-2]
+    if out[0] =~# '^tldr page.*not found$'
+        echo out
+        return
+    endif
+    call map(out, {i,v -> substitute(v, '\e.\{-}m\|\%x0f', '', 'g')})
+    call map(out, {i,v -> substitute(v, '^-', '#', '')})
+    call map(out, {i,v -> substitute(v, '^  ', '    ', '')})
+    sp /tmp/.tldr.md
+    %d_
+    call setline(1, out)
+    keepj keepp g/^#/call append('.', '')
+    update
+    norm! gg
+    nno <buffer><nowait><silent> q :<c-u>q<cr>
+    let g:fold_autoclose = &foldclose isnot# ''
+    if &foldclose is# ''
+        norm coz
+    endif
+endfu
+
+augroup autoclose_fold_tldr
+    au!
+    au BufHidden /tmp/.tldr.md call s:tldr_autoclose_restore()
+augroup END
+
+fu! s:tldr_autoclose_restore() abort
+    if get(g:, 'fold_autoclose', 0) && &foldclose is# ''
+    \ || !get(g:, 'fold_autoclose', 1) && &foldclose isnot# ''
+        norm coz
+    endif
+    unlet! g:fold_autoclose
+endfu
+
 " TW {{{2
 
 com! -bar -range=% TW call s:trim_whitespace(<line1>,<line2>)
@@ -5781,6 +5859,139 @@ fu! s:filetype_linter(action) abort
         let pat = '\m\C\%(^\%(\s*"\)\@!.*\)\@<=\mset\s\+\%(ft\|filetype\)\@!'
         let w:my_filetype_linter = matchadd('ErrorMsg', pat)
     endif
+endfu
+
+" Persistent clipboard {{{2
+
+" Which issue is solved by this autocmd?{{{
+"
+" Start a terminal (not urxvt).
+" Start Vim and copy some text in the clipboard (`""y...`).
+" Quit Vim.
+" Try to paste the clipboard in the terminal: it doesn't work.
+"
+" Do the same experiment with Nvim.
+" You can paste the clipboard once; after that, you can't.
+"}}}
+"   What's the cause of the issue?{{{
+"
+" A text copied in the clipboard is called a "selection".
+"
+" When  you yank  some text  in  the clipboard,  Vim  becomes the  owner of  the
+" selection.
+"
+" Later, in  the terminal,  when you  ask for  the selection  to be  pasted, the
+" terminal  requests from  the  X server  the ownership  of  the selection  from
+" whoever currently owns it.
+" The X  server will then relay  this request to  the other X client,  here Vim,
+" that owns the selection.
+"
+" Now, if you've  quit Vim, then no  one owns the selection anymore,  and so the
+" request of the terminal fails.
+" The same is true for any other application, like the web browser.
+" So,  if you've  yanked some  text in  the clipboard  from Vim,  then quit  the
+" latter, you won't be able to paste it in Firefox.
+"
+" This is explained at `:h clipboard-x11` (Nvim only):
+"
+" > X11 clipboard providers store text in "selections".
+" > Selections are owned by an application, so when the application gets closed,
+" > the selection text is lost.
+" > The contents  of selections are  held by the originating  application (e.g.,
+" > upon  a copy),  and  only  passed to  another  application  when that  other
+" > application requests them (e.g., upon a paste).
+"
+" And here: https://vi.stackexchange.com/a/19726/17449
+"}}}
+"     How do you fix it?{{{
+"
+" Before quitting Vim, we call xclip.
+" We pass it the contents of Vim's clipboard, and we make xclip its new owner.
+" You can check this by running:
+"
+"     $ ps aux | grep xclip
+"     user 123  ... xclip -selection clipboard /tmp/vXIc2YS/71~
+"
+" With the autocmd,  if you yank some  text in the clipboard then  quit Vim, you
+" will find this running process.
+" It will persist for as long as you don't yank some other text in the clipboard.
+" For example, if  you copy sth from  Firefox, then re-run the  previous `$ ps`,
+" you won't find xclip anymore.
+"}}}
+"       Yeah, but why do you write the clipboard in a file?  Why not passing it directly to xclip?{{{
+"
+" You would  need to  invoke `shellescape()`,  and I  wonder whether  that would
+" always be enough to protect any weird yanked text.
+"
+" Besides, it would add a trailing newline.
+" And I don't know how to get rid of it:
+"
+"     call system('echo ' . shellescape(@+) . ' | xclip -selection clipboard')
+"}}}
+
+"     Why doesn't it affect urxvt?{{{
+"
+" It *does* affect urxvt.
+"
+" But if you have this code in `~/.Xresources`:
+"
+"     URxvt.perl-ext-common: selection-to-clipboard,pasta
+"     URxvt.keysym.Control-Shift-V: perl:pasta:paste
+"
+" And this code in `~/.urxvt/ext/pasta`:
+"
+"     #! /usr/bin/env perl -w
+"     # Usage: put the following lines in your .Xdefaults/.Xresources:
+"     # URxvt.perl-ext-common           : selection-to-clipboard,pasta
+"     # URxvt.keysym.Control-Shift-V    : perl:pasta:paste
+"
+"     use strict;
+"
+"     sub on_user_command {
+"       my ($self, $cmd) = @_;
+"       if ($cmd eq "pasta:paste") {
+"         $self->selection_request (urxvt::CurrentTime, 3);
+"       }
+"       ()
+"     }
+"
+" Then, the issue is partially mitigated.
+" That is, you  can paste the clipboard  in an urxvt terminal  even after quitting
+" the Vim instance from which you copied it, but you still can't paste it anywhere
+" else.
+"
+" Btw, I can't find the perl script at  the address given in the file, but you can
+" still find it here:
+" https://wiki.gentoo.org/wiki/Rxvt-unicode#Copy.2FPaste_and_URL_handling
+"
+" ---
+"
+" Note that the issue also affects Nvim.
+" But  for some reason,  you can still paste  the clipboard once  after quitting
+" Nvim; after that, you can't.
+"
+" Before pasting the clipboard:
+"
+"     $ ps aux | grep xclip
+"     user 1234 ... xclip -quiet -i -selection clipboard~
+"
+" After pasting the clipboard once:
+"
+"     $ ps aux | grep xclip
+"     ''~
+"}}}
+augroup make_clipboard_persist_after_quitting_vim
+    au!
+    au VimLeave * call s:make_clipboard_persist_after_quitting_vim()
+augroup END
+
+fu! s:make_clipboard_persist_after_quitting_vim() abort
+    if !executable('xclip')
+        return
+    endif
+    let tempfile = tempname()
+    call writefile(split(@+, '\n'), tempfile)
+    call system('xclip -selection clipboard ' . tempfile)
 endfu
 
 " Read special files {{{2
@@ -6444,35 +6655,53 @@ endfu
 " https://github.com/neovim/neovim/issues/1496
 "
 " 22 -
-" when we try to paste a tmux buffer from insert mode (M-SPC p), the indentation
-" is increasingly wrong.
-" The cause seems  to be `'ai'` which should be  temporarily disabled (and maybe
-" temporarily enable 'paste'?).
 "
-" anyway, the  best solution is the  `tbone` plugin which provides  the commands
-" `:tput` and `:tyank`, and gives a direct access to the tmux buffers.
-" although, `:tput` isn't always accessible from a vim instance (think ultisnips
-" docker) ...
+"     Level 1
+"         Level 2
+"         Level 2
+"     Level 1
 "
-" in `~/.tmux.conf`, we should rebind `pfx p` to temporarily disable 'ai'.
+" Write this text in an unnamed  buffer (without the comment leader), select it,
+" and yank it with `""y`.
+" Then, position  your cursor at  the start of a  line (column 1),  enter insert
+" mode, and press `C-S-v`.
 "
-" edit:
-" i've  removed   'autoindent'  from   vimrc. it  shouldn't   be  necessary. the
-" indentation  should be  completely handled  by an  indent plugin.   if there's
-" none, find an indent plugin. if it's wrong, find a better one.
+" Inside tmux, you'll get:
 "
-" edit2:
-" every popular vimrc which i'm watching sets 'ai', except justinmk's.
-" should we reconsider 'ai'?
+"     Level 1
+"         Level 2
+"             Level 2
+"             Level 1
 "
-" edit3:
-" i've restore 'ai'; let's see what happens.
+" Found here:
+" https://vi.stackexchange.com/questions/15722/vim-tmux-and-xterm-bracketed-paste
 "
-" update:
-" document the fact that the tmux buffers are especially useful when you work in
+" Solution1:
+" Temporarily disable `'ai'`.
+" Or temporarily enable `'paste'`.
+"
+" Solution2:
+" Use the `tbone`  plugin which provides the commands `:Tput`  and `:Tyank`, and
+" gives a  direct access  to the  tmux buffers.  Although, `:Tput`  isn't always
+" accessible from a Vim instance (think ultisnips docker) ...
+"
+" Solution3:
+" Use Nvim.
+"
+" Solution4:
+" See `:h xterm-bracketed-paste`.
+if has('vim_starting') && !has('nvim') && $TERM is# 'tmux-256color'
+    let &t_BE = "\e[?2004h"
+    let &t_BD = "\e[?2004l"
+    let &t_PS = "\e[200~"
+    let &t_PE = "\e[201~"
+endif
+"
+" Update:
+" Document the fact that the tmux buffers are especially useful when you work in
 " a vim which wasn't compiled with the clipboard support (no `+` register).
 "
-" think docker ultisnips:
+" Think docker ultisnips:
 "
 "     https://github.com/sirver/ultisnips/blob/master/contributing.md#running-using-docker
 "     https://github.com/sirver/ultisnips/blob/master/contributing.md#reproducing-bugs

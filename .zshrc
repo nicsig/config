@@ -2114,6 +2114,28 @@ palette(){ #{{{2
     fi
   done
 }
+
+pp() { #{{{2
+  # https://unix.stackexchange.com/a/96398/289772
+  #     print -z `xsel -b`
+  var=$(xsel -b)
+  echo $var >>/tmp/debug
+  BUFFER=$var
+}
+# zle -N pp
+# bindkey '^V' pp
+function zle_insert_x_selection {
+  # What's this plus in `${NUMERIC+-b}`?{{{
+  #
+  # From `$ man zshexpn /{name+word}`
+  #
+  # > If name is set [...], then substitute word; otherwise substitute nothing.
+  # }}}
+  echo $NUMERIC >/tmp/debug
+  LBUFFER+=$(xsel ${NUMERIC+-b} -o </dev/null)
+}
+zle -N zle_insert_x_selection
+bindkey '\e\C-v' zle_insert_x_selection
 #}}}2
 
 ppa_what_can_i_install() { #{{{2
@@ -4915,19 +4937,6 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # See:
 #     https://unix.stackexchange.com/a/68748/289772
 
-
-# TODO:
-# Do we need to set the option `zle_bracketed_paste`?
-# The bracketed paste mode is useful, among other things, to prevent the shell
-# from executing automatically a multi-line pasted text:
-#
-#     https://cirw.in/blog/bracketed-paste
-#
-# Atm, zsh doesn't execute a multi-line pasted text. Does it mean we're good?
-# Is the bracketed paste mode enabled?
-# Or do we need to copy the code of this plugin:
-#
-#     https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/safe-paste/safe-paste.plugin.zsh
 
 # TODO:
 # Currently we have several lines in this file which must appear before or after

@@ -150,6 +150,7 @@ aptitude install \
   synaptic \
   trash-cli \
   wmctrl \
+  xclip \
   xdg-utils \
   xsel
 
