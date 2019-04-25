@@ -1,6 +1,11 @@
-# Why is there a cloc binary here?
+# Do *not* version control youtube-dl!
 
-Atm, the cloc binary installed through the ubuntu repo is too old, and sometimes
+It's a binary, so there's nothing to compare between 2 different versions.
+And it's big, so it probably dramatically increases the size of the repo.
+
+# Why is there a cloc script here?
+
+Atm, the cloc script installed through the ubuntu repo is too old, and sometimes
 fails to compute the number of lines of code in a repo (such as Vim):
 
     Can't use an undefined value as an ARRAY reference at /usr/bin/cloc 1498
@@ -74,7 +79,7 @@ Git-jump can generate four types of interesting lists:
 
   4. Any whitespace errors detected by `git diff --check`.
 
-## Using git-jump
+## using git-jump
 
 To use it, just drop git-jump in your PATH, and then invoke it like this:
 
@@ -98,7 +103,7 @@ To use it, just drop git-jump in your PATH, and then invoke it like this:
     # use the silver searcher for git jump grep
     git config jump.grepCmd "ag --column"
 
-## Related Programs
+## related programs
 
 You can accomplish some of the same things with individual tools.
 For example, you can use `git mergetool` to start vimdiff on each unmerged file.
@@ -113,7 +118,7 @@ using the editor or pager.
 By contrast, git-jump provides the editor  with a complete list of files, lines,
 and a column number for each match.
 
-## Limitations
+## limitations
 
 This script was written and tested with vim.
 Given that the quickfix format is the  same as what gcc produces, I expect emacs
@@ -122,11 +127,4 @@ about how to activate it.
 
 The shell snippets to generate the quickfix lines will almost certainly choke on
 filenames with exotic characters (like newlines).
-
-##
-# Todo
-
-We should not version control youtube-dl.
-It's a binary, so there's nothing to compare between 2 different versions.
-And it's big, so it probably dramatically increases the size of the repo.
 

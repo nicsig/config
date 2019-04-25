@@ -2114,28 +2114,6 @@ palette(){ #{{{2
     fi
   done
 }
-
-pp() { #{{{2
-  # https://unix.stackexchange.com/a/96398/289772
-  #     print -z `xsel -b`
-  var=$(xsel -b)
-  echo $var >>/tmp/debug
-  BUFFER=$var
-}
-# zle -N pp
-# bindkey '^V' pp
-function zle_insert_x_selection {
-  # What's this plus in `${NUMERIC+-b}`?{{{
-  #
-  # From `$ man zshexpn /{name+word}`
-  #
-  # > If name is set [...], then substitute word; otherwise substitute nothing.
-  # }}}
-  echo $NUMERIC >/tmp/debug
-  LBUFFER+=$(xsel ${NUMERIC+-b} -o </dev/null)
-}
-zle -N zle_insert_x_selection
-bindkey '\e\C-v' zle_insert_x_selection
 #}}}2
 
 ppa_what_can_i_install() { #{{{2

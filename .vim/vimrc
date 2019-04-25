@@ -5881,7 +5881,7 @@ endfu
 " selection.
 "
 " Later, in  the terminal,  when you  ask for  the selection  to be  pasted, the
-" terminal  requests from  the  X server  the ownership  of  the selection  from
+" terminal sends  a request  to the  X server,  and asks  it the  selection from
 " whoever currently owns it.
 " The X  server will then relay  this request to  the other X client,  here Vim,
 " that owns the selection.
@@ -5927,6 +5927,9 @@ endfu
 " And I don't know how to get rid of it:
 "
 "     call system('echo ' . shellescape(@+) . ' | xclip -selection clipboard')
+"
+" Currently, we avoid  this trailing newline by passing the  second argument `b`
+" to `writefile()`.
 "}}}
 
 "     Why doesn't it affect urxvt?{{{
@@ -5990,7 +5993,7 @@ fu! s:make_clipboard_persist_after_quitting_vim() abort
         return
     endif
     let tempfile = tempname()
-    call writefile(split(@+, '\n'), tempfile)
+    call writefile(split(@+, '\n'), tempfile, 'b')
     call system('xclip -selection clipboard ' . tempfile)
 endfu
 
