@@ -56,6 +56,16 @@ set guioptions=M
 "
 " I still prefer to enable `netrw`, because  other plugins may rely on it, and I
 " don't want to lose time debugging them.
+"
+" ---
+"
+" Update: netrw also allows you to edit a remote file located at an arbitrary url.
+"
+" For example, if you press `Zf` on this url:
+"
+"     https://salsa.debian.org/printing-team/cups/raw/debian/master/cups/utf8demo.txt
+"
+" It will open the `utf8demo.txt` file in a new split.
 "}}}
 
 " I don't  want to  see `GLVS`  nor `GetLatestVimScripts`  when I  press Tab/C-d
@@ -1595,7 +1605,8 @@ set synmaxcol=250
 "                any character prefixed by a string heavier than that
 "                will NOT be syntax highlighted
 
-" t_ut {{{2
+" t_ {{{2
+" ut {{{3
 
 " We don't really need this atm.
 " It's only useful if you start Vim inside `xterm-kitty` (and outside tmux).
@@ -1606,6 +1617,211 @@ if &term =~# '-256color$\|^xterm-kitty$' && has('vim_starting')
   set t_ut=
 endif
 
+" BD BE PS PE {{{3
+
+" What's the bracketed paste mode?{{{
+"
+" A  special  mode in  which  the  terminal surrounds  a  pasted  text with  the
+" sequences `Esc [ 200 ~` and `Esc [ 201 ~`.
+"}}}
+"   How is it useful?{{{
+"
+" Thanks to these sequences, the application  which receives the text knows that
+" it was  not typed  by the  user, but pasted,  and that  it should  disable the
+" interpretation of what it considers to be special characters.
+"
+" Example:
+"
+"     $ vim -Nu NONE +'let @+ = "hello\e:echom \"malicious code injected\"\ri"' +startinsert
+"     C-S-v
+"     Esc
+"     :mess
+"     malicious code injected~
+"
+" In this  example, the escape,  colon and  carriage return were  interpreted as
+" "enter normal mode", "enter command-line mode", and "run command".
+"
+" As you can see,  this can be dangerous, because if you  don't pay attention to
+" what you've copied, Vim may run an obfuscated and dangerous command.
+"
+" Other Example:
+"
+" Consider this text:
+"
+"     Level 1
+"         Level 2
+"         Level 2
+"     Level 1
+"
+" Yank it in the clipboard selection (without the  comment leader) by pressing `""y`.
+" Now, position  your cursor  at the start  of a line  (column 1),  enter insert
+" mode, and press `C-S-v`.
+"
+" You'll get:
+"
+"     Level 1
+"         Level 2
+"             Level 2
+"             Level 1
+"
+" Notice how the indentation of some lines is increasingly wrong.
+" This  is because  when  you enter  a  new line,  if `'ai'`  is  set, Vim  will
+" automatically autoindent the new line.
+"}}}
+"   Is it 100% reliable?{{{
+"
+" No.
+"
+" The protection  offered by  the bracketed  paste mode can  be bypassed  if the
+" pasted text contains `\e[201~`; it will end the bracketed mode prematurely.
+" This works  because, before sending the  text to the application,  some (all?)
+" terminals do not properly filter escape sequences before adding their own.
+"
+" See the second example on this page:
+" https://thejh.net/misc/website-terminal-copy-paste
+"}}}
+"   How many things need to be configured for it to work?{{{
+"
+" The terminal and the application which is running in the foreground.
+"
+" But you don't need to configure the terminal; it just needs to be recent enough.
+"
+" And note  that whether the application  needs to be configured  depends on its
+" default configuration.
+" For example, zsh automatically sets the parameter `zle_bracketed_paste`:
+"
+" > This two-element array  contains the terminal escape  sequences for enabling
+" > and  disabling  the  feature. These  escape sequences  are  used  to  enable
+" > bracketed paste when ZLE is active and disable it at other times.  Unsetting
+" > the  parameter has  the  effect  of ensuring  that  bracketed paste  remains
+" > disabled.
+"
+" Which enables the bracketed paste mode.
+" But if you unset the parameter, you disable the mode.
+" So, it's just a choice from the devs to enable the mode by default.
+"
+" See: `$ man zshparam /zle_bracketed_paste`
+"
+" OTOH, for bash, you need to set the readline variable `enable-bracketed-paste`.
+" It is not set by default.
+"}}}
+
+"   How to make the terminal enter/leave this mode while Vim is running?{{{
+"
+" Set the options `'t_BE'` and `'t_BD'`, with the values `CSI ? 2004 h`
+" and `CSI ? 2004 l`.
+" These sequences are documented at `CSI ? Pm h /Ps = 2 0 0 4`
+" and `CSI ? Pm l /Ps = 2 0 0 4`.
+"
+" When the terminal enters raw mode,  Vim sends to it `&t_BE` (Bracketed paste Enable).
+" And when the terminal leaves raw mode, Vim sends `&t_BD`.
+" So,  if  these options  are  properly  set,  the terminal  will  automatically
+" enable/disable the bracketed paste mode whenever it enters/leaves raw mode.
+" IOW, the raw and bracketed paste modes will be synchronized.
+"
+" You also need to set the options  `'t_PS'` and `'t_PE'` with the values
+" `CSI 200 ~` and `CSI 201 ~`.
+" Probably  to  let   Vim  know  which  sequences  it  must   interpret  as  the
+" beginning/end of a pasted text.
+"
+" For more info, see `:h xterm-bracketed-paste`.
+"
+" > When the 't_BE' option is set then  't_BE' will be sent to the terminal when
+" > entering "raw"  mode and 't_BD'  when leaving  "raw" mode.  The  terminal is
+" > then  expected to  put 't_PS'  before pasted  text and  't_PE' after  pasted
+" > text.  This  way Vim can separate  text that is pasted  from characters that
+" > are typed.  The pasted text is handled  like when the middle mouse button is
+" > used, it is inserted literally and not interpreted as commands.
+"}}}
+"     Now you're talking about yet another mode!  What's this raw mode?{{{
+"
+" A mode in which the terminal doesn't interpret the characters it receives.
+"
+" > The  terminal can  be placed  into  "raw" mode  where the  characters are  not
+" > processed by the terminal driver, but are sent straight through (it can be set
+" > that INTR and QUIT characters  are still processed). This allows programs like
+" > emacs and vi to use the entire screen more easily.
+"
+" Source: https://unix.stackexchange.com/a/21760/289772
+"
+" See also `:h raw-terminal-mode`.
+"}}}
+"       When Vim is running, is the terminal in raw mode?{{{
+"
+" I think it depends.
+"
+" Most of the time, it must be, so  that Vim can receive all the keys pressed by
+" the user, and interpret them however it wants.
+" Among other things, this allows the user to remap `C-c`, `C-u`, `C-d`, ...
+" which otherwise would be interpreted by the line discipline of the terminal:
+"
+"     $ stty -a | grep 'intr\|kill'
+"     intr = ^C; quit = <undef>; erase = ^?; kill = ^U; eof = ^D; eol = <undef>;~
+"            ^^                                     ^^        ^^
+"
+" However, sometimes, Vim temporarily switches to cooked mode.
+" This allows  the user to end  an external process started  with `system()`, by
+" pressing `C-c`.
+"}}}
+"       What's the relationship between raw mode and bracketed paste mode?{{{
+"
+" I don't think there's one.
+" I  think  they  are  orthogonal,  i.e. the  terminal  can  enable/disable  one
+" independently of the other's state.
+"}}}
+
+" Why can't we enable the bracketed paste mode for the whole Vim session?{{{
+"
+" Why this dance: enter raw mode → enable bracketed paste
+"                 leave raw mode → disable bracketed paste
+"
+" Instead of:     enter Vim → enable bracketed paste
+"                 leave Vim → restore bracketed paste as it was before Vim was started
+"
+" Would sth bad  happen if the mode  was still enabled when  the terminal leaves
+" raw mode and enters cooked mode?
+"
+" Answer: I don't know, but it seems weird  to let the terminal add some special
+" sequences in  cooked mode; it already  has to interpret some  possible special
+" characters. Maybe there could be some unexpected interaction between the two.
+"
+" ---
+"
+" If sth bad can happen, then why  doesn't this issue also affect the shell?
+" The latter is in cooked mode, right?
+"
+" Answer: No, I don't think that the terminal is *always* in cooked mode.
+" I think  that when you  paste, it temporarily  enters raw mode,  to faithfully
+" transmit  whatever  text  is  contained  in the  clipboard  selection  to  the
+" foreground process.
+"}}}
+
+" Why `!has('nvim')` in the guard?{{{
+"
+" Nvim doesn't have terminal options.
+" It correctly and automatically sets its internal terminfo db.
+"
+"     $ nvim -V3/tmp/log +'call timer_start(0, {-> execute("q")})'
+"     $ nvim -es +'exe "1,/{{{$/g/^/d_" | /}}}$/,$g/^/d_' +'%p | qa!' /tmp/log | nvim -
+"     /paste
+"     ext.enable_bpaste         = <Esc>[?2004h~
+"     ext.disable_bpaste        = <Esc>[?2004l~
+"}}}
+"   And why `&t_BE is# ''`?{{{
+"
+" Because Vim  already sets these options  for some terminals (e.g.  xterm), but
+" not all.
+" In particular, it fails to set them for st, and for any terminal in tmux.
+" Presumably because  it only recognizes a few terminals  (via `$TERM`) which it
+" knows how to configure.
+"}}}
+if has('vim_starting') && !has('nvim') && &t_BE is# ''
+    let &t_BE = "\e[?2004h"
+    let &t_BD = "\e[?2004l"
+    let &t_PS = "\e[200~"
+    let &t_PE = "\e[201~"
+endif
+" }}}2
 " tags {{{2
 
 " When searching the tags file, ignore the case unless an upper case letter is used.
@@ -2750,6 +2966,9 @@ augroup END
 nno  <silent>  <space>i  :<c-u>call <sid>websearch()<cr>
 
 fu! s:websearch() abort
+    if &ft is# 'websearch'
+        return
+    endif
     let dir = $HOME . '/.vim/tmp'
     let file = dir . '/websearch'
     let max_history = 100
@@ -2761,7 +2980,7 @@ fu! s:websearch() abort
     if len(lines) > max_history
         call writefile(lines[len(lines) - max_history : ], file)
     endif
-    exe 'sp ' . file
+    exe 'bo sp ' . file
 endfu
 
 " s S                           saiw  saiW{{{4
@@ -3286,7 +3505,7 @@ nno <silent> -d :<c-u>call <sid>show_doc()<cr>
 "}}}
 fu! s:show_doc() abort
     let line = getline('.')
-    let cmd_pat = '\C\s*\%($\s*\zs\%(info\|man\)\|\zs:h\)\s.*'
+    let cmd_pat = '\C\s*\%($\s*\zs\%(info\|man\)\|\zs\%(:h\|CSI\|OSC\|DCS\)\)\s.*'
     let codespan = s:get_codespan(line, cmd_pat)
     let codeblock = s:get_codeblock(line, cmd_pat)
     if codespan is# '' && codeblock isnot# ''
@@ -3297,9 +3516,17 @@ fu! s:show_doc() abort
         echo 'no documentation command to run'
         return
     endif
-    let pat = '^\(info\|man\)'
-    let l:Rep = {m -> m[1] is# 'info' ? 'Info' : 'Man'}
-    let cmd = substitute(cmd, pat, l:Rep, '')
+    if cmd =~# '^\%(info\|man\)'
+        let l:Rep = {m -> m[0] is# 'info' ? 'Info' : 'Man'}
+        let cmd = substitute(cmd, '^\(info\|man\)', l:Rep, '')
+    elseif cmd =~# '^\%(CSI\|OSC\|DCS\)'
+        let l:Rep = {m -> m[0] is# 'info' ? 'Info' : 'Man'}
+        sp +1 /usr/share/doc/xterm/ctlseqs.txt.gz
+        if expand('%:t') is# 'ctlseqs.txt.gz'
+            nno <buffer><nowait><silent> q :<c-u>q<cr>
+        endif
+        let cmd = substitute(cmd, '^', '/', '')
+    endif
     if cmd =~# '/'
         let [cmd, topics] = [matchstr(cmd, '.\{-}\ze\s*/'), matchstr(cmd, '/.*')]
         let cmd = substitute(cmd, '|.*', '', '')
@@ -3322,7 +3549,7 @@ fu! s:show_doc() abort
         exe cmd
         " Don't make the cursor move if the previous command failed.
         " Don't try to catch an error; `:Man not_a_cmd` doesn't raise a real error.
-        if index(['info', 'man'], &ft) == -1
+        if index(['info', 'man'], &ft) == -1 && expand('%:t') isnot# 'ctlseqs.txt.gz'
             return
         endif
         try
@@ -5877,17 +6104,17 @@ endfu
 "
 " A text copied in the clipboard is called a "selection".
 "
-" When  you yank  some text  in  the clipboard,  Vim  becomes the  owner of  the
-" selection.
+" When you yank some  text in the clipboard selection, Vim  becomes the owner of
+" the latter.
 "
-" Later, in  the terminal,  when you  ask for  the selection  to be  pasted, the
-" terminal sends  a request  to the  X server,  and asks  it the  selection from
-" whoever currently owns it.
+" Later, in the terminal, when you ask for the clipboard selection to be pasted,
+" the terminal  sends a  request to  the X  server, and  asks for  the clipboard
+" selection from whoever currently owns it.
 " The X  server will then relay  this request to  the other X client,  here Vim,
-" that owns the selection.
+" that owns the clipboard selection.
 "
-" Now, if you've  quit Vim, then no  one owns the selection anymore,  and so the
-" request of the terminal fails.
+" Now, if you've quit Vim, then no one owns the clipboard selection anymore, and
+" so the request of the terminal fails.
 " The same is true for any other application, like the web browser.
 " So,  if you've  yanked some  text in  the clipboard  from Vim,  then quit  the
 " latter, you won't be able to paste it in Firefox.
@@ -5902,6 +6129,7 @@ endfu
 " > application requests them (e.g., upon a paste).
 "
 " And here: https://vi.stackexchange.com/a/19726/17449
+" And here: https://unix.stackexchange.com/a/254745/289772
 "}}}
 "     How do you fix it?{{{
 "
@@ -5917,16 +6145,6 @@ endfu
 " It will persist for as long as you don't yank some other text in the clipboard.
 " For example, if  you copy sth from  Firefox, then re-run the  previous `$ ps`,
 " you won't find xclip anymore.
-"}}}
-"       Yeah, but why do you write the clipboard in a file?  Why not passing it directly to xclip?{{{
-"
-" You would  need to  invoke `shellescape()`,  and I  wonder whether  that would
-" always be enough to protect any weird yanked text.
-"
-"     call system('printf -- ' . shellescape(@+) . ' | xclip -selection clipboard')
-"
-" You would need `$ printf` instead of  `$ echo`, because the latter would add a
-" trailing newline.
 "}}}
 
 "     Why doesn't it affect urxvt?{{{
@@ -5980,18 +6198,72 @@ endfu
 "     $ ps aux | grep xclip
 "     ''~
 "}}}
+"     Does it affect all applications?{{{
+"
+" No, for example, zathura is not affected.
+" I don't know  why. Maybe it gives the ownership of  its clipboard selection to
+" another program before quitting...
+"
+" OTOH, the issue does affect libreoffice.
+"}}}
 augroup make_clipboard_persist_after_quitting_vim
     au!
     au VimLeave * call s:make_clipboard_persist_after_quitting_vim()
 augroup END
 
 fu! s:make_clipboard_persist_after_quitting_vim() abort
-    if !executable('xclip')
+    " Why the `strlen()` guard?{{{
+    "
+    " If the clipboard selection is too big, I don't want Vim to be slow when we quit.
+    " If you find the current limit too low, you may increase it, after doing some tests:
+    "
+    "     :let @+ = repeat('a', 999999)
+    "     :10Time call system('xclip -selection clipboard', @+)
+    "}}}
+    if !executable('xclip') || strlen(@+) == 0 || strlen(@+) > 999
         return
     endif
-    let tempfile = tempname()
-    call writefile(split(@+, '\n'), tempfile, 'b')
-    call system('xclip -selection clipboard ' . tempfile)
+    " Why do you pass the text via the second argument of `system()`?{{{
+    "
+    " There are two other alternatives.
+    "
+    " You could write the clipboard in a temporary file:
+    "
+    "     let tempfile = tempname()
+    "     call writefile(split(@+, '\n'), tempfile, 'b')
+    "     call system('xclip -selection clipboard ' . tempfile)
+    "
+    " But it would be cumbersome, and maybe brittle.
+    " What if for some  reason the file is removed before xclip  has a chance to
+    " read it,  or it does not  have the right permissions  (`writefile()` can't
+    " write into it, `$ xclip` can't read it)?
+    "
+    " ---
+    "
+    " Or, you could use a pipe:
+    "
+    "     call system('printf -- ' . shellescape(@+) . ' | xclip -selection clipboard')
+    "
+    " But note that we already have 3 pitfalls to avoid.
+    " We don't want a trailing newline to be appended, so we have to use `$ printf` instead
+    " of `$ echo` (you could use `$ echo -n`, but in general `$ echo` is not reliable).
+    "
+    " We don't the  beginning of the text  to be interpreted as an  option if it
+    " begins with a hyphen, so we need `--`.
+    "
+    " We don't special characters to be interpreted by the shell, so we need `shellescape()`.
+    " But even with all those precautions, it would still not be reliable.
+    " For example, in Vim, try to copy this text in the clipboard:
+    "
+    "     +some str%nge|name'with"quotes!bang$dollar
+    "
+    " Then quit Vim, and paste it in the terminal:
+    "
+    "     +some strge|name'with"quotes!bang$dollar~
+    "              ^
+    "              ✘ where is `%n`?
+    "}}}
+    call system('xclip -selection clipboard', @+)
 endfu
 
 " Read special files {{{2
@@ -6655,49 +6927,6 @@ endfu
 " https://github.com/neovim/neovim/issues/1496
 "
 " 22 -
-"
-"     Level 1
-"         Level 2
-"         Level 2
-"     Level 1
-"
-" Write this text in an unnamed  buffer (without the comment leader), select it,
-" and yank it with `""y`.
-" Then, position  your cursor at  the start of a  line (column 1),  enter insert
-" mode, and press `C-S-v`.
-"
-" Inside tmux, you'll get:
-"
-"     Level 1
-"         Level 2
-"             Level 2
-"             Level 1
-"
-" Found here:
-" https://vi.stackexchange.com/questions/15722/vim-tmux-and-xterm-bracketed-paste
-"
-" Solution1:
-" Temporarily disable `'ai'`.
-" Or temporarily enable `'paste'`.
-"
-" Solution2:
-" Use the `tbone`  plugin which provides the commands `:Tput`  and `:Tyank`, and
-" gives a  direct access  to the  tmux buffers.  Although, `:Tput`  isn't always
-" accessible from a Vim instance (think ultisnips docker) ...
-"
-" Solution3:
-" Use Nvim.
-"
-" Solution4:
-" See `:h xterm-bracketed-paste`.
-if has('vim_starting') && !has('nvim') && $TERM is# 'tmux-256color'
-    let &t_BE = "\e[?2004h"
-    let &t_BD = "\e[?2004l"
-    let &t_PS = "\e[200~"
-    let &t_PE = "\e[201~"
-endif
-"
-" Update:
 " Document the fact that the tmux buffers are especially useful when you work in
 " a vim which wasn't compiled with the clipboard support (no `+` register).
 "
@@ -8317,6 +8546,9 @@ endif
 "     https://github.com/neovim/neovim/pull/9338
 "
 " Then, see whether it fixes the issue.
+"
+" 130 -
+" Extract `:Doc` and `-d` into a dedicated plugin (vim-doc).
 
 
 

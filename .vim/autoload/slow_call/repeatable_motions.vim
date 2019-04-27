@@ -27,6 +27,7 @@ nno  <unique>  g,  g;zv
 
 "    gj  gk         vertical jump {{{2
 
+" Alternative: https://github.com/haya14busa/vim-edgemotion
 noremap  <expr><silent><unique>  gk  <sid>vertical_jump_rhs(0)
 noremap  <expr><silent><unique>  gj  <sid>vertical_jump_rhs(1)
 

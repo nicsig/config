@@ -4660,14 +4660,14 @@ ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
 # The syntax of the assignment is:
 # ZSH_HIGHLIGHT_PATTERNS+=('shell cmd' 'style')
 #                           │           │
-#                           │           └── 2nd string
-#                           └── 1st string
+#                           │           └ 2nd string
+#                           └ 1st string
 
 # Here are some more configurations, that are commented because they're already
 # enabled by default; change them as you see fit:
 #
-#                                   ┌── ✘ FIXME: don't work when we change the value to `bg=blue`; why?
-#                                   │            maybe because the appearance of the cursor is overridden by urxvt
+#                                   ┌ ✘ FIXME: don't work when we change the value to `bg=blue`; why?
+#                                   │          maybe because the appearance of the cursor is overridden by urxvt
 #     ZSH_HIGHLIGHT_STYLES[cursor]='standout'
 #     ZSH_HIGHLIGHT_STYLES[bracket-error]='fg=red,bold'
 #     ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='standout'

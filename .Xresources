@@ -57,7 +57,8 @@
 ! Certain characters, such as ``, are still not displayed.
 !
 ! Try also to read this page in a Vim buffer:
-! https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-demo.txt
+! https://salsa.debian.org/printing-team/cups/raw/debian/master/cups/utf8demo.txt
+!
 ! You'll notice that the characters below this line are not displayed:
 !
 !     Proverbs in the Amharic language:
@@ -320,20 +321,24 @@ XTerm*faceSize: 20
 
 ! Colors (for all X programs) {{{1
 
-! don't choose the closest match in the palette for a true color{{{
+! enable true color in xterm{{{
 !
-! Source:
-!
-! > http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
-! > CSI Pm m  Character Attributes (SGR).
-! >
 ! > If  xterm  is  compiled  with   direct-color  support,  and  the  resource
 ! > directColor is  true, then rather  than choosing the closest  match, xterm
 ! > asks the X server to directly render a given color.
 !
-! Also useful for xterm to use the colors defined in this file.
+! Source:
+! http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Functions-using-CSI-_-ordered-by-the-final-character_s_
+!
+! Useful for xterm to use the colors defined in this file.
 ! Without enabling  `directColor`, xterm  chooses a  black background  no matter
 ! what we we set up here.
+!
+! ---
+!
+! Note  that  if  xterm  was   not  compiled  with  `--enable-direct-color`,  it
+! approximates a true color to the closest match in its palette.
+! This compiling option is recent (xterm 331?).
 !}}}
 directColor: true
 
@@ -411,11 +416,8 @@ URxvt*cursorColor2: #dadada
 !     https://www.w3schools.com/colors/colors_shades.asp
 !
 ! It's used by `cmus` to color its status line.
-! It's also used by `pygmentize` to color python comments in white:
-!
-!     $ pygmentize ~/bin/python/xkbmapd.py
 !}}}
-*color7:  #808080
+*color7:  #f5f5f5
 *color15: #ffffff
 
 ! color of bold text{{{

@@ -439,9 +439,25 @@ configure() { #{{{2
     # it's not a big deal.
     # When you reinstall the OS, just make sure you can run `:py3 ""`.
     #}}}
+    # Do *not* use gtk3. Prefer gtk2; it gives a lower latency.{{{
+    #
+    # > We can also  note that Vim using GTK3 is slower  than its GTK2 counterpart
+    # > by  an order  of magnitude. It  might therefore  be possible  that the  GTK3
+    # > framework  introduces extra  latency,  as  we can  also  observe other  that
+    # > GTK3-based terminals  (Terminator, Xfce4  Terminal, and GNOME  Terminal, for
+    # > example) have higher latency.
+    #
+    # Source: https://lwn.net/Articles/751763/
+    #
+    # ---
+    #
+    # I can corroborate what the article states.
+    # In my limited testing with  typometer, the latency doubles after compiling
+    # with gtk3.
+    #}}}
     ./configure --enable-cscope                                                      \
                 --enable-fail-if-missing                                             \
-                --enable-gui=gtk3                                                    \
+                --enable-gui=gtk2                                                    \
                 --enable-luainterp=dynamic                                           \
                 --enable-multibyte                                                   \
                 --enable-perlinterp=dynamic                                          \

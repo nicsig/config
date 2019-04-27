@@ -147,6 +147,32 @@ ino  <silent>  <c-g><s-tab>  <c-r>=execute(g:_uspy . ' UltiSnips_Manager._curren
 "}}}
 xno  <silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
+" The  autotrigger feature  of UltiSnips  has a  *very* negative  impact on  the
+" latency/jitter in Nvim.
+" To make some tests, use typometer: https://github.com/pavelfatin/typometer
+if has('nvim')
+    augroup ultisnips_no_autotrigger
+        au!
+        au VimEnter * au! UltiSnips_AutoTrigger
+    augroup END
+endif
+
+" We need a way to enable UltiSnips's autotrigger on-demand.
+nno <silent> cou :<c-u>call <sid>ultisnips_toggle_autotrigger()<cr>
+fu! s:ultisnips_toggle_autotrigger() abort
+    if exists('#UltiSnips_AutoTrigger')
+        au! UltiSnips_AutoTrigger
+        aug! UltiSnips_AutoTrigger
+        echom '[UltiSnips AutoTrigger] OFF'
+    else
+        augroup UltiSnips_AutoTrigger
+            au!
+            au InsertCharPre,TextChangedI * call UltiSnips#TrackChange()
+        augroup END
+        echom '[UltiSnips AutoTrigger] ON'
+    endif
+endfu
+
 " When we execute `:UltiSnipsEditSplit`, we want to open the snippet file in
 " an horizontal split.
 let g:UltiSnipsEditSplit = 'horizontal'

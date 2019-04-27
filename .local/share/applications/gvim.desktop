@@ -84,9 +84,15 @@ TryExec=gvim
 # > "-f" should be used when gvim is started by a program that will wait for the
 # > edit session to finish (e.g., mail or readnews).
 # }}}
-# Why `--remote-tab-silent`?{{{
+# TODO: find a way to add `--remote-tab-silent`
+# What `--remote-tab-silent` would do?{{{
 #
-# `tab` will make gVim use one tabpage per file.
+# It  would  be useful  when  we  select some  files  in  a file  manager,  then
+# right-click and choose to open them with gVim.
+#
+# ---
+#
+# `tab` will make gVim use one tabpage per selected file.
 #
 # `remote` will make gVim try to open the file(s) in a running server if there's
 # one.
@@ -94,8 +100,17 @@ TryExec=gvim
 # `silent` will prevent gVim from complaining if no server is running:
 # > E247: no registered server named "GVIM"
 # A local gVim process will be started.
+# }}}
+#   Why don't you use it for now?{{{
+#
+# Because, if  we tried to  start gVim  without any file  (from a gui  menu), it
+# would raise an error:
+#
+#     Argument missing after: "--remote-silent-tab"
+#
+# And the process would not start.
 #}}}
-Exec=gvim -f --remote-silent-tab %F
+Exec=gvim -f %F
 Terminal=false
 Type=Application
 Keywords=Text;editor;

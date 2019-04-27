@@ -27,7 +27,7 @@ EOF
   # shorter.
   #
   # The default values are `500` and `20`.
-  # To find the current values, execute `xset -q`.
+  # To find the current values, run `$ xset -q`.
   #
   #           ┌ delay before a keypress is sent to the application
   #           │   ┌ maximum number of times a key can be repeated per second

@@ -27,6 +27,7 @@ video/x-msvideo=mpv.desktop
 audio/wav=mpv.desktop
 text/x-log=gvim.desktop
 text/plain=gvim.desktop
+inode/directory=pcmanfm.desktop;
 
 [Default Applications]
 application/x-compressed-tar=org.gnome.FileRoller.desktop
@@ -180,5 +181,6 @@ x-tex=gvim.desktop
 video/mp4=mpv.desktop
 video/x-msvideo=mpv.desktop
 application/epub+zip=zathura-pdf-mupdf.desktop
+inode/directory=pcmanfm.desktop
 
 [Removed Associations]

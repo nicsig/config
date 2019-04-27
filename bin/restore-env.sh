@@ -152,7 +152,8 @@ aptitude install \
   wmctrl \
   xclip \
   xdg-utils \
-  xsel
+  xsel \
+  xvkbd
 
 # TODO: Add more.
 # Have a look at all the packages that you have manuall installed:
