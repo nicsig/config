@@ -22,6 +22,18 @@ printf -- "${selection}" | xvkbd -xsendevent -file - 2>/dev/null
 #
 #     $ xvkbd -text 'éòü' 2>/dev/null
 #     Ã©Ã²Ã¼~
+#
+# ---
+#
+# It may also fail on a percent character.
+#
+# MWE:
+# Write a percent character in `/tmp/md.md`.
+# Run `:Preview`.
+# Select the percent character.
+# Try to paste it on the shell's command-line.
+#
+# Result: nothing is inserted.
 #}}}
 
 # `-xsendevent` {{{

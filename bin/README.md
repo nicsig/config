@@ -16,15 +16,20 @@ So, we install here a more recent version:
 
 ##
 # Where did you find the
+## `ch` bash script?
+
+<https://github.com/learnbyexample/command_help>
+
 ## `NetalyzrCLI.jar` archive?
 
 <https://sebsauvage.net/links/?r-awQg>
 <http://www.netalyzr.icsi.berkeley.edu/NetalyzrCLI.jar>
 <https://play.google.com/store/apps/details?id=edu.berkeley.icsi.netalyzr.android>
 
-## `ch` bash script?
+## `typometer.jar` archive?
 
-<https://github.com/learnbyexample/command_help>
+<https://pavelfatin.com/typometer/>
+<https://github.com/pavelfatin/typometer>
 
 ##
 # git-jump

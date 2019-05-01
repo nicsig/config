@@ -2484,11 +2484,13 @@ _fzf_compgen_path() { #{{{2
 # }}}1
 # Aliases {{{1
 # regular {{{2
-# aptitude {{{3
+# apt {{{3
 
 alias api='sudo aptitude install'
 alias app='sudo aptitude purge'
 alias aps='aptitude show'
+
+alias afs='apt-file search'
 
 # awk {{{3
 
@@ -2529,13 +2531,21 @@ alias dirs='dirs -v'
 
 # dl {{{3
 
-alias dl_mp3='youtube-dl -x --audio-format mp3 -o "%(title)s.%(ext)s"'
-alias dl_pl='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(autonumber)02d - %(title)s.%(ext)s"'
+# Do *not* remove `--restrict-filenames`!{{{
+#
+# If the filename contains spaces, we  want them to be replaced with underscores
+# automatically.
+# Otherwise,  when you  read a  file containing  spaces with  `$ mpv`,  it's not
+# logged by  fasd (unless you  quote it,  but we always  forget to quote  such a
+# file).
+#}}}
+alias dl_mp3='youtube-dl --restrict-filenames -x --audio-format mp3 -o "%(title)s.%(ext)s"'
+alias dl_pl='youtube-dl --restrict-filenames --write-sub --sub-lang en,fr --write-auto-sub -o "%(autonumber)02d - %(title)s.%(ext)s"'
 
 alias dl_sub_en='subliminal download -l en'
 alias dl_sub_fr='subliminal download -l fr'
 
-alias dl_video='youtube-dl --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
+alias dl_video='youtube-dl --restrict-filenames --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
 
 # git {{{3
 

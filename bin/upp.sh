@@ -71,6 +71,12 @@ set -e
 # Init {{{1
 
 PGM="$1"
+# Purpose:{{{
+#
+# It can be useful to compile the  program at a specific commit hash, instead of
+# the very latest version which may be buggy at the moment.
+#}}}
+COMMIT_HASH="$2"
 SUPPORTED_PGMS=(ansifilter gawk jumpapp mpv nvim tmux trans surfraw vim weechat zsh)
 GIT_REPOS="${HOME}/GitRepos/"
 
@@ -569,7 +575,10 @@ download() { #{{{2
   git stash
   # check a master branch exists (trans has no master branch)
   # https://stackoverflow.com/q/5167957/9780968
-  if git show-ref --verify --quiet refs/heads/master; then
+  if [[ -n "${COMMIT_HASH}" ]]; then
+    git checkout "${COMMIT_HASH}"
+    return
+  elif git show-ref --verify --quiet refs/heads/master; then
     git checkout master
   fi
   # To prevent this kind of error:{{{

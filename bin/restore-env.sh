@@ -100,22 +100,25 @@ ${USER} ${HOSTNAME}=(root)NOPASSWD:/usr/bin/systemctl
 EOF
 
 # When we press `M-SysRq-e`, we don't want systemd to restart the display manager.
-sed -in 's/^Restart=always/# Restart=always/' /etc/systemd/system/display-manager.service
+sed -i.bak 's/^Restart=always/# Restart=always/' /etc/systemd/system/display-manager.service
 
 mkdir -p /etc/systemd/system/getty@.service.d/
 
+# turn on the Numlock key by default in a console
 cat <<EOF >/etc/systemd/system/getty@.service.d/activate-numlock.conf
 [Service]
 StandardInput=/dev/%I
 ExecStartPre=setleds -D +num
 EOF
 
+# customize the keyboard layout in a console
 cat <<EOF >/etc/systemd/system/getty@.service.d/keyboard-layout.conf
 [Service]
 ExecStartPre=/usr/bin/loadkeys /home/${USER}/.config/keyboard/vc.conf
 EOF
 
-cat <<EOF >/etc/systemd/system/getty@.service.d/activate-numlock.conf
+# make the background color of a console white immediately (before a successful login)
+cat <<EOF >/etc/systemd/system/getty@.service.d/white-background.conf
 [Service]
 StandardOutput=/dev/%I
 ExecStartPre=/usr/bin/setterm -background white -foreground black -store
@@ -200,7 +203,7 @@ mkdir -p "${HOME}/.tmux/plugins/tpm" &&
 printf -- '\nCreate the directory ~/.zsh/completion\n' &&
   mkdir "${HOME}/.zsh/completion"
 
-printf -- '\nInstalilng zsh-syntax-highlighting\n'
+printf -- '\nInstalling zsh-syntax-highlighting\n'
 git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${HOME}/GitRepos/zsh-syntax-highlighting"
 
 # Removal of some deb packages {{{1
@@ -208,9 +211,9 @@ git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${HOME}/GitRep
 # Note that removing `update-notifier` will cause `aptitude` to remove `xubuntu-desktop`.{{{
 #
 # Which is ok.
-# From `aptitude show xubuntu-desktop`:
+# From `$ aptitude show xubuntu-desktop`:
 #
-#     It is safe to remove this package if some of the desktop system packages are not desired.
+#     It is safe to remove this package if some of the desktop system packages are not desired.~
 #}}}
 aptitude purge whoopsie update-notifier
 

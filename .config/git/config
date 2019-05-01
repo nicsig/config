@@ -34,7 +34,11 @@
 	email = lacygoill@lacygoill.me
 [diff]
         ; use "patience diff" algorithm when generating patches
+        ; `$ man git-config /diff\.algorithm`
 	algorithm = patience
+        ; enable experimental heuristics that shift diff hunk boundaries to make patches easier to read
+        ; `$ man git-config /diff\.indentHeuristic`
+        indentHeuristic = true
 [advice]
         ; Do NOT show directions on how to proceed from the current state in the output of git-status(1),
         ;

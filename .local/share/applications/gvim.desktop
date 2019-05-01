@@ -75,42 +75,50 @@ Comment[vi]=Soạn thảo tập tin văn bản
 Comment[wa]=Asspougnî des fitchîs tecses
 Comment[zh_CN]=编辑文本文件
 Comment[zh_TW]=編輯文字檔
-TryExec=gvim
-# What's the influence of the argument `-f` for gVim? {{{
+# Why do we have 2 different commands?{{{
 #
-# It's used in the default `/usr/local/share/applications/gvim.desktop`.
-# Here's what the helps says about it (`:h -f`):
+# The first command is used when we start gVim from a menu like rofi.
+# The second  command is  used when  we start  gVim from  a file  manager, after
+# selection one or several files.
 #
-# > "-f" should be used when gvim is started by a program that will wait for the
-# > edit session to finish (e.g., mail or readnews).
+# At least that's what seems to happen.
+#
+# See the specifications of a desktop file for more info:
+# https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
+#
+# See also how the default Nvim desktop file is written:
+#
+#     $ grep -i 'exec' /usr/local/share/applications/nvim.desktop
+#     TryExec=nvim~
+#     Exec=nvim %F~
+#}}}
+# Why must I use `-f`? {{{
+#
+# Without, you couldn't run gVim from a menu like rofi.
+#
+# It's also used in the default `/usr/local/share/applications/gvim.desktop`.
+# Here's what the helps says at `:h -f`:
+#
+# > GUI: Do not  disconnect from the  program that  started Vim. 'f'  stands for
+# > "foreground".  If omitted, the GUI forks a new process and exits the current
+# > one. "-f" should  be used when gvim  is started by a program  that will wait
+# > for the edit session to finish (e.g., mail or readnews).
 # }}}
-# TODO: find a way to add `--remote-tab-silent`
-# What `--remote-tab-silent` would do?{{{
+TryExec=gvim -f
+# What does `--remote-tab-silent`?{{{
 #
-# It  would  be useful  when  we  select some  files  in  a file  manager,  then
-# right-click and choose to open them with gVim.
+# `tab` makes gVim use one tabpage per selected file.
 #
-# ---
-#
-# `tab` will make gVim use one tabpage per selected file.
-#
-# `remote` will make gVim try to open the file(s) in a running server if there's
+# `remote` makes  gVim try to  open the file(s) in  a running server  if there's
 # one.
 #
-# `silent` will prevent gVim from complaining if no server is running:
-# > E247: no registered server named "GVIM"
+# `silent` prevents gVim from complaining if no server is running:
+#
+#     E247: no registered server named "GVIM"~
+#
 # A local gVim process will be started.
 # }}}
-#   Why don't you use it for now?{{{
-#
-# Because, if  we tried to  start gVim  without any file  (from a gui  menu), it
-# would raise an error:
-#
-#     Argument missing after: "--remote-silent-tab"
-#
-# And the process would not start.
-#}}}
-Exec=gvim -f %F
+Exec=gvim -f --remote-tab-silent %F
 Terminal=false
 Type=Application
 Keywords=Text;editor;

@@ -142,11 +142,19 @@ fu! colorscheme#customize() abort "{{{2
     if has('gui_running') && has('vim_starting')
         augroup delay_color_scheme_when_gvim_starts
             au!
-            au VimEnter * call s:styled_comments() | call s:tabline() | call s:title() | call s:user()
+            au VimEnter * call s:customize()
         augroup END
     else
-        call s:styled_comments() | call s:tabline() | call s:title() | call s:user()
+        call s:customize()
     endif
+endfu
+
+fu! s:customize() abort
+    call s:diff()
+    call s:styled_comments()
+    call s:tabline()
+    call s:title()
+    call s:user()
 endfu
 
 fu! colorscheme#save_last_version() abort "{{{2
@@ -155,6 +163,29 @@ fu! colorscheme#save_last_version() abort "{{{2
 endfu
 " }}}1
 " Core {{{1
+fu! s:diff() abort "{{{2
+    " Why do you change `DiffText`?{{{
+    "
+    " In seoul256, it alters the background highlighting, which I find to be too
+    " much:
+    "
+    "     DiffText       xxx term=reverse cterm=bold ctermbg=224 gui=bold guibg=#ffd7d7~
+    "
+    " The foreground  would be  enough, so we  link `DiffText`  to `Identifier`,
+    " which is the most readable HG I could find at `:h group-name`.
+    "}}}
+    hi! link DiffText   Identifier
+    " Why do you clear `DiffChange`?{{{
+    "
+    " When  you compare  two  windows  in diff  mode,  `DiffChange`  is used  to
+    " highlight the text which has *not* changed on a line which *has* changed.
+    " I don't care about the text which didn't change.
+    " It adds visual clutter.
+    "}}}
+    hi! link DiffChange NONE
+    hi! clear DiffChange
+endfu
+
 fu! s:styled_comments() abort "{{{2
     " Why `Underlined`?{{{
     "

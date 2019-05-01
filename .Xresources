@@ -11,7 +11,6 @@
 !     :syn match xdefaultsComment /^!.*$/  contains=xdefaultsTodo,@Spell
 !}}}
 
-*.allowWindowOps:  true
 ! URxvt {{{1
 
 ! TODO: Learn how to start the urxvt daemon.
@@ -267,9 +266,6 @@ matcher,\
 keyboard-select,\
 clipboard-osc
 
-*allowWindowOps: true
-! XTerm.VT100.allowWindowOps:  true
-
 ! Temporarily disabled.
 ! We need to find another key to not shadow `M-u` (readline capitalize) besides,
 ! the next key binding can't work because we don't have any url-select extension
@@ -318,6 +314,27 @@ XTerm*metaSendsEscape: true
 ! font (face and size)
 XTerm*faceName: DejaVu Sans Mono
 XTerm*faceSize: 20
+
+! This *drastically* improves the bandwidth output performance of xterm.{{{
+!
+! It allows xterm  to drop some screen  updates to catch up with  the flow, when
+! your command outputs a lot of data.
+!
+! MWE:
+!
+!     $ time seq -f "the quick brown fox jumps over the lazy dog %g" 1000000
+!
+! In st, this command takes about 3.5 seconds.
+! In xterm, it takes 70 seconds.
+!
+! When this resource is set to  true, xterm needs only 8 seconds; unfortunately,
+! for a few seconds, the screen appears  to have stopped since it is waiting for
+! a new set of screen updates after having discarded some.
+!
+! However, if  you run xterm in  tmux, then, not only  does it catch up  st (3.5
+! seconds), but the screen doesn't appear to have stopped anymore!
+!}}}
+XTerm*fastScroll: true
 
 ! Colors (for all X programs) {{{1
 
