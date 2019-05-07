@@ -241,18 +241,8 @@ Xft.lcdfilter:  lcddefault
 !
 ! It allows us to paste the clipboard.
 !
-! You could also try these lines:
-!
-!     XTerm*VT100.Translations: #override \
-!                      Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
-!                      Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
-!
-! Copied from here:
-!
-!     https://unix.stackexchange.com/a/225076/277716
-!
-! But the  benefit of the  perl script,  is that you  can paste the  text you've
-! yanked from a Vim instance which you've quit.
+! One benefit of this perl script, is  that you can paste the text you've yanked
+! from a Vim instance which you've quit.
 !}}}
 !   Where did you find it?{{{
 !
@@ -336,6 +326,12 @@ XTerm*faceSize: 20
 !}}}
 XTerm*fastScroll: true
 
+! Let us paste the clipboard selection by pressing `C-S-v`.
+! Source: https://unix.stackexchange.com/a/225076/277716
+XTerm*VT100.Translations: #override \
+                 Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
+                 Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
+
 ! Colors (for all X programs) {{{1
 
 ! enable true color in xterm{{{
@@ -397,6 +393,9 @@ directColor: true
 ! Value copied from: `~/.vim/plugged/seoul256.vim/urxvt/seoul256-light`
 !}}}
 URxvt*cursorColor2: #dadada
+
+! If you change the colors here, try to replicate those changes in st's `config.h`,
+! and in the `colorscheme#set()` function from `~/.vim/autoload/colorscheme.vim`.
 
 ! black
 *color0:  #1d1f21

@@ -46,6 +46,110 @@ fu! colorscheme#set() abort "{{{2
         let g:seoul256_light_background = seoul_bg
         colo seoul256-light
     endif
+
+    " Make Vim use the ANSI colors of our terminal palette in a terminal buffer.
+    " Wait.  Why doesn't Vim use our terminal palette by default?{{{
+    "
+    " I think  it does, except when  you run gVim, or  when you run Vim  from an
+    " unknown terminal and you've set `'tgc'`.
+    " In that  case, Vim  seems to fall  back on weird  ANSI colors,  which look
+    " flashy and ugly.
+    "}}}
+    "   What do you mean by{{{
+    "}}}
+    "     “unknown terminal”?{{{
+    "
+    " Vim only recognizes a few terminals (and their derivatives):
+    "
+    "    - gui
+    "    - amiga
+    "    - beos-ansi
+    "    - ansi
+    "    - pcansi
+    "    - win32
+    "    - vt320
+    "    - vt52
+    "    - xterm
+    "    - iris-ansi
+    "    - debug
+    "    - dumb
+    "
+    " I found this list by running `$ xterm=foobar vim`.
+    " You can also find it by looking at `:h vms-notes /builtin_gui`.
+    "
+    " Basically, it seems  Vim doesn't know any terminal we  use, outside xterm,
+    " and  terminals which  pretend to  be xterm  (i.e. all  terminals based  on
+    " libvte, like xfce4-terminal, gnome-terminal, konsole, ...).
+    "}}}
+    "     “weird” colors?{{{
+    "
+    " Temporarily comment the `g:terminal_ansi_colors` assignment.
+    " Next, start Vim like this (or start gVim):
+    "
+    "     $ TERM=ansi vim
+    "
+    " Then, open a terminal, and run `$ echo $TERM`; the output is `xterm`.
+    " So, one would expect that Vim is using xterm's default palette.
+    " And yet, if you  run `$ palette`, and use Gpick to get  the hex color code
+    " of the  color 11; it's  `#ffff40`, which I  can't find in  xterm's default
+    " palette:
+    "
+    " https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
+    "
+    " Update:
+    " After reading this:
+    " https://github.com/vim/vim/issues/2353#issuecomment-372451614
+    "
+    " ... I wonder whether these weird colors are defined in `src/libvterm/src/pen.c`.
+    "}}}
+
+    " What would happen if I removed this assignment?{{{
+    "
+    " Colors in  a terminal  buffer would  be wrong, when  Vim was  started from
+    " urxvt, st, or tmux (and more generally from any shell whose `$TERM` is not
+    " `xterm` or `xterm-256color`).
+    "
+    " This  also matters for  fzf buffers, which  are based on  terminal buffers
+    " (where `:setf fzf` is run).
+    "}}}
+    " Could I use color names instead?{{{
+    "
+    " Yes, you can use a color name  as suggested at `:h gui-colors`, instead of
+    " a  hex  color  code, but  it  would  make  Vim  choose the  color  in  its
+    " builtin/fallback palette, which will be ugly/flashy.
+    "}}}
+    let g:terminal_ansi_colors = [
+        \ '#1d1f21',
+        \ '#cc342b',
+        \ '#198844',
+        \ '#af8760',
+        \ '#3971ed',
+        \ '#a36ac7',
+        \ '#3971ed',
+        \ '#f5f5f5',
+        \ '#989698',
+        \ '#cc342b',
+        \ '#198844',
+        \ '#d8865f',
+        \ '#3971ed',
+        \ '#a36ac7',
+        \ '#3971ed',
+        \ '#ffffff',
+        \ ]
+
+    " Nvim needs the same kind of configuration.
+    " Why do you run the previous code even in Nvim?{{{
+    "
+    " To avoid duplicating the hex color codes.
+    "}}}
+    if has('nvim')
+        for i in range(0, 15)
+            " See `:h terminal-configuration` for more info about these
+            " `g:terminal_color_` variables.
+            let g:terminal_color_{i} = g:terminal_ansi_colors[i]
+        endfor
+        unlet! g:terminal_ansi_colors
+    endif
 endfu
 
 fu! colorscheme#customize() abort "{{{2

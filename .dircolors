@@ -2,37 +2,37 @@
 #
 # A configuration file for `/usr/bin/dircolors`.
 #}}}
-# What's `dircolors`?{{{
+# What's `$ dircolors`?{{{
 #
 # A utility to help you set `$LS_COLORS`.
 #}}}
 # What's `$LS_COLORS`?{{{
 #
-# An environment variable which controls how `ls --color` colorizes its output.
+# An environment variable which controls how `$ ls --color` colorizes its output.
 #}}}
 
 # How to restore the default config of `dircolors`?{{{
 #
-#         $ dircolors -p >~/.dircolors
+#     $ dircolors -p >~/.dircolors
 #}}}
 # How to save the current value of `$LS_COLORS`?{{{
 #
-#         $ dircolors -b
+#     $ dircolors -b
 #
 # The output will be a string looking like this:
 #
-#         LS_COLORS='...'; export LS_COLORS
+#     LS_COLORS='...'; export LS_COLORS
 #
 # If you execute this command, it will restore `$LS_COLORS` as it is now.
 # Write it somewhere.
 #}}}
 # The current value of `$LS_COLORS` is unreadable! How to make it more readable?{{{
 #
-#         $ echo $LS_COLORS | sed 's/:/\n/g'
+#     $ echo $LS_COLORS | sed 's/:/\n/g'
 #}}}
 # But it's still unreadable!{{{
 #
-#         $ ~/bin/ls-colors.sh
+#     $ ~/bin/ls-colors.sh
 #
 # It will display all the values in `$LS_COLORS` in a human readable format.
 # In particular, each color value is colorized with the actual color it stands for.
@@ -43,7 +43,7 @@
 # In zsh, yes.
 # Because we've included this command in `~/.zshenv`:
 #
-#         $ eval "$(dircolors "${HOME}/.dircolors")"
+#     $ eval "$(dircolors "${HOME}/.dircolors")"
 #
 # Just make sure to start a new shell so that `~/.zshenv` is sourced.
 # Note that if you're in tmux, opening a new pane/window won't be enough
@@ -63,42 +63,42 @@
 #
 # Attribute codes:
 #
-#         00=none
-#         01=bold
-#         03=italic
-#         04=underscore
-#         05=blink
-#         07=reverse
-#         08=concealed
+#     00=none
+#     01=bold
+#     03=italic
+#     04=underscore
+#     05=blink
+#     07=reverse
+#     08=concealed
 #
 # Text color codes:
 #
-#         30=black
-#         31=red
-#         32=green
-#         33=yellow
-#         34=blue
-#         35=magenta
-#         36=cyan
-#         37=white
+#     30=black
+#     31=red
+#     32=green
+#     33=yellow
+#     34=blue
+#     35=magenta
+#     36=cyan
+#     37=white
 #
 # Background color codes:
 #
-#         40=black
-#         41=red
-#         42=green
-#         43=yellow
-#         44=blue
-#         45=magenta
-#         46=cyan
-#         47=white
+#     40=black
+#     41=red
+#     42=green
+#     43=yellow
+#     44=blue
+#     45=magenta
+#     46=cyan
+#     47=white
 #}}}
 # What's the syntax of a setting?{{{
 #
-#         <item>=<style>;<color>
-#         <item>=<color>;<style>
-#         <item>=<style>;<color>;<style>
-#         ...
+#     <item>=<style>;<color>
+#     <item>=<color>;<style>
+#     <item>=<style>;<color>;<style>
+#     ...
 #
 # An item can contain as many styles/colors as you want, in any order.
 #
@@ -111,31 +111,69 @@
 #
 # `style` can have, among other values:
 #
-#         00  = default color
-#         01  = bold
-#         30  = yellow background
-#         34  = green background
-#         37  = red background
-#         40  = black background
+#    ┌────┬───────────────────┐
+#    │ 00 │ default color     │
+#    ├────┼───────────────────┤
+#    │ 01 │ bold              │
+#    ├────┼───────────────────┤
+#    │ 30 │ yellow background │
+#    ├────┼───────────────────┤
+#    │ 34 │ green background  │
+#    ├────┼───────────────────┤
+#    │ 37 │ red background    │
+#    ├────┼───────────────────┤
+#    │ 40 │ black background  │
+#    └────┴───────────────────┘
 #
 # `color` can have, among other values:
 #
-#         31  = red
-#         32  = green
-#         33  = orange
-#         34  = blue
-#         35  = purple
-#         36  = cyan
-#         37  = grey
-#         90  = dark grey
-#         91  = light red
-#         92  = light green
-#         93  = yellow
-#         94  = light blue
-#         95  = light purple
-#         96  = turquoise
+#    ┌────┬──────────────┐
+#    │ 31 │ red          │
+#    ├────┼──────────────┤
+#    │ 32 │ green        │
+#    ├────┼──────────────┤
+#    │ 33 │ orange       │
+#    ├────┼──────────────┤
+#    │ 34 │ blue         │
+#    ├────┼──────────────┤
+#    │ 35 │ purple       │
+#    ├────┼──────────────┤
+#    │ 36 │ cyan         │
+#    ├────┼──────────────┤
+#    │ 37 │ grey         │
+#    ├────┼──────────────┤
+#    │ 90 │ dark grey    │
+#    ├────┼──────────────┤
+#    │ 91 │ light red    │
+#    ├────┼──────────────┤
+#    │ 92 │ light green  │
+#    ├────┼──────────────┤
+#    │ 93 │ yellow       │
+#    ├────┼──────────────┤
+#    │ 94 │ light blue   │
+#    ├────┼──────────────┤
+#    │ 95 │ light purple │
+#    ├────┼──────────────┤
+#    │ 96 │ turquoise    │
+#    └────┴──────────────┘
 #}}}
-
+# Why should I avoid the style attribute `02`?{{{
+#
+# Here's how it's documented at `$ man console_codes`:
+#
+# > 2       set half-bright (simulated with color on a color display)
+#
+# It makes the terminal emulate the color whose code follows the semicolon, in a
+# half-bright tone.
+# The result of this simulation is inconsistent from one terminal to another.
+# Besides,  you can't  even rely  on the  dircolors syntax  plugin to  correctly
+# highlight the code `02;...` in this script.
+#}}}
+# Where can I find more information about all the numeric codes used in the settings?{{{
+#
+# See `$ man console_codes`
+# See also `$ man dir_colors`.
+#}}}
 
 
 # TERM entries which determine if the current terminal is colorizable.{{{
@@ -183,7 +221,7 @@ DIR 01;34 # directory
 
 # If you set this to 'target' instead of  a numerical value, the color is as for
 # the file pointed to.
-LINK 02;35 # symbolic link.
+LINK 35 # symbolic link.
 
 MULTIHARDLINK 00               # regular file with more than one link
 FIFO 40;33                     # pipe

@@ -28,6 +28,17 @@ DEBUG_LOGFILE=/tmp/debug
 # TODO: Add python (+ruby?) integration for Neovim.
 # And maybe use update-alternatives to make Neovim our default editor in the future.
 
+# TODO: We should be able  to pass an argument to the script  so that it doesn't
+# install any package.  It would just compile.
+# Basically,  `main()` would  do everything  as usual,  except it  wouldn't call
+# these functions at the end:
+#
+#     install
+#     update_alternatives
+#     xdg_mime_default
+#
+# This would be useful when we git bisect an issue.
+
 # exit upon error{{{
 #
 # man bash
@@ -42,7 +53,7 @@ set -e
 #
 # Nevertheless,  we  need  to  keep  it at  the  moment,  otherwise  the  script
 # would  not  terminate when  we  execute  `exit 1`  from  a  function (such  as
-# `check_vim_version_is_correct`).
+# `check_tmux_version_is_correct`).
 #
 # Source:
 #     https://stackoverflow.com/a/9893727/9780968
@@ -148,9 +159,7 @@ EOF
   download
   get_version
 
-  if [[ "${PGM}" == 'vim' ]]; then
-    check_vim_version_is_correct
-  elif [[ "${PGM}" == 'tmux' ]]; then
+  if [[ "${PGM}" == 'tmux' ]]; then
     check_tmux_version_is_correct
   fi
 
@@ -176,20 +185,11 @@ build() { #{{{2
     make deb
 
   elif [[ "${PGM}" == 'nvim' ]]; then
-    make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS=-DENABLE_JEMALLOC=OFF
-    #                                    ├─────────────────────────────────────┘{{{
-    #                                    └ necessary to be able to use `checkinstall` later
-    #
-    # https://github.com/neovim/neovim/issues/2364#issuecomment-113966180
-    # https://github.com/serverwentdown/env/commit/a05a31733443fcb0979fecf18f2aa8e9e2722c7c
-    #
-    # TODO:
-    # What do we lose by disabling jemalloc?
-    # Are we going to suffer from a noticeable performance hit?
-    # I could  be wrong,  but after  reading this  (and because  Neovim is  probably a
-    # single-threaded process) I don't think so:
-    # https://stackoverflow.com/a/1624744/9780968
-    #}}}
+    make CMAKE_BUILD_TYPE=Release
+    #    ├──────────────────────┘
+    #    └ Full compiler optimisations and no debug information.
+    #      Expect the best performance from this build type.
+    #      Often used by package maintainers.
 
   else
     make
@@ -228,14 +228,6 @@ build() { #{{{2
 }
 
 check_tmux_version_is_correct() { #{{{2
-  # Why not including the regex inside `[[ ... ]]`?{{{
-  #
-  # You would need to use this regex:
-  #
-  #     ^tmux[[:space:]][0-9]\.[0-9]$
-  #
-  # I find it less readable.
-  #}}}
   # Can I quote a regex?{{{
   #
   # It depends.
@@ -258,7 +250,12 @@ check_tmux_version_is_correct() { #{{{2
   # This operator doesn't exist in bash.
   # Use the `!` operator to negate the test.
   #}}}
-  REGEX='^[0-9]\.[0-9]$'
+  # Why `.*` at the end?{{{
+  #
+  # Right now, the tmux version is `2.9a`.
+  # So, it may end with some alphabetical character(s).
+  #}}}
+  REGEX='^[0-9]\.[0-9].*$'
   if [[ ! "${VERSION}" =~ ${REGEX} ]]; then
     cat <<EOF >&2
 
@@ -271,32 +268,20 @@ This may break some tmux plugins which relies on the following scheme:
 Edit the script "$(basename "$0")" so that it edits "configure.ac" correctly.
 
 EOF
+    # TODO: Suppose the version is not correct.{{{
+    #
+    # The function  will make the  script end prematurely,  and tell us  that we
+    # need to edit `configure.ac`.
+    #
+    # So far so good.
+    # We edit the file, and retry a compilation.
+    # The script will probably fail again, because the output of
+    # `$ git  describe --abbrev=0` will still be the same.
+    #
+    # How to deal with this?
+    #}}}
     exit 1
   fi
-}
-
-check_vim_version_is_correct() { #{{{2
-      REGEX='^[0-9]:[0-9]\.[0-9].[0-9]+$'
-      if [[ ! "${VERSION}" =~ ${REGEX} ]]; then
-        cat <<EOF >&2
-
-Your Vim version is:
-    "${VERSION}"
-
-This may cause 'aptitude safe-upgrade'  to overwrite your compiled package
-with an older version, from the official repositories.
-It would be better if your version followed the scheme:
-    A:B.C.D-E
-
-Example:
-    2:8.1.0390-1
-
-Edit the script "$(basename "$0")" so that it sets the version of your compiled
-package correctly.
-
-EOF
-      exit 1
-    fi
 }
 
 check_we_are_root() { #{{{2
@@ -424,6 +409,22 @@ configure() { #{{{2
     #
     #         https://github.com/vim/vim/pull/2317#issue-273094230
     #}}}
+    # Do *not* use gtk3. Prefer gtk2; it gives a lower latency.{{{
+    #
+    # > We can also  note that Vim using GTK3 is slower  than its GTK2 counterpart
+    # > by  an order  of magnitude. It  might therefore  be possible  that the  GTK3
+    # > framework  introduces extra  latency,  as  we can  also  observe other  that
+    # > GTK3-based terminals  (Terminator, Xfce4  Terminal, and GNOME  Terminal, for
+    # > example) have higher latency.
+    #
+    # Source: https://lwn.net/Articles/751763/
+    #
+    # ---
+    #
+    # I can corroborate what the article states.
+    # In my limited testing with  typometer, the latency doubles after compiling
+    # with gtk3.
+    #}}}
     # FIXME: We can't run python3.{{{
     #
     #     $ vim -Nu NONE
@@ -444,22 +445,6 @@ configure() { #{{{2
     #
     # it's not a big deal.
     # When you reinstall the OS, just make sure you can run `:py3 ""`.
-    #}}}
-    # Do *not* use gtk3. Prefer gtk2; it gives a lower latency.{{{
-    #
-    # > We can also  note that Vim using GTK3 is slower  than its GTK2 counterpart
-    # > by  an order  of magnitude. It  might therefore  be possible  that the  GTK3
-    # > framework  introduces extra  latency,  as  we can  also  observe other  that
-    # > GTK3-based terminals  (Terminator, Xfce4  Terminal, and GNOME  Terminal, for
-    # > example) have higher latency.
-    #
-    # Source: https://lwn.net/Articles/751763/
-    #
-    # ---
-    #
-    # I can corroborate what the article states.
-    # In my limited testing with  typometer, the latency doubles after compiling
-    # with gtk3.
     #}}}
     ./configure --enable-cscope                                                      \
                 --enable-fail-if-missing                                             \
@@ -633,10 +618,7 @@ get_version() { #{{{2
     # I think it happens  when the latest commit was not  tagged, which seems to
     # be always the case when Bram commits lots of changes in `$VIMRUNTIME`.
     #
-    # Anyway, the format of this version will make a regex comparison fail
-    # in `check_vim_version_is_correct()`.
-    # We use `--abbrev=0` to make sure it doesn't happen, and that the format of
-    # the version is always the same.
+    # I prefer `v8.1.0648`.
     #}}}
     VERSION="$(git describe --tags --abbrev=0)"
   fi
@@ -673,7 +655,7 @@ get_version() { #{{{2
     #
     #     0:X.Y.Z
     #
-    # As a result, your package will be overwritten by a `$ aptitude safe-upgrade`.
+    # As a result, your package will be overwritten by `$ aptitude safe-upgrade`.
     #}}}
     VERSION="9:${VERSION#v}"
 
@@ -764,6 +746,37 @@ install() { #{{{2
     if [[ "${DEBUG}" -ne 0 ]]; then
       echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null -y >>"${DEBUG_LOGFILE}"
     fi
+    # If this command fails for Nvim, try this:{{{
+    #
+    # Recompile and replace:
+    #
+    #     $ make CMAKE_BUILD_TYPE=Release
+    #
+    # With:
+    #
+    #     $ make CMAKE_BUILD_TYPE=Release CMAKE_EXTRA_FLAGS=-DENABLE_JEMALLOC=OFF
+    #
+    # See:
+    # https://github.com/neovim/neovim/issues/2364#issuecomment-113966180
+    # https://github.com/serverwentdown/env/commit/a05a31733443fcb0979fecf18f2aa8e9e2722c7c
+    #
+    # Note that I  don't know whether there's a performance  cost if you disable
+    # jemalloc.
+    #
+    # See here to understand what jemalloc is:
+    # https://stackoverflow.com/a/1624744/9780968
+    #
+    # Note that Nvim is multi-threaded:
+    # > `thread apply all bt` may be necessary because **Neovim is multi-threaded**.
+    # Source: https://github.com/neovim/neovim/wiki/Development-tips/fd1582128edb0130c1d5c828a3a9b55aa9107030
+    #
+    # ---
+    #
+    # Alternatively, you  could try  to pass  an option to  checkinstall, and  make it
+    # generate a deb without installing it.
+    # Then, you could try to force its installation with `dpkg` and the right options.
+
+    #}}}
     checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null -y
     #                                 │
     #                                 └ don't overwrite my package
@@ -896,8 +909,7 @@ update_alternatives(){ #{{{2
         update-alternatives --log "${LOGFILE}" \
           --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
         # set our compiled Vim to be the master link
-        update-alternatives --log "${LOGFILE}" \
-          --set "${name}" /usr/local/bin/vim
+        update-alternatives --log "${LOGFILE}" --set "${name}" /usr/local/bin/vim
       done
     fi
 

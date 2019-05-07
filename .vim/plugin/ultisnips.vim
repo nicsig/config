@@ -153,7 +153,7 @@ xno  <silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 if has('nvim')
     augroup ultisnips_no_autotrigger
         au!
-        au VimEnter * au! UltiSnips_AutoTrigger
+        au VimEnter * exe 'au! UltiSnips_AutoTrigger' | aug! UltiSnips_AutoTrigger
     augroup END
 endif
 

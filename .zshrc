@@ -381,6 +381,11 @@ compdef vboxheadless=VBoxHeadless
 autoload -Uz bashcompinit
 bashcompinit
 
+# TODO: When you update zsh, try to remove all our code related to `$ pandoc`.{{{
+#
+# A commit has added support for completing `$ pandoc`:
+# https://github.com/zsh-users/zsh/commit/cecaad96cb9a2324e73c58f5dfa8b16fa0d3c589
+#}}}
 # Why do you need to source this `_pandoc` file here?{{{
 #
 # There's no default zsh completion function for pandoc:
@@ -1208,6 +1213,17 @@ EOF
   #        when we search for a  pattern (`/pat`), ignore the difference between
   #        uppercase and lowercase characters in the text
   #}}}
+}
+
+environ() { #{{{2
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+  purpose: print the environment variables of an arbitrary process
+  usage: $0 PID
+EOF
+    return 64
+  fi
+  sed 's/\x0/\n/g' "/proc/$1/environ"
 }
 
 expand_this() { #{{{2

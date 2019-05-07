@@ -546,11 +546,11 @@ fu! myfuncs#gtfo_open_term(dir) abort
     endif
 
     if s:IS_TMUX
-        "                                   ┌─ splits vertically (by default tmux splits horizontally)
+        "                                   ┌ splits vertically (by default tmux splits horizontally)
         "                                   │
         sil call system('tmux split-window -h -c '.string(a:dir))
         "                                      │
-        "                                      └── start-directory
+        "                                      └ start-directory
     elseif s:IS_X_RUNNING
         sil call system(s:LAUNCH_TERM.' '.shellescape(a:dir).' &')
         redraw!
@@ -744,18 +744,18 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "     let @" = "that's"
             "     let @" = 'foo%bar'
             "
-            "                          ; is special             % is special
-            "                          on shell's               on Vim's
-            "                          command-line             command-line
-            "     ┌───────────────────┬──────────┬─────────────┬────────────┐
-            "     │         @"        │  foo;ls  │  that's     │  foo%bar   │
-            "     ├───────────────────┼──────────┼─────────────┼────────────┤
-            "     │ fnameescape(@")   │  foo;ls  │  that\'s    │  foo\%bar  │
-            "     ├───────────────────┼──────────┼─────────────┼────────────┤
-            "     │ shellescape(@")   │ 'foo;ls' │ 'that'\''s' │ 'foo%bar'  │
-            "     ├───────────────────┼──────────┼─────────────┼────────────┤
-            "     │ shellescape(@",1) │ 'foo;ls' │ 'that'\''s' │ 'foo\%bar' │
-            "     └───────────────────┴──────────┴─────────────┴────────────┘
+            "                         ; is special             % is special
+            "                         on shell's               on Vim's
+            "                         command-line             command-line
+            "    ┌───────────────────┬──────────┬─────────────┬────────────┐
+            "    │         @"        │  foo;ls  │  that's     │  foo%bar   │
+            "    ├───────────────────┼──────────┼─────────────┼────────────┤
+            "    │ fnameescape(@")   │  foo;ls  │  that\'s    │  foo\%bar  │
+            "    ├───────────────────┼──────────┼─────────────┼────────────┤
+            "    │ shellescape(@")   │ 'foo;ls' │ 'that'\''s' │ 'foo%bar'  │
+            "    ├───────────────────┼──────────┼─────────────┼────────────┤
+            "    │ shellescape(@",1) │ 'foo;ls' │ 'that'\''s' │ 'foo\%bar' │
+            "    └───────────────────┴──────────┴─────────────┴────────────┘
             "
             " `fnameescape()` would not protect `;`.
             " The shell would interpret the semicolon as the end of the `$ grep`
@@ -1013,6 +1013,9 @@ fu! myfuncs#plugin_install(url) abort "{{{1
 
     call win_gotoid(win_orig)
     call win_gotoid(win_plug)
+    if has('nvim')
+        UpdateRemotePlugins
+    endif
 endfu
 
 fu! myfuncs#plugin_global_variables(keyword) abort "{{{1

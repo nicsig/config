@@ -107,6 +107,30 @@ set expand-tilde on
 #     ^
 #     added because we've modified the command line by inserting 'modified' at its end
 #}}}
+# FIXME: This may corrupt the display.{{{
+#
+# MWE:
+#
+#     user@ubuntu:~$ printf 'foobar'
+#     foobarjean@ubuntu:~$~
+#
+#     press up arrow key
+#     foobaruser@ubuntu:~$ printf 'foobar'~
+#
+#     press left arrow key, 4 times, then insert `x` (between foo and bar)
+#     *user@ubuntu:~$ printf 'fooxbar'bar'~
+#
+# The issue is due to an interaction between `mark-modified-lines` and `$ printf`
+# when the string it prints doesn't end with a new line.
+# I think this is because, without trailing  newline, the start of the prompt is
+# shifted to the right.
+# In that regard, zsh is better, because, it never shifts the prompt.
+# If there's no trailing newline, it just adds a trailing percent (in standout style):
+#
+#     % printf 'foobar'
+#     foobar%~
+#           ^
+#}}}
 set mark-modified-lines on
 
 # menu completion displays the common prefix of the list of possible completions

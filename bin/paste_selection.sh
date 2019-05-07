@@ -34,6 +34,27 @@ printf -- "${selection}" | xvkbd -xsendevent -file - 2>/dev/null
 # Try to paste it on the shell's command-line.
 #
 # Result: nothing is inserted.
+#
+# ---
+#
+# Solution: Try  to get  the  primary selection,  then use  it  to populate  the
+# clipboard selection, and finally run `$ xdotool` to simulate `C-S-v`.
+#
+#     # get the primary selection
+#     text="\e[200~$(xsel)\e[201~"
+#     # populate the clipboard selection with the primary selection
+#     printf -- "${text}" | xsel -i --clipboard
+#     # simulate a press on C-S-v
+#     xdotool key 'ctrl+shift+v'
+#
+# The code works, except for the last `$ xdotool` command.
+# The syntax seems good, since the command works when run in an interactive shell.
+#
+# The issue can be reproduced with just the `$ xdotool` command.
+# But  only if  we invoke  this script  via the  key binding  installed from  in
+# `~/.config/keyboard/xbindkeys.conf`.
+# Btw, in the latter file, right above the key binding, we've written that `$ xdotool`
+# was to avoid; I wonder whether that has something to do with our current issue.
 #}}}
 
 # `-xsendevent` {{{

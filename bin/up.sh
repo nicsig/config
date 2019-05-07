@@ -67,6 +67,7 @@ EOF
   update_pandoc_completion_function
   update_pip
   update_ranger
+  update_terminfo
   update_texlive
   update_tldr
   update_youtube_dl
@@ -329,6 +330,12 @@ update_ranger() { #{{{1
   # You may enhance ranger by installing some optional dependencies:
   #
   #     https://github.com/ranger/ranger#dependencies
+}
+
+update_terminfo() { #{{{1
+  curl -L http://invisible-island.net/datafiles/current/terminfo.src.gz -o /tmp/terminfo.scr.gz
+  gunzip /tmp/terminfo.scr.gz
+  tic -sx /tmp/terminfo.scr
 }
 
 update_texlive() { #{{{1

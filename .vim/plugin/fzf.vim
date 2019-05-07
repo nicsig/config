@@ -4,17 +4,6 @@ endif
 
 " For more information about the available settings, read `:h fzf` *and* `:h fzf-vim`.
 
-" Why must I put the config of fzf.vim in this directory instead of `~/.vim/after/plugin/`?{{{
-"
-" We want all the commands installed by the plugin to be prefixed by `Fz`:
-"
-"         let g:fzf_command_prefix = 'Fz'
-"
-" `fzf.vim` needs to be informed of our prefix when its interface is sourced.
-" `after/plugin/` would be too late, and thus `fzf.vim` would install all of its
-" commands ignoring our prefix.
-"}}}
-
 " Make fzf use the builtin terminal.
 " Do *not* use `{'window': 'split'}`!{{{
 "

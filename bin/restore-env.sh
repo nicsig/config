@@ -238,6 +238,8 @@ aptitude purge whoopsie update-notifier
 #                                              └ you can write several mime types
 #}}}
 xdg-mime default mpv.desktop video/mp4
+# Useful for starting gVim when we try to open a ftp link with `$ xdg-open`.
+xdg-mime default gvim.desktop application/octet-stream
 
 # Symlinks creation {{{1
 

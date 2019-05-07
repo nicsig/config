@@ -192,8 +192,22 @@ Plug 'lacygoill/vim-graph'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
 Plug 'foxik/vim-makejob'
-" the neovim `man` plugin is better
-" TODO: although it doesn't support our custom motions such as `]r`, nor folding
+" TODO: Remove this condition whenever you can.{{{
+"
+" We should use the neovim `man` plugin, because it's better.
+" However, it doesn't support our custom motions such as `]r`, nor folding.
+" So, we'll need to add those features when we re-implement the plugin.
+"
+" Also:
+"
+"     $ nvim
+"     :PlugClean
+"     Directories to delete:~
+"     - ~/.vim/plugged/vim-man/~
+"
+" Because of this `!has('nvim')` condition, we  run the risk of locally deleting
+" the plugin by accident. No big deal, unless we have uncommitted changes...
+"}}}
 if !has('nvim')
     Plug 'lacygoill/vim-man'
 endif
@@ -981,32 +995,33 @@ fu! s:customize_diff() abort
         "
         " But `:windo` needs to visit all windows of the current tabpage.
         "}}}
-        " TODO: finish this comment
         " Do *not* use a guard such as `if &l:diff` in the callback of the timer!{{{
-        "
-        " It would create issues.
-        "
-        " MWE: Open a file, and run `:diffsplit`.
-        " Close a window, and press `cod`.
-        " The syntax is not restored.
-        " The issue disappears if you remove the `if &l:diff` guard.
-        " I think the issue comes from the timer:
-        " we have no idea what the value of `&l:diff` is when the callback is processed.
-        "
-        " MWE:
-        "
-        "     $ vim -d ~/.shrc ~/.bashrc
-        "     c-l (focus bashrc)
-        "     cod (toggle diff mode)
-        "
-        " The fold markers are not concealed anymore.
-        " They should.
-        " We can manually fix the issue by pressing `=d`.
-        " Update:
-        " This is because of the guard `if &l:diff` in the timer:
         "
         "     \ execute('windo if &l:diff | call s:restore_highlighting_after_diff() | endif') + win_gotoid(winid)})
         "                      ^^^^^^^^^^
+        "
+        " It would  create issues, because  when the callback is  processed, you
+        " have no idea what the value of `&l:diff` is.
+        " This   matters  because   `s:restore_highlighting_after_diff()`  calls
+        " `s:get_number_of_windows_in_diff_mode()`, which inspects  the value of
+        " `'diff'` in each window.
+        "
+        " MWE:
+        "
+        "     $ vim ~/.bashrc
+        "     :diffsplit
+        "     :q
+        "     :diffoff
+        "
+        " The syntax is not restored.
+        "
+        " MWE:
+        "
+        "     $ vim -d ~/.zshrc ~/.bashrc
+        "     :diffoff
+        "
+        " The fold markers are not concealed anymore in `~/.zshrc`.
+        " This can be manually fixed by pressing `=d`.
         "}}}
         call timer_start(0, {->
             \ execute('windo call s:restore_highlighting_after_diff()') + win_gotoid(winid)})
@@ -1021,7 +1036,6 @@ fu! s:get_number_of_windows_in_diff_mode() abort
 endfu
 
 fu! s:restore_highlighting_after_diff() abort
-    " TODO: better explain why each command in this function is necessary
     let view = winsaveview()
     " What's the purpose of this guard? {{{
     "
@@ -1042,20 +1056,36 @@ fu! s:restore_highlighting_after_diff() abort
         do ColorScheme
     endif
     " restore the syntax groups which have been cleared
-    call s:styled_comments()
-    do Syntax
-    " for some reason, without this, `norm! zv` fails
-    do BufWinEnter
-    " TODO: finish the explanation
-    " hint: it has to do with the fact that `:diffoff` only resets `fdc` in the current window
-    " Why?{{{
+    call s:styled_comments() | do Syntax
+    " Without this, `norm! zMzv` may fail.{{{
     "
-    " Suppose we are comparing the differences between 2 files.
-    " We press `cod`.
+    " It would fail when you start Vim with `$ vimdiff`.
+    " This is because, after running  `:diffoff`, the value of `'foldmethod'` is
+    " reset to the value it had when Vim started, i.e. `manual`.
+    "
+    " See `:h :diffoff`:
+    "
+    " > The `:diffoff` command resets the relevant options to the values they had when
+    " > using `:diffsplit`, `:diffpatch` , `:diffthis`. or starting Vim in diff mode.
+    "
+    " We could also run `:setl fmd=marker`, but other options could suffer from the same
+    " issue in the future. Indeed, currently `:diffoff` affects:
+    "
+    "    - `'diff'`
+    "    - `'scrollbind'`
+    "    - `'cursorbind'`
+    "    - `'scrollopt'`
+    "    - `'wrap'`
+    "    - `'foldmethod'`
+    "    - `'foldcolumn'`
+    "
+    " Since  most  of  these  options  are  local to  a  window,  and  since  we
+    " usually set  window-local options  by installing  an autocmd  listening to
+    " `BufWinEnter`, it seems more reliable to manually fire the latter.
     "}}}
-    setl fdc=0
+    do BufWinEnter
     call winrestview(view)
-    norm! zv
+    norm! zMzv
 endfu
 
 " We need this when we start Vim in diff mode right from the shell.{{{
@@ -1693,6 +1723,20 @@ augroup END
 
 " We want a margin between the left of the screen and the text.
 set signcolumn=yes
+
+" We don't want `'signcolumn'` to be enabled in a Vim terminal buffer.{{{
+"
+" Otherwise, it's disabled when we're  in terminal-job mode, and enabled when we
+" enter terminal-normal mode.
+" This makes all the text move one character forward/backward, which is distracting.
+" The issue doesn't affect Nvim.
+"}}}
+if !has('nvim')
+    augroup disable_signcolumn_in_terminal_buffer
+        au!
+        au TerminalOpen * setl scl=no
+    augroup END
+endif
 
 " OLD WAY:
 " sign define dummy
@@ -3217,6 +3261,7 @@ fu! s:websearch() abort
         call writefile(lines[len(lines) - max_history : ], file)
     endif
     exe 'bo sp ' . file
+    setl bh=delete nobl noswf nowrap
 endfu
 
 " s S                           saiw  saiW{{{4
@@ -3614,7 +3659,26 @@ nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/' .
 " Instead, simply set the compiler in the filetype plugin with `:compiler foo`.
 " This global `<bar>c` mapping will then use the right compiler.
 "}}}
-nno  <silent>  <bar>c  :<c-u>update <bar> sil lmake! <bar> redraw!<cr>
+nno  <silent>  <bar>c  :<c-u>call <sid>run_compiler()<cr>
+
+fu! s:run_compiler() abort
+    let is_shellcheck = &l:mp =~# '\m\C^shellcheck\>'
+    update
+    sil lmake!
+    redraw!
+    if &ft is# 'qf' && is_shellcheck
+        " install  `gx` mapping, to  let us open the  wiki page where  the error
+        " under the cursor is documented
+        nno <buffer><nowait><silent> gx :<c-u>call <sid>gx_shellcheck()<cr>
+    endif
+endfu
+
+fu! s:gx_shellcheck() abort
+    let error_number = matchstr(getline('.'), '\d\s*col\s*\d\s*\S*\s*\zs\d\+')
+    " `:ShellCheckWiki` is defined only in a shell buffer (i.e. in the previous window).
+    wincmd p
+    exe 'ShellCheckWiki' . error_number
+endfu
 
 " |g         grep word under cursor / visual selection {{{4
 
@@ -5570,11 +5634,59 @@ com!      -nargs=1 PQ exe myfuncs#populate_list('quickfix', <q-args>)
 " It seems they do the same thing, but `:PQ` “hides” the real command, while our
 " cycle populates the command-line with it.
 
+" PC    Plugin Clean {{{2
+
+com! -bar PC call s:plug_clean()
+
+fu! s:plug_clean() abort
+    sil! PlugClean
+    " Why do you run this?{{{
+    "
+    " From `:h UpdateRemotePlugins`:
+    "
+    " > You must  execute |:UpdateRemotePlugins| every  time a remote  plugin is
+    " > installed, updated, or deleted.
+    "}}}
+    " What kind of issue could I encounter if I don't run `:UpdateRemotePlugins`?{{{
+    "
+    " Install this plugin: https://github.com/numirias/semshi
+    " Remove it with `:PlugClean`.
+    " Now, run this:
+    "
+    "     $ nvim -Nu NORC /tmp/py.py
+    "     Error detected while processing function remote#define#request:~
+    "     line    2:~
+    "     no request handler registered for "~/.vim/plugged/semshi/rplugin/python3/semshi:autocmd:BufEnter:*.py"~
+    "
+    " The error comes from:
+    "
+    "     /usr/local/share/nvim/runtime/autoload/remote/define.vim:196
+    "
+    " To understand, run this:
+    "
+    "     $ nvim -V15/tmp/log -Nu NORC /tmp/py.py
+    "     /semshi
+    "}}}
+    "   In the previous log, I can see that Nvim sources a file outside the rtp.  Why?{{{
+    "
+    " After reading the log, you may have found that Nvim sources
+    " `~/.local/share/nvim/rplugin.vim` –  the remote plugin manifest  – and you
+    " may wonder why, since its parent directory is not in Nvim's rtp.
+    "
+    " I  think that's  just how  Nvim works  by default;  it sources  the remote
+    " plugin manifest, *in addition to* plugins in directories of the rtp.
+    " For more info, see: `:h $NVIM_RPLUGIN_MANIFEST`.
+    "}}}
+    if has('nvim')
+        UpdateRemotePlugins
+    endif
+endfu
+
 " PI    Plugin Install {{{2
 
 com! -bar -nargs=1 PI call myfuncs#plugin_install(<q-args>)
 
-" PU    update Vim plugins {{{2
+" PU    update (N)Vim plugins {{{2
 
 com! -bar PU call s:plugins_update()
 
@@ -5640,6 +5752,9 @@ fu! s:plugins_update() abort
     endif
     PlugUpgrade
     PlugUpdate
+    if has('nvim')
+        UpdateRemotePlugins
+    endif
 endfu
 
 " RemoveDuplicateLines {{{2
@@ -6332,7 +6447,8 @@ fu! s:make_clipboard_persist_after_quitting_vim() abort
     " We don't the  beginning of the text  to be interpreted as an  option if it
     " begins with a hyphen, so we need `--`.
     "
-    " We don't special characters to be interpreted by the shell, so we need `shellescape()`.
+    " We  don't want special  characters to be interpreted  by the shell,  so we
+    " need `shellescape()`.
     " But even with all those precautions, it would still not be reliable.
     " For example, in Vim, try to copy this text in the clipboard:
     "
@@ -6667,6 +6783,31 @@ augroup trailing_whitespace
     au!
     au VimEnter,WinEnter,InsertLeave * call s:trailing_whitespace(1)
     au InsertEnter * call s:trailing_whitespace(0)
+    " We don't want a match in a terminal buffer when we quit terminal-job mode.{{{
+    "
+    " In  Vim,  the match  is  installed  when  we  open a  terminal  window
+    " (`WinEnter`).
+    " After that, it's not removed, because  `InsertLeave` is not fired in a
+    " terminal, so our autocmd which deletes the match is not triggered.
+    "
+    " ---
+    "
+    " This is useless in Nvim.
+    " First, the match is not installed, because we don't install the match in a
+    " buffer whose filetype is empty (and it is in a terminal buffer).
+    " Second, even if it was, it doesn't seem to be applied.
+    "
+    " ---
+    "
+    " You may wonder why the match is  installed in a Vim terminal buffer, since
+    " its filetype  is empty, and  we check the  filetype is *not*  empty before
+    " installing any match.
+    " I think that's because when `WinEnter`  is fired, the filetype has not yet
+    " been correctly set.
+    "}}}
+    if !has('nvim')
+        au TerminalOpen * call s:trailing_whitespace(0)
+    endif
     " An undesirable match will be installed in a help buffer, even if we include `help` in s:NO_TRAILING_WHITESPACE_FT.{{{
     "
     " Try `:h 'list`, and you'll see it.
@@ -8629,6 +8770,203 @@ endfu
 "     https://github.com/neovim/neovim/pull/9338
 "
 " Then, see whether it fixes the issue.
+"
+" 130 -
+" The  `C-n` and  `C-p`  buffer-local  mappings installed  by  fugitive in  some
+" buffers, conflict with our global mappings to cycle through tabpages.
+" We're often distracted, because we wonder why our mappings are not working.
+"
+" 131 -
+" Watch this video about using Vim as a diff tool:
+" https://www.youtube.com/watch?v=zEah_HDpHzc
+"
+" 132 - Read this: https://github.com/neovim/neovim/wiki/FAQ
+"
+" 133 -
+"
+"     $ vim -d ~/.bashrc ~/.zshrc
+"
+" Why does the statusline in the right window is noisy?
+" Focus it, then get  back to the first window: it gets quiet,  which is what we
+" wanted right from the start.
+"
+" Same issue if we start Vim with `-O`.
+"
+" I think the  issue is that BufWinEnter  or WinEnter is probably  fired for all
+" windows, which makes all windows receive a noisy statusline:
+"
+"     au BufWinEnter,WinEnter  *  setl stl=%!statusline#main(1)
+"                                                            │
+"                                                            └ has focus
+"
+" But WinLeave is not fired as we could expect:
+"
+"     au WinLeave              *  setl stl=%!statusline#main(0)
+"
+" So, the statuslines are not reset to be quiet.
+"
+" 134 -
+" Refactor your `]q` &friends mapping, so that they call `:[cl]above` and `:[cl]below`.
+" But do that only when Nvim has merged the Vim patch 8.1.1256.
+"
+" Update: No wait, those commands move relatively to the current *entry* in the qfl.
+" Maybe you would prefer commands which move relatively to the current *cursor position*.
+" If so, try the `:[cl]before` and the `:[cl]after` commands, introduced in the Vim patch
+" 8.1.1275.
+"
+" Also: Vim  patch 8.1.1281  has extended  `:[cl]history` to  make it  select an
+" arbitrary qfl in the stack, via a count.
+" Once the patch has been ported to Nvim, use this command and get rid of `:CC`, `:LL`.
+"
+" 135 -
+" In `~/.local/share/applications/gvim.desktop`, we write this:
+"
+"     TryExec=gvim -f
+"                  ^^
+"
+" We need `-f` to start gVim from rofi.
+" But why can't we start gVim from the whisker menu.
+" Update: We've used libremenu to edit the menu.
+" Now we have 2 gVim entries. The second one works, but not the first one.
+" And I don't know how to remove it.
+" I've searched for “vim” in the search field, and I've ticked “Hide from menus”
+" for each result; it's still there in the menu.
+" I think the menu is built dynamically from the .desktop files;
+" so try to move all `gvim.desktop` files (`$ mv gvim.desktop{,.bak}`),
+" and see whether it removes the broken gvim entry from the menu.
+" You can also temporarily purge the whisker package:
+"
+"     $ app xfce4-whiskermenu-plugin
+"
+" Btw, we don't need `-f` for the whisker menu. Why?
+"
+" Also, no other desktop file uses `-f` in `TryExec`:
+"
+"     $ grep TryExec /usr/local/share/applications/nvim.desktop
+"     TryExec=nvim~
+"
+"     $ grep TryExec /usr/local/share/applications/gvim.desktop
+"     TryExec=gvim~
+"
+" Besides, when we strace  `$ xdg-open` to open a ftp link, we  can see that the
+" system tries to find the binary `/usr/local/bin/gvim -f` which doesn't exist.
+" It finally finds gVim thanks to `/usr/local/share/applications/gvim.desktop`
+" (which is not our desktop file).
+" And if we temporarily add `-f` in  the latter desktop file, `$ xdg-open` fails
+" to open the ftp link with gvim; it falls back on mousepad.
+"
+" Is it an error to use `-f`?
+"
+" 136 -
+"
+"     ✔
+"     $ xdg-open ftp://ftp.vim.org/pub/vim/patches/8.0/README
+"
+"     ✘
+"     $ gvim [-f] ftp://ftp.vim.org/pub/vim/patches/8.0/README
+"
+" How does `$ xdg-open` run gVim to succeed in opening the link?
+" Have a look at strace.
+"
+"     $ strace -f -o ./log2 -e trace=execve xdg-open ftp://ftp.vim.org/pub/vim/patches/8.0/README
+"     $ vim log2
+"
+" Btw: I can see that the system did pass `-f` to gVim!
+" Where does it come from?
+"
+" Also: why is it so slow?
+" Update: It's fast if you use `$ gvim` instead of `$ xdg-open`, *and*
+" you provide the username 'anonymous' and any non-empty password.
+"
+" Also: why does strace needs to be killed with C-c?
+" It doesn't if we disable our vimrc (:finish at the top).
+"
+" 137 -
+" Document this:
+" When you need to bisect a long config file, note the current undo sequence number.
+" It will be useful later to restore the file in its original state.
+" Then press:
+"
+"    - `viE` (select whole file)
+"    - `myC` (yank code only)
+"    - `gv` (reselect whole file)
+"    - `p` (replace whole file with only code; in effect, you've removed empty/commented lines)
+"
+" Then, bisect the code.
+" Once you've found the problematic line(s),  press `-u` to restore the original
+" state of the file.
+"
+" ---
+"
+" Also, document this:
+"
+" When you  have a bug which  is hard to reproduce,  try to find an  easy way to
+" reset your environment so that the issue disappears.
+"
+" This servers two purposes.
+" First, it will help you manually and quickly fix the issue when needed.
+" Second, it will help you find a reliable MWE.
+" Indeed, to do so, you need to remember what you've done recently.
+" Don't let the bug last too long. The longer it lasts, the less chance you have
+" to retrieve in your memory the action which triggered it (“is it because I did
+" X?”, “or Y?”, “or Z?”, ...).
+"
+" We applied this trick  to find a MWE to reproduce the  issue where Vim redraws
+" the command-line/screen  prematurely when  we're trying to  copy some  text in
+" tmux copy-mode.
+" We noticed that we could temporarily  and manually fix the issue by restarting
+" Vim from another pane.
+"
+" 138 -
+" Assimilate the `Yank()` function, and the `~/bin/yank` script.
+"
+" 139 -
+" Document this somewhere.
+" When you're writing a complex bug  report, *always* start by writing the title
+" of your issue, even if it's just a temporary title.
+" Use the keywords in this title to search for information on the issue tracker.
+" This may help you find more relevant info, and a solution to your issue.
+" If not, go on writing your bug  report, but make sure to regularly revisit the
+" title  of  your issue,  and  update  it whenever  you  make  progress in  your
+" understanding of the issue.
+" And whenever you update the title of your issue, use its most important keywords
+" in a search on the issue tracker.
+"
+" If you had  followed this rule, you  would have wasted less  time when writing
+" your bug report concerning the truncation of the clipboard in tmux + st.
+"
+" Bottom line: the title of your issue is *very* important.
+
+
+
+fu! s:yank(text) abort
+    " What's this `yank.sh` ?{{{
+    "
+    " A custom script: `~/bin/yank.sh`.
+    " It copies the text in the clipboard.
+    "}}}
+    let seq = system('yank.sh', a:text)
+    " Why this guard?{{{
+    "
+    " gVim doesn't seem to support OSC52.
+    "}}}
+    "   Why don't you move it at the top?{{{
+    "
+    " Besides  producing an  OSC52 sequence,  `yank.sh` copies  the text  in the
+    " clipboard via `$ xsel`.
+    "}}}
+    if has('gui_running')
+        return
+    endif
+    if v:shell_error
+        echohl ErrorMsg
+        echom v:exception
+        echohl NONE
+    else
+        call writefile([seq], '/dev/tty', 'b')
+    endif
+endfu
+nno <silent> <space>y y:<c-u>call <sid>yank(@0)<cr>
 
 
 

@@ -133,3 +133,10 @@ about how to activate it.
 The shell snippets to generate the quickfix lines will almost certainly choke on
 filenames with exotic characters (like newlines).
 
+##
+# Todo
+
+We should have a mechanism which regenerates the tags file regularly.
+Maybe we should create a git repo specifically for these scripts.
+This way, there  would be a `.git/` directory, and  `vim-gutentags` would do the
+work...
