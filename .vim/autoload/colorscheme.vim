@@ -187,6 +187,15 @@ fu! colorscheme#customize() abort "{{{2
     let cmd = substitute(cmd, 'line\s\+\d\+:.*', '', '')
     exe cmd
 
+    " define the `CommentUnderlined` HG (useful for urls in comments)
+    let comment_definition = substitute(execute('hi Comment'), '\n\|xxx', '', 'g')
+    let comment_underlined_definition = substitute(comment_definition, 'Comment', 'CommentUnderlined', '')
+    let comment_underlined_definition =
+        \ substitute(comment_underlined_definition, '\m\C\<\%(term\|cterm\|gui\)=\S*', '', 'g')
+    let comment_underlined_definition =
+        \ substitute(comment_underlined_definition, '$', ' term=underline cterm=underline gui=underline', '')
+    exe 'hi ' . comment_underlined_definition
+
     " Why changing `CursorLine`?{{{
     "
     " The attributes  set by our  color scheme  make the cursorline  not visible

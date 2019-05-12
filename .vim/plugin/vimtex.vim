@@ -8,19 +8,39 @@ if stridx(&rtp, 'vimtex') == -1 || exists('g:no_plugin')
     finish
 endif
 
+" TODO: When we `:Rename` a tex file, vimtex complains with:{{{
+"
+"     vimtex: "syntax on" seems to be applied before "filetype plugin on".~
+"     This is suboptimal, because some syntax features require an initialized state.~
+"     Please see ":help vimtex_syntax_filetype".~
+"
+" You can reproduce the message by running `:filetype detect on`.
+" Is sth broken after running `:Rename`/`:filetype detect on`?
+" Or can we ignore the message?
+"}}}
+
 " Compiler {{{1
 
-" What's `latexmk.pl`?{{{
+" What's `latexmk`?{{{
 "
 " To compile a LaTeX document, you need a LaTeX compiler backend.
 " See `:h vimtex-compiler`.
 "
-" latexmk.pl is one of them.
-" You can download it and read its documentation at:
+" `latexmk` is one of them.
+" It's included in the texlive distribution:
+"
+"     $ ls -l ~/texlive/2018/bin/x86_64-linux/latexmk
+"     lrwxrwxrwx 1 .. latexmk -> ../../texmf-dist/scripts/latexmk/latexmk.pl~
+"
+" ---
+"
+" Alternatively, you can download it and read its documentation at:
 "
 "     http://personal.psu.edu/jcc8//software/latexmk-jcc/
 "
-" Once the script is downloaded, move it in ~/bin.
+" Once the script is downloaded, move it in `~/bin`.
+" Rename it into `latexmk` (i.e. remove `.pl`), or update the value of the
+" `executable` key in `g:vimtex_compiler_latexmk`.
 "}}}
 " What's the purpose of `g:vimtex_compiler_latexmk`?{{{
 "
@@ -32,8 +52,8 @@ endif
 "
 " We tweak it so that:
 "
-"     - the 'backend' key uses Vim's or Neovim's jobs
-"     - the 'executable' key matches the right name of the script
+"    - the 'backend' key uses Vim's or Neovim's jobs
+"    - the 'executable' key matches the right name of the script
 "}}}
 
 let g:vimtex_compiler_latexmk = {
@@ -42,7 +62,7 @@ let g:vimtex_compiler_latexmk = {
     \ 'build_dir' : '',
     \ 'callback' : 1,
     \ 'continuous' : 1,
-    \ 'executable' : 'latexmk.pl',
+    \ 'executable' : 'latexmk',
     \ 'options' : [
     \      '-pdf',
     \      '-verbose',
@@ -68,7 +88,7 @@ let g:vimtex_compiler_latexmk = {
 "     \begin{displaymath}
 "     \end{displaymath}
 "
-" … insert `~0`, it should be replaced with `\emptyset`.
+" ... insert `~0`, it should be replaced with `\emptyset`.
 "
 " For more info, see:    :h vimtex-imaps
 " And:                   :VimtexImapsList

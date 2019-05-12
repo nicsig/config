@@ -3674,7 +3674,7 @@ fu! s:run_compiler() abort
 endfu
 
 fu! s:gx_shellcheck() abort
-    let error_number = matchstr(getline('.'), '\d\s*col\s*\d\s*\S*\s*\zs\d\+')
+    let error_number = matchstr(getline('.'), '.\{-}|.\{-}\zs\d\+\ze\s*|')
     " `:ShellCheckWiki` is defined only in a shell buffer (i.e. in the previous window).
     wincmd p
     exe 'ShellCheckWiki' . error_number
@@ -6863,18 +6863,18 @@ endfu
 " equal than our current cursor position.
 " Useful to move by logical blocks of code of the same level.
 "
-"        http://vi.stackexchange.com/a/213/6960
+" http://vi.stackexchange.com/a/213/6960
 "        nno cd /\%<c-r>=virtcol('.')<cr>v\S<cr>
 "        nno cu ?\%<c-r>=virtcol('.')<cr>v\S<cr>
 "
 " 4 - Vimcast, Episode 50, An introduction to vspec
 "
-"     https://github.com/junegunn/vader.vim (927 sloc)
+" https://github.com/junegunn/vader.vim (927 sloc)
 "
-"     http://whileimautomaton.net/2013/02/13211500
-"     https://github.com/kana/vim-vspec
-"     https://github.com/kana/vim-flavor
-"     http://www.relishapp.com/kana/vim-flavor/docs
+" http://whileimautomaton.net/2013/02/13211500
+" https://github.com/kana/vim-vspec
+" https://github.com/kana/vim-flavor
+" http://www.relishapp.com/kana/vim-flavor/docs
 "
 " 5 - Implement the concept of "narrowing region".
 "
@@ -7744,6 +7744,7 @@ endfu
 "    - `:scriptversion`; https://github.com/vim/vim/commit/558ca4ae55096f8763ab8515a304cda9c57f18a7
 "
 "    - `:tcd`; https://github.com/vim/vim/commit/00aa069db8132851a91cfc5ca7f58ef945c75c73
+"    - `chdir()`; https://github.com/vim/vim/commit/1063f3d2008f22d02ccfa9dab83a23db52febbdc
 "
 "    - 'filewinid' (location list property)
 "    - :swapname
@@ -7793,6 +7794,14 @@ endfu
 "    - trim()
 "    - winlayout()
 "    - winnr(): new argument `{N}[hjkl]`
+"
+"    - environ(), getenv(), setenv()
+"
+"    - ability to set a default value to an argument passed to a function:
+"
+"        `function Something(a = 10, b = 20, c = 30)`
+"
+"      https://github.com/vim/vim/commit/42ae78cfff171fbd7412306083fe200245d7a7a6
 "
 " 65 -
 " in `vim-window`, don't do this:
@@ -8777,8 +8786,9 @@ endfu
 " We're often distracted, because we wonder why our mappings are not working.
 "
 " 131 -
-" Watch this video about using Vim as a diff tool:
+" Watch these videos about using Vim as a diff tool, and as a merge tool:
 " https://www.youtube.com/watch?v=zEah_HDpHzc
+" https://www.youtube.com/watch?v=VxpCgQyUXlI
 "
 " 132 - Read this: https://github.com/neovim/neovim/wiki/FAQ
 "
@@ -8903,7 +8913,7 @@ endfu
 " When you  have a bug which  is hard to reproduce,  try to find an  easy way to
 " reset your environment so that the issue disappears.
 "
-" This servers two purposes.
+" This serves two purposes.
 " First, it will help you manually and quickly fix the issue when needed.
 " Second, it will help you find a reliable MWE.
 " Indeed, to do so, you need to remember what you've done recently.
@@ -8936,24 +8946,34 @@ endfu
 " your bug report concerning the truncation of the clipboard in tmux + st.
 "
 " Bottom line: the title of your issue is *very* important.
+"
+" 140 -
+" Diff 2 files (cod).
+" Close both windows by pressing `SPC q`.
+" The syntax highlighting has not been restored.
+"
+" You'll need  to make `s:restore_highlighting_after_diff()` a  public function,
+" so that it can be called by our vim-lg plugin (with `:windo call ...`).
+" Indeed, you need to call this  function for everything to work again properly;
+" it's not as simple as running `:syn enable`.
 
 
 
 fu! s:yank(text) abort
-    " What's this `yank.sh` ?{{{
+    " What's this `yank` ?{{{
     "
-    " A custom script: `~/bin/yank.sh`.
+    " A custom script: `~/bin/yank`.
     " It copies the text in the clipboard.
     "}}}
-    let seq = system('yank.sh', a:text)
+    let seq = system('yank', a:text)
     " Why this guard?{{{
     "
-    " gVim doesn't seem to support OSC52.
+    " gVim doesn't seem to support OSC 52.
     "}}}
     "   Why don't you move it at the top?{{{
     "
-    " Besides  producing an  OSC52 sequence,  `yank.sh` copies  the text  in the
-    " clipboard via `$ xsel`.
+    " In addition to producing an OSC 52 sequence, `yank` copies the text in the
+    " clipboard via `$ xsel`; this last feature may still be useful in gVim.
     "}}}
     if has('gui_running')
         return

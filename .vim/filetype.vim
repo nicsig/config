@@ -89,7 +89,7 @@ augroup filetypedetect
 
     au! BufRead,BufNewFile $HOME/.vim/doc/misc/{notes,galore} setf help
 
-    au! BufRead,BufNewFile .gitignore,~/.config/surfraw/bookmarks setf conf
+    au! BufRead,BufNewFile .gitignore,$HOME/.config/surfraw/bookmarks setf conf
 
     " ~/.vim/after/ftplugin/nfo.vim
     au! BufRead,BufNewFile *.nfo,*.NFO setf nfo
@@ -98,6 +98,8 @@ augroup filetypedetect
     " > Rofi themes use the .rasi file extension. The format is similar to .css.
     " Source: https://github.com/DaveDavenport/rofi/wiki/Themes
     au! BufRead,BufNewFile *.rasi setf css
+
+    au! BufRead,BufNewFile $HOME/.tmux/terminal-overrides.conf setf tmux
 
     " ~/.vim/tmp/websearch
     au! BufRead,BufNewFile websearch setf websearch

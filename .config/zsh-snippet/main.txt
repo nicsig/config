@@ -7,9 +7,15 @@ gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
 groff -man -Tascii {{program}}.man # check formatting of a manual page
 
+sudo chown -R user:user . # may be necessary before compiling vim/tmux
+make clean; make distclean; sh autogen.sh && ./configure && make # compile tmux (useful when git-bisecting)
+make clean; make distclean; ./configure --enable-fail-if-missing --with-features=huge; make # compile vim
+
 strace -o {{/tmp/log}} {{cmd}} # run a command, and trace the new process
 strace -o {{/tmp/log}} -p $(pidof {{cmd}}) # trace an existing process; run `less +F /tmp/log` to read it
 strace -o {{/tmp/log}} -e trace={file|open|read} {{cmd}} # trace a command, but only some system calls
+
+tmux -L test -f /tmp/tmux.conf new # run a new tmux instance, with custom config
 
 vboxmanage unregistervm {{ubuntu}} --delete # delete VM
 vboxmanage controlvm {{ubuntu}} pause # pause VM
