@@ -66,7 +66,7 @@ setlocal fdn=20
 setlocal fen
 3308
 normal! zo
-let s:l = 4486 - ((1035 * winheight(0) + 14) / 28)
+let s:l = 4486 - ((1036 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -145,7 +145,7 @@ setlocal fdn=20
 setlocal fen
 320
 normal! zo
-let s:l = 99 - ((98 * winheight(0) + 14) / 28)
+let s:l = 99 - ((82 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -206,7 +206,7 @@ setlocal fen
 normal! zo
 83
 normal! zo
-let s:l = 137 - ((3 * winheight(0) + 14) / 28)
+let s:l = 137 - ((13 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -334,11 +334,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 473 - ((472 * winheight(0) + 13) / 26)
+let s:l = 471 - ((470 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-473
+471
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -368,7 +368,9 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 65 - ((56 * winheight(0) + 0) / 1)
+9
+normal! zo
+let s:l = 65 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -388,7 +390,7 @@ setlocal fdn=20
 setlocal fen
 99
 normal! zo
-let s:l = 147 - ((11 * winheight(0) + 14) / 28)
+let s:l = 147 - ((3 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -488,16 +490,16 @@ setlocal fen
 normal! zo
 220
 normal! zo
-let s:l = 241 - ((0 * winheight(0) + 0) / 1)
+let s:l = 153 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-241
-let s:c = 76 - ((53 * winwidth(0) + 59) / 119)
+153
+let s:c = 9 - ((3 * winwidth(0) + 59) / 119)
 if s:c > 0
-  exe 'normal! ' . s:c . '|zs' . 76 . '|'
+  exe 'normal! ' . s:c . '|zs' . 9 . '|'
 else
-  normal! 076|
+  normal! 09|
 endif
 lcd ~/.vim
 wincmd w
@@ -554,11 +556,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 3 - ((0 * winheight(0) + 0) / 1)
+let s:l = 50 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
+50
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -572,11 +574,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 61 - ((5 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-61
+1
 normal! 0
 lcd ~/wiki/shell
 wincmd w
@@ -590,11 +592,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 364 - ((266 * winheight(0) + 13) / 26)
+let s:l = 164 - ((163 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-364
+164
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -602,7 +604,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
-edit ~/.tmux.conf
+edit ~/wiki/tmux/tmux.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -615,28 +617,26 @@ set winminwidth=0
 set winwidth=1
 wincmd =
 argglobal
-setlocal fdm=marker
-setlocal fde=0
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-57
+227
 normal! zo
-58
-normal! zo
-let s:l = 224 - ((0 * winheight(0) + 0) / 1)
+let s:l = 229 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-224
-normal! 06|
-lcd ~/.vim
+229
+normal! 0
+lcd ~/wiki/tmux
 wincmd w
 argglobal
-if bufexists("~/.tmux/terminal-overrides.conf") | buffer ~/.tmux/terminal-overrides.conf | else | edit ~/.tmux/terminal-overrides.conf | endif
+if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -645,12 +645,22 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 68 - ((0 * winheight(0) + 0) / 1)
+1
+normal! zo
+2
+normal! zo
+245
+normal! zo
+866
+normal! zo
+877
+normal! zo
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-68
-normal! 01|
+1
+normal! 0
 lcd ~/.vim
 wincmd w
 2wincmd w
@@ -658,29 +668,28 @@ wincmd =
 tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
+badd +249 ~/wiki/tmux/tmux.md
 badd +963 ~/wiki/awk/sed.md
 badd +2 ~/wiki/man/examples/pathfind.1
 badd +111 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 badd +96 ~/wiki/vim/ex.md
 badd +360 ~/wiki/st.md
 badd +53 ~/.config/st/patches/README.md
-badd +86 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
+badd +103 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
 badd +258 ~/bin/upp.sh
 badd +241 ~/bin/restore-env.sh
 badd +3 ~/bin/yank
-badd +224 ~/.tmux.conf
 badd +4486 ~/wiki/awk/awk.md
 badd +99 ~/wiki/man/man.md
 badd +78 ~/Dropbox/vim_plugins/vimrc_grepper.vim
 badd +33 ~/.config/st/patches/01_custom_config.diff
-badd +388 ~/.Xresources
-badd +178 ~/wiki/shell/process.md
+badd +344 ~/.Xresources
+badd +147 ~/wiki/shell/process.md
 badd +1 ~/wiki/vim/install.md
 badd +80 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +22 ~/wiki/shell/script.md
-badd +365 ~/Desktop/bug.md
-badd +1 ~/.tmux/terminal-overrides.conf
-badd +2550 man://tmux(1)
+badd +337 ~/Desktop/bug.md
+badd +417 ~/.tmux.conf
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -7,24 +7,29 @@
 #}}}
 # Where can I find tutorials about conky?{{{
 #
-#     https://github.com/brndnmtthws/conky/wiki
-#     http://crunchbang.org/forums/viewtopic.php?id=17246
+# https://github.com/brndnmtthws/conky/wiki
+# http://crunchbang.org/forums/viewtopic.php?id=17246
 #}}}
 # How to print info about the weather?{{{
 #
 # Look at `$ man conky` / wiki (there're weather functions built-in).
 # Or for inspiration, look here:
-#
-#     https://github.com/edusig/conky-weather
+# https://github.com/edusig/conky-weather
 #
 # It's in python.
-#
 # Conky may need curl to dl information about the weather.
 #}}}
 
-exec 3>&1 4>&2
 [[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
-exec 1>"${HOME}/log/$(basename "$0" .sh).log" 2>&1
+LOGFILE="${HOME}/log/$(basename "$0" .sh).log"
+
+main() {
+  cat <<EOF
+
+-----------
+$(date +%m-%d\ %H:%M)
+-----------
+EOF
 
 killall conky
 # Why?{{{
@@ -46,4 +51,7 @@ cd "${HOME}/.conky/"
 #}}}
 conky -c "${HOME}/.conky/time.lua" &
 conky -c "${HOME}/.conky/system.lua" &
+}
+
+main 2>&1 | tee -a "${LOGFILE}"
 

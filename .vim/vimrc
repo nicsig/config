@@ -451,6 +451,9 @@ endif
 
 " Environment "{{{2
 
+" See `~/wiki/shell/environment.md` for an explanation as to why we do that.
+let $MANSECT = $MYMANSECT
+
 " TODO: We should probably remove this assignment.{{{
 "
 " To create RELIABLE links inside a wiki, we should use tags:
@@ -505,25 +508,6 @@ endif
 " Used in our notes when we create links between files, in a wiki on a topic.
 let $MY_WIKI = $HOME.'/wiki'
 
-" Why?{{{
-"
-" For some reason, when you start `(n)vim` with `$ man`, the value of `$MANSECT`
-" is truncated.
-" Only the first section number before the first colon is kept.
-" The rest is lost.
-"
-" Because of this:
-"     $ man man
-"     :Man mount
-"     man.vim: command error (11) man -w mount: No manual entry for mount~
-"     See 'man 7 undocumented' for help when manual pages are not available.~
-"
-" So,  in `~/.zshenv`,  I've created  a duplicate  variable, `MYMANSECT`,  which
-" serves as a backup.
-" And here, I make sure to reset the value of `MANSECT` to `$MYMANSECT`.
-"}}}
-let $MANSECT = $MYMANSECT
-
 if !isdirectory($XDG_RUNTIME_DIR.'/vim')
     call mkdir($XDG_RUNTIME_DIR.'/vim', 'p', '0700')
 endif
@@ -531,8 +515,7 @@ let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
 " For more info about `$XDG_RUNTIME_DIR`:
 "
 "     https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
-" }}}2
-
+" }}}1
 " backspace {{{2
 
 " Allow BS, Del, C-w, C-u to delete:
@@ -1324,15 +1307,26 @@ fu! s:inex() abort
     "}}}
     if line =~# '='
         return substitute(v:fname, '.*=', '', '')
+    " the path could contain an environment variable surrounded by curly brackets
     else
-        " The path could contain an environment variable:
-        let path = '\m\C\%($\u\+\|"$\u\+"\|${\u\+}\|"${\u\+}"\)'.'\V'.v:fname
-        "                                                          │
-        "                                                          └ `v:fname` could contain a tilde
-        if line =~# path
-            let path = matchstr(line, path)
-            let env = matchstr(path, '\u\+')
-            return substitute(path, '"\=${\='.env.'}\="\=', eval('$'.env), '')
+        " What's the purpose of the second branch?{{{
+        "
+        "     '\|${'.v:fname.'}\f\+'
+        "
+        " It handles the case where our cursor is on the environment variable name:
+        "
+        "     ${HOME}/bin/README.md
+        "      ^^^^^^
+        "}}}
+        let pat = '\m\C${\w\+}'.'\V'.v:fname.'\|${'.v:fname.'}\f\+'
+        "                         │
+        "                         └ `v:fname` could contain a tilde
+        let cursor_not_after = '\m\%(.*\%'.col('.').'c\)\@!'
+        let pat = pat . cursor_not_after
+        if line =~# pat
+            let pat = matchstr(line, pat)
+            let env = matchstr(pat, '\w\+')
+            return substitute(pat, '${'.env.'}', eval('$'.env), '')
         endif
     endif
 
@@ -1854,7 +1848,7 @@ set synmaxcol=250
 " it was  not typed  by the  user, but pasted,  and that  it should  disable the
 " interpretation of what it considers to be special characters.
 "
-" Example:
+" MWE:
 "
 "     $ vim -Nu NONE +'let @+ = "hello\e:echom \"malicious code injected\"\ri"' +startinsert
 "     C-S-v
@@ -1868,25 +1862,14 @@ set synmaxcol=250
 " As you can see,  this can be dangerous, because if you  don't pay attention to
 " what you've copied, Vim may run an unexpected command.
 "
-" Other Example:
+" Other MWE:
 "
-" Consider this text:
-"
-"     Level 1
-"         Level 2
-"         Level 2
-"     Level 1
-"
-" Yank it in the clipboard selection (without the  comment leader) by pressing `""y`.
-" Now, position  your cursor  at the start  of a line  (column 1),  enter insert
-" mode, and press `C-S-v`.
-"
-" You'll get:
-"
-"     Level 1
-"         Level 2
-"             Level 2
-"             Level 1
+"     $ vim -Nu NONE +'let @+ = "Level 1\n    Level 2\n    Level 2\nLevel 1"' +'setl ai' +startinsert
+"     C-S-v
+"     Level 1~
+"         Level 2~
+"             Level 2~
+"             Level 1~
 "
 " Notice how the indentation of some lines is increasingly wrong.
 " This is because when you enter a new line, if `'ai'` is set, Vim automatically
@@ -2089,6 +2072,31 @@ if has('vim_starting') && !has('gui_running') && !has('nvim') && &t_BE is# ''
     let &t_PS = "\e[200~"
     let &t_PE = "\e[201~"
 endif
+" FIXME: Nvim's bracketed paste mode doesn't prevent the interpretation of some special keys.{{{
+"
+" The issue is specific to some terminals.
+" I can't reproduce in xterm, but I can in st/urxvt/konsole/xfce4-terminal.
+"
+" MWE:
+"
+"     $ nvim -Nu NONE +'let @+ = "hello\e:echom \"malicious code injected\"\ri"' +startinsert
+"     C-S-v
+"     Esc
+"     :mess
+"     malicious code injected~
+"
+" Note that setting 'paste' doesn't fix the issue (neither in Vim, nor in Nvim).
+"
+" It's possible that the cause of this issue is the same as the cause of this other issue:
+" https://github.com/neovim/neovim/issues/8395
+"
+" Besides, Nvim misses some Vim patches regarding the bracketed paste mode:
+" https://gist.github.com/janlazo/cea7acf2711e89a9bc4f7c79612c6e54#bracketed-paste
+"
+" Before submitting  an issue, wait for  #8395 to be  fixed, and have a  look at
+" issues tagged with 'clipboard':
+" https://github.com/neovim/neovim/labels/clipboard
+"}}}
 
 " ut {{{3
 
@@ -7763,6 +7771,9 @@ endfu
 "    - appendbufline()
 "    - deletebufline()
 "
+"    - listener_add()
+"    - listener_remove()
+"
 "    - argc() + argv()
 "      in Vim, they can now access the global arglist and the local arglist of another window
 "
@@ -8956,6 +8967,53 @@ endfu
 " so that it can be called by our vim-lg plugin (with `:windo call ...`).
 " Indeed, you need to call this  function for everything to work again properly;
 " it's not as simple as running `:syn enable`.
+"
+" 141 -
+" We have too many comments in this file about the bracketed paste mode.
+" Plus two fixmes.
+" Move all of that in a dedicated file (vim notes, terminal notes, ...).
+" I don't  care about  the fixmes  right now,  because I  don't use  the builtin
+" terminal, and because I never paste from insert mode.
+"
+" 142 -
+" Document the fact  that you need to put  `<esc>` at the start of the  rhs of a
+" `:ono` mapping if it presses `v:operator`.
+"
+" Watch this:
+"
+"     :ono ii :<c-u>exe 'normal! T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())<cr>
+"
+" Move your cursor on `bar`, then press `ciixy`:
+"
+"     foo x_bar_y baz
+"     foo baz~
+"
+" Here, `ciixy` is equivalent to `c:norm! Txcty`.
+"
+" Now try this mapping:
+"
+"             vvvvv
+"     :ono ii <esc>:<c-u>exe 'normal! T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())<cr>
+"     foo x_bar_y baz
+"     foo xy baz~
+"
+" The result is different.
+"
+" If you omit `<esc>` the result can even be wrong.
+" Watch this:
+"
+"     :ono <expr> ii 'T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())
+"     foo x_bar_y baz
+"     foo xctyar_y baz~
+"
+"                     vvvvv
+"     :ono <expr> ii '<esc>T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())
+"     foo x_bar_y baz
+"     foo xy baz~
+"
+" https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
+
+
 
 
 

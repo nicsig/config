@@ -341,8 +341,6 @@ XTerm*disallowedWindowOps: 20,21,SetXprop
 !
 ! Without this setting, xterm would write in the primary selection.
 !
-! ---
-!
 ! MWE:
 !
 !     # start xterm

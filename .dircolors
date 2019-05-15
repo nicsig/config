@@ -46,12 +46,6 @@
 #     $ eval "$(dircolors "${HOME}/.dircolors")"
 #
 # Just make sure to start a new shell so that `~/.zshenv` is sourced.
-# Note that if you're in tmux, opening a new pane/window won't be enough
-# to see the result of your new settings.
-#
-# Indeed, the new shell will be a child of the server, and so
-# `$MY_ENVIRONMENT_HAS_BEEN_SET` will prevent `~/.zshenv` to be resourced.
-# In this case, restart tmux, or execute the previous `$ eval` command.
 #}}}
 # If I comment all the settings, does `ls --color` prints its output without any color?{{{
 #

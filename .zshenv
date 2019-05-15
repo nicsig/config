@@ -1,18 +1,3 @@
-# I've changed the value of a variable, but it doesn't take effect, even after restarting tmux!{{{
-#
-# I can't  reproduce this issue, atm,  but it happened once in  the past; here's
-# how I fixed it.
-#
-# Start a terminal from the whisker menu (Alt-F1).
-# From there, restart xbindkeys.
-#
-#     $ xbindkeys_restart
-#     $ killall xbindkeys_restart; xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"
-#
-# If the issue persists, this command may help the debugging:
-#     $ pstree -s -p $$
-#}}}
-
 # We could change the location of our `zsh` config files:{{{
 #
 #     export ZDOTDIR=~/.config/zsh
@@ -40,20 +25,6 @@
 # Probably only `export` commands and maybe `.` (to source a `*profile` file
 # for example).
 # }}}
-# Are there some dangers using it?{{{
-#
-# Yes, we must make sure it doesn't export environment variables which have
-# already been set.
-# Otherwise,  it could  lead to  problems,  if we  append/prepend a  value to  a
-# variable:
-#
-#     https://www.zsh.org/mla/users/2012/msg00784.html
-#
-# For example, if we append a value to `$PATH`, it will grow bigger every time
-# `$SHLVL` is incremented. That is every time, we start a subshell.
-#
-# So, we need a guard:    MY_ENVIRONMENT_HAS_BEEN_SET
-# }}}
 
 # Should we copy some of the next statements in `~/.bashrc`?{{{
 #
@@ -61,11 +32,6 @@
 # When you start a bash shell, it's always from a zsh shell.
 # So the bash shell will inherit all the environment of the zsh shell.
 #}}}
-if [[ -n "${MY_ENVIRONMENT_HAS_BEEN_SET}" ]]; then
-  return
-fi
-
-export MY_ENVIRONMENT_HAS_BEEN_SET=yes
 
 # bat {{{1
 
@@ -209,9 +175,9 @@ eval "$(lesspipe)"
 
 # ls {{{1
 
-# Ask  `dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
+# Ask `$  dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
 # `$LS_COLORS`.
-# The latter controls the colors in the output of `ls --color`.
+# The latter controls the colors in the output of `$ ls --color`.
 eval "$(dircolors "${HOME}/.dircolors")"
 
 # man {{{1
@@ -236,7 +202,7 @@ eval "$(dircolors "${HOME}/.dircolors")"
 # The  latter only  works in  Vim and,  contrary to  the Neovim  plugin, doesn't
 # support some attributes such as bold/underlined.
 #
-# Btw, if, later, you decide to use Vim again, read `:h manpager.vim`.
+# Btw, if later you decide to use Vim again, read `:h manpager.vim`.
 # It recommends this command instead:
 #
 #     export MANPAGER="vim -M +MANPAGER -"
@@ -257,31 +223,14 @@ export MANPAGER='nvim +Man!'
 #
 # Use this `export` statement to change the priority of the sections.
 #
-# Note that pressing `3K`  or executing `man 3 printf` will  give you the page
+# Note that pressing `3K`  or executing `$ man 3 printf` will  give you the page
 # from the section 3, no matter what `$MANSECT` contains.
 # This variable is only useful for when you don't provide the section number.
 #
 # See `$ man 1 man` for more info.
 #}}}
 export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
-# Why this second export?{{{
-#
-# For some reason, when you start `(n)vim` with `$ man`, the value of `$MANSECT`
-# is truncated.
-# Only the first section number before the first colon is kept.
-# The rest is lost.
-#
-# As a result, we face this issue:
-#
-#     $ man man
-#     :Man mount
-#       → ✘
-#         man.vim: command error (11) man -w mount: No manual entry for mount
-#         See 'man 7 undocumented' for help when manual pages are not available.
-#
-# So I create this duplicate variable, which will serve as a backup.
-# And in our vimrc, I make sure to reset the value of `MANSECT` to `$MYMANSECT`.
-#}}}
+# See `~/wiki/shell/environment.md` for an explanation as to why we do that.
 export MYMANSECT="${MANSECT}"
 
 export MANWIDTH=80
@@ -372,9 +321,9 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 #
 # Then run:
 #
-#     $ sed 's/\x0/\n/g' /proc/PID/environ | grep ^PATH
-#                              ^^^
-#                              pid of an ancestor process
+#     $ tr '\0' '\n' < /proc/PID/environ | grep ^PATH
+#                            ^^^
+#                            pid of an ancestor process
 #
 # You'll notice that the first process whose `$PATH` contains those directories is upstart.
 #}}}
@@ -450,6 +399,32 @@ export REPORTTIME=15
 #}}}
 export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 
+# TERM {{{1
+
+# Let applications running in Vim's terminal know, that our terminal supports 256 colors.{{{
+#
+# Without  this line,  when opening  a terminal  buffer, most  of the  time, Vim
+# would  see  that  `$TERM`  doesn't begin  with  `xterm`  (e.g.  `st-256color`,
+# `tmux-256color`, ...), and would set `$TERM` with `xterm` as a fallback.
+#
+# As a  result, the applications  running in  the terminal buffer  would wrongly
+# think that our terminal doesn't support more than 8 or 16 colors.
+# This would break, for example, the zsh syntax highlighting plugin; whenever we
+# refer to a color beyond the 16  ANSI colors, the plugin would immediately fall
+# back on black.
+#
+# From `:h terminal-unix`
+#
+# > Environment variables are used to pass information to the running job:
+#
+# >     TERM    the name of the terminal, from the 'term' option or
+# >             $TERM in the GUI; falls back to "xterm" if it does not
+# >             start with "xterm"
+#}}}
+if [[ -n "${VIM_TERMINAL}" ]]; then
+  export TERM=xterm-256color
+fi
+
 # tldr {{{1
 
 # Configure the colors and styles of the output of `$ tldr`.
@@ -503,8 +478,8 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 # This is the case with `XDG_CONFIG_DIRS` and `XDG_DATA_DIRS`.
 # It can have undesired effects.
 # For example, these variables are used by Neovim to add some paths in its rtp.
-# If one day,  one of those paths  contain a filetype plugin, it  may be sourced
-# twice and lead to errors.
+# If one of them  contains a duplicate path, and we have  a Nvim filetype plugin
+# in it, the filetype plugin may be sourced twice which could raise errors.
 #
 # This  anonymous function  makes sure  that those  variables don't  contain any
 # duplicate entries.
@@ -528,6 +503,8 @@ export XDG_RUNTIME_DIR=/run/user/$UID
   #}}}
   local -A vars=( \
     [PATH]="${PATH}" \
+    [INFOPATH]="${INFOPATH}" \
+    [MANPATH]="${MANPATH}" \
     [XDG_CONFIG_DIRS]="${XDG_CONFIG_DIRS}" \
     [XDG_DATA_DIRS]="${XDG_DATA_DIRS}" \
     )

@@ -1,11 +1,13 @@
 #!/bin/bash
 
+# TODO: When do you need the `&` operator at the end of a command?
+
 mkdir -p /run/user/$UID/tmp
 
 # Autostart programs
 
 # conky
-"${HOME}/bin/conky-startup.sh"
+"${HOME}/bin/conky-startup.sh" &
 
 # redshift
 redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
@@ -51,11 +53,12 @@ redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
 #}}}
 xbanish &
 
-# Why don't you start `urxvt` anymore?{{{
+# Why don't you start urxvt anymore?{{{
 #
 #     /usr/bin/urxvt &
 #
-# Sometimes, the terminal is slightly too high for the desktop.
+# First, we don't use urxvt as our default terminal emulator anymore.
+# Second, sometimes, the terminal is slightly too high for the desktop.
 # I think the issue comes from it being started automatically.
 #}}}
 
@@ -64,7 +67,7 @@ xbanish &
 # Configure xterm. In  particular, make its  background identical to the  one in
 # urxvt (instead of black by default).
 #}}}
-xrdb -cpp "$(command -v cpp) -traditional-cpp" "${HOME}"/.Xresources
+xrdb -cpp "$(command -v cpp) -traditional-cpp" "${HOME}"/.Xresources &
 
-"${HOME}/.config/keyboard/setup.sh"
+"${HOME}/.config/keyboard/setup.sh" &
 

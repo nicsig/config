@@ -340,6 +340,7 @@ compinit
 #
 #     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command
 #}}}
+compdef environ=kill
 compdef ppa_what_have_i_installed=ppa_what_can_i_install
 compdef surfraw=sr
 # Why?{{{
@@ -772,6 +773,13 @@ zstyle ':completion:*' menu select=long
 zstyle ':completion:*' use-compctl false
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+# This zstyle is important to make our `$ environ` function be completed with *all* the running processes.{{{
+#
+# And not just the processes running in the current shell.
+# Found here: https://unix.stackexchange.com/a/281614/289772
+#}}}
+zstyle ':completion:*:processes' command 'ps -A'
+
 # Necessary to be able to move in a completion menu:
 #
 #     bindkey -M menuselect '^L' forward-char
@@ -1223,7 +1231,9 @@ environ() { #{{{2
 EOF
     return 64
   fi
-  sed 's/\x0/\n/g' "/proc/$1/environ"
+  # https://serverfault.com/a/66366
+  tr '\0' '\n' </proc/$1/environ
+  # Alternative: `sed 's/\x0/\n/g' "/proc/$1/environ"`
 }
 
 expand_this() { #{{{2
@@ -3498,11 +3508,11 @@ _fzf_snippet_placeholder() {
     #
     # A variable storing the delimiter used in the next sed command.
     #}}}
-    # What value do you assign it?{{{
+    #   Which value do you assign it?{{{
     #
     # A literal ‘C-a’.
     #}}}
-    # Why this particular value?{{{
+    #     Why this particular value?{{{
     #
     # We don't know what will be in the placeholder.
     # It will contain user data, i.e. whatever  we write in the placeholder of a
@@ -4572,13 +4582,13 @@ fi
 
 # Syntax Highlighting {{{1
 
-# The colors are different in a Vim or Nvim terminal.{{{
+# The colors are different in a Nvim terminal.{{{
 #
-# That's because they use a different palette.
+# That's because Nvim uses a different palette when 'tgc' is set.
 # For example, atm, we use the color 168 to highlight function names.
-# Run `$  palette` in your regular  terminal, then start gpick  and position the
+# Run `$  palette` in your regular  terminal, then start Gpick  and position the
 # cursor on the color 168.
-# Repeat the process, but this time run `$ palette` in (N)Vim's terminal.
+# Repeat the process, but this time run `$ palette` in Nvim's terminal.
 # Compare the hexcodes: they'll be different.
 #}}}
 
@@ -4635,8 +4645,7 @@ ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=black'
 
 
 # We can use decimal code colors from this link:
-#
-#     https://jonasjacek.github.io/colors/
+# https://jonasjacek.github.io/colors/
 #
 # We want some tokens colored in yellow by default, to be bold and more
 # readable on a light palette:
