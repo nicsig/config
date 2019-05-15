@@ -9015,8 +9015,6 @@ endfu
 
 
 
-
-
 fu! s:yank(text) abort
     " What's this `yank` ?{{{
     "

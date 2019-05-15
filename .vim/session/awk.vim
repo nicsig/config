@@ -22,6 +22,7 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -615,7 +616,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -627,12 +629,12 @@ setlocal fdn=20
 setlocal fen
 227
 normal! zo
-let s:l = 229 - ((0 * winheight(0) + 0) / 1)
+let s:l = 263 - ((21 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-229
-normal! 0
+263
+normal! 09|
 lcd ~/wiki/tmux
 wincmd w
 argglobal
@@ -651,11 +653,90 @@ normal! zo
 normal! zo
 245
 normal! zo
+577
+normal! zo
+584
+normal! zo
+638
+normal! zo
 866
 normal! zo
 877
 normal! zo
-let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+938
+normal! zo
+976
+normal! zo
+1065
+normal! zo
+1249
+normal! zo
+1251
+normal! zo
+1257
+normal! zo
+1262
+normal! zo
+let s:l = 438 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+438
+normal! 0
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+tabnext
+edit ~/wiki/shell/environment.md
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+argglobal
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+241
+normal! zo
+let s:l = 247 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+247
+normal! 044|
+lcd ~/wiki/shell
+wincmd w
+argglobal
+if bufexists("~/.zshenv") | buffer ~/.zshenv | else | edit ~/.zshenv | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+109
+normal! zo
+174
+normal! zo
+109
+normal! zc
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -664,11 +745,11 @@ normal! 0
 lcd ~/.vim
 wincmd w
 2wincmd w
-wincmd =
-tabnext 12
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext 13
 set stal=1
 badd +1 ~/Desktop/countries
-badd +249 ~/wiki/tmux/tmux.md
 badd +963 ~/wiki/awk/sed.md
 badd +2 ~/wiki/man/examples/pathfind.1
 badd +111 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
@@ -679,6 +760,7 @@ badd +103 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
 badd +258 ~/bin/upp.sh
 badd +241 ~/bin/restore-env.sh
 badd +3 ~/bin/yank
+badd +249 ~/wiki/tmux/tmux.md
 badd +4486 ~/wiki/awk/awk.md
 badd +99 ~/wiki/man/man.md
 badd +78 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -689,7 +771,9 @@ badd +1 ~/wiki/vim/install.md
 badd +80 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +22 ~/wiki/shell/script.md
 badd +337 ~/Desktop/bug.md
-badd +417 ~/.tmux.conf
+badd +1 ~/.tmux.conf
+badd +241 ~/wiki/shell/environment.md
+badd +483 ~/.zshenv
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -171,14 +171,25 @@ export LESS=iMRS+G
 #
 # For more information, see `$ man lesspipe` or `$ man lessopen`.
 #}}}
-eval "$(lesspipe)"
+# Why the guard?{{{
+#
+# The `$ eval` has a big impact on performance.
+# You can measure it with this command:
+#
+#     $ time zsh -c 'repeat 1000 source ~/.zshenv'
+#}}}
+if [[ -z "${LESSOPEN}" ]]; then
+  eval "$(lesspipe)"
+fi
 
 # ls {{{1
 
 # Ask `$  dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
 # `$LS_COLORS`.
 # The latter controls the colors in the output of `$ ls --color`.
-eval "$(dircolors "${HOME}/.dircolors")"
+if [[ -z "${LS_COLORS}" ]]; then
+  eval "$(dircolors "${HOME}/.dircolors")"
+fi
 
 # man {{{1
 
