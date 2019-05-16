@@ -1540,7 +1540,12 @@ if !has('gui_running') && has('vim_starting')
     " so that the statusline  is correctly drawn even if we  press `:` very fast
     " after (Neo)Vim has been started.
     "}}}
-    au CursorHold,InsertEnter,CmdlineEnter * ++once sil! set lazyredraw
+    unlet! s:one_shot
+    au CursorHold,InsertEnter,CmdlineEnter * ++once
+        \ if get(s:, 'one_shot', 1)
+        \ |     let s:one_shot = 0
+        \ |     set lazyredraw
+        \ | endif
 endif
 
 " match (showmatch / matchtime) {{{2
@@ -2109,7 +2114,6 @@ if has('vim_starting') && !has('nvim') && &term =~# '-256color$\|^xterm-kitty$'
   set t_ut=
 endif
 " }}}2
-
 " tags {{{2
 
 " When searching the tags file, ignore the case unless an upper case letter is used.
@@ -3686,6 +3690,7 @@ fu! s:gx_shellcheck() abort
     " `:ShellCheckWiki` is defined only in a shell buffer (i.e. in the previous window).
     wincmd p
     exe 'ShellCheckWiki' . error_number
+    wincmd p
 endfu
 
 " |g         grep word under cursor / visual selection {{{4
@@ -4413,6 +4418,12 @@ fu! s:easy_and_custom_paste() abort
     if &ft is# 'markdown'
         let @+ = substitute(@+, '’', "'", 'g')
         let @+ = substitute(@+, '\w\zs \ze, \w', '', 'g')
+        if @+ =~# 'http'
+            augroup test_sth
+                au!
+                au TextChanged * s/^\s*\zshttp.*/<&>/e | au! test_sth
+            augroup END
+        endif
     endif
     let @+ = substitute(@+, '٪', '$', 'g')
     return '"+'

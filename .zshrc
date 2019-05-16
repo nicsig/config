@@ -16,10 +16,10 @@ bindkey -e
 # “stop sending data“, “continue sending“.
 #
 # Explanations:
-#         http://unix.stackexchange.com/a/12108/125618
-#         http://unix.stackexchange.com/a/12146/125618
-#         http://unix.stackexchange.com/a/72092/125618
-#         https://en.wikipedia.org/wiki/Software_flow_control
+# http://unix.stackexchange.com/a/12108/125618
+# http://unix.stackexchange.com/a/12146/125618
+# http://unix.stackexchange.com/a/72092/125618
+# https://en.wikipedia.org/wiki/Software_flow_control
 #}}}
 stty -ixon
 # disable SIGQUIT signal

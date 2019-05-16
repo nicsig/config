@@ -53,7 +53,7 @@
 !     Is it enough?{{{
 !
 ! No.
-! Certain characters, such as ``, are still not displayed.
+! Certain characters, such as `🤔`, are still not displayed.
 !
 ! Try also to read this page in a Vim buffer:
 ! https://salsa.debian.org/printing-team/cups/raw/debian/master/cups/utf8demo.txt
