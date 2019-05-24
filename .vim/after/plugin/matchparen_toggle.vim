@@ -22,25 +22,81 @@ endif
 if exists('g:loaded_matchparen')
     " command defined in `$VIMRUNTIME/plugin/matchparen.vim`
     NoMatchParen
-
-    " We need to always have at least one autocmd listening to `CursorMoved`.
+    " We need to always have at least one autocmd listening to `CursorMoved`.{{{
+    "
     " Otherwise, Vim may detect the motion of the cursor too late.
+    "
     " For an explanation of the issue, see:
-    "         https://github.com/vim/vim/issues/2053#issuecomment-327004968
-    augroup default_cursor_moved
-        au!
-        au CursorMoved * "
-        "                │
-        "                └─ just execute a commented line
-        "                   does nothing, but is just enough to register an
-        "                   autocmd listening to `CursorMoved`
-    augroup END
-
+    " https://github.com/vim/vim/issues/2053#issuecomment-327004968
+    "
+    " Although, I don't think it really explains the issue...
+    "}}}
+    "   Same thing for `TextChanged`.{{{
+    "
+    " MWE:
+    "
+    "     $ cat <<'EOF' >/tmp/vimrc
+    "     nno <expr> "" Func()
+    "     fu! Func() abort
+    "         augroup format_automatic_link
+    "             au!
+    "             au TextChanged * s/^\s*\zshttp.*/<&>/e | au! format_automatic_link
+    "         augroup END
+    "         return '"+'
+    "     endfu
+    "     au VimEnter * exe 'au! matchparen' | au! my_default_autocmds
+    "     EOF
+    "
+    " The purpose  of this vimrc is  to automatically surround a  url with angle
+    " brackets to format  it as a markdown  link, when you paste  it by pressing
+    " `""p`.
+    "
+    "     $ vim -Nu /tmp/vimrc +'let @+ = "http://www.example.com"'
+    "     ""p
+    "     <http://www.example.com>~
+    "     ✔
+    "
+    "     u
+    "     ""p
+    "     http://www.example.com~
+    "     ✘
+    "
+    " To reproduce  the issue, before  pressing `""p`,  run `:au` and  make sure
+    " there's no autocmd listening to `TextChanged` in there.
+    "}}}
+    "   Why also `CursorMovedI`, `WinEnter` and `TextChangedI`?{{{
+    "
+    " The matchparen plugin also installs autocmds listening to these events.
+    " If we disable  the plugin, I want  to be sure that there's  still at least
+    " one autocmd listening to each of them.
+    " Otherwise, we could encounter bugs which  are hard to understand, and that
+    " other people can't reproduce.
+    "}}}
+    let events = [
+                 \ 'CursorMoved',
+                 \ 'CursorMovedI',
+                 \ 'WinEnter',
+                 \ 'TextChanged',
+                 \ 'TextChangedI',
+                 \ ]
+    for event in events
+        if !exists('#' . event)
+            augroup my_default_autocmds
+                " An empty commented  line does nothing, so will  have a minimal
+                " impact  on Vim's  performance, but  is enough  to register  an
+                " autocmd listening to a given event.
+                exe 'au! ' . event . ' * "'
+            augroup END
+        endif
+    endfor
 else
-    " We remove the autocmd before `:DoMatchParen`, because if the latter raises
-    " an error, the function would abort, and our autocmd wouldn't be removed.
-    au! default_cursor_moved
-    aug! default_cursor_moved
+    " Why `silent!`?{{{
+    "
+    " If an error is raised, `abort` would make the function stop.
+    " We want the function to process all the code.
+    "}}}
+    sil! au! my_default_autocmds
+    sil! aug! my_default_autocmds
     noa DoMatchParen
 endif
 

@@ -25,6 +25,10 @@
 DEBUG=0
 DEBUG_LOGFILE=/tmp/debug
 
+# TODO: Add support for updating the python interpreter.
+# Updating the latter may help when you have issues to install packages with pip
+# (including pip itself).
+
 # TODO: Add python (+ruby?) integration for Neovim.
 # And maybe use update-alternatives to make Neovim our default editor in the future.
 
@@ -879,6 +883,9 @@ install_dependencies() { #{{{2
       ruby-dev
   elif [[ "${PGM}" == 'nvim' ]]; then
     aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
+  elif [[ "${PGM}" == 'tmux' ]]; then
+    # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
+    aptitude install bison debhelper autotools-dev dh-autoreconf file libncurses5-dev libevent-dev pkg-config libutempter-dev build-essential
   fi
 }
 

@@ -2959,10 +2959,6 @@ alias what_is_my_ip='curl ifconfig.me'
 
 alias xbindkeys_restart='killall xbindkeys; xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"'
 
-# zsh_prof {{{3
-
-alias zsh_prof='repeat 10 time zsh -i -c exit'
-
 # zsh_sourcetrace {{{3
 
 # get the list of files sourced by zsh
@@ -2970,6 +2966,10 @@ alias zsh_sourcetrace='zsh -o sourcetrace'
 #                           ├────────────┘
 #                           └ start a new zsh shell, enabling the 'sourcetrace' option
 #                             see `man zshoptions` for a description of the option
+
+# zsh_startup {{{3
+
+alias zsh_startup='repeat 10 time zsh -i -c exit'
 
 # }}}2
 # global {{{2

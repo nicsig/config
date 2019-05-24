@@ -99,7 +99,8 @@ augroup filetypedetect
     " Source: https://github.com/DaveDavenport/rofi/wiki/Themes
     au! BufRead,BufNewFile *.rasi setf css
 
-    au! BufRead,BufNewFile $HOME/.tmux/terminal-overrides.conf setf tmux
+    au! BufRead,BufNewFile $HOME/.tmux/*.conf setf tmux
+    au! BufRead,BufNewFile $HOME/.tmux/plugins_config/* setf tmux
 
     " ~/.vim/tmp/websearch
     au! BufRead,BufNewFile websearch setf websearch

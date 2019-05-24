@@ -1,0 +1,9 @@
+set -g @fingers-key f
+# Why? {{{
+#
+# The main key binding of tmux-fingers is by default `pfx F`.
+# I prefer `pfx f`, because it's easier to type.
+# But the latter  is already bound to `find-window`, so  we rebind `find-window`
+# to `pfx F`.
+# }}}
+bind -T prefix F command-prompt "find-window -Z -- '%%'"

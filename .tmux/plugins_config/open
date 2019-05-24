@@ -1,0 +1,13 @@
+# Open a visually selected text (file path or url) by pressing `x`.
+# The default is `o`, which is confusing because of the semantic of `v_o` in Vim.
+set -g @open 'x'
+# Search a visually selected text on google by pressing `S`.
+# You're not limited to a single search engine!{{{
+#
+# You can define as many key bindings as you want, to search on several engines:
+#
+#     set -g @open-B 'https://www.bing.com/search?q='
+#}}}
+set -g @open-S 'https://www.google.com/search?q='
+# Open the visually selected file path in Vim.
+set -g @open-editor 'C-x'

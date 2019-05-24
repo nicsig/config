@@ -1063,32 +1063,6 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
     return ''
 endfu
 
-fu! myfuncs#remove_duplicate_lines(line1, line2) abort "{{{1
-    let view = winsaveview()
-
-    " Iterate over the lines in the range, from the last one up to the first
-    " one (to avoid having to take into account a change of address when a line
-    " is deleted).
-    " The goal of each iteration is to determine whether the line is unique,
-    " and delete it when it's not.
-    let p = a:line2
-    while p > a:line1
-        " Iterate over the lines from the first in the range, up to line `p`.
-        " The goal of each iteration is to compare line `p` to a previous line.
-        let q = a:line1
-        while q < p
-            if getline(p) is# getline(q)
-                exe p.'d_' | break
-            endif
-            let q += 1
-        endwhile
-        let p -= 1
-    endwhile
-
-    call winrestview(view)
-    return ''
-endfu
-
 fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     let mods = 'sil keepj keepp'
