@@ -102,7 +102,7 @@ augroup filetypedetect
     au! BufRead,BufNewFile $HOME/.tmux/*.conf setf tmux
     au! BufRead,BufNewFile $HOME/.tmux/plugins_config/* setf tmux
 
-    " ~/.vim/tmp/websearch
-    au! BufRead,BufNewFile websearch setf websearch
+    au! BufRead,BufNewFile ~/.vim/tmp/websearch setf websearch
+    au! BufRead,BufNewFile ~/.vim/tmp/tmux_prompt setf tmux_prompt
 augroup END
 

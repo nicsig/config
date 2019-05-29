@@ -19,12 +19,42 @@
 
 # Create temporary directory for tmux log files.
 run '[ -d $XDG_RUNTIME_DIR/tmux ] || mkdir $XDG_RUNTIME_DIR/tmux'
-set -g @logging_key 'G'
-set -g @screen-capture-key 'M-g'
-set -g @save-complete-history-key 'M-G'
+
+# What are the default key bindings installed by tmux-logging?{{{
+#
+#    ┌─────┬───────────────────────┐
+#    │ p   │ toggle logging        │
+#    ├─────┼───────────────────────┤
+#    │ M-p │ screen capture        │
+#    ├─────┼───────────────────────┤
+#    │ M-P │ save complete history │
+#    └─────┴───────────────────────┘
+#}}}
+#   How can they be configured?{{{
+#
+#     set -g @logging_key 'key1'
+#     set -g @screen-capture-key 'key2'
+#     set -g @save-complete-history-key 'key3'
+#}}}
+# What is this key binding? {{{
+#
+# It displays  a menu to  let us choose  which one of  the three scripts  of the
+# tmux-logging plugin we want to run.
+# }}}
+#   Why do you do that?{{{
+#
+# Well, *one* key binding is easier to remember than *three*.
+# Besides, it frees up keys for future key bindings.
+#}}}
+bind g display-menu -x P -y P \
+    'toggle logging' a { run ~/.tmux/plugins/tmux-logging/scripts/toggle_logging.sh } \
+    'save complete history' b { run ~/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh } \
+    'screen capture' c { run ~/.tmux/plugins/tmux-logging/scripts/screen_capture.sh }
+
 set -g @logging-path "$XDG_RUNTIME_DIR/tmux"
 set -g @logging-filename '#S-#W-%H%M%S.log'
 set -g @screen-capture-path "$XDG_RUNTIME_DIR/tmux"
 set -g @screen-capture-filename 'capture-#S-#W-%H%M%S.log'
 set -g @save-complete-history-path "$XDG_RUNTIME_DIR/tmux"
 set -g @save-complete-history-filename 'history-#S-#W-%H%M%S.log'
+

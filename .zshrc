@@ -1,3 +1,16 @@
+# When we debug tmux, we want a minimum amount of code to be sourced.{{{
+#
+# For example, the  syntax highlighting plugin may badly interfere  if we attach
+# to tmux via gdb.
+#}}}
+if [[ -n "${TMUX}" && -z "${TMUX_IS_CUSTOMIZED}" ]]; then
+  . "${HOME}/.zsh/minimal_zshrc.zsh"
+  return
+fi
+
+# Make sure we always have a core file, whenever a pgm crashes because of a hard-to-reproduce issue.
+ulimit -c unlimited
+
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
 #
@@ -1930,7 +1943,7 @@ nv() { #{{{2
   #                             │  By default, when we execute:
   #                             │          vim --remote file
   #                             │
-  #                             │  … without `--servername`, Vim tries to open `file` in a Vim server
+  #                             │  ... without `--servername`, Vim tries to open `file` in a Vim server
   #                             │  whose name is VIM.
   #                             │  So, we'll use this name for our default server.
   #                             │  This way, we won't have to specify the name of the server later.
@@ -2031,9 +2044,9 @@ nv() { #{{{2
       #                                 ┌─ Why not $@?
       #                                 │  $@ would be expanded into:
       #                                 │
-      #                                 │      '$1' '$2' …
+      #                                 │      '$1' '$2' ...
       #                                 │
-      #                                 │  … but `system()` expects a single string.
+      #                                 │  ... but `system()` expects a single string.
       #                                 │
       vim --remote-send ":cexpr system('$*')<cr>"
 
@@ -3884,12 +3897,12 @@ bindkey '^Xh' describe-key-briefly
 __fancy_ctrl_z() {
   emulate -L zsh
 
-  # if the current line is empty …
+  # if the current line is empty ...
   if [[ $#BUFFER -eq 0 ]]; then
   #     │
-  #     └─ size of the buffer
+  #     └ size of the buffer
     bg
-    # … redisplay the edit buffer (to get rid of a message)
+    # ... redisplay the edit buffer (to get rid of a message)
     zle redisplay
     # Without `zle redisplay`, when we hit `C-z` while the command line is empty,
     # we would always have an annoying message:
@@ -4350,8 +4363,8 @@ bindkey -M isearch ' ' self-insert
 # Without the previous:
 #     bindkey -M isearch " " self-insert
 #
-# … as soon as we would type a space in a search, we would leave the latter and
-# go back to the regular command line.
+# ... as soon  as we would type a  space in a search, we would  leave the latter
+# and go back to the regular command line.
 
 # Options {{{1
 # Never use `setopt` to unset an option.{{{
@@ -4579,143 +4592,11 @@ fi
 # No subprocess could understand it.
 #     https://stackoverflow.com/a/1158231/9780968
 # precmd_functions=(__restart_vim)
+# }}}1
 
-# Syntax Highlighting {{{1
-
-# The colors are different in a Nvim terminal.{{{
-#
-# That's because Nvim uses a different palette when 'tgc' is set.
-# For example, atm, we use the color 168 to highlight function names.
-# Run `$  palette` in your regular  terminal, then start Gpick  and position the
-# cursor on the color 168.
-# Repeat the process, but this time run `$ palette` in Nvim's terminal.
-# Compare the hexcodes: they'll be different.
-#}}}
-
-# customize default syntax highlighting
-#
-#     zle_highlight=(paste:fg=yellow,underline region:fg=yellow suffix:bold)
-#                    │                         │                │                                 v
-#                    │                         │                └ some suffix characters (Document/)
-#                    │                         │                                                  ^
-#                    │                         └ the region between the cursor and the mark
-#                    │
-#                    └ what we paste with C-S-v
-
-# Source the plugin `zsh-syntax-highlighting`:
-#     https://github.com/zsh-users/zsh-syntax-highlighting
-
-[[ -f ${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
-. "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-
-# Choose which highlighters we want to enable:
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
-# Warning: don't enable the `cursor` highlighter, because it doesn't seem to
-# play nicely with `brackets`. The readline motions (M-b, M-f), and the editing
-# become weird.
-
-# The configuration of the plugin is written in an associative array,
-# stored in a variable called `ZSH_HIGHLIGHT_STYLES`.
-# Declare the latter
-typeset -A ZSH_HIGHLIGHT_STYLES
-
-##################################
-# Styles from `main` highlighter #
-##################################
-
-# we want some tokens to be colored in black, so that they're readable with
-# a light palette
-# FIXME:
-# rewrite this block of lines with a `for` loop to avoid repetition,
-# and to provide future scaling if we need to apply the same style (`fg=black`)
-# to other tokens
-ZSH_HIGHLIGHT_STYLES[assign]='fg=black'
-# `backtick expansion`
-ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=black'
-# command separators (; && …)
-ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=black'
-ZSH_HIGHLIGHT_STYLES[default]='fg=black'
-# **/*.txt
-ZSH_HIGHLIGHT_STYLES[globbing]='fg=black'
-# echo foo >file
-ZSH_HIGHLIGHT_STYLES[redirection]='fg=black'
-# short and long options (ex: -o, --long-option)
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=black'
-ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=black'
-
-
-# We can use decimal code colors from this link:
-# https://jonasjacek.github.io/colors/
-#
-# We want some tokens colored in yellow by default, to be bold and more
-# readable on a light palette:
-ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=137,bold'
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=137,bold'
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=137,bold'
-
-
-
-# differentiate aliases and functions from other types of command
-ZSH_HIGHLIGHT_STYLES[alias]='fg=magenta,bold'
-ZSH_HIGHLIGHT_STYLES[function]='fg=168,bold'
-#                                  │{{{
-#                                  └ press `1!s` on a builtin zsh command in this file,
-#                                  and you'll see that the syntax element is linked to
-#                                  the `Keyword` HG, which currently uses the color 168.
-#}}}
-
-# have valid paths colored
-ZSH_HIGHLIGHT_STYLES[path]='fg=cyan'
-
-# The `main` highlighter recognizes many other tokens.
-# For the full list, read:
-# https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/main.md
-
-######################################
-# Styles from `brackets` highlighter #
-######################################
-
-# Define the styles for nested brackets up to level 4.
-ZSH_HIGHLIGHT_STYLES[bracket-level-1]='fg=blue,bold'
-ZSH_HIGHLIGHT_STYLES[bracket-level-2]='fg=magenta,bold'
-ZSH_HIGHLIGHT_STYLES[bracket-level-3]='fg=202,bold'
-ZSH_HIGHLIGHT_STYLES[bracket-level-4]='fg=green,bold'
-# test it against this command:
-#
-#     echo (foo (bar (baz (qux))))
-
-#####################################
-# Styles from `pattern` highlighter #
-#####################################
-
-# Color in red commands beginning with some chosen pattern:
-ZSH_HIGHLIGHT_PATTERNS+=('rm -rf *' 'fg=white,bold,bg=red')
-
-# This works because we enabled the `pattern` highlighter.
-# The syntax of the assignment is:
-# ZSH_HIGHLIGHT_PATTERNS+=('shell cmd' 'style')
-#                           │           │
-#                           │           └ 2nd string
-#                           └ 1st string
-
-# Here are some more configurations, that are commented because they're already
-# enabled by default; change them as you see fit:
-#
-#                                   ┌ ✘ FIXME: don't work when we change the value to `bg=blue`; why?
-#                                   │          maybe because the appearance of the cursor is overridden by urxvt
-#     ZSH_HIGHLIGHT_STYLES[cursor]='standout'
-#     ZSH_HIGHLIGHT_STYLES[bracket-error]='fg=red,bold'
-#     ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='standout'
-#     ZSH_HIGHLIGHT_STYLES[line]='bold'      # require the `line` highlighter to be enabled
-#     ZSH_HIGHLIGHT_STYLES[root]='bg=red'
-#
-# For the root highlighter to work, we must write the 3 following lines in
-# /root/.zshrc (as root obviously):
-#
-#     . "$HOME/GitRepos/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-#     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main root)
-#     ZSH_HIGHLIGHT_STYLES[root]='bg=red'
-#}}}1
+if [[ -z "${NO_SYNTAX_HIGHLIGHTING}" ]]; then
+  . "${HOME}/.zsh/syntax_highlighting.zsh"
+fi
 
 # TO_DO {{{1
 

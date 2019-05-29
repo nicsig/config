@@ -1,9 +1,22 @@
-set -g @fingers-key f
-# Why? {{{
-#
 # The main key binding of tmux-fingers is by default `pfx F`.
 # I prefer `pfx f`, because it's easier to type.
-# But the latter  is already bound to `find-window`, so  we rebind `find-window`
-# to `pfx F`.
-# }}}
+# https://github.com/Morantron/tmux-fingers#fingers-key
+set -g @fingers-key f
+# `pfx f` was bound to `find-window`, so we rebind the latter to `pfx F`.
 bind -T prefix F command-prompt "find-window -Z -- '%%'"
+
+# If I press the hint in uppercase, don't just copy the text, paste it immediately.
+# https://github.com/Morantron/tmux-fingers#fingers-copy-command-uppercase
+set -g @fingers-copy-command-uppercase 'tmux paste-buffer -p'
+
+# set the style of the hints
+# https://github.com/Morantron/tmux-fingers#fingers-hint-format
+# https://github.com/Morantron/tmux-fingers#fingers-hint-format-nocompact
+set -g @fingers-hint-format '#[fg=blue,bold]%s'
+set -g @fingers-hint-format-nocompact '#[fg=blue,bold][%s]'
+# set the style of the highlighted matches
+# https://github.com/Morantron/tmux-fingers#fingers-highlight-format
+# https://github.com/Morantron/tmux-fingers#fingers-highlight-format-nocompact
+set -g @fingers-highlight-format '#[fg=red,bold,dim]%s'
+set -g @fingers-highlight-format-nocompact '#[fg=red,bold,dim]%s'
+

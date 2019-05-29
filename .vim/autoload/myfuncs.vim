@@ -1,3 +1,47 @@
+fu! myfuncs#after_tmux_capture_pane() abort "{{{1
+    " Purpose:{{{
+    "
+    " This function is called by our tmux key binding `pfx /`.
+    "
+    " It makes tmux copy the contents of the pane, from the start of the history
+    " down to the end of the visible pane, in a tmux buffer.
+    " Then, it makes Nvim read this tmux buffer.
+    "
+    " If you create a new tmux window and run `$ ls ~`, the tmux buffer contains
+    " a lot of empty lines at the bottom; we don't want them.
+    "
+    " Besides, the tmux buffer contains a lot of trailing whitespace, because we
+    " need to pass `-J` to `capture-pane`; we don't want them either.
+    "
+    " This function  tries to remove  all trailing whitespace, and  all trailing
+    " empty lines at the end of the Nvim buffer.
+    "
+    " ---
+    "
+    " Also, it tries to  ease the process of copying text  in Nvim, then pasting
+    " it in the shell; see the one-shot autocmd at the end.
+    "}}}
+
+    " Unfold everything, otherwise the next `delete` command may delete too many lines.{{{
+    "
+    " To see the issue, without `norm! zR`, press `pfx /` after `$ cat ~/.zshrc`,
+    " then press `u` in Nvim.
+    "}}}
+    norm! zR
+    TW
+    $
+    call search('^\S', 'b')
+    sil! keepj keepp .,$g/^\s*$/d_
+
+    " Write the  unnamed register in the  X clipboard selection, so  that we can
+    " copy sth in Nvim without the `""`  prefix, and paste it in the shell after
+    " quitting Nvim.
+    au VimLeave <buffer> ++once
+        \   if executable('xclip') && strlen(@") != 0 && strlen(@") <= 999
+        \ |     call system('xclip -selection clipboard', @")
+        \ | endif
+endfu
+
 fu! myfuncs#align_with_beginning(type) abort "{{{1
     exe 'left '.indent(line('.')+s:align_with_beginning_dir)
 endfu
@@ -1187,6 +1231,72 @@ fu! s:search_todo_text(dict) abort
     return dict
 endfu
 
+fu! myfuncs#tab_toc() abort "{{{1
+    if index(['help', 'man', 'markdown'], &ft) ==# -1
+        return
+    endif
+
+    let patterns = {
+        \ 'man'     : '\S\zs',
+        \ 'markdown': '\v^%(#+)?\S.\zs',
+        \ 'help'    : '\S\ze\*$\|^\s*\*\zs\S',
+        \ }
+
+    let syntaxes = {
+        \ 'man'     : 'heading\|title',
+        \ 'markdown': 'markdownH\d\+',
+        \ 'help'    : 'helpHyperTextEntry\|helpStar',
+        \ }
+
+    let toc = []
+    for lnum in range(1, line('$'))
+        let col = match(getline(lnum), patterns[&ft])
+        if col !=# -1 && synIDattr(synID(lnum, col, 0), 'name') =~? syntaxes[&ft]
+            let text = substitute(getline(lnum), '\s\+', ' ', 'g')
+            call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
+        endif
+   endfor
+
+    " Why do we call `setloclist()` 2 times? {{{
+
+    " To set the title of the location window, we must pass the dictionary
+    " `{'title': 'TOC'}` as a fourth argument to `setloclist()`.
+    " But when we pass a fourth argument, the list passed as a 2nd argument is
+    " ignored. No item in this list will populate the location list.
+    "
+    " So, the purpose of the first call to `setloclist()` is to populate the
+    " location list.
+    " The purpose of the second call is to set the title of the location
+    " window.
+    "
+    " In the 2nd call, the empty list and the `a` flag are not important.
+    " We could replace them with resp. any list and the `r` flag, for example.
+    " But we choose the empty list `[]` and the `a` flag, because it makes the
+    " code more readable. Indeed, since we only set the title of the window,
+    " and nothing in the list changes, it's as if we were adding/appending an
+    " empty list.
+    "
+    "}}}
+    call setloclist(0, toc)
+    call setloclist(0, [], 'a', {'title': 'TOC'})
+
+    let is_help_file = &bt is# 'help'
+
+    " The width of the current window is going to be reduced by the TOC window.
+    " Long lines may be wrapped. I don't like wrapped lines.
+    setl nowrap
+
+    do <nomodeline> QuickFixCmdPost lwindow
+    if &bt isnot# 'quickfix'
+        return
+    endif
+
+    if is_help_file
+        call qf#set_matches('myfuncs:tab_toc', 'Conceal', '\*')
+        call qf#create_matches()
+    endif
+endfu
+
 " tmux_{current|last}_command {{{1
 
 fu! myfuncs#tmux_current_command(cmd, ...) abort
@@ -1360,72 +1470,6 @@ endfu
 "         echohl None
 "     endtry
 " endfu
-
-fu! myfuncs#tab_toc() abort "{{{1
-    if index(['help', 'man', 'markdown'], &ft) ==# -1
-        return
-    endif
-
-    let patterns = {
-        \ 'man'     : '\S\zs',
-        \ 'markdown': '\v^%(#+)?\S.\zs',
-        \ 'help'    : '\S\ze\*$\|^\s*\*\zs\S',
-        \ }
-
-    let syntaxes = {
-        \ 'man'     : 'heading\|title',
-        \ 'markdown': 'markdownH\d\+',
-        \ 'help'    : 'helpHyperTextEntry\|helpStar',
-        \ }
-
-    let toc = []
-    for lnum in range(1, line('$'))
-        let col = match(getline(lnum), patterns[&ft])
-        if col !=# -1 && synIDattr(synID(lnum, col, 0), 'name') =~? syntaxes[&ft]
-            let text = substitute(getline(lnum), '\s\+', ' ', 'g')
-            call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
-        endif
-   endfor
-
-    " Why do we call `setloclist()` 2 times? {{{
-
-    " To set the title of the location window, we must pass the dictionary
-    " `{'title': 'TOC'}` as a fourth argument to `setloclist()`.
-    " But when we pass a fourth argument, the list passed as a 2nd argument is
-    " ignored. No item in this list will populate the location list.
-    "
-    " So, the purpose of the first call to `setloclist()` is to populate the
-    " location list.
-    " The purpose of the second call is to set the title of the location
-    " window.
-    "
-    " In the 2nd call, the empty list and the `a` flag are not important.
-    " We could replace them with resp. any list and the `r` flag, for example.
-    " But we choose the empty list `[]` and the `a` flag, because it makes the
-    " code more readable. Indeed, since we only set the title of the window,
-    " and nothing in the list changes, it's as if we were adding/appending an
-    " empty list.
-    "
-    "}}}
-    call setloclist(0, toc)
-    call setloclist(0, [], 'a', {'title': 'TOC'})
-
-    let is_help_file = &bt is# 'help'
-
-    " The width of the current window is going to be reduced by the TOC window.
-    " Long lines may be wrapped. I don't like wrapped lines.
-    setl nowrap
-
-    do <nomodeline> QuickFixCmdPost lwindow
-    if &bt isnot# 'quickfix'
-        return
-    endif
-
-    if is_help_file
-        call qf#set_matches('myfuncs:tab_toc', 'Conceal', '\*')
-        call qf#create_matches()
-    endif
-endfu
 
 " trans {{{1
 
@@ -1691,7 +1735,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 
     exe 'vert res '.(max(map(getline(1, '$'), {i,v -> strchars(v, 1)}))+4)
 
-    nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
+    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
     exe winnr('#').'windo call winrestview(view)'
 endfu
 

@@ -2,6 +2,8 @@ sudo dpkg -i --force-overwrite {{package}}.deb # force package installation
 
 for f in *; do echo cp "${{f}}" "${{{f}.bak}}";done # backup files
 
+gdb -n -ex 'thread apply all bt full' -batch {{/path/to/tmux}} {{/path/to/core}} >~/backtrace.txt # get backtrace after tmux crash
+
 gpg --verify {{file.tar.xz}}.sig {{file.tar.xz}}
 gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
@@ -15,7 +17,10 @@ strace -o {{/tmp/log}} {{cmd}} # run a command, and trace the new process
 strace -o {{/tmp/log}} -p $(pidof {{cmd}}) # trace an existing process; run `less +F /tmp/log` to read it
 strace -o {{/tmp/log}} -e trace={file|open|read} {{cmd}} # trace a command, but only some system calls
 
-tmux -L test -f /tmp/tmux.conf new # run a new tmux instance, with custom config
+NO_SYNTAX_HIGHLIGHTING=yes exec zsh
+
+tmux -Ltest -f/tmp/tmux.conf new # run a new tmux instance, with custom config
+tmux -Ltest -f/dev/null new # run a new tmux instance, with no config
 
 vboxmanage unregistervm {{ubuntu}} --delete # delete VM
 vboxmanage controlvm {{ubuntu}} pause # pause VM

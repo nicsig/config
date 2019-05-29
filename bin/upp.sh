@@ -401,7 +401,33 @@ configure() { #{{{2
     # So,  I use  the  least restrictive  regex  to match  as  many versions  as
     # possible.
     #}}}
-    sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac
+    #     sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac
+    # TODO: We've commented the line for the moment.{{{
+    #
+    # Indeed, we have an issue where tmux crashes.
+    # We need to get a core file, then extract a backtrace from it, with relevant info.
+    # Right now, the backtrace that I extract doesn't contain relevant info, and
+    # I think that's because we've manipulated tmux version.
+    #
+    # I think you should stop modifying the version.
+    # But you'll have to run:
+    #
+    #     $ rg least ~/.tmux/plugins
+    #
+    # And remove all the `if tmux-is-at-least` or `tmux_is_at_least` guards.
+    # Write a sed script to do it automatically.
+    #
+    # Also, maybe you should remove tpm, to avoid overwriting your local changes.
+    # Just subscribe  to the rss feeds  of the few  tmux plugins you use,  to be
+    # notified of a possible useful update.
+    # If you do so, try to install a  git hook to automatically call our new sed
+    # script which removes the guards, whenever we `$ git pull`.
+    #
+    # ---
+    #
+    # Once you've taken  a decision, update our  notes in `~/wiki/tmux/tmux.md`,
+    # in the `# Debugging` section.
+    #}}}
     sh autogen.sh
     ./configure
 
