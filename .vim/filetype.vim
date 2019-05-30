@@ -102,7 +102,18 @@ augroup filetypedetect
     au! BufRead,BufNewFile $HOME/.tmux/*.conf setf tmux
     au! BufRead,BufNewFile $HOME/.tmux/plugins_config/* setf tmux
 
+    " Do *not* name the filetype `tmux_prompt`!{{{
+    "
+    " It would  make Vim  source the `tmux_prompt`  filetype plugin  whenever we
+    " load a regular tmux buffer.
+    "
+    " This is because, by default, Vim sources:
+    "
+    "     */ftplugin/tmux.vim
+    "     */fptlugin/tmux_*.vim
+    "     */fptlugin/tmux/*.vim
+    "}}}
+    au! BufRead,BufNewFile ~/.vim/tmp/tmuxprompt setf tmuxprompt
     au! BufRead,BufNewFile ~/.vim/tmp/websearch setf websearch
-    au! BufRead,BufNewFile ~/.vim/tmp/tmux_prompt setf tmux_prompt
 augroup END
 

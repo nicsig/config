@@ -1,7 +1,7 @@
 fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     " Purpose:{{{
     "
-    " This function is called by our tmux key binding `pfx /`.
+    " This function is called by a tmux key binding.
     "
     " It makes tmux copy the contents of the pane, from the start of the history
     " down to the end of the visible pane, in a tmux buffer.
@@ -33,6 +33,35 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     call search('^\S', 'b')
     sil! keepj keepp .,$g/^\s*$/d_
 
+    let pat_cmd = '\m\C/MSG\s\+.\{-}XDCC\s\+SEND\s\+\d\+'
+    " Format the buffer if it contains commands to downloads files via xdcc.{{{
+    "
+    " Remove noise.
+    " Conceal xdcc commands.
+    " Highlight filenames.
+    " Install mappings to copy the xdcc command in the clipboard.
+    "}}}
+    " Why `!search('│')`?{{{
+    "
+    " The code will work  best after we have pressed our  WeeChat key binding to
+    " get a bare window (`M-r` atm), where “noise” has been removed.
+    " Indeed, with  noise, some xdcc commands  can't be copied in  one pass, but
+    " only in two.
+    " So,  if we're  not  in  a bare  window,  I don't  want  to  get the  false
+    " impression that the buffer can be interacted with reliably.
+    "}}}
+    if search(pat_cmd) && !search('│')
+        call s:format_xdcc_buffer(pat_cmd)
+    endif
+
+    " Why ?{{{
+    "
+    " We already have a similar autocmd in our vimrc (but it deals with `@+`, not `@"`).
+    " I don't want it to interfere.
+    " I don't want a race condition where the winning `$ xclip` process is the last one.
+    " It's probably unnecessary but better be safe than sorry.
+    "}}}
+    au! make_clipboard_persist_after_quitting_vim
     " Write the  unnamed register in the  X clipboard selection, so  that we can
     " copy sth in Nvim without the `""`  prefix, and paste it in the shell after
     " quitting Nvim.
@@ -40,6 +69,31 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
         \   if executable('xclip') && strlen(@") != 0 && strlen(@") <= 999
         \ |     call system('xclip -selection clipboard', @")
         \ | endif
+endfu
+
+fu! s:format_xdcc_buffer(pat_cmd) abort
+    " remove noise
+    exe 'sil keepj keepp v@'. a:pat_cmd . '@d_'
+    sil keepj keepp %s/^.\{-}\d\+)\s*//e
+
+    " highlight filenames
+    let pat_file = '\d\+x\s*|\s*[0-9.MG]*\s*|\s*\zs\S*'
+    call matchadd('Underlined', pat_file)
+
+    " conceal commands
+    call matchadd('Conceal', a:pat_cmd . '\s*|\s*')
+    setl cole=3 cocu=nc
+
+    " make filenames interactive{{{
+    "
+    " You don't need  `"+y`.
+    " `y` is enough, provided that the next one-shot autocmd is installed.
+    "}}}
+    exe 'nno <buffer><nowait><silent> <cr> :<c-u>let @/ = ' . string(a:pat_cmd) . '<cr>gny:q!<cr>'
+    nmap <buffer><nowait><silent> ZZ <cr>
+
+    " let us jump from one filename to another by pressing `n` or `N`
+    let @/ = pat_file
 endfu
 
 fu! myfuncs#align_with_beginning(type) abort "{{{1

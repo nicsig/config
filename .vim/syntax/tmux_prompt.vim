@@ -1,1 +1,0 @@
-ru! syntax/tmux.vim

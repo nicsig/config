@@ -3252,7 +3252,7 @@ augroup my_goyo
     au User GoyoLeave ++nested call s:goyo_leave()
 augroup END
 
-" i                             ixquick {{{4
+" i x                           ixquick, tmux prompt {{{4
 
 " Why don't you use your shell script anymore?{{{
 "
@@ -3266,14 +3266,16 @@ augroup END
 " If you need to read it, it's there: `~/bin/bash/search-engine.sh`.
 "}}}
 nno  <silent>  <space>i  :<c-u>call <sid>run_current_line('websearch')<cr>
-nno  <silent>  <space>x  :<c-u>call <sid>run_current_line('tmux')<cr>
+" Tmux command-prompt has too limited editing capabilities.
+" Let's use a Vim buffer to leverage Vim's editing capabilities.
+nno  <silent>  <space>x  :<c-u>call <sid>run_current_line('tmuxprompt')<cr>
 
 fu! s:run_current_line(type) abort
     if &ft is# a:type
         return
     endif
     let dir = $HOME . '/.vim/tmp'
-    let file = dir . '/' . a:type . (a:type is# 'tmux' ? '_prompt' : '')
+    let file = dir . '/' . a:type
     let max_history = 100
     if !isdirectory(dir)
         call mkdir(dir, 'p', '0700')
@@ -7765,6 +7767,8 @@ endfu
 " 64 -
 " play with (or document):
 "
+"    - `win_execute()`: https://github.com/vim/vim/commit/868b7b6712ea4f2232eeeae18c5cbbbddf2ee84d
+"
 "    - `:scriptversion`; https://github.com/vim/vim/commit/558ca4ae55096f8763ab8515a304cda9c57f18a7
 "
 "    - `:tcd`; https://github.com/vim/vim/commit/00aa069db8132851a91cfc5ca7f58ef945c75c73
@@ -7803,10 +7807,10 @@ endfu
 "    - `ExitPre` event
 "    - `SourcePost` event
 "    - getcompletion('*', 'arglist')   +   com! -complete=arglist ...
-"    - gettagstack(), settagstack()
-"    - mode() (new output `n_ov`, `n_oV`, `n_oC-v`)
+"    - `gettagstack()`, `settagstack()`
+"    - `mode()` (new output `n_ov`, `n_oV`, `n_oC-v`)
 "    - prompt-buffer
-"    - reg_recording() + reg_executing()
+"    - `reg_recording()` + `reg_executing()`
 "
 "    - sign_define()
 "    - sign_getdefined()

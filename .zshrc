@@ -2383,6 +2383,26 @@ vim_startup() { #{{{2
 }
 #}}}2
 
+whichcomp() { #{{{2
+  # Ask zsh where a particular completion is being sourced from.
+  # Where did you find the code?{{{
+  #
+  # Go to the irc channel `#zsh` and run the command `!whichcomp`.
+  # A bot will print the code.
+  #}}}
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+  usage: $0 <command name>
+  example: $0 ls
+EOF
+    return 64
+  fi
+  # TODO: Document how the code works.
+  for 1; do
+    (print -raC 2 -- $^fpath/${_comps[$1]:?unknown command}(NP*$1*))
+  done
+}
+
 xev_terse() { #{{{2
   # Purpose:{{{
   #
