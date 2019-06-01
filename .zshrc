@@ -1030,6 +1030,24 @@ cdt() { #{{{2
   cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
 }
 
+chown2me() { #{{{2
+  # Purpose:{{{
+  #
+  # Running this function  may be necessary before manually  compiling a program
+  # which was installed via checkinstall (think vim or tmux).
+  # }}}
+  # Why don't you use a zsh snippet? {{{
+  #
+  # It's too easy to run the command by accident in the wrong directory.
+  # We need some logic to make sure we're in the right kind of directory.
+  # }}}
+  if [[ ! "${PWD}" =~ "^${HOME}/GitRepos" ]]; then
+    printf -- "you need to be somewhere below ${HOME}/GitRepos\n"
+    return 64
+  fi
+  sudo chown -R $USER:$USER .
+}
+
 cs() { #{{{2
 # Do *not* name the function `cheat`!{{{
 #

@@ -44,7 +44,7 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     " Why `!search('│')`?{{{
     "
     " The code will work  best after we have pressed our  WeeChat key binding to
-    " get a bare window (`M-r` atm), where “noise” has been removed.
+    " get a bare display (`M-r` atm), where “noise” has been removed.
     " Indeed, with  noise, some xdcc commands  can't be copied in  one pass, but
     " only in two.
     " So,  if we're  not  in  a bare  window,  I don't  want  to  get the  false
@@ -89,11 +89,57 @@ fu! s:format_xdcc_buffer(pat_cmd) abort
     " You don't need  `"+y`.
     " `y` is enough, provided that the next one-shot autocmd is installed.
     "}}}
-    exe 'nno <buffer><nowait><silent> <cr> :<c-u>let @/ = ' . string(a:pat_cmd) . '<cr>gny:q!<cr>'
+    nno <buffer><nowait><silent> <cr> :<c-u>call <sid>copy_cmd_to_get_file_via_xdcc()<cr>
     nmap <buffer><nowait><silent> ZZ <cr>
 
     " let us jump from one filename to another by pressing `n` or `N`
     let @/ = pat_file
+endfu
+
+fu! s:copy_cmd_to_get_file_via_xdcc() abort
+    let line = getline('.')
+    let msg = matchstr(line, '\m\C/MSG\s\+\zs.\{-}XDCC\s\+SEND\s\+\d\+')
+    " What is this `moviegods_send_me_file`?{{{
+    "
+    " A WeeChat alias.
+    " If it doesn't exist, you can install it by running in WeeChat:
+    "
+    "     /alias add moviegods_send_me_file /j #moviegods ; /msg
+    "}}}
+    "   Why do you use an alias?{{{
+    "
+    " I don't join `#moviegods` by default, because it adds too much network traffic.
+    " And, a `/msg ... xdcc send ...` command doesn't work if you haven't joined this channel.
+    " IOW, we need to run 2 commands:
+    "
+    "     /j #moviegods
+    "     /msg ... xdcc send ...
+    "
+    " But, in the end, we will only be able to write one in the clipboard.
+    " To fix  this issue, we  need to build a  command-line which would  run two
+    " commands.
+    "
+    " An alias allows you to use the `;` token which has the same meaning as in a shell.
+    " With it, you can do:
+    "
+    "     cmd1 ; cmd2
+    "}}}
+    "   How to list all currently installed aliases?{{{
+    "
+    "     /alias list
+    "}}}
+    "   How to remove an alias?{{{
+    "
+    "     /alias del <alias>
+    "}}}
+    "   How to install an alias, running two commands?{{{
+    "
+    "     /alias add <alias> cmd1 ; cmd2
+    "                             ^
+    "}}}
+    let cmd = '/moviegods_send_me_file ' . msg
+    let @" = cmd
+    q!
 endfu
 
 fu! myfuncs#align_with_beginning(type) abort "{{{1

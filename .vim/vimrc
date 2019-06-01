@@ -1294,40 +1294,36 @@ let &includeexpr = s:snr().'inex()'
 fu! s:inex() abort
     let line = getline('.')
 
+    " the path could contain an environment variable surrounded by curly brackets
+    " What's the purpose of the second branch?{{{
+    "
+    "     '\|${'.v:fname.'}\f\+'
+    "
+    " It handles the case where our cursor is on the environment variable name:
+    "
+    "     ${HOME}/bin/README.md
+    "      ^^^^^^
+    "}}}
+    let pat = '\m\C${\w\+}'.'\V'.v:fname.'\|${'.v:fname.'}\f\+'
+    "                         │
+    "                         └ `v:fname` could contain a tilde
+    let cursor_not_after = '\m\%(.*\%'.col('.').'c\)\@!'
+    let pat = pat . cursor_not_after
+    if line =~# pat
+        let pat = matchstr(line, pat)
+        let env = matchstr(pat, '\w\+')
+        return substitute(pat, '${'.env.'}', eval('$'.env), '')
+
     " Why?{{{
     "
-    " If gf  fails to open the  file whose path  is under cursor, make  it retry
-    " with the path after the equal sign.
+    " Sometimes, we have something like:
     "
-    " Useful because sometimes, we have something like:
-    "
-    "         set option=path
+    "     set option=path
     "
     " And Vim tries to open 'option=path' instead of 'path'.
     "}}}
-    if line =~# '='
+    elseif line =~# '='
         return substitute(v:fname, '.*=', '', '')
-    " the path could contain an environment variable surrounded by curly brackets
-    else
-        " What's the purpose of the second branch?{{{
-        "
-        "     '\|${'.v:fname.'}\f\+'
-        "
-        " It handles the case where our cursor is on the environment variable name:
-        "
-        "     ${HOME}/bin/README.md
-        "      ^^^^^^
-        "}}}
-        let pat = '\m\C${\w\+}'.'\V'.v:fname.'\|${'.v:fname.'}\f\+'
-        "                         │
-        "                         └ `v:fname` could contain a tilde
-        let cursor_not_after = '\m\%(.*\%'.col('.').'c\)\@!'
-        let pat = pat . cursor_not_after
-        if line =~# pat
-            let pat = matchstr(line, pat)
-            let env = matchstr(pat, '\w\+')
-            return substitute(pat, '${'.env.'}', eval('$'.env), '')
-        endif
     endif
 
     return v:fname
@@ -5786,7 +5782,7 @@ endfu
 
 " RemoveDuplicateLines {{{2
 
-com! -bar -range=% RemoveDuplicateLines <line1>,<line2>!awk '\!x[$0]++'
+com! -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
 
 " RemoveSwapFiles {{{2
 

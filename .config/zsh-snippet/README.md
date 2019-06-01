@@ -8,6 +8,16 @@ snippets:
     $ tldr <cmd>
 
 ##
+# Why do you use `$ git stash` in the snippet compiling tmux?
+
+Just in case we've edited a file.
+We want to undo any modification.
+
+This matters, for example, if you need a tmux binary with debugging information,
+but you've edited `configure.ac` with `$ sed` in `~/bin/upp.sh`.
+Indeed,  for  some  reason,  changing  the  version  prevents  the  binary  from
+containing debugging information.
+
 # Why do you use `=()` instead of `<()` in the `vimdiff` snippet?
 
 `<()` asks the shell to open a special file (e.g. `/proc/13319/fd/11`).

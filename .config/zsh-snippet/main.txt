@@ -2,16 +2,15 @@ sudo dpkg -i --force-overwrite {{package}}.deb # force package installation
 
 for f in *; do echo cp "${{f}}" "${{{f}.bak}}";done # backup files
 
-gdb -n -ex 'thread apply all bt full' -batch {{/path/to/tmux}} {{/path/to/core}} >~/backtrace.txt # get backtrace after tmux crash
+gdb -n -ex 'thread apply all bt full' -batch {{/path/to/tmux}} {{/path/to/core}} >backtrace.txt # get backtrace after tmux crash
 
 gpg --verify {{file.tar.xz}}.sig {{file.tar.xz}}
 gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
 groff -man -Tascii {{program}}.man # check formatting of a manual page
 
-sudo chown -R user:user . # may be necessary before compiling vim/tmux
-make clean; make distclean; sh autogen.sh && ./configure && make # compile tmux (useful when git-bisecting)
-make clean; make distclean; ./configure --enable-fail-if-missing --with-features=huge; make # compile vim
+git stash; make clean; make distclean; sh autogen.sh && ./configure && make # compile tmux (useful when git-bisecting)
+git stash; make clean; make distclean; ./configure --enable-fail-if-missing --with-features=huge; make # compile vim
 
 strace -o {{/tmp/log}} {{cmd}} # run a command, and trace the new process
 strace -o {{/tmp/log}} -p $(pidof {{cmd}}) # trace an existing process; run `less +F /tmp/log` to read it

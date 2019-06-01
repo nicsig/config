@@ -401,33 +401,7 @@ configure() { #{{{2
     # So,  I use  the  least restrictive  regex  to match  as  many versions  as
     # possible.
     #}}}
-    #     sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac
-    # TODO: We've commented the line for the moment.{{{
-    #
-    # Indeed, we have an issue where tmux crashes.
-    # We need to get a core file, then extract a backtrace from it, with relevant info.
-    # Right now, the backtrace that I extract doesn't contain relevant info, and
-    # I think that's because we've manipulated tmux version.
-    #
-    # I think you should stop modifying the version.
-    # But you'll have to run:
-    #
-    #     $ rg least ~/.tmux/plugins
-    #
-    # And remove all the `if tmux-is-at-least` or `tmux_is_at_least` guards.
-    # Write a sed script to do it automatically.
-    #
-    # Also, maybe you should remove tpm, to avoid overwriting your local changes.
-    # Just subscribe  to the rss feeds  of the few  tmux plugins you use,  to be
-    # notified of a possible useful update.
-    # If you do so, try to install a  git hook to automatically call our new sed
-    # script which removes the guards, whenever we `$ git pull`.
-    #
-    # ---
-    #
-    # Once you've taken  a decision, update our  notes in `~/wiki/tmux/tmux.md`,
-    # in the `# Debugging` section.
-    #}}}
+    sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac
     sh autogen.sh
     ./configure
 
@@ -701,6 +675,12 @@ get_version() { #{{{2
 }
 
 install() { #{{{2
+  # TODO: We don't  need the compiled  binary in  the source repository,  once a
+  # debian package has been installed; try to remove it.
+  # This could make you save a little space, which could add up after the compilation
+  # of several programs.
+  #
+  # For example, the mpv binary weighs 22M (if stripped).
   if [[ "${PGM}" == 'mpv' ]]; then
     rm -f ../mpv_*.changes
     mv ../mpv_*.deb .
@@ -712,7 +692,7 @@ install() { #{{{2
 
   # We don't have any version number for `mpv` (because `git describe` fails).
   if [[ "${PGM}" == 'mpv' ]]; then
-    checkinstall --pkgname "${PGM}" -y
+    checkinstall --pkgname "${PGM}" --backup=no -y
 
   elif [[ "${PGM}" == 'jumpapp' ]]; then
     # Can't use `checkinstall`, because:
@@ -755,6 +735,13 @@ install() { #{{{2
     # Use `--spec /dev/null`.
     # This will prevent checkinstall from using any spec file.
     #
+    # Update: I doubt this solution works completely.
+    # I think checkinstall will still fall back on some other default spec file.
+    # For example, if you read the logfile for Vim, you'll find these lines:
+    #
+    #     Warning: .spec file path "/dev/null" not found.
+    #     Warning: Defaulting to "vim.spec".
+    #
     # Solution2:
     # Test the existence of a spec file, and  if there's one, use sed to edit it
     # before invoking checkinstall.
@@ -774,7 +761,7 @@ install() { #{{{2
     # It's a bit long, maybe we could improve the code...
     #}}}
     if [[ "${DEBUG}" -ne 0 ]]; then
-      echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null -y >>"${DEBUG_LOGFILE}"
+      echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null ---backup=no y >>"${DEBUG_LOGFILE}"
     fi
     # If this command fails for Nvim, try this:{{{
     #
@@ -798,6 +785,7 @@ install() { #{{{2
     #
     # Note that Nvim is multi-threaded:
     # > `thread apply all bt` may be necessary because **Neovim is multi-threaded**.
+    #
     # Source: https://github.com/neovim/neovim/wiki/Development-tips/fd1582128edb0130c1d5c828a3a9b55aa9107030
     #
     # ---
@@ -807,7 +795,7 @@ install() { #{{{2
     # Then, you could try to force its installation with `dpkg` and the right options.
 
     #}}}
-    checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null -y
+    checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null --backup=no -y
     #                                 │
     #                                 └ don't overwrite my package
     #                                   with an old version from the official repositories

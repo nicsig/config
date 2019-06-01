@@ -374,6 +374,59 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 #}}}
 export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/GitRepos/dasht/bin
 
+# What is the purpose of this block? {{{
+#
+# Adding the path to the ruby gems installed in our home via `--user-install`.
+#
+# As an example of a locally installed gem:
+#
+#     $ gem install --user-install heytmux
+# }}}
+# What does this `.ruby_user_dir_cache` contain? {{{
+#
+# A `PATH=` assignment, such as:
+#
+#     PATH=${PATH}:/home/user/.gem/ruby/2.3.0/bin
+# }}}
+#   Why do you use a cache? {{{
+#
+# Because to get the path to the ruby gems programmatically, we need to run a
+# `$ ruby` command, which is slow.
+# We don't want the shell startup time to be impacted.
+# }}}
+# What's `-s` in `[[ -s file ]]`? {{{
+#
+# It asserts that the file exists and that its size is not 0.
+# Btw, that's similar to how fasd lazy-loads some of its code:
+#
+#     if [ "$(command -v fasd)" -nt "$fasd_cache" -o ! -s "$fasd_cache" ]; then
+#                                                      ^^
+#
+# https://github.com/clvv/fasd#install
+# }}}
+if [[ ! -s "${HOME}/.ruby_user_dir_cache" ]]; then
+  printf -- "PATH=\${PATH}:$(ruby -e 'puts Gem.user_dir')/bin" >"${HOME}/.ruby_user_dir_cache"
+  # Where did you find the `ruby -e '...'` command? {{{
+  #
+  # https://wiki.archlinux.org/index.php/ruby#Setup
+  # }}}
+  #   What is `-e`? {{{
+  #
+  # It specifies  the script  from the  command-line while  telling Ruby  not to
+  # search the rest of the arguments for a script file name.
+  # See `$ man ruby /^\C\s*-e\>`.
+  # }}}
+  #     `puts`? {{{
+  #
+  # A command similar to `$ printf`.
+  # }}}
+  #     `Gem.user_dir`? {{{
+  # The path for gems in the user's home directory.
+  # https://www.rubydoc.info/github/rubygems/rubygems/Gem.user_dir
+  # }}}
+fi
+. "${HOME}/.ruby_user_dir_cache"
+
 # pdf {{{1
 
 # Choose which program should be used to open pdf documents.
