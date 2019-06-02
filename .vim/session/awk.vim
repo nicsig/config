@@ -23,7 +23,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -461,8 +460,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -476,11 +475,11 @@ setlocal fen
 normal! zo
 220
 normal! zo
-let s:l = 153 - ((0 * winheight(0) + 0) / 1)
+let s:l = 147 - ((3 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-153
+147
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -500,7 +499,7 @@ normal! zo
 normal! zo
 84
 normal! zo
-let s:l = 105 - ((3 * winheight(0) + 14) / 28)
+let s:l = 105 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -508,8 +507,8 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-debug
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
 tabnext
 edit ~/bin/yank
 set splitbelow splitright
@@ -621,12 +620,12 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 655 - ((0 * winheight(0) + 0) / 1)
+let s:l = 607 - ((10 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-655
-normal! 0
+607
+normal! 01|
 lcd ~/.vim
 wincmd w
 argglobal
@@ -639,27 +638,57 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-59
+213
 normal! zo
-let s:l = 133 - ((24 * winheight(0) + 14) / 28)
+let s:l = 221 - ((50 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-133
+221
 normal! 0
 lcd ~/wiki/tmux
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
-edit ~/.tmux.conf
+edit ~/wiki/tmux/tmux.md
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+316
+normal! zo
+let s:l = 340 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+340
+normal! 0
+lcd ~/wiki/tmux
+wincmd w
+argglobal
+if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -670,23 +699,17 @@ setlocal fdn=20
 setlocal fen
 1091
 normal! zo
-let s:l = 1093 - ((1092 * winheight(0) + 15) / 30)
+let s:l = 1106 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1093
-normal! 010|
+1106
+normal! 035|
 lcd ~/.vim
-tabnext
-edit ~/wiki/tmux/todo.md
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
+wincmd w
 argglobal
-setlocal fdm=manual
+if bufexists("~/.tmux/plugins/tmux-open/scripts/helpers.sh") | buffer ~/.tmux/plugins/tmux-open/scripts/helpers.sh | else | edit ~/.tmux/plugins/tmux-open/scripts/helpers.sh | endif
+setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
@@ -694,15 +717,19 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/wiki/tmux
-tabnext 14
+lcd ~/.vim
+wincmd w
+3wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
+tabnext 13
 set stal=1
 badd +1 ~/Desktop/countries
 badd +963 ~/wiki/awk/sed.md
@@ -715,8 +742,7 @@ badd +33 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
 badd +404 ~/bin/upp.sh
 badd +153 ~/bin/restore-env.sh
 badd +150 ~/bin/yank
-badd +128 ~/Desktop/tmux_Y_bug.md
-badd +1093 ~/.tmux.conf
+badd +122 ~/Desktop/tmux_Y_bug.md
 badd +394 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +78 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -727,8 +753,10 @@ badd +1 ~/wiki/vim/install.md
 badd +207 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +24 ~/wiki/shell/script.md
 badd +7 ~/Desktop/bug.md
-badd +60 ~/wiki/tmux/option.md
-badd +0 ~/wiki/tmux/todo.md
+badd +205 ~/wiki/tmux/option.md
+badd +159 ~/wiki/tmux/tmux.md
+badd +895 ~/.tmux.conf
+badd +46 ~/.tmux/plugins/tmux-open/scripts/helpers.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

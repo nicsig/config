@@ -1,4 +1,4 @@
-#!bash
+#!/bin/bash
 # shellcheck disable=SC2239
 
 yank_line="y"
@@ -164,8 +164,6 @@ clipboard_copy_command() {
             xclip_selection="$(yank_selection)"
         fi
         echo "xclip -selection $xclip_selection"
-    elif command_exists "putclip"; then # cygwin clipboard command
-        echo "putclip"
     elif [ -n "$(custom_copy_command)" ]; then
         custom_copy_command
     fi
