@@ -1,7 +1,7 @@
 # 876 sloc (`$ cloc --exclude-ext=md .`)
 source $HOME/.tmux/plugins_config/fingers ; run $HOME/.tmux/plugins/tmux-fingers/tmux-fingers.tmux
 
-# 244 sloc
+# 174 sloc
 source $HOME/.tmux/plugins_config/logging ; run $HOME/.tmux/plugins/tmux-logging/logging.tmux
 
 # 260 sloc

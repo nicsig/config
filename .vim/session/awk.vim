@@ -22,9 +22,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
-tabnew
-tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -648,122 +645,18 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 146 - ((30 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-146
+1
 normal! 0
 lcd ~/wiki/tmux
 wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit ~/.tmux.conf
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-572
-normal! zo
-674
-normal! zo
-let s:l = 771 - ((61 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-771
-normal! 05|
-lcd ~/.vim
-tabnext
-edit ~/.vim/autoload/myfuncs.vim
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-1
-normal! zo
-let s:l = 81 - ((9 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-81
-normal! 010|
-lcd ~/.vim
-tabnext
-edit ~/.vim/plugged/vim-capslock/.git/index
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-wincmd =
-argglobal
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
-lcd ~/.vim/plugged/vim-capslock
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-capslock/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-capslock/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-capslock/.git/COMMIT_EDITMSG | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 7) / 15)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim/plugged/vim-capslock/.git
-wincmd w
-2wincmd w
-wincmd =
-tabnext 15
+tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
 badd +963 ~/wiki/awk/sed.md
@@ -777,8 +670,6 @@ badd +404 ~/bin/upp.sh
 badd +147 ~/bin/restore-env.sh
 badd +150 ~/bin/yank
 badd +327 ~/Desktop/tmux_Y_bug.md
-badd +771 ~/.tmux.conf
-badd +84 ~/.vim/autoload/myfuncs.vim
 badd +394 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +130 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -790,8 +681,6 @@ badd +105 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +24 ~/wiki/shell/script.md
 badd +99 ~/Desktop/bug.md
 badd +60 ~/wiki/tmux/environment.md
-badd +0 ~/.vim/plugged/vim-capslock/.git/index
-badd +0 ~/.vim/plugged/vim-capslock/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

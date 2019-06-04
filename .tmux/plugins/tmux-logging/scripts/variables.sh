@@ -1,5 +1,3 @@
-SUPPORTED_VERSION="1.9"
-
 # Key binding options and defaults
 
 default_logging_key="P" # Shift-p

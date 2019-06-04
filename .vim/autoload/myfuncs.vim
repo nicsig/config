@@ -34,7 +34,7 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     sil! keepj keepp .,$g/^\s*$/d_
 
     " We need the buffer to be saved into a file, for `:lvim /pat/ %` to work.
-    let tempfile = tempname() . '_captured_pane'
+    let tempfile = tempname()
     sil exe 'sav ' . tempfile
 
     let pat_cmd = '\m\C/MSG\s\+.\{-}XDCC\s\+SEND\s\+\d\+'
@@ -56,7 +56,7 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     "}}}
     if search(pat_cmd) && !search('│')
         call s:format_xdcc_buffer(pat_cmd)
-    elseif search('^٪')
+    elseif search('^٪.\+')
         call s:format_shell_buffer()
     endif
 
@@ -78,15 +78,17 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
 endfu
 
 fu! s:format_shell_buffer() abort
-    " We want to be able to repeat `]l` right from the start.
+    " we want to be able to repeat `]l` right from the start
     do <nomodeline> CursorHold
     let pat = '^٪.\+'
     call matchadd('Statement', pat)
     sil exe 'lvim /' . pat . '/j %'
-    lopen
+    " the location list window is automatically opened by one of our autocmds;
+    " conceal the location
     call qf#set_matches('after_tmux_capture_pane:format_shell_buffer', 'Conceal', 'location')
     call qf#create_matches()
-    wincmd p
+    " close location list window; the conceal will still be applied whenever we re-open it
+    close
 endfu
 
 fu! s:format_xdcc_buffer(pat_cmd) abort

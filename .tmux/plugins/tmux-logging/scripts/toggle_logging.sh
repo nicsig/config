@@ -51,9 +51,4 @@ toggle_pipe_pane() {
 	fi
 }
 
-main() {
-	if supported_tmux_version_ok; then
-		toggle_pipe_pane
-	fi
-}
-main
+toggle_pipe_pane

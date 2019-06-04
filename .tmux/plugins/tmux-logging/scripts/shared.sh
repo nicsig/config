@@ -40,10 +40,6 @@ remove_empty_lines_from_end_of_file() {
 	printf '%s\n' "$temp" > "$file"
 }
 
-supported_tmux_version_ok() {
-	$CURRENT_DIR/check_tmux_version.sh "$SUPPORTED_VERSION"
-}
-
 # Checking full path to logfile and expanding tmux format in normal path
 # As example: expand %Y-%m-%d to current date
 expand_tmux_format_path() {
