@@ -99,9 +99,6 @@ augroup filetypedetect
     " Source: https://github.com/DaveDavenport/rofi/wiki/Themes
     au! BufRead,BufNewFile *.rasi setf css
 
-    au! BufRead,BufNewFile $HOME/.tmux/*.conf setf tmux
-    au! BufRead,BufNewFile $HOME/.tmux/plugins_config/* setf tmux
-
     " Do *not* name the filetype `tmux_prompt`!{{{
     "
     " It would  make Vim  source the `tmux_prompt`  filetype plugin  whenever we

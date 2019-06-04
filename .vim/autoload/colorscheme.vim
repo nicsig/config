@@ -277,17 +277,6 @@ endfu
 " }}}1
 " Core {{{1
 fu! s:diff() abort "{{{2
-    " Why do you change `DiffText`?{{{
-    "
-    " In seoul256, it alters the background highlighting, which I find to be too
-    " much:
-    "
-    "     DiffText       xxx term=reverse cterm=bold ctermbg=224 gui=bold guibg=#ffd7d7~
-    "
-    " The foreground  would be  enough, so we  link `DiffText`  to `Identifier`,
-    " which is the most readable HG I could find at `:h group-name`.
-    "}}}
-    hi! link DiffText   Identifier
     " Why do you clear `DiffChange`?{{{
     "
     " When  you compare  two  windows  in diff  mode,  `DiffChange`  is used  to

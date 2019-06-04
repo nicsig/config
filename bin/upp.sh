@@ -43,46 +43,6 @@ DEBUG_LOGFILE=/tmp/debug
 #
 # This would be useful when we git bisect an issue.
 
-# exit upon error{{{
-#
-# man bash
-#     /SHELL BUILTIN COMMANDS
-#     /^\s*set\>
-#}}}
-set -e
-# Don't eliminate `set -e`!{{{
-#
-# You could be tempted to do it, because of this:
-#     http://mywiki.wooledge.org/BashFAQ/105
-#
-# Nevertheless,  we  need  to  keep  it at  the  moment,  otherwise  the  script
-# would  not  terminate when  we  execute  `exit 1`  from  a  function (such  as
-# `check_tmux_version_is_correct`).
-#
-# Source:
-#     https://stackoverflow.com/a/9893727/9780968
-#
-# If you really want to remove it, you'll  need to find another way to quit from
-# a function.
-# Have a look here:
-#     https://unix.stackexchange.com/a/48550/289772
-#     https://stackoverflow.com/a/9894126/9780968
-#}}}
-# What to do if a `rm` command may fail?{{{
-#
-# Add the `-f` option.
-#}}}
-# What to do if a `mkdir` command may fail?{{{
-#
-# Add the `-p` option.
-#}}}
-# What to do if another command may fail, but there's no option to suppress the errors?{{{
-#
-#     set +e
-#     problematic_command
-#     set -e
-#}}}
-
 # Init {{{1
 
 PGM="$1"
@@ -162,11 +122,6 @@ EOF
 
   download
   get_version
-
-  if [[ "${PGM}" == 'tmux' ]]; then
-    check_tmux_version_is_correct
-  fi
-
   clean
   install_dependencies
   configure
@@ -231,63 +186,6 @@ build() { #{{{2
   # We need a way to ignore just a specific error. Not any error.
 }
 
-check_tmux_version_is_correct() { #{{{2
-  # Can I quote a regex?{{{
-  #
-  # It depends.
-  #
-  # Quoting a part of the regex forces the latter to be matched as a string.
-  # So, while it doesn't make much sense to quote an entire regex, it could
-  # be useful to quote some part of it.
-  #}}}
-  # Can I use a space in a regex?{{{
-  #
-  # Not a literal one.
-  # You can use this though:
-  #
-  #     [[:blank:]] = [ \t]
-  #     [[:space:]] = [ \t\n\r\f\v]
-  #}}}
-  # Can I use the `!~` operator to check a NON-match?{{{
-  #
-  # No.
-  # This operator doesn't exist in bash.
-  # Use the `!` operator to negate the test.
-  #}}}
-  # Why `.*` at the end?{{{
-  #
-  # Right now, the tmux version is `2.9a`.
-  # So, it may end with some alphabetical character(s).
-  #}}}
-  REGEX='^[0-9]\.[0-9].*$'
-  if [[ ! "${VERSION}" =~ ${REGEX} ]]; then
-    cat <<EOF >&2
-
-Your tmux version is:
-    "${VERSION}"
-
-This may break some tmux plugins which relies on the following scheme:
-    tmux X.Y
-
-Edit the script "$(basename "$0")" so that it edits "configure.ac" correctly.
-
-EOF
-    # TODO: Suppose the version is not correct.{{{
-    #
-    # The function  will make the  script end prematurely,  and tell us  that we
-    # need to edit `configure.ac`.
-    #
-    # So far so good.
-    # We edit the file, and retry a compilation.
-    # The script will probably fail again, because the output of
-    # `$ git  describe --abbrev=0` will still be the same.
-    #
-    # How to deal with this?
-    #}}}
-    exit 1
-  fi
-}
-
 check_we_are_root() { #{{{2
   # We need to be root.
   #
@@ -306,38 +204,20 @@ EOF
 }
 
 clean() { #{{{2
-  #   ┌ necessary because of `set -e`{{{
-  #   │
-  #   │ if the files don't exist, it will cause an error
-  #   │ which will cause the script to exit prematurely
-  #   │
-  #   │ `-f` asks `rm` to ignore nonexistent files
-  #   │ }}}
   rm -f backup*.tgz "${PGM}"*.deb
 
   if [[ "${PGM}" == 'weechat' ]]; then
     # Clean last `$ cmake` command:
-    #     https://stackoverflow.com/a/9680493/9780968
+    # https://stackoverflow.com/a/9680493/9780968
     if [[ -d 'build' ]]; then
       rm -rf build
     fi
-    #      ┌ no error if existing{{{
-    #      │ we don't want an error because of `set -e`
-    #      │}}}
     mkdir -p build
     cd build
 
   else
-    # If  we've already  cleaned manually  the  repo, it's  possible that  `make
-    # [dist]clean`, causes the error:
-    #
-    #     No rule to make target '[dist]clean'
-    #
-    # I don't know how to prevent these errors, so I temporarily disable `set -e`.
-    set +e
     make clean
     make distclean
-    set -e
   fi
 }
 
@@ -372,36 +252,6 @@ configure() { #{{{2
     ./configure
 
   elif [[ "${PGM}" == 'tmux' ]]; then
-    # Why this `sed` command?{{{
-    #
-    # If you're installing tmux, you'll first need to edit `configure.ac`.
-    #
-    #     AC_INIT(tmux, master) → AC_INIT(tmux, x.y)
-    #                                           ^^^
-    # By  default, the  configuration assigns  `master`  as the  version of  the
-    # future tmux running process, instead of something like `2.8`.
-    #
-    # This will  break some  tmux plugins  which inspect  the version  number to
-    # decide whether it's recent enough to support some features.
-    #
-    # It would be useful if `./configure` had an option for that...
-    # I haven't found one in `./configure --help`.
-    # So, I edit `configure.ac` manually.
-    #
-    # https://unix.stackexchange.com/a/469130/289772
-    #}}}
-    # Ok, and why did you choose the regex `\S\+`?{{{
-    #
-    # nicm keeps changing the version reported by `$ tmux -V`.
-    # In the past, he has used `master`, `X.Y-rc`, and now it's `next-X.Y`.
-    # Have a look here:
-    #     https://github.com/tmux/tmux/commits/master/configure.ac
-    #
-    # Who knows what it will be tomorrow...
-    # So,  I use  the  least restrictive  regex  to match  as  many versions  as
-    # possible.
-    #}}}
-    sed -i "/AC_INIT/s/\S\+)/${VERSION})/" configure.ac
     sh autogen.sh
     ./configure
 
@@ -585,14 +435,6 @@ download() { #{{{2
 }
 
 get_version() { #{{{2
-  # To prevent `set -e` from terminating the script.{{{
-  #
-  # Indeed, `git describe --tags` gives this error:
-  #
-  #     fatal: No names found, cannot describe anything
-  #
-  # This is probably because `mpv` is special; we don't build it from its repo.
-  #}}}
   if [[ "${PGM}" == 'gawk' ]]; then
     VERSION="$(git describe --tags)"
   elif [[ "${PGM}" == 'nvim' ]]; then

@@ -33,6 +33,10 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     call search('^\S', 'b')
     sil! keepj keepp .,$g/^\s*$/d_
 
+    " We need the buffer to be saved into a file, for `:lvim /pat/ %` to work.
+    let tempfile = tempname() . '_captured_pane'
+    sil exe 'sav ' . tempfile
+
     let pat_cmd = '\m\C/MSG\s\+.\{-}XDCC\s\+SEND\s\+\d\+'
     " Format the buffer if it contains commands to downloads files via xdcc.{{{
     "
@@ -52,6 +56,8 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     "}}}
     if search(pat_cmd) && !search('│')
         call s:format_xdcc_buffer(pat_cmd)
+    elseif search('^٪')
+        call s:format_shell_buffer()
     endif
 
     " Why ?{{{
@@ -69,6 +75,18 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
         \   if executable('xclip') && strlen(@") != 0 && strlen(@") <= 999
         \ |     call system('xclip -selection clipboard', @")
         \ | endif
+endfu
+
+fu! s:format_shell_buffer() abort
+    " We want to be able to repeat `]l` right from the start.
+    do <nomodeline> CursorHold
+    let pat = '^٪.\+'
+    call matchadd('Statement', pat)
+    sil exe 'lvim /' . pat . '/j %'
+    lopen
+    call qf#set_matches('after_tmux_capture_pane:format_shell_buffer', 'Conceal', 'location')
+    call qf#create_matches()
+    wincmd p
 endfu
 
 fu! s:format_xdcc_buffer(pat_cmd) abort
@@ -109,7 +127,7 @@ fu! s:copy_cmd_to_get_file_via_xdcc() abort
     "   Why do you use an alias?{{{
     "
     " I don't join `#moviegods` by default, because it adds too much network traffic.
-    " And, a `/msg ... xdcc send ...` command doesn't work if you haven't joined this channel.
+    " And a `/msg ... xdcc send ...` command doesn't work if you haven't joined this channel.
     " IOW, we need to run 2 commands:
     "
     "     /j #moviegods
@@ -123,19 +141,6 @@ fu! s:copy_cmd_to_get_file_via_xdcc() abort
     " With it, you can do:
     "
     "     cmd1 ; cmd2
-    "}}}
-    "   How to list all currently installed aliases?{{{
-    "
-    "     /alias list
-    "}}}
-    "   How to remove an alias?{{{
-    "
-    "     /alias del <alias>
-    "}}}
-    "   How to install an alias, running two commands?{{{
-    "
-    "     /alias add <alias> cmd1 ; cmd2
-    "                             ^
     "}}}
     let cmd = '/moviegods_send_me_file ' . msg
     let @" = cmd

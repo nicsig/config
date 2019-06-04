@@ -515,7 +515,8 @@ let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
 " For more info about `$XDG_RUNTIME_DIR`:
 "
 "     https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
-" }}}1
+" }}}2
+
 " backspace {{{2
 
 " Allow BS, Del, C-w, C-u to delete:
@@ -888,8 +889,7 @@ set cpoptions+=n
 "     xno  <silent>  .  :norm! .<cr>
 "
 " The issue is fixed in this commit:
-"
-"     https://github.com/vim/vim/releases/tag/v8.1.0686
+" https://github.com/vim/vim/releases/tag/v8.1.0686
 "
 " But it has not been merged in Neovim yet.
 "}}}
@@ -967,7 +967,7 @@ fu! s:customize_diff() abort
         " So, we may think there's an issue somewhere in our config.
         "}}}
         syn off
-    else
+    elseif v:option_new == 0
         " `:windo` is going to change the currently focused window; we need to restore it
         let winid = win_getid()
         " Why the timer?{{{
@@ -1051,7 +1051,7 @@ fu! s:restore_highlighting_after_diff() abort
     " > The `:diffoff` command resets the relevant options to the values they had when
     " > using `:diffsplit`, `:diffpatch` , `:diffthis`. or starting Vim in diff mode.
     "
-    " We could also run `:setl fmd=marker`, but other options could suffer from the same
+    " We could also run `:setl fdm=marker`, but other options could suffer from the same
     " issue in the future. Indeed, currently `:diffoff` affects:
     "
     "    - `'diff'`
@@ -1435,9 +1435,8 @@ let g:is_bash = 1
 
 
 " For more info, see this:
-"
-"         https://github.com/neovim/neovim/issues/5559
-"         https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=848663
+" https://github.com/neovim/neovim/issues/5559
+" https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=848663
 
 " isfname {{{2
 
@@ -1500,7 +1499,7 @@ set nojoinspaces
 " In the past, I think it caused the  index message after a search to be weirdly
 " displayed.
 "
-"         https://github.com/neovim/neovim/pull/6366#issuecomment-289273001
+" https://github.com/neovim/neovim/pull/6366#issuecomment-289273001
 "
 " Revisit this when the PR is merged.
 "}}}
@@ -6778,8 +6777,8 @@ endfu
 " So, for the moment, we don't want a terminal buffer to be modifiable.
 " It may change in the future though:
 "
-"     https://github.com/neovim/neovim/issues/5431
-"     https://github.com/neovim/neovim/pull/6142
+" https://github.com/neovim/neovim/issues/5431
+" https://github.com/neovim/neovim/pull/6142
 "
 " We can still paste text on the command-line though.
 " No matter what we copy, no matter where we are, it will be put on the command
@@ -7009,11 +7008,11 @@ endfu
 "
 " 12 -
 " read/bookmark/follow this:
-"     https://github.com/neovim/neovim/wiki/following-head
+" https://github.com/neovim/neovim/wiki/following-head
 "
 " and read this:
-"     https://neovim.io/doc/user/vim_diff.html#vim-differences
-"     :h vim-differences (in neovim)
+" https://neovim.io/doc/user/vim_diff.html#vim-differences
+" `:h vim-differences` (in neovim)
 "
 " ... in particular to improve our options
 "
@@ -7176,8 +7175,8 @@ endfu
 "
 " Think docker ultisnips:
 "
-"     https://github.com/sirver/ultisnips/blob/master/contributing.md#running-using-docker
-"     https://github.com/sirver/ultisnips/blob/master/contributing.md#reproducing-bugs
+" https://github.com/sirver/ultisnips/blob/master/contributing.md#running-using-docker
+" https://github.com/sirver/ultisnips/blob/master/contributing.md#reproducing-bugs
 "
 " 23 -
 " protect all temporary change of option with `try|catch|endtry`.
@@ -7596,12 +7595,11 @@ endfu
 " maybe we should use this instead:
 "
 "     let id = win_getid()
-"     …
+"     ...
 "     call win_gotoid(id)
 "
 " 51 -
-" read all of this:
-"     https://neovim.io/news/archive/
+" read all of this: https://neovim.io/news/archive/
 "
 " 52 -
 " read this:
@@ -7847,7 +7845,7 @@ endfu
 " In  neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
 " current neovim instance. But what about vim?
 "
-"     https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
+" https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 "
 " 67 -
 " Read:
@@ -7923,8 +7921,8 @@ endfu
 " It should make neovim download some missing files (i don't know where).
 " For more info:
 "
-"     https://github.com/neovim/neovim/issues/7694
-"     https://github.com/neovim/neovim/issues/7189
+" https://github.com/neovim/neovim/issues/7694
+" https://github.com/neovim/neovim/issues/7189
 "
 " Also, for debugging purpose, try `:spellinfo`.
 "
@@ -8656,7 +8654,8 @@ endfu
 " Because of this `c_^d` didn't work in Neovim.
 " It works now, because I've refactored the mapping to avoid `<expr>`.
 " But still, report it on Neovim's bug tracker.
-" Btw, it looks similar to another issue we opened.
+" Btw, it looks similar to another issue we opened:
+" https://github.com/neovim/neovim/issues/9006
 "
 " 116 -
 "
@@ -8786,30 +8785,18 @@ endfu
 " commented line.
 "
 " 127 -
-" Press `-P` in Neovim.
-" The cwd is printed in the middle of the command-line, instead of being at the left.
-" The issue is due to `execute()` being used in a function.
-" You could fix this now by adding `:redraw` before `:echo`.
-" But we would need to do this in several other places.
-" For the moment, wait for this PR to be merged:
-"
-"     https://github.com/neovim/neovim/pull/9338
-"
-" Then, see whether it fixes the issue.
-"
-" 128 -
 " The  `C-n` and  `C-p`  buffer-local  mappings installed  by  fugitive in  some
 " buffers, conflict with our global mappings to cycle through tabpages.
 " We're often distracted, because we wonder why our mappings are not working.
 "
-" 129 -
+" 128 -
 " Watch these videos about using Vim as a diff tool, and as a merge tool:
 " https://www.youtube.com/watch?v=zEah_HDpHzc
 " https://www.youtube.com/watch?v=VxpCgQyUXlI
 "
-" 130 - Read this: https://github.com/neovim/neovim/wiki/FAQ
+" 129 - Read this: https://github.com/neovim/neovim/wiki/FAQ
 "
-" 131 -
+" 130 -
 "
 "     $ vim -d ~/.bashrc ~/.zshrc
 "
@@ -8832,7 +8819,7 @@ endfu
 "
 " So, the statuslines are not reset to be quiet.
 "
-" 132 -
+" 131 -
 " Refactor your `]q` &friends mapping, so that they call `:[cl]above` and `:[cl]below`.
 " But do that only when Nvim has merged the Vim patch 8.1.1256.
 "
@@ -8845,7 +8832,7 @@ endfu
 " arbitrary qfl in the stack, via a count.
 " Once the patch has been ported to Nvim, use this command and get rid of `:CC`, `:LL`.
 "
-" 133 -
+" 132 -
 " In `~/.local/share/applications/gvim.desktop`, we write this:
 "
 "     TryExec=gvim -f
@@ -8884,7 +8871,7 @@ endfu
 "
 " Is it an error to use `-f`?
 "
-" 134 -
+" 133 -
 "
 "     ✔
 "     $ xdg-open ftp://ftp.vim.org/pub/vim/patches/8.0/README
@@ -8908,7 +8895,7 @@ endfu
 " Also: why does strace needs to be killed with C-c?
 " It doesn't if we disable our vimrc (:finish at the top).
 "
-" 135 -
+" 134 -
 " Document this:
 " When you need to bisect a long config file, note the current undo sequence number.
 " It will be useful later to restore the file in its original state.
@@ -8944,10 +8931,10 @@ endfu
 " We noticed that we could temporarily  and manually fix the issue by restarting
 " Vim from another pane.
 "
-" 136 -
+" 135 -
 " Assimilate the `Yank()` function, and the `~/bin/yank` script.
 "
-" 137 -
+" 136 -
 " Document this somewhere.
 " When you're writing a complex bug  report, *always* start by writing the title
 " of your issue, even if it's just a temporary title.
@@ -8964,24 +8951,7 @@ endfu
 "
 " Bottom line: the title of your issue is *very* important.
 "
-" 138 -
-" Diff 2 files (cod).
-" Close both windows by pressing `SPC q`.
-" The syntax highlighting has not been restored.
-"
-" You'll need  to make `s:restore_highlighting_after_diff()` a  public function,
-" so that it can be called by our vim-lg plugin (with `:windo call ...`).
-" Indeed, you need to call this  function for everything to work again properly;
-" it's not as simple as running `:syn enable`.
-"
-" 139 -
-" We have too many comments in this file about the bracketed paste mode.
-" Plus two fixmes.
-" Move all of that in a dedicated file (vim notes, terminal notes, ...).
-" I don't  care about  the fixmes  right now,  because I  don't use  the builtin
-" terminal, and because I never paste from insert mode.
-"
-" 140 -
+" 137 -
 " Document the fact  that you need to put  `<esc>` at the start of the  rhs of a
 " `:ono` mapping if it presses `v:operator`.
 "
@@ -9019,7 +8989,29 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 141 -
+" 138 -
+" We have too many comments in this file about the bracketed paste mode.
+" Plus two fixmes.
+" Move all of that in a dedicated file (vim notes, terminal notes, ...).
+" I don't  care about  the fixmes  right now,  because I  don't use  the builtin
+" terminal, and because I never paste from insert mode.
+"
+" 139 -
+" Diff 2 files (cod).
+" Close both windows by pressing `SPC q`.
+" The syntax highlighting has not been restored.
+"
+" You'll need  to make `s:restore_highlighting_after_diff()` a  public function,
+" so that it can be called by our vim-lg plugin (with `:windo call ...`).
+" Indeed, you need to call this  function for everything to work again properly;
+" it's not as simple as running `:syn enable`.
+"
+" ---
+"
+" Also, maybe you should colorize the  `[Diff]` indicator, so that it stands out
+" better. Right now, I barely notice it.
+"
+" 140 -
 " Document somewhere that instead of writing this (in your notes, a bug report, ...):
 "
 "     $ cat <<'EOF' >/tmp/vimrc
@@ -9034,6 +9026,23 @@ endfu
 "     ...
 "     EOF
 "     )
+"
+" 141 -
+"
+"     $ vim ~/.shrc
+"     :lvim /the/ %
+"     SPC q
+"     Vim(close):E444: Cannot close last window~
+"
+" I think that's  due to an autocmd  which closes the location  list window when
+" the associated window is closed.
+" Anyway, why does the original stays open while the location window is closed?
+" It's confusing. Shouldn't it be the opposite?
+"
+" Also, because of this, atm, when we press  `M-:` in a shell, an Nvim buffer is
+" opened with a location  window opened; and if we press `SPC  q`, we don't quit
+" Nvim because of this error, so if we have to press the key binding twice.
+" Find a way to make us quit Nvim in a single step.
 
 
 

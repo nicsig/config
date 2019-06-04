@@ -47,8 +47,8 @@ run '[ -d $XDG_RUNTIME_DIR/tmux ] || mkdir $XDG_RUNTIME_DIR/tmux'
 # Besides, it frees up keys for future key bindings.
 #}}}
 bind g display-menu -x P -y P \
-    'toggle logging' a { run ~/.tmux/plugins/tmux-logging/scripts/toggle_logging.sh } \
-    'save complete history' b { run ~/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh } \
+    'toggle logging' t { run ~/.tmux/plugins/tmux-logging/scripts/toggle_logging.sh } \
+    'save complete history' C { run ~/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh } \
     'screen capture' c { run ~/.tmux/plugins/tmux-logging/scripts/screen_capture.sh }
 
 set -g @logging-path "$XDG_RUNTIME_DIR/tmux"
