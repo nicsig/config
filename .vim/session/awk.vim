@@ -22,6 +22,7 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -573,13 +574,13 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-22
+26
 normal! zo
-let s:l = 24 - ((0 * winheight(0) + 0) / 1)
+let s:l = 28 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-24
+28
 normal! 0
 lcd ~/wiki/shell
 wincmd w
@@ -593,11 +594,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 99 - ((98 * winheight(0) + 13) / 26)
+let s:l = 64 - ((63 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-99
+64
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -605,7 +606,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
-edit ~/Desktop/tmux_Y_bug.md
+edit ~/wiki/shell/shell.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -627,16 +628,18 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 327 - ((0 * winheight(0) + 0) / 1)
+53
+normal! zo
+let s:l = 53 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-327
+53
 normal! 0
-lcd ~/.vim
+lcd ~/wiki/shell
 wincmd w
 argglobal
-if bufexists("~/wiki/tmux/environment.md") | buffer ~/wiki/tmux/environment.md | else | edit ~/wiki/tmux/environment.md | endif
+if bufexists("~/Desktop/tmux_Y_bug.md") | buffer ~/Desktop/tmux_Y_bug.md | else | edit ~/Desktop/tmux_Y_bug.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -645,18 +648,24 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 66 - ((65 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
-lcd ~/wiki/tmux
+66
+normal! 01|
+lcd ~/.vim
 wincmd w
-2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext 12
+tabnext
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+tabnext 13
 set stal=1
 badd +1 ~/Desktop/countries
 badd +963 ~/wiki/awk/sed.md
@@ -669,7 +678,7 @@ badd +41 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
 badd +404 ~/bin/upp.sh
 badd +147 ~/bin/restore-env.sh
 badd +150 ~/bin/yank
-badd +327 ~/Desktop/tmux_Y_bug.md
+badd +17 ~/wiki/shell/shell.md
 badd +394 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +130 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -678,9 +687,9 @@ badd +471 ~/.Xresources
 badd +147 ~/wiki/shell/process.md
 badd +1 ~/wiki/vim/install.md
 badd +105 ~/.vim/plugged/vim-debug/plugin/debug.vim
-badd +24 ~/wiki/shell/script.md
-badd +99 ~/Desktop/bug.md
-badd +60 ~/wiki/tmux/environment.md
+badd +28 ~/wiki/shell/script.md
+badd +64 ~/Desktop/bug.md
+badd +203 ~/Desktop/tmux_Y_bug.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -692,6 +701,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

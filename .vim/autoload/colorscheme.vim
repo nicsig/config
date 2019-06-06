@@ -188,7 +188,7 @@ fu! colorscheme#customize() abort "{{{2
     exe cmd
 
     " define the `CommentUnderlined` HG (useful for urls in comments)
-    let comment_definition = substitute(execute('hi Comment'), '\n\|xxx', '', 'g')
+    let comment_definition = substitute(execute('hi Comment'), '\n\|xxx\|Last set from.*', '', 'g')
     let comment_underlined_definition = substitute(comment_definition, 'Comment', 'CommentUnderlined', '')
     let comment_underlined_definition =
         \ substitute(comment_underlined_definition, '\m\C\<\%(term\|cterm\|gui\)=\S*', '', 'g')

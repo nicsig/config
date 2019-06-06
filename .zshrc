@@ -8,9 +8,6 @@ if [[ -n "${TMUX}" && -z "${TMUX_IS_CUSTOMIZED}" ]]; then
   return
 fi
 
-# Make sure we always have a core file, whenever a pgm crashes because of a hard-to-reproduce issue.
-ulimit -c unlimited
-
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
 #
@@ -4680,6 +4677,14 @@ fi
 #
 # Update:
 # Install a mapping (`-D`?) to get a tldr window when you press it on a command name.
+#
+# Update:
+# Install a local key binding in any tldr file to fuzzy search through all shell
+# commands given in answers.
+# In  the preview  pane,  make fzf  display a  description  (maybe the  question
+# associated with the command).
+# When you select a command, make fzf write  it in the clipboard, so that we can
+# paste it immediately on the shell's command-line.
 
 # TODO: Think about how better leveraging our zsh history.
 #

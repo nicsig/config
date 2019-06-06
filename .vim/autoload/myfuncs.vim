@@ -81,7 +81,12 @@ fu! s:format_shell_buffer() abort
     " we want to be able to repeat `]l` right from the start
     do <nomodeline> CursorHold
     let pat = '^٪.\+'
-    call matchadd('Statement', pat)
+    " Why the priority 0?{{{
+    "
+    " To allow  a search to highlight  text even if it's  already highlighted by
+    " this match.
+    "}}}
+    call matchadd('Statement', pat, 0)
     sil exe 'lvim /' . pat . '/j %'
     " the location list window is automatically opened by one of our autocmds;
     " conceal the location

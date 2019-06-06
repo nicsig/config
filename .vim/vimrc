@@ -5925,12 +5925,13 @@ com! -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | 
 
 " Tldr {{{2
 
+" TODO: Add completion
 com! -bar -nargs=1 Tldr call s:tldr(<q-args>)
 
 fu! s:tldr(shellcmd) abort
-    let out = systemlist('tldr ' . a:shellcmd)[:-2]
-    if out[0] =~# '^tldr page.*not found$'
-        echo out
+    let out = systemlist('tldr ' . a:shellcmd)
+    if get(out, 0, '') =~# '^tldr page.*not found$'
+        echo out[0]
         return
     endif
     call map(out, {i,v -> substitute(v, '\e.\{-}m\|\%x0f', '', 'g')})
@@ -8896,62 +8897,9 @@ endfu
 " It doesn't if we disable our vimrc (:finish at the top).
 "
 " 134 -
-" Document this:
-" When you need to bisect a long config file, note the current undo sequence number.
-" It will be useful later to restore the file in its original state.
-" Then press:
-"
-"    - `viE` (select whole file)
-"    - `myC` (yank code only)
-"    - `gv` (reselect whole file)
-"    - `p` (replace whole file with only code; in effect, you've removed empty/commented lines)
-"
-" Then, bisect the code.
-" Once you've found the problematic line(s),  press `-u` to restore the original
-" state of the file.
-"
-" ---
-"
-" Also, document this:
-"
-" When you  have a bug which  is hard to reproduce,  try to find an  easy way to
-" reset your environment so that the issue disappears.
-"
-" This serves two purposes.
-" First, it will help you manually and quickly fix the issue when needed.
-" Second, it will help you find a reliable MWE.
-" Indeed, to do so, you need to remember what you've done recently.
-" Don't let the bug last too long. The longer it lasts, the less chance you have
-" to retrieve in your memory the action which triggered it (“is it because I did
-" X?”, “or Y?”, “or Z?”, ...).
-"
-" We applied this trick  to find a MWE to reproduce the  issue where Vim redraws
-" the command-line/screen  prematurely when  we're trying to  copy some  text in
-" tmux copy-mode.
-" We noticed that we could temporarily  and manually fix the issue by restarting
-" Vim from another pane.
-"
-" 135 -
 " Assimilate the `Yank()` function, and the `~/bin/yank` script.
 "
-" 136 -
-" Document this somewhere.
-" When you're writing a complex bug  report, *always* start by writing the title
-" of your issue, even if it's just a temporary title.
-" Use the keywords in this title to search for information on the issue tracker.
-" This may help you find more relevant info, and a solution to your issue.
-" If not, go on writing your bug  report, but make sure to regularly revisit the
-" title  of  your issue,  and  update  it whenever  you  make  progress in  your
-" understanding of the issue.
-" And whenever you update the title of your issue, use its most important keywords
-" in a search on the issue tracker.
-"
-" If you had  followed this rule, you  would have wasted less  time when writing
-" your bug report concerning the truncation of the clipboard in tmux + st.
-"
-" Bottom line: the title of your issue is *very* important.
-"
-" 137 -
+" 135 -
 " Document the fact  that you need to put  `<esc>` at the start of the  rhs of a
 " `:ono` mapping if it presses `v:operator`.
 "
@@ -8989,14 +8937,14 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 138 -
+" 136 -
 " We have too many comments in this file about the bracketed paste mode.
 " Plus two fixmes.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
 " I don't  care about  the fixmes  right now,  because I  don't use  the builtin
 " terminal, and because I never paste from insert mode.
 "
-" 139 -
+" 137 -
 " Diff 2 files (cod).
 " Close both windows by pressing `SPC q`.
 " The syntax highlighting has not been restored.
@@ -9010,39 +8958,6 @@ endfu
 "
 " Also, maybe you should colorize the  `[Diff]` indicator, so that it stands out
 " better. Right now, I barely notice it.
-"
-" 140 -
-" Document somewhere that instead of writing this (in your notes, a bug report, ...):
-"
-"     $ cat <<'EOF' >/tmp/vimrc
-"     ...
-"     EOF
-"
-"     $ vim -Nu /tmp/vimrc
-"
-" You can write:
-"
-"     $ vim -Nu <(cat <<'EOF'
-"     ...
-"     EOF
-"     )
-"
-" 141 -
-"
-"     $ vim ~/.shrc
-"     :lvim /the/ %
-"     SPC q
-"     Vim(close):E444: Cannot close last window~
-"
-" I think that's  due to an autocmd  which closes the location  list window when
-" the associated window is closed.
-" Anyway, why does the original stays open while the location window is closed?
-" It's confusing. Shouldn't it be the opposite?
-"
-" Also, because of this, atm, when we press  `M-:` in a shell, an Nvim buffer is
-" opened with a location  window opened; and if we press `SPC  q`, we don't quit
-" Nvim because of this error, so if we have to press the key binding twice.
-" Find a way to make us quit Nvim in a single step.
 
 
 
@@ -9108,34 +9023,6 @@ nno <silent> <space>y y:<c-u>call <sid>yank(@0)<cr>
 "
 " Once finished, get back to studying the terminal and latex.
 
-
-
-augroup quick_and_dirty_settings
-    au!
-    au BufReadPost * call s:quick_and_dirty_settings()
-augroup END
-
-fu! s:quick_and_dirty_settings() abort
-    if getline(1) isnot# 'QnD'
-        return
-    endif
-
-    call cursor(1,1)
-    let end = search('^QnD_END$')
-    if !end
-        sil! norm! g`.
-    endif
-
-    let settings = getline(2, end - 1)
-    let b:quick_and_dirty_settings = tempname()
-    call writefile(settings, b:quick_and_dirty_settings)
-    augroup apply_quick_and_dirty_settings
-        au! * <buffer>
-        au BufWinEnter <buffer> exe 'so '.b:quick_and_dirty_settings
-    augroup END
-
-    sil! norm! g`.
-endfu
 
 
 

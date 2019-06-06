@@ -23,9 +23,7 @@ endif
 "}}}
 " I have an issue!{{{
 "
-" See this:
-"
-"     https://github.com/junegunn/fzf/issues/1055
+" See this: https://github.com/junegunn/fzf/issues/1055
 "}}}
 let g:fzf_layout = {'window': '10split +enew'}
 
