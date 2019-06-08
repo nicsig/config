@@ -406,6 +406,15 @@ set termencoding=utf-8
 " That is, after `:syntax enable` or after `vim-plug` has done its job.
 " Otherwise, the syntax elements it installs would be cleared.
 "}}}
+" Sometimes, the styles are not applied anymore!{{{
+"
+" In your config files and plugins, look for `syntax on` or `syntax enable`.
+" Whenever  you  run   one  of  these  commands,  you  need   to  reinstall  our
+" `styled_comments` autocmd, so that it  runs *after* the default syntax plugins
+" have been sourced; add this line right after `syntax on`:
+"
+"     call s:styled_comments()
+"}}}
 fu! s:styled_comments() abort
     let s:styled_comments_filetypes = [
         \ 'awk',

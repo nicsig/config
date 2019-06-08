@@ -95,7 +95,7 @@ setlocal fdn=20
 setlocal fen
 958
 normal! zo
-let s:l = 963 - ((157 * winheight(0) + 15) / 30)
+let s:l = 963 - ((83 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -232,7 +232,7 @@ normal! zo
 normal! zo
 186
 normal! zo
-let s:l = 130 - ((24 * winheight(0) + 14) / 28)
+let s:l = 130 - ((13 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -524,7 +524,7 @@ normal! zo
 normal! zo
 84
 normal! zo
-let s:l = 115 - ((24 * winheight(0) + 14) / 28)
+let s:l = 115 - ((13 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -611,11 +611,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 81 - ((80 * winheight(0) + 13) / 26)
+let s:l = 89 - ((88 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-81
+89
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -631,10 +631,7 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-4wincmd k
-wincmd w
+3wincmd k
 wincmd w
 wincmd w
 wincmd w
@@ -646,8 +643,7 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 1 + 16) / 33)
-exe '5resize ' . ((&lines * 22 + 16) / 33)
+exe '4resize ' . ((&lines * 24 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -682,11 +678,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 329
-normal! 015|
+normal! 05|
 lcd ~/wiki/tmux
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-markdown/autoload/markdown/link_inline2ref.vim") | buffer ~/.vim/plugged/vim-markdown/autoload/markdown/link_inline2ref.vim | else | edit ~/.vim/plugged/vim-markdown/autoload/markdown/link_inline2ref.vim | endif
+if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -695,38 +691,16 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-8
-normal! zo
-9
-normal! zo
-let s:l = 13 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1099 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-13
-normal! 09|
-lcd ~/.vim/plugged/vim-markdown
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-markdown/.git/index") | buffer ~/.vim/plugged/vim-markdown/.git/index | else | edit ~/.vim/plugged/vim-markdown/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
+1099
 normal! 0
-lcd ~/.vim/plugged/vim-markdown
+lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-markdown/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-markdown/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-markdown/.git/COMMIT_EDITMSG | endif
+if bufexists("~/.vim/tmp/websearch") | buffer ~/.vim/tmp/websearch | else | edit ~/.vim/tmp/websearch | endif
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -736,33 +710,32 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 11) / 22)
+let s:l = 1 - ((0 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim/plugged/vim-markdown/.git
+lcd ~/.vim
 wincmd w
-5wincmd w
+4wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 1 + 16) / 33)
-exe '5resize ' . ((&lines * 22 + 16) / 33)
+exe '4resize ' . ((&lines * 24 + 16) / 33)
 tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
-badd +963 ~/wiki/awk/sed.md
-badd +2 ~/wiki/man/examples/pathfind.1
-badd +106 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
-badd +204 ~/wiki/vim/ex.md
-badd +375 ~/wiki/st.md
-badd +12 ~/.config/st/patches/README.md
-badd +41 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
-badd +404 ~/bin/upp.sh
-badd +147 ~/bin/restore-env.sh
-badd +150 ~/bin/yank
+badd +1 ~/wiki/awk/sed.md
+badd +1 ~/wiki/man/examples/pathfind.1
+badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
+badd +1 ~/wiki/vim/ex.md
+badd +1 ~/wiki/st.md
+badd +1 ~/.config/st/patches/README.md
+badd +1 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
+badd +1 ~/bin/upp.sh
+badd +1 ~/bin/restore-env.sh
+badd +1 ~/bin/yank
 badd +1 ~/Desktop/tmux_Y_bug.md
 badd +394 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
@@ -773,11 +746,9 @@ badd +147 ~/wiki/shell/process.md
 badd +1 ~/wiki/vim/install.md
 badd +115 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +28 ~/wiki/shell/script.md
-badd +81 ~/Desktop/bug.md
+badd +7 ~/Desktop/bug.md
 badd +398 ~/wiki/tmux/option.md
-badd +11 ~/.vim/plugged/vim-markdown/autoload/markdown/link_inline2ref.vim
-badd +0 ~/.vim/plugged/vim-markdown/.git/index
-badd +0 ~/.vim/plugged/vim-markdown/.git/COMMIT_EDITMSG
+badd +1109 ~/.tmux.conf
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

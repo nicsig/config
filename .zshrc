@@ -1,13 +1,3 @@
-# When we debug tmux, we want a minimum amount of code to be sourced.{{{
-#
-# For example, the  syntax highlighting plugin may badly interfere  if we attach
-# to tmux via gdb.
-#}}}
-if [[ -n "${TMUX}" && -z "${TMUX_IS_CUSTOMIZED}" ]]; then
-  . "${HOME}/.zsh/minimal_zshrc.zsh"
-  return
-fi
-
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
 #
