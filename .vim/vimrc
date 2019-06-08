@@ -3683,10 +3683,22 @@ nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/' .
 nno  <silent>  <bar>c  :<c-u>call <sid>run_compiler()<cr>
 
 fu! s:run_compiler() abort
+    if &l:mp =~# '\m\C^desktop-file-validate\>'
+        sil update
+        let out = system('desktop-file-validate ' . shellescape(expand('%:p')))
+        if out is# ''
+            echo '[desktop-file-validate] OK'
+        else
+            echo out
+        endif
+        return
+    endif
+
     let is_shellcheck = &l:mp =~# '\m\C^shellcheck\>'
     update
     sil lmake!
     redraw!
+
     if &ft is# 'qf' && is_shellcheck
         " install  `gx` mapping, to  let us open the  wiki page where  the error
         " under the cursor is documented
@@ -5926,6 +5938,8 @@ com! -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | 
 " Tldr {{{2
 
 " TODO: Add completion
+" https://unix.stackexchange.com/a/310970/289772
+" https://github.com/Valodim/zsh-capture-completion
 com! -bar -nargs=1 Tldr call s:tldr(<q-args>)
 
 fu! s:tldr(shellcmd) abort

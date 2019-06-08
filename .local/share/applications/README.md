@@ -3,6 +3,14 @@
 <https://developer.gnome.org/integration-guide/stable/desktop-files.html.en>
 <https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#introduction>
 
+# What should I do after writing a desktop file?
+
+Pass it to `$ desktop-file-validate` to check whether it contains errors.
+
+    $ desktop-file-validate mypgm.desktop
+
+Or press `|c` while in Vim (custom mapping).
+
 ##
 # Where did you find the code for
 ## `st`?
@@ -11,7 +19,7 @@
 
 ## `typometer`?
 
-I looked at the desktop firl of gVim, and copied the most useful keys.
+I looked at the desktop file of gVim, and copied the most useful keys.
 
 ### Why do you run `$ sh -c`?
 
@@ -20,10 +28,21 @@ It's not expanded by default, so we rely on `$ sh` to do it instead.
 
 See: <https://stackoverflow.com/a/8980518/9780968>
 
-Note that contrary to what is written in this answer, there doesn't seem to be a
-need to escape the  dollar sign, provided that it's [inside a string][1].
-Also, if you have to use double quotes,  and you need to escape the dollar sign,
-then, according to the [specification][2], you need 2 backslashes:
+### Why double quotes (`$ sh -c "..."`) and not single quotes (`$ sh -c '...'`)?
+
+If you use single quotes, `$ desktop-file-validate` will complain:
+
+    /home/user/.local/share/applications/typometer.desktop: error: value "sh -c 'java -jar $HOME/bin/typometer-1.0.1.jar'" for key "Exec" in group "Desktop Entry" contains a reserved character ''' outside of a quote
+    /home/user/.local/share/applications/typometer.desktop: error: value "sh -c 'java -jar $HOME/bin/typometer-1.0.1.jar'" for key "Exec" in group "Desktop Entry" contains a reserved character '$' outside of a quote
+    /home/user/.local/share/applications/typometer.desktop: error: value "sh -c 'java -jar $HOME/bin/typometer-1.0.1.jar'" for key "Exec" in group "Desktop Entry" contains a reserved character ''' outside of a quote
+
+### Why the double backslash (`\\$HOME`)?
+
+Without, `$ desktop-file-validate` will complain:
+
+    /home/user/.local/share/applications/typometer.desktop: error: value "sh -c "java -jar $HOME/bin/typometer-1.0.1.jar"" for key "Exec" in group "Desktop Entry" contains a non-escaped character '$' in a quote, but it should be escaped with two backslashes ("\\$")
+
+This is due to the [specification][2]:
 
 > Note that the  general escape rule for  values of type string  states that the
 > backslash character can be escaped as ("\\") as well and that this escape rule

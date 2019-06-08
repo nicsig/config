@@ -100,6 +100,7 @@ fu! s:format_xdcc_buffer(pat_cmd) abort
     " remove noise
     exe 'sil keepj keepp v@'. a:pat_cmd . '@d_'
     sil keepj keepp %s/^.\{-}\d\+)\s*//e
+    sil update
 
     " highlight filenames
     let pat_file = '\d\+x\s*|\s*[0-9.MG]*\s*|\s*\zs\S*'

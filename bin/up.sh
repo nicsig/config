@@ -328,8 +328,7 @@ update_ranger() { #{{{1
   #}}}
   python3 -m pip install --user --upgrade .
   # You may enhance ranger by installing some optional dependencies:
-  #
-  #     https://github.com/ranger/ranger#dependencies
+  # https://github.com/ranger/ranger#dependencies
 }
 
 update_terminfo() { #{{{1

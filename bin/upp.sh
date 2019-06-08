@@ -815,7 +815,6 @@ xdg_mime_default() { #{{{2
         | xargs xdg-mime default gvim.desktop
   fi
 }
-
 # }}}1
 # Execution {{{1
 
