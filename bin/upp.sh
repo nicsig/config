@@ -603,7 +603,7 @@ install() { #{{{2
     # It's a bit long, maybe we could improve the code...
     #}}}
     if [[ "${DEBUG}" -ne 0 ]]; then
-      echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null ---backup=no y >>"${DEBUG_LOGFILE}"
+      echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null ---backup=no -y >>"${DEBUG_LOGFILE}"
     fi
     # If this command fails for Nvim, try this:{{{
     #

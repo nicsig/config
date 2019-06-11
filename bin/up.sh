@@ -64,7 +64,6 @@ EOF
 
   update_apt "$1"
   update_mpv_completion_function
-  update_pandoc_completion_function
   update_pip
   update_ranger
   update_terminfo
@@ -237,18 +236,6 @@ EOF
   curl -Ls 'https://raw.githubusercontent.com/mpv-player/mpv/master/TOOLS/zsh.pl' | \
     perl - \
     >"${HOME}/.zsh/my-completions/_mpv"
-  [[ $? ]] && printf -- 'Done\n'
-}
-
-update_pandoc_completion_function() { #{{{1
-  cat <<EOF
-
-pandoc completion function
---------------------------
-
-EOF
-
-  pandoc --bash-completion >"${HOME}/.zsh/my-completions/_pandoc"
   [[ $? ]] && printf -- 'Done\n'
 }
 

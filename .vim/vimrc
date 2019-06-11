@@ -432,6 +432,7 @@ fu! s:styled_comments() abort
         \ 'sed',
         \ 'sh',
         \ 'snippets',
+        \ 'systemd',
         \ 'tex',
         \ 'tmux',
         \ 'vim',
@@ -6461,7 +6462,7 @@ fu! s:make_clipboard_persist_after_quitting_vim() abort
     "     :let @+ = repeat('a', 999999)
     "     :10Time call system('xclip -selection clipboard', @+)
     "}}}
-    if !executable('xclip') || strlen(@+) == 0 || strlen(@+) > 999
+    if !executable('xclip') || strlen(@+) == 0 || strlen(@+) > 9999
         return
     endif
     " Why do you pass the text via the second argument of `system()`?{{{
@@ -7785,12 +7786,14 @@ endfu
 " 64 -
 " play with (or document):
 "
-"    - `win_execute()`: https://github.com/vim/vim/commit/868b7b6712ea4f2232eeeae18c5cbbbddf2ee84d
+"    - `expandcmd()`: https://github.com/vim/vim/releases/tag/v8.1.1510
 "
-"    - `:scriptversion`; https://github.com/vim/vim/commit/558ca4ae55096f8763ab8515a304cda9c57f18a7
+"    - `win_execute()`: https://github.com/vim/vim/releases/tag/v8.1.1418
 "
-"    - `:tcd`; https://github.com/vim/vim/commit/00aa069db8132851a91cfc5ca7f58ef945c75c73
-"    - `chdir()`; https://github.com/vim/vim/commit/1063f3d2008f22d02ccfa9dab83a23db52febbdc
+"    - `:scriptversion`; https://github.com/vim/vim/releases/tag/v8.1.1116
+"
+"    - `:tcd`; https://github.com/vim/vim/releases/tag/v8.1.1218
+"    - `chdir()`; https://github.com/vim/vim/releases/tag/v8.1.1291
 "
 "    - 'filewinid' (location list property)
 "    - :swapname
@@ -7798,7 +7801,7 @@ endfu
 "
 "    - 'user_data' entry in completion item
 "    - `CompleteChanged` event
-"    - `complete_info()`; https://github.com/vim/vim/commit/fd133323d4e1cc9c0e61c0ce357df4d36ea148e3
+"    - `complete_info()`; https://github.com/vim/vim/releases/tag/v8.1.1068
 "    - `TextChangedP` event
 "
 "    - `'varsofttabstop'`, `'vartabstop'`
@@ -7850,10 +7853,10 @@ endfu
 "
 "        `function Something(a = 10, b = 20, c = 30)`
 "
-"      https://github.com/vim/vim/commit/42ae78cfff171fbd7412306083fe200245d7a7a6
+"      https://github.com/vim/vim/releases/tag/v8.1.1310
 "
 "    - heredoc assignment (:h :let=<<)
-"      https://github.com/vim/vim/commit/f5842c5a533346c4ff41ff666e465c85f1de35d5
+"      https://github.com/vim/vim/releases/tag/v8.1.1354
 "
 " 65 -
 " prevent vim-session from checking swap files.

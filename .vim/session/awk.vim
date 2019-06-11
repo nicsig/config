@@ -36,7 +36,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -54,7 +55,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/wiki/awk/awk.md") | buffer ~/wiki/awk/awk.md | else | edit ~/wiki/awk/awk.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -66,7 +68,7 @@ setlocal fdn=20
 setlocal fen
 3317
 normal! zo
-let s:l = 4497 - ((1038 * winheight(0) + 14) / 28)
+let s:l = 4497 - ((358 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -84,7 +86,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -95,7 +98,7 @@ setlocal fdn=20
 setlocal fen
 958
 normal! zo
-let s:l = 963 - ((83 * winheight(0) + 15) / 30)
+let s:l = 963 - ((156 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -116,7 +119,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -133,7 +137,8 @@ normal! zt
 normal! 0
 lcd ~/wiki/man
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/wiki/man/man.md") | buffer ~/wiki/man/man.md | else | edit ~/wiki/man/man.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -153,7 +158,7 @@ normal! zo
 normal! zo
 466
 normal! zo
-let s:l = 31 - ((30 * winheight(0) + 14) / 28)
+let s:l = 31 - ((19 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -177,7 +182,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -212,7 +218,8 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-cmdline
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/Dropbox/vim_plugins/vimrc_grepper.vim") | buffer ~/Dropbox/vim_plugins/vimrc_grepper.vim | else | edit ~/Dropbox/vim_plugins/vimrc_grepper.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -232,7 +239,7 @@ normal! zo
 normal! zo
 186
 normal! zo
-let s:l = 130 - ((13 * winheight(0) + 14) / 28)
+let s:l = 130 - ((17 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -250,7 +257,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -276,7 +284,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -310,7 +319,8 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -329,7 +339,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/.config/st/patches/01_custom_config.diff") | buffer ~/.config/st/patches/01_custom_config.diff | else | edit ~/.config/st/patches/01_custom_config.diff | endif
 setlocal fdm=manual
 setlocal fde=0
@@ -348,7 +359,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/.Xresources") | buffer ~/.Xresources | else | edit ~/.Xresources | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -383,7 +395,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -400,7 +413,8 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-snippets
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/wiki/shell/process.md") | buffer ~/wiki/shell/process.md | else | edit ~/wiki/shell/process.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -410,7 +424,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 147 - ((146 * winheight(0) + 14) / 28)
+let s:l = 147 - ((145 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -434,7 +448,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -451,7 +466,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/wiki/vim/install.md") | buffer ~/wiki/vim/install.md | else | edit ~/wiki/vim/install.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -487,7 +503,8 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -508,7 +525,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/.vim/plugged/vim-debug/plugin/debug.vim") | buffer ~/.vim/plugged/vim-debug/plugin/debug.vim | else | edit ~/.vim/plugged/vim-debug/plugin/debug.vim | endif
 setlocal fdm=marker
 setlocal fde=0
@@ -524,7 +542,7 @@ normal! zo
 normal! zo
 84
 normal! zo
-let s:l = 115 - ((13 * winheight(0) + 14) / 28)
+let s:l = 115 - ((17 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -552,7 +570,8 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -581,7 +600,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/wiki/shell/script.md") | buffer ~/wiki/shell/script.md | else | edit ~/wiki/shell/script.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -593,15 +613,16 @@ setlocal fdn=20
 setlocal fen
 26
 normal! zo
-let s:l = 28 - ((0 * winheight(0) + 0) / 1)
+let s:l = 29 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-28
+29
 normal! 0
 lcd ~/wiki/shell
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/Desktop/bug.md") | buffer ~/Desktop/bug.md | else | edit ~/Desktop/bug.md | endif
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -611,11 +632,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 89 - ((88 * winheight(0) + 13) / 26)
+let s:l = 164 - ((163 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-89
+164
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -625,26 +646,13 @@ exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
 edit ~/Desktop/tmux_Y_bug.md
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
-wincmd w
-wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
-argglobal
+arglocal
+%argdel
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
 setlocal fmr={{{,}}}
@@ -653,89 +661,26 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/wiki/tmux/option.md") | buffer ~/wiki/tmux/option.md | else | edit ~/wiki/tmux/option.md | endif
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-323
-normal! zo
-let s:l = 329 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-329
-normal! 05|
-lcd ~/wiki/tmux
-wincmd w
-argglobal
-if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 1099 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1099
-normal! 0
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.vim/tmp/websearch") | buffer ~/.vim/tmp/websearch | else | edit ~/.vim/tmp/websearch | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim
-wincmd w
-4wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
 tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
-badd +1 ~/wiki/awk/sed.md
-badd +1 ~/wiki/man/examples/pathfind.1
-badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
-badd +1 ~/wiki/vim/ex.md
-badd +1 ~/wiki/st.md
-badd +1 ~/.config/st/patches/README.md
-badd +1 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
-badd +1 ~/bin/upp.sh
-badd +1 ~/bin/restore-env.sh
-badd +1 ~/bin/yank
+badd +963 ~/wiki/awk/sed.md
+badd +2 ~/wiki/man/examples/pathfind.1
+badd +106 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
+badd +204 ~/wiki/vim/ex.md
+badd +375 ~/wiki/st.md
+badd +12 ~/.config/st/patches/README.md
+badd +41 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
+badd +606 ~/bin/upp.sh
+badd +147 ~/bin/restore-env.sh
+badd +150 ~/bin/yank
 badd +1 ~/Desktop/tmux_Y_bug.md
 badd +394 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
@@ -745,10 +690,8 @@ badd +471 ~/.Xresources
 badd +147 ~/wiki/shell/process.md
 badd +1 ~/wiki/vim/install.md
 badd +115 ~/.vim/plugged/vim-debug/plugin/debug.vim
-badd +28 ~/wiki/shell/script.md
-badd +7 ~/Desktop/bug.md
-badd +398 ~/wiki/tmux/option.md
-badd +1109 ~/.tmux.conf
+badd +497 ~/wiki/shell/script.md
+badd +63 ~/Desktop/bug.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -760,6 +703,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

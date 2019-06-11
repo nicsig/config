@@ -321,7 +321,17 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 # add the `texlive` and `dasht` binaries to our path
 # Aren't `~/bin` and `~/.local/bin` already in `$PATH` by default?{{{
 #
-# Yes they are.
+# `~/bin` is there by default.
+# However, `~/.local/bin` is not there by default in Ubuntu 18.04 in a VM.
+#
+# Besides, both  paths are missing  when zsh  is started as  a login shell  in a
+# virtual console.  Indeed, in that case:
+#
+#     $ pstree -s -p $$
+#     systemd(1)---login(8518)---zsh(8579)---pstree(8900)~
+#
+# The shell  has only 2 ancestors,  none of which has a  PATH containing `~/bin`
+# nor `~/.local/bin`.
 #}}}
 #     How to find the first ancestor of my shell whose `$PATH` contains them?{{{
 #
@@ -360,17 +370,6 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 # `~/.profile` is – probably – initially copied from:
 #
 #     /etc/skel/.profile
-#}}}
-#     But if they're already there by default, why add them here again?{{{
-#
-# They would be missing when zsh is started as a login shell in a virtual console.
-# Indeed, in that case:
-#
-#     $ pstree -s -p $$
-#     systemd(1)---login(8518)---zsh(8579)---pstree(8900)~
-#
-# The shell  has only 2 ancestors,  none of which has a  PATH containing `~/bin`
-# nor `~/.local/bin`.
 #}}}
 export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/GitRepos/dasht/bin
 

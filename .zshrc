@@ -253,9 +253,6 @@ tmp=/run/user/$UID/tmp
 #                                   ├──────────────────────────────┐
 fpath=( ${HOME}/.zsh/my-completions ${HOME}/.zsh/zsh-completions/src $fpath )
 
-# we use `~/.zsh/my-func` to autoload some of our own custom functions
-fpath=( ${HOME}/.zsh/my_func $fpath )
-
 # Add completion for the `dasht` command:
 #
 #     https://github.com/sunaku/dasht
@@ -362,104 +359,23 @@ compdef vboxheadless=VBoxHeadless
 
 # What's the purpose of these commands?{{{
 #
-# For some commands, like `$ pandoc`, there's no easy way to find/generate a zsh
+# For some commands, like  `$ tldr`, there's no easy way  to find/generate a zsh
 # completion function. But there's one for bash.
 # In this case, it can be useful to use the bash completion function.
 # To do so, we need to install a compatibility layer to emulate `compgen` and `complete`.
 #
-# Source:
-#     $ man zshcompsys
+# Source: `$ man zshcompsys`.
 #}}}
 # Will it always work as expected?{{{
 #
-# It depends on whether the bash completion function you want to use needs
-# only `compgen` and/or `complete`.
+# It depends on whether the bash completion  function you want to use needs only
+# `compgen` and/or `complete`.
 # If so, it should work, otherwise probably not.
 #
-# Source:
-#     https://unix.stackexchange.com/a/417143/289772
+# Source: https://unix.stackexchange.com/a/417143/289772
 #}}}
 autoload -Uz bashcompinit
 bashcompinit
-
-# TODO: When you update zsh, try to remove all our code related to `$ pandoc`.{{{
-#
-# A commit has added support for completing `$ pandoc`:
-# https://github.com/zsh-users/zsh/commit/cecaad96cb9a2324e73c58f5dfa8b16fa0d3c589
-#}}}
-# Why do you need to source this `_pandoc` file here?{{{
-#
-# There's no default zsh completion function for pandoc:
-#     https://github.com/jgm/pandoc/issues/4668
-#
-# So, we try to use the bash one instead.
-#}}}
-# How did you generate this file?{{{
-#
-#     $ pandoc --bash-completion
-#}}}
-# Is there an alternative to `. /path/to/_pandoc`?{{{
-#
-# Yes:
-#     $ . =(pandoc --bash-completion)
-# Or:
-#     # From: https://pandoc.org/MANUAL.html
-#     $ eval "$(pandoc --bash-completion)"
-#}}}
-# Why don't you use it?{{{
-#
-# I don't want to re-generate the  bash completion function every time I start a
-# zsh shell.
-#}}}
-
-# Why do you use this `bash_source` function? Why don't you source `_pandoc` with a simple `source` or `.`?{{{
-#
-# To  avoid the  bash `shopt`  builtin and  to avoid  problems with  common bash
-# functions that have the same name as zsh ones.
-#}}}
-# Where did you find the code of these 2 functions?{{{
-#
-#     https://web.archive.org/web/20180404080213/http://zshwiki.org/home/convert/bash
-#}}}
-# Are they really necessary for us now? {{{
-#
-# They don't seem necessary for `pandoc`, at least atm.
-# They're not strictly necessary for `tldr`,  but without them, for some reason,
-# you would need to press Tab twice to get the completion menu.
-#}}}
-# TODO: Autoload the functions.
-bash_source() {
-  alias shopt=':'
-  alias _expand=_bash_expand
-  alias _complete=_bash_comp
-  emulate -L sh
-  setopt KSH_GLOB BRACE_EXPAND
-  unsetopt SH_GLOB
-
-  source "$@"
-}
-have() {
-  unset have
-  (( ${+commands[$1]} )) && have=yes
-}
-bash_source ~/.zsh/my-completions/_pandoc
-# TODO: Sourcing this completion function is too slow. Find a way to make it faster.{{{
-#
-# It's slow because it runs an external process:
-#
-#     tldr 2>/dev/null --list
-#
-# We should cache the output in a file, and ask the completion function to read it.
-# It's ok for the completion function to be slightly slow when we press Tab after `$ tldr`.
-# It is *not* ok for the sourcing of the function to be slow, because it affects
-# every zsh start.
-#
-# Update:
-# The completion still works, even though we've commented the next line.
-# However, we have to press Tab twice, instead of once.
-# How is that possible?
-#}}}
-#     bash_source ~/.zsh/my-completions/_tldr
 
 # Why removing the alias `run-help`?{{{
 #
@@ -737,8 +653,7 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 #                                              > s:string:
 #                                                     Force field splitting at the separator string.
 #}}}
-# TODO: read this:
-#   https://unix.stackexchange.com/a/477527/289772
+# TODO: read this: https://unix.stackexchange.com/a/477527/289772
 zstyle ':completion:*' list-colors ''
 
 zstyle ':completion:*' completer _expand _complete _correct _approximate
@@ -789,8 +704,7 @@ zstyle ':filter-select' case-insensitive yes
 # Suggest us only video files when we tab complete `$ mpv`.
 #
 # TODO: To explain.
-# Source:
-#     https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
+# Source: https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
 #
 # `(-.)`  is a  glob qualifier  restricting the  expansion to  regular files  or
 # symlinks pointing to to regular files.
@@ -829,119 +743,105 @@ if [[ ! -f "${HOME}/bin/fasd" ]]; then
   chmod +x "${HOME}/bin/fasd"
 fi
 
-# Why the guard?{{{
-#
-# In a virtual console, fasd slightly slows  down the shell when the prompt must
-# be updated (after executing a command like `cd` or `ls`).
-#
-# The culprit line is:
-#
-#     . "${fasd_cache}"
-#
-# We could disable  only this line, but  it wouldn't make sense  to execute some
-# code which we won't use, so we disable everything related to fasd.
-#}}}
-if [[ -n "${DISPLAY}" ]]; then
-  # When we start a shell, the fasd functions may slow the start up.
-  # As a workaround, we write them in a cache (`~/.fasd-init-zsh`), which we
-  # update when fasd is more recent.
-  fasd_cache="${HOME}/.fasd-init-zsh"
-  #     ┌ ~/bin/fasd is newer than the cache{{{
-  #     │                                           ┌ the cache doesn't exist, or it's empty
-  #     ├──────────────────────────────────────┐    ├──────────────────┐}}}
-  if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
-    # What does it do?{{{
-    #
-    # It writes some code in a cache.
-    # The code sets up:
-    #
-    #    - a command hook that executes on every command
-    #    - an advanced tab completion
-    #
-    # The hook will  scan your commands' arguments and determine  if any of them
-    # refer to existing files or directories.
-    # If yes, fasd will add them to its database.
-    #
-    # See `$ man fasd` for more info.
-    #}}}
-    # Why caching the code?{{{
-    #
-    # We use `fasd` as an external binary.
-    # Calling an external binary has some overhead.
-    # OTOH, sourcing some file has no overhead.
-    #}}}
-    # Where did you find the command?{{{
-    #
-    # Read the output of:
-    #
-    #     $ fasd --init auto
-    #
-    # Note the presence of an `eval` in the code.
-    # We don't use any `eval` to  avoid calling an external binary every time we
-    # start a shell.
-    # We source a cache instead.
-    #}}}
-    # What does each argument passed to `fasd` mean?{{{
-    #
-    #    ┌───────────────────┬──────────────────────────────────────────────────────┐
-    #    │ posix-alias       │ define aliases that applies to all posix shells      │
-    #    ├───────────────────┼──────────────────────────────────────────────────────┤
-    #    │ zsh-hook          │ define _fasd_preexec and add it to zsh preexec array │
-    #    ├───────────────────┼──────────────────────────────────────────────────────┤
-    #    │ zsh-ccomp         │ zsh command mode completion definitions              │
-    #    ├───────────────────┼──────────────────────────────────────────────────────┤
-    #    │ zsh-ccomp-install │ setup command mode completion for zsh                │
-    #    ├───────────────────┼──────────────────────────────────────────────────────┤
-    #    │ zsh-wcomp         │ zsh word mode completion definitions                 │
-    #    ├───────────────────┼──────────────────────────────────────────────────────┤
-    #    │ zsh-wcomp-install │ setup word mode completion for zsh                   │
-    #    └───────────────────┴──────────────────────────────────────────────────────┘
-    #}}}
-    fasd --init \
-      posix-alias \
-      zsh-hook \
-      zsh-ccomp \
-      zsh-ccomp-install \
-      zsh-wcomp \
-      zsh-wcomp-install >| "${fasd_cache}"
-      #                 │{{{
-      #                 └ >| word
-      # From `$ man zshmisc`:
-      #
-      # > Same  as >,  except that  the file  is truncated  to zero  length if  it
-      # > exists, even if CLOBBER is unset.
-      #}}}
-  fi
-  . "${fasd_cache}"
-  unset fasd_cache
-  # TODO: delete the cache from time to time (once per day)?{{{
+# When we start a shell, the fasd functions may slow the start up.
+# As  a workaround,  we write  them in  a cache  (`~/.fasd-init-zsh`), which  we
+# update when fasd is more recent.
+fasd_cache="${HOME}/.fasd-init-zsh"
+#     ┌ ~/bin/fasd is newer than the cache{{{
+#     │                                           ┌ the cache doesn't exist, or it's empty
+#     ├──────────────────────────────────────┐    ├──────────────────┐}}}
+if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
+  # What does it do?{{{
   #
-  # Look at our warning comment before the global alias `V`.
-  # It describes an issue which may be solved by removing the fasd cache.
+  # It writes some code in a cache.
+  # The code sets up:
   #
-  # More generally, maybe we should remove any cache from time to time.
+  #    - a command hook that executes on every command
+  #    - an advanced tab completion
+  #
+  # The hook will  scan your commands' arguments and determine  if any of them
+  # refer to existing files or directories.
+  # If yes, fasd will add them to its database.
+  #
+  # See `$ man fasd` for more info.
   #}}}
-
-  alias m='fasd -f -e mpv'
-  #                 │
-  #                 └ look for a file and open it with `mpv`
-
-  alias o='fasd -a -e xdg-open'
-  #                 │
-  #                 └ open with `xdg-open`
-
-  alias v='fasd -f -t -e vim -b viminfo'
-  #                 │  │      │
-  #                 │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
-  #                 │  └ open with vim
-  #                 └ match by recent access only
-
-  alias j='fasd_cd -d'
-  alias jj='fasd_cd -d -i'
-  unalias z zz
-
-  bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
+  # Why caching the code?{{{
+  #
+  # We use `fasd` as an external binary.
+  # Calling an external binary has some overhead.
+  # OTOH, sourcing some file has no overhead.
+  #}}}
+  # Where did you find the command?{{{
+  #
+  # Read the output of:
+  #
+  #     $ fasd --init auto
+  #
+  # Note the presence of an `eval` in the code.
+  # We don't use any `eval` to  avoid calling an external binary every time we
+  # start a shell.
+  # We source a cache instead.
+  #}}}
+  # What does each argument passed to `fasd` mean?{{{
+  #
+  #    ┌───────────────────┬──────────────────────────────────────────────────────┐
+  #    │ posix-alias       │ define aliases that applies to all posix shells      │
+  #    ├───────────────────┼──────────────────────────────────────────────────────┤
+  #    │ zsh-hook          │ define _fasd_preexec and add it to zsh preexec array │
+  #    ├───────────────────┼──────────────────────────────────────────────────────┤
+  #    │ zsh-ccomp         │ zsh command mode completion definitions              │
+  #    ├───────────────────┼──────────────────────────────────────────────────────┤
+  #    │ zsh-ccomp-install │ setup command mode completion for zsh                │
+  #    ├───────────────────┼──────────────────────────────────────────────────────┤
+  #    │ zsh-wcomp         │ zsh word mode completion definitions                 │
+  #    ├───────────────────┼──────────────────────────────────────────────────────┤
+  #    │ zsh-wcomp-install │ setup word mode completion for zsh                   │
+  #    └───────────────────┴──────────────────────────────────────────────────────┘
+  #}}}
+  fasd --init \
+    posix-alias \
+    zsh-hook \
+    zsh-ccomp \
+    zsh-ccomp-install \
+    zsh-wcomp \
+    zsh-wcomp-install >| "${fasd_cache}"
+    #                 │{{{
+    #                 └ >| word
+    # From `$ man zshmisc`:
+    #
+    # > Same  as >,  except that  the file  is truncated  to zero  length if  it
+    # > exists, even if CLOBBER is unset.
+    #}}}
 fi
+. "${fasd_cache}"
+unset fasd_cache
+# TODO: delete the cache from time to time (once per day)?{{{
+#
+# Look at our warning comment before the global alias `V`.
+# It describes an issue which may be solved by removing the fasd cache.
+#
+# More generally, maybe we should remove any cache from time to time.
+#}}}
+
+alias m='fasd -f -e mpv'
+#                 │
+#                 └ look for a file and open it with `mpv`
+
+alias o='fasd -a -e xdg-open'
+#                 │
+#                 └ open with `xdg-open`
+
+alias v='fasd -f -t -e vim -b viminfo'
+#                 │  │      │
+#                 │  │      └ use `viminfo` backend only (search only for files present in `viminfo`)
+#                 │  └ open with vim
+#                 └ match by recent access only
+
+alias j='fasd_cd -d'
+alias jj='fasd_cd -d -i'
+unalias z zz
+
+bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 
 # source fzf config
 # Do NOT edit this line!{{{
@@ -2893,6 +2793,59 @@ alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ranger'
 
 alias rg='rg 2>/dev/null --vimgrep -i -L'
 
+# sh {{{3
+
+# Purpose:{{{
+#
+# We can't use readline key bindings when using sh/dash.
+# When we need to test some command, it's annoying.
+# This alias enables some readline-like key bindings.
+#}}}
+# Why don't you use the default `dash`? Why `$HOME/.local/bin/dash`?{{{
+#
+# The default one has not been  compiled with `--with-libedit`, so you can't use
+# any editing key binding.
+#}}}
+#   Ok, how do I get this binary?{{{
+#
+#     $ git clone https://git.kernel.org/pub/scm/utils/dash/dash.git
+#     $ cd dash
+#     $ git checkout vX.Y.Z
+#     $ ./autogen.sh
+#     $ sudo aptitude install libedit-dev
+#     $ ./configure --with-libedit
+#     $ make
+#     $ cp src/dash ~/.local/bin/
+#}}}
+#     Why don't you install it with checkinstall?{{{
+#
+# It will try to overwrite the default sh, and will fail.
+# As a  result, sh will be  broken, which in  turn will break several  things on
+# your system (e.g. your M-j and M-k  key bindings, and your ixquick search from
+# Vim).
+#
+# You could try to  install it in a different directory,  but you would probably
+# also need to change the name of the package (mydash ?).
+# And even then, I'm concerned by a script whose shebang would be:
+#
+#     #!/usr/bin/env sh
+#
+# Does such a script exist on our system?
+# If it does, what would happen? Would it use our custom sh, or the default one?
+# If it uses our custom one, would it break?
+# Too many questions, too much uncertainty.
+#
+# If you  nevertheless fuck up  sh, you'll need  to downgrade it  to the old  version, but
+# `apt-get` will fail, presumably because it relies on a working sh.
+# In that case, run:
+#
+#     $ sudo ln -s /bin/bash /bin/sh
+#     $ sudo apt-get install dash=<old version given by `$ apt-cache policy`
+#}}}
+alias sh='$HOME/.local/bin/dash -E'
+#                                │
+#                                └ Enable the built-in emacs(1) command line editor
+
 # sudo {{{3
 
 # Why?{{{
@@ -2903,12 +2856,11 @@ alias rg='rg 2>/dev/null --vimgrep -i -L'
 #     # ✘
 #     $ sudo foo
 #
-# It won't  work because the shell  doesn't check for an alias  beyond the first
-# word.
-# The solution is given in `man bash` (/^ALIASES):
+# It won't work because the shell doesn't check for an alias beyond the first word.
+# The solution is given at `$ man bash /^ALIASES`:
 #
-#      If  the last  character of  the alias  value is  a blank,  then the  next
-#      command word following the alias is also checked for alias expansion.
+# > If the last character  of the alias value is a blank,  then the next command
+# > word following the alias is also checked for alias expansion.
 #
 # By creating the alias  `alias sudo='sudo '`, we make sure  that when the shell
 # will  expand  the alias  `sudo`  in  `sudo foo`,  the  last  character of  the
@@ -2916,9 +2868,7 @@ alias rg='rg 2>/dev/null --vimgrep -i -L'
 # This  will cause the shell  to check the next  word for an alias,  and make it
 # expand `foo`.
 #
-# See also:
-#
-#     https://askubuntu.com/a/22043/867754
+# See also: https://askubuntu.com/a/22043/867754
 #}}}
 alias sudo='sudo '
 
@@ -2992,10 +2942,6 @@ alias website_cwd='{ python3 -m http.server >/dev/null 2>&1 & ;} && disown %'
 # what_is_my_ip {{{3
 
 alias what_is_my_ip='curl ifconfig.me'
-
-# xbindkeys {{{3
-
-alias xbindkeys_restart='killall xbindkeys; xbindkeys -f "${HOME}/.config/keyboard/xbindkeys.conf"'
 
 # zsh_sourcetrace {{{3
 
@@ -3504,7 +3450,7 @@ bindkey -r '^G'
 # (remove the `{{` and `}}`).
 
 FZF_SNIPPET_COMMAND_COLOR='\x1b[38;5;33m'
-FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;7m'
+FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;35m'
 
 # snippet selection
 _fzf_snippet_main_widget() {
@@ -3830,26 +3776,6 @@ __reread_zshrc() {
 }
 zle -N __reread_zshrc
 bindkey '^X^R' __reread_zshrc
-
-# C-x C-s         reexecute-with-sudo {{{4
-
-# re-execute last command with higher privileges
-bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
-#        │               │      │{{{
-#        │               │      └ make sure `PATH` is preserved, in case `-E` didn't
-#        │               │
-#        │               └ preserve some variables in current environment
-#        │
-#        └ interpret the arguments as strings of characters
-#          without `-s`, `sudo` would be interpreted as the name of a zle widget
-#}}}
-
-# Alternative:
-#     bindkey -s '^Xs' 'sudo !!^M'
-#
-# The 1st command is more powerul,  because it should escalate the privilege for
-# the whole command-line.
-# Sometimes, `sudo` fails because it doesn't affect a redirection.
 
 # C-x D           end-of-list {{{4
 
@@ -4204,6 +4130,9 @@ bindkey '\em' __normalize_command_line
 # insert an entry from the output of the previous command,
 # selecting it with fuzzy search
 bindkey -s '\eZ' '$(!!|fzf)'
+#        │
+#        └ interpret the arguments as strings of characters
+#          without `-s`, `sudo` would be interpreted as the name of a zle widget
 # }}}2
 # Menuselect {{{2
 # Warning: I've disabled all key bindings using a printable character.{{{
@@ -4615,7 +4544,7 @@ fi
 # It doesn't seem necessary to export the variable.
 # `precmd_functions` is a variable specific to the zsh shell.
 # No subprocess could understand it.
-#     https://stackoverflow.com/a/1158231/9780968
+# https://stackoverflow.com/a/1158231/9780968
 # precmd_functions=(__restart_vim)
 # }}}1
 
@@ -4676,7 +4605,7 @@ fi
 # When you select a command, make fzf write  it in the clipboard, so that we can
 # paste it immediately on the shell's command-line.
 
-# TODO: Think about how better leveraging our zsh history.
+# TODO: Think about how we could better leverage our zsh history.
 #
 # For example, whenever you press `C-r` several times to retrieve the same old command,
 # immediately consider adding it to our zsh snippets in `~/.config/zsh-snippet/`.
@@ -4821,16 +4750,16 @@ fi
 
 # TODO: improve our scripts by reading:
 #
-#     http://www.kfirlavi.com/blog/2012/11/14/defensive-bash-programming/
+# http://www.kfirlavi.com/blog/2012/11/14/defensive-bash-programming/
 #
 # Also, have a look at `bashmount`:
 #
-#     https://github.com/jamielinux/bashmount
-#     https://www.youtube.com/watch?v=WaYZ9D7sX4U
+# https://github.com/jamielinux/bashmount
+# https://www.youtube.com/watch?v=WaYZ9D7sX4U
 
 # TODO: To document in our notes:
 #
-#     https://unix.stackexchange.com/a/88851/289772
+# https://unix.stackexchange.com/a/88851/289772
 
 # TODO: Do these substitutions:
 #
@@ -4861,8 +4790,7 @@ fi
 #     export CDPATH=:"${HOME}":/tmp
 #                    ^       ^
 #
-# See:
-#     https://unix.stackexchange.com/a/68748/289772
+# See: https://unix.stackexchange.com/a/68748/289772
 
 
 # TODO:
@@ -4876,8 +4804,36 @@ fi
 # TODO:
 # When we clone a git repo, it would be useful to automatically cd into it.
 # Install a hook to do that.
-# Read `man zshcontrib`, section `Manipulating Hook Functions`.
-# Also `man zshmisc`, section `SPECIAL FUNCTIONS`.
+# Read `$ man zshcontrib /Manipulating Hook Functions`.
+# Also `$ man zshmisc /SPECIAL FUNCTIONS`.
+#
+# ---
+#
+# Update: Let's try this:
+# https://unix.stackexchange.com/a/276472/289772
+#
+# Document the code:
+clone_check() {
+  emulate -L zsh
+  (($? != 0)) && return
+  local cmd=$history[$((HISTCMD-1))]
+  cmd=("${(@Q)${(z)cmd}}")
+  if [[ $cmd = "git clone "* ]]; then
+    local dir
+    if (($#cmd == 3)); then
+      dir=${cmd[3]:t}
+      dir=${dir%.git}
+      dir=${dir#*:}
+    elif (($#cmd > 3)); then
+      dir=$cmd[-1]
+    else
+      return
+    fi
+    print -r CDing into $dir > /dev/tty
+    cd -- $dir
+  fi
+}
+precmd_functions+=(clone_check)
 
 # TODO:
 # automatically highlight in red special characters on the command line
@@ -4890,8 +4846,7 @@ fi
 #            providing an opportunity to update the region_highlight array.
 #
 # Also read this:
-#
-#     https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/regexp.md
+# https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/docs/highlighters/regexp.md
 
 # TODO:
 # read this tuto
@@ -4910,26 +4865,6 @@ fi
 #     apt-file update
 #     apt-file -x search '/myalias$'
 
-# FIXME:
-# Find a video whose title contains a single quote; e.g.:
-#
-#   [HorribleSubs] JoJo's Bizarre Adventure - Golden Wind - 01 [480p].mkv
-#
-# Start ranger, navigate to the directory containing of the video, and play it.
-# Quit ranger:
-#
-#   zsh:1: unmatched '
-#
-# The issue is probably in ranger, because it persists even if I disable the zshrc.
-# However, I can't find anything wrong in:
-#
-#   ~/.config/ranger/rifle.conf
-#   →
-#   mime ^video,       has mpv,      X, flag f = mpv -- "$@"
-#                                                       ^^^^
-#                                                       should properly a video title
-#                                                       even if it contains a single quote
-
 # TODO:
 # understand: https://unix.stackexchange.com/questions/366549/how-to-deal-with-filenames-containing-a-single-quote-inside-a-zsh-completion-fun
 
@@ -4937,7 +4872,7 @@ fi
 # https://github.com/sindresorhus/pure (≈ 550 sloc, 2 fichiers: pure.zsh, async.zsh)
 
 # TODO: to read (about glob qualifiers):
-#   https://unix.stackexchange.com/a/471081/289772
+# https://unix.stackexchange.com/a/471081/289772
 
 # TODO: Install a key binding to kill ffmpeg.
 # It would be useful when we record our desktop, or the sound...

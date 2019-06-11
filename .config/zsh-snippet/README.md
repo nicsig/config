@@ -78,3 +78,66 @@ but it didn't work.
 If you  also redirect the  error stream  `>/dev/null </dev/null 2>&1`,  then the
 shell quits again.
 
+##
+# About `sudo -E env "PATH=$PATH" zsh -c "!!"`
+## why `-E`?
+
+To preserve some variables in current environment (`$ man sudo /^\s*-E\>`).
+
+## why `env "PATH=$PATH"`?
+
+To make sure `PATH` is preserved, in case `-E` was not enough.
+
+`$ env` runs the next command (here bash), in an arbitrarily modified environment.
+
+## why `bash -c`?
+
+To escalate the privileges for the whole command-line.
+Without, `sudo`  may fail if the  command includes a redirection  from/to a file
+owned by root.
+
+##
+## How to use a key binding instead of a snippet?
+
+    bindkey -s '^X^S' 'sudo -E env "PATH=$PATH" bash -c "!!"^M'
+             │
+             └ interpret the arguments as strings of characters
+               without `-s`, `sudo` would be interpreted as the name of a zle widget
+
+##
+# About `sudo zsh -c "$(typeset -f ...); ..."`
+## when do I need this snippet?
+
+Whenever you have a custom zsh function which needs root privileges.
+For example, `$ environ` works fine for a user process, but not for a root process:
+
+    $ environ 1
+    environ:9: permission denied: /proc/1/environ~
+
+The snippet can help:
+
+    $ sudo zsh -c "$(typeset -f environ); environ 1"
+    HOME=/~
+    init=/sbin/init~
+    NETWORK_SKIP_ENSLAVED=~
+    recovery=~
+    TERM=linux~
+    drop_caps=~
+    BOOT_IMAGE=/boot/vmlinuz-4.15.0-51-generic~
+    PATH=/sbin:/usr/sbin:/bin:/usr/bin~
+    PWD=/~
+    rootmnt=/root~
+
+For more info, see: <https://unix.stackexchange.com/a/269080/289772>
+
+##
+## why `$()`?
+
+`typeset -f ...` will output the code of a function.
+But we don't want to read the code; we want to run it.
+
+## why `zsh`, and not `bash`?
+
+The code is for a *zsh* function, since we're in zsh.
+So, zsh is the most appropriate shell to run it.
+
