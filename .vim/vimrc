@@ -315,10 +315,10 @@ augroup delay_slow_call
     " Why don't you use `++once`?{{{
     "
     " It wouldn't work.
-    " When one of these 2 autocmds is fired, it needs to remove itself *and* the
-    " other autocmd; `++once` can do the first part but not the second one.
+    " When one of these  autocmds is fired, it needs to  remove itself *and* the
+    " other ones; `++once` can do the first part but not the second one.
     "}}}
-    au CursorHold,InsertEnter * call s:delay_slow_call()
+    au CursorHold,CursorMoved,InsertEnter * call s:delay_slow_call()
     " Do NOT call the function when we enter debug mode (>).
     " It could raise spurious errors when we debug Vim (`$ vim -D`).
     au CmdlineEnter :,/,\?,@ call s:delay_slow_call()
@@ -4523,8 +4523,7 @@ nmap  crgg  <plug>(MakeDigraph)_
 " The dot command doesn't save that information.
 " So, we have to do it manually.
 
-" TODO:
-" maybe we could get rid of `myfuncs#set_reg()` and use `repeat#setreg()` instead.
+" TODO: maybe we could get rid of `myfuncs#set_reg()` and use `repeat#setreg()` instead.
 
 nno  <silent>  dr  :<c-u>call myfuncs#set_reg(v:register)
                   \ <bar>set opfunc=myfuncs#op_replace_without_yank<cr>g@

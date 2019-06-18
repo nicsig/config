@@ -39,4 +39,5 @@ main() { #{{{1
 # Execution {{{1
 
 main
+tput bel
 

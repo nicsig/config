@@ -420,6 +420,7 @@ if [[ ! -s "${HOME}/.ruby_user_dir_cache" ]]; then
   # A command similar to `$ printf`.
   # }}}
   #     `Gem.user_dir`? {{{
+  #
   # The path for gems in the user's home directory.
   # https://www.rubydoc.info/github/rubygems/rubygems/Gem.user_dir
   # }}}
@@ -501,10 +502,7 @@ export TLDR_QUOTE='italic'
 # XDG_* {{{1
 
 # directories relative to which various kinds of user-specific files should be written
-# For more info, see:{{{
-#
-#     https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
-#}}}
+# For more info, see: https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
 # The link talks about data files. What are they?{{{
 #
 #    - trash
@@ -580,6 +578,13 @@ export XDG_RUNTIME_DIR=/run/user/$UID
   #
   #     for key in "${!vars[@]}"; do
   #                   ^
+  # Also, I don't think bash supports  anonymous functions, so you would need to
+  # give a name to this function, and call it right after defining it:
+  #
+  #     func() {
+  #       ...
+  #     }
+  #     func
   #}}}
   for key in "${(k)vars[@]}"; do
     if [[ -n "${vars[$key]}" ]]; then

@@ -80,14 +80,26 @@ if exists('g:loaded_matchparen')
                  \ 'TextChangedI',
                  \ ]
     for event in events
-        if !exists('#' . event)
-            augroup my_default_autocmds
-                " An empty commented  line does nothing, so will  have a minimal
-                " impact  on Vim's  performance, but  is enough  to register  an
-                " autocmd listening to a given event.
-                exe 'au! ' . event . ' * "'
-            augroup END
-        endif
+        " Why not using a guard to only install the autocmd if there's none?{{{
+        "
+        " So, sth like this:
+        "
+        "     if !exists('#' . event)
+        "     ...
+        "     endif
+        "
+        " It wouldn't be reliable.
+        " Indeed, we could have a temporary one-shot autocmd listening to the event.
+        " In that case, the guard would prevent the installation of the autocmd running `"`.
+        " Shortly after, the one-shot autocmd could be removed, and we would end
+        " up with no autocmd listening to our event.
+        "}}}
+        augroup my_default_autocmds
+            " An empty commented  line does nothing, so will  have a minimal
+            " impact  on Vim's  performance, but  is enough  to register  an
+            " autocmd listening to a given event.
+            exe 'au! ' . event . ' * "'
+        augroup END
     endfor
 else
     " Why `silent!`?{{{

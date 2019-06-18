@@ -7,8 +7,8 @@ gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
 groff -man -Tascii {{program}}.man # check formatting of a manual page
 
-git stash; make clean; make distclean; sh autogen.sh && ./configure && make # compile tmux (useful when git-bisecting)
-git stash; make clean; make distclean; ./configure --enable-fail-if-missing --with-features=huge; make # compile vim
+git stash; make clean; make distclean; sh autogen.sh && ./configure && make ; tput bel # compile tmux (useful when git-bisecting)
+git stash; make clean; make distclean; ./configure --enable-fail-if-missing --with-features=huge; make ; tput bel # compile vim
 
 strace -o {{/tmp/log}} {{cmd}} # run a command, and trace the new process
 strace -o {{/tmp/log}} -p $(pidof {{cmd}}) # trace an existing process; run `less +F /tmp/log` to read it
@@ -16,8 +16,8 @@ strace -o {{/tmp/log}} -e trace={file|open|read} {{cmd}} # trace a command, but 
 
 NO_SYNTAX_HIGHLIGHTING=yes exec zsh
 
-tmux -Ltest -f/tmp/tmux.conf new # run a new tmux instance, with custom config
-tmux -Ltest -f/dev/null new # run a new tmux instance, with no config
+tmux -Lx -f/tmp/tmux.conf new # run a new tmux instance, with custom config
+tmux -Lx -f/dev/null new # run a new tmux instance, with no config
 
 vboxmanage unregistervm {{ubuntu}} --delete # delete VM
 vboxmanage controlvm {{ubuntu}} pause # pause VM
@@ -34,6 +34,7 @@ vboxmanage snapshot {{ubuntu}} restore {{snapname}} # restore arbitrary snapshot
 vboxmanage snapshot {{ubuntu}} take {{snapname}} --description "{{my snapshot}}" --live # take snapshot of VM
 
 vimdiff =({{cmd1}}) =({{cmd2}}) # compare output of 2 commands
+vim -q =(!!) +cw # use last output to populate Vim qf list
 
 xdg-mime query filetype {{file}} # get the mimetype of a file
 xdg-mime query default {{mimetype}} # get the default application which handles a particular type of data

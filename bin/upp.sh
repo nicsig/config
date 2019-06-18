@@ -826,4 +826,5 @@ xdg_mime_default() { #{{{2
 #}}}
 check_we_are_root
 main "$1" 2>&1 | tee -a "${LOGFILE}"
+tput bel
 

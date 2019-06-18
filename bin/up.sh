@@ -386,4 +386,5 @@ update_zsh_plugins() { #{{{1
 # Execution {{{1
 
 main
+tput bel
 

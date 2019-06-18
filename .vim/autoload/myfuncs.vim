@@ -22,6 +22,8 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     " it in the shell; see the one-shot autocmd at the end.
     "}}}
 
+    " do not syntax highlight as a conf file, if one of the first lines begins with `#`
+    syn off
     " Unfold everything, otherwise the next `delete` command may delete too many lines.{{{
     "
     " To see the issue, without `norm! zR`, press `pfx /` after `$ cat ~/.zshrc`,

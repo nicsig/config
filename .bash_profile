@@ -12,8 +12,7 @@
 # These quirks are annoying because hard to remember.
 #
 # We create this file to never have to remember them again.
-#
-#     https://unix.stackexchange.com/a/88266/232487
+# https://unix.stackexchange.com/a/88266/232487
 #
 # Now,  bash  will  always  read  this   file  as  a  login  shell,  and  ignore
 # `~/.bash_login` or `~/.profile` if they exist,  simply because this file has a

@@ -10,22 +10,11 @@ endif
 " Otherwise, in  Neovim, when you  invoke an fzf  Ex command (like  `:FZF`), you
 " will have 2 windows with an identical terminal buffer.
 "}}}
-" Do *not* use `{'window': '10split enew'}`!{{{
-"
-" This  value is  suggested in  `:h fzf-examples`,  but it  contains a  typo, it
-" really should be:
-"
-"     10split +enew
-"             ^
-"
-" Without the `+`, `enew` would be interpreted  as a filename, which can lead to
-" very-hard-to-debug issues.
-"}}}
 " I have an issue!{{{
 "
 " See this: https://github.com/junegunn/fzf/issues/1055
 "}}}
-let g:fzf_layout = {'window': '10split +enew'}
+let g:fzf_layout = {'window': '10new'}
 
 let g:fzf_action = {
     \ 'ctrl-t': 'tab split',

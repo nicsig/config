@@ -983,6 +983,7 @@ cfg_surfraw() { "${=EDITOR}" -o "${HOME}/.config/surfraw/bookmarks" "${HOME}/.co
 cfg_tmux() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
 cfg_vim() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
 cfg_w3m() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
+cfg_weechat() { "${=EDITOR}" "${HOME}/.config/weechat/script/rc.conf" ;}
 cfg_xbindkeys() { "${=EDITOR}" "${HOME}/.config/keyboard/xbindkeys.conf" ;}
 cfg_xfce_terminal() { "${=EDITOR}" "${HOME}/.config/xfce4/terminal/terminal.rc" ;}
 cfg_xmodmap() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
@@ -2962,6 +2963,9 @@ alias zsh_startup='repeat 10 time zsh -i -c exit'
 # because they can only be used at the end of a command.
 # To be expanded, an abbreviation needs to be followed by a space.
 
+# ring the bell
+alias -g B='; tput bel'
+
 # align columns
 alias -g C='| column -t'
 
@@ -3097,8 +3101,7 @@ ignore_these_cmds() {
   local first_word
   # zsh passes the command line to this function via $1
   # we extract the first word on the line
-  # Source:
-  #     https://unix.stackexchange.com/a/273277/289772
+  # Source: https://unix.stackexchange.com/a/273277/289772
   first_word=${${(z)1}[1]}
   # What's the effect of this `z` flag in the expansion of the `$1` parameter?{{{
   #
@@ -3128,7 +3131,7 @@ ignore_these_cmds() {
   #}}}
 
   # now we check whether it's somewhere in our array of commands to ignore
-  #     https://unix.stackexchange.com/a/411331/289772
+  # https://unix.stackexchange.com/a/411331/289772
   if ((${cmds_to_ignore_in_history[(I)$first_word]})); then
     # Why `2` instead of `1`?{{{
     #
@@ -3349,9 +3352,7 @@ fi
 
 # TODO: To document.
 #
-# Source:
-#
-#     https://unix.stackexchange.com/a/32426/232487
+# Source: https://unix.stackexchange.com/a/32426/232487
 #
 # Idea: improve the function so that it opens the completion menu,
 # this way we could cd into any directory (without `cd`, thanks to `AUTOCD`).
