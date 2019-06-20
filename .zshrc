@@ -2648,13 +2648,11 @@ alias iotop='iotop -o -P'
 # It should be highlighted as an alias.
 #
 # It's fixed by this commit:
-#
-#     https://github.com/zsh-users/zsh-syntax-highlighting/commit/cb8c736a564e0023a0ef4e7635c0eb4be5eb56a4
+# https://github.com/zsh-users/zsh-syntax-highlighting/commit/cb8c736a564e0023a0ef4e7635c0eb4be5eb56a4
 #
 # I use a purposefully older version of the zsh-syntax-highlighting plugin,
 # because this commit introduces a regression:
-#
-#     https://github.com/zsh-users/zsh-syntax-highlighting/issues/565
+# https://github.com/zsh-users/zsh-syntax-highlighting/issues/565
 #}}}
 alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
 
@@ -4549,6 +4547,7 @@ fi
 # precmd_functions=(__restart_vim)
 # }}}1
 
+. "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 if [[ -z "${NO_SYNTAX_HIGHLIGHTING}" ]]; then
   . "${HOME}/.zsh/syntax_highlighting.zsh"
 fi
@@ -4813,6 +4812,9 @@ fi
 # Update: Let's try this:
 # https://unix.stackexchange.com/a/276472/289772
 #
+# Try to fix this issue:
+# https://unix.stackexchange.com/questions/97920/how-to-cd-automatically-after-git-clone/276472#comment972969_276472
+#
 # Document the code:
 clone_check() {
   emulate -L zsh
@@ -4834,7 +4836,23 @@ clone_check() {
     cd -- $dir
   fi
 }
-precmd_functions+=(clone_check)
+precmd_functions+=(clone_check ring_the_bell)
+
+# Ring the bell after every command: https://stackoverflow.com/a/39397414/9780968
+# Why?{{{
+#
+# It's useful in case we start a long-running process, and we forgot to write at
+# the end `; tput bel` (or our global alias `B`).
+#}}}
+# TODO: If you keep this hook, you should probably remove `tput bel` from:
+#
+#     ~/.config/zsh-snippet/main.txt
+#     ~/bin/up.sh
+#     ~/bin/up_yt.sh
+#     ~/bin/upp.sh
+ring_the_bell() {
+  tput bel
+}
 
 # TODO:
 # automatically highlight in red special characters on the command line
@@ -4877,4 +4895,19 @@ precmd_functions+=(clone_check)
 
 # TODO: Install a key binding to kill ffmpeg.
 # It would be useful when we record our desktop, or the sound...
+
+# TODO: Make zsh eat a dollar sign at the start of a pasted command.
+#
+# Add this alias:
+#
+#     alias \$=''
+#
+# Source: https://github.com/zpm-zsh/undollar/blob/master/undollar.plugin.zsh
+#
+# We can't do it now, because it would raise this error:
+#
+#     zsh-syntax-highlighting: BUG: _zsh_highlight_main_highlighter_expand_path: called without argument~
+#
+# This is due to: https://github.com/zsh-users/zsh-syntax-highlighting/issues/565
+# Wait for this other issue to be fixed, then add the alias.
 

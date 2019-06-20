@@ -319,9 +319,9 @@ update_ranger() { #{{{1
 }
 
 update_terminfo() { #{{{1
-  curl -L http://invisible-island.net/datafiles/current/terminfo.src.gz -o /tmp/terminfo.scr.gz
-  gunzip /tmp/terminfo.scr.gz
-  tic -sx /tmp/terminfo.scr
+  curl -L http://invisible-island.net/datafiles/current/terminfo.src.gz -o /tmp/terminfo.src.gz
+  gunzip /tmp/terminfo.src.gz
+  tic -sx /tmp/terminfo.src
 }
 
 update_texlive() { #{{{1

@@ -22,6 +22,7 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -627,7 +628,16 @@ edit ~/wiki/tmux/format.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+4wincmd k
+wincmd w
+wincmd w
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
@@ -635,7 +645,10 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 22 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -645,13 +658,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-179
-normal! zo
-let s:l = 184 - ((0 * winheight(0) + 0) / 1)
+let s:l = 449 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-184
+449
 normal! 0
 lcd ~/wiki/tmux
 wincmd w
@@ -665,19 +676,83 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-500
-normal! zo
-let s:l = 514 - ((38 * winheight(0) + 14) / 28)
+let s:l = 497 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-514
-normal! 05|
+497
+normal! 0
 lcd ~/wiki/tmux
 wincmd w
-2wincmd w
+argglobal
+if bufexists("~/Desktop/answer.md") | buffer ~/Desktop/answer.md | else | edit ~/Desktop/answer.md | endif
+setlocal fdm=expr
+setlocal fde=fold#md#fde#stacked()
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+1
+normal! zo
+let s:l = 6 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+6
+normal! 031|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("/tmp/tmux.conf") | buffer /tmp/tmux.conf | else | edit /tmp/tmux.conf | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 21 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+21
+normal! 027|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 11) / 22)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/wiki/tmux
+wincmd w
+5wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 22 + 16) / 33)
+tabnext
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
@@ -691,7 +766,7 @@ badd +42 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
 badd +829 ~/bin/upp.sh
 badd +147 ~/bin/restore-env.sh
 badd +150 ~/bin/yank
-badd +184 ~/wiki/tmux/format.md
+badd +449 ~/wiki/tmux/format.md
 badd +4499 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +130 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -702,7 +777,10 @@ badd +1 ~/wiki/vim/install.md
 badd +115 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +497 ~/wiki/shell/script.md
 badd +63 ~/Desktop/bug.md
-badd +504 ~/wiki/tmux/option.md
+badd +6 ~/Desktop/answer.md
+badd +25 /tmp/tmux.conf
+badd +0 ~/wiki/tmux/option.md
+badd +0 ~/wiki/.git/index
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -714,7 +792,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
