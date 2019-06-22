@@ -188,7 +188,11 @@ fu! colorscheme#customize() abort "{{{2
     exe cmd
 
     " define the `CommentUnderlined` HG (useful for urls in comments)
-    let comment_definition = substitute(execute('hi Comment'), '\n\|xxx\|Last set from.*', '', 'g')
+    " Why the `:\s\+hi\s\+` and the `line\s*\d\+`?{{{
+    "
+    " When we start with `-V15/tmp/log`, the output of `hi Comment` contains more noise.
+    "}}}
+    let comment_definition = substitute(execute('hi Comment'), '\n\|xxx\|:\s\+hi\s\+\|line\s*\d\+\|Last set from.*', '', 'g')
     let comment_underlined_definition = substitute(comment_definition, 'Comment', 'CommentUnderlined', '')
     let comment_underlined_definition =
         \ substitute(comment_underlined_definition, '\m\C\<\%(term\|cterm\|gui\)=\S*', '', 'g')

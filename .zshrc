@@ -4547,8 +4547,8 @@ fi
 # precmd_functions=(__restart_vim)
 # }}}1
 
-. "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 if [[ -z "${NO_SYNTAX_HIGHLIGHTING}" ]]; then
+  . "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
   . "${HOME}/.zsh/syntax_highlighting.zsh"
 fi
 
