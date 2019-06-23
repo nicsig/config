@@ -105,7 +105,7 @@ fu! s:format_xdcc_buffer(pat_cmd) abort
     sil update
 
     " highlight filenames
-    let pat_file = '\d\+x\s*|\s*[0-9.MG]*\s*|\s*\zs\S*'
+    let pat_file = '\d\+x\s*|\s*[0-9.KMG]*\s*|\s*\zs\S*'
     call matchadd('Underlined', pat_file)
 
     " conceal commands
@@ -705,11 +705,11 @@ fu! myfuncs#gtfo_open_term(dir) abort
     endif
 
     if s:IS_TMUX
-        "                                   ┌ splits vertically (by default tmux splits horizontally)
-        "                                   │
-        sil call system('tmux split-window -h -c '.string(a:dir))
-        "                                      │
-        "                                      └ start-directory
+        sil call system('tmux splitw -h -c '.string(a:dir))
+        "                             │  │{{{
+        "                             │  └ start-directory
+        "                             └ splits vertically (by default tmux splits horizontally)
+        "}}}
     elseif s:IS_X_RUNNING
         sil call system(s:LAUNCH_TERM.' '.shellescape(a:dir).' &')
         redraw!
@@ -1425,12 +1425,12 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
         " therefore the  next time we  invoke the  function, it won't  split the
         " window, thinking the pane is still there.
         " We must make sure it's still open before going further.
-        "                                                           ┌ eliminate trailing newline
-        "                                                           ├───┐
         sil let open_panes = split(system("tmux list-panes -F '#D'")[:-2])
-        "                                                   │   │
-        "                                                   │   └ unique pane ID
-        "                                                   └ format the output according to the following string
+        "                                                  ├┘  ├┘   ├───┘{{{
+        "                                                  │   │    └ eliminate trailing newline
+        "                                                  │   └ unique pane ID
+        "                                                  └ format the output according to the following string
+        "}}}
         let is_pane_still_open = index(open_panes, s:pane_id) >= 0
         if !is_pane_still_open
             " the pane should be closed, but better be safe
@@ -1441,7 +1441,7 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
 
     if !exists('s:pane_id')
         sil let s:pane_id = system(
-            \ 'tmux split-window -c '.shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
+            \ 'tmux splitw -c '.shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
             \ )[:-2]
     endif
 
@@ -1466,8 +1466,7 @@ fu! s:tmux_run_this_shell_cmd(cmd) abort
     " Extract this function inside a dedicated plugin.
     "
     " Improve the reliability of the code by merging this PR:
-    "
-    "     https://github.com/jebaum/vim-tmuxify/pull/28
+    " https://github.com/jebaum/vim-tmuxify/pull/28
     "}}}
     let cmd = substitute(a:cmd, '\t', ' ', 'g')
     let cmd = substitute(cmd, '\\\s\+$', '\', '')
@@ -1476,10 +1475,10 @@ fu! s:tmux_run_this_shell_cmd(cmd) abort
     " `-l` disables key name lookup.
     " So, if the command contains `C-m`, tmux will send it literally to the shell.
     " Without `-l`, it would be translated into a CR.
-    let tmux_cmd = 'tmux send-keys -t '.s:pane_id.' -l '.shellescape(a:cmd)
-               \ . ' && tmux send-keys -t '.s:pane_id.' C-m'
+    let tmux_cmd = 'tmux send -t '.s:pane_id.' -l '.shellescape(a:cmd)
+               \ . ' \; send -t '.s:pane_id.' C-m'
     sil call system(tmux_cmd)
-    " The `-d`  in `tmux split-window ...`  means “do NOT give  focus“, so don't
+    " The `-d`  in `tmux splitw ...`  means “do NOT give  focus“, so don't
     " try to use `tmux last-pane`, there's no last pane.
 endfu
 
@@ -1490,7 +1489,7 @@ fu! myfuncs#tmux_last_command() abort
     endif
 
     sil! update
-    let number_of_panes = system('tmux display-message -p "#{window_panes}"')[:-2]
+    let number_of_panes = system('tmux display -p "#{window_panes}"')[:-2]
     " If there's only one pane, we want to:
     "    - open one
     "    - grab the command following the first `Usage:` in the file
@@ -1503,7 +1502,7 @@ fu! myfuncs#tmux_last_command() abort
         endif
 
         sil let s:pane_id =
-            \ system('tmux split-window -d -h -p 30 -c ' . shellescape(expand('%:p:h')) . ' -PF "#D"')[:-2]
+            \ system('tmux splitw -d -h -p 30 -c ' . shellescape(expand('%:p:h')) . ' -PF "#D"')[:-2]
         call s:tmux_run_this_shell_cmd(cmd)
 
         augroup tmux_last_cmd_close_pane
@@ -1554,37 +1553,37 @@ endfu
 "
 " TODO: Review these tmux-navigator functions.
 
-" echo system('tmux -S /tmp/tmux-1000/default display-message -p "#{pane_current_command}"')
+"     echo system('tmux -S /tmp/tmux-1000/default display -p "#{pane_current_command}"')
 
-" fu! myfuncs#navigate(dir) abort
-"     if !empty($TMUX)
-"         call s:tmux_navigate(a:dir)
-"     else
+"     fu! myfuncs#navigate(dir) abort
+"         if !empty($TMUX)
+"             call s:tmux_navigate(a:dir)
+"         else
+"             call s:vim_navigate(a:dir)
+"         endif
+"     endfu
+
+"     fu! s:tmux_navigate(dir) abort
+"         let x = winnr()
 "         call s:vim_navigate(a:dir)
-"     endif
-" endfu
+"         if winnr() ==# x
+"             "                                       ┌ path to tmux socket
+"             "                    ┌──────────────────┤
+"             let cmd = 'tmux -S '.split($TMUX, ',')[0].' '.
+"                         \ 'select-pane -' . tr(a:dir, 'hjkl', 'LDUR')
+"             sil! call system(cmd)
+"         endif
+"     endfu
 
-" fu! s:tmux_navigate(dir) abort
-"     let x = winnr()
-"     call s:vim_navigate(a:dir)
-"     if winnr() ==# x
-"         "                                       ┌ path to tmux socket
-"         "                    ┌──────────────────┤
-"         let cmd = 'tmux -S '.split($TMUX, ',')[0].' '.
-"                     \ 'select-pane -' . tr(a:dir, 'hjkl', 'LDUR')
-"         sil! call system(cmd)
-"     endif
-" endfu
-
-" fu! s:vim_navigate(dir) abort
-"     try
-"         exe 'wincmd '.a:dir
-"     catch
-"         echohl ErrorMsg
-"         echo 'E11: Invalid in command-line window; <cr> executes, CTRL-C quits: wincmd ' . a:dir
-"         echohl None
-"     endtry
-" endfu
+"     fu! s:vim_navigate(dir) abort
+"         try
+"             exe 'wincmd '.a:dir
+"         catch
+"             echohl ErrorMsg
+"             echo 'E11: Invalid in command-line window; <cr> executes, CTRL-C quits: wincmd ' . a:dir
+"             echohl None
+"         endtry
+"     endfu
 
 " trans {{{1
 
