@@ -611,11 +611,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 136 - ((135 * winheight(0) + 13) / 26)
+let s:l = 5 - ((4 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-136
+5
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -629,10 +629,7 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
+2wincmd k
 wincmd w
 wincmd w
 wincmd t
@@ -642,8 +639,7 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -653,30 +649,20 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 844 - ((0 * winheight(0) + 0) / 1)
+272
+normal! zo
+543
+normal! zo
+766
+normal! zo
+827
+normal! zo
+let s:l = 830 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-844
+830
 normal! 0
-lcd ~/wiki/tmux
-wincmd w
-argglobal
-if bufexists("~/wiki/tmux/todo.md") | buffer ~/wiki/tmux/todo.md | else | edit ~/wiki/tmux/todo.md | endif
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 193 - ((6 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-193
-normal! 01|
 lcd ~/wiki/tmux
 wincmd w
 argglobal
@@ -708,7 +694,7 @@ setlocal fml=0
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -716,11 +702,10 @@ normal! zt
 normal! 0
 lcd ~/wiki/.git
 wincmd w
-4wincmd w
+3wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-exe '4resize ' . ((&lines * 24 + 16) / 33)
+exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
@@ -731,21 +716,20 @@ badd +1 ~/wiki/vim/ex.md
 badd +1 ~/wiki/st.md
 badd +1 ~/.config/st/patches/README.md
 badd +1 ~/.vim/plugged/vim-snippets/UltiSnips/markdown.snippets
-badd +1 ~/bin/upp.sh
+badd +35 ~/bin/upp.sh
 badd +1 ~/bin/restore-env.sh
-badd +1 ~/bin/yank
-badd +844 ~/wiki/tmux/format.md
-badd +4504 ~/wiki/awk/awk.md
-badd +31 ~/wiki/man/man.md
-badd +130 ~/Dropbox/vim_plugins/vimrc_grepper.vim
-badd +33 ~/.config/st/patches/01_custom_config.diff
-badd +471 ~/.Xresources
-badd +153 ~/wiki/shell/process.md
+badd +150 ~/bin/yank
+badd +848 ~/wiki/tmux/format.md
+badd +1 ~/wiki/awk/awk.md
+badd +1 ~/wiki/man/man.md
+badd +1 ~/Dropbox/vim_plugins/vimrc_grepper.vim
+badd +1 ~/.config/st/patches/01_custom_config.diff
+badd +1 ~/.Xresources
+badd +1 ~/wiki/shell/process.md
 badd +1 ~/wiki/vim/install.md
-badd +115 ~/.vim/plugged/vim-debug/plugin/debug.vim
-badd +29 ~/wiki/shell/script.md
-badd +136 ~/Desktop/bug.md
-badd +195 ~/wiki/tmux/todo.md
+badd +1 ~/.vim/plugged/vim-debug/plugin/debug.vim
+badd +1 ~/wiki/shell/script.md
+badd +1 ~/Desktop/bug.md
 badd +0 ~/wiki/.git/index
 badd +0 ~/wiki/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
