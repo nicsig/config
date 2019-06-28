@@ -1194,6 +1194,26 @@ EOF
   fi
   printf -- '%s\n' "$@"
 }
+# fa  fdd {{{2
+
+fa() {
+  emulate -L zsh
+  fasd -A "$1"
+  if ! fasd | grep "^$1$"; then
+    echo "failed to add $1"
+  fi
+}
+
+# `fd` is already taken by `/usr/bin/fd` (`$ man fd`).
+fdd() {
+  emulate -L zsh
+  fasd -D "$1"
+  if ! fasd | grep "^$1$"; then
+    echo "removed $1"
+  else
+    echo "failed to remove"
+  fi
+}
 #}}}2
 
 ff_audio_extract() { #{{{2
@@ -2786,7 +2806,7 @@ alias qmv='qmv --format=destination-only'
 
 # ranger {{{3
 
-alias fm='[[ -n "${TMUX}" ]] && tmux rename-window fm; ranger'
+alias fm='[[ -n "${TMUX}" ]] && [[ $(tmux display -p "#W") == "zsh" ]] && tmux rename-window fm; ranger'
 
 # rg {{{3
 
@@ -4453,11 +4473,11 @@ setopt RM_STAR_SILENT
 # However, you may find a way to  configure how they advertise themselves to the
 # programs they run, like this:
 #
-#     1. right-click
-#     2. preferences
-#     3. compatibility
+#    1. right-click
+#    2. preferences
+#    3. compatibility
 #
-# urxvt uses ~/.Xresources.
+# urxvt uses `~/.Xresources`.
 #}}}
 # Why do we, on some conditions, reassign `xterm-256color` to `$TERM`?{{{
 #
@@ -4467,7 +4487,7 @@ setopt RM_STAR_SILENT
 # limited amount  of escape  sequences used  to encode 8  colors, and  they will
 # restrict themselves to a limited palette.
 #}}}
-# Ok, but why do it in this file?{{{
+#   Ok, but why do it in this file?{{{
 #
 # The configuration  of `$TERM` should  happen only in a  terminal configuration
 # file.
@@ -4480,7 +4500,7 @@ setopt RM_STAR_SILENT
 # should find `COLORTERM` whose value is set to 'xfce4-terminal'.
 # We're going to use it to detect an xfce4 terminal.
 #}}}
-# Is it enough?{{{
+#   Is it enough?{{{
 #
 # No, watch this:
 #
@@ -4492,7 +4512,7 @@ setopt RM_STAR_SILENT
 #   5. $ tmux (connect to running server)
 #   6. $ echo $TERM  →  xterm-256color  ✘
 #
-# We must NOT  reset `$TERM` when the  terminal is connecting to  a running tmux
+# We must *not* reset `$TERM` when the  terminal is connecting to a running tmux
 # server.
 # Because the latter will already have set `$TERM` to 'tmux-256color' (thanks to
 # the  option 'default-terminal'  in `~/.tmux.conf`),  which is  one of  the few
@@ -4512,6 +4532,11 @@ setopt RM_STAR_SILENT
 # Still, I  think it's a  good idea to set  `$TERM` to `xterm-256color`  only if
 # it's currently set to `xterm`.
 #}}}
+# Why don't you export it in `~/.zshenv`?{{{
+#
+# It  worked in  the past,  but it  doesn't work  anymore in  an xfce  terminal,
+# because when `~/.zshenv` is sourced, `TERM` and `COLORTERM` are not set yet.
+#}}}
 # Alternative to support Gnome terminal, Terminator, and XFCE4 terminal:{{{
 #
 #     if [[ "${TERM}" == "xterm" ]]; then
@@ -4526,11 +4551,6 @@ setopt RM_STAR_SILENT
 #
 # Source:
 # https://github.com/romainl/Apprentice/wiki/256-colors-and-you
-#}}}
-# Why don't you export it in `~/.zshenv`?{{{
-#
-# It  worked in  the past,  but it  doesn't work  anymore in  an xfce  terminal,
-# because when `~/.zshenv` is sourced, `TERM` and `COLORTERM` are not set yet.
 #}}}
 if [[ "${TERM}" == 'xterm' ]]; then
   if [[ "${COLORTERM}" == 'xfce4-terminal' || -n "${KONSOLE_PROFILE_NAME}" ]]; then
