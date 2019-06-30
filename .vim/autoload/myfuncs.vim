@@ -1445,8 +1445,8 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
             \ )[:-2]
     endif
 
-    let delim = '__::__'
-    sil let pane_current_path = systemlist('tmux list-panes -F "#{pane_current_path}"' . delim . '"#D"')
+    let delim = '$(echo x | tr x ''\001'')'
+    sil let pane_current_path = systemlist('tmux list-panes -F "#{pane_current_path}' . delim . '#D"')
     call filter(pane_current_path, {i,v -> v =~# '\m\C' . delim . s:pane_id . '$'})
     let pane_current_path = substitute(get(pane_current_path, 0, ''), delim . '.\{-}$', '', '')
 

@@ -828,8 +828,8 @@ endif
 " When we move the cursor (hjkl wbe …) and Vim consumes a lot of cpu / is slow,
 " it can be for 2 reasons:
 "
-"         - we're inside a deep nested fold:  solution → open folds (zR)
-"         - 'showcmd' is enabled:             solution → disable it
+"    - we're inside a deep nested fold:  solution → open folds (zR)
+"    - 'showcmd' is enabled:             solution → disable it
 
 " Even though it can have an impact on performance, we enable 'showcmd',
 " because sometimes it's useful to see what we type. Also, it's useful to see
@@ -1494,8 +1494,7 @@ set nojoinspaces
 " I don't like that, and it could have a bad impact on performance.
 "
 " TODO:
-" Why does resetting 'lz' in Vim does NOT make `gj` being displayed when I press
-" `j`?
+" Why does resetting 'lz' in Vim does NOT make `gj` being displayed when I press `j`?
 " And why does setting 'lz' in gVim DOES make `gj` being displayed when I press `j`?
 " MWE:
 "
@@ -1503,6 +1502,9 @@ set nojoinspaces
 "     nno  k  gk
 "     set lazyredraw
 "     set showcmd
+"
+" Update: I can't reproduce anymore.
+" Was the issue due to gtk3? (now we use gtk2, for a latency reason)
 "}}}
 " TODO: Is 'lazyredraw' broken in Neovim?{{{
 "
@@ -2639,8 +2641,8 @@ set wildmode=full
 "
 " The key to press for Vim to start a wildcard expansion, from:
 "
-"     - the recording of a macro
-"     - the rhs of a mapping
+"    - the recording of a macro
+"    - the rhs of a mapping
 "}}}
 " What does the value `26` stand for?{{{
 "

@@ -46,7 +46,7 @@ run '[ -d $XDG_RUNTIME_DIR/tmux ] || mkdir $XDG_RUNTIME_DIR/tmux'
 # Well, *one* key binding is easier to remember than *three*.
 # Besides, it frees up keys for future key bindings.
 #}}}
-bind g display-menu -x P -y P \
+bind g display-menu -y 0 \
     'toggle logging' t { run ~/.tmux/plugins/tmux-logging/scripts/toggle_logging.sh } \
     'save complete history' C { run ~/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh } \
     'screen capture' c { run ~/.tmux/plugins/tmux-logging/scripts/screen_capture.sh }

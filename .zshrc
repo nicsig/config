@@ -9,6 +9,31 @@
 #}}}
 bindkey -e
 
+# Why 4096?{{{
+#
+# The limit size for a core file must be expressed as a number of blocks.
+#
+#     $ ulimit -d -c
+#     -d: data seg size (kbytes)          unlimited~
+#     -c: core file size (blocks)         4096~
+#                         ^^^^^^
+#
+# Atm, the size of a block on our filesystem is 4096 bytes:
+#
+#     $ sudo blockdev --getbsz /dev/sda1
+#     4096~
+#
+# We want to grant around 10 mebibytes for a process to leave a core file.
+# To get a number of blocks which is an integer, we'll use an actual limit which
+# is a power of 2.
+# 2^23 bytes is about 8 mebibytes, so  we'll grant 2^24 bytes, which is about 16
+# mebibytes; and 16 mebibytes is exactly 4096 blocks of 4096 bytes:
+#
+#     $ bc <<<'2^24 / 4096'
+#     4096~
+#}}}
+ulimit -c 4096
+
 # disable XON/XOFF flow control
 # Why?{{{
 #
@@ -3529,15 +3554,6 @@ _fzf_snippet_placeholder() {
     # The sequence of characters `\001` would not be translated into a literal ‘C-a’.
     #
     # MWE:
-    #     func() {
-    #       A="$(tr 'x' '\001' <<<'x')"
-    #       echo "s${A}bar${A}${A}" | od -t c
-    #       sed "s${A}bar${A}${A}" <<<'foo bar baz'
-    #     }
-    #     $ func
-    #     0000000   s 001   b   a   r 001 001  \n~
-    #     0000010~
-    #     foo  baz~
     #
     #     func() {
     #       A="\001"
@@ -3549,6 +3565,16 @@ _fzf_snippet_placeholder() {
     #     0000020  \n~
     #     0000021~
     #     foo bar baz~
+    #
+    #     func() {
+    #       A="$(tr 'x' '\001' <<<'x')"
+    #       echo "s${A}bar${A}${A}" | od -t c
+    #       sed "s${A}bar${A}${A}" <<<'foo bar baz'
+    #     }
+    #     $ func
+    #     0000000   s 001   b   a   r 001 001  \n~
+    #     0000010~
+    #     foo  baz~
     #}}}
     A="$(tr 'x' '\001' <<<'x')"
     BUFFER=$(echo -E ${BUFFER} | sed "s${A}${placeholder}${A}${A}")
