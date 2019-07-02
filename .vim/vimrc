@@ -2392,10 +2392,10 @@ endif
 " a character which is not in 'isk' (space or comma for example).
 "
 " We can download such a file at the following url:
-"         https://archive.org/stream/mobythesauruslis03202gut/mthesaur.txt
+" https://archive.org/stream/mobythesauruslis03202gut/mthesaur.txt
 "
 " Otherwise, search the following query on google:
-"         mthesaur.txt filetype:txt
+" > mthesaur.txt filetype:txt
 
 set thesaurus+=$HOME/.vim/tools/mthesaur.txt
 
@@ -5790,6 +5790,7 @@ fu! s:plugins_update() abort
     "     _
     "
     " https://stackoverflow.com/a/458001/8243465
+    " https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_282
 "}}}
 
     " wipe the Vim buffer containing the snapshot

@@ -12,7 +12,7 @@
 #     $ sudo visudo -f /etc/sudoers.d/my_modifications
 #
 # For more info, read this:
-#     https://askubuntu.com/a/100953/867754
+# https://askubuntu.com/a/100953/867754
 #}}}
 # Why don't you do it atm?{{{
 #
