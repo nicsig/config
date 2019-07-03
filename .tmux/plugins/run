@@ -1,9 +1,9 @@
 # 876 sloc (`$ cloc --exclude-ext=md .`)
-source $HOME/.tmux/plugins_config/fingers ; run $HOME/.tmux/plugins/tmux-fingers/tmux-fingers.tmux
+source "$HOME/.tmux/plugins_config/fingers" ; run "$HOME/.tmux/plugins/tmux-fingers/tmux-fingers.tmux"
 
 # 174 sloc
-source $HOME/.tmux/plugins_config/logging ; run $HOME/.tmux/plugins/tmux-logging/logging.tmux
+source "$HOME/.tmux/plugins_config/logging" ; run "$HOME/.tmux/plugins/tmux-logging/logging.tmux"
 
 # 260 sloc
-run $HOME/.tmux/plugins/tmux-yank/yank.tmux
+run "$HOME/.tmux/plugins/tmux-yank/yank.tmux"
 

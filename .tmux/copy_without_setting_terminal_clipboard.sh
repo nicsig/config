@@ -67,9 +67,12 @@
 #          'buf'"
 #}}}
 
+copy_mode_command="$1"
+shell_command="$2"
+buffer_name_prefix="$3"
 # Run the copy mode command after temporarily resetting 'set-clipboard'.
 tmux set -F @set-clipboard-save '#{set-clipboard}' \; \
     set set-clipboard off \; \
-    send -X "$1" "$2" "$3" \; \
+    send -X "$copy_mode_command" "$shell_command" "$buffer_name_prefix" \; \
     set -F set-clipboard '#{@set-clipboard-save}' \; set -u @set-clipboard-save
 

@@ -689,7 +689,7 @@ setlocal fdn=20
 setlocal fen
 292
 normal! zo
-let s:l = 349 - ((0 * winheight(0) + 0) / 0)
+let s:l = 349 - ((4 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -711,12 +711,12 @@ setlocal fen
 normal! zo
 547
 normal! zo
-let s:l = 578 - ((0 * winheight(0) + 0) / 1)
+let s:l = 596 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-578
-normal! 06|
+596
+normal! 05|
 lcd ~/.vim
 wincmd w
 argglobal
@@ -772,7 +772,7 @@ badd +1 ~/wiki/tmux/command.md
 badd +818 ~/wiki/tmux/todo.md
 badd +66 ~/Desktop/bug.md
 badd +107 ~/.tmux.conf
-badd +52 ~/.tmux/copy_without_setting_terminal_clipboard.sh
+badd +13 ~/.tmux/copy_without_setting_terminal_clipboard.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
