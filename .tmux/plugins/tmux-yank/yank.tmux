@@ -37,7 +37,6 @@ set_copy_mode_bindings() {
     copy_wo_newline_command="$(clipboard_copy_without_newline_command "$copy_command")"
     local copy_command_mouse
     copy_command_mouse="$(clipboard_copy_command "true")"
-    tmux bind-key -T copy-mode-vi "$(yank_key)" send-keys -X "$(yank_action)" "$copy_command"
     tmux bind-key -T copy-mode-vi "$(put_key)" send-keys -X copy-pipe-and-cancel "tmux paste-buffer"
     tmux bind-key -T copy-mode-vi "$(yank_put_key)" send-keys -X copy-pipe-and-cancel "$copy_command; tmux paste-buffer"
     if [[ "$(yank_with_mouse)" == "on" ]]; then

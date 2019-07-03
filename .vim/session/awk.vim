@@ -22,8 +22,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
-tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -700,7 +698,7 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 339
-normal! 027|
+normal! 093|
 lcd ~/wiki/tmux
 wincmd w
 argglobal
@@ -715,114 +713,26 @@ setlocal fdn=20
 setlocal fen
 540
 normal! zo
-711
+547
 normal! zo
-1112
+1165
 normal! zo
-1164
-normal! zo
-let s:l = 1201 - ((77 * winheight(0) + 13) / 26)
+1165
+normal! zc
+let s:l = 573 - ((32 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1201
-normal! 073|
+573
+normal! 07|
 lcd ~/.vim
 wincmd w
+4wincmd w
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 26 + 16) / 33)
-tabnext
-edit ~/.tmux/plugins/tmux-yank/scripts/helpers.sh
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 104 - ((13 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-104
-normal! 04|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.tmux/plugins/tmux-yank/yank.tmux") | buffer ~/.tmux/plugins/tmux-yank/yank.tmux | else | edit ~/.tmux/plugins/tmux-yank/yank.tmux | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 40 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-40
-normal! 038|
-lcd ~/.vim
-wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabnext
-edit ~/.zshrc
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-2495
-normal! zo
-2496
-normal! zo
-2893
-normal! zo
-2977
-normal! zo
-3285
-normal! zo
-4004
-normal! zo
-4190
-normal! zo
-let s:l = 2984 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-2984
-normal! 056|
-lcd ~/.vim
-tabnext 14
+tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
 badd +1 ~/wiki/awk/sed.md
@@ -849,9 +759,6 @@ badd +1 ~/wiki/tmux/command.md
 badd +633 ~/wiki/tmux/todo.md
 badd +28 ~/Desktop/bug.md
 badd +580 ~/.tmux.conf
-badd +42 ~/.tmux/plugins/tmux-yank/yank.tmux
-badd +11 ~/.tmux/plugins/tmux-yank/scripts/helpers.sh
-badd +4214 ~/.zshrc
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
