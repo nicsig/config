@@ -13,6 +13,8 @@
 # This is an issue if you want to set the terminal clipboard yourself via `$ xsel` (or `$ xclip`),
 # with a modified version of the selection, because there may be a race condition between
 # `$ xsel` and tmux; and tmux may win.
+# If  tmux wins,  it's  the original  selection  which will  be  written in  the
+# terminal clipboard, not your modified version.
 #
 # MWE:
 #
