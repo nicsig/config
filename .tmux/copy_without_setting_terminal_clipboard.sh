@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Purpose: Run an arbitrary tmux copy mode command, *without* setting the terminal clipboard.{{{
+# Purpose: Run an arbitrary tmux copy mode command, *without* setting the terminal clipboard.
+# Rationale:{{{
 #
 # If the  tmux option 'set-clipboard'  (server option)  is set to  'external' or
 # 'on', when you copy some text in copy  mode, tmux will try to set the terminal
@@ -52,6 +53,7 @@
 #          'buf'"
 #}}}
 
+# Run the copy mode command after temporarily resetting 'set-clipboard'.
 tmux set -F @set-clipboard-save '#{set-clipboard}' \; \
     set set-clipboard off \; \
     send -X "$1" "$2" "$3" \; \
