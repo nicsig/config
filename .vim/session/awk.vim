@@ -550,9 +550,9 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -562,12 +562,16 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 151 - ((0 * winheight(0) + 0) / 1)
+183
+normal! zo
+183
+normal! zc
+let s:l = 61 - ((60 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-151
-normal! 0
+61
+normal! 01|
 lcd ~/.vim
 wincmd w
 argglobal
@@ -602,7 +606,7 @@ setlocal fdn=20
 setlocal fen
 351
 normal! zo
-let s:l = 79 - ((7 * winheight(0) + 13) / 27)
+let s:l = 79 - ((7 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -610,9 +614,9 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
 tabnext
 edit ~/wiki/tmux/format.md
 set splitbelow splitright
@@ -631,9 +635,9 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
 exe '4resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
@@ -646,7 +650,7 @@ setlocal fdn=20
 setlocal fen
 889
 normal! zo
-let s:l = 891 - ((0 * winheight(0) + 0) / 0)
+let s:l = 891 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -686,7 +690,7 @@ setlocal fdn=20
 setlocal fen
 292
 normal! zo
-let s:l = 349 - ((0 * winheight(0) + 0) / 1)
+let s:l = 349 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -716,28 +720,18 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
 exe '4resize ' . ((&lines * 26 + 16) / 33)
 tabnext
 edit ~/.tmux/copy_without_setting_terminal_clipboard.sh
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -749,70 +743,13 @@ setlocal fdn=20
 setlocal fen
 4
 normal! zo
-let s:l = 45 - ((0 * winheight(0) + 0) / 0)
+let s:l = 41 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-45
-normal! 09|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-1
-normal! zo
-2
-normal! zo
-540
-normal! zo
-547
-normal! zo
-let s:l = 107 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-107
+41
 normal! 0
 lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-1
-normal! zo
-2
-normal! zo
-540
-normal! zo
-547
-normal! zo
-let s:l = 1 - ((0 * winheight(0) + 13) / 27)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim
-wincmd w
-3wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
 tabnext 13
 set stal=1
 badd +1 ~/Desktop/countries

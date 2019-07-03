@@ -46,7 +46,10 @@
 #     $ xsel -b
 #     hello~
 #
-# See `$ man tmux /^\s*set-clipboard` for more info.
+# For more info, see:
+#
+#     $ man tmux /^\s*set-clipboard
+#     https://sunaku.github.io/tmux-yank-osc52.html
 #}}}
 # Synopsis:{{{
 #
