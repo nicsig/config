@@ -9,6 +9,7 @@
 #
 #     $ infocmp -x | grep Ms
 #     Ms=\E]52;%p1%s;%p2%s\007, S0=\E(%p1%c, Se=\E[2 q,~
+#     ^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # This is an issue if you want to set the terminal clipboard yourself via `$ xsel` (or `$ xclip`),
 # with a modified version of the selection, because there may be a race condition between
@@ -34,7 +35,7 @@
 #     foo~
 #     bar~
 #
-# The output should be:
+# The output of the last shell command should be:
 #
 #     foobar~
 #

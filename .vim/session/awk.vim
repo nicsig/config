@@ -22,7 +22,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -562,15 +561,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-183
-normal! zo
-183
-normal! zc
-let s:l = 61 - ((60 * winheight(0) + 14) / 28)
+let s:l = 52 - ((51 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-61
+52
 normal! 01|
 lcd ~/.vim
 wincmd w
@@ -604,13 +599,13 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-351
+349
 normal! zo
-let s:l = 79 - ((7 * winheight(0) + 0) / 0)
+let s:l = 77 - ((7 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-79
+77
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -626,7 +621,10 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-3wincmd k
+wincmd _ | wincmd |
+split
+4wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd w
@@ -635,10 +633,11 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 26 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 25 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -650,7 +649,7 @@ setlocal fdn=20
 setlocal fen
 889
 normal! zo
-let s:l = 891 - ((0 * winheight(0) + 0) / 1)
+let s:l = 891 - ((1 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -712,27 +711,16 @@ setlocal fen
 normal! zo
 547
 normal! zo
-let s:l = 579 - ((39 * winheight(0) + 13) / 26)
+let s:l = 578 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-579
-normal! 0
+578
+normal! 06|
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 26 + 16) / 33)
-tabnext
-edit ~/.tmux/copy_without_setting_terminal_clipboard.sh
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
+if bufexists("~/.tmux/copy_without_setting_terminal_clipboard.sh") | buffer ~/.tmux/copy_without_setting_terminal_clipboard.sh | else | edit ~/.tmux/copy_without_setting_terminal_clipboard.sh | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -743,14 +731,21 @@ setlocal fdn=20
 setlocal fen
 4
 normal! zo
-let s:l = 41 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 12) / 25)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-41
+1
 normal! 0
 lcd ~/.vim
-tabnext 13
+wincmd w
+5wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 1 + 16) / 33)
+exe '5resize ' . ((&lines * 25 + 16) / 33)
+tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
 badd +963 ~/wiki/awk/sed.md
@@ -775,9 +770,9 @@ badd +115 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +26 ~/wiki/shell/script.md
 badd +1 ~/wiki/tmux/command.md
 badd +818 ~/wiki/tmux/todo.md
-badd +355 ~/Desktop/bug.md
+badd +66 ~/Desktop/bug.md
 badd +107 ~/.tmux.conf
-badd +47 ~/.tmux/copy_without_setting_terminal_clipboard.sh
+badd +52 ~/.tmux/copy_without_setting_terminal_clipboard.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
