@@ -38,6 +38,11 @@
 #
 #     foobar~
 #
+# To fix  this issue, you  could simply turn  off 'set-clipboard', but  then you
+# couldn't use  the OSC 52  sequence anymore; the latter  can be very  useful to
+# synchronize a remote clipboard with a local one:
+# https://sunaku.github.io/tmux-yank-osc52.html
+#
 # See `$ man tmux /^\s*set-clipboard` for more info.
 #}}}
 # Synopsis:{{{
