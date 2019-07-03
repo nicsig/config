@@ -7,9 +7,8 @@
 # 'on', when you copy some text in copy  mode, tmux will try to set the terminal
 # clipboard, using the sequence stored in the 'Ms' capability (tmux extension):
 #
-#     $ infocmp -x | grep Ms
-#     Ms=\E]52;%p1%s;%p2%s\007, S0=\E(%p1%c, Se=\E[2 q,~
-#     ^^^^^^^^^^^^^^^^^^^^^^^^
+#     $ infocmp -x | sed -n '/Ms/s/,.*//p'
+#     Ms=\E]52;%p1%s;%p2%s\007~
 #
 # This is an issue if you want to set the terminal clipboard yourself via `$ xsel` (or `$ xclip`),
 # with a modified version of the selection, because there may be a race condition between
@@ -72,7 +71,7 @@ shell_command="$2"
 buffer_name_prefix="$3"
 # Run the copy mode command after temporarily resetting 'set-clipboard'.
 tmux set -F @set-clipboard-save '#{set-clipboard}' \; \
-    set set-clipboard off \; \
-    send -X "$copy_mode_command" "$shell_command" "$buffer_name_prefix" \; \
-    set -F set-clipboard '#{@set-clipboard-save}' \; set -u @set-clipboard-save
+  set set-clipboard off \; \
+  send -X "$copy_mode_command" "$shell_command" "$buffer_name_prefix" \; \
+  set -F set-clipboard '#{@set-clipboard-save}' \; set -u @set-clipboard-save
 

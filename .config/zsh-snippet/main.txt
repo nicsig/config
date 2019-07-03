@@ -43,6 +43,6 @@ xdg-mime default {{app.desktop}} {{mimetype}} # set the default application whic
 xset r rate 175 40 # fix slow cursor
 
 sudo dpkg -i --force-overwrite {{package}}.deb # force package installation
-sudo -E env "PATH=$PATH" zsh -c "!!" # re-run last command – which uses script/binary – as root
+\sudo -E env "PATH=$PATH" zsh -c "!!" # re-run last command – which uses script/binary – as root
 sudo zsh -c "$(typeset -f {{function name}}); {{cmd}}" # run command – which uses custom function – as root
 

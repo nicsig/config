@@ -2981,12 +2981,9 @@ alias sh='$HOME/.local/bin/dash -E'
 #
 # The shell doesn't check  for an alias beyond the first word,  so it didn't use
 # our `ls` alias (`ls` is only the second word, not the first).
-# The solution is given at `$ man bash /^ALIASES`:
+# The solution is given at `$ man zshbuiltins /^\s*alias`:
 #
-# > If the last character  of the alias value is a blank,  then the next command
-# > word following the alias is also checked for alias expansion.
-#
-# See also: https://askubuntu.com/a/22043/867754
+# > A trailing space in value causes the next word to be checked for alias expansion.
 #}}}
 alias sudo='sudo -E env "PATH=$PATH" '
 #                                   ^
