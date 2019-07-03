@@ -723,11 +723,21 @@ exe '4resize ' . ((&lines * 26 + 16) / 33)
 tabnext
 edit ~/.tmux/copy_without_setting_terminal_clipboard.sh
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -737,13 +747,72 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+4
+normal! zo
+let s:l = 45 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+45
+normal! 09|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+1
+normal! zo
+2
+normal! zo
+540
+normal! zo
+547
+normal! zo
+let s:l = 107 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+107
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.tmux.conf") | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+1
+normal! zo
+2
+normal! zo
+540
+normal! zo
+547
+normal! zo
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 lcd ~/.vim
+wincmd w
+3wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
 tabnext 13
 set stal=1
 badd +1 ~/Desktop/countries
@@ -769,9 +838,9 @@ badd +115 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +26 ~/wiki/shell/script.md
 badd +1 ~/wiki/tmux/command.md
 badd +818 ~/wiki/tmux/todo.md
-badd +69 ~/Desktop/bug.md
-badd +1309 ~/.tmux.conf
-badd +56 ~/.tmux/copy_without_setting_terminal_clipboard.sh
+badd +355 ~/Desktop/bug.md
+badd +107 ~/.tmux.conf
+badd +47 ~/.tmux/copy_without_setting_terminal_clipboard.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
