@@ -675,7 +675,7 @@ endfu
 " gtfo {{{1
 
 fu! s:gtfo_init() abort
-    let s:IS_TMUX      = !empty($TMUX)
+    let s:IS_TMUX = !empty($TMUX)
     " terminal Vim running within a GUI environment
     let s:IS_X_RUNNING = !empty($DISPLAY) && $TERM isnot# 'linux'
     let s:LAUNCH_TERM  = 'urxvt -cd'
@@ -703,13 +703,8 @@ fu! myfuncs#gtfo_open_term(dir) abort
     if s:gtfo_is_not_valid(a:dir)
         return
     endif
-
     if s:IS_TMUX
         sil call system('tmux splitw -h -c '.string(a:dir))
-        "                             │  │{{{
-        "                             │  └ start-directory
-        "                             └ splits vertically (by default tmux splits horizontally)
-        "}}}
     elseif s:IS_X_RUNNING
         sil call system(s:LAUNCH_TERM.' '.shellescape(a:dir).' &')
         redraw!

@@ -241,8 +241,7 @@ configure() { #{{{2
   #     $ ./rebuild
   #     $ cp ./mpv/build/mpv ~/bin
   #
-  # Or:
-  #     https://github.com/mpv-player/mpv-build#instructions-for-debian--ubuntu-package (used in this script)
+  # Or: https://github.com/mpv-player/mpv-build#instructions-for-debian--ubuntu-package (used in this script)
   #}}}
   elif [[ "${PGM}" == 'mpv' ]]; then
     ./update

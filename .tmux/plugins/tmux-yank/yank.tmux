@@ -9,6 +9,7 @@ source "${HELPERS_DIR}/helpers.sh"
 
 clipboard_copy_without_newline_command() {
     local copy_command="$1"
+    "tr -d '\\n' | %s" "$copy_command"
     printf "tr -d '\\n' | %s" "$copy_command"
 }
 
@@ -17,7 +18,6 @@ set_error_bindings() {
     key_bindings="$(yank_key) $(put_key) $(yank_put_key)"
     for key in $key_bindings; do
       tmux bind-key -T copy-mode-vi "$key" send-keys -X copy-pipe-and-cancel "tmux display-message 'Error! tmux-yank dependencies not installed!'"
-      tmux bind-key -T copy-mode "$key" send-keys -X copy-pipe-and-cancel "tmux display-message 'Error! tmux-yank dependencies not installed!'"
     done
 }
 
@@ -40,17 +40,8 @@ set_copy_mode_bindings() {
     tmux bind-key -T copy-mode-vi "$(yank_key)" send-keys -X "$(yank_action)" "$copy_command"
     tmux bind-key -T copy-mode-vi "$(put_key)" send-keys -X copy-pipe-and-cancel "tmux paste-buffer"
     tmux bind-key -T copy-mode-vi "$(yank_put_key)" send-keys -X copy-pipe-and-cancel "$copy_command; tmux paste-buffer"
-    tmux bind-key -T copy-mode-vi "$(yank_wo_newline_key)" send-keys -X "$(yank_action)" "$copy_wo_newline_command"
     if [[ "$(yank_with_mouse)" == "on" ]]; then
       tmux bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X "$(yank_action)" "$copy_command_mouse"
-    fi
-
-    tmux bind-key -T copy-mode "$(yank_key)" send-keys -X "$(yank_action)" "$copy_command"
-    tmux bind-key -T copy-mode "$(put_key)" send-keys -X copy-pipe-and-cancel "tmux paste-buffer"
-    tmux bind-key -T copy-mode "$(yank_put_key)" send-keys -X copy-pipe-and-cancel "$copy_command; tmux paste-buffer"
-    tmux bind-key -T copy-mode "$(yank_wo_newline_key)" send-keys -X "$(yank_action)" "$copy_wo_newline_command"
-    if [[ "$(yank_with_mouse)" == "on" ]]; then
-      tmux bind-key -T copy-mode MouseDragEnd1Pane send-keys -X "$(yank_action)" "$copy_command_mouse"
     fi
 }
 

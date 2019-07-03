@@ -207,6 +207,33 @@ Plug 'foxik/vim-makejob'
 "
 " Because of this `!has('nvim')` condition, we  run the risk of locally deleting
 " the plugin by accident. No big deal, unless we have uncommitted changes...
+"
+" ---
+"
+" Run this:
+"
+"     $ man man
+"     :Man man
+"
+" The formatting is not applied.
+" The lines are too long.
+" 'showbreak' is on.
+"
+" Fix all of this.
+"
+" You  could  fix  the  formatting  by  adding the  next  line  at  the  end  of
+" `man#init_pager()` in `/usr/local/share/nvim/runtime/autoload/man.vim`:
+"
+"     doautocmd man BufReadCmd
+"
+" However, it would not fix the 2 other issues (lines too long, 'showbreak' on).
+" Worse, these 2 other issues would also immediately affect `$ man man` (no need
+" of `:Man man`).
+"
+" ---
+"
+" When you  re-implement the man  plugin, make sure  to support motions  such as
+" `]r`, and commands such as `C-]`.
 "}}}
 if !has('nvim')
     Plug 'lacygoill/vim-man'
@@ -4149,22 +4176,48 @@ nno  <c-g><c-g>  <c-g>
 " C-np                move across tab pages {{{4
 
 nno  <silent>  <c-p>  :<c-u>tabprevious<cr>
-nno  <silent>  <c-n>  :<c-u>call <sid>move_across_tab_pages(v:count)<cr>
+nno  <silent>  <c-n>  :<c-u>tabnext<cr>
 
-nno  <silent>  <<c-n>  :<c-u>call <sid>move_across_tab_pages(tabpagenr()-1)<cr>
-nno  <silent>  ><c-n>  :<c-u>call <sid>move_across_tab_pages(tabpagenr()+1)<cr>
+" C-w N               join tab page {{{4
 
-fu! s:move_across_tab_pages(cnt) abort
+" Why `C-w N`?{{{
+"
+" Symmetry with the default `C-w T`.
+"
+" Mnemonic:
+"
+" 'T' for spli*t*.
+" 'N' for joi*n*.
+"}}}
+nno  <silent>  <c-w>N  :<c-u>call <sid>join_tab_page(v:count)<cr>
+
+fu! s:join_tab_page(cnt) abort
+    let cnt = a:cnt
+    if cnt == tabpagenr()
+        echo "can't join current tab page with itself" | return
+    " if we don't press a count before the lhs, we want the chance to provide it afterward
+    elseif cnt == 0
+        let cnt = input('join with tab page nr: ')
+        if cnt !~# '^[+-]\=\d*[1-9]\d*$'
+            redraw | if cnt isnot# '' | echo 'not a valid number' | endif | return
+        " parse a `+2` or `-3` number as an index relative to the current tabpage
+        elseif cnt[0] =~# '+\|-'
+            let cnt = eval(tabpagenr() . cnt[0] . matchstr(cnt, '\d\+'))
+        else
+            let cnt = matchstr(cnt, '\d\+')
+        endif
+    endif
     " If the mapping received  a count, move the current window  to the tab page
     " whose number matches this count.
-    if a:cnt
-        let bufnr = bufnr('%')
-        close!
-        exe 'tabnext '.min([a:cnt, tabpagenr('$')])
-        exe 'sb '.bufnr
+    let bufnr = bufnr('%')
+    " we use our custom `SPC q` mapping to be able to undo
+    norm 1 q
+    if cnt < tabpagenr()
+        exe 'tabnext '.min([cnt, tabpagenr('$')])
     else
-        tabnext
+        exe 'tabnext '.min([cnt - 1, tabpagenr('$')])
     endif
+    exe 'sb '.bufnr
 endfu
 
 " M-m                 matchadd / matchdelete search pattern {{{4

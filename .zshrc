@@ -2892,29 +2892,104 @@ alias sh='$HOME/.local/bin/dash -E'
 
 # sudo {{{3
 
-# Why?{{{
+# Why `-E`?{{{
 #
-# Suppose you have an alias `foo`.
-# You want to execute it with `sudo`:
+# Suppose you run:
 #
-#     # ✘
-#     $ sudo foo
+#     $ sudo vim /path/to/file/owned/by/root
 #
-# It won't work because the shell doesn't check for an alias beyond the first word.
+# *Yeah, I know, we should use `$ sudoedit` instead, but in that case the cwd would be*
+# *`/var/tmp` which would prevent us from visiting neighbor files with vim-dirvish*.
+#
+# Press `got` to make tmux split the window; instead, a new terminal will be opened.
+# Indeed, our Vimscript  code will think we're outside tmux,  because `$TMUX` is
+# empty (sudo probably resets it).
+# Besides, the new shell will be started  as root, which is not necessarily what
+# you want:
+#
+#     $ sudo zsh
+#     zsh compinit: insecure directories and files, run compaudit for list.~
+#     Ignore insecure directories and files and continue [y] or abort compinit [n]?~
+#
+# To fix this, we use this alias to always pass `-E` to sudo.
+#}}}
+# Why `env "PATH=$PATH"`?{{{
+#
+# Suppose your file  contains a vimscript function; you position  your cursor in
+# it, and press `gl` to count how many lines it contains.
+# Atm,  it   will  fail,   because  `$   cloc`  is   `/home/user/bin/cloc`,  and
+# `/home/user/bin` is not in root's PATH.
+# So, we need to tell sudo to also preserve PATH (`-E` doesn't preserve it).
+#
+# You may wonder why `-E` doesn't preserve PATH.
+# It's because of the value given to `secure_path` in `/etc/sudoers`:
+#
+#     "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+#
+# It overrides our PATH.
+# This is confirmed by the fact that PATH  is one of the few variables listed at
+# `$ man sudo /ENVIRONMENT`.
+# Also, if you add `/home/user/bin` to `secure_path`, you don't need `env` anymore.
+#}}}
+#   Couldn't we just use `PATH=$PATH`?{{{
+#
+# It's  a special syntax  (usually variable  assignments are written  before the
+# command name), but yes, sudo can be followed by `VAR=value`.
+# From `$ man sudo /DESCRIPTION /VAR=value`:
+#
+# > Environment variables to be set for the command may also be passed on the
+# > command line in the form of VAR=value, e.g.
+# > LD_LIBRARY_PATH=/usr/local/pkg/lib.  Variables passed on the command line
+# > are subject to restrictions imposed by the security policy plugin.
+#}}}
+#     So why don't you use it?  Why `env`?{{{
+#
+# `env` runs an arbitrary command in a modified environment.
+# If we didn't use `env`:
+#
+#     $ sudo "PATH=$PATH" command
+#
+# Our PATH  would be copied into  the environment of `command`,  but sudo itself
+# would not look into it to find `command`.
+# This is an issue if `command` is not in `secure_path`.
+# For example, suppose your `cloc` binary is in `/home/user/bin/cloc`:
+#
+#     $ \sudo "PATH=$PATH" cloc .
+#     sudo: cloc: command not found~
+#
+#     $ \sudo env "PATH=$PATH" cloc .
+#     434 text files.~
+#     413 unique files.~
+#     217 files ignored.~
+#     ...~
+#
+# In  the  first command,  `PATH=$PATH`  is  meant to  copy  our  PATH into  the
+# environment of `cloc`.
+# But since `cloc` is not in `secure_path`, sudo fails to run it.
+#
+# In the second command, sudo doesn't run `cloc` directly; it runs `env`.
+# And the latter runs in a modified environment in which it should find `cloc`.
+# In  conclusion, sudo  finds  `env`  because it's  in  `/usr/bin`  which is  in
+# `secure_path`, and `env` finds `cloc` because we reset its PATH with ours.
+#
+# Source: https://unix.stackexchange.com/a/83194/289772
+#}}}
+# Why the trailing space?{{{
+#
+#     $ sudo ls /root
+#     ✘ the listing is not colored~
+#
+# The shell doesn't check  for an alias beyond the first word,  so it didn't use
+# our `ls` alias (`ls` is only the second word, not the first).
 # The solution is given at `$ man bash /^ALIASES`:
 #
 # > If the last character  of the alias value is a blank,  then the next command
 # > word following the alias is also checked for alias expansion.
 #
-# By creating the alias  `alias sudo='sudo '`, we make sure  that when the shell
-# will  expand  the alias  `sudo`  in  `sudo foo`,  the  last  character of  the
-# expansion will be a blank.
-# This  will cause the shell  to check the next  word for an alias,  and make it
-# expand `foo`.
-#
 # See also: https://askubuntu.com/a/22043/867754
 #}}}
-alias sudo='sudo '
+alias sudo='sudo -E env "PATH=$PATH" '
+#                                   ^
 
 # systemd {{{3
 
@@ -4648,21 +4723,27 @@ clone_check() {
     cd -- $dir
   fi
 }
-precmd_functions+=(clone_check ring_the_bell)
-
-# Ring the bell after every command: https://stackoverflow.com/a/39397414/9780968
-# Why?{{{
+# How could I make zsh ring the bell after any command has finished running?{{{
 #
-# It's useful in case we start a long-running process, and we forgot to write at
-# the end `; tput bel` (or our global alias `B`).
+# Add the name `ring_the_bell` in the array `precmd_functions`, and write
+# this function:
+#
+#     ring_the_bell() {
+#       tput bel
+#     }
+#
+# https://stackoverflow.com/a/39397414/9780968
 #}}}
-# TODO: If you keep this hook, you should probably remove `tput bel` from:
+#   Why don't you do it?{{{
+#
+# Too much noise.
+# Besides,  we already  have the  global alias  `B`, and  we use  `tput bel`  in
+# various places:
 #
 #     ~/.config/zsh-snippet/main.txt
 #     ~/bin/up.sh
 #     ~/bin/up_yt.sh
 #     ~/bin/upp.sh
-ring_the_bell() {
-  tput bel
-}
+#}}}
+precmd_functions+=(clone_check)
 
