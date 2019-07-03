@@ -11,7 +11,7 @@
 #
 # This is an issue if you want to set the terminal clipboard yourself via `$ xsel` (or `$ xclip`),
 # with a modified version of the selection, because there may be a race condition between
-# `$ xsel` and tmux, and tmux may win.
+# `$ xsel` and tmux; and tmux may win.
 #
 # MWE:
 #

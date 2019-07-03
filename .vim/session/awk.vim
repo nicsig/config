@@ -625,7 +625,13 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-5wincmd k
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+7wincmd k
+wincmd w
+wincmd w
 wincmd w
 wincmd w
 wincmd w
@@ -636,7 +642,14 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 0 + 16) / 33)
+exe '5resize ' . ((&lines * 0 + 16) / 33)
+exe '6resize ' . ((&lines * 0 + 16) / 33)
+exe '7resize ' . ((&lines * 1 + 16) / 33)
+exe '8resize ' . ((&lines * 22 + 16) / 33)
 argglobal
 setlocal fdm=expr
 setlocal fde=fold#md#fde#stacked()
@@ -648,7 +661,7 @@ setlocal fdn=20
 setlocal fen
 889
 normal! zo
-let s:l = 891 - ((1 * winheight(0) + 0) / 0)
+let s:l = 891 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -715,7 +728,7 @@ setlocal fen
 normal! zo
 547
 normal! zo
-let s:l = 579 - ((0 * winheight(0) + 0) / 0)
+let s:l = 579 - ((1 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -735,7 +748,7 @@ setlocal fdn=20
 setlocal fen
 3
 normal! zo
-let s:l = 20 - ((0 * winheight(0) + 0) / 1)
+let s:l = 20 - ((2 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -753,7 +766,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 42 - ((0 * winheight(0) + 0) / 0)
+let s:l = 42 - ((1 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -761,8 +774,52 @@ normal! zt
 normal! 027|
 lcd ~/.vim
 wincmd w
-5wincmd w
-wincmd =
+argglobal
+if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
+setlocal fdm=syntax
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=1
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 5 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
+normal! 0
+lcd ~/wiki/tmux
+wincmd w
+argglobal
+if bufexists("~/wiki/.git/COMMIT_EDITMSG") | buffer ~/wiki/.git/COMMIT_EDITMSG | else | edit ~/wiki/.git/COMMIT_EDITMSG | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 11) / 22)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/wiki/.git
+wincmd w
+8wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 0 + 16) / 33)
+exe '5resize ' . ((&lines * 0 + 16) / 33)
+exe '6resize ' . ((&lines * 0 + 16) / 33)
+exe '7resize ' . ((&lines * 1 + 16) / 33)
+exe '8resize ' . ((&lines * 22 + 16) / 33)
 tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
@@ -792,6 +849,8 @@ badd +6 ~/Desktop/bug.md
 badd +1309 ~/.tmux.conf
 badd +20 ~/.tmux/copy_without_setting_terminal_clipboard.sh
 badd +0 ~/.tmux/plugins/tmux-yank/yank.tmux
+badd +1 ~/wiki/.git/index
+badd +0 ~/wiki/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
