@@ -39,8 +39,8 @@
 #     foobar~
 #
 # To fix  this issue, you  could simply turn  off 'set-clipboard', but  then you
-# couldn't use  the OSC 52  sequence anymore; the latter  can be very  useful to
-# synchronize a remote clipboard with a local one.
+# couldn't use  the OSC 52  sequence anymore.
+# The latter can be very useful to synchronize a remote clipboard with a local one:
 #
 #     $ printf '\ePtmux;\e\e]52;c;%s\x07\e\\' $(printf 'hello' | base64)
 #     $ xsel -b
