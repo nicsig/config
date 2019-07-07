@@ -1,0 +1,33 @@
+# Explanation:{{{
+#
+# From: https://unix.stackexchange.com/a/59194/289772
+#
+# > You can set your  own key bindings with the lesskey  program.  Create a file
+# > called .lesskey in your home directory containing your keybindings, then run
+# > the lesskey command  to convert them into a form  that less understands (the
+# > compiled bindings are stored in ~/.less).
+#
+# > There is no command that scrolls one character left or right.
+# > You can  do that by  passing the numeric argument  1 to the  left-scroll and
+# > right-scroll commands.
+#
+# > You can't directly set a binding for a command with an argument, but you can
+# > **set a binding to run a command and then parse more keys**.
+# > So run the noaction command, then parse  a key sequence that runs the scroll
+# > command with the desired arguments.
+#
+# ---
+#
+# Also, from `$ man lesskey /COMMAND SECTION`:
+#
+# > An action may be followed by an "extra" string.
+# > When such a command is entered  while running less, the action is performed,
+# > and then the extra string is parsed, just as if it were typed in to less.
+# > This feature can be  used in certain cases to extend  the functionality of a
+# > command.
+# }}}
+
+# scroll to the left/right by pressing `h` and `l`
+h noaction 3\e(
+l noaction 3\e)
+

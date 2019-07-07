@@ -150,12 +150,14 @@ export LC_TIME=en_US.UTF-8
 #
 # It's a `$ less` option which prevents long lines from being wrapped.
 #}}}
-# What does `+G` mean?{{{
+export LESS=iMRS
+# How to make the cursor jump at the bottom of the screen, on startup?{{{
 #
-# It's a `$ less` option which makes the cursor jump at the bottom of the screen
-# on startup.
+# Use the option `+G`.
+#
+#     export LESS=iMRS+G
+#                     ^^
 #}}}
-export LESS=iMRS+G
 
 # Make `less` able to read archives and pdfs.
 # How does it work?{{{
