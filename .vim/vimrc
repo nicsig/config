@@ -7027,13 +7027,13 @@ endfu
 "
 " 8 -
 "
-"     https://github.com/hunspell/mythes
-"     https://hunspell.github.io/
-"     http://icon.shef.ac.uk/moby/mthes.html
+" https://github.com/hunspell/mythes
+" https://hunspell.github.io/
+" http://icon.shef.ac.uk/moby/mthes.html
 "
 " lire le code de:
 "
-"     https://github.com/beloglazov/vim-online-thesaurus/
+" https://github.com/beloglazov/vim-online-thesaurus/
 "
 " ajoute ça dans le vimrc:
 "
@@ -7132,9 +7132,9 @@ endfu
 "
 " also, implement a mechanism which would analyze the log:
 "
-"     http://www.drbunsen.org/vim-croquet/
-"     https://github.com/nelstrom/vimprint
-"     http://vimcasts.org/blog/2013/05/vimprint---a-vim-keystroke-parser/
+" http://www.drbunsen.org/vim-croquet/
+" https://github.com/nelstrom/vimprint
+" http://vimcasts.org/blog/2013/05/vimprint---a-vim-keystroke-parser/
 "
 " 16 -
 " https://github.com/lifepillar/vim-mucomplete/issues/59#issuecomment-293920115
@@ -9042,6 +9042,7 @@ endfu
 " better. Right now, I barely notice it.
 
 
+nno <c-\> :echo 'hello'<cr>
 
 " More generally, you never need to escape
 fu! s:yank(text) abort

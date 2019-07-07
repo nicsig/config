@@ -48,8 +48,8 @@
 #
 # For more info, see:
 #
-#     $ man tmux /^\s*set-clipboard
-#     https://sunaku.github.io/tmux-yank-osc52.html
+# `$ man tmux /^\s*set-clipboard`
+# https://sunaku.github.io/tmux-yank-osc52.html
 #}}}
 # Synopsis:{{{
 #
@@ -63,7 +63,7 @@
 #     bind -T copy-mode-vi ! run "${HOME}/.tmux/copy_without_setting_terminal_clipboard.sh \
 #          'copy-pipe-and-cancel' \
 #          \"tr -d '\n' | xsel -i --clipboard\" \
-#          'buf'"
+#          'buf_'"
 #}}}
 
 copy_mode_command="$1"

@@ -1014,10 +1014,11 @@ cfg_xfce_terminal() { "${=EDITOR}" "${HOME}/.config/xfce4/terminal/terminal.rc" 
 cfg_xmodmap() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
 cfg_zathura() { "${=EDITOR}" "${HOME}/.config/zathura/zathurarc" ;}
 cfg_zsh() { "${=EDITOR}" -o "${HOME}/.zshrc" "${HOME}/.zshenv" ;}
-#              │{{{
-#              └ Suppose that we export a value containing a whitespace:
+cfg_zsh_snippet() { "${=EDITOR}" -o "${HOME}/.config/zsh-snippet/main.txt" ;}
+#                      │{{{
+#                      └ Suppose that we export a value containing a whitespace:
 #
-#                    export EDITOR='env not_called_by_me=1 vim'
+#                            export EDITOR='env not_called_by_me=1 vim'
 #
 # This `export`  would cause  our functions  to fail,  because of the quotes
 # which prevent zsh from doing field splitting.

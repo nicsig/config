@@ -9,6 +9,7 @@
 #}}}
 
 # Nvim: If a network connection fails during the compilation, the latter will also fail.{{{
+#
 # In that case, re-try a compilation (now or a bit later).
 #}}}
 # Vim: After an update, in case of an issue, restart Vim in a new shell!{{{
@@ -48,8 +49,8 @@ DEBUG_LOGFILE=/tmp/debug
 PGM="$1"
 # Purpose:{{{
 #
-# It can be useful to compile the  program at a specific commit hash, instead of
-# the very latest version which may be buggy at the moment.
+# It  can be  useful to  compile  the program  against a  specific commit  hash,
+# instead of the very latest version which may be buggy at the moment.
 #}}}
 COMMIT_HASH="$2"
 SUPPORTED_PGMS=(ansifilter gawk jumpapp mpv nvim tmux trans surfraw vim weechat zsh)
@@ -79,10 +80,10 @@ if [[ -z "${PGM}" ]]; then
   printf -- '%s: you must provide the name of the program you want to update\n' "$(basename "$0")" >&2
   exit 1
 # How to check if a variable exists in a list?
-#     https://stackoverflow.com/a/8063398/9780968
+# https://stackoverflow.com/a/8063398/9780968
 #
 # How to negate a test with regular expressions?
-#     https://stackoverflow.com/a/7846318/9780968
+# https://stackoverflow.com/a/7846318/9780968
 #
 # TODO: There's a duplication of code here; remove it.{{{
 # Every time we add or remove a program in the array URLS, we must do the same here.
@@ -95,7 +96,7 @@ if [[ -z "${PGM}" ]]; then
 elif [[ ! 'ansifilter gawk jumpapp mpv nvim surfraw tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
   printf -- '%s: the only programs this script can update are:\n' "$(basename "$0")" >&2
   # How to print array elements on separate lines?
-  #     https://stackoverflow.com/a/15692004/9780968
+  # https://stackoverflow.com/a/15692004/9780968
   printf -- '    %s\n' "${SUPPORTED_PGMS[@]}" >&2
   # 65 = input user data is incorrect
   exit 65
@@ -105,8 +106,7 @@ elif [[ ! 'ansifilter gawk jumpapp mpv nvim surfraw tmux trans vim weechat zsh' 
   # The command was used incorrectly, e.g.,  with the wrong number of arguments,
   # a bad flag, a bad syntax in a parameter, or whatever.
   # Source:
-  #
-  #     https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
+  # https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
   #}}}
 fi
 
@@ -140,9 +140,6 @@ build() { #{{{2
     # I'm ok with a building process which takes more time (≈ 12 min).
     dpkg-buildpackage -uc -us -b
 
-  elif [[ "${PGM}" == 'jumpapp' ]]; then
-    make deb
-
   elif [[ "${PGM}" == 'nvim' ]]; then
     make CMAKE_BUILD_TYPE=Release
     #    ├──────────────────────┘
@@ -165,25 +162,25 @@ build() { #{{{2
   #     $ make check
   #}}}
   # If you want to test the Vim binary, try sth like this:{{{
-  #     xfce4-terminal -e 'make test' 2>/dev/null
+  #
+  #     $ xterm -e 'make test'
   #
   # But not this:
-  #     make test    ✘
+  #
+  #     $ make test
   #
   # Because of:
-  #     test1 FAILED - terminal size must be 80x24 or larger
+  #     test1 FAILED - terminal size must be 80x24 or larger~
   #
   # Neither this:
-  #     xfce4-terminal -e 'make test'    ✘
+  #
+  #     $ xfce4-terminal -e 'make test'
   #
   # Because of:
-  #     xfce4-terminal: Gdk-WARNING: gdk_window_set_icon_list: icons too large
-  #     https://github.com/snwh/paper-icon-theme/issues/340
+  #     xfce4-terminal: Gdk-WARNING: gdk_window_set_icon_list: icons too large~
+  # https://github.com/snwh/paper-icon-theme/issues/340
   #}}}
-  # TODO:
-  # If there's a valid error during the test, `2>/dev/null` won't stop our script
-  # from installing the binary.
-  # We need a way to ignore just a specific error. Not any error.
+  # TODO: If a test fails, maybe we should make the script fail too.
 }
 
 check_we_are_root() { #{{{2
@@ -278,43 +275,120 @@ configure() { #{{{2
     # In my limited testing with  typometer, the latency doubles after compiling
     # with gtk3.
     #}}}
-    # FIXME: We can't run python3.{{{
+
+    # Why moving `/usr/bin` at the start of `PATH`?{{{
+    #
+    # Without, we can't run python3.
     #
     #     $ vim -Nu NONE
     #     :py3 ""
     #     E448: Could not load library function PySlice_AdjustIndices~
     #     E263: Sorry, this command is disabled, the Python library could not be loaded.~
     #
-    # It doesn't seem to have anything to do with our `./configure` command.
-    # I made a test in a Vim with  a simplified command in Ubuntu 18.04 (VM) and
-    # `:py3` works fine.  While the same command fails on our current system.
+    # This is because we've compiled a more recent version of python (3.7 atm).
+    # And for some reason, during the compilation, sometimes Vim uses it.
+    # It mixes the default python (3.5 atm) and our local version.
     #
-    # Anyway, since:
+    # By  moving `/usr/bin`  at  the start  of  `PATH`, we  make  sure that  Vim
+    # finds  the default  python  (`/usr/bin/python3`), and  not  our local  one
+    # (`/usr/local/bin/python3`).
     #
-    #    - the issue can't be reproduced on 18.04
-    #    - the issue can't be reproduced in Nvim
-    #    - we only rely on python2 for our plugins
-    #    - if you really need python3, removing `--enable-pythoninterp` fixes the issue
-    #
-    # it's not a big deal.
-    # When you reinstall the OS, just make sure you can run `:py3 ""`.
+    # https://stackoverflow.com/a/15282645/9780968
+    # https://stackoverflow.com/questions/8391077/vim-python-support-with-non-system-python/8393716#comment21639294_8393716
     #}}}
-    ./configure --enable-cscope                                                      \
-                --enable-fail-if-missing                                             \
-                --enable-gui=gtk2                                                    \
-                --enable-luainterp=dynamic                                           \
-                --enable-multibyte                                                   \
-                --enable-perlinterp=dynamic                                          \
-                --enable-python3interp=dynamic                                       \
-                --enable-pythoninterp=dynamic                                        \
-                --enable-rubyinterp=dynamic                                          \
-                --enable-terminal                                                    \
-                --prefix=/usr/local                                                  \
-                --with-compiledby=user                                               \
-                --with-features=huge                                                 \
-                --with-luajit                                                        \
-                --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu  \
-                --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
+    #   Ok, but why not simply exclude `/usr/local/bin` from `PATH` while configuring?{{{
+    #
+    # So, you want to try sth like this:
+    #
+    #     delim="$(tr x '\001' <<<x)"
+    #     new_path=$(sed "s${delim}/usr/local/bin:${delim}${delim}" <<<$PATH)
+    #     PATH="$new_path" ./configure ...
+    #
+    # It could break the compilation of some programs which need to find some utility
+    # installed in `/usr/local/bin`.
+    # As an  example, Vim's compilation  requires gawk,  and atm, the  latter is
+    # only installed in `/usr/local/bin`.
+    #}}}
+    #   And why not setting `--with-python3-config-dir` with the config dir of python3.7?{{{
+    #
+    # So, you want to replace this:
+    #
+    #     --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
+    #
+    # with:
+    #
+    #     --with-python3-config-dir=/usr/local/lib/python3.7/config-3.7m-x86_64-linux-gnu
+    #
+    # I tried, and the compilation succeeds, but the python3 interface doesn't work:
+    #
+    #     $ vim -Nu NONE
+    #     :py3 ""
+    #     E370: Could not load library libpython3.7m.a~
+    #     E263: Sorry, this command is disabled, the Python library could not be loaded.~
+    #
+    # ---
+    #
+    # There may be sth to do with the environment variable `LD_LIBRARY_PATH`.
+    # I tried to set it like this:
+    #
+    #     LD_LIBRARY_PATH=/usr/lib:/usr/local/lib ./configure ...
+    #
+    # The compilation succeeded, but the python3 interface still didn't work.
+    #
+    # ---
+    #
+    # If you  find a way  to make this  solution work, and  you need to  get the
+    # config paths programmatically, try this:
+    #
+    #     # example of values: 2.7 and 3.5
+    #     python2_version="$(readlink -f "$(which python)" | sed 's/.*\(...\)/\1/')"
+    #     python3_version="$(readlink -f "$(which python3)" | sed 's/.*\(...\)/\1/')"
+    #
+    #     # example of paths: `/usr/lib/python2.7/config-x86_64-linux-gnu` and `/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu`
+    #     python2_config_path="$(locate -r "/usr/.*lib/python${python2_version}/config-" | head -n1)"
+    #     python3_config_path="$(locate -r "/usr/.*lib/python${python3_version}/config-${python3_version}" | head -n1)"
+    #
+    #     ...
+    #
+    #     --with-python-config-dir="$python2_config_path" \
+    #     --with-python3-config-dir="$python3_config_path"
+    #}}}
+    #   Is there an alternative?{{{
+    #
+    # You could try to set `vi_cv_path_python3` with the path to the default python:
+    #
+    #     vi_cv_path_python3=/usr/bin/python3.5 ./configure ...
+    #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #
+    # But I don't understand what it does, and I don't know where it's documented.
+    # I found it here:
+    #
+    # https://stackoverflow.com/a/23095537/9780968
+    #
+    # ---
+    #
+    # Also, from `:h python-building`:
+    #
+    # > If you have more than one version  of Python 3, you need to link python3
+    # > to the one you prefer, before running configure.
+    #}}}
+    PATH=/usr/bin:$PATH ./configure  \
+      --enable-cscope                \
+      --enable-fail-if-missing       \
+      --enable-gui=gtk2              \
+      --enable-luainterp=dynamic     \
+      --enable-multibyte             \
+      --enable-perlinterp=dynamic    \
+      --enable-python3interp=dynamic \
+      --enable-pythoninterp=dynamic  \
+      --enable-rubyinterp=dynamic    \
+      --enable-terminal              \
+      --prefix=/usr/local            \
+      --with-compiledby=user         \
+      --with-features=huge           \
+      --with-luajit                  \
+      --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
+      --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
 
   # If you want the online documentation, add this option:{{{
   #
@@ -332,23 +406,23 @@ configure() { #{{{2
     # Where did you find the configuration options?{{{
     #
     # I read the INSTALL file:
-    #         https://github.com/zsh-users/zsh/blob/master/INSTALL
+    # https://github.com/zsh-users/zsh/blob/master/INSTALL
     #
     # I also read this link:
-    #         https://gist.github.com/nicoulaj/715855
+    # https://gist.github.com/nicoulaj/715855
     #
     # I also read how the ubuntu devs compiled `zsh-5.2`:
     #
-    #     https://launchpad.net/ubuntu/+source/zsh
+    # https://launchpad.net/ubuntu/+source/zsh
     #
-    #     # link found by clicking on the button below “Latest upload”
-    #     https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1
+    # link found by clicking on the button below “Latest upload”
+    # https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1
     #
-    #     # link found by clicking on the button “amd64” in the section “Builds”
-    #     https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1/+build/10653977
+    # link found by clicking on the button “amd64” in the section “Builds”
+    # https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1/+build/10653977
     #
-    #     # link found by clicking on the button “buildlog”
-    #     https://launchpadlibrarian.net/280509421/buildlog_ubuntu-yakkety-amd64.zsh_5.2-5ubuntu1_BUILDING.txt.gz
+    # link found by clicking on the button “buildlog”
+    # https://launchpadlibrarian.net/280509421/buildlog_ubuntu-yakkety-amd64.zsh_5.2-5ubuntu1_BUILDING.txt.gz
     #}}}
     # How to get more information about the configuration options?{{{
     #
@@ -406,10 +480,8 @@ download() { #{{{2
   fi
 
   cd "${PGM}"
-  # We edit the file `configure.ac` for tmux.
-  # This edit must be stashed before going on.
-  # Even  if we didn't  edited this  file, it's still  a good practice  to stash
-  # (there may be other file(s) that we edit).
+  # We may have edited some file (`configure`, `Makefile`, ...).
+  # Stash those edits.
   git stash
   # check a master branch exists (trans has no master branch)
   # https://stackoverflow.com/q/5167957/9780968
@@ -495,7 +567,7 @@ get_version() { #{{{2
     # > versions of a  package, and also a package's  previous version numbering
     # > schemes, to be left behind.
     #
-    # If you don't put include an epoch in the version of your Vim package, `0:`
+    # If you  don't include an  epoch in the version  of your Vim  package, `0:`
     # will be assumed:
     #
     #     0:X.Y.Z
@@ -533,76 +605,11 @@ install() { #{{{2
 
   # We don't have any version number for `mpv` (because `git describe` fails).
   if [[ "${PGM}" == 'mpv' ]]; then
-    checkinstall --pkgname "${PGM}" --backup=no -y
-
-  elif [[ "${PGM}" == 'jumpapp' ]]; then
-    # Can't use `checkinstall`, because:
-    #     make: *** No rule to make target 'install'.  Stop.
-    sudo dpkg -i jumpapp*all.deb
+    checkinstall --pkgname="${PGM}" --backup=no -y
 
   else
-    # TODO: Sometimes, checkinstall ignores the options `--pkgversion`, `--pkgname`, ...{{{
-    #
-    # This is because if  it finds a .spec file at the root  of the project, and
-    # its  basename matches  the  program  (e.g. ansifilter.spec,  weechat.spec,
-    # ...), then it uses its contents to assign the values of these options.
-    # IOW, a {vim|tmux|...}.spec file has priority over `--pkg...`.
-    #
-    # Besides, sometimes, the values in the .spec file are not literal.
-    # For example, in `~/GitRepos/weechat/weechat.spec:31`, one can read:
-    #
-    #     Version:   %{version}
-    #     Release:   %{release}
-    #
-    # Currently, here are the repos which have a spec file:
-    #
-    #    - ansifilter (but no issue)
-    #
-    #    - jumpapp; issue, because of:
-    #
-    #         3 -  Version: [ VERSION ]
-    #         4 -  Release: [ 1%{?dist} ]
-    #
-    #    - weechat; issue, because of:
-    #
-    #         2 -  Name:    [ 0--name- ]
-    #         3 -  Version: [  ]
-    #         4 -  Release: [ %{release} ]
-    #
-    # This can cause an issue, especially for the version field.
-    #
-    # Solution1:
-    #
-    # Use `--spec /dev/null`.
-    # This will prevent checkinstall from using any spec file.
-    #
-    # Update: I doubt this solution works completely.
-    # I think checkinstall will still fall back on some other default spec file.
-    # For example, if you read the logfile for Vim, you'll find these lines:
-    #
-    #     Warning: .spec file path "/dev/null" not found.
-    #     Warning: Defaulting to "vim.spec".
-    #
-    # Solution2:
-    # Test the existence of a spec file, and  if there's one, use sed to edit it
-    # before invoking checkinstall.
-    #
-    # ---
-    #
-    # Once you've implemented a solution, test it against surfraw.
-    # Right now, checkinstall does not install the latter.
-    #
-    # ---
-    #
-    # Update:
-    # Here's a first attempt to replace `%{name}` with `weechat`:
-    #
-    #     $ sed '/^%define\s\+name/{s/.*\s//; h; s/^/%define name /}; /^Name:/{G; s/^\(Name:\s\+\)%{name}\n\(\w\+\)/\1\2/}' weechat.spec
-    #
-    # It's a bit long, maybe we could improve the code...
-    #}}}
     if [[ "${DEBUG}" -ne 0 ]]; then
-      echo checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null ---backup=no -y >>"${DEBUG_LOGFILE}"
+      echo checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no -y >>"${DEBUG_LOGFILE}"
     fi
     # If this command fails for Nvim, try this:{{{
     #
@@ -634,20 +641,16 @@ install() { #{{{2
     # Alternatively, you  could try  to pass  an option to  checkinstall, and  make it
     # generate a deb without installing it.
     # Then, you could try to force its installation with `dpkg` and the right options.
-
     #}}}
-    checkinstall --pkgname "${PGM}" --pkgversion "${VERSION}" --spec /dev/null --backup=no -y
+    checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no -y
     #                                 │
     #                                 └ don't overwrite my package
     #                                   with an old version from the official repositories
     #                                   when I execute `aptitude safe-upgrade`
     # Why can aptitude overwrite our compiled package?{{{
     #
-    # It seems that the packages from the priority of the official repositories is 500.
-    # While the priority of our compiled package is only 100.
-    #
-    # So, when  aptitude finds several versions  of the same package,  it checks
-    # their version to decide which one is the newer one.
+    # When aptitude  finds several  candidates for the  same package,  it checks
+    # their version to decide which one is the newest.
     # By default, checkinstall uses the current date as the package version:
     #
     #     20180914
@@ -655,13 +658,13 @@ install() { #{{{2
     # This would cause an issue for Vim:
     #
     #     $ apt-cache policy vim
-    #     vim:
-    #       Installed: (none)
-    #       Candidate: 2:8.0.0134-1ubuntu1~ppa1~x
-    #       Version table:
-    #          2:8.0.0134-1ubuntu1~ppa1~x 500
-    #             500 http://ppa.launchpad.net/pi-rho/dev/ubuntu xenial/main amd64 Packages
-    #     ...
+    #     vim:~
+    #       Installed: (none)~
+    #       Candidate: 2:8.0.0134-1ubuntu1~ppa1~x~
+    #       Version table:~
+    #          2:8.0.0134-1ubuntu1~ppa1~x 500~
+    #             500 http://ppa.launchpad.net/pi-rho/dev/ubuntu xenial/main amd64 Packages~
+    #     ...~
     #
     # Here the version of the Vim package in the ppa is `2:8.0.0134`.
     # If the version of our compiled package is `20180914`, it will be considered
@@ -671,18 +674,19 @@ install() { #{{{2
     # So it assumes that the date should be prefixed by `0:` or `1:` which gives:
     #
     #     0:20180914
-    #     <
+    #         <
     #     2:8.0.0134-1ubuntu1~ppa1~x
     #}}}
-    # Why don't you use `--pkgname "my{PGM}"` anymore?{{{
+    # Why don't you use `--pkgname="my{PGM}"` anymore?{{{
     #
-    # When checkinstall tries  to install `myPGM`, it may try  to overwrite a file
-    # belonging to `PGM` (it will probably happen if `PGM` is installed).
+    # When checkinstall tries to install `myPGM`, it may try to overwrite a file
+    # belonging to `PGM` (it will probably  happen if `PGM` is already installed
+    # in a different version).
     # If that happens, the installation will fail:
     #
-    #     dpkg: error processing archive /home/user/GitRepos/zsh/zsh_9999.9999-1_amd64.deb (--install):
-    #      trying to overwrite '/usr/share/man/man1/zshmodules.1.gz', which is also in package myzsh 999-1
-    #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)
+    #     dpkg: error processing archive /home/user/GitRepos/zsh/zsh_9999.9999-1_amd64.deb (--install):~
+    #      trying to overwrite '/usr/share/man/man1/zshmodules.1.gz', which is also in package myzsh 999-1~
+    #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)~
     #}}}
   fi
 }
@@ -708,9 +712,7 @@ install_dependencies() { #{{{2
   #
   # For Vim, you may need to run:
   #
-  #     $ sudo aptitude build-dep vim vim-gtk
-  #                                   ^^^^^^^
-  #                                   does it make a difference? is it necessary?
+  #     $ sudo aptitude build-dep vim-gtk
   #}}}
   aptitude build-dep "${PGM}"
 
