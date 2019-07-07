@@ -182,6 +182,17 @@ export LESS=iMRS
 #}}}
 if [[ -z "${LESSOPEN}" ]]; then
   eval "$(lesspipe)"
+
+  # Why inside the guard?{{{
+  #
+  # `$ lesskey` doesn't seem  to have a big impact on  performance at the moment
+  # (probably  because our  lesskey file  is very  short), but  it could  in the
+  # future.
+  # Besides, its purpose is to compile the config of `$ less` in a binary format
+  # (in `~/.less`), and  it doesn't make sense  to do that every time  we open a
+  # new shell.
+  #}}}
+  lesskey "${HOME}/.config/lesskey"
 fi
 
 # ls {{{1
