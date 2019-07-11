@@ -3300,6 +3300,7 @@ augroup END
 " If you need to read it, it's there: `~/bin/bash/search-engine.sh`.
 "}}}
 nno  <silent>  <space>i  :<c-u>call <sid>run_current_line('websearch')<cr>
+
 " Tmux command-prompt has too limited editing capabilities.
 " Let's use a Vim buffer to leverage Vim's editing capabilities.
 nno  <silent>  <space>x  :<c-u>call <sid>run_current_line('tmuxprompt')<cr>
@@ -9040,9 +9041,84 @@ endfu
 "
 " Also, maybe you should colorize the  `[Diff]` indicator, so that it stands out
 " better. Right now, I barely notice it.
+"
+" 138 -
+"
+"     $ ./build/bin/nvim -Nu NONE +'cno <c-a> <home>' +'let @+ = "\r"'
+"     :
+"     C-S-v
+"     :echo
+"     C-a
+"
+" I would expect the cursor to jump to the start of the line.
+" Instead, it inserts all completions of `echo`:
+"
+"     :echo echoerr echohl echomsg echon
+"
+" Nvim uses the default `C-a` which suggests all possible completions.
+" This is because the 'paste' option has been set.
+"
+" ---
+"
+" Is it a known issue?
+"
+" It definitely looks similar to the issue #7212:
+" https://github.com/neovim/neovim/issues/7212
+"
+" which has been closed and merged with the issue #7066:
+" https://github.com/neovim/neovim/issues/7066
+"
+" The latter is the reverse issue.
+" Basically, the devs  consider #7212 and #7066 as two  opposite issues with the
+" same root.
+"
+" Both issues should be addressed by the PR #4448:
+" https://github.com/neovim/neovim/pull/4448
+"
+" ---
+"
+" I tried this, but it doesn't work:
+"
+"     augroup fix_bug
+"         au!
+"         au CmdlineLeave : if has('nvim') && getcmdline() =~# '\r$'
+"             \ | call timer_start(0, {-> execute('set nopaste')})
+"             \ | endif
+"     augroup END
+"
+" I don't know why the autocmd fails, but it's not because of a plugin.
+" It still fails with no config (`$ nvim -Nu /tmp/vimrc`).
+"
+" Also, if you replace `\r` in the regex with `.`, the autocmd works.
+" So, there's definitely sth weird going on in the command which is run.
+"
+" Update:
+" I've included this in the autocmd:
+"
+"     \ | call writefile([getcmdline()], '/tmp/log', 'ab')
+"
+" and run Nvim with no config.
+" After reading  the log file,  it seems the command  which is written  has been
+" stripped from the trailing carriage return.
+" I think the  latter is consumed by  Nvim, and interpreted as the  Enter key we
+" press to validate a command.
+"
+" In  the meantime,  maybe we  should  simply reset  'paste' whenever  we run  a
+" command in Nvim. But is it safe? Could there be unexpected side effects?
+"
+" Fun fact:
+" If you repaste the command, the option is reset.
+" So,  pasting the  command does  not make Nvim  set the  option; it  makes Nvim
+" toggle the option.
+"
+" 139 -
+" In the  past, we have  had too many  issues by trying  to parse the  output of
+" `execute('syn list ...')`, `execute('hi ...')`.
+" Maybe we should ask for  some built-in functions (`getsynlist()`?, `gethi()`?)
+" which would give this info in a nice dictionary.
 
 
-nno <c-\> :echo 'hello'<cr>
+
 
 " More generally, you never need to escape
 fu! s:yank(text) abort

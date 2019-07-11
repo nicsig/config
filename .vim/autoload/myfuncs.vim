@@ -380,6 +380,23 @@ endfu
 " https://github.com/vimwiki/vimwiki/blob/dev/autoload/vimwiki/tbl.vim
 "
 " In particular, it could update an existing table.
+"
+" ---
+"
+" Also, we should improve it to generate this kind of table:
+"
+"     ┌───────────────────┬─────────────────────────────────────────────────┐
+"     │                   │                    login                        │
+"     │                   ├─────────────────────────────────┬───────────────┤
+"     │                   │ yes                             │ no            │
+"     ├─────────────┬─────┼─────────────────────────────────┼───────────────┤
+"     │ interactive │ yes │ zshenv  zprofile  zshrc  zlogin │ zshenv  zshrc │
+"     │             ├─────┼─────────────────────────────────┼───────────────┤
+"     │             │ no  │ zshenv  zprofile         zlogin │ zshenv        │
+"     └─────────────┴─────┴─────────────────────────────────┴───────────────┘
+"
+" The peculiarity here, is the variable number of cells per line (2 on the first
+" one, 3 on the second one, 4 on the last ones).
 fu! myfuncs#box_create(type, ...) abort
     try
         " draw `|` on the left of the paragraph
