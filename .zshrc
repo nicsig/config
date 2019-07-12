@@ -1469,10 +1469,13 @@ EOF
 }
 
 fix() { #{{{2
+  # If you want the terminal to be in an unsane state, to test the function:{{{
+  #
+  #     printf '\e(0'
+  #}}}
   emulate -L zsh
 
-  # For more info:
-  #     https://unix.stackexchange.com/q/79684/289772
+  # For more info: https://unix.stackexchange.com/q/79684/289772
   reset
   stty sane
   stty -ixon
@@ -4242,6 +4245,15 @@ __normalize_command_line() {
 }
 zle -N __normalize_command_line
 bindkey '\em' __normalize_command_line
+
+# M-Y           copy-region-as-kill {{{3
+
+# By default, `copy-region-as-kill` is bound to `M-w` and `M-W`.
+# It seems too hard to type.
+# Let's try `M-Y`.
+bindkey -r '\ew'
+bindkey -r '\eW'
+bindkey '\eY' copy-region-as-kill
 
 # M-Z           fuZzy-select-output {{{3
 

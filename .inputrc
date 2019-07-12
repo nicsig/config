@@ -9,7 +9,8 @@
 #}}}
 
 # TODO: Learn all readline key bindings:{{{
-#     http://www.catonmat.net/download/readline-emacs-editing-mode-cheat-sheet.pdf
+#
+#     $ man bash /Readline Command Names
 #
 # If some of them don't work, rebind them to key sequences recognized by the terminal.
 # Find a way to replicate the same functionalities provided by `readline` in `zle`.
@@ -204,10 +205,10 @@ set bind-tty-special-chars Off
 # We do it in this file, instead of `~/.bashrc`, because this way, we can affect
 # all the interpreters using readline. (lua, python, ...)
 #}}}
-# We start  by removing the  default key binding using  `M-u` to upcase  a word,{{{
+# We start by removing the default key  binding using `M-u` to upcase a word,{{{
 # otherwise readline would execute `upcase-word` after 1s, which is too quick.
 #
-#     https://unix.stackexchange.com/a/374535/289772
+# https://unix.stackexchange.com/a/374535/289772
 # }}}
 "\eu": nop
 "\euu": upcase-word

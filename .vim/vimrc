@@ -2440,9 +2440,9 @@ set timeoutlen=3000
 " ... and 6 ms for keycodes.
 " Previously we used 50ms, but 6 is the max value to prevent this error:
 "
-"       1. insert sth wrong
-"       2. hit escape
-"       3. hit u (undo)    →    M-u: uppercase next word
+"    1. insert sth wrong
+"    2. hit escape
+"    3. hit u (undo)    →    M-u: uppercase next word
 " TODO: When you set this option, the contents of a recording is weird.{{{
 "
 "     $ vim -Nu NONE +'set ttimeoutlen=6'
@@ -2646,7 +2646,7 @@ set wildignore+=*/.git/*
 " Tab completion should be case-insensitive.
 " If we type `:e bar Tab`, and a file `Bar` exists, we should get:
 "
-"         :e Bar
+"     :e Bar
 set wildignorecase
 
 " wildmenu  wildchar(m) {{{2

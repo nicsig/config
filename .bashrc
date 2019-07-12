@@ -71,12 +71,11 @@ PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[0
 
 # Why don't you export your environment variables here?{{{
 #
-#     You  should  not  define  environment variables  in  ~/.bashrc. The  right
-#     place  to define  environment variables  such  as PATH  is ~/.profile  (or
-#     ~/.bash_profile if you don't care about shells other than bash).
+# > You should not define environment variables in ~/.bashrc. The right place to
+# > define environment variables such as  PATH is ~/.profile (or ~/.bash_profile
+# > if you don't care about shells other than bash).
 #
-# Source:
-#     https://unix.stackexchange.com/a/26059/289772
+# Source: https://unix.stackexchange.com/a/26059/289772
 #}}}
 # Ok, but why using `~/.bashenv` and not `~/.bash_profile`?{{{
 #
@@ -202,7 +201,7 @@ bind -x '"\ez": previous_directory'
 # Update:
 # I've commented the key binding because I hit it by accident too often.
 # It happens when I press Escape then C-b quickly afterwards.
-
+#}}}1
 # Options {{{1
 
 # Typing a directory name alone is enough to cd into it
