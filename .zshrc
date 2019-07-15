@@ -279,8 +279,7 @@ tmp=/run/user/$UID/tmp
 fpath=( ${HOME}/.zsh/my-completions ${HOME}/.zsh/zsh-completions/src $fpath )
 
 # Add completion for the `dasht` command:
-#
-#     https://github.com/sunaku/dasht
+# https://github.com/sunaku/dasht
 fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions
 
 # Why loading this module?{{{
@@ -2209,6 +2208,54 @@ shellcheck_wiki() { #{{{2
   xdg-open "https://github.com/koalaman/shellcheck/wiki/SC$1"
 }
 
+stream() { #{{{2
+  emulate -L zsh
+  if [[ $# -ne 1 ]]; then
+    cat <<EOF >&2
+usage:    $0  <video url>
+EOF
+    return 64
+  fi
+
+  # watch a video stream with the local video player:
+  #
+  #     $ youtube-dl [-f best] 'url' ST
+  youtube-dl "$1" -o -| mpv --cache=4096 -
+  #                           │
+  #                           └ sets the size of the cache to 4096kB
+  #
+  # Why is a cache important?{{{
+  #
+  # May be useful
+  # When playing files from slow media, it's necessary, but  can also have negative
+  # effects, especially  with file formats  that require a  lot of seeking,  such as
+  # MP4.
+  #}}}
+  # Is there a downside to using a cache?{{{
+  #
+  # Yes.
+  #}}}
+  # Why giving the value '4096'?{{{
+  #
+  # The default value of the 'cache' option is 'auto', which means that `mpv` will
+  # decide depending on the media whether it must cache data.
+  # Also,  `--cache=auto` implies  that  the size  of  the cache  will  be set  by
+  # '--cache-default', whose default value is '75000kB'.
+  # It's too much according to this:
+  #
+  #     https://streamlink.github.io/issues.html#issues-player-caching
+  #
+  # They recommend using between '1024' and '8192', so we take the middle value.
+
+  # Note that half the cache size will be used to allow fast seeking back.
+  # This is also the reason why a full cache is usually not reported as 100% full.
+  # The cache  fill display  does not  include the  part of  the cache  reserved for
+  # seeking back.
+  # The actual  maximum percentage will usually  be the ratio between  readahead and
+  # backbuffer sizes.
+  #}}}
+}
+
 tor() { #{{{2
   # Why `cd ...`?  Why not running the desktop file with an absolute path?{{{
   #
@@ -2497,6 +2544,21 @@ _fzf_compgen_path() { #{{{2
 }
 # }}}1
 # Aliases {{{1
+#   Do *not* install global aliases!{{{
+#
+# They are dangerous.
+# It's  too   easy  to  accidentally   use  them  without  realizing   it,  with
+# unpredictable consequences.
+# In  the past, we've often  seen zsh run  commands we didn't expect  because of
+# global aliases.
+#
+# Besides, not seeing what is run can be misleading, and sometimes also prevents
+# us  from memorizing  the  expanded command,  which could  be  useful in  other
+# contexts.
+#
+# Use abbreviations instead.
+#}}}
+
 # regular {{{2
 # apt {{{3
 
@@ -3076,88 +3138,6 @@ alias zsh_sourcetrace='zsh -o sourcetrace'
 alias zsh_startup='repeat 10 time zsh -i -c exit'
 
 # }}}2
-# global {{{2
-
-# We could implement the following global aliases as abbreviations, but we won't
-# because they can only be used at the end of a command.
-# To be expanded, an abbreviation needs to be followed by a space.
-
-# ring the bell
-alias -g B='; tput bel'
-
-# align columns
-alias -g C='| column -t'
-
-alias -g L='2>&1 | less -R'
-
-# No Errors
-alias -g NE='2>/dev/null'
-
-# silence!
-#           ┌ redirect output to /dev/null
-#           │          ┌ same thing for errors
-#           ├────────┐ ├──┐
-alias -g S='>/dev/null 2>&1 &'
-#                           │
-#                           └ execute in background
-
-# watch a video STream with the local video player:
-#
-#     $ youtube-dl [-f best] 'url' ST
-alias -g ST=' -o -| mpv --cache=4096 -'
-#                         │
-#                         └ sets the size of the cache to 4096kB
-#
-# Why is a cache important?{{{
-#
-# May be useful
-# When playing files from slow media, it's necessary, but  can also have negative
-# effects, especially  with file formats  that require a  lot of seeking,  such as
-# MP4.
-#}}}
-# Is there a downside to using a cache?{{{
-#
-# Yes.
-#}}}
-# Why giving the value '4096'?{{{
-#
-# The default value of the 'cache' option is 'auto', which means that `mpv` will
-# decide depending on the media whether it must cache data.
-# Also,  `--cache=auto` implies  that  the size  of  the cache  will  be set  by
-# '--cache-default', whose default value is '75000kB'.
-# It's too much according to this:
-#
-#     https://streamlink.github.io/issues.html#issues-player-caching
-#
-# They recommend using between '1024' and '8192', so we take the middle value.
-
-# Note that half the cache size will be used to allow fast seeking back.
-# This is also the reason why a full cache is usually not reported as 100% full.
-# The cache  fill display  does not  include the  part of  the cache  reserved for
-# seeking back.
-# The actual  maximum percentage will usually  be the ratio between  readahead and
-# backbuffer sizes.
-#}}}
-
-# Warning: If `cmd V` opens an empty buffer,{{{
-# then later opens the right buffer (the  one containing the output of `$ cmd`),
-# try to delete `~/.fasd-init-zsh`, and restart the shell.
-#
-# It worked in the past.
-# The issue came from:
-#
-#     ~/.fasd-init-zsh:22
-#     { eval "fasd --proc $(fasd --sanitize $1)"; } >> "/dev/null" 2>&1
-#                                            ^
-#                                            ✘ if you replace it with 2, the issue disappears
-#
-# Maybe  the issue  came  from  having installed  fasd  from  the official  repo
-# (instead of github)...
-#}}}
-alias -g V='2>&1 | vipe >/dev/null'
-#                       │
-#                       └ don't write on the terminal, the Vim buffer is enough
-
 # suffix {{{2
 
 # automatically open a file with the right program, according to its extension
@@ -3665,6 +3645,19 @@ zle -N _fzf_snippet_placeholder_widget
 bindkey '^G^G' _fzf_snippet_main_widget
 bindkey '^Gg' _fzf_snippet_placeholder_widget
 # }}}3
+# C-k        kill_line_or_region {{{3
+
+__kill_line_or_region() {
+  emulate -L zsh
+  if (( $REGION_ACTIVE )); then
+    zle kill-region
+  else
+    zle kill-line
+  fi
+}
+zle -N __kill_line_or_region
+bindkey '^K' __kill_line_or_region
+
 # C-q        quote_big_word {{{3
 
 # useful to quote a url which contains special characters
@@ -4352,18 +4345,60 @@ bindkey -M menuselect '^Q' send-break
 
 # http://zshwiki.org/home/examples/zleiab
 
-#        ┌ `abbrev` refer to an associative array parameter
-#        │
 typeset -Ag abbrev
-#         │
-#         └ don't restrict to local scope
+#        ││
+#        │└ don't restrict to local scope
+#        └ `abbrev` refer to an associative array parameter
 
+# How to prevent the expansion of an abbreviation?{{{
+#
+# Quote it:
+#
+#     $ echo 'V' some text
+#
+# Or insert the next space literally, by pressing `C-v SPC`:
+#
+#     $ echo V C-v SPC some text
+#}}}
 abbrev=(
-  # column
-  "Jc"    "| awk '{ print $"
-  "Jn"    "2>/dev/null"
-  "Jp"    "printf -- '"
-  "Jt"    "| tail -20"
+  # ring the bell
+  'B'    '; tput bel'
+  # align columns
+  'C'    '| column -t'
+  # printf Field
+  'F'    "| awk '{ print $"
+  'L'    '2>&1 | less -R'
+  # No Errors
+  'NE'   '2>/dev/null'
+  'P'    "printf -- '"
+
+  # silence!
+  #       ┌ redirect output to /dev/null
+  #       │          ┌ same thing for errors
+  #       ├────────┐ ├──┐
+  'S'    '>/dev/null 2>&1'
+
+  # Do *not* use `T`; it would be expanded when you try to (un)bind a tmux key binding:
+  #     $ tmux bind -T ...
+  'tl'    '| tail -20'
+  # Warning: If `cmd V` opens an empty buffer,{{{
+  # then later opens the right buffer (the  one containing the output of `$ cmd`),
+  # try to delete `~/.fasd-init-zsh`, and restart the shell.
+  #
+  # It worked in the past.
+  # The issue came from:
+  #
+  #     ~/.fasd-init-zsh:22
+  #     { eval "fasd --proc $(fasd --sanitize $1)"; } >> "/dev/null" 2>&1
+  #                                            ^
+  #                                            ✘ if you replace it with 2, the issue disappears
+  #
+  # Maybe  the issue  came  from  having installed  fasd  from  the official  repo
+  # (instead of github)...
+  #}}}
+  'V'     '2>&1 | vipe >/dev/null'
+  #                    │
+  #                    └ don't write on the terminal, the Vim buffer is enough
 )
 
 __abbrev_expand() {

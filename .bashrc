@@ -176,6 +176,7 @@ bind '"\em": "\C-aman \ef\C-k\C-m"'
 # M-z       previous directory {{{3
 
 # FIXME: how to refresh the prompt?
+# Update: Also, it's broken because we already use `M-z` in a tmux key binding.
 previous_directory() {
   # check that `$OLDPWD` is set otherwise we get an error
   [[ -z "${OLDPWD}" ]] && return
