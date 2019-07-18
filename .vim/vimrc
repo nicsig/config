@@ -891,49 +891,33 @@ endif
 
 " When I type `:r some_file` or `:'<,'>w some_file`, I don't want `some_file`
 " to become the alternate file of the current window.
+" Update: It's commented. Did we change our mind?
 " set cpo-=aA
 
-" 'cpo' doesn't contain the M flag by default.
-" It means that escaped parentheses are ignored when we hit ib
-" (inside parentheses text-object)
-" E.g.:
-" if we hit dib while the cursor is on O in the following text:
+" Don't ignore escaped parentheses when using the text-object `ib`.{{{
+"
+" If we hit `dib` while the cursor is on 'O' in the following text:
+"
 "     (hello \(fOo) world)
+"
 " We get:
+"
 "     () world)
+"
 " For the moment, we prefer that Vim doesn't ignore escaped parentheses:
-
+"
+" So instead we get:
+"
+"     (hello \() world)
+"}}}
 set cpoptions+=M
 
 " the nr column (`'nu'`,  `'rnu'`) will be taken into account  to decide when to
 " wrap long lines
 set cpoptions+=n
 
-" So instead we get:
-"     (hello \() world)
-
-" Why this guard for Neovim?{{{
-"
-" The next setting breaks `:norm! .` when some lines are visually selected:
-"
-"         :set cpo+=y
-"         A ) Esc
-"         visually select lines
-"         :norm! .
-"
-" This can break our custom mapping:
-"
-"     xno  <silent>  .  :norm! .<cr>
-"
-" The issue is fixed in this commit:
-" https://github.com/vim/vim/releases/tag/v8.1.0686
-"
-" But it has not been merged in Neovim yet.
-"}}}
-if !has('nvim')
-    " allow us to redo a yank command with the dot command
-    set cpoptions+=y
-endif
+" allow us to redo a yank command with the dot command
+set cpoptions+=y
 
 " diffopt {{{2
 
@@ -7915,6 +7899,18 @@ endfu
 "    - heredoc assignment (:h :let=<<)
 "      https://github.com/vim/vim/releases/tag/v8.1.1354
 "
+"    - `:h literal-Dict`
+"
+"    - bufadd(), bufload()
+"      useful to edit a file which is not current loaded, with `deletebufline()`, `setbufline()`, ...
+"      and *without* side-effects (e.g. no window opened/closed which could alter the layout)
+"
+"         let bufnr = bufadd(expand('~/.shrc'))
+"         call bufload(bufnr)
+"         call appendbufline(bufnr, 1, ['some', 'text'])
+"
+"      ... but how do you save it?
+"
 " 65 -
 " prevent vim-session from checking swap files.
 " annoying when a session crashed, and we can't restore a session.
@@ -9116,6 +9112,17 @@ endfu
 " `execute('syn list ...')`, `execute('hi ...')`.
 " Maybe we should ask for  some built-in functions (`getsynlist()`?, `gethi()`?)
 " which would give this info in a nice dictionary.
+"
+" 140 -
+" To resize a window we press `z c-h` then `;` or `,`.
+" Compared to tmux, it's confusing.
+" In tmux, we press pfx + `c-h`, then we can press `c-h`, `c-l`, `c-j`, `c-k` repeatedly.
+" We should do sth  similar in Vim to be more consistent,  and also because it's
+" more powerful.
+" To do so,  you'll need to create  a submode, and maybe  tweak `vim-submode` so
+" that we quit a submode automatically after 1 or 2 seconds.
+
+
 
 
 

@@ -3342,6 +3342,10 @@ fi
 # What does it do?{{{
 #
 # It temporarily turns on the “application” mode.
+#
+# See:
+# > 3.8: Why do the cursor (arrow) keys not work? (And other terminal oddities.)
+# http://zsh.sourceforge.net/FAQ/zshfaq03.html
 #}}}
 #   What's that application mode?{{{
 #
@@ -4361,22 +4365,22 @@ typeset -Ag abbrev
 #     $ echo V C-v SPC some text
 #}}}
 abbrev=(
-  # ring the bell
-  'B'    '; tput bel'
-  # align columns
-  'C'    '| column -t'
-  # printf Field
-  'F'    "| awk '{ print $"
+  # ring the BelL
+  'bl'    '; tput bel'
+  # Align Columns
+  'ac'    '| column -t'
+  # printf FieLd
+  'fl'   "| awk '{ print $"
   'L'    '2>&1 | less -R'
   # No Errors
-  'NE'   '2>/dev/null'
-  'P'    "printf -- '"
+  'ne'   '2>/dev/null'
+  'pf'    "printf -- '"
 
   # silence!
-  #       ┌ redirect output to /dev/null
-  #       │          ┌ same thing for errors
-  #       ├────────┐ ├──┐
-  'S'    '>/dev/null 2>&1'
+  #        ┌ redirect output to /dev/null
+  #        │          ┌ same thing for errors
+  #        ├────────┐ ├──┐
+  'sl'    '>/dev/null 2>&1'
 
   # Do *not* use `T`; it would be expanded when you try to (un)bind a tmux key binding:
   #     $ tmux bind -T ...

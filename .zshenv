@@ -340,7 +340,7 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 # Besides, both  paths are missing  when zsh  is started as  a login shell  in a
 # virtual console.  Indeed, in that case:
 #
-#     $ pstree -s -p $$
+#     $ pstree -lsp $$
 #     systemd(1)---login(8518)---zsh(8579)---pstree(8900)~
 #
 # The shell  has only 2 ancestors,  none of which has a  PATH containing `~/bin`
@@ -350,7 +350,7 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 #
 # Run this:
 #
-#     $ pstree -s -p $$
+#     $ pstree -lsp $$
 #     systemd(1)───lightdm(934)───lightdm(997)───upstart(1006)───tmux: server(1642)───zsh(9687)───pstree(9733)~
 #
 # Then run:
@@ -406,7 +406,7 @@ export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux
 # `$ ruby` command, which is slow.
 # We don't want the shell startup time to be impacted.
 # }}}
-# What's `-s` in `[[ -s file ]]`? {{{
+# What is `-s` in `[[ -s file ]]`? {{{
 #
 # It asserts that the file exists and that its size is not 0.
 # Btw, that's similar to how fasd lazy-loads some of its code:
@@ -430,7 +430,7 @@ if [[ ! -s "${HOME}/.ruby_user_dir_cache" ]]; then
   # }}}
   #     `puts`? {{{
   #
-  # A command similar to `$ printf`.
+  # A ruby command similar to `$ printf`.
   # }}}
   #     `Gem.user_dir`? {{{
   #

@@ -1432,45 +1432,37 @@ fu! myfuncs#tmux_current_command(cmd, ...) abort
         return
     endif
 
+    " remove the variable if we manually closed the pane associated to it,
+    " otherwise the function will think there's no need to create a pane
     if exists('s:pane_id')
-        " If  we close  the tmux  pane manually,  `s:pane_id` won't  be deleted,
-        " therefore the  next time we  invoke the  function, it won't  split the
-        " window, thinking the pane is still there.
-        " We must make sure it's still open before going further.
-        sil let open_panes = split(system("tmux list-panes -F '#D'")[:-2])
-        "                                                  ├┘  ├┘   ├───┘{{{
-        "                                                  │   │    └ eliminate trailing newline
-        "                                                  │   └ unique pane ID
-        "                                                  └ format the output according to the following string
-        "}}}
+        sil let open_panes = systemlist("tmux list-panes -F '#D'")
         let is_pane_still_open = index(open_panes, s:pane_id) >= 0
         if !is_pane_still_open
             " the pane should be closed, but better be safe
-            sil call system('tmux kill-pane -t '.s:pane_id)
+            sil call system('tmux kill-pane -t '..s:pane_id)
             unlet! s:pane_id
         endif
     endif
 
     if !exists('s:pane_id')
-        sil let s:pane_id = system(
-            \ 'tmux splitw -c '.shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM).' -d -p 25 -PF "#D"'
-            \ )[:-2]
+        let s:pane_id = s:run([
+            \ 'splitw -c',
+            \ shellescape(a:0 ? a:1 : $XDG_RUNTIME_VIM),
+            \ '-d -p 25 -PF "#D"'
+            \ ])
     endif
 
-    let delim = '$(echo x | tr x ''\001'')'
-    sil let pane_current_path = systemlist('tmux list-panes -F "#{pane_current_path}' . delim . '#D"')
-    call filter(pane_current_path, {i,v -> v =~# '\m\C' . delim . s:pane_id . '$'})
-    let pane_current_path = substitute(get(pane_current_path, 0, ''), delim . '.\{-}$', '', '')
-
     " Make sure the working directory of the pane matches the one we want.
+    let pane_current_path = system('tmux lsp -F "#{pane_current_path}" -t'..s:pane_id)
     if a:0 && (a:1 isnot# pane_current_path)
-        call s:tmux_run_this_shell_cmd('cd '.shellescape(a:1))
+        call s:tmux_run_this_shell_cmd('cd '..shellescape(a:1))
     endif
 
     call s:tmux_run_this_shell_cmd(a:cmd)
 endfu
 
 fu! s:tmux_run_this_shell_cmd(cmd) abort
+    let cmd = substitute(cmd, '\\\s\+$', '\', '')
     " TODO: Better comment these commands.{{{
     "
     " See the function `s:fixstr()` in `vim-tmuxify` for an explanation.
@@ -1480,18 +1472,95 @@ fu! s:tmux_run_this_shell_cmd(cmd) abort
     " Improve the reliability of the code by merging this PR:
     " https://github.com/jebaum/vim-tmuxify/pull/28
     "}}}
+    " https://github.com/jebaum/vim-tmuxify/issues/16
     let cmd = substitute(a:cmd, '\t', ' ', 'g')
-    let cmd = substitute(cmd, '\\\s\+$', '\', '')
-    let cmd = cmd[-1:] is# ';' ? cmd[:-2].'\;' : cmd
+    " https://github.com/jebaum/vim-tmuxify/issues/11
+    " Why ?{{{
+    "
+    " Originally, the vim-tmuxify  plugin sometimes ran sth like  this (when you
+    " tried to send to a pane a command with a trailing semicolon):
+    "
+    "     $ tmux send 'ls;' C-m
+    "
+    " In this case, tmux receives these arguments:
+    "
+    "     $ printf '%s\n' send 'ls;' C-m
+    "     send~
+    "     ls;~
+    "     C-m~
+    "
+    " So, tmux runs:
+    "
+    "     :send ls; C-m
+    "
+    " Which fails, because C-m is not a tmux command.
+    "
+    " ---
+    "
+    " Could this happen to us?
+    "
+    " Answer: I don't think so.
+    " I think this issue stems from a more fundamental issue.
+    " The plugin, originally, didn't use `-l` to send the keys, which imo was wrong.
+    " If you want to send the current line to  a pane, I think you want it to be
+    " sent literally.
+    " OTOH, `C-m` must not be sent literally; it must be interpreted.
+    " You need 2 `send-keys` commands, which is what we do in our Vim functions.
+    " So, even if one of our command ended with a semicolon, there should be no issue:
+    "
+    " Watch:
+    "
+    "     " original plugin (✘)
+    "     :call system('tmux send -t2 "ls;" C-m')
+    "
+    "     " our code (✔)
+    "     :call system('tmux send -l -t2 "ls;" \; send -t2 C-m')
+    "
+    "
+    " If the issue can't happen to us, remove this `if` block.
+    " But before doing that, were there other issues fixed by it?
+    " If yes, don't remove it immediately; think about it.
+    "
+    " ---
+    "
+    " Why does this fail:
+    "
+    "     $ tmux send 'ls;' C-m
+    "
+    " But not this:
+    "
+    "     :send 'ls;' C-m
+    "
+    " Answer: Because the quotes are removed in the first command.
+    "
+    " ---
+    "
+    " Are you sure your explanations are correct?
+    "
+    " Watch this:
+    "
+    "     $ tmux send 'ls;a' C-m
+    "     output of `$ ls`~
+    "     output of `$ a`~
+    "
+    "     :send ls;a C-m
+    "     Usage: attach-session [-dErx] [-c working-directory] [-t target-session]~
+    "
+    " But you just said that tmux removed the quotes in the command from the shell.
+    " If that was true, the first command should fail like the second one.
+    "
+    " It seems  that a trailing semicolon  at the end  of a string is  a special
+    " case, but why?
+    " Because  of  the shell? But  the  shell  should  not interfere  since  the
+    " semicolon is inside quotes.
+    "}}}
+    if cmd[-1:] is# ';'
+        let cmd = cmd[:-2]..'\;'
+    endif
 
-    " `-l` disables key name lookup.
-    " So, if the command contains `C-m`, tmux will send it literally to the shell.
-    " Without `-l`, it would be translated into a CR.
-    let tmux_cmd = 'tmux send -t '.s:pane_id.' -l '.shellescape(a:cmd)
-               \ . ' \; send -t '.s:pane_id.' C-m'
+    let tmux_cmd = 'tmux send -t '..s:pane_id..' -l '..shellescape(a:cmd)
+            \ ..'     \; send -t '..s:pane_id..' C-m'
     sil call system(tmux_cmd)
-    " The `-d`  in `tmux splitw ...`  means “do NOT give  focus“, so don't
-    " try to use `tmux last-pane`, there's no last pane.
 endfu
 
 fu! myfuncs#tmux_last_command() abort
@@ -1514,7 +1583,7 @@ fu! myfuncs#tmux_last_command() abort
         endif
 
         sil let s:pane_id =
-            \ system('tmux splitw -d -h -p 30 -c ' . shellescape(expand('%:p:h')) . ' -PF "#D"')[:-2]
+            \ system('tmux splitw -d -h -p 30 -c '..shellescape(expand('%:p:h'))..' -PF "#D"')[:-2]
         call s:tmux_run_this_shell_cmd(cmd)
 
         augroup tmux_last_cmd_close_pane
@@ -1526,13 +1595,16 @@ fu! myfuncs#tmux_last_command() abort
     " If  there're more than two  panes, we just  want to re-run the  last shell
     " command in the previous pane.
     else
-        let cmds = [
-            \ 'last-pane',
-            \ 'send-keys C-l Up Enter',
-            \ 'last-pane',
-            \ ]
-        sil call system(join(map(cmds, {i,v -> 'tmux '.v.';'})))
+        call s:run([
+            \ 'lastp',
+            \ 'send C-l Up Enter',
+            \ 'lastp',
+            \ ], 1)
     endif
+endfu
+
+fu! s:run(cmds, ...) abort
+    sil return system('tmux '..join(a:cmds, (a:0 ? ' \; ' : ' ')))[:-2]
 endfu
 
 fu! s:get_usage_lnum() abort
@@ -1541,14 +1613,14 @@ fu! s:get_usage_lnum() abort
     let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S\+')
     " Note that we don't exclude the whitespace which follows the `$` shell prompt.
     " This will make sure that when the command is run, zsh doesn't log it in its history.
-    let lnum = search(cml . '\s*Usage:\_.\{-}\zs\$', 'n')
+    let lnum = search(cml..'\s*Usage:\_.\{-}\zs\$', 'n')
     call setpos('.', pos)
     return lnum
 endfu
 
 fu! s:tmux_last_cmd_close_pane() abort
     try
-        sil call system('tmux kill-pane -t '.s:pane_id)
+        sil call system('tmux killp -t '..s:pane_id)
         unlet! s:pane_id
     catch
         return lg#catch_error()
