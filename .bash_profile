@@ -29,11 +29,8 @@ case "$-" in *i*) . ~/.bashrc;; esac
 # Why don't you export your environment variables directly from this file?  Why using `~/.bashenv`?{{{
 #
 # We also want them to be sourced when we start an interactive bash shell.
-# So, we would need to source this file from `~/.bashrc`:
-#
-#     . ~/.bash_profile
-#
-# But that would create a loop, because we source our bashrc from this file.
+# So, we would need to source `~/.bash_profile` from `~/.bashrc`.
+# But that would create a loop, because we source our bashrc from `~/.bash_profile`.
 # So,  instead, we  dedicate a  new file  for the  sole purpose  of setting  and
 # exporting environment variables.
 # Note that it also makes bash more  consistent with zsh; the latter also uses a

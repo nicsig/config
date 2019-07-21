@@ -551,8 +551,7 @@ endif
 let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
 " For more info about `$XDG_RUNTIME_DIR`:
 "
-"     https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
-" }}}2
+" https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
 
 " backspace {{{2
 
@@ -1630,18 +1629,20 @@ set nrformats-=octal
 " path {{{2
 
 " Where should `:find` and `gf` look for a file?
+" TODO: Should we add a limit on the recursion of `**`?
+" https://begriffs.com/posts/2019-07-19-history-use-vim.html#include-and-path
 set path=.,**
 "        │ │
-"        │ └─ and in the working directory recursively
-"        └─ look in the directory of the current buffer, non-recursively
+"        │ └ and in the working directory recursively
+"        └ look in the directory of the current buffer, non-recursively
 
 " Its default value was:
 "
 "     .,/usr/include,,
 "     │ │            │
-"     │ │            └─ empty value = working directory
-"     │ └─ /usr/include directory
-"     └─ directory of the current buffer
+"     │ │            └ empty value = working directory
+"     │ └ /usr/include directory
+"     └ directory of the current buffer
 
 " scroll {{{2
 
@@ -2258,10 +2259,10 @@ augroup END
 " Finish implementing proper backup.
 " Read files in `backup` session.
 "
-" And read this:
-"
-"         https://www.zachpfeffer.com/single-post/Practice-Recovering-a-File-in-Vim
-"
+" And read these:
+" https://www.zachpfeffer.com/single-post/Practice-Recovering-a-File-in-Vim
+" https://begriffs.com/posts/2019-07-19-history-use-vim.html#backups-and-undo
+
 " TODO:
 " Read this:
 " https://vi.stackexchange.com/a/53/13370
@@ -3783,10 +3784,6 @@ nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
 "                           \   .  expand('<cword>'))
 "                           \<bar> redraw!<cr>
 
-" ||  |x     Tmux run last / current command {{{4
-
-nno  <silent>  <bar><bar>  :<c-u>call myfuncs#tmux_last_command()<cr>
-nno  <silent>  <bar>x  :<c-u>call myfuncs#tmux_current_command(getline('.'))<cr>
 " }}}3
 " hyphen              (prefix) {{{3
 " -a  -8           ascii / bytes info {{{4
@@ -6923,7 +6920,7 @@ endfu
 " 1 -
 " We should never create special buffers:
 "
-"         vim /sil file/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"     vim /sil file/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "
 " We should always use the qfl. The latter gives us more commands to interact.
 " Exception:
@@ -7281,8 +7278,8 @@ endfu
 " refactor all operators so that they remove  'unnamed' and 'unnamedplus'
 " from 'cb', and set 'inclusive'
 "
-"         vim /\v%(opfunc|operatorfunc)\=\zs.*g\@/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
-"         :cfilter! -other_plugins
+"     vim /\v%(opfunc|operatorfunc)\=\zs.*g\@/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
+"     :cfilter! -other_plugins
 "
 " also:
 "         catch
@@ -7432,8 +7429,8 @@ endfu
 " replace all occurrences of `norm ga` with appropriate code.
 " do the same for other `norm` (ex: `norm gs`).
 "
-"         vim /\c\%(^\s*".*\|\<ono\>.*\)\@<!norm!\@!\>/gj ~/.vim/**/*.vim ~/.vim/vimrc
-"         :cfilter! -other_plugins
+"     vim /\c\%(^\s*".*\|\<ono\>.*\)\@<!norm!\@!\>/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"     :cfilter! -other_plugins
 "
 " 32 -
 " Implement a global `:FoldToggle` command
@@ -7442,7 +7439,7 @@ endfu
 " refactor all our functions which populate the qfl to offload work to a single
 " function in `vim-qf`?
 "
-"         vim /set\%(qf\|loc\)list/gj ~/.vim/**/*.vim ~/.vim/vimrc
+"     vim /set\%(qf\|loc\)list/gj ~/.vim/**/*.vim ~/.vim/vimrc
 "
 " 34 -
 " restore  buffer-local  mappings, j  and  k,  if  they existed,  after  preview
@@ -7475,7 +7472,7 @@ endfu
 " abort and/or try conditional are enough
 " sure?
 "
-"         vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
+"     vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
 " 38 -
 " https://github.com/justinmk/vim-dirvish/issues/62
@@ -7488,7 +7485,7 @@ endfu
 " 39 -
 " do we really need a timer to display a message?
 "
-"         vim /execute(.*echo/gj ~/.vim/**
+"     vim /execute(.*echo/gj ~/.vim/**
 "
 " we haven't seriously taken into account `:redraw`.
 "
@@ -7826,6 +7823,10 @@ endfu
 "
 " 64 -
 " play with (or document):
+"
+"    - `'wincolor'`: in Vim, could be used to dim the unfocused windows
+"    (I think the equivalent in Nvim is `'winhighlight'`;
+"    see also `:h hl-NormalNC` and `:h hl-NormalFloat`)
 "
 "    - `expandcmd()`: https://github.com/vim/vim/releases/tag/v8.1.1510
 "
@@ -9121,8 +9122,6 @@ endfu
 " more powerful.
 " To do so,  you'll need to create  a submode, and maybe  tweak `vim-submode` so
 " that we quit a submode automatically after 1 or 2 seconds.
-
-
 
 
 

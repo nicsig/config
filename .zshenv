@@ -457,10 +457,11 @@ export REPORTTIME=15
 
 # Purpose:{{{
 #
-# When we try to save a modified file in Neovim, we get this error:
-#
-#     Error detected while processing BufWriteCmd Auto commands for "...":
-#     sudo: no tty present and no askpass program specified
+#     $ nvim file_owned_by_root
+#     # edit file
+#     :W
+#     Error detected while processing BufWriteCmd Auto commands for "...":~
+#     sudo: no tty present and no askpass program specified~
 #
 # According to the message, we need to specify an askpass program.
 # If you search `askpass` in `$ man sudo`, you'll find the `-A` option (which we
@@ -473,6 +474,20 @@ export REPORTTIME=15
 # Ok, and where did you find this package?{{{
 #
 #     $ aptitude search '~daskpass'
+#}}}
+# When I try to `:Gpush` a commit, the askpass program prompts me for a password.  I can't paste my password in it!{{{
+#
+# It has nothing to do with `SUDO_ASKPASS`.
+# Since the commit `adba9c6`, fugitive runs the askpass program if `executable('ssh-askpass')`
+# is true.
+#
+# Solution 1: Make sure your first commit push is not performed with `:Gpush`.
+# Solution 2: Press Escape when askpass asks for your username, and when it asks for your password.
+# Each time, fugitive will fall back on asking the info via the terminal.
+#
+# Once  you've  given  your  credentials,   you  won't  be  asked  again  before
+# some  time  (look for  'timeout'  in  `~/.config/git/config`), thanks  to  the
+# `$ git-credential-cache` agent.
 #}}}
 export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 

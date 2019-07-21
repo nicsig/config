@@ -30,7 +30,7 @@
 #
 # The output of `bt full` should be in `gdb.txt`.
 #
-# I'm not sure but  `$ lscpu` may be the cause, because  once, it crashed, right
+# I'm not sure  but `$ lscpu` may  be the cause, because once,  it crashed right
 # after we faced the issue.
 #}}}
 ncore=$(lscpu | grep -i 'cpu(s)' | head -n1 | awk '{ print $2 }')

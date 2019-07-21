@@ -367,12 +367,15 @@ configure() { #{{{2
     #
     # ---
     #
-    # Also, from `:h python-building`:
+    # From `:h python-building`:
     #
     # > If you have more than one version  of Python 3, you need to link python3
     # > to the one you prefer, before running configure.
     #
     # I have no idea how to “link python3 to the one I prefer” though.
+    #
+    # Also, maybe have a look at `:h python-dynamic`, and `:h python-2-and-3`.
+    # More generally, reading the whole `if_pyth.txt` file may be useful.
     #}}}
     PATH=/usr/bin:$PATH ./configure  \
       --enable-cscope                \
