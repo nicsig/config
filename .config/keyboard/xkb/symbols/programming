@@ -39,7 +39,7 @@ partial alphanumeric_keys
     key <AC07> { [ j, J, asterisk ] };
     key <AC08> { [ k, K, numbersign ] };
     key <AC09> { [ l, L ] };
-    key <AB02> { [ x, X, braceleft ] };
+    key <AB02> { [ x, X, braceleft, z ] };
     key <AB03> { [ c, C, braceright, copyright ] };
     key <AB04> { [ v, V, v ] };
     key <AB05> { [ b, B, asciitilde ] };

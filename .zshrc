@@ -2256,6 +2256,47 @@ EOF
   #}}}
 }
 
+tmux_log() { #{{{2
+  emulate -L zsh
+  if pidof strace >/dev/null 2>&1; then
+    # Where can I find more information about this `USR2` signal?{{{
+    #
+    # `$ man tmux /-v`:
+    #
+    # > The SIGUSR2 signal may be sent to the tmux server process
+    # > to toggle logging between on (as if -v was given) and off.
+    #}}}
+    # Why do you use `USR2` instead of `SIGUSR2`?{{{
+    #
+    # Because `run` invokes sh, not bash.
+    # And in sh, you need to remove the `SIG` prefix.
+    # https://unix.stackexchange.com/a/199384/289772
+    #}}}
+    tmux display 'Stopped tmux server logging' \; \
+         run 'kill -s USR2 #{pid} ; killall strace'
+  else
+    # Where is the logfile written?{{{
+    #
+    # In the cwd of the shell from which you started tmux.
+    # It is *not* written in the cwd of the shell in which you press the key binding.
+    # IOW, it's most probably written in your $HOME.
+    #}}}
+    tmux display 'Started tmux server logging' \; \
+         run 'kill -s USR2 #{pid} ; strace -ttt -ostrace.txt -p #{pid}'
+  fi
+}
+# TODO: What if we have a running `$ strace` process when we use the function for the first time?{{{
+#
+# It will wrongly think tmux is being logged, and:
+#
+#    - tell us that the logging is being stopped (wrong but not harmful)
+#    - start the logging (✘ contradicts what has been displayed)
+#    - kill all `$ strace` processes
+#
+# We would need a  format variable which tells us whether  tmux is being logged:
+# `#{logging}`.
+#}}}
+
 tor() { #{{{2
   # Why `cd ...`?  Why not running the desktop file with an absolute path?{{{
   #
@@ -3662,29 +3703,33 @@ __kill_line_or_region() {
 zle -N __kill_line_or_region
 bindkey '^K' __kill_line_or_region
 
-# C-q        quote_big_word {{{3
+# C-q        quote_word_or_region {{{3
 
 # useful to quote a url which contains special characters
-__quote_big_word() {
+__quote_word_or_region() {
   emulate -L zsh
-  zle set-mark-command
-  zle vi-backward-blank-word
-  zle quote-region
-
-  # Alternative:
-  #
-  #   RBUFFER+="'"
-  #   zle vi-backward-blank-word
-  #   LBUFFER+="'"
-  #   zle vi-forward-blank-word
+    if (( $REGION_ACTIVE )); then
+      zle quote-region
+    else
+      # Alternative:{{{
+      #
+      #     RBUFFER+="'"
+      #     zle vi-backward-blank-word
+      #     LBUFFER+="'"
+      #     zle vi-forward-blank-word
+      #}}}
+      zle set-mark-command
+      zle vi-backward-blank-word
+      zle quote-region
+    fi
 }
-zle -N __quote_big_word
+zle -N __quote_word_or_region
 #    │
 #    └ -N widget [ function ]
 # Create a user-defined  widget. When the new widget is invoked  from within the
 # editor, the specified shell function is called.
 # If no function name is specified, it defaults to the same name as the widget.
-bindkey '^Q' __quote_big_word
+bindkey '^Q' __quote_word_or_region
 
 # C-u        backward-kill-line {{{3
 
@@ -3702,6 +3747,66 @@ bindkey '^U' backward-kill-line
 # `stty` (the  output of  `stty -a` contains  `intr = ^C`),  but it  wouldn't be
 # wise, because it's too important.
 # We would need to find a way to disable it only after `C-x`.
+
+# C-x C-?         __complete_debug {{{4
+
+# What's the purpose of the `_complete_debug` widget?{{{
+#
+# It performs ordinary  completion, but captures in a temporary  file a trace of
+# the shell commands executed by the completion system.
+# Each completion attempt gets its own file.
+# A command to view each of these files is pushed onto the editor buffer stack.
+#}}}
+# Why do you create a wrapper around the default widget `_complete_debug`?{{{
+#
+# After invoking the `_complete_debug` widget, you'll see sth like:
+#
+#     Trace output left in /tmp/zsh6028echo1 (up-history to view)
+#                                             ^^^^^^^^^^^^^^^^^^
+# If you invoke  `up-history` (for us `C-p`  is bound to sth  similar because of
+# `bindkey  -e`), in  theory zsh  should populate  the command  line with  a vim
+# command to read the trace file.
+# In practice, it won't happen because you've enabled 'MENU_COMPLETE'.
+# Because of this, after pressing Tab, you've already entered the menu,
+# and `C-p` will simply select the above match in the menu.
+#
+# MWE:
+#
+#     autoload -Uz compinit
+#     compinit
+#     setopt MENU_COMPLETE
+#     bindkey '^X?' _complete_debug
+#     bindkey '^P' up-history
+#
+# So, to conveniently read the trace  file, we make sure that 'MENU_COMPLETE' is
+# temporarily reset.
+#}}}
+__complete_debug() {
+  emulate -L zsh
+  unsetopt MENU_COMPLETE
+  zle _complete_debug
+  # no need to restore the option, the change is local to the function
+  # thanks to `emulate -L zsh`
+}
+zle -N __complete_debug
+bindkey '^X?' __complete_debug
+
+# C-x C-d         end-of-list {{{4
+
+# Purpose:{{{
+#
+# `end-of-list` allows you to make a list of matches persistent.
+#
+#     % echo $HO C-d
+#         → parameter
+#           HOME  HOST    # this list may be erased if you repress C-d later
+#
+#     % echo $HO C-d C-x D
+#         → parameter
+#           HOME  HOST    # this list is printed forever
+#     % echo $HO          # new prompt automatically populated with the previous command
+#}}}
+bindkey '^X^D' end-of-list
 
 # C-x C-e         edit-command-line {{{4
 
@@ -3798,8 +3903,9 @@ bindkey '^X^E' sane-edit-command-line
 # to customize the completion system.
 # Explain what tags are, and how to read the output of `_complete_help`.
 #
-# See `man zshcompsys` > COMPLETION SYSTEM CONFIGURATION > Overview
-#                    > BINDABLE COMMANDS
+# See:
+#     $ man zshcompsys /COMPLETION SYSTEM CONFIGURATION /Overview
+#     $ man zshcompsys /BINDABLE COMMANDS
 bindkey '^X^H' _complete_help
 
 # The  `_complete_help` widget  shows all  the contexts  and tags  available for
@@ -3814,69 +3920,6 @@ bindkey '^X^H' _complete_help
 # Note that  the information about styles  may be incomplete; it  depends on the
 # information available  from the  completion functions called,  which in  turn is
 # determined by the user's own styles and other settings.
-
-# What's the purpose of the `_complete_debug` widget?{{{
-#
-# It performs ordinary  completion, but captures in a temporary  file a trace of
-# the shell commands executed by the completion system.
-# Each completion attempt gets its own file.
-# A command to view each of these files is pushed onto the editor buffer stack.
-#}}}
-# Why do you create a wrapper around the default widget `_complete_debug`?{{{
-#
-# After invoking the `_complete_debug` widget, you'll see sth like:
-#
-#     Trace output left in /tmp/zsh6028echo1 (up-history to view)
-#                                             ^^^^^^^^^^^^^^^^^^
-# If you invoke  `up-history` (for us `C-p`  is bound to sth  similar because of
-# `bindkey  -e`), in  theory zsh  should populate  the command  line with  a vim
-# command to read the trace file.
-# In practice, it won't happen because you've enabled 'MENU_COMPLETE'.
-# Because of this, after pressing Tab, you've already entered the menu,
-# and `C-p` will simply select the above match in the menu.
-#
-# MWE:
-#
-#     autoload -Uz compinit
-#     compinit
-#     setopt MENU_COMPLETE
-#     bindkey '^X?' _complete_debug
-#     bindkey '^P' up-history
-#
-# So, to conveniently read the trace  file, we make sure that 'MENU_COMPLETE' is
-# temporarily reset.
-#}}}
-__complete_debug() {
-  emulate -L zsh
-  unsetopt MENU_COMPLETE
-  zle _complete_debug
-  # no need to restore the option, the change is local to the function
-  # thanks to `emulate -L zsh`
-}
-zle -N __complete_debug
-bindkey '^X?' __complete_debug
-
-# C-x C-k         kill-region {{{4
-
-# Usage:{{{
-#
-#     $ echo foo 'baz' bar
-#                ^
-#                cursor here
-#
-#     # press C-SPC to set the mark
-#
-#     $ echo foo 'baz' bar
-#                     ^
-#                     cursor moved here, so that the region covers the text 'baz'
-#
-#     # press C-x C-k to kill the region
-#     $ echo  foo bar~
-#
-#     # press C-d C-e SPC C-y
-#     $ echo foo bar 'baz'~
-#}}}
-bindkey '^X^K' kill-region
 
 # C-x C-r         re-source zshrc {{{4
 
@@ -3895,23 +3938,6 @@ __reread_zshrc() {
 zle -N __reread_zshrc
 bindkey '^X^R' __reread_zshrc
 
-# C-x D           end-of-list {{{4
-
-# Purpose:{{{
-#
-# `end-of-list` allows you to make a list of matches persistent.
-#
-#     % echo $HO C-d
-#         → parameter
-#           HOME  HOST    # this list may be erased if you repress C-d later
-#
-#     % echo $HO C-d C-x D
-#         → parameter
-#           HOME  HOST    # this list is printed forever
-#     % echo $HO          # new prompt automatically populated with the previous command
-#}}}
-bindkey '^XD' end-of-list
-
 # C-x H           run-help {{{4
 
 # What's this “run-help”?{{{
@@ -3924,11 +3950,11 @@ bindkey '^XD' end-of-list
 #
 # It:
 #
-#     1. pushes the current buffer (command line) onto the buffer stack
-#     2. looks for a help page for the command name on the current command line (in case it's a builtin)
-#     3. if it doesn't find one, it invokes `$ man`
+#    1. pushes the current buffer (command line) onto the buffer stack
+#    2. looks for a help page for the command name on the current command line (in case it's a builtin)
+#    3. if it doesn't find one, it invokes `$ man`
 #
-# For more info, see `$ man zshzle`.
+# For more info, see `$ man zshzle /run-help`.
 #}}}
 bindkey '^XH' run-help
 
@@ -3942,7 +3968,6 @@ bindkey '^XH' run-help
 #     "^[!" is _bash_complete-word
 #}}}
 bindkey '^Xh' describe-key-briefly
-
 # }}}3
 # C-z        fancy_ctrl_z {{{3
 
@@ -3959,8 +3984,7 @@ bindkey '^Xh' describe-key-briefly
 # background process, so that we can put a running command in the background
 # with 2 `C-z`.
 # Try to reimplement what is shown here:
-#
-#     https://www.youtube.com/watch?v=SW-dKIO3IOI
+# https://www.youtube.com/watch?v=SW-dKIO3IOI
 #
 # https://unix.stackexchange.com/a/10851/232487
 __fancy_ctrl_z() {
@@ -4005,7 +4029,7 @@ bindkey '^Z' __fancy_ctrl_z
 # What's this “unnamed” function?{{{
 #
 # An anonymous function.
-# See `man zshmisc` for more info.
+# See `$ man zshmisc` for more info.
 #}}}
 # Why such a function?{{{
 #
@@ -4078,26 +4102,59 @@ bindkey '^Z' __fancy_ctrl_z
 #}}}
 # TODO: When we press `M-~`, our terminal doesn't receive anything. {{{
 #
-# Try this in bash:
+# This is a Xorg issue.
+# For some reason, pressing `Alt AltGr key` doesn't work for some keys (i, u, x, ...).
+# Run `$ xev_terse_terse`, then press `Alt AltGr`:
 #
-#     $ xmodmap -e 'keycode  11 = a a a a asciitilde'
-#     $ cat
-#     # press M-AltGr-2
-#         → ^[ ~
-#         ✔
+#     64 Alt_L~
+#     108 ISO_Level3_Shift~
 #
-#     $ xmodmap -e 'keycode  56 = a a a a asciitilde'
-#     $ cat
-#     # press M-AltGr-b
-#         → ∅
-#         ✘
+# Now press and release `a`:
 #
-# It seems `M-~`  works when `~` is  produced by many keys (`a`,  `s`, `,`, ...)
-# but not all (`b`, `v`, ...).
+#     24 bar~
 #
-# Solution:
+# Next press `i`: nothing happens.
+# This is unexpected. Why?
+#
+# Finally release `i`:
+#
+#     64 Alt_L~
+#     108 ISO_Level3_Shift~
+#
+# This is also unexpected. Why?
+#
+# Temporary Solution:
 # Make another additional key generate `~`.
-# Maybe you could try the key `1`.
+# This works because the issue doesn't apply to all physical keys, only these ones:
+#
+#    - F1, F2, F3, F5
+#    - PgDown
+#    - 1, 6, 8
+#    - k_3, k_7, k_8 (`k_` = keypad)
+#    - Tab, u, i, o
+#    - Capslock, d, f, g, j
+#    - greater/lower than sign, w, x, v, b
+#
+# ... out of around 98 (?) keys which can be combined with Meta + AltGr.
+# Why those 25 keys?
+# https://0x0.st/zpOa.txt
+#
+# Update:
+# If you go into the keyboard settings and choose the English layout (move it to
+# the top), then repeat the experiment  with `$ xev`, the issue persists, except
+# this time, you'll see AltL and AltR:
+#
+#     (our custom layout)
+#     64 Alt_L~
+#     108 ISO_Level3_Shift~
+#
+#     (default english layout)
+#     64 Alt_L~
+#     68 Alt_R~
+#
+# Does this mean that the issue is in the kernel and not in Xorg?
+# Not necessarily, it could simply be that our custom layout and the english one
+# share the same “deficiencies”.
 #}}}
 
 # M-#           pound-insert {{{3
@@ -4138,7 +4195,7 @@ bindkey '\e,' copy-earlier-word
 # This key binding is  useful when you press `M-.` too many  times, and you want
 # to go back to the next history event (instead of the previous one).
 #
-#     https://unix.stackexchange.com/a/481714/289772
+# https://unix.stackexchange.com/a/481714/289772
 #}}}
 # What does the `1` argument passed to `insert-last-word` mean?{{{
 #
@@ -4271,7 +4328,7 @@ bindkey -s '\eZ' '$(!!|fzf)'
 # use vi-like keys in menu completion
 # bindkey -M menuselect 'h' backward-char
 #        │
-#        └─ selects the `menuselect` keymap
+#        └ selects the `menuselect` keymap
 #
 #           `bindkey -l` lists all the keymap names
 #            for more info: man zshzle
@@ -4371,7 +4428,8 @@ abbrev=(
   'ac'    '| column -t'
   # printf FieLd
   'fl'   "| awk '{ print $"
-  'L'    '2>&1 | less -R'
+  # can't use `L` because of `$ dpkg -L`
+  'LL'    '2>&1 | less'
   # No Errors
   'ne'   '2>/dev/null'
   'pf'    "printf -- '"

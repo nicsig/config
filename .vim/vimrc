@@ -2428,7 +2428,7 @@ set timeoutlen=3000
 "    1. insert sth wrong
 "    2. hit escape
 "    3. hit u (undo)    →    M-u: uppercase next word
-" TODO: When you set this option, the contents of a recording is weird.{{{
+" TODO: When you set this option to a low value, the contents of a recording is weird.{{{
 "
 "     $ vim -Nu NONE +'set ttimeoutlen=6'
 "     qqq
@@ -2437,6 +2437,11 @@ set timeoutlen=3000
 "     A^[<80><fd>a~
 "
 " Can it cause any issue?
+" Even  if  it  doesn't, it  makes  reading  the  contents  of a  register,  and
+" `/tmp/.vimkeys` harder than it should be.
+"
+" Note that the issue is specific to Vim, not Nvim.
+" And it disappears below a certain threshold which can vary (≈ 300ms?).
 "}}}
 set ttimeoutlen=6
 " the lower the value, the less risk there is for keys manually typed to be
@@ -3499,21 +3504,23 @@ nno  <silent>  gT  :<c-u>call myfuncs#search_todo('project')<cr>
 "                                   :lhi[story]
 
 " add current position in loclist
-nno  <silent>  m/  :<c-u>call <sid>add_to_loclist(1)<cr>
+nno <silent> m/ :<c-u>call <sid>add_to_loclist(1)<cr>
 " empty loclist
-nno  <silent>  m?  :<c-u>call <sid>add_to_loclist(0)<cr>
+nno <silent> m? :<c-u>call <sid>add_to_loclist(0)<cr>
 
 fu! s:add_to_loclist(populate) abort
-    let s:my_marks = a:populate
-                 \ ?     get(s:, 'my_marks', []) + [{'bufnr': bufnr('%'), 'lnum': line('.'), 'col': col('.')}]
-                 \ :     []
+    if a:populate
+        let s:my_marks =  get(s:, 'my_marks', [])
+            \ + [{'bufnr': bufnr('%'), 'lnum': line('.'), 'col': col('.'), 'text': getline('.')}]
+    else
+        let s:my_marks = []
+    endif
     "                               ┌─ without this, Vim would create a new
     "                               │  loclist every time we invoke the function
     "                               │
     call setloclist(0, s:my_marks, 'r')
     call setloclist(0, [], 'a', {'title': 'My marks'})
 endfu
-
 "}}}3
 " U                   (prefix) {{{3
 
@@ -4089,19 +4096,18 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
 " We need to set up the modified arrow keys ourselves.
 
 " To understand the code, read:
-"
-"         https://unix.stackexchange.com/a/34723/289772
+" https://unix.stackexchange.com/a/34723/289772
 "
 " See also: :h xterm-modifier-keys
 "
 " :h version7:
 "
-"         Not all modifiers were recognized for xterm function keys.  Added the
-"         possibility in term codes to end in ";*X" or "O*X", where X is any
-"         character and the * stands for the modifier code.
-"         Added the <xUp>, <xDown>, <xLeft> and <xRight> keys, to be able to
-"         recognize the two forms that xterm can send their codes in and still
-"         handle all possible modifiers.
+" > Not all modifiers were recognized for xterm function keys.  Added the
+" > possibility in term codes to end in ";*X" or "O*X", where X is any
+" > character and the * stands for the modifier code.
+" > Added the <xUp>, <xDown>, <xLeft> and <xRight> keys, to be able to
+" > recognize the two forms that xterm can send their codes in and still
+" > handle all possible modifiers.
 "
 " The `*` in the next code stands for the modifier `C-`, `S-`, `M-`.
 " While the `x` is there because it seems that `xterm` can send codes in

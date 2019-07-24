@@ -6,7 +6,6 @@
 #    - formatter (stay consistent; enforce styleguide)
 #    - REPL/compiler (evaluate code to check it works)
 #    - integrated documentation
-#    pizza
 #    - ?
 
 
@@ -15,16 +14,16 @@
 # In your functions, try to create as few temporary files as you can.
 # Maybe you could eliminate some of them, using process redirection:
 #
-#         https://www.reddit.com/r/vim/comments/7czgrd/profiling_and_optimizing_vim/dpvzt9h/
+# https://www.reddit.com/r/vim/comments/7czgrd/profiling_and_optimizing_vim/dpvzt9h/
 #
 # Example:
 #
-#                                                           ┌ last argument of the previous command,
-#                                                           │ here it should be `/tmp/vim.log` (could use `$_` too)
-#                                                           ├┐
-#         vim -c 'q' --startuptime /tmp/vim.log && tail -n1 !$
-#             vs
-#         vim -c 'q' --startuptime >(tail -n1)
+#                                                       ┌ last argument of the previous command,
+#                                                       │ here it should be `/tmp/vim.log` (could use `$_` too)
+#                                                       ├┐
+#     vim -c 'q' --startuptime /tmp/vim.log && tail -n1 !$
+#         vs
+#     vim -c 'q' --startuptime >(tail -n1)
 
 
 
@@ -78,8 +77,8 @@ alias lsf='ls --color=always -p | grep -v "/$"'
 #       └ mnemonic: files only
 
 # -X    Sort alphabetically by extension, then by the rest.
-#       Directories can't have an extension, so they always come first.
-#       Handy to separate files from directories.
+#       Directories can't have an extension, so they always come first.
+#       Handy to separate files from directories.
 #
 # Mnemnonic:    x for eXtension
 alias lsx='ls -lX'
@@ -91,8 +90,8 @@ alias lsx='ls -lX'
 #
 # -1    list one file per line
 # -d, --directory
-#       list directory entries instead of contents,
-#       and do not dereference symbolic links
+#       list directory entries instead of contents,
+#       and do not dereference symbolic links
 #
 # ls *        list everything
 # ls */       list every folder and their contents
@@ -108,7 +107,8 @@ alias lss='ls++ --psf'
 # ls by time/changes, newest at bottom
 #
 # -c    with  -lt:
-#       sort  by,  and show, ctime (time of last modification of file status information)
+#       sort  by,  and show, ctime (time of last modification of file status information)
 #
 # Mnemonic:    t for Time
 alias lst='ls++ --ptsf'
+

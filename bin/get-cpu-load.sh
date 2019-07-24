@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # TODO: The tmux faq uses another command:{{{
 #
@@ -33,8 +33,5 @@
 # I'm not sure  but `$ lscpu` may  be the cause, because once,  it crashed right
 # after we faced the issue.
 #}}}
-ncore=$(lscpu | grep -i 'cpu(s)' | head -n1 | awk '{ print $2 }')
+lscpu | awk '/^CPU\(s\):\s*[0-9]/ { ncore = $2 }; END { getline load <"/proc/loadavg"; printf("%d", 100 * load / ncore) }'
 
-avg1=$(cut -d' ' -f1 /proc/loadavg)
-avg1=$(bc <<< "100*${avg1}/${ncore}")
-printf -- '%s' "${avg1}"

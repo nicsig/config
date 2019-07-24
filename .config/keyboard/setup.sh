@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# WARNING: Do *not* run this script from a terminal.{{{
+#
+# It would pollute the environment of any process started by xbindkeys.
+#
+# If  you do  it  by accident,  run  the  script again,  but  directly from  the
+# application launcher of your desktop environment.
+# Just write the full path to the script without the tilde (expand it yourself).
+#}}}
+# TODO:
+# We shoul  install a systemd service,  so that we re-run  this script properly,
+# without risking to pollute the environment of xbindkeys.
+# But that's tricky.
+# Read our todo in `~/wiki/admin/systemd.md`.
+
 [[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
 LOGFILE="${HOME}/log/keyboard_$(basename "$0" .sh).log"
 

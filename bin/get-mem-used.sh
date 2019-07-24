@@ -1,8 +1,3 @@
-#!/bin/bash
+#!/bin/sh
 
-used=$(free | grep Mem | awk '{ print $3 }')
-total=$(free | grep Mem | awk '{ print $2 }')
-
-percentage=$(bc <<< "100*${used}/${total}")
-
-printf -- '%s' "${percentage}"
+free | awk '/Mem/ { total = $2; used = $3}; END { printf("%d", 100 * used / total) }'

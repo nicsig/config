@@ -248,6 +248,8 @@ configure() { #{{{2
     ./configure
 
   elif [[ "${PGM}" == 'tmux' ]]; then
+    # TODO: remove this line once our crash issue is fixed
+    sed -i 's/-O2/-O0/' Makefile.am
     sh autogen.sh
     ./configure
 
