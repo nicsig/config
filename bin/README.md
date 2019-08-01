@@ -20,6 +20,10 @@ So, we install here a more recent version:
 
 <https://github.com/learnbyexample/command_help>
 
+## `fzfimg.sh` script?
+
+<https://github.com/seebye/ueberzug/blob/master/examples/fzfimg.sh>
+
 ## `NetalyzrCLI.jar` archive?
 
 <https://sebsauvage.net/links/?r-awQg>

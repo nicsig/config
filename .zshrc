@@ -2666,6 +2666,16 @@ alias dl_video='youtube-dl --restrict-filenames --write-sub --sub-lang en,fr --w
 
 # git {{{3
 
+# FIXME: `config_push` is highlighted in red.{{{
+#
+# Here is what *I think* is a MWE:
+#
+#     alias e='echo'
+#     alias ee='e one; e two'
+#}}}
+
+# TODO: add file completion to `config`
+
 # Usage:{{{
 #
 #     % config status
@@ -4155,6 +4165,9 @@ bindkey '^Z' __fancy_ctrl_z
 # Does this mean that the issue is in the kernel and not in Xorg?
 # Not necessarily, it could simply be that our custom layout and the english one
 # share the same “deficiencies”.
+#
+# Although, I can reproduce the issue in the console, where Xorg has no influence.
+# So, I start thinking the issue is in the kernel...
 #}}}
 
 # M-#           pound-insert {{{3

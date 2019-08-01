@@ -51,6 +51,7 @@ alert() {
 }
 
 img_w3m() {
+  # FIXME: doesn't work in st; try to use ueberzug instead (see `~/bin/fzfimg.sh`)
 	w3m -o imgdisplay=/usr/lib/w3m/w3mimgdisplay "$1"
 }
 

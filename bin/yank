@@ -1,0 +1,262 @@
+#!/bin/bash
+
+# TODO: Document that you can read the clipboard via a special OSC 52 sequence.{{{
+#
+#     OSC;c;?ST
+#           ^
+#           special parameter
+#
+# Usage example:
+#
+#     # write 'hello' in the clipboard
+#     $ printf -- '\033]52;c;%s\007' "$(printf -- 'hello' | base64)"
+#
+#     # read the clipboard
+#     $ printf -- '\033]52;c;?\007'
+#     52;c;aGVsbG8=~
+#
+#     # decode the clipboard
+#     $ base64 -d <<<'aGVsbG8='
+#     hello~
+#
+# Note that `52;c;aGVsbG8=` is not written on printf's standard output (i.e. the
+# terminal). Instead, it's written directly on the command-line.
+# So, I don't know how to reduce the last 2 commands down to a one-liner;
+# nor how to use it from a script...
+#
+# Also, note that st doesn't recognize this sequence. And so, upon receiving it,
+# st clears its clipboard.
+#}}}
+# TODO: What's the use of this script for someone who sets the tmux option 'set-clipboard' to 'on' or 'external'?
+
+# What does this script do?{{{
+#
+# It writes arbitrary text in the clipboard selection.
+#
+# The source of the text can be:
+#
+#    - the terminal (what you type interactively)
+#    - a pipe
+#    - some file(s)
+#
+# ---
+#
+# If the script is run from a shell managed by tmux, it will also write the text
+# in a tmux buffer (in addition to the clipboard selection).
+#
+# And if the  script is run from a  shell where `$DISPLAY` is set,  it will also
+# try to write the text in the clipboard selection via `$ xclip` or `$ xsel`.
+#}}}
+#   Where did you find it?{{{
+#
+# https://github.com/sunaku/home/blob/master/bin/yank
+# https://sunaku.github.io/tmux-yank-osc52.html
+#}}}
+#   Why does it write in the clipboard selection via `$ xsel` *and* via OSC 52?{{{
+#
+# Most of the time, this is – indeed – redundant.
+# That is, when you're  copying some short text from a local  shell, only one of
+# these tools is necessary.
+#
+# However, there're 2 special cases where only one of them will work.
+#
+# - If the script is run locally, OSC 52 may truncate the text if it's too long (>75k).
+#   In that case, `$ xsel` is useful as a more reliable fallback.
+#
+# - If the script is run on a remote server, there's probably no display server (Xorg).
+#   In that case, `$ xsel` will fail.
+#   And even if there  is a display server, you probably want to  copy the text in
+#   the *local* clipboard selection, not the remote one.
+#   Only OSC 52 can do that.
+#}}}
+
+# Where is OSC 52 documented?{{{
+#
+#     OSC Ps ; Pt BEL /Ps = 5 2
+#}}}
+#   What's the exact sequence used by the script?{{{
+#
+#     \033]52;c;<base64-encoded text>\007
+#             │
+#             └ clipboard selection parameter
+#}}}
+#   What's its maximum size?{{{
+#
+# OSC 52 was introduced by xterm, and the latter doesn't specify any limit.
+# So, technically, there's no limit.
+#
+# However, tmux doesn't send to the outer terminal any sequence of more than
+# 100_000 bytes.
+#
+# https://www.mail-archive.com/tmux-users%40lists.sourceforge.net/msg05950.html
+#
+# Besides, the terminal may impose its own limit.
+# For example, by default, st truncates a sequence after 512 bytes.
+# Have a look at `~/GitRepos/st/st.c:36`:
+#
+#     #define UTF_SIZ       4
+#     #define ESC_BUF_SIZ   (128*UTF_SIZ)
+#}}}
+#   What's the maximum size of text it can copy?{{{
+#
+# 74_994 bytes.
+#
+# ---
+#
+# There's an overhead of 8 bytes for the header (`\033]52;c;`) and the footer (`\007`).
+# So, only 99_992 bytes can be used for the text.
+# Besides, the text must be base64-encoded, which adds 33% of additional overhead:
+#
+#      77_994 * 4/3 = 99_992
+#
+# See https://en.wikipedia.org/wiki/Base64#Output_padding for the `4*ceil(n/3)` length formula:
+#
+# > The ratio of output bytes to input bytes is 4:3 (33% overhead).
+# ...
+#}}}
+
+# Usage:{{{
+#
+#     $ yank
+#     $ cmd | yank
+#     $ yank FILE ...
+#
+# In the first command, write your text, then press C-d twice:
+#
+#     $ yank
+#     hello
+#     C-d C-d
+#}}}
+
+# Why `$ cat`?{{{
+#
+# The input could be some file(s).
+#}}}
+#   Why does it still work when the input is not a file?{{{
+#
+# When the script's input is a pipe, or the terminal, `"$@"` is empty.
+# And  `$ cat`,  without arguments,  reads its  standard input  – which  here is
+# inherited from the script.
+#
+#     # the input is a pipe
+#     $ echo 'text' | cat
+#     text~
+#
+#     # the input is the terminal
+#     $ cat
+#     text
+#     text~
+#}}}
+buf=$(cat "$@")
+
+# copy to tmux buffer {{{1
+
+# What's this `||:`?{{{
+#
+# It makes sure that the script exits with the code 0, even if tmux is not running.
+# https://github.com/sunaku/home/commit/cdd9a75c97d0f8c10527f4ebc856491967a2f245#diff-736f8a257c8415da60b212e37ac5cf30
+#
+# The `:` command has no effect, it will just succeed no matter what:
+#
+#     $ not_a_cmd || :
+#     $ echo $?
+#     0~
+#
+# It's documented at `$ man bash /SHELL BUILTIN COMMANDS`:
+#
+# > : [arguments]
+# >        No effect; the command does nothing beyond  expanding  arguments
+# >        and  performing any specified redirections.  A zero exit code is
+# >        returned.
+#}}}
+[[ -n "$TMUX" ]] && tmux set-buffer "${buf}" ||:
+
+# copy to clipboard selection via `$ xsel` {{{1
+
+[[ -n "$DISPLAY" ]] && printf -- '%s' "${buf}" | { xsel -i -b || xclip -selection clipboard ;} ||:
+#                                                        │  │{{{
+#                                                        │  │
+#                                                        │  └ operate on the CLIPBOARD selection.
+#                                                        └ read standard input into the selection.
+#}}}
+
+# copy to clipboard selection via OSC 52 {{{1
+
+# Don't try to set the clipboard via OSC 52 if we're in gVim.{{{
+#
+# gVim doesn't support OSC 52.
+#
+# ---
+#
+# As a guard, you could also try:
+#
+#     if [[ "${TERM}" != 'dumb' ]]; then
+#     if [[ -n "${WINDOWID}" ]]; then
+#}}}
+if [[ "${TERM}" == 'dumb' ]]; then
+  exit
+fi
+
+# Why not `$ wc -c <<<"${buf}"`?{{{
+#
+# It would add a trailing newline.
+#}}}
+len=$(printf -- "${buf}" | wc -c)
+max=74994
+if [[ "${len}" -gt "${max}" ]]; then
+  printf -- "$0: input is $((len - max)) bytes too long\n" >&2
+fi
+
+# Why `$ head -c`?{{{
+#
+# To truncate the text after `$max` bytes, in case it's too long.
+# The final sequence must not exceed 100_000 bytes.
+#}}}
+# Why `$ tr -d '\n'`?{{{
+#
+# To remove the trailing newline added by `$ base64`.
+#}}}
+base64_encoded_text="$(printf -- "%s" "${buf}" | head -c "${max}" | base64 | tr -d '\n')"
+put() {
+  seq="$1"
+  if [[ -n "${TMUX}" ]]; then
+    seq="\033Ptmux;\033${seq}\033\\"
+  fi
+  # Do *not* use a `%s` item!{{{
+  #
+  #     ✘
+  #     printf -- '%s' "${seq}"
+  #
+  # `\033` and `\007` would not be replaced with `Esc` and `ST`.
+  # I think that's because:
+  #
+  #    - `$ printf` doesn't expand a backslash escape sequence in an argument
+  #      after the format (except if the argument replaces `%b`)
+  #
+  #         $ printf '%s' 'a\tb'
+  #         a\tb
+  #
+  #    - `$ printf` first expands  backslash escape sequences in the format,
+  #      *then* replaces the format specifications like `%s`
+  #
+  # If you really wanted to use a format specification, you could try `%b`.
+  # From `$ man bash /printf /%b`:
+  #
+  # > %b     causes printf to expand backslash escape sequences in the
+  # >        corresponding argument (except that \c terminates output,
+  # >        backslashes  in \', \", and \? are not removed, and octal
+  # >        escapes beginning with \0 may contain up to four digits).
+  #
+  # But, you  would have to  be sure that the  encoded text doesn't  contain any
+  # backslash, to prevent any undesired expansion.
+  #
+  # I think it's the case:
+  # https://tools.ietf.org/html/rfc4648#section-4
+  #}}}
+  printf -- "${seq}"
+}
+# KiTTY always appends to the clipboard, so clear it first
+# https://sw.kovidgoyal.net/kitty/protocol-extensions.html#pasting-to-clipboard
+put "\033]52;c;!\007"
+put "\033]52;c;${base64_encoded_text}\007"
+
