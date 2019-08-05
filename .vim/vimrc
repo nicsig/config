@@ -2512,12 +2512,14 @@ set ttimeoutlen=6
 " It seems we can resize viewports without.
 "
 " However:
-"     1. resizing is brittle/wonky no matter what
-"     2. `xterm2` might be a better value than default `xterm`:
+"    1. resizing is brittle/wonky no matter what
+"    2. `xterm2` might be a better value than default `xterm`:
 "
-"            “This works much faster and more precise.”
+"         “This works much faster and more precise.”
 "
-"     3. why do we sometimes get into visual mode when we try to resize?
+"    3. why do we sometimes get into visual mode when we try to resize?
+"
+" ---
 "
 "        ┌ nvim doesn't have this issue, and 'ttym' has been removed from it
 "        │
@@ -6973,7 +6975,7 @@ endfu
 " would be replaced by it.
 " There's a plugin for that:
 "
-"     https://github.com/chrisbra/NrrwRgn
+" https://github.com/chrisbra/NrrwRgn
 "
 " ... but the source code is too long (1500 sloc).
 " Take inspiration from it.
@@ -7034,19 +7036,19 @@ endfu
 " chercher un site équivalent à thesaurus.com pour le français.
 " ou chercher une bdd de synonymes, et écrire un algo qui l'analyse:
 "
-"         http://www.dicollecte.org/download.php?prj=fr
+" http://www.dicollecte.org/download.php?prj=fr
 "
 " on pourrait aussi s'inspirer de la méthode du plugin pour ouvrir un split de
 " taille dynamique, adapté à la taille des données à afficher.
 "
 " jeter un oeil aux liens suivants :
 "
-"         https://hyperdic.net/en/doc/antonyms (trouvé en cherchant "where can
-"         i download antonym file" page 3)
-"         https://github.com/emugel/vim-thesaurus-files
+" https://hyperdic.net/en/doc/antonyms
+" (trouvé en cherchant "where can i download antonym file" page 3)
+" https://github.com/emugel/vim-thesaurus-files
 "
-"         character-wise visual mode word lookup
-"         https://github.com/beloglazov/vim-online-thesaurus/pull/31
+" character-wise visual mode word lookup
+" https://github.com/beloglazov/vim-online-thesaurus/pull/31
 "
 " créer une méthode mucomplete qui s'en sert.
 "
@@ -7098,11 +7100,11 @@ endfu
 " text we're interested in.
 "
 " for more info, see:
-"     http://www.regular-expressions.info/possessive.html
+" http://www.regular-expressions.info/possessive.html
 "
 " and :
 "
-"     http://perldoc.perl.org/perlre.html#extended-patterns
+" http://perldoc.perl.org/perlre.html#extended-patterns
 "
 " this section is very long.
 " to find what the excerpt dedicated to `(?>pattern)`, look right before the
@@ -7209,10 +7211,10 @@ endfu
 "                                      if you only select one in particular
 "
 " interesting links:
-"         https://vi.stackexchange.com/a/541/13370
-"         http://melp.nl/2013/08/flow-charts-in-code-enter-graphviz-and-the-dot-language/
-"         https://github.com/wannesm/wmgraphviz.vim
-"         $ man graph-easy
+" https://vi.stackexchange.com/a/541/13370
+" http://melp.nl/2013/08/flow-charts-in-code-enter-graphviz-and-the-dot-language/
+" https://github.com/wannesm/wmgraphviz.vim
+" `$ man graph-easy`
 "
 " update:
 " this is really useful with vim-schlepp, and vim-draw.
@@ -7425,7 +7427,7 @@ endfu
 "     endfu
 "
 " Source:
-"     https://www.reddit.com/r/vim/comments/9r3rcd/open_current_file_in_github/
+" https://www.reddit.com/r/vim/comments/9r3rcd/open_current_file_in_github/
 "
 " Update:
 " `:Gbrowse` does sth similar.
@@ -7536,7 +7538,7 @@ endfu
 " also:
 " look at this:
 "
-"         https://github.com/sk1418/howmuch
+" https://github.com/sk1418/howmuch
 "
 " is there any functionality we could steal?
 "
@@ -7574,9 +7576,8 @@ endfu
 " 46 -
 " install autocmd listening to `bufreadpost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `bufwritepost`
-" which would give us a warning when we forget to undo a:
-"
-"         mapping/abbreviation/command/autocmd/variable
+" which would give us a warning when we forget to undo a
+" mapping/abbreviation/command/autocmd/variable
 "
 " or when we undo a non-existing …
 "
@@ -7783,8 +7784,8 @@ endfu
 "     $ vim (a 2nd instance)
 "     :try | e /tmp/file | catch | call lg#catch_error() | endtry
 "
-" if the file is already loaded in another instance, it will raise the error:
-"         :h e325
+" If the  file is already  loaded in another instance,  it will raise  the error
+" `e325`.
 "
 " but the error won't be catched because vim prompts us with a question to know
 " what we want to do (edit, quit, ...).
@@ -7829,6 +7830,18 @@ endfu
 "
 " 64 -
 " play with (or document):
+"
+"    - `:h method`
+"    In case you wonder what “global” means: I think that some functions could have
+"    different effects depending on the type of argument they receive (e.g. dict vs list).
+"    So, a global method is probably a function which has always the same effect,
+"    while a local method would be a function whose effect depends on the type of the object
+"    on which it operates.
+"    Also, this new syntax can probably improve the readability of nested function calls:
+"
+"         funcA(funcB(funcC(arg)))
+"       vs
+"         arg->funcA()->funcB()->funcC()
 "
 "    - `'wincolor'`: in Vim, could be used to dim the unfocused windows
 "    (I think the equivalent in Nvim is `'winhighlight'`;
@@ -7998,11 +8011,11 @@ endfu
 " If neovim is unable to suggest suggestions to fix spelling errors,
 " start it like this:
 "
-"         $ nvim -nu NORC
+"     $ nvim -nu NORC
 "
 " write a word with a spelling error:
 "
-"         helzo
+"     helzo
 "
 " then execute `:set spell`.
 " It should make neovim download some missing files (i don't know where).
@@ -8018,22 +8031,22 @@ endfu
 " In   `vim-qf`,  maybe   we  could   reduce  the   number  of   invocations  to
 " `s:setqflist()`:
 "
-"         call s:setqflist(list, action)
-"         call s:setqflist([], 'a', {'title': 'hello'})
-"         →
-"         call s:setqflist([], action, {'items': list, 'title': 'hello'})
+"     call s:setqflist(list, action)
+"     call s:setqflist([], 'a', {'title': 'hello'})
+"     →
+"     call s:setqflist([], action, {'items': list, 'title': 'hello'})
 "
 " In fact,  maybe we could  simplify the code  much more, because  using 'items'
 " doesn't alter the title. So, maybe there's no need to save/restore the latter:
 "
-"         call s:setqflist([], action, {'items': list})
+"     call s:setqflist([], action, {'items': list})
 "
 " 72 -
-" how to filter  a custom text-object without the command-line not being redrawn?
-" mwe:
-"         !ie spc
-"         ![m spc
-"         ...
+" How to filter  a custom text-object without the command-line not being redrawn?
+" MWE:
+"     !ie spc
+"     ![m spc
+"     ...
 "
 " we could try sth like this:
 "
@@ -8215,13 +8228,13 @@ endfu
 " and use the latter to pass the info.
 " look at what we did with `:tree` for inspiration.
 "
-" update:
+" Update:
 " if you don't need to interact with the temp buffer, only read it, make it use
 " a preview window:
 "
 "     let &l:pvw = 1
 "
-" update:
+" Update:
 "
 " open a tree buffer, then press `--`.
 "
@@ -8240,13 +8253,13 @@ endfu
 " it doesn't make sense to view the contents of the current directory.
 " from a buffer associated to no file, there's no current directory.
 "
-" update:
+" Update:
 " once we've come up with a design, formalize it somewhere.
 " atm, maybe you should  do it in our notes; however, in  the future, you should
 " probably do it in a set of snippets/templates/...
 " also, maybe you should use `vim-projectionist` to enforce a design.
 "
-" update:
+" Update:
 "
 "     :vim /setl.*bt=nofile/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets ~/.vim/vimrc
 "
@@ -8259,7 +8272,7 @@ endfu
 " it would be useful in the qf window.
 " see here for inspiration:
 "
-"     https://github.com/wsdjeg/vim-fetch
+" https://github.com/wsdjeg/vim-fetch
 "
 " we could write a wrapper around these normal commands which would return
 " the keys pressed, and start a timer which would execute `:norm` to position
@@ -8267,7 +8280,7 @@ endfu
 "
 " see also this:
 "
-"     https://github.com/kana/vim-gf-user/blob/master/doc/gf-user.txt
+" https://github.com/kana/vim-gf-user/blob/master/doc/gf-user.txt
 "
 " also, they should be able to parse a reference link in a markdown buffer:
 "
@@ -8439,7 +8452,7 @@ endfu
 " pro:
 " it would fix this kind of issue:
 "
-"         https://vi.stackexchange.com/a/17193/17449
+" https://vi.stackexchange.com/a/17193/17449
 "
 " con:
 " we would need to be sure that 'esckeys' is re-enabled.
@@ -8784,16 +8797,16 @@ endfu
 " 118 -
 " Read this:
 "
-"     https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
-" >     Updating a quickfix/location list asynchronously without interfering with another plugin
+" https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
+" > Updating a quickfix/location list asynchronously without interfering with another plugin
 "
 " Also, study these plugins:
 "
-"     https://github.com/yegappan/asyncmake (125 sloc)
-"     https://github.com/chrisbra/vim-autoread (145)
-"     https://github.com/foxik/vim-makejob (197)
-"     https://github.com/prabirshrestha/async.vim (243)
-"     https://github.com/metakirby5/codi.vim (747)
+" https://github.com/yegappan/asyncmake (125 sloc)
+" https://github.com/chrisbra/vim-autoread (145)
+" https://github.com/foxik/vim-makejob (197)
+" https://github.com/prabirshrestha/async.vim (243)
+" https://github.com/metakirby5/codi.vim (747)
 "
 " 119 -
 " Could  we use  Vim packages  to eliminate  the separation  of plugins'  config

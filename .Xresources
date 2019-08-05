@@ -296,6 +296,8 @@ URxvt.iso14755_52: false
 !
 ! A resource which specifies which features will be disabled if 'allowWindowOps' is false.
 ! Its value is a comma-separated list of names or operation numbers.
+!
+! See `$ man xterm /^\s*disallowedWindowOps`.
 !}}}
 !   What's this 'allowWindowOps'?{{{
 !

@@ -75,7 +75,7 @@ fu! colorscheme#set() abort "{{{2
     "    - dumb
     "
     " I found this list by running `$ xterm=foobar vim`.
-    " You can also find it by looking at `:h vms-notes /builtin_gui`.
+    " You can also find it by looking at `:h vms-notes /unknown-terminal`.
     "
     " Basically, it seems  Vim doesn't know any terminal we  use, outside xterm,
     " and  terminals which  pretend to  be xterm  (i.e. all  terminals based  on

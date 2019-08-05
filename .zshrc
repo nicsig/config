@@ -2256,47 +2256,6 @@ EOF
   #}}}
 }
 
-tmux_log() { #{{{2
-  emulate -L zsh
-  if pidof strace >/dev/null 2>&1; then
-    # Where can I find more information about this `USR2` signal?{{{
-    #
-    # `$ man tmux /-v`:
-    #
-    # > The SIGUSR2 signal may be sent to the tmux server process
-    # > to toggle logging between on (as if -v was given) and off.
-    #}}}
-    # Why do you use `USR2` instead of `SIGUSR2`?{{{
-    #
-    # Because `run` invokes sh, not bash.
-    # And in sh, you need to remove the `SIG` prefix.
-    # https://unix.stackexchange.com/a/199384/289772
-    #}}}
-    tmux display 'Stopped tmux server logging' \; \
-         run 'kill -s USR2 #{pid} ; killall strace'
-  else
-    # Where is the logfile written?{{{
-    #
-    # In the cwd of the shell from which you started tmux.
-    # It is *not* written in the cwd of the shell in which you press the key binding.
-    # IOW, it's most probably written in your $HOME.
-    #}}}
-    tmux display 'Started tmux server logging' \; \
-         run 'kill -s USR2 #{pid} ; strace -ttt -ostrace.txt -p #{pid}'
-  fi
-}
-# TODO: What if we have a running `$ strace` process when we use the function for the first time?{{{
-#
-# It will wrongly think tmux is being logged, and:
-#
-#    - tell us that the logging is being stopped (wrong but not harmful)
-#    - start the logging (✘ contradicts what has been displayed)
-#    - kill all `$ strace` processes
-#
-# We would need a  format variable which tells us whether  tmux is being logged:
-# `#{logging}`.
-#}}}
-
 tor() { #{{{2
   # Why `cd ...`?  Why not running the desktop file with an absolute path?{{{
   #
@@ -2672,6 +2631,13 @@ alias dl_video='youtube-dl --restrict-filenames --write-sub --sub-lang en,fr --w
 #
 #     alias e='echo'
 #     alias ee='e one; e two'
+#
+# ---
+#
+# Write ` fm` (note the leading space); `fm` is highlighted as an alias (✔).
+# Press Enter to start ranger.
+# Press q to quit ranger.
+# `fm` is now highlighted in red (✘).
 #}}}
 
 # TODO: add file completion to `config`
@@ -3433,7 +3399,7 @@ fi
 #
 # A virtual console has no `smkx` capability:
 #
-#     $ infocmp linux | grep smkx
+#     $ infocmp -1 linux | grep smkx
 #     ''~
 #
 # So, the code would raise this error:
@@ -3447,7 +3413,7 @@ fi
 # application  mode. That is,  they emit  the  string stored  in the  capability
 # `kdch1` (Keyboard Delete 1 CHaracter).
 #
-#     $ infocmp -x | grep kdch1
+#     $ infocmp -1x | grep kdch1
 #     ... kdch1=\E[3~,~
 #               ^^^^^
 #

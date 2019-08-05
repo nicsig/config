@@ -18,6 +18,12 @@
 #}}}
 selection="\e[200~$(xsel)\e[201~"
 printf -- "${selection}" | xvkbd -xsendevent -file - 2>/dev/null
+# FIXME: Doesn't work in xterm nor in gnome-terminal. But works in st and urxvt.{{{
+#
+# MWE:
+#
+#     $ printf "test" | xvkbd -xsendevent -file -
+#}}}
 # FIXME: fails on multibyte characters (e.g. 'éòü'){{{
 #
 #     $ xvkbd -text 'éòü' 2>/dev/null
@@ -51,7 +57,7 @@ printf -- "${selection}" | xvkbd -xsendevent -file - 2>/dev/null
 # The syntax seems good, since the command works when run in an interactive shell.
 #
 # The issue can be reproduced with just the `$ xdotool` command.
-# But  only if  we invoke  this script  via the  key binding  installed from  in
+# But  only  if  we invoke  this  script  via  the  key binding  installed  from
 # `~/.config/keyboard/xbindkeys.conf`.
 # Btw, in the latter file, right above the key binding, we've written that `$ xdotool`
 # was to avoid; I wonder whether that has something to do with our current issue.

@@ -70,51 +70,6 @@
 #   Only OSC 52 can do that.
 #}}}
 
-# Where is OSC 52 documented?{{{
-#
-#     OSC Ps ; Pt BEL /Ps = 5 2
-#}}}
-#   What's the exact sequence used by the script?{{{
-#
-#     \033]52;c;<base64-encoded text>\007
-#             │
-#             └ clipboard selection parameter
-#}}}
-#   What's its maximum size?{{{
-#
-# OSC 52 was introduced by xterm, and the latter doesn't specify any limit.
-# So, technically, there's no limit.
-#
-# However, tmux doesn't send to the outer terminal any sequence of more than
-# 100_000 bytes.
-#
-# https://www.mail-archive.com/tmux-users%40lists.sourceforge.net/msg05950.html
-#
-# Besides, the terminal may impose its own limit.
-# For example, by default, st truncates a sequence after 512 bytes.
-# Have a look at `~/GitRepos/st/st.c:36`:
-#
-#     #define UTF_SIZ       4
-#     #define ESC_BUF_SIZ   (128*UTF_SIZ)
-#}}}
-#   What's the maximum size of text it can copy?{{{
-#
-# 74_994 bytes.
-#
-# ---
-#
-# There's an overhead of 8 bytes for the header (`\033]52;c;`) and the footer (`\007`).
-# So, only 99_992 bytes can be used for the text.
-# Besides, the text must be base64-encoded, which adds 33% of additional overhead:
-#
-#      77_994 * 4/3 = 99_992
-#
-# See https://en.wikipedia.org/wiki/Base64#Output_padding for the `4*ceil(n/3)` length formula:
-#
-# > The ratio of output bytes to input bytes is 4:3 (33% overhead).
-# ...
-#}}}
-
 # Usage:{{{
 #
 #     $ yank
@@ -202,6 +157,23 @@ fi
 # It would add a trailing newline.
 #}}}
 len=$(printf -- "${buf}" | wc -c)
+# Where does that number come from?{{{
+#
+# Tmux doesn't  send to  the outer  terminal any sequence  of more  than 100_000
+# bytes: <https://www.mail-archive.com/tmux-users%40lists.sourceforge.net/msg05950.html>
+#
+# Besides, there's an overhead of 8  bytes for the header (`\033]52;c;`) and the
+# footer (`\007`); so, only 99_992 bytes can be used for the text.
+# Finally, the text must be base64-encoded, which adds 33% of additional overhead:
+#
+#     77_994 * 4/3 = 99_992
+
+# See <https://en.wikipedia.org/wiki/Base64#Output_padding> for the
+# `4*ceil(n/3)` length formula:
+#
+# > The ratio of output bytes to input bytes is 4:3 (33% overhead).
+# ...
+#}}}
 max=74994
 if [[ "${len}" -gt "${max}" ]]; then
   printf -- "$0: input is $((len - max)) bytes too long\n" >&2
@@ -222,41 +194,36 @@ put() {
   if [[ -n "${TMUX}" ]]; then
     seq="\033Ptmux;\033${seq}\033\\"
   fi
-  # Do *not* use a `%s` item!{{{
+  # Why `%b`?{{{
   #
-  #     ✘
-  #     printf -- '%s' "${seq}"
+  # To make `$ printf` translate `\033` and `\007` into `Esc` and `ST`.
+  # Remember  that `$  printf` translates  a backslash  escape sequence  iff the
+  # latter is in the format, or in  an argument associated to `%b`; and *not* if
+  # it's inside an argument bound to any other specifier (like e.g. `%s`).
   #
-  # `\033` and `\007` would not be replaced with `Esc` and `ST`.
-  # I think that's because:
-  #
-  #    - `$ printf` doesn't expand a backslash escape sequence in an argument
-  #      after the format (except if the argument replaces `%b`)
-  #
-  #         $ printf '%s' 'a\tb'
-  #         a\tb
-  #
-  #    - `$ printf` first expands  backslash escape sequences in the format,
-  #      *then* replaces the format specifications like `%s`
-  #
-  # If you really wanted to use a format specification, you could try `%b`.
   # From `$ man bash /printf /%b`:
   #
   # > %b     causes printf to expand backslash escape sequences in the
   # >        corresponding argument (except that \c terminates output,
   # >        backslashes  in \', \", and \? are not removed, and octal
   # >        escapes beginning with \0 may contain up to four digits).
-  #
-  # But, you  would have to  be sure that the  encoded text doesn't  contain any
-  # backslash, to prevent any undesired expansion.
-  #
-  # I think it's the case:
-  # https://tools.ietf.org/html/rfc4648#section-4
   #}}}
-  printf -- "${seq}"
+  # Is there a risk that some part of the sequence is wrongly interpreted as a backslash escape sequence (like `\007`)?{{{
+  #
+  # No, because the encoded text will never contain a backslash:
+  # https://tools.ietf.org/html/rfc4648#section-4
+  #
+  # You can check yourself by encoding a large file:
+  #
+  #     $ base64 <~/.vim/vimrc | vim -
+  #     /\
+  #}}}
+  printf -- '%b' "${seq}"
 }
 # KiTTY always appends to the clipboard, so clear it first
 # https://sw.kovidgoyal.net/kitty/protocol-extensions.html#pasting-to-clipboard
 put "\033]52;c;!\007"
 put "\033]52;c;${base64_encoded_text}\007"
+#            │
+#            └ clipboard selection parameter
 
