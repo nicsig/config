@@ -3179,7 +3179,7 @@ alias -s pdf="${PDFVIEWER}"
 # zsh provides a hook function `zshaddhistory` which can be used for that.
 # If `zshaddhistory_functions` contains  the name of a function  which returns a
 # non-zero value, the command is not saved in the history file.
-# zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
+zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
 
 # The shell allows newlines to separate array elements.
 # So,  an array  assignment can  be split  over multiple  lines without  putting
@@ -4137,6 +4137,7 @@ bindkey '^Z' __fancy_ctrl_z
 #}}}
 
 # M-#           pound-insert {{{3
+
 bindkey '\e#' pound-insert
 
 # M-,           copy-earlier-word {{{3
@@ -4278,6 +4279,67 @@ __normalize_command_line() {
 }
 zle -N __normalize_command_line
 bindkey '\em' __normalize_command_line
+
+# M-[pn]        {up|down}-line-or-beginning-search {{{3
+
+# Rationale:{{{
+#
+# By default,  `M-p` and `M-n` are  bound to `history-beginning-search-backward`
+# and `history-beginning-search-forward`.
+# Those widgets search for a line which begins with the *first word* on the line.
+# We want to search for a line which begins with the *whole current line*, up to
+# the current cursor position.
+#
+# See:
+#
+#     $ man zshcontrib /up-line-or-beginning-search
+#     /usr/share/zsh/functions/Zle/up-line-or-beginning-search
+#     /usr/share/zsh/functions/Zle/down-line-or-beginning-search
+#}}}
+# TODO: Sometimes, I can't access a previous command!{{{
+#
+# It seems  that as soon  as you edit an  old command, it's  temporarily removed
+# from the set of commands in which `up-line-or-beginning-search` searches.
+#
+#     $ zsh -f
+#
+#     $ autoload -Uz up-line-or-beginning-search ; autoload -Uz down-line-or-beginning-search
+#     $ zle -N up-line-or-beginning-search ; zle -N down-line-or-beginning-search
+#     $ bindkey '\ep' up-line-or-beginning-search ; bindkey '\en' down-line-or-beginning-search
+#
+#     $ echo 1
+#     $ echo 2
+#     $ echo 3
+#
+#     $ echo M-p
+#     3~
+#     M-p
+#     2~
+#     C-u
+#     ''~
+#     echo M-p (stay on the current prompt)
+#     1~
+#     M-n
+#     3~
+#
+# ---
+#
+# For  the moment, the only  solution I know is  to start a new  command-line by
+# pressing `C-c` or `M-#`.
+#
+# Try to improve the code in:
+#
+#     /usr/share/zsh/functions/Zle/up-line-or-beginning-search
+#     /usr/share/zsh/functions/Zle/down-line-or-beginning-search
+#}}}
+autoload -Uz up-line-or-beginning-search
+autoload -Uz down-line-or-beginning-search
+
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+bindkey '\ep' up-line-or-beginning-search
+bindkey '\en' down-line-or-beginning-search
 
 # M-Y           copy-region-as-kill {{{3
 
