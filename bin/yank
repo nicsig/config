@@ -1,33 +1,17 @@
-#!/bin/bash
-
-# TODO: Document that you can read the clipboard via a special OSC 52 sequence.{{{
+#!/bin/sh
+# Usage:{{{
 #
-#     OSC;c;?ST
-#           ^
-#           special parameter
+#     $ yank
+#     $ cmd | yank
+#     $ yank FILE ...
 #
-# Usage example:
+# In the first command, write your text, then press Enter followed by C-d:
 #
-#     # write 'hello' in the clipboard
-#     $ printf -- '\033]52;c;%s\007' "$(printf -- 'hello' | base64)"
-#
-#     # read the clipboard
-#     $ printf -- '\033]52;c;?\007'
-#     52;c;aGVsbG8=~
-#
-#     # decode the clipboard
-#     $ base64 -d <<<'aGVsbG8='
-#     hello~
-#
-# Note that `52;c;aGVsbG8=` is not written on printf's standard output (i.e. the
-# terminal). Instead, it's written directly on the command-line.
-# So, I don't know how to reduce the last 2 commands down to a one-liner;
-# nor how to use it from a script...
-#
-# Also, note that st doesn't recognize this sequence. And so, upon receiving it,
-# st clears its clipboard.
+#     $ yank
+#     hello
+#     Enter
+#     C-d
 #}}}
-# TODO: What's the use of this script for someone who sets the tmux option 'set-clipboard' to 'on' or 'external'?
 
 # What does this script do?{{{
 #
@@ -54,7 +38,7 @@
 #}}}
 #   Why does it write in the clipboard selection via `$ xsel` *and* via OSC 52?{{{
 #
-# Most of the time, this is – indeed – redundant.
+# Most of the time, this is indeed redundant.
 # That is, when you're  copying some short text from a local  shell, only one of
 # these tools is necessary.
 #
@@ -69,20 +53,17 @@
 #   the *local* clipboard selection, not the remote one.
 #   Only OSC 52 can do that.
 #}}}
-
-# Usage:{{{
+#   What's its benefit over using tmux with `set-clipboard` set to 'on' or 'external'?{{{
 #
-#     $ yank
-#     $ cmd | yank
-#     $ yank FILE ...
-#
-# In the first command, write your text, then press C-d twice:
-#
-#     $ yank
-#     hello
-#     C-d C-d
+# In  that  case,   the  script  is  useless  when  you   copy  some  text  with
+# `copy-selection`  or `copy-pipe`  (because tmux  automatically sends  OSC 52).
+# But in all other cases (see `Usage:`), the script is useful.
 #}}}
 
+# Why `$ rlwrap`?{{{
+#
+# It's convenient when we type the text interactively.
+#}}}
 # Why `$ cat`?{{{
 #
 # The input could be some file(s).
@@ -102,7 +83,7 @@
 #     text
 #     text~
 #}}}
-buf=$(cat "$@")
+buf=$(rlwrap cat "$@")
 
 # copy to tmux buffer {{{1
 
@@ -124,15 +105,15 @@ buf=$(cat "$@")
 # >        and  performing any specified redirections.  A zero exit code is
 # >        returned.
 #}}}
-[[ -n "$TMUX" ]] && tmux set-buffer "${buf}" ||:
+[ -n "$TMUX" ] && tmux set-buffer "${buf}" ||:
 
 # copy to clipboard selection via `$ xsel` {{{1
 
-[[ -n "$DISPLAY" ]] && printf -- '%s' "${buf}" | { xsel -i -b || xclip -selection clipboard ;} ||:
-#                                                        │  │{{{
-#                                                        │  │
-#                                                        │  └ operate on the CLIPBOARD selection.
-#                                                        └ read standard input into the selection.
+[ -n "$DISPLAY" ] && printf -- '%s' "${buf}" | { xsel -i -b || xclip -selection clipboard ;} ||:
+#                                                      │  │{{{
+#                                                      │  │
+#                                                      │  └ operate on the CLIPBOARD selection.
+#                                                      └ read standard input into the selection.
 #}}}
 
 # copy to clipboard selection via OSC 52 {{{1
@@ -145,16 +126,16 @@ buf=$(cat "$@")
 #
 # As a guard, you could also try:
 #
-#     if [[ "${TERM}" != 'dumb' ]]; then
-#     if [[ -n "${WINDOWID}" ]]; then
+#     if [ "${TERM}" != 'dumb' ]; then
+#     if [ -n "${WINDOWID}" ]; then
 #}}}
-if [[ "${TERM}" == 'dumb' ]]; then
+if [ "${TERM}" = 'dumb' ]; then
   exit
 fi
 
 # Why not `$ wc -c <<<"${buf}"`?{{{
 #
-# It would add a trailing newline.
+# It would add a trailing newline, and `<<<` is not supported by sh.
 #}}}
 len=$(printf -- "${buf}" | wc -c)
 # Where does that number come from?{{{
@@ -175,7 +156,7 @@ len=$(printf -- "${buf}" | wc -c)
 # ...
 #}}}
 max=74994
-if [[ "${len}" -gt "${max}" ]]; then
+if [ "${len}" -gt "${max}" ]; then
   printf -- "$0: input is $((len - max)) bytes too long\n" >&2
 fi
 
@@ -191,7 +172,27 @@ fi
 base64_encoded_text="$(printf -- "%s" "${buf}" | head -c "${max}" | base64 | tr -d '\n')"
 put() {
   seq="$1"
-  if [[ -n "${TMUX}" ]]; then
+  # Why do you wrap the OSC 52 sequence inside a DCS sequence?{{{
+  #
+  # Without,  the script  would fail  on a  remote machine  (or on  a local  one
+  # without X or xsel / xclip) if `set-clipboard` is set to 'external'.
+  #
+  # This looks like a bug:
+  #
+  #     $ tmux set -s set-clipboard external
+  #     $ printf 'foo' | xsel -i -b
+  #     $ printf '\e]52;c;%s\x07' $(printf 'bar' | base64)
+  #     C-S-v
+  #     foo~
+  #
+  # But I may be wrong: https://github.com/tmux/tmux/issues/1864
+  #
+  # The script would also fail is `set-clipboard` is 'false' (which is expected).
+  #
+  # In any case, the DCS wrapper  makes the script more reliable and insensitive
+  # to the value of `set-clipboard`.
+  #}}}
+  if [ -n "${TMUX}" ]; then
     seq="\033Ptmux;\033${seq}\033\\"
   fi
   # Why `%b`?{{{

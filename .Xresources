@@ -292,28 +292,21 @@ URxvt.iso14755_52: false
 
 ! allow an OSC 52 sequence to set xterm's selection(s)
 
-! Technically, what is 'disallowedWindowOps'?{{{
+! What is the purpose of 'disallowedWindowOps'?{{{
 !
-! A resource which specifies which features will be disabled if 'allowWindowOps' is false.
+! It's  a  resource   which  specifies  which  features  will   be  disabled  if
+! 'allowWindowOps' is false.
 ! Its value is a comma-separated list of names or operation numbers.
 !
 ! See `$ man xterm /^\s*disallowedWindowOps`.
-!}}}
-!   What's this 'allowWindowOps'?{{{
 !
-! A resource which specifies whether extended window control sequences should be
-! allowed.
+! ---
+!
+! 'allowWindowOps' is a resource which specifies whether extended window control
+! sequences should be allowed.
 ! These  include several  control sequences  which manipulate  the window  size or
 ! position, as well as reporting these values and the title or icon name.
 !}}}
-!     Why is it better to set 'disallowedWindowOps'?{{{
-!
-! Extended window control sequences can be abused in a script, which is probably
-! why its default value is “false”.
-!
-! 'disallowedWindowOps' allows you to fine-tune which sequence you want to allow.
-!}}}
-
 !   What's its default value?{{{
 !
 !     1,2,3,4,5,6,7,8,9,11,13,14,18,19,20,21,GetSelection,SetSelection,SetWinLines,SetXprop
@@ -322,7 +315,11 @@ URxvt.iso14755_52: false
 !}}}
 !   Why do you use this new value?{{{
 !
-! It's recommended in `$ man tmux /set-clipboard`:
+! It allows  us to send an  OSC 52 sequence  (stored in the `Ms`  capability) to
+! write arbitrary text in xterm's clipboard, probably because it doesn't include
+! the name 'SetSelection'.
+!
+! Also, this value is recommended in `$ man tmux /set-clipboard`:
 !
 ! > Note  that this  feature needs  to  be enabled  in xterm(1)  by setting  the
 ! > resource:
@@ -337,9 +334,28 @@ URxvt.iso14755_52: false
 !    - GetWinTitle (21): Report xterm window's title as a string.
 !    - SetXprop: Set X property on top-level window.
 !}}}
+!   Is there an equivalent resource for urxvt?{{{
+!
+! I haven't found one.
+! I've tried to set 'allowWindowOps' like so:
+!
+!     *.allowWindowOps:  true
+!
+! But the OSC 52 sequence still doesn't work in urxvt:
+!
+!     $ printf '\e]52;c;%s\x07' $(printf 'hello' | base64)
+!}}}
+! Why don't you simply set 'allowWindowOps' with the value 'true'?{{{
+!
+! Extended window control sequences can be abused in a script.
+!
+! It's better  to let 'allowWindowOps' with  its default value 'false',  and set
+! 'disallowedWindowOps' which allows  you to fine-tune which  sequences you want
+! to allow.
+!}}}
 XTerm*disallowedWindowOps: 20,21,SetXprop
 
-! Write in the *clipboard* selection, by default, when receiving an OSC 52 sequence.{{{
+! By default, write in the *clipboard* selection when receiving an OSC 52 sequence.{{{
 !
 ! Without this setting, xterm would write in the primary selection.
 !
@@ -379,13 +395,8 @@ XTerm*disallowedWindowOps: 20,21,SetXprop
 !                     ^
 !
 ! But it would fail inside tmux, because the latter will remove `c`.
-! You can check this like so:
-!
-!    1. turn on the logging of the tmux server
-!    2. run the previous `$ printf` command
-!    3. turn off the logging
-!    4. read the logfile
-!    5. search for the pattern `]52;`
+! You can check  this by logging the  activity of the server,  and searching for
+! `]52;` in the logfile.
 !}}}
 XTerm*selectToClipboard: true
 

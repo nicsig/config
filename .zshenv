@@ -121,13 +121,13 @@ export LC_TIME=en_US.UTF-8
 #
 # It's like 'ignorecase' and 'smartcase' in Vim.
 #}}}
-# What does `M` mean?{{{
+#   `M`?{{{
 #
 # It's a Less option which makes the prompt more verbose.
 # At  the bottom  of  the screen,  it  prints  info about  our  position with  a
 # percentage, and line numbers.
 #}}}
-# What does `R` mean?{{{
+#   `R`?{{{
 #
 # It's  an option  which prevents  Less from  displaying the  caret notation  of
 # control characters used in ANSI color escape sequences.
@@ -143,10 +143,10 @@ export LC_TIME=en_US.UTF-8
 # > Warning: when the  -r option is used,  less cannot keep track  of the actual
 # > appearance of the  screen (since this depends on how  the screen responds to
 # > each type of control character).
-# >  Thus, various display  problems may result, such as long  lines being split
-# >  in the wrong place.
+# > Thus, various display problems may result, such as long lines being split in
+# > the wrong place.
 #}}}
-# What does `S` mean?{{{
+#   `S`?{{{
 #
 # It's a `$ less` option which prevents long lines from being wrapped.
 #}}}

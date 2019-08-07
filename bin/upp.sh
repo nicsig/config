@@ -403,40 +403,9 @@ configure() { #{{{2
   #
   # The doc should be in `/usr/share/doc/weechat/doc/en`
   #}}}
-  # Why `-DENABLE_PYTHON2`?{{{
-  #
-  # I don't know why, but after this commit:
-  #
-  # https://github.com/weechat/weechat/commit/ab81128a7aa7944201725000420662b33f22d1ec
-  #
-  # we need to pass `-DENABLE_PYTHON2:BOOL=ON` to `$ cmake`.
-  # Otherwise, we don't have the python plugin:
-  #
-  #     /plugin load python
-  #     ✘ │ Error: unable to load plugin "python": python: cannot open shared object file: No such file or directory~
-  #     ✘ │ If you're trying to load a script and not a C plugin, try command to load scripts (/perl, /python, ...)~
-  #
-  # And we need the latter for our autosort.py script.
-  #
-  # ---
-  #
-  # I tried  `-DENABLE_PYTHON:BOOL=ON` and `-DENABLE_PYTHON3:BOOL=ON`,  but none
-  # of them worked.
-  # I.e. there was  no “Scanning dependencies of target python”  line during the
-  # compilation; you  should be  able to  read the latter  right after  the perl
-  # target has been processed.
-  #}}}
-  # TODO: We should use python3.{{{
-  #
-  # Maybe we can't because we're using a locally compiled python3.
-  # If that's the case, we should be able to fix this issue by moving `/usr/bin`
-  # before `/usr/local/bin` in `$PATH`; and yet,  in practice, it didn't seem to
-  # work the last time I tried.
-  #}}}
   elif [[ "${PGM}" == 'weechat' ]]; then
     cmake .. -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo         \
              -DWEECHAT_HOME:STRING="${HOME}/.config/weechat"  \
-             -DENABLE_PYTHON2:BOOL=ON                         \
              -DENABLE_MAN:BOOL=ON                             \
              -DENABLE_TESTS:BOOL=ON
 

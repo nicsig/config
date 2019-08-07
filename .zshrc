@@ -3266,17 +3266,17 @@ ignore_these_cmds() {
 
 ignore_short_or_failed_cmds() {
   emulate -L zsh
-  # ignore commands who are shorter than 5 characters
+  # ignore commands which are shorter than 5 characters
   # Why `-le 6` instead of `-le 5`?{{{
   #
   # Because zsh sends a newline at the end of the command.
   #}}}
-  #                             ┌ ignore non-recognized commands
-  #                             ├─────────┐
+  #                            ┌ ignore non-recognized commands
+  #                            ├─────────┐
   if [[ "${#1}" -le 6 ]] || [[ "$?" == 127 ]]; then
-    return 0
-  else
     return 2
+  else
+    return 0
   fi
 }
 

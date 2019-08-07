@@ -5306,6 +5306,10 @@ if has('nvim')
     com! -bar CheckHealth checkhealth | do bufwinenter
 endif
 
+" CtlSeqs {{{2
+
+com! -bar CtlSeqs tabe /usr/share/doc/xterm/ctlseqs.txt.gz
+
 " DiffLines {{{2
 
 com! -bar -bang -range -nargs=? DiffLines call myfuncs#diff_lines(<bang>0, <line1>, <line2>, <q-args>)
@@ -9144,12 +9148,15 @@ endfu
 
 
 
-" More generally, you never need to escape
 fu! s:yank(text) abort
     " What's this `yank` ?{{{
     "
     " A custom script: `~/bin/yank`.
-    " It copies the text in the clipboard.
+    " It writes the text in:
+    "
+    "    - a tmux buffer
+    "    - the clipboard via xsel or xclip
+    "    - the clipboard via xsel or xclip
     "}}}
     let seq = system('yank', a:text)
     " Why this guard?{{{
@@ -9169,6 +9176,18 @@ fu! s:yank(text) abort
         echom v:exception
         echohl NONE
     else
+        " TODO: Document why this line is needed.{{{
+        "
+        " Hint: It's only needed when you're working on a remote machine.
+        "
+        " If you're  not convinced, comment  the line,  and in the  yank script,
+        " comment the line invoking xsel and xclip.
+        " Then, try to use this function: it will fail.
+        " It should work  thanks to the OSC 52 sequence,  but it doesn't without
+        " this `writefile()` line.
+        " I think  that's because the script  is called via `system()`  and thus
+        " has no controlling terminal; so the sequence is written nowhere.
+        "}}}
         call writefile([seq], '/dev/tty', 'b')
     endif
 endfu

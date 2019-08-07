@@ -22,6 +22,7 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -66,7 +67,7 @@ setlocal fdn=20
 setlocal fen
 3266
 normal! zo
-let s:l = 4507 - ((1184 * winheight(0) + 14) / 28)
+let s:l = 4507 - ((772 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -153,7 +154,7 @@ normal! zo
 normal! zo
 466
 normal! zo
-let s:l = 31 - ((8 * winheight(0) + 14) / 28)
+let s:l = 31 - ((25 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -254,7 +255,7 @@ setlocal fdn=20
 setlocal fen
 71
 normal! zo
-let s:l = 104 - ((8 * winheight(0) + 13) / 27)
+let s:l = 104 - ((16 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -379,13 +380,13 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-434
+445
 normal! zo
-let s:l = 468 - ((12 * winheight(0) + 13) / 27)
+let s:l = 479 - ((466 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-468
+479
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -520,7 +521,7 @@ normal! zo
 normal! zo
 84
 normal! zo
-let s:l = 113 - ((8 * winheight(0) + 14) / 28)
+let s:l = 113 - ((13 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -575,7 +576,7 @@ setlocal fdn=20
 setlocal fen
 1264
 normal! zo
-let s:l = 1280 - ((8 * winheight(0) + 14) / 28)
+let s:l = 1280 - ((176 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -592,10 +593,7 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
+2wincmd k
 wincmd w
 wincmd w
 wincmd t
@@ -603,7 +601,9 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -613,13 +613,43 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-3
+88
 normal! zo
-let s:l = 23 - ((1 * winheight(0) + 0) / 0)
+88
+normal! zc
+110
+normal! zo
+110
+normal! zc
+119
+normal! zo
+119
+normal! zc
+let s:l = 1 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-23
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.Xresources") | buffer ~/.Xresources | else | edit ~/.Xresources | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+291
+normal! zo
+let s:l = 291 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+291
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -633,60 +663,49 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-415
+397
 normal! zo
-let s:l = 415 - ((12 * winheight(0) + 0) / 0)
+550
+normal! zo
+let s:l = 579 - ((15 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-415
-normal! 011|
+579
+normal! 0
 lcd ~/wiki/terminal
 wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
+tabnext
+edit ~/bin/term-color-count.sh
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
-if bufexists("~/wiki/tmux/capabilities.md") | buffer ~/wiki/tmux/capabilities.md | else | edit ~/wiki/tmux/capabilities.md | endif
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fdm=manual
+setlocal fde=0
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-207
-normal! zo
-let s:l = 207 - ((1 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-207
-normal! 0
-lcd ~/wiki/tmux
-wincmd w
-argglobal
-if bufexists("~/wiki/.git/index") | buffer ~/wiki/.git/index | else | edit ~/wiki/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 5) / 10)
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/wiki/tmux
-wincmd w
-4wincmd w
-wincmd =
-tabnext 12
+lcd ~/.vim
+tabnext 13
 set stal=1
 badd +1 ~/Desktop/countries
-badd +23 ~/bin/yank
 badd +963 ~/wiki/awk/sed.md
 badd +2 ~/wiki/man/examples/pathfind.1
 badd +173 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
@@ -697,18 +716,18 @@ badd +153 ~/wiki/shell/process.md
 badd +1 ~/bin/upp.sh
 badd +165 ~/bin/restore-env.sh
 badd +892 ~/wiki/tmux/command.md
+badd +63 ~/bin/yank
 badd +4507 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +150 ~/Dropbox/vim_plugins/vimrc_grepper.vim
 badd +104 ~/wiki/vim/async.md
 badd +33 ~/.config/st/patches/01_custom_config.diff
-badd +468 ~/.Xresources
+badd +291 ~/.Xresources
 badd +1 ~/wiki/vim/install.md
 badd +113 ~/.vim/plugged/vim-debug/plugin/debug.vim
 badd +1280 ~/wiki/tmux/format.md
-badd +505 ~/wiki/terminal/capabilities.md
-badd +1 ~/wiki/tmux/capabilities.md
-badd +0 ~/wiki/.git/index
+badd +562 ~/wiki/terminal/capabilities.md
+badd +0 ~/bin/term-color-count.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -720,6 +739,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
