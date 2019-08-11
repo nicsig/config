@@ -3,8 +3,7 @@
 # TODO:
 # comment the code
 
-# Source:
-#     http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
+# Source: http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
 
 palette='/tmp/palette.png'
 

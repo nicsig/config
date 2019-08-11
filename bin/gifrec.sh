@@ -1,8 +1,12 @@
 #!/bin/bash
 
 # Alternative: https://github.com/nbedos/termtosvg
-
 # Output file is:    /tmp/gif.gif
+
+# How to prevent the script from changing the layout of the tmux window?{{{
+#
+#     $ TMUX= gifrec.sh zsh
+#}}}
 
 # TODO: screenkey{{{
 #
@@ -27,8 +31,7 @@
 #
 #       to display 'C-a' rather than 'Ctrl+a'
 #}}}
-# TODO:
-# comment the code more thorougly
+# TODO: comment the code more thorougly
 
 # Warning: If you modify the script to quote the shell command it must record:{{{
 #
@@ -99,13 +102,12 @@ get_geometry() { #{{{2
     XWININFO="$(xwininfo)"
 
     # extract relevant info from the output
-    read X <<< $(awk -F: '/Absolute upper-left X/{print $2}' <<< "${XWININFO}")
-    read Y <<< $(awk -F: '/Absolute upper-left Y/{print $2}' <<< "${XWININFO}")
-    read H <<< $(awk -F: '/Height/{print $2}' <<< "${XWININFO}")
-    read W <<< $(awk -F: '/Width/{print $2}' <<< "${XWININFO}")
+    read -r X <<< "$(awk -F: '/Absolute upper-left X/{print $2}' <<< "${XWININFO}")"
+    read -r Y <<< "$(awk -F: '/Absolute upper-left Y/{print $2}' <<< "${XWININFO}")"
+    read -r H <<< "$(awk -F: '/Height/{print $2}' <<< "${XWININFO}")"
+    read -r W <<< "$(awk -F: '/Width/{print $2}' <<< "${XWININFO}")"
 
-    # Alternative to `xwininfo`:
-    #     https://github.com/naelstrof/slop
+    # Alternative to `xwininfo`: https://github.com/naelstrof/slop
   fi
 }
 
@@ -183,10 +185,10 @@ stop_everything() { #{{{2
 
   killall screenkey
 }
-
+#}}}1
 # Execution {{{1
 
-if [[ -z "$@" ]]; then
+if [[ $# = 0 ]]; then
   printf -- 'usage: %s some_command_to_record\n' "$(basename "$0")" >&2
   exit 64
 fi

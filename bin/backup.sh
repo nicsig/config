@@ -16,7 +16,7 @@
 #     /media/$USER/5d18be51-3217-4679-9c72-a54e0fc53d6b/home/pi/backup
 DEST="$1"
 if [[ -z "$1" ]]; then
-  printf -- 'provide the destination directory\n' "$1"
+  printf -- 'provide the destination directory\n'
   exit 65
 elif [[ ! -d "$1" ]]; then
   printf -- '%s is not a directory\n' "$1"
@@ -62,7 +62,7 @@ vimrc="$(sed "/^Plug\s*'lacygoill/!d; s:Plug\s*'lacygoill/\|'.*::g" ~/.vim/vimrc
 # The array `plugins` would contain only the first vim plugin.
 #}}}
 # How to split a string into an array: https://stackoverflow.com/a/10586169/9780968
-IFS=' ' read -r -a plugins <<< $vimrc
+IFS=' ' read -r -a plugins <<< "$vimrc"
 for plugin in "${plugins[@]}"; do
   rsync -ahPuzR --delete --stats --exclude='.git*' "${HOME}/.vim/plugged/${plugin}" "${DEST}"
 done

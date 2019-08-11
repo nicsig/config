@@ -23,7 +23,7 @@ bitmask2signals() {
 }
 
 grep -E '^Sig(Blk|Ign|Cgt):' "/proc/$1/status" |
-  while read a b; do
+  while read -r a b; do
     printf '%s%s\n' "$a" "$(bitmask2signals "$b")"
   done
 

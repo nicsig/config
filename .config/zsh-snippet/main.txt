@@ -7,7 +7,7 @@ gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
 groff -man -Tascii {{program}}.man # check formatting of a manual page
 
-git stash; make clean; make distclean; sh autogen.sh && ./configure && make ; tput bel # compile tmux (useful when git-bisecting)
+git stash; make clean; make distclean; \sh autogen.sh && ./configure && make ; tput bel # compile tmux (useful when git-bisecting)
 git stash; make clean; make distclean; ./configure --enable-fail-if-missing --with-features=huge; make ; tput bel # compile vim
 
 strace -o {{/tmp/log}} {{cmd}} # run a command, and trace the new process

@@ -17,7 +17,7 @@ start_ueberzug() { #{{{2
 finalise() { #{{{2
     exec 3>&-
     rm "$UEBERZUG_FIFO" &>/dev/null
-    kill $(jobs -p)
+    kill "$(jobs -p)"
 }
 
 calculate_position() { #{{{2
@@ -27,7 +27,7 @@ calculate_position() { #{{{2
     #      (in this case we will also need to use perl or something else
     #      as bash won't execute traps if a command is running)
     < <(</dev/tty stty size) \
-        read TERMINAL_LINES TERMINAL_COLUMNS
+        read -r TERMINAL_LINES TERMINAL_COLUMNS
 
     X=$((TERMINAL_COLUMNS - COLUMNS - 2))
     Y=1

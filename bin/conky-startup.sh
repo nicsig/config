@@ -41,7 +41,7 @@ killall conky
 #
 # This prevents the rings from being displayed.
 #}}}
-cd "${HOME}/.conky/"
+cd "${HOME}/.conky/" || exit
 
 # What's this `-c` option?{{{
 #

@@ -2,8 +2,9 @@
 
 # Purpose: Paste the primary selection in the terminal.
 # Dependencies: xvkbd
-# Limitation: You can paste the primary selection only once.
-# Or twice if you're in urxvt.
+# Limitation: Sometimes, the contents of the primary clipboard gets erased (`$ xsel -p` is empty).
+# It happens if you  invoke the script multiple times too  fast (e.g. the script
+# can be invoked by a key binding, and you maintain the latter pressed for a few seconds).
 # Source:
 # https://askubuntu.com/a/7807/867754
 # https://unix.stackexchange.com/a/11890/289772
@@ -16,30 +17,32 @@
 # Alternatively, you could also try to  use the tmux command `paste-buffer`, and
 # pass it the `-p` option.
 #}}}
-selection="\e[200~$(xsel)\e[201~"
-printf -- "${selection}" | xvkbd -xsendevent -file - 2>/dev/null
-# FIXME: Doesn't work in xterm nor in gnome-terminal. But works in st and urxvt.{{{
+selection="$(xsel -p)"
+seq="\e[200~${selection}\e[201~"
+# FIXME: Doesn't work in gnome-terminal nor in xterm. But works in st and urxvt.{{{
 #
 # MWE:
 #
 #     $ printf "test" | xvkbd -xsendevent -file -
+#
+# You could make the command work in xterm by adding this line in `~/.Xresources`:
+#
+#     XTerm*allowSendEvents: true
+#
+# But, it would disable `allowWindowOps`.
+# From `$ man xterm /allowSendEvents (`:
+#
+# > Note that  allowing such  events would  create a  very large  security hole,
+# > therefore  enabling  this  resource   forcefully  disables  the  allowXXXOps
+# > resources.
+#
+# Because of  this, you wouldn't be  able to use  OSC sequences, like OSC  52 to
+# get/set the clipboard, and OSC 4 to get/set a color in the 256-color palette.
 #}}}
-# FIXME: fails on multibyte characters (e.g. 'éòü'){{{
+# FIXME: fails on non-ascii characters (e.g. 'éòü'){{{
 #
 #     $ xvkbd -text 'éòü' 2>/dev/null
 #     Ã©Ã²Ã¼~
-#
-# ---
-#
-# It may also fail on a percent character.
-#
-# MWE:
-# Write a percent character in `/tmp/md.md`.
-# Run `:Preview`.
-# Select the percent character.
-# Try to paste it on the shell's command-line.
-#
-# Result: nothing is inserted.
 #
 # ---
 #
@@ -47,9 +50,9 @@ printf -- "${selection}" | xvkbd -xsendevent -file - 2>/dev/null
 # clipboard selection, and finally run `$ xdotool` to simulate `C-S-v`.
 #
 #     # get the primary selection
-#     text="\e[200~$(xsel)\e[201~"
+#     text="\e[200~$(xsel -p)\e[201~"
 #     # populate the clipboard selection with the primary selection
-#     printf -- "${text}" | xsel -i --clipboard
+#     printf -- '%b' "${text}" | xsel -i --clipboard
 #     # simulate a press on C-S-v
 #     xdotool key 'ctrl+shift+v'
 #
@@ -62,6 +65,11 @@ printf -- "${selection}" | xvkbd -xsendevent -file - 2>/dev/null
 # Btw, in the latter file, right above the key binding, we've written that `$ xdotool`
 # was to avoid; I wonder whether that has something to do with our current issue.
 #}}}
+printf -- '%b' "${seq}" | xvkbd -xsendevent -file - 2>/dev/null
+
+# Rewrite the  text in the primary  clipboard, because for some  reason, it gets
+# erased after `$ kvkbd` is invoked.
+printf -- '%s' "${selection}" | xsel -i -p
 
 # `-xsendevent` {{{
 #

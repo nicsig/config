@@ -28,5 +28,5 @@ exec 3>&1 4>&2
 exec 1>"${HOME}/log/$(basename "$0" .sh).log" 2>&1
 
 
-cd "$2"
+cd "$2" || exit
 subliminal download -l en -- "$1" && notify-send "Des sous-titres anglais ont été téléchargés" || notify-send "Aucun sous-titres anglais trouvés"

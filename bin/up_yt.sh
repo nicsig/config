@@ -12,7 +12,7 @@ main() { #{{{1
     git -C "${HOME}/GitRepos/" clone 'https://github.com/rg3/youtube-dl'
   fi
 
-  cd "${HOME}/GitRepos/youtube-dl"
+  cd "${HOME}/GitRepos/youtube-dl" || exit
   git stash
   git checkout master
   git pull

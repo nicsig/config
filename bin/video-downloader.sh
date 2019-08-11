@@ -16,6 +16,6 @@ exec 1>"${HOME}/log/$(basename "$0" .sh).log" 2>&1
 
 dest=$(zenity --file-selection --directory --title "Choose a save destination") && cd "$dest" || exit 1
 
-youtube-dl -c --restrict-filenames -o "$dest"/"%(title)s.%(ext)s" "$1"
+youtube-dl -c --restrict-filenames -o "${dest}/%(title)s.%(ext)s" "$1"
 
 notify-send "La vidéo a été téléchargée."

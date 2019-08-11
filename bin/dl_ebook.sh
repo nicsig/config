@@ -14,7 +14,7 @@ fi
 main() { #{{{1
   # No need to restore the working directory later, because we're in a script.
   # And a script is executed in a subshell.
-  builtin cd /tmp
+  builtin cd /tmp || exit
 
   cat <<EOF
 ---

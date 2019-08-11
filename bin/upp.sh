@@ -210,7 +210,7 @@ clean() { #{{{2
       rm -rf build
     fi
     mkdir -p build
-    cd build
+    cd build || exit
 
   else
     make clean
@@ -479,14 +479,14 @@ configure() { #{{{2
 
 download() { #{{{2
   [[ -d "${GIT_REPOS}" ]] || mkdir -p "${GIT_REPOS}"
-  cd "${GIT_REPOS}"
+  cd "${GIT_REPOS}" || exit
 
   aptitude install git
   if [[ ! -d "${PGM}" ]]; then
     git clone "${URLS[${PGM}]}" "${PGM}"
   fi
 
-  cd "${PGM}"
+  cd "${PGM}" || exit
   # We may have edited some file (`configure`, `Makefile`, ...).
   # Stash those edits.
   git stash
@@ -707,6 +707,17 @@ install() { #{{{2
     #      trying to overwrite '/usr/share/man/man1/zshmodules.1.gz', which is also in package myzsh 999-1~
     #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)~
     #}}}
+    if [[ ${PGM} == 'nvim' ]]; then
+      # When you run `:Man man`, the manpage is not prettified like with
+      # `$ man man`; let's fix that:
+      sed -i.bak \
+        -e '/function! man#init_pager()/,/endfunction/{/endfunction/i \  do <nomodeline> man BufReadCmd' \
+        -e '}' \
+        /usr/local/share/nvim/runtime/autoload/man.vim
+      # Open the TOC on the left rather than at the bottom.
+      sed '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
+        /usr/local/share/nvim/runtime/autoload/man.vim
+    fi
   fi
 }
 

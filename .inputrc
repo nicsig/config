@@ -178,8 +178,7 @@ $if mode=emacs
 # will be impossible to unbind the function unix-word-rubout and replace it with
 # backward-kill-word.
 #
-# Source:
-#     http://shallowsky.com/blog/linux/bash-word-erase.html
+# Source: http://shallowsky.com/blog/linux/bash-word-erase.html
 #}}}
 set bind-tty-special-chars Off
 "\C-w": backward-kill-word

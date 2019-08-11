@@ -156,13 +156,13 @@ Plug 'lacygoill/vim-graph'
 " Use git hooks instead.
 " Less code, more control, occasion to better understand git.
 "
-"     https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration
-"     https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks
-"     https://git-scm.com/docs/githooks
+" https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration
+" https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks
+" https://git-scm.com/docs/githooks
 "
-"     https://tbaggery.com/2011/08/08/effortless-ctags-with-git.html
-"     https://github.com/tpope/tpope/tree/master/.git_template
-"     https://github.com/tpope/tpope/blob/master/.gitconfig
+" https://tbaggery.com/2011/08/08/effortless-ctags-with-git.html
+" https://github.com/tpope/tpope/tree/master/.git_template
+" https://github.com/tpope/tpope/blob/master/.gitconfig
 "
 " Update:
 " A file watcher (like entr) may be even better.
@@ -194,9 +194,12 @@ Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
 Plug 'foxik/vim-makejob'
 " TODO: Remove this condition whenever you can.{{{
 "
-" We should use the neovim `man` plugin, because it's better.
-" However, it doesn't support our custom motions such as `]r`, nor folding.
+" We should use the neovim `man` plugin even in Vim, because it's better.
+" However,  it doesn't  support  our custom  motions such  as  `]r`, and  Nvim's
+" folding is not as good as Vim folding.
 " So, we'll need to add those features when we re-implement the plugin.
+"
+" Also, remove `~/.vim/plugin/man.vim` once you use your own man plugin.
 "
 " Also:
 "
@@ -206,29 +209,8 @@ Plug 'foxik/vim-makejob'
 "     - ~/.vim/plugged/vim-man/~
 "
 " Because of this `!has('nvim')` condition, we  run the risk of locally deleting
-" the plugin by accident. No big deal, unless we have uncommitted changes...
-"
-" ---
-"
-" Run this:
-"
-"     $ man man
-"     :Man man
-"
-" The formatting is not applied.
-" The lines are too long.
-" 'showbreak' is on.
-"
-" Fix all of this.
-"
-" You  could  fix  the  formatting  by  adding the  next  line  at  the  end  of
-" `man#init_pager()` in `/usr/local/share/nvim/runtime/autoload/man.vim`:
-"
-"     doautocmd man BufReadCmd
-"
-" However, it would not fix the 2 other issues (lines too long, 'showbreak' on).
-" Worse, these 2 other issues would also immediately affect `$ man man` (no need
-" of `:Man man`).
+" the plugin by accident when we run `:PlugClean` from Nvim.
+" No big deal, unless we have uncommitted changes...
 "
 " ---
 "
@@ -494,8 +476,7 @@ let $MANSECT = $MYMANSECT
 " TODO: We should probably remove this assignment.{{{
 "
 " To create RELIABLE links inside a wiki, we should use tags:
-"
-"     https://stackoverflow.com/q/25742396
+" https://stackoverflow.com/q/25742396
 "
 " Indeed, with  regular links (filepaths),  if we rename  a file, or  change its
 " location, we need to refactor all links towards the latter.
@@ -663,8 +644,7 @@ set backspace=indent,eol,start
 
 " My current version of xfce4-terminal doesn't support true color.
 "
-" FIXME:
-" We should use a whitelist, not a blacklist.
+" FIXME: We should use a whitelist, not a blacklist.
 "
 " Atm,  the only  terminals which  I  can install  and support  true color,  are
 " Konsole, gnome-terminal and a recent version of urxvt (compiled from source).
@@ -1363,10 +1343,10 @@ set expandtab
 "
 " When we hit:
 "
-"        - {count}>>
-"        - {count}<<
-"        - >{motion}
-"        - <{motion}
+"    - {count}>>
+"    - {count}<<
+"    - >{motion}
+"    - <{motion}
 "
 " ... on indented lines,  if 'sr' is enabled, the new  level of indentation will
 " be a multiple of `&sw`.
@@ -1374,8 +1354,8 @@ set expandtab
 " The current level of indentation is 2, and `&sw` is 4.
 " We hit `>>`:
 "
-"         - without `shiftround`, the new indent becomes 6
-"         - with    `shiftround`, the new indent becomes 4
+"    - without `shiftround`, the new indent becomes 6
+"    - with    `shiftround`, the new indent becomes 4
 "}}}
 " Why don't you enable 'sr' anymore?{{{
 "
@@ -3204,8 +3184,7 @@ fu! s:goyo_enter() abort
     let s:goyo_cole_save = &l:conceallevel
     setl concealcursor=nc conceallevel=3
 
-    " FIXME:
-    " need to find another way to change the shape of the cursor in Neovim
+    " FIXME: need to find another way to change the shape of the cursor in Neovim
     if !has('nvim')
         let &t_EI = "\e[4 q"
         exe "norm! r\e"
@@ -4583,14 +4562,13 @@ nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
 " By default, we can't move across several lines of a long wrapped line with
 " `j` and `k`.
 "
-"                       ┌─ if we used a count, we probably don't care about wrapped lines
-"                       │
-nno  <expr><silent>  j  v:count ? (v:count >= 5 ? "m'".v:count : '').'j' : 'gj'
-nno  <expr><silent>  k  v:count ? (v:count >= 5 ? "m'".v:count : '').'k' : 'gk'
-"                                 └────────────────────────────────┤
-"                                                                  └ if the count was bigger than 5,
-"                                                                    we consider the motion as a jump
-"                                                                    useful to come back with `c-o`
+"                    ┌─ if we used a count, we probably don't care about wrapped lines
+"                    │
+nno <expr><silent> j v:count ? (v:count >= 5 ? "m'".v:count : '').'j' : 'gj'
+nno <expr><silent> k v:count ? (v:count >= 5 ? "m'".v:count : '').'k' : 'gk'
+"                              ├────────────────────────────────┘
+"                              └ if the count was bigger than 5,
+"                                we consider the motion as a jump useful to come back with `c-o`
 
 " If we're inside a long wrapped line, `^` and `0` should go the beginning
 " of the line of the screen (not the beginning of the long line of the file).
@@ -6351,7 +6329,7 @@ endfu
 
 " TODO:
 " Instead of using a match, automatically populate the qfl, and place signs.
-"     https://gist.github.com/BoltsJ/5942ecac7f0b0e9811749ef6e19d2176
+" https://gist.github.com/BoltsJ/5942ecac7f0b0e9811749ef6e19d2176
 
 " Purpose: get a warning when we make a typo in a filetype detection script {{{
 "

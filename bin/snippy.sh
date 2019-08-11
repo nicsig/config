@@ -41,7 +41,7 @@ XSEL_ARGS='--clipboard --input'
 #            |           +-- read standard input into the selection
 #            +-- operate on the CLIPBOARD selection
 
-cd "${DIR}"
+cd "${DIR}" || exit
 
 # Use the filenames in the snippy directory as menu entries.
 # Get the menu selection from the user.

@@ -105,7 +105,7 @@ sed -i.bak 's/^Restart=always/# Restart=always/' /etc/systemd/system/display-man
 mkdir -p /etc/systemd/system/getty@.service.d/
 
 # turn on the Numlock key by default in a console
-cat <<EOF >/etc/systemd/system/getty@.service.d/activate-numlock.conf
+cat <<'EOF' >/etc/systemd/system/getty@.service.d/activate-numlock.conf
 [Service]
 StandardInput=/dev/%I
 ExecStartPre=setleds -D +num
@@ -118,7 +118,7 @@ ExecStartPre=/usr/bin/loadkeys /home/${USER}/.config/keyboard/vc.conf
 EOF
 
 # make the background color of a console white immediately (before a successful login)
-cat <<EOF >/etc/systemd/system/getty@.service.d/white-background.conf
+cat <<'EOF' >/etc/systemd/system/getty@.service.d/white-background.conf
 [Service]
 StandardOutput=/dev/%I
 ExecStartPre=/usr/bin/setterm -background white -foreground black -store
@@ -177,7 +177,7 @@ mkdir "${HOME}/GitRepos"
 printf -- '\nInstalling ranger\n'
 
 git clone git://git.savannah.nongnu.org/ranger.git "${HOME}/GitRepos/ranger"
-cd ranger
+cd ranger || exit
 git checkout stable
 git pull
 ranger --copy-config=all
@@ -243,13 +243,13 @@ xdg-mime default gvim.desktop application/octet-stream
 
 # Symlinks creation {{{1
 
-cd "${HOME}"/.mozilla/firefox/*.default
+cd "${HOME}"/.mozilla/firefox/*.default || exit
 [[ ! -d 'chrome' ]] && mkdir chrome
 cp ~/.config/home/user/.mozilla/firefox/xxx.default/chrome/userContent.css ~/.mozilla/firefox/*.default/chrome/userContent.css
 
 printf -- "\nCreating symlinks pointing to config files in the Dropbox directory.\n"
 
-cd "${HOME}"
+cd "${HOME}" || exit
 dpath="${HOME}/Dropbox/conf"
 
 ln -sfn "${dpath}/bin" bin

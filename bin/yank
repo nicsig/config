@@ -137,7 +137,7 @@ fi
 #
 # It would add a trailing newline, and `<<<` is not supported by sh.
 #}}}
-len=$(printf -- "${buf}" | wc -c)
+len=$(printf -- '%s' "${buf}" | wc -c)
 # Where does that number come from?{{{
 #
 # Tmux doesn't  send to  the outer  terminal any sequence  of more  than 100_000
@@ -157,7 +157,7 @@ len=$(printf -- "${buf}" | wc -c)
 #}}}
 max=74994
 if [ "${len}" -gt "${max}" ]; then
-  printf -- "$0: input is $((len - max)) bytes too long\n" >&2
+  printf -- "%s: input is $((len - max)) bytes too long\n" "$0" >&2
 fi
 
 # Why `$ head -c`?{{{

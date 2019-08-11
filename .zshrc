@@ -2638,6 +2638,17 @@ alias dl_video='youtube-dl --restrict-filenames --write-sub --sub-lang en,fr --w
 # Press Enter to start ranger.
 # Press q to quit ranger.
 # `fm` is now highlighted in red (✘).
+#
+# ---
+#
+# Also, our `sh` alias is highlighted in red.
+#
+#     alias sh='$HOME/.local/bin/dash -E'
+#
+# It seems the  zsh syntax highlighting plugin doesn't like  you to override any
+# default command with an alias.
+#
+#     alias bash='foobar'
 #}}}
 
 # TODO: add file completion to `config`
@@ -3179,7 +3190,82 @@ alias -s pdf="${PDFVIEWER}"
 # zsh provides a hook function `zshaddhistory` which can be used for that.
 # If `zshaddhistory_functions` contains  the name of a function  which returns a
 # non-zero value, the command is not saved in the history file.
-zshaddhistory_functions=(ignore_these_cmds ignore_short_or_failed_cmds)
+zshaddhistory_functions=(ignore_comments ignore_short_or_failed_cmds ignore_these_cmds)
+
+ignore_comments() {
+  emulate -L zsh
+  if [[ $1 =~ ^# ]]; then
+    return 2
+  else
+    return 0
+  fi
+}
+
+ignore_short_or_failed_cmds() {
+  emulate -L zsh
+  # ignore commands which are shorter than 5 characters
+  # Why `-le 6` instead of `-le 5`?{{{
+  #
+  # Because zsh sends a newline at the end of the command.
+  #}}}
+  #                            ┌ ignore non-recognized commands
+  #                            ├─────────┐
+  if [[ "${#1}" -le 6 ]] || [[ "$?" == 127 ]]; then
+    return 2
+  else
+    return 0
+  fi
+}
+
+ignore_these_cmds() {
+  emulate -L zsh
+  local first_word
+  # zsh passes the command line to this function via $1
+  # we extract the first word on the line
+  # Source: https://unix.stackexchange.com/a/273277/289772
+  first_word=${${(z)1}[1]}
+  # What's the effect of this `z` flag in the expansion of the `$1` parameter?{{{
+  #
+  # It splits the result of the expansion into words.
+  #
+  # Watch:
+  #     $ sentence='Hello jane, how are you!'
+  #
+  #     $ printf -- '%s\n' ${sentence}
+  #         Hello jane, how are you!
+  #
+  #     $ printf -- '%s\n' ${(z)sentence}
+  #         Hello
+  #         jane,
+  #         how
+  #         are
+  #         you!
+  #
+  #     $ printf -- '%s\n' ${${(z)sentence}[2]}
+  #         jane,
+  #
+  # For more info, see:
+  #
+  #     $ man zshexpn /PARAMETER EXPANSION /Parameter Expansion Flags
+  #}}}
+
+  # now we check whether it's somewhere in our array of commands to ignore
+  # https://unix.stackexchange.com/a/411331/289772
+  if ((${cmds_to_ignore_in_history[(I)$first_word]})); then
+    # Why `2` instead of `1`?{{{
+    #
+    # `1` = the command is removed from the history of the session,
+    # as soon as you execute another command
+    #
+    # `2` = the command is still in the history of the session,
+    # even after executing another command,
+    # so you can retrieve it by pressing M-p or C-p
+    #}}}
+    return 2
+  else
+    return 0
+  fi
+}
 
 # The shell allows newlines to separate array elements.
 # So,  an array  assignment can  be split  over multiple  lines without  putting
@@ -3211,74 +3297,6 @@ cmds_to_ignore_in_history=(
   vimdiff
   web
 )
-
-ignore_these_cmds() {
-  emulate -L zsh
-  local first_word
-  # zsh passes the command line to this function via $1
-  # we extract the first word on the line
-  # Source: https://unix.stackexchange.com/a/273277/289772
-  first_word=${${(z)1}[1]}
-  # What's the effect of this `z` flag in the expansion of the `$1` parameter?{{{
-  #
-  # It splits the result of the expansion into words.
-  #
-  # Watch:
-  #     $ sentence='Hello jane, how are you!'
-  #
-  #     $ printf -- '%s\n' ${sentence}
-  #         Hello jane, how are you!
-  #
-  #     $ printf -- '%s\n' ${(z)sentence}
-  #         Hello
-  #         jane,
-  #         how
-  #         are
-  #         you!
-  #
-  #     $ printf -- '%s\n' ${${(z)sentence}[2]}
-  #         jane,
-  #
-  # For more info, see:
-  #
-  #     man zshexpn
-  #     > PARAMETER EXPANSION
-  #     > Parameter Expansion Flags
-  #}}}
-
-  # now we check whether it's somewhere in our array of commands to ignore
-  # https://unix.stackexchange.com/a/411331/289772
-  if ((${cmds_to_ignore_in_history[(I)$first_word]})); then
-    # Why `2` instead of `1`?{{{
-    #
-    # `1` = the command is removed from the history of the session,
-    # as soon as you execute another command
-    #
-    # `2` = the command is still in the history of the session,
-    # even after executing another command,
-    # so you can retrieve it by pressing M-p or C-p
-    #}}}
-    return 2
-  else
-    return 0
-  fi
-}
-
-ignore_short_or_failed_cmds() {
-  emulate -L zsh
-  # ignore commands which are shorter than 5 characters
-  # Why `-le 6` instead of `-le 5`?{{{
-  #
-  # Because zsh sends a newline at the end of the command.
-  #}}}
-  #                            ┌ ignore non-recognized commands
-  #                            ├─────────┐
-  if [[ "${#1}" -le 6 ]] || [[ "$?" == 127 ]]; then
-    return 2
-  else
-    return 0
-  fi
-}
 
 # Key Bindings {{{1
 # How to bind a function to a key sequence using both the meta and control modifiers?{{{

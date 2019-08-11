@@ -26,7 +26,7 @@ sleep 0.5
 xdotool key ctrl+c
 
 # save location
-cd ~/Desktop
+cd ~/Desktop || exit
 
 # OSD display starting
 notify-send -i ~/Downloads/youtube_green.png 'Starting Download' -t 5000
