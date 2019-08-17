@@ -3524,6 +3524,12 @@ nno  <silent>  U<c-r>  :<c-u>exe 'undo '.undotree().seq_last<cr>
 " fugitive
 nno  <silent>  Ud  :<c-u>Gdiff<cr>
 
+augroup test_sth
+    au!
+    au FileType fugitive nunmap <buffer> U
+augroup END
+
+
 nno  <silent>  Up  :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
 nno  <silent>  Us  :<c-u>call <sid>try_fugitive_cmd('Gstatus')<cr>
 
@@ -3779,6 +3785,18 @@ nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
 nno <silent> -$ :<c-u>call <sid>shell_command_help()<cr>
 xno <silent> -$ :<c-u>call <sid>shell_command_help('vis')<cr>
 
+" TODO: Improve the code to support commented lines and commands inside codespans.
+" Also, only process a shell command in a codeblock or in a codespan.
+"
+" Update: We really need a library function to get a comment leader.
+" We  also need  a  library function  to  get  a commented  shell  command in  a
+" codeblock (and maybe in a codespan).
+" It should support continuatios lines (see how we did it in vim-tmux for `|x`).
+"
+" Once you have one, use it here, and in:
+"
+"     ~/.vim/plugged/vim-tmux/autoload/tmux/run.vim:36
+
 fu! s:shell_command_help(...) abort
     let reg_save = [getreg('"'), getregtype('"')]
     try
@@ -3786,10 +3804,20 @@ fu! s:shell_command_help(...) abort
             norm! gvy
             let cmd = @"
         else
-            let cmd = matchstr(getline('.'), '^\s*\$\s*\zs.*')
-            if cmd is# ''
+            let cml = &ft is# 'markdown' ? '' : matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
+            "     $ ls -larth
+            " foo `$ ls -larth` bar
+            let cmd_in_codeblock = matchstr(getline('.'), '^\s*\V'.escape(cml, '\').'\m\s\{5}\$\s*\zs.*')
+            let cmd_in_codespan = matchstr(getline('.'), '^\s*\V'.escape(cml, '\').'\m\s\{5}\$\s*\zs.*')
+            if cmd_in_codeblock is# '' && cmd_in_codespan is# ''
                 echo 'no shell command on this line'
                 return
+            else
+                if cmd_in_codespan is# ''
+                    let cmd = cmd_in_codeblock
+                else
+                    let cmd = cmd_in_codespan
+                endif
             endif
         endif
         let @o = system('ch '..cmd)
@@ -9153,8 +9181,18 @@ endfu
 "
 " 142 -
 "
-" Improve our `-$` mapping to support comments and commands inside codespan.
-" Also, only process a shell command in a codeblock or in a codespan.
+" Check whether the  issue with `:norm` + `feedkeys(..., 't')`  can be reproduce
+" with 2 invocations of `feekdeys()`; the  first (without 't' flag) should press
+" keys which in turn invoke the second `feedkeys()` (with 't' flag).
+" This may give you a better understanding of the issue.
+"
+" 143 -
+"
+" Revisit the gitcommit plugin.
+" We  should  not  save  the  index  of   the  message  to  use  to  populate  a
+" gitcommit  buffer. This is  unreliable  if  we remove  some  message files  in
+" `~/.vim/tmp/commit_messages/`.
+" Instead, we should save the name of the file, and infer the index from the name.
 
 
 

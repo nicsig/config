@@ -765,12 +765,12 @@ normal! zo
 normal! zo
 1670
 normal! zo
-let s:l = 1681 - ((34 * winheight(0) + 14) / 28)
+let s:l = 1691 - ((44 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1681
-normal! 016|
+1691
+normal! 069|
 lcd ~/wiki/shell
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
@@ -778,11 +778,21 @@ exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/.vim/vimrc
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -792,21 +802,61 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-6906
+6934
 normal! zo
-9163
-normal! zo
-9173
-normal! zo
-9177
-normal! zo
-let s:l = 9151 - ((3 * winheight(0) + 5) / 10)
+let s:l = 9192 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-9151
-normal! 0
+9192
+normal! 050|
 lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-gitcommit/autoload/gitcommit.vim") | buffer ~/.vim/plugged/vim-gitcommit/autoload/gitcommit.vim | else | edit ~/.vim/plugged/vim-gitcommit/autoload/gitcommit.vim | endif
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+11
+normal! zo
+12
+normal! zo
+let s:l = 38 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+38
+normal! 024|
+lcd ~/.vim/plugged/vim-gitcommit
+wincmd w
+argglobal
+if bufexists("/usr/local/share/vim/vim81/doc/eval.txt") | buffer /usr/local/share/vim/vim81/doc/eval.txt | else | edit /usr/local/share/vim/vim81/doc/eval.txt | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal nofen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-gitcommit
+wincmd w
+3wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
 tabnext 14
 set stal=1
 badd +1 ~/Desktop/countries
@@ -822,7 +872,7 @@ badd +892 ~/wiki/tmux/command.md
 badd +1 ~/bin/yank
 badd +192 ~/Desktop/session.md
 badd +97 ~/wiki/shell/job.md
-badd +9166 ~/.vim/vimrc
+badd +9195 ~/.vim/vimrc
 badd +4507 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +150 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -835,6 +885,7 @@ badd +1280 ~/wiki/tmux/format.md
 badd +676 ~/wiki/terminal/capabilities.md
 badd +92 ~/Desktop/ask.md
 badd +1690 ~/wiki/shell/process.md
+badd +13 ~/.vim/plugged/vim-gitcommit/autoload/gitcommit.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
