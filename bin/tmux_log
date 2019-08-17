@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[[ -d "${HOME}/log" ]] || mkdir "${HOME}/log"
+[ -d "${HOME}/log" ] || mkdir "${HOME}/log"
 LOGFILE="${HOME}/log/$(basename "$0" .sh).log"
 
 main() {
@@ -25,8 +25,13 @@ EOF
     # And in sh, you need to remove the `SIG` prefix.
     # https://unix.stackexchange.com/a/199384/289772
     #}}}
+    # Why do pass `-b` to `run-shell`? We already use it in our tmux key binding.{{{
+    #
+    # In case we forget the tmux  key binding, and invoke the script manually on
+    # the shell's command-line.
+    #}}}
     tmux display 'Stopped tmux server logging' \; \
-         run 'kill -s USR2 #{pid} ; killall strace'
+         run -b 'kill -s USR2 #{pid} ; killall strace'
   else
     # Where is the logfile written?{{{
     #
@@ -35,7 +40,7 @@ EOF
     # IOW, it's most probably written in your $HOME.
     #}}}
     tmux display 'Started tmux server logging' \; \
-         run 'kill -s USR2 #{pid} ; strace -ttt -ostrace.txt -p #{pid}'
+         run -b 'kill -s USR2 #{pid} ; strace -ttt -ostrace.txt -p #{pid}'
   fi
   # TODO: What if we have a running `$ strace` process when we use the function for the first time?{{{
   #

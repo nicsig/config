@@ -2558,12 +2558,35 @@ _fzf_compgen_path() { #{{{2
 #
 # Use abbreviations instead.
 #}}}
+#   *Always* backslash a command whose name is also used as an alias name.{{{
+#
+# Otherwise,  when you  expand  the  alias, you  may  have  an undesired  double
+# expansion.
+#
+#     alias foo='echo foo'
+#     alias bar='echo bar; foo'
+#
+#     $ echo bar
+#     M-e
+#     $ echo bar; echo foo~
+#                 ^^^^^^^^
+#
+#     alias foo='echo foo'
+#     alias bar='echo bar; \foo'
+#                          ^
+#
+#     $ echo bar
+#     M-e
+#     $ echo bar; foo~
+#                 ^^^
+#}}}
+# TODO: regular aliases seem really shitty. Convert as many of them as possible into functions.
 
 # regular {{{2
 # apt {{{3
 
-alias api='sudo aptitude install'
-alias app='sudo aptitude purge'
+alias api='\sudo aptitude install'
+alias app='\sudo aptitude purge'
 alias aps='aptitude show'
 
 alias afs='apt-file search'
@@ -2574,11 +2597,11 @@ alias rawk='rlwrap awk'
 
 # bc {{{3
 
-alias bc='bc -q -l'
-#             │  │
-#             │  └ load standard math library (to get more accuracy, and some functions)
-#             │
-#             └ do not print the welcome message
+alias bc='\bc -q -l'
+#              │  │
+#              │  └ load standard math library (to get more accuracy, and some functions)
+#              │
+#              └ do not print the welcome message
 
 # cd {{{3
 
@@ -2594,16 +2617,16 @@ alias ..5='cd ../../../../..'
 #
 # Use `$ dfc`.
 #}}}
-alias df='df -h -x tmpfs -T'
-#             │  ├─────┘  │{{{
-#             │  │        └ print filesystem type (e.g. ext4)
-#             │  └ exclude filesystems of type devtmpfs
-#             └ human-readable sizes
+alias df='\df -h -x tmpfs -T'
+#              │  ├─────┘  │{{{
+#              │  │        └ print filesystem type (e.g. ext4)
+#              │  └ exclude filesystems of type devtmpfs
+#              └ human-readable sizes
 #}}}
 
 # dirs {{{3
 
-alias dirs='dirs -v'
+alias dirs='\dirs -v'
 
 # dl {{{3
 
@@ -2622,6 +2645,23 @@ alias dl_sub_en='subliminal download -l en'
 alias dl_sub_fr='subliminal download -l fr'
 
 alias dl_video='youtube-dl --restrict-filenames --write-sub --sub-lang en,fr --write-auto-sub -o "%(title)s.%(ext)s"'
+
+# free {{{3
+
+alias free='\free -mt'
+#                  ││
+#                  │└ display a line showing the column totals
+#                  └ display the amount of memory in megabytes (easier to read)
+
+# gdb {{{3
+
+# Don't print the introductory and copyright messages.
+# Could I set this in `~/.gdbinit`?{{{
+#
+# It seems that no, you can't:
+# https://stackoverflow.com/a/34201975/9780968
+#}}}
+alias gdb='\gdb -q'
 
 # git {{{3
 
@@ -2731,7 +2771,7 @@ alias gs='git status -s'
 
 # grep {{{3
 
-alias grep='grep --color=auto'
+alias grep='\grep --color=auto'
 
 # grml {{{3
 
@@ -2760,16 +2800,22 @@ alias iconv_no_accent='iconv -f utf8 -t ascii//TRANSLIT'
 # `--init-file` = Read key bindings and variable settings from INIT-FILE
 # instead of the .infokey file in your home directory.
 # https://www.gnu.org/software/texinfo/manual/info-stnd/html_node/Invoking-Info.html#g_t_002d_002dinit_002dfile
-alias info='info --vi-keys --init-file=~/.config/infokey'
+alias info='\info --vi-keys --init-file=~/.config/infokey'
 
 # iotop {{{3
 
 # `iotop` monitors which process(es) access our disk to read/write it:
-alias iotop='iotop -o -P'
-#                   │  │
-#                   │  └ no threads
-#                   │
-#                   └ only active processes
+alias iotop='\iotop -o -P'
+#                    │  │
+#                    │  └ no threads
+#                    │
+#                    └ only active processes
+
+# jobs {{{3
+
+alias jobs='\jobs -l'
+#                  │
+#                  └ print the pids
 
 # lessh {{{3
 
@@ -2797,7 +2843,7 @@ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
 
 # ls {{{3
 
-alias ls='ls --color=auto'
+alias ls='\ls --color=auto'
 alias l=ls++
 
 # lua {{{3
@@ -2890,29 +2936,19 @@ alias options='vim -O =(setopt) =(unsetopt)'
 
 # ps {{{3
 
+# display only our processes, and with a minimum of noise
+alias pss='\ps xfo pid,tty=TTY,stat=STATE,args'
+# For some reason, the last character of the `TTY` and `STATE` column headers is
+# omitted, so we set those two column headers explicitly.
+
 # http://0pointer.de/blog/projects/systemd-for-admins-2.html
-#                   ┌ select all processes{{{
-#                   │┌ user-defined format
-#                   ││}}}
-alias psc='ps xawf -eo pid,user,cgroup,args'
-#             ││││{{{
-#             ││││
-#             ││││
-#             │││└ ASCII art process hierarchy (forest)
-#             ││└ wide output
-#             │└ list the "only yourself" restriction
-#             └ list the "must have a tty" restriction
-#}}}
-
-# py {{{3
-
-alias py='/usr/local/bin/python3.7'
+alias psc='\ps axfo pid,user,cgroup,args'
 
 # qmv {{{3
 
-alias qmv='qmv --format=destination-only'
-#                │
-#                └ -f, --format=FORMAT
+alias qmv='\qmv --format=destination-only'
+#                 │
+#                 └ -f, --format=FORMAT
 #
 # Change edit format of text file.
 # Available edit formats are:
@@ -2929,7 +2965,7 @@ alias fm='[[ -n "${TMUX}" ]] && [[ $(tmux display -p "#W") == "zsh" ]] && tmux r
 
 # rg {{{3
 
-alias rg='rg 2>/dev/null --vimgrep -i -L'
+alias rg='\rg 2>/dev/null --vimgrep -i -L'
 
 # sh {{{3
 
@@ -3079,8 +3115,8 @@ alias sh='$HOME/.local/bin/dash -E'
 #
 # > A trailing space in value causes the next word to be checked for alias expansion.
 #}}}
-alias sudo='sudo -E env "PATH=$PATH" '
-#                                   ^
+alias sudo='\sudo -E env "PATH=$PATH" '
+#                                    ^
 
 # systemd {{{3
 
@@ -4487,8 +4523,7 @@ abbrev=(
   'ac'    '| column -t'
   # printf FieLd
   'fl'   "| awk '{ print $"
-  # can't use `L` because of `$ dpkg -L`
-  'LL'    '2>&1 | less'
+  'L'    '2>&1 | less'
   # No Errors
   'ne'   '2>/dev/null'
   'pf'    "printf -- '"
@@ -4518,8 +4553,8 @@ abbrev=(
   # (instead of github)...
   #}}}
   'V'     '2>&1 | vipe >/dev/null'
-  #                    │
-  #                    └ don't write on the terminal, the Vim buffer is enough
+  #                     │
+  #                     └ don't write on the terminal, the Vim buffer is enough
 )
 
 __abbrev_expand() {
@@ -4533,51 +4568,70 @@ __abbrev_expand() {
   # the last space
   local MATCH
 
-  #                ┌ remove longest suffix matching the following pattern
+  LBUFFER=${LBUFFER%%(#m)[a-zA-Z]#}
+  #                ├┘├──┘        │{{{
+  #                │ │           └ matches 0 or more of the previous pattern (word character)
+  #                │ │             See: `$ man zshexpn /^\s*x#\s`
+  #                │ │
+  #                │ └ populate `$MATCH` with the suffix removed by `%%`
+  #                │   See: `$ man zshexpn /\C^\s*m\s*Set`
   #                │
-  #                │   ┌ populates `$MATCH` with the suffix removed by `%%`
-  #                │   │ for more info:    man zshexpn, filename generation
-  LBUFFER=${LBUFFER%%(#m)[_a-zA-Z0-9]#}
-  #                                  │
-  #                                  └─ matches 0 or more of the previous pattern (word character)
-  #                                  for more info:    man zshexpn, filename generation
-  #
-  #                                  NOTE:
-  #                                  contrary to most regex engines, for zsh,
-  #                                  `*` is not a quantifier:
-  #                                  in a classical regex, it would match the pattern `.*`
+  #                └ remove longest suffix matching the following pattern
+  #                  See: `$ man zshexpn /%%pat`
+  #}}}
 
-  LBUFFER+=${abbrev[$MATCH]:-$MATCH}
-  #        │
-  #        └─ expands into:
-  #        is `abbrev[$MATCH]` set, or non-null?
+  # Only trigger abbreviation if the previous character is a space.{{{
   #
-  #            yes  →  abbrev[$MATCH]
-  #            no   →         $MATCH
+  # Useful, for example, to not trigger an abbreviation right after a hyphen:
   #
-  # For more info, man zshexpn:    ${name:-word}
+  #     $ dpkg -L foo
+  #     $ awk -V | head -n1
+  #}}}
+  if [[ "${LBUFFER: -1}" == ' ' ]]; then
+  #                │{{{
+  #                └ `$ man zshexpn /${name:offset}`
+  #
+  # > If offset  is negative, the  - may not appear  immediately after the  : as
+  # > this indicates the ${name:-word} form of substitution.
+  # > Instead,  a  space  may  be inserted before the -.
+  #}}}
+    LBUFFER+=${abbrev[$MATCH]:-$MATCH}
+    #        │{{{
+    #        └ expands into `abbrev[$MATCH]` if the latter is set, `$MATCH` otherwise
+    #          See: `$ man zshexpn /${name:-word}`
+    #}}}
 
-  if [[ $MATCH = 'Jc' ]]; then
-    RBUFFER="'}"
-    # FIXME:
-    # we want the cursor to be right after the `$` sign in:
-    #     awk '{ print $ }'
+    # Append some text for some abbreviations.{{{
     #
-    # but zsh inserts a space before the cursor, no matter the value we give
-    # to `CURSOR`. How to avoid this?
-    # CURSOR=$(($#LBUFFER))
-    # NOTE:
-    # by default, CURSOR=$#LBUFFER
-  elif [[ $MATCH = 'Jp' ]]; then
-    RBUFFER="\n'"
+    # Atm only for:
+    #
+    #     'fl'   "| awk '{ print $"
+    #     'pf'    "printf -- '"
+    #}}}
+    if [[ $MATCH = 'fl' ]]; then
+      RBUFFER="}'"
+      # FIXME: we want the cursor to be right after the `$` sign in:
+      #
+      #     awk '{ print $ }'
+      #
+      # but zsh inserts a space before the cursor, no matter the value we give
+      # to `CURSOR`. How to avoid this?
+      # CURSOR=$(($#LBUFFER))
+      # NOTE: by default, CURSOR=$#LBUFFER
+    elif [[ $MATCH = 'pf' ]]; then
+      RBUFFER="\n'"
+    fi
+
+  else
+    LBUFFER+=$MATCH
   fi
 
   # we need to insert the key we've just typed (here space), otherwise,
   # we wouldn't be able to insert a space anymore
   zle self-insert
   #   │
-  #   └─ run the `self-insert` widget to insert a character into the buffer at
-  #   the cursor position (man zshzle)
+  #   └ run the `self-insert` widget to insert a character into the buffer at
+  #     the cursor position (`$ man zshzle`)
 }
 
 # define a widget to expand when inserting a space
@@ -4591,16 +4645,18 @@ bindkey ' ' __abbrev_expand
 # However, we still disable abbreviation expansion in a search:
 bindkey -M isearch ' ' self-insert
 #        │
-#        └─ man zshzle: this key binding will only take effect in a search
+#        └ man zshzle: this key binding will only take effect in a search
 #
 # NOTE:
 # To test the influence of this key binding, uncomment next key binding, and
 # move it at the end of `~/.zshrc`:
+#
 #     bindkey "^R" history-incremental-search-backward
 #
 # It restores default `C-r`.
 #
 # Without the previous:
+#
 #     bindkey -M isearch " " self-insert
 #
 # ... as soon  as we would type a  space in a search, we would  leave the latter
@@ -4834,7 +4890,8 @@ fi
 # precmd_functions=(__restart_vim)
 # }}}1
 
-if [[ -z "${NO_SYNTAX_HIGHLIGHTING}" ]]; then
+# TODO: Try to customize the theme for the linux console (then remove `[[ -n "$DISPLAY" ]]`).
+if [[ -z "${NO_SYNTAX_HIGHLIGHTING}" ]] && [[ -n "$DISPLAY" ]]; then
   . "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
   . "${HOME}/.zsh/syntax_highlighting.zsh"
 fi

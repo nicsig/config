@@ -117,8 +117,8 @@ main "$1" 2>&1 | tee -a "${LOGFILE}"
 #     }
 #     main &
 #
-# The issue seems to come from a command with a lot of output, such as `wget`,
-# + the `&` operator.
+# The issue seems to come from a command with a lot of output – such as `wget` –
+# and the `&` operator.
 #
 # If we remove `xdg-open` from `main()`, we don't need to apply the `&` operator
 # to `wget`, which fixes the issue.

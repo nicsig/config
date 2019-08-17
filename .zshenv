@@ -121,6 +121,16 @@ export LC_TIME=en_US.UTF-8
 #
 # It's like 'ignorecase' and 'smartcase' in Vim.
 #}}}
+#   `~`?{{{
+#
+# Normally lines  after end of  file are displayed as  a single tilde  (~). This
+# option causes lines after end of file to be displayed as blank lines.
+#}}}
+#   `F`?{{{
+#
+# Causes less to automatically  exit if the entire file can  be displayed on the
+# first screen.
+#}}}
 #   `M`?{{{
 #
 # It's a Less option which makes the prompt more verbose.
@@ -150,7 +160,7 @@ export LC_TIME=en_US.UTF-8
 #
 # It's a `$ less` option which prevents long lines from being wrapped.
 #}}}
-export LESS=iMRS
+export LESS=i~FMRS
 # How to make the cursor jump at the bottom of the screen, on startup?{{{
 #
 # Use the option `+G`.
@@ -181,7 +191,17 @@ export LESS=iMRS
 #     $ time zsh -c 'repeat 1000 source ~/.zshenv'
 #}}}
 if [[ -z "${LESSOPEN}" ]]; then
-  eval "$(lesspipe)"
+  # The default debian less package installs the script lesspipe.{{{
+  #
+  # But if you compile it from source, the script is not included.
+  # We need to download it from: https://github.com/wofr06/lesspipe
+  # And in this case, its name is `lesspipe.sh`.
+  #}}}
+  if command -v lesspipe >/dev/null 2>&1; then
+    eval "$(lesspipe)"
+  else
+    eval "$(lesspipe.sh)"
+  fi
 
   # Why inside the guard?{{{
   #

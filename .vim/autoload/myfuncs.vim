@@ -94,8 +94,6 @@ fu! s:format_shell_buffer() abort
     " conceal the location
     call qf#set_matches('after_tmux_capture_pane:format_shell_buffer', 'Conceal', 'location')
     call qf#create_matches()
-    " close location list window; the conceal will still be applied whenever we re-open it
-    close
 endfu
 
 fu! s:format_xdcc_buffer(pat_cmd) abort
@@ -385,15 +383,15 @@ endfu
 "
 " Also, we should improve it to generate this kind of table:
 "
-"     ┌───────────────────┬─────────────────────────────────────────────────┐
-"     │                   │                    login                        │
-"     │                   ├─────────────────────────────────┬───────────────┤
-"     │                   │ yes                             │ no            │
-"     ├─────────────┬─────┼─────────────────────────────────┼───────────────┤
-"     │ interactive │ yes │ zshenv  zprofile  zshrc  zlogin │ zshenv  zshrc │
-"     │             ├─────┼─────────────────────────────────┼───────────────┤
-"     │             │ no  │ zshenv  zprofile         zlogin │ zshenv        │
-"     └─────────────┴─────┴─────────────────────────────────┴───────────────┘
+"    ┌───────────────────┬─────────────────────────────────────────────────┐
+"    │                   │                    login                        │
+"    │                   ├─────────────────────────────────┬───────────────┤
+"    │                   │ yes                             │ no            │
+"    ├─────────────┬─────┼─────────────────────────────────┼───────────────┤
+"    │ interactive │ yes │ zshenv  zprofile  zshrc  zlogin │ zshenv  zshrc │
+"    │             ├─────┼─────────────────────────────────┼───────────────┤
+"    │             │ no  │ zshenv  zprofile         zlogin │ zshenv        │
+"    └─────────────┴─────┴─────────────────────────────────┴───────────────┘
 "
 " The peculiarity here, is the variable number of cells per line (2 on the first
 " one, 3 on the second one, 4 on the last ones).
@@ -631,9 +629,7 @@ endfu
 fu! myfuncs#dump_wiki(url) abort "{{{1
     " TODO: Regarding triple backticks.{{{
     "
-    " Look at this page:
-    "
-    "     https://github.com/ranger/ranger/wiki/Keybindings
+    " Look at this page: https://github.com/ranger/ranger/wiki/Keybindings
     "
     " Some lines of code are surrounded by triple backticks:
     "
@@ -1003,7 +999,6 @@ fu! myfuncs#op_replace_without_yank(type) abort
 
         " save registers and types to restore later.
         " FIXME:
-        " Wait...
         " We save and restore the register which can be prefixed before the `dr` operator.
         " Is it necessary?
         " If so, have we done the same for the other operators which can be prefixed
@@ -1048,8 +1043,7 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " indentation.
 
         if a:type is# 'line' || replace_current_line
-            " TODO:
-            " Should we use `:keepj` in all our operators?
+            " TODO: Should we use `:keepj` in all our operators?
             exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
 
         elseif a:type is# 'block'

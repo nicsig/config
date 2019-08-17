@@ -23,7 +23,7 @@
 # And I think that `$ git describe` fails on such a commit...
 #}}}
 
-DEBUG=0
+DEBUG=1
 DEBUG_LOGFILE=/tmp/debug
 
 # TODO: Add support for updating the python interpreter.
@@ -32,17 +32,6 @@ DEBUG_LOGFILE=/tmp/debug
 
 # TODO: Add python (+ruby?) integration for Neovim.
 # And maybe use update-alternatives to make Neovim our default editor in the future.
-
-# TODO: We should be able  to pass an argument to the script  so that it doesn't
-# install any package.  It would just compile.
-# Basically,  `main()` would  do everything  as usual,  except it  wouldn't call
-# these functions at the end:
-#
-#     install
-#     update_alternatives
-#     xdg_mime_default
-#
-# This would be useful when we git bisect an issue.
 
 # Init {{{1
 
@@ -126,6 +115,12 @@ EOF
   install_dependencies
   configure
   build
+
+  # If we've compiled against a specific commit hash, we're probably bisecting a
+  # bug. Don't install the binary. We just need it to make some tests.
+  if [[ -n "$COMMIT_HASH" ]]; then
+    return
+  fi
   install
   update_alternatives
   xdg_mime_default
@@ -248,8 +243,8 @@ configure() { #{{{2
     ./configure
 
   elif [[ "${PGM}" == 'tmux' ]]; then
-    # TODO: remove this line once our crash issue is fixed
-    sed -i 's/-O2/-O0/' Makefile.am
+    # Uncomment to get more info in your backtraces.
+    #     sed -i 's/-O2/-O0/' Makefile.am
     sh autogen.sh
     ./configure
 
@@ -277,109 +272,7 @@ configure() { #{{{2
     # In my limited testing with  typometer, the latency doubles after compiling
     # with gtk3.
     #}}}
-
-    # Why moving `/usr/bin` at the start of `PATH`?{{{
-    #
-    # Without, we can't run python3.
-    #
-    #     $ vim -Nu NONE
-    #     :py3 ""
-    #     E448: Could not load library function PySlice_AdjustIndices~
-    #     E263: Sorry, this command is disabled, the Python library could not be loaded.~
-    #
-    # This is because we've compiled a more recent version of python (3.7 atm).
-    # And for some reason, during the compilation, sometimes Vim uses it.
-    # It mixes the default python (3.5 atm) and our local version.
-    #
-    # By  moving `/usr/bin`  at  the start  of  `PATH`, we  make  sure that  Vim
-    # finds  the default  python  (`/usr/bin/python3`), and  not  our local  one
-    # (`/usr/local/bin/python3`).
-    #
-    # https://stackoverflow.com/a/15282645/9780968
-    # https://stackoverflow.com/questions/8391077/vim-python-support-with-non-system-python/8393716#comment21639294_8393716
-    #}}}
-    #   Ok, but why not simply exclude `/usr/local/bin` from `PATH` while configuring?{{{
-    #
-    # So, you want to try sth like this:
-    #
-    #     delim="$(tr x '\001' <<<x)"
-    #     new_path=$(sed "s${delim}/usr/local/bin:${delim}${delim}" <<<$PATH)
-    #     PATH="$new_path" ./configure ...
-    #
-    # It could break the compilation of some programs which need to find some utility
-    # installed in `/usr/local/bin`.
-    # As an  example, Vim's compilation  requires gawk,  and atm, the  latter is
-    # only installed in `/usr/local/bin`.
-    #}}}
-    #   And why not setting `--with-python3-config-dir` with the config dir of python3.7?{{{
-    #
-    # So, you want to replace this:
-    #
-    #     --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
-    #
-    # with:
-    #
-    #     --with-python3-config-dir=/usr/local/lib/python3.7/config-3.7m-x86_64-linux-gnu
-    #
-    # I tried, and the compilation succeeds, but the python3 interface doesn't work:
-    #
-    #     $ vim -Nu NONE
-    #     :py3 ""
-    #     E370: Could not load library libpython3.7m.a~
-    #     E263: Sorry, this command is disabled, the Python library could not be loaded.~
-    #
-    # ---
-    #
-    # There may be sth to do with the environment variable `LD_LIBRARY_PATH`.
-    # I tried to set it like this:
-    #
-    #     LD_LIBRARY_PATH=/usr/lib:/usr/local/lib ./configure ...
-    #
-    # The compilation succeeded, but the python3 interface still didn't work.
-    #
-    # ---
-    #
-    # If you  find a way  to make this  solution work, and  you need to  get the
-    # config paths programmatically, try this:
-    #
-    #     # example of values: 2.7 and 3.5
-    #     python2_version="$(readlink -f "$(which python)" | sed 's/.*\(...\)/\1/')"
-    #     python3_version="$(readlink -f "$(which python3)" | sed 's/.*\(...\)/\1/')"
-    #
-    #     # example of paths: `/usr/lib/python2.7/config-x86_64-linux-gnu` and `/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu`
-    #     python2_config_path="$(locate -r "/usr/.*lib/python${python2_version}/config-" | head -n1)"
-    #     python3_config_path="$(locate -r "/usr/.*lib/python${python3_version}/config-${python3_version}" | head -n1)"
-    #
-    #     ...
-    #
-    #     --with-python-config-dir="$python2_config_path" \
-    #     --with-python3-config-dir="$python3_config_path"
-    #}}}
-    #   Is there an alternative?{{{
-    #
-    # You could try to set `vi_cv_path_python3` with the path to the default python:
-    #
-    #     vi_cv_path_python3=/usr/bin/python3.5 ./configure ...
-    #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    #
-    # But I don't understand what it does, and I don't know where it's documented.
-    # I found it here:
-    #
-    # https://stackoverflow.com/a/23095537/9780968
-    #
-    # ---
-    #
-    # From `:h python-building`:
-    #
-    # > If you have more than one version  of Python 3, you need to link python3
-    # > to the one you prefer, before running configure.
-    #
-    # I have no idea how to “link python3 to the one I prefer” though.
-    #
-    # Also, maybe have a look at `:h python-dynamic`, and `:h python-2-and-3`.
-    # More generally, reading the whole `if_pyth.txt` file may be useful.
-    #}}}
-    PATH=/usr/bin:$PATH ./configure  \
+    ./configure  \
       --enable-cscope                \
       --enable-fail-if-missing       \
       --enable-gui=gtk2              \
@@ -708,15 +601,13 @@ install() { #{{{2
     #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)~
     #}}}
     if [[ ${PGM} == 'nvim' ]]; then
-      # When you run `:Man man`, the manpage is not prettified like with
-      # `$ man man`; let's fix that:
+      # In a manpage, open the TOC on the *left* rather than at the bottom.
+      # Also, when you run `:Man man`, the manpage is not prettified like with `$ man man`; let's fix that.
       sed -i.bak \
-        -e '/function! man#init_pager()/,/endfunction/{/endfunction/i \  do <nomodeline> man BufReadCmd' \
-        -e '}' \
-        /usr/local/share/nvim/runtime/autoload/man.vim
-      # Open the TOC on the left rather than at the bottom.
-      sed '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
-        /usr/local/share/nvim/runtime/autoload/man.vim
+          -e '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
+          -e '/function! man#init_pager()/,/endfunction/{/endfunction/i \  do <nomodeline> man BufReadCmd' \
+          -e '}' \
+          /usr/local/share/nvim/runtime/autoload/man.vim
     fi
   fi
 }
@@ -855,7 +746,15 @@ xdg_mime_default() { #{{{2
 # `tee` will report an error, before `check_we_are_root` tells us to restart the
 # script as root; this is noise.
 #}}}
-check_we_are_root
+# And why the guard?{{{
+#
+# If we intend to  compile against a specific commit hash,  we won't install the
+# binary (because we're probably bisecting a bug  and we just need the binary to
+# make some tests). So, we don't need root privileges.
+#}}}
+if [[ -z "$COMMIT_HASH" ]]; then
+  check_we_are_root
+fi
 main "$1" 2>&1 | tee -a "${LOGFILE}"
 tput bel
 

@@ -3774,6 +3774,31 @@ nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
 
 " }}}3
 " hyphen              (prefix) {{{3
+" -$               shell command help {{{4
+
+nno <silent> -$ :<c-u>call <sid>shell_command_help()<cr>
+xno <silent> -$ :<c-u>call <sid>shell_command_help('vis')<cr>
+
+fu! s:shell_command_help(...) abort
+    let reg_save = [getreg('"'), getregtype('"')]
+    try
+        if a:0
+            norm! gvy
+            let cmd = @"
+        else
+            let cmd = matchstr(getline('.'), '^\s*\$\s*\zs.*')
+            if cmd is# ''
+                echo 'no shell command on this line'
+                return
+            endif
+        endif
+        let @o = system('ch '..cmd)
+        echo @o
+    finally
+        call setreg('"', reg_save[0], reg_save[1])
+    endtry
+endfu
+
 " -a  -8           ascii / bytes info {{{4
 
 " We remap `-a`  to a function of  the `unicode.vim` plugin which  gives us more
@@ -3824,31 +3849,6 @@ endfu
 "     - not colored
 "     - unable to expand `~`
 "     - relative to the working directory
-
-" -h               shell command help {{{4
-
-nno <silent> -h :<c-u>call <sid>shell_command_help()<cr>
-xno <silent> -h :<c-u>call <sid>shell_command_help('vis')<cr>
-
-fu! s:shell_command_help(...) abort
-    let reg_save = [getreg('"'), getregtype('"')]
-    try
-        if a:0
-            norm! gvy
-            let cmd = @"
-        else
-            let cmd = matchstr(getline('.'), '^\s*\$\s*\zs.*')
-            if cmd is# ''
-                echo 'no shell command on this line'
-                return
-            endif
-        endif
-        let @o = system('ch ' . cmd)
-        echo @o
-    finally
-        call setreg('"', reg_save[0], reg_save[1])
-    endtry
-endfu
 
 " -p  -P           show filePath / :pwd {{{4
 
@@ -4679,8 +4679,8 @@ nno  Y  y$
 " They  must be consecutive. Otherwise the  yanking fails to target  the desired
 " register. MWE:
 "
-"         C-v 3j "+ $ y    ✘
-"         C-v 3j $ "+ y    ✔
+"     C-v 3j "+ $ y    ✘
+"     C-v 3j $ "+ y    ✔
 "
 " As  soon as  we type  the `$`  motion, the  register name  is lost  (watch the
 " command-line).
@@ -5073,7 +5073,7 @@ xno  <c-s>  <esc>:keepj keepp *g/\%V/#<left><left>
 xno  <silent>  /  :<c-u>call <sid>visual_slash()<cr>
 fu! s:visual_slash() abort
     if line("'<") ==# line("'>")
-        call feedkeys('gv/', 'int')
+        call feedkeys('gv/', 'in')
     else
         " Do not reselect the visual selection with `gv`.{{{
         "
@@ -5081,7 +5081,7 @@ fu! s:visual_slash() abort
         " That's not what we want.
         " We want to search in the last visual selection.
         "}}}
-        call feedkeys('/\%V', 'int')
+        call feedkeys('/\%V', 'in')
     endif
 endfu
 
@@ -8486,6 +8486,17 @@ endfu
 " Should  we refactor the snippets  so that it  allows us to remove  those parts
 " (including the ex command)?
 "
+" Should we use `:keepj` in all our operators?
+" See `myfuncs#op_replace_without_yank()`.
+"
+" Should we use `:keepj` in all our operators?
+"
+" For  an operator  which can  be prefixed  by a  register, should  we save  and
+" restore the register?
+" If so,  consider passing the optional  argument `1` to `getreg()`  to properly
+" restore the expression register.
+" See `myfuncs#op_replace_without_yank()`.
+"
 " Have you saved and restored the visual marks?
 "
 " Do you need to save and restore v:register every time?
@@ -8727,7 +8738,7 @@ endfu
 " 115 -
 " This mapping works in Vim, but not in Neovim:
 "
-"     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'int')})[-1]
+"     cno  <expr>  <c-d>  timer_start(0, {-> feedkeys("\<lt>del>", 'in')})[-1]
 "                                                      ├───┘
 "                                                      └ yeah, you really need that
 "                                                       (to prevent "<del>" from deleting the next quote
@@ -9123,6 +9134,28 @@ endfu
 " more powerful.
 " To do so,  you'll need to create  a submode, and maybe  tweak `vim-submode` so
 " that we quit a submode automatically after 1 or 2 seconds.
+"
+" 141 -
+"
+" *Maybe*, our notes about plugins should be in help files.
+" If so, *maybe* they should support folding.
+"
+" Also, document somewhere, that when you  try to assimilate a plugin, the first
+" thing to do is to refactor its documentation.
+" Remove  any documentation  about a  feature you find  useless (and  remove the
+" associated code).
+" Make  the explanations clearer,  and add explanations or  questions/answers if
+" needed.
+" Once you  fully understand the doc,  and it only contains  useful information,
+" you know the plugin's interface.
+" And  once  the  interface  has  entered your  muscle  memory,  you  can  start
+" refactoring the code.
+"
+" 142 -
+"
+" Improve our `-$` mapping to support comments and commands inside codespan.
+" Also, only process a shell command in a codeblock or in a codespan.
+
 
 
 

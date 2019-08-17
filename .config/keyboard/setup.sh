@@ -46,6 +46,13 @@ EOF
   #           ┌ delay before a keypress is sent to the application
   #           │   ┌ maximum number of times a key can be repeated per second
   #           │   │}}}
+  # We don't use the same values in `/etc/rc.local` for `$ kbdrate`, because the result would be slower than under X.{{{
+  #
+  # You can  measure the  speed by  running `$ time  cat` in  a tmux  pane, then
+  # keeping the space key pressed in  another pane until you've filled 10 lines,
+  # and  finally pressing  `C-d` in  the  previous pane  where `$  time cat`  is
+  # running.
+  #}}}
   xset r rate 175 40
 }
 

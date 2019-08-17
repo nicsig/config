@@ -4,10 +4,18 @@
 set -g @fingers-key f
 # `pfx f` was bound to `find-window`, so we rebind the latter to `pfx F`.
 bind -T prefix F command-prompt "find-window -Z -- '%%'"
+# TODO: Pressing the prefix key is annoying.
+# For such a useful feature, I would prefer a key binding in the root table.
 
-# If I press the hint in uppercase, don't just copy the text, paste it immediately.
+# If I press the hint in lowercase, don't just copy the text, paste it immediately.
+# https://github.com/Morantron/tmux-fingers#fingers-copy-command
+set -g @fingers-copy-command ': ; tmux pasteb -p'
+#                             │
+#                             └ make tmux-fingers pipe the text to a command which will do nothing with its stdin
+
+# If I press the hint in uppercase, only copy the text; don't paste it.
 # https://github.com/Morantron/tmux-fingers#fingers-copy-command-uppercase
-set -g @fingers-copy-command-uppercase 'tmux paste-buffer -p'
+set -g @fingers-copy-command-uppercase 'echo >/dev/null'
 
 # set the style of the hints
 # https://github.com/Morantron/tmux-fingers#fingers-hint-format
@@ -22,3 +30,4 @@ set -g @fingers-highlight-format-nocompact '#[fg=red,bold,dim]%s'
 
 # https://github.com/Morantron/tmux-fingers#fingers-patterns-n
 set -g @fingers-pattern-0 'sudo "/home/.*/bin/upp.sh" ".*"'
+
