@@ -1452,6 +1452,60 @@ set isfname+=@-@
 " Don't insert two spaces after a '.', '?' and '!' with a join command.
 set nojoinspaces
 
+" keywordprg {{{2
+
+" The default value of 'kp' is `man -s`. It can cause an issue.{{{
+"
+" Write `ls` in `/tmp/file`, and press `K` on it:
+"
+"     Error detected while processing command line:~
+"     E492: Not an editor command: Man!~
+"     Error detected while processing VimEnter Autocommands for "*":~
+"     E216: No such group or event: UltiSnips_AutoTrigger~
+"
+" I think  that the issue is  due to the  environment of the Vim  process, which
+" wrongly interferes with the environment of the Nvim process.
+"
+" Indeed, from Nvim (started by Vim's `K` command), run these commands:
+"
+"     :echo $VIM
+"     /usr/local/share/vim~
+"     " it should be `/usr/local/share/nvim`
+"
+"     :echo $VIMRUNTIME
+"     /usr/local/share/vim/vim81~
+"     " it should be `/usr/local/share/nvim/runtime`
+"
+"     :checkhealth
+"     E5009: Invalid 'runtimepath'~
+"     " the runtimepath is wrong (the issue persists even if you manually reset $VIMRUNTIME)
+"
+"     :echo has('python')
+"     0~
+"     :echo has('python3')
+"     0~
+"     " the python interface is not available
+"     " which explains why UltiSnips didn't install its `UltiSnips_AutoTrigger` autocmd
+"
+"     :echo @+
+"     clipboard: No provider. Try ":checkhealth" or ":h clipboard".~
+"     " no access to the system clipboard
+"
+" `:h $VIMRUNTIME` explains how `$VIMRUNTIME` is set.
+"
+" ---
+"
+" Anyway, it doesn't make sense to keep the default value of `'kp'`.
+"
+" First, as  the previous MWE  showed you, this can  lead to Vim  invoking Nvim,
+" which is awkward, and can create a "frankenstein" environment.
+"
+" Second, there's no reason to invoke `$ man`.
+" We are in Vim, and we can read manpages via `:Man`; why bother invoking a shell?
+" Let's use `:Man`.
+"}}}
+set kp=:Man
+
 " lazyredraw {{{2
 " What does it do?{{{
 "
@@ -3409,8 +3463,9 @@ fu! s:install_vimrc_mappings() abort
     nno  <buffer><nowait><silent>  <c-w>gf  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gf")<cr>
     nno  <buffer><nowait><silent>  <c-w>gF  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gF")<cr>
 
+    nmap <buffer><nowait>          Z        <c-w>
+    " easier to press `ZGF` than `ZgF`
     nmap <buffer><nowait>          <c-w>GF  <c-w>gF
-    nmap <buffer>                  Z        <c-w>
 endfu
 
 fu! s:try_to_edit_plugin_config(cmd) abort
@@ -3419,7 +3474,7 @@ fu! s:try_to_edit_plugin_config(cmd) abort
 
     if empty(plugin)
         try
-            exe 'norm! '.a:cmd
+            exe 'norm! '.a:cmd.'zv'
         catch
             echohl ErrorMsg
             echom v:exception
@@ -3430,7 +3485,7 @@ fu! s:try_to_edit_plugin_config(cmd) abort
         let files =  [$HOME.'/.vim/plugin/'.plugin.'.vim']
         let files += [$HOME.'/.vim/after/plugin/'.plugin.'.vim']
         let files += [$HOME.'/.vim/autoload/slow_call/'.plugin.'.vim']
-        call filter(files, {i,v -> filereadable(v)})
+        call filter(files, {_,v -> filereadable(v)})
         if empty(files)
             echo 'There''s no config file for '.string(plugin)
             return
@@ -3439,6 +3494,7 @@ fu! s:try_to_edit_plugin_config(cmd) abort
         let a_file_is_opened = 0
         for f in files
             exe (a_file_is_opened ? 'sp ' : split).f
+            norm! zv
             let a_file_is_opened = 1
         endfor
     endif
@@ -3522,14 +3578,39 @@ nno  <silent>  U<c-i>  :<c-u>later 1f<cr>
 nno  <silent>  U<c-r>  :<c-u>exe 'undo '.undotree().seq_last<cr>
 
 " fugitive
-nno  <silent>  Ud  :<c-u>Gdiff<cr>
 
-augroup test_sth
+" We need to unmap `U` in a fugitive buffer because it's used by fugitive
+" (`:h fugitive_U`) to unstage everything; this prevents us from using `U`
+" as a prefix key in the next mappings.
+" TODO: Maybe we should remove this autocmd and map all our prefix keys to `<nop>` in *buffer-local* mappings.{{{
+"
+" This would be a more general solution to this particular problem.
+" To implement this idea, you need to write this autocmd:
+"
+"     augroup cancel_prefix
+"         exe 'au FileType * nno <buffer> '.pfx.' <nop>'
+"         exe 'au FileType * xno <buffer> '.pfx.' <nop>'
+"     augroup END
+"
+" inside the function `s:cancel_prefix()` from the file:
+"
+"     ~/.vim/after/plugin/nop.vim
+"
+" Issue: It would break the `-` fugitive mapping (`:h fugitive_-`) which we use.
+" We would need to  re-install this mapping but I don't know how  to get the rhs
+" programmatically; the latter contains sth like `<snr>123_`.
+" I seem to  remember trying to use the  rhs of a fugitive mapping in  one of my
+" own mapping, and it didn't work well; it's much trickier than what it seems.
+"
+" Anyway, this issue  highlights the importance of getting  `<plug>` mappings to
+" override all of fugitive mappings.
+"}}}
+augroup unmap_fugitive
     au!
     au FileType fugitive nunmap <buffer> U
 augroup END
 
-
+nno  <silent>  Ud  :<c-u>Gdiff<cr>
 nno  <silent>  Up  :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
 nno  <silent>  Us  :<c-u>call <sid>try_fugitive_cmd('Gstatus')<cr>
 
@@ -3784,18 +3865,6 @@ nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
 
 nno <silent> -$ :<c-u>call <sid>shell_command_help()<cr>
 xno <silent> -$ :<c-u>call <sid>shell_command_help('vis')<cr>
-
-" TODO: Improve the code to support commented lines and commands inside codespans.
-" Also, only process a shell command in a codeblock or in a codespan.
-"
-" Update: We really need a library function to get a comment leader.
-" We  also need  a  library function  to  get  a commented  shell  command in  a
-" codeblock (and maybe in a codespan).
-" It should support continuatios lines (see how we did it in vim-tmux for `|x`).
-"
-" Once you have one, use it here, and in:
-"
-"     ~/.vim/plugged/vim-tmux/autoload/tmux/run.vim:36
 
 fu! s:shell_command_help(...) abort
     let reg_save = [getreg('"'), getregtype('"')]
@@ -9181,18 +9250,103 @@ endfu
 "
 " 142 -
 "
-" Check whether the  issue with `:norm` + `feedkeys(..., 't')`  can be reproduce
-" with 2 invocations of `feekdeys()`; the  first (without 't' flag) should press
-" keys which in turn invoke the second `feedkeys()` (with 't' flag).
-" This may give you a better understanding of the issue.
-"
-" 143 -
-"
 " Revisit the gitcommit plugin.
 " We  should  not  save  the  index  of   the  message  to  use  to  populate  a
 " gitcommit  buffer. This is  unreliable  if  we remove  some  message files  in
 " `~/.vim/tmp/commit_messages/`.
 " Instead, we should save the name of the file, and infer the index from the name.
+"
+" 143 -
+"
+" Find a way to prevent `$ par` from breaking a codespan on multiple lines.
+"
+" Idea: If you can't,  then maybe you could temporarily replace  all spaces in a
+" codespan with  C-b; this should  prevent `$ par`  from breaking a  codespan on
+" multiple lines. Then after the formatting, you would replace C-b with spaces.
+"
+" 144 -
+"
+" Improve  the `-$`  mapping  to  support commented  lines  and commands  inside
+" codespans.   Also,  only process  a  shell  command in  a  codeblock  or in  a
+" codespan.
+"
+" Update: We really need a library function to get a comment leader.
+" We  also need  a  library function  to  get  a commented  shell  command in  a
+" codeblock (and maybe in a codespan).
+" It should support continuation lines (see how we did it in vim-tmux for `|x`).
+"
+" Once you have one, use it for the `-$` mapping, and in:
+"
+"     ~/.vim/plugged/vim-tmux/autoload/tmux/run.vim:36
+"
+" 145 -
+"
+" Implement a refactoring command in:
+"
+"     ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
+"
+" to replace `.` concatenation operator with `..`.
+"
+" Try this pattern:
+"
+"     \%(^\%('[^']*'\|[^']\)*\)\@<=\%(^\%("[^"]*"\|[^"]\)*\)\@<=\%(^\s*".*\)\@<!\s*\.\@<!\.\.\@!\s*
+"
+" Broken down:
+"
+"     " a dot not followed or preceded by another dot
+"     \s*\.\@<!\.\.\@!\s*
+"
+"     " not on a commented line
+"     \%(^\s*".*\)\@<!
+"
+"     " outside a single-quoted string
+"     \%(^\%('[^']*'\|[^']\)*\)\@<=
+"
+"     " outside a double-quoted string
+"     \%(^\%("[^"]*"\|[^"]\)*\)\@<=
+"
+" This could give false positives:
+"
+"     echo '
+"     \ a . b
+"     \ '
+"
+" which is why you should use `:s` and pass it the `c` flag.
+" This could  also fail to  find some  dots because of  the part of  the pattern
+" which ignores dots inside strings:
+"
+"     echo 'a
+"     \ ' . 'b . c'
+"
+" But I think this kind of snippets are rare.
+" And I  prefer failing to double  some dots, rather than  wrongly doubling some
+" dots which I shouldn't  in a regex string for example  (could happen even with
+" the `c` flag of `:s` when there are many matches and you're tired).
+"
+" 146 -
+"
+" Write a minimal vimrc sourcing only the vim-man plugin.
+" Then:
+"
+"     $ export MANPAGER="vim -M +Man -"
+"     $ man ls
+"     q
+"     E169: Command too recursive~
+"
+" I think we should stop writing `norm 1 q`.
+" This seems to cause too many issues (this one and the one with the 't' flag of
+" `feedkeys()`).
+"
+"     :vim /\m\C\<norm 1\%( \|<space>\)q/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc
+"
+" 147 -
+" Open a file in Vim from xterm or xfce4-terminal.
+" Press `*` on a word.
+"
+"     E486: Pattern not found: <Plug>(ms_up)
+"
+" The issue is absent from st.
+" The issue is fixed inside tmux.
 
 
 
@@ -9412,12 +9566,15 @@ fu! s:nofrils() abort
     let syntax_groups = [
     \ 'Conditional',
     \ 'Delimiter',
+    \ 'Exception',
     \ 'Function',
     \ 'Identifier',
+    \ 'Keyword',
     \ 'MatchParen',
     \ 'Number',
     \ 'Operator',
     \ 'PreProc',
+    \ 'Repeat',
     \ 'Special',
     \ 'Statement',
     \ 'String',

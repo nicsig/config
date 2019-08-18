@@ -250,6 +250,14 @@ fi
 # It recommends this command instead:
 #
 #     export MANPAGER="vim -M +MANPAGER -"
+#
+# If you try it, `$ man` will fail because we remove the `:MANPAGER` command in:
+#
+#     ~/.vim/after/plugin/tidy_tab_completion.vim
+#
+# But you can try it if you set `g:no_after_plugin`:
+#
+#     $ MANPAGER="vim -Nu NORC --cmd 'filetype on | runtime ftplugin/man.vim | let g:no_after_plugin = 1' -M +MANPAGER -" man man
 #}}}
 export MANPAGER='nvim +Man!'
 

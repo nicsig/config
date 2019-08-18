@@ -459,7 +459,7 @@ autoload -Uz run-help
 # Do  the  same  thing for  various  other  commands  (if  you type  `git  add`,
 # `run-help` should show you the help of `git-add`, ...).
 #
-#     https://stackoverflow.com/a/32293317/9780968
+# https://stackoverflow.com/a/32293317/9780968
 #}}}
 # Where did you find this list of functions?{{{
 #
@@ -1219,21 +1219,40 @@ EOF
   fi
   printf -- '%s\n' "$@"
 }
-# fa  fdd {{{2
+# fasd_add  fasd_remove {{{2
 
-fa() {
+# The benefit of this function over `$ fasd -A` is that you get an immediate feedback.
+# You know whether the path was added to fasd's database.
+#
+# Don't try to shorten its name.
+# Keep  the  `fasd`  prefix,  so  that  we see  the  function  when  we  try  to
+# tab-complete `$ fasd`; this may help us remembering its existence.
+fasd_add() {
   emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+  usage: $0 <filepath to add in fasd's database>
+EOF
+    return 64
+  fi
+
   fasd -A "$1"
-  if ! fasd | grep "^$1$"; then
+  if ! fasd | grep -P "^\d*\.?\d*\s*$1$"; then
     echo "failed to add $1"
   fi
 }
 
-# `fd` is already taken by `/usr/bin/fd` (`$ man fd`).
-fdd() {
+fasd_remove() {
   emulate -L zsh
+  if [[ $# -eq 0 ]]; then
+    cat <<EOF >&2
+  usage: $0 <filepath to remove from fasd's database>
+EOF
+    return 64
+  fi
+
   fasd -D "$1"
-  if ! fasd | grep "^$1$"; then
+  if ! fasd | grep -P "^\d*\.?\d*\s*$1$"; then
     echo "removed $1"
   else
     echo "failed to remove"
@@ -3970,23 +3989,43 @@ bindkey '^X^R' __reread_zshrc
 
 # C-x H           run-help {{{4
 
-# What's this “run-help”?{{{
-#
-# From `type run-help`:
-#
-#     run-help is an autoload shell function
-#}}}
-# What does it do?{{{
-#
-# It:
-#
-#    1. pushes the current buffer (command line) onto the buffer stack
-#    2. looks for a help page for the command name on the current command line (in case it's a builtin)
-#    3. if it doesn't find one, it invokes `$ man`
-#
-# For more info, see `$ man zshzle /run-help`.
-#}}}
-bindkey '^XH' run-help
+my-run-help() {
+  # Why running `__expand_aliases`?{{{
+  #
+  # If the first word on the line is an alias, `run-alias` will be run twice.
+  # I don't like that, it's confusing.
+  #
+  # MWE:
+  #
+  #     $ unalias ls
+  #     $ run-help ls
+  #     # `run-help` is run only once
+  #
+  #     $ alias ls='\ls --color=auto'
+  #     $ run-help ls
+  #     # `run-help` is run twice
+  #}}}
+  zle __expand_aliases
+  # What's this “run-help”?{{{
+  #
+  # From `type run-help`:
+  #
+  # > run-help is an autoload shell function
+  #}}}
+  #   What does it do?{{{
+  #
+  # It:
+  #
+  #    1. pushes the current buffer (command line) onto the buffer stack
+  #    2. looks for a help page for the command name on the current command line (in case it's a builtin)
+  #    3. if it doesn't find one, it invokes `$ man`
+  #
+  # For more info, see `$ man zshzle /run-help`.
+  #}}}
+  zle run-help
+}
+zle -N my-run-help
+bindkey '^XH' my-run-help
 
 # C-x h           describe-key-briefly {{{4
 

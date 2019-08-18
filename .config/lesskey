@@ -39,6 +39,10 @@
 # > This feature can be  used in certain cases to extend  the functionality of a
 # > command.
 # }}}
+# Doesn't our `h` key binding shadow the default help command?{{{
+#
+# Yes, but you can stil get the help screen by pressing `H`.
+#}}}
 h noaction 3\e(
 l noaction 3\e)
 
@@ -46,3 +50,4 @@ l noaction 3\e)
 # https://unix.stackexchange.com/a/455144/289772
 _ no-scroll
 $ end-scroll
+
