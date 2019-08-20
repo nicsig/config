@@ -7,6 +7,17 @@ snippets:
 
     $ tldr <cmd>
 
+# Why do you use `§` as a comment marker?
+
+We can't use `#`.
+It appears in one of our snippets atm:
+
+    cd ~/GitRepos/vim/ && { git stash; make clean; make distclean; sed -i 's/#ABORT_CFLAGS ...
+                                                                             ^
+
+We need some character which will never appear in our snippets.
+If you have a better idea for the comment marker, feel free to change it.
+
 ##
 # Why do you use `$ git stash` in the snippet compiling tmux?
 
@@ -140,4 +151,21 @@ But we don't want to read the code; we want to run it.
 
 The code is for a *zsh* function, since we're in zsh.
 So, zsh is the most appropriate shell to run it.
+
+##
+# About `cd ~/GitRepos/vim && { ... make ... ;}`
+## Why `sed -i 's/#ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/'`?
+
+To make Vim crash and dump a core as soon as it detects an internal error (`:h E315`).
+
+## Why `sed -i 's/#CFLAGS = -g -DSINIXN/CFLAGS = -g -DSINIXN/'`?
+
+To make the Vim binary include debugging symbols.
+See `:h debug-gcc`.
+
+## Why `sed -i 's@#STRIP = /bin/true@STRIP = /bin/true@' src/Makefile'`?
+
+Same as above.
+Although, in  practice, it doesn't seem  to be necessary, but  it's mentioned in
+`:h debug-gcc`, so better be safe than sorry.
 

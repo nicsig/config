@@ -661,7 +661,7 @@ set backspace=indent,eol,start
 "}}}
 if $COLORTERM isnot# 'xfce4-terminal'
     set termguicolors
-    if !has('nvim')
+    if has('vim_starting') && !has('gui_running') && !has('nvim')
         " In Vim, if `$TERM` is not  'xterm', Vim won't automatically set 't_8f'
         " nor 't_8b'.  We need to do it manually. See: :h xterm-true-color.
         let &t_8f = "\e[38;2;%lu;%lu;%lum"
@@ -1893,6 +1893,18 @@ set synmaxcol=250
 " }}}2
 
 " t_ {{{2
+" Why `!has('nvim')` in the guard?{{{
+"
+" Nvim doesn't have terminal options.
+" It correctly and automatically sets its internal terminfo db.
+"
+"     $ nvim -V3/tmp/log +'call timer_start(0, {-> execute("q")})'
+"     $ nvim -es +'exe "1,/{{{$/g/^/d_" | /}}}$/,$g/^/d_' +'%p | qa!' /tmp/log | nvim -
+"     /paste
+"     ext.enable_bpaste         = <Esc>[?2004h~
+"     ext.disable_bpaste        = <Esc>[?2004l~
+"}}}
+if has('vim_starting') && !has('gui_running') && !has('nvim')
 " BD BE PS PE {{{3
 
 " What's the bracketed paste mode?{{{
@@ -2108,18 +2120,7 @@ set synmaxcol=250
 " transmit whatever text is contained in the clipboard selection to the shell.
 "}}}
 
-" Why `!has('nvim')` in the guard?{{{
-"
-" Nvim doesn't have terminal options.
-" It correctly and automatically sets its internal terminfo db.
-"
-"     $ nvim -V3/tmp/log +'call timer_start(0, {-> execute("q")})'
-"     $ nvim -es +'exe "1,/{{{$/g/^/d_" | /}}}$/,$g/^/d_' +'%p | qa!' /tmp/log | nvim -
-"     /paste
-"     ext.enable_bpaste         = <Esc>[?2004h~
-"     ext.disable_bpaste        = <Esc>[?2004l~
-"}}}
-"   And why `&t_BE is# ''`?{{{
+" Why `&t_BE is# ''`?{{{
 "
 " Because Vim  already sets these options  for some terminals (e.g.  xterm), but
 " not all.
@@ -2127,7 +2128,7 @@ set synmaxcol=250
 " Presumably because  it only recognizes a few terminals  (via `$TERM`) which it
 " knows how to configure.
 "}}}
-if has('vim_starting') && !has('gui_running') && !has('nvim') && &t_BE is# ''
+if &t_BE is# ''
     let &t_BE = "\e[?2004h"
     let &t_BD = "\e[?2004l"
     let &t_PS = "\e[200~"
@@ -2159,15 +2160,98 @@ endif
 " https://github.com/neovim/neovim/labels/clipboard
 "}}}
 
+" RV {{{3
+
+" If we don't clear `'t_RV'`, our `vim-search` plugin is broken in xterm.{{{
+"
+" More specifically, it raises this error when we press `*` on a word:
+"
+"     E486: Pattern not found: <Plug>(ms_up)~
+"
+" MWE:
+"
+"     $ cat <<'EOF' >/tmp/vimrc
+"     cno <plug>(up) <up>
+"     nmap <expr> * Func()
+"     fu! Func()
+"         return "*/\<plug>(up)\r"
+"     endfu
+"     EOF
+"
+"     # open xterm
+"     $ vim -Nu /tmp/vimrc /tmp/vimrc
+"     # move cursor above 'Func' and press `*`
+"     E486: Pattern not found: <Plug>(up)~
+"
+" The issue occurs only  in xterm and other terminals whose  `TERM` uses a value
+" derived from 'xterm'.
+"
+" It doesn't  occur in st,  probably because  the latter doesn't  understand the
+" sequence stored in `'t_RV'`  which is sent by Vim; so,  st doesn't answer, and
+" Vim doesn't adjust various t_ codes.
+"
+" It doesn't occur in xterm+tmux,  because inside tmux `TERM` is 'tmux-256color'
+" instead of 'xterm-256color'.
+"
+" ---
+"
+" When `'t_RV'` is set, Vim sends a request sequence to the terminal.
+" If the latter  is xterm, it answers with another sequence  which Vim stores in
+" `v:termresponse`. Atm, in xterm, the answer is:
+"
+"     ^[[>41;322;0c
+"
+" `41` is the terminal type, and 322 the current patch level (we're using xterm(322)).
+" Then, Vim adjusts various t_ codes.
+"
+" ---
+"
+" This issue is weird, because `'t_RV'` doesn't do anything in itself.
+" It causes other t_ codes to be adjusted.
+" But the only differences between the termcap  db of Vim when it's started from
+" xterm with `'t_RV'` set and unset are those 2 keycodes:
+"
+"     set <SgrMouse>=^[[<*M
+"     set <SgrMouseRelelase>=^[[<*m
+"
+" They don't seem related to our issue (i.e. to the Up key).
+" I even recompiled Vim after removing all the lines found by:
+"
+"     $ vim -q =(rg '<\*m') +cw
+"     $ vim -q =(rg 'SgrMouse') +cw
+"
+" so that the termcap db of our  Vim binary is identical whether `'t_RV'` is set
+" or not.
+" And yet, it still doesn't fix the  issue; this seems to show that `'t_RV'` has
+" an effect which is not documented.
+"}}}
+"   Is there an alternative solution?{{{
+"
+" Yes, you could replace `\<plug>(ms_up)` with `\<up>` in
+" `~/.vim/plugged/vim-search/autoload/search.vim:608`:
+"
+"     \                   ? "\<plug>(ms_slash)\<plug>(ms_up)\<plug>(ms_cr)\<plug>(ms_prev)" : '')
+"                                             ^^^^^^^^^^^^^^
+"
+" But I'm not sure this would be a good idea.
+" If you do remove `<plug>(ms_up)`, you don't need this line in
+" `~/.vim/plugged/vim-search/plugin/search.vim`:
+"
+"     cno  <plug>(ms_up)      <up>
+"}}}
+set t_RV=
+
 " ut {{{3
 
 " We don't really need this atm.
 " It's only useful if you start Vim inside `xterm-kitty` (and outside tmux).
-if has('vim_starting') && !has('nvim') && &term =~# '-256color$\|^xterm-kitty$'
+if &term =~# '-256color$\|^xterm-kitty$'
   " Disable Background Color  Erase (BCE) so that color  schemes render properly
   " when inside 256-color tmux and GNU screen.
   " See: http://snk.tuxfamily.org/log/vim-256color-bce.html
   set t_ut=
+endif
+"}}}3
 endif
 " }}}2
 " tags {{{2
@@ -2583,8 +2667,8 @@ set viminfo+=!
 
 " In visual-block mode, let us move the cursor on a cell where there's no character:
 "
-"         - in the middle of a tab
-"         - beyond the last char on a line
+"    - in the middle of a tab
+"    - beyond the last char on a line
 "
 " Useful to select a rectangle out of irregular (different lengths) lines.
 set virtualedit=block
@@ -3239,7 +3323,8 @@ fu! s:goyo_enter() abort
     setl concealcursor=nc conceallevel=3
 
     " FIXME: need to find another way to change the shape of the cursor in Neovim
-    if !has('nvim')
+    " And what about the gui?
+    if !has('gui_running') && !has('nvim')
         let &t_EI = "\e[4 q"
         exe "norm! r\e"
     endif
@@ -3290,9 +3375,10 @@ fu! s:goyo_leave() abort
     let &l:conceallevel = s:goyo_cole_save
     unlet! s:goyo_cocu_save s:goyo_cole_save
 
-    let &t_EI = "\e[2 q"
-
-    exe "norm! r\e"
+    if !has('gui_running') && !has('nvim')
+        let &t_EI = "\e[2 q"
+        exe "norm! r\e"
+    endif
 
     exe 'colo '.g:colors_name
     Limelight!
@@ -5225,8 +5311,8 @@ xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar())<cr>
 " v_b_I = Visual-block Insert
 " v_b_A = Visual-block Append
 "
-"         - Make |v_b_I| and |v_b_A| available in all kinds of Visual mode.
-"         - Adjust the selected area to be intuitive before doing blockwise insertion.
+"    - Make |v_b_I| and |v_b_A| available in all kinds of Visual mode.
+"    - Adjust the selected area to be intuitive before doing blockwise insertion.
 
 let s:niceblock_keys = {
     \   '$'    : {'v': 'g$h',      'V': '$',          "\<c-v>": '$'},
@@ -7908,6 +7994,7 @@ endfu
 " :h quickref
 "
 " 64 -
+" https://arp242.net/vimlog/
 " play with (or document):
 "
 "    - `:h method`
@@ -9279,6 +9366,11 @@ endfu
 "
 "     ~/.vim/plugged/vim-tmux/autoload/tmux/run.vim:36
 "
+" Also, we need a library function to install these kind of `q` mappings:
+"
+"     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
+"     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
+"
 " 145 -
 "
 " Implement a refactoring command in:
@@ -9340,13 +9432,11 @@ endfu
 "     :vim /\m\C\<norm 1\%( \|<space>\)q/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc
 "
 " 147 -
-" Open a file in Vim from xterm or xfce4-terminal.
-" Press `*` on a word.
 "
-"     E486: Pattern not found: <Plug>(ms_up)
+" You don't need an `:exe` to break fold markers in a Vimscript.
+" You can use `\%x7b` and `\%x7d`.
 "
-" The issue is absent from st.
-" The issue is fixed inside tmux.
+"     vim /'{{\|{{'\|'}}\|}}'/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc
 
 
 

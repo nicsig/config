@@ -112,5 +112,6 @@ augroup filetypedetect
     "}}}
     au! BufRead,BufNewFile ~/.vim/tmp/tmuxprompt setf tmuxprompt
     au! BufRead,BufNewFile ~/.vim/tmp/websearch setf websearch
+    au! BufRead,BufNewFile ~/.config/zsh-snippets/main.txt setf zshsnippets
 augroup END
 

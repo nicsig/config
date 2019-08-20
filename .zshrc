@@ -9,7 +9,15 @@
 #}}}
 bindkey -e
 
-# Why 4096?{{{
+# Why 8192?{{{
+#
+# Last time I needed a core file for an issue with Vim, the latter didn't dump a
+# core below `4856`; and I like powers of 2s; the next power of 2 is 8192.
+#
+# Note that this is weird, because the size  of the core file was only 2.4M, and
+# 4856 should grant much more space than that (around 19 mebibytes).
+#}}}
+#   How much space does that stand for?{{{
 #
 # The limit size for a core file must be expressed as a number of blocks.
 #
@@ -23,16 +31,9 @@ bindkey -e
 #     $ sudo blockdev --getbsz /dev/sda1
 #     4096~
 #
-# We want to grant around 10 mebibytes for a process to leave a core file.
-# To get a number of blocks which is an integer, we'll use an actual limit which
-# is a power of 2.
-# 2^23 bytes is about 8 mebibytes, so  we'll grant 2^24 bytes, which is about 16
-# mebibytes; and 16 mebibytes is exactly 4096 blocks of 4096 bytes:
-#
-#     $ bc <<<'2^24 / 4096'
-#     4096~
+# So, 8192 should allow a core file up to 32 mebybytes (2^25 bytes).
 #}}}
-ulimit -c 4096
+ulimit -c 8192
 
 # disable XON/XOFF flow control
 # Why?{{{
@@ -1002,7 +1003,6 @@ cfg_mpv() { "${=EDITOR}" -o "${HOME}/.config/mpv/input.conf" "${HOME}/.config/mp
 cfg_newsboat() { "${=EDITOR}" -o "${HOME}/.config/newsboat/config" "${HOME}/.config/newsboat/urls" ;}
 cfg_ranger() { "${=EDITOR}" "${HOME}/.config/ranger/rc.conf" ;}
 cfg_readline() { "${=EDITOR}" "${HOME}/.inputrc" ;}
-cfg_snippet_zsh() { "${=EDITOR}" -o ${HOME}/.config/zsh-snippet/*.txt ;}
 cfg_surfraw() { "${=EDITOR}" -o "${HOME}/.config/surfraw/bookmarks" "${HOME}/.config/surfraw/conf" ;}
 cfg_tmux() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
 cfg_vim() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
@@ -1013,7 +1013,7 @@ cfg_xfce_terminal() { "${=EDITOR}" "${HOME}/.config/xfce4/terminal/terminal.rc" 
 cfg_xmodmap() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
 cfg_zathura() { "${=EDITOR}" "${HOME}/.config/zathura/zathurarc" ;}
 cfg_zsh() { "${=EDITOR}" -o "${HOME}/.zshrc" "${HOME}/.zshenv" ;}
-cfg_zsh_snippet() { "${=EDITOR}" -o "${HOME}/.config/zsh-snippet/main.txt" ;}
+cfg_zsh_snippets() { "${=EDITOR}" -o ${HOME}/.config/zsh-snippets/*.txt ;}
 #                      │{{{
 #                      └ Suppose that we export a value containing a whitespace:
 #
@@ -3653,12 +3653,12 @@ _fzf_snippet_main_widget() {
     _fzf_snippet_placeholder
   else
     local selected
-    if selected=$(cat ${HOME}/.config/zsh-snippet/*.txt |
-      sed "/^$\|^#/d
+    if selected=$(cat ${HOME}/.config/zsh-snippets/*.txt |
+      sed "/^$\|^§/d
            s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_SNIPPET_COMMAND_COLOR}\1\x1b[0m /
-           s/\s*\(#\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
+           s/\s*\(§\+\)\(.*\)/${FZF_SNIPPET_COMMENT_COLOR}  \1\2\x1b[0m/" |
       fzf --height=${FZF_TMUX_HEIGHT:-40%} --reverse --ansi -q "${LBUFFER}"); then
-      LBUFFER=$(sed 's/\s*#.*//' <<<"${selected}")
+      LBUFFER=$(sed 's/\s*§.*//' <<<"${selected}")
     fi
     zle redisplay
   fi
@@ -5002,7 +5002,7 @@ clone_check() {
 # Besides,  we already  have the  global alias  `B`, and  we use  `tput bel`  in
 # various places:
 #
-#     ~/.config/zsh-snippet/main.txt
+#     ~/.config/zsh-snippets/main.txt
 #     ~/bin/up.sh
 #     ~/bin/up_yt.sh
 #     ~/bin/upp.sh
