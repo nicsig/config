@@ -36,7 +36,7 @@ redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
 #
 # Besides, unclutter could cause other issues:
 #
-#     https://wiki.archlinux.org/index.php/unclutter#Known_bugs
+# https://wiki.archlinux.org/index.php/unclutter#Known_bugs
 #
 # ---
 #

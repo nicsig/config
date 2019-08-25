@@ -20,7 +20,7 @@
 " From `:h 'go-M`:
 "
 " Note that  this flag  must be added  in the .vimrc  file, before  switching on
-" syntax  or filetype  recognition (…;  the  `:syntax on`  and `:filetype  on`
+" syntax  or filetype  recognition (...;  the  `:syntax on`  and `:filetype  on`
 " commands load the menu too). `:filetype on` and `:syntax on` source menu.vim.
 "}}}
 set guioptions=M
@@ -95,7 +95,7 @@ let g:loaded_vimball      = 1
 "
 "        ~/.vim/autoload/plug.vim
 "
-" … exists.
+" ... exists.
 
 if empty(glob('~/.vim/autoload/plug.vim'))
     sil !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
@@ -584,15 +584,15 @@ set backspace=indent,eol,start
 " The system  register register will  now have  a similar (although  not exactly
 " identical) behavior than the one of the unnamed:
 "
-"     - it will contain the text of the last changed register (like `"`)
+"    - it will contain the text of the last changed register (like `"`)
 "
-"     -  … except  if  the  last changed  register  was  changed by  a  command
-"       containing its explicit name:
+"    -  ... except  if  the  last changed  register  was  changed by  a  command
+"      containing its explicit name:
 "
-"               "ayy
+"         "ayy
 "
-"       This  is different from `"`,  which always copy  the text of the  last changed
-"       register.
+"      This  is different from `"`,  which always copy  the text of the  last changed
+"      register.
 "
 " If you copy some text in Firefox,  it goes into `+` (regardless of 'cb').  But
 " because  of the  new value  of 'cb',  `p` will  automatically paste  `+` (last
@@ -784,7 +784,7 @@ if has('vim_starting')
         " What's the purpose of this call?{{{
         "
         " We want to memorize somewhere the  last version of the color scheme we
-        " used (atm it's expressed by an ANSI code: 233 … 239, 252 … 256).
+        " used (atm it's expressed by an ANSI code: 233 ... 239, 252 ... 256).
         "}}}
         " Is there an alternative?{{{
         "
@@ -831,8 +831,8 @@ endif
 
 " cmd  mode  ruler{{{2
 
-" When we move the cursor (hjkl wbe …) and Vim consumes a lot of cpu / is slow,
-" it can be for 2 reasons:
+" When we  move the cursor  (hjkl wbe ...)  and Vim consumes a  lot of cpu  / is
+" slow, it can be for 2 reasons:
 "
 "    - we're inside a deep nested fold:  solution → open folds (zR)
 "    - 'showcmd' is enabled:             solution → disable it
@@ -897,6 +897,9 @@ set cpoptions+=n
 
 " allow us to redo a yank command with the dot command
 set cpoptions+=y
+
+" When appending to a register, put a line break before the appended text.
+set cpoptions+=>
 
 " diffopt {{{2
 
@@ -1421,9 +1424,9 @@ set softtabstop=-1
 " By default, Vim uses the Bourne shell syntax.
 " We prefer to use `bash`.
 "
-" Indeed, most of the time, we'll use `bash`, and some bash constructs don't exist
-" in Bourne shell, like commands substitutions ($(…)). These bashisms are
-" considered as errors if   b:current_syntax is# 'sh'
+" Indeed, most  of the time,  we'll use `bash`,  and some bash  constructs don't
+" exist in Bourne shell, like commands substitutions (`$(...)`).
+" These bashisms are considered as errors if `b:current_syntax is# 'sh'`.
 "
 " For more info, read `:h sh.vim`.
 let g:is_bash = 1
@@ -1826,7 +1829,7 @@ set nostartofline
 "         Which commands honor 'swb'?{{{
 
 " |quickfix| commands, when jumping to errors (`:cc`, `:cn`, `cp`, etc.).
-" All buffer related split commands: `:sbuffer`, `:sbnext`, `:sbrewind`…
+" All buffer related split commands: `:sbuffer`, `:sbnext`, `:sbrewind`...
 "}}}
 "         Are there pitfalls?{{{
 
@@ -2404,16 +2407,20 @@ endif
 " l'option 'dir' et dans lequel il peut écrire (existe + droits suffisants).
 "
 " La valeur par défaut de 'dir' est:
-"         .,~/tmp,/var/tmp,/tmp
+"
+"     .,~/tmp,/var/tmp,/tmp
 "
 " Ça signifie que Vim crée le fichier d'échange dans le même dossier que bar.
 " Le problème est que ça pollue le système de fichiers avec des fichiers
 " d'échange un peu partout.
 "
 " On veut les confiner dans un dossier qui leur sera dédié, pex:
-"         ~/.vim/tmp/swap
+"
+"     ~/.vim/tmp/swap
+"
 " Pour ce faire, on ajoute au début (^=) de 'dir' la valeur:
-"         "$HOME/.vim/tmp/swap//"
+"
+"     "$HOME/.vim/tmp/swap//"
 "
 " Pk un double slash à la fin ?
 " Par défaut, le fichier d'échange créé s'appellera: .bar.swp
@@ -2421,7 +2428,9 @@ endif
 " différents. Leurs fichiers d'échange auront tous le même nom.
 " Le double backslash demande à Vim d'utiliser le chemin vers bar pour créer
 " un nom de fichier d'échange unique:
-" %path%to%.bar.swp
+"
+"     %path%to%.bar.swp
+"
 " Au passage, on remarque que les slashs séparant les dossiers du chemin vers
 " bar sont remplacés par des %.
 set directory=$HOME/.vim/tmp/swap//
@@ -2432,6 +2441,44 @@ if !isdirectory(&directory)
 endif
 
 
+" TODO: The undo files are never removed by Vim, and that they can take a lot of space over time (e.g. 1 gig).{{{
+"
+" Here's a way to remove the ones which were written for files in `/tmp/` or `/run/`:
+"
+"     $ find ~/.vim/tmp/undo -path '*/%run%*' -print0 | xargs -0 rm
+"     $ find ~/.vim/tmp/undo -path '*/%tmp%*' -print0 | xargs -0 rm
+"
+" And the ones written for a pdf:
+"
+"     $ find ~/.vim/tmp/undo -name '*.pdf' -print0 | xargs -0 rm
+"
+" How to merge them in a single shell command?
+"
+" ---
+"
+" Find  a command  to remove  all  undo files  which  are not  associated to  an
+" existing file anymore.
+" For example if this undo file exists:
+"
+"     ~/.vim/tmp/undo/%path%to%file
+"
+" But `/path/to/file` does not exist anymore, then we should remove the undo file.
+"
+" ---
+"
+" Find a way to run these commands automatically via a cron job once a week/month.
+"
+" ---
+"
+" Maybe we should also automatically remove the undo files which take more than 20 megs.
+" Atm, my biggest "valid" undo file takes 5 megs.
+" The ones above are not valid (pdfs, non-existing files, ...).
+"
+" ---
+"
+" Maybe we should disable `'undofile'` in certain directories (not sure I want that).
+" Or, enable `'undofile'` only in our home (not sure I want that either).
+"}}}
 " enable persistent undo
 set undofile
 
@@ -2541,11 +2588,44 @@ set ttimeout
 set timeoutlen=3000
 
 " ... and 6 ms for keycodes.
-" Previously we used 50ms, but 6 is the max value to prevent this error:
+" Previously we used 50ms, but 6 is the max value to prevent this error:{{{
 "
 "    1. insert sth wrong
 "    2. hit escape
 "    3. hit u (undo)    →    M-u: uppercase next word
+"
+" Vim recognizes `M-u` as `Esc + u`, because of this line in vim-readline:
+"
+"     exe "set <m-u>=\eu"
+"
+" So, if  we press  `Esc` then `u`  in less than  &ttimeoutlen, Vim  thinks that
+" we've pressed `M-u`.
+" To avoid this kind of misunderstanding,  we need to set `'ttimeoutlen'` as low
+" as possible.
+"}}}
+"   What other issue does this fix?{{{
+"
+" The default value of `'ttimeoutlen'` is -1.
+" It means that it copies the value of `'timeoutlen'`, which we've set to 3s.
+" Now suppose that you're in insert mode, and want to get back to normal mode by
+" pressing `Esc`: you'll have to wait 3s.
+"
+" Why?
+" Because  some special  keys (e.g. F1,  F2, ...,  left, right,  ...) produce  a
+" keycode beginning with `Esc`.
+" So, Vim has to  wait `'ttimeoutlen'` ms to know whether  the `Esc` was pressed
+" manually or it was part of some keycode.
+"}}}
+"   What issue can this cause?{{{
+"
+" If Vim is running on a remote machine, a low value could be insufficient for a
+" keycode to reach the latter.
+"
+" For example,  if we press `M-u`  and our local  machine sends `Esc +  u`, more
+" than `&ttimeoutlen` could elapse between `Esc` reaching the remote machine and `u`.
+" In that case, Vim will think we pressed `Esc` then `u` instead of `M-u`.
+"}}}
+set ttimeoutlen=6
 " TODO: When you set this option to a low value, the contents of a recording is weird.{{{
 "
 "     $ vim -Nu NONE +'set ttimeoutlen=6'
@@ -2561,49 +2641,6 @@ set timeoutlen=3000
 " Note that the issue is specific to Vim, not Nvim.
 " And it disappears below a certain threshold which can vary (≈ 300ms?).
 "}}}
-set ttimeoutlen=6
-" the lower the value, the less risk there is for keys manually typed to be
-" interpreted as a keycode
-"
-" E.g.:
-" When Vim receives `Esc` then `d`, it has to decide:
-"
-" does it mean “escape to normal mode“, then “hit the `d` operator“,
-" or does it mean `M-d` (delete the next word)?
-" If `d` came less than `&ttimeoutlen` ms after `Esc`, Vim will assume it's
-" the keycode for `M-d`. Otherwise, it will think we've just manually hit
-" `Esc` then `d`.
-
-
-" Si on a créé un mapping qui à la séquence de touches (keycodes) a et b,
-" associe une action, qd on appuiera sur a, Vim attendra un certain temps pour
-" nous laisser taper b. Au-delà si l'option 'timeout' est activée, Vim
-" exécutera l'action associée à la touche a.
-" Cette durée est définie par l'option 'timeoutlen' qui par défaut vaut 1000.
-"
-" De la même façon, les touches de contrôle produisent souvent une séquence
-" d'échappement / de keycodes.
-" Pex, F1 produit escape + O + P, on peut vérifier via la commande shell: $ xxd p
-"
-" Ainsi quand on tape sur escape puis sur O, Vim attend un certain temps avant
-" d'ouvrir une nouvelle ligne au-dessus de l'actuelle, pour laisser le temps
-" au keycode associé à P d'arriver.
-"
-" Cette durée est définie par l'option 'ttimeoutlen' qui par défaut vaut -1,
-" ce qui signifie qu'elle prend la même valeur que 'timeoutlen', à savoir 1000.
-"
-" Cette valeur pose pb car elle introduit un délai d'une seconde quand on
-" appuie sur escape puis O. Pour résoudre ce pb, on configure 'timeoutlen' à
-" 3000 (3s), pour se laisser du temps quand on tape nos mappings, et on
-" configure 'ttimeoutlen' à 100 pour raccourcir le délai après un escape + O.
-"
-" Ça ne devrait pas poser de pb puisqu'aucun de nos mappings ne commence
-" par cette séquence de keycodes, par contre il faudra faire attention.
-" Dans une session Vim qui tourne sur une machine distante, le lag ou la charge
-" de la machine pourrait nous empêcher d'utiliser correctement des touches de
-" contrôle (F1, F2, flèches …).
-" En effet, 100ms pourrait s'avérer insuffisant pour que l'un des keycodes qui
-" compose la séquence arrive à temps.
 
 " ttymouse {{{2
 
@@ -3095,6 +3132,31 @@ fu! s:move_by_sentence(is_fwd) abort
     return ''
 endfu
 
+" M-h  M-l {{{3
+
+" Ignore a `M-h` or `M-l` keypress in insert mode or command-line mode.
+" In normal or visual mode, make tmux focus the next/previous window.
+if !has('nvim')
+    " Warning: These lines prevent you from inserting `è` and `ì`.
+    exe "set <m-h>=\eh"
+    exe "set <m-l>=\el"
+endif
+
+noremap! <expr> <m-h> <sid>m_hl('h')
+noremap! <expr> <m-l> <sid>m_hl('l')
+nno <expr> <m-h> <sid>m_hl('h')
+nno <expr> <m-l> <sid>m_hl('l')
+xno <expr> <m-h> <sid>m_hl('h')
+xno <expr> <m-l> <sid>m_hl('l')
+
+fu! s:m_hl(seq) abort
+    if mode() =~# '^[ic]$'
+        return ''
+    endif
+    call system('tmux '..(a:seq is# 'l' ? 'next' : 'prev'))
+    return ''
+endfu
+
 " \ {{{3
 
 ino  <silent>  <bslash>  <c-r>=<sid>indent_before_backslash()<cr>
@@ -3204,7 +3266,6 @@ nno  <silent>  <space>an  :<c-u>arglocal %<cr>
 " before the cursor.
 
 fu! s:fuzzy_mappings() abort
-
     let fuzzy_mappings = {
                          \ 'bt': 'BTags',
                          \ 'f' : 'Files',
@@ -3225,7 +3286,39 @@ fu! s:fuzzy_mappings() abort
         exe 'nno  <space>f'.l:char.'  :<c-u>Fz'.cmd.'<cr>'
     endfor
 
-    nno  <silent>  <space>fF  :<c-u>FZF $HOME<cr>
+    nno <silent> <space>fF :<c-u>FZF $HOME<cr>
+
+    augroup remove_gvfs_from_oldfiles
+        au!
+        " Rationale:{{{
+        "
+        " If you've opened ftp files with Vim:
+        "
+        "     $ gvim ftp://ftp.vim.org/pub/vim/patches/8.0/README
+        "
+        " `v:oldfiles` will contain filepaths such as:
+        "
+        "     /run/user/1000/gvfs/ftp:host=ftp.vim.org/pub/vim/patches/8.0/README
+        "
+        " Those kind of paths make `:FzHistory` slow to start.
+        " This is because the command  calls `filereadable()`, and the latter is
+        " slow on such a path:
+        "
+        "     :Time echo filereadable('~/.bashrc')
+        "     :Time echo filereadable('/run/user/1000/gvfs/ftp:host=ftp.vim.org/pub/vim/patches/8.0/README')
+        "
+        " The first command is instantaneous.
+        " The second command takes more than a tenth of a second.
+        "
+        " And the  effect is cumulative: the  more paths like the  previous one,
+        " the slower `:FzHistory` opens its fzf window.
+        "
+        " The value of `v:oldfiles` is built from the viminfo file.
+        " The latter is read after our vimrc, so we can't clean `v:oldfiles` right now.
+        " We need to wait for Vim to have fully started up.
+        "}}}
+        au VimEnter * call filter(v:oldfiles, {_,v -> v !~# '/gvfs/'})
+    augroup END
 endfu
 
 call s:fuzzy_mappings()
@@ -3708,6 +3801,14 @@ fu! s:try_fugitive_cmd(cmd) abort
 
     exe a:cmd
     if a:cmd is# 'Gstatus'
+        " When we press `q` in the window opened by `:Gstatus`, fugitive gives this warning message:{{{
+        "
+        "     :Gstatus q is deprecated in favor of gq or the built-in <C-W>q
+        "
+        " It's annoying and distracting.
+        "}}}
+        nno <buffer><nowait><silent> q <c-w>q
+
         sil! keepj keepp 1;/^# \%(Changes\|Untracked files\)/
     endif
 endfu
@@ -4244,9 +4345,9 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
 " A terminal emulator gives its name to the programs through the shell
 " environment variable $TERM.
 
-" When Vim runs inside a terminal whose name begins with 'xterm' (xterm,
-" xterm-256color), it automatically sets up a few keys including the modified
-" arrow keys (S-Left, S-Right, C-Up, C-Down …).
+" When  Vim runs  inside  a  terminal whose  name  begins  with 'xterm'  (xterm,
+" xterm-256color), it  automatically sets up  a few keys including  the modified
+" arrow keys (S-Left, S-Right, C-Up, C-Down ...).
 "
 " However, if the name  of the terminal begins with 'screen'  or 'tmux', it does
 " NOT set up those keys.
@@ -4362,8 +4463,8 @@ fu! s:join_tab_page(cnt) abort
     " If the mapping received  a count, move the current window  to the tab page
     " whose number matches this count.
     let bufnr = bufnr('%')
-    " we use our custom `SPC q` mapping to be able to undo
-    norm 1 q
+    " we use our `lg#window#quit()` function to be able to undo
+    call lg#window#quit()
     if cnt < tabpagenr()
         exe 'tabnext '.min([cnt, tabpagenr('$')])
     else
@@ -4740,7 +4841,7 @@ nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
                    \ <bar>set opfunc=myfuncs#op_replace_without_yank
                    \ <bar>exe 'norm! '.v:count1.'g@_'<cr>
 
-" j  k  ^  0  $       gj  gk  … {{{3
+" j  k  ^  0  $       gj  gk  ... {{{3
 
 " By default, we can't move across several lines of a long wrapped line with
 " `j` and `k`.
@@ -4905,22 +5006,21 @@ xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 " Objects {{{2
 " i% {{{3
 
-" OLD CODE:{{{
+" Old Code:{{{
 "
-"                    ┌ move cursor to next surrounding symbols
-"               ┌────┤
-"               │    │          ┌ do NOT add a bang:
-"               │    │          │ it would break the mapping for custom text-object like `i“`
-"               │    │          │
 " xno <silent> i% <esc>%:exe 'norm vi'.matchstr(getline('.'), '\%'.col('.').'c.')<cr>
-"                                    │
-"                                    └ surrounding symbol
-"
-"                                      We could also use:
-"
-"                                              getline('.')[col('.')-1]<cr>
-"
-"                                      … but it would not work for multi-byte characters.
+"                 ├────┘          │    │
+"                 │               │    └ surrounding symbol
+"                 │               │      We could also use:
+"                 │               │
+"                 │               │              getline('.')[col('.')-1]<cr>
+"                 │               │
+"                 │               │      ... but it would not work for multi-byte characters.
+"                 │               │
+"                 │               └ do NOT add a bang:
+"                 │                 it would break the mapping for custom text-object like `i“`
+"                 │
+"                 └ move cursor to next surrounding symbols
 "}}}
 " Why don't we use the old code anymore?{{{
 "
@@ -5034,9 +5134,9 @@ ono  <silent>  al  _
 "     +y_
 "     +y3_
 "
-" … add current line to plus register (`+y` = custom operator, incremental yanking).
-" Besides, an operator should be able to operate on the current line when it's
-" repeated (`cc`, `yy`, `dd`…).
+" ... add current line to plus register (`+y` = custom operator, incremental yanking).
+" Besides, an operator should  be able to operate on the  current line when it's
+" repeated (`cc`, `yy`, `dd`...).
 " But still, it brings consistency/symmetry.
 
 " in {{{3
@@ -6078,8 +6178,8 @@ endfu
 " we assigned a value to a variable whose name is the same as an internal
 " variable.
 " It could help us avoid conflicts.
-" Whenever the command finds such variable (`key`, `char`, `lnum`, …), we
-" should put it in an explicit scope (s:, l:, …).
+" Whenever  the command  finds such  variable (`key`,  `char`, `lnum`,  ...), we
+" should put it in an explicit scope (`s:`, `l:`, ...).
 "
 " Update:
 " In reality,  it seems that  Vim puts a variable  inside a function  (and whose
@@ -7106,7 +7206,7 @@ endfu
 "    - delete
 "    - sort
 "
-" … every N lines.
+" ... every N lines.
 " Write a command implementing each solution.
 " Group the interface of the commands, with `:ReverseEveryNLines`.
 " Try to infer some general principles underlying the solutions of this family
@@ -7161,7 +7261,7 @@ endfu
 " navigation.
 " Trop d'incohérences.
 " Navigation entre onglets  Vim, viewports Vim, panes Tmux,  fenêtres Tmux, Tmux
-" <-> Vim …
+" <-> Vim ...
 " C'est un gros bordel:
 "
 "     AltGr-hl, C-hjkl, pfx-hjkl, M-hl
@@ -7259,8 +7359,8 @@ endfu
 "
 "     :h /\@>
 "
-" … called “match without retry“ in `:h perl-patterns`, and “possessive matching“
-" in perldoc.perl.org.
+" ...  called  “match without  retry“  in  `:h perl-patterns`,  and  “possessive
+" matching“ in perldoc.perl.org.
 " it can be used to optimize a regex, or it can be necessary to describe the
 " text we're interested in.
 "
@@ -7277,7 +7377,7 @@ endfu
 " http://perldoc.perl.org/perlre.html#special-backtracking-control-verbs
 "
 " basically, it's a type of quantifier.
-" there are greedy quantifiers (`*`, `+`, …), non-greedy or lazy (`{-}`), and
+" there are greedy quantifiers (`*`, `+`,  ...), non-greedy or lazy (`{-}`), and
 " possessive (`@>`).
 " the (non-)greedy ones control how to repeat a token, the possessive one
 " prevents backtracking (`>` = move forward no matter what).
@@ -7564,7 +7664,7 @@ endfu
 " Don't use `echoerr` in the catch clause. it would raise an error (again).
 " use `echo` (+ echohl if needed).
 " PS: i've tried this solution but the message gets erased.
-" To continue…
+" To continue...
 "
 " 29 -
 " Use `:[c|l]bottom` in your jobs plugins (if they populate a qfl asynchronously)
@@ -7744,7 +7844,7 @@ endfu
 " which would give us a warning when we forget to undo a
 " mapping/abbreviation/command/autocmd/variable
 "
-" or when we undo a non-existing …
+" or when we undo a non-existing ...
 "
 " 47 -
 " normalize underscore/hyphen in plug mappings, and function names in shell init files
@@ -7886,7 +7986,7 @@ endfu
 "
 " 59 -
 " implement a search ring, and install mappings to cycle through it
-" useful to search for an old pattern without having to do `/ up …`
+" useful to search for an old pattern without having to do `/ up ...`
 " (; and ,  would be more comfy)
 "
 " 60 -
@@ -8097,6 +8197,8 @@ endfu
 "
 "      ... but how do you save it?
 "
+"    - v:echospace
+"
 " 65 -
 " prevent vim-session from checking swap files.
 " annoying when a session crashed, and we can't restore a session.
@@ -8259,8 +8361,7 @@ endfu
 "
 " 73 -
 " document `$ paste` as a filter:
-"
-"         https://vi.stackexchange.com/a/16096/17270
+" https://vi.stackexchange.com/a/16096/17270
 "
 " also, make some cleaning in our mappings:
 "
@@ -8666,14 +8767,14 @@ endfu
 "
 " 100 -
 " Search for `g@` everywhere.
-" Do you need to save and restore the unnamed register, and the options every time?
-" Should  we refactor the snippets  so that it  allows us to remove  those parts
-" (including the ex command)?
 "
 " Should we use `:keepj` in all our operators?
 " See `myfuncs#op_replace_without_yank()`.
 "
-" Should we use `:keepj` in all our operators?
+" Answer: I think so.
+" It doesn't seem useful for the jumplist, but it is for the changelist.
+"
+" ---
 "
 " For  an operator  which can  be prefixed  by a  register, should  we save  and
 " restore the register?
@@ -8681,16 +8782,29 @@ endfu
 " restore the expression register.
 " See `myfuncs#op_replace_without_yank()`.
 "
+" ---
+"
 " Have you saved and restored the visual marks?
 "
-" Do you need to save and restore v:register every time?
-" Do you need to save and restore v:count every time?
+" ---
+"
+" Do you need to save and restore `v:register` every time?
+"
+" ---
+"
+" Do you need to save and restore `v:count` every time?
+"
+" ---
 "
 " Have you used `:s`, while you should have used `setline()`?
+"
+" ---
 "
 " You should simplify the mappings, so that we call only one function,
 " before pressing `g@`.
 " The latter should save some info if needed, and set 'opfunc'.
+"
+" ---
 "
 " The repetition of an operation in visual mode is not consistent
 " with what Vim does:
@@ -8700,11 +8814,31 @@ endfu
 "    - press .
 "
 " Vim has recomputed a new visual selection with the same geometry
-" than the previous one.
+" as the previous one.
 " That's not what your operators do.
-" Study how `vim-operator-user` solves this issue (I think it solves
-" the issue by pressing `gvg@`; that is `g@` should be pressed from
-" visual mode for the repetition to work as expected).
+" Study how  `vim-operator-user` solves this  issue (I think it  presses `gvg@`;
+" IOW, `g@`  should be pressed  from visual mode for  the repetition to  work as
+" expected).
+"
+" ---
+"
+" Our snippet  implementing an operator  is too long;  move it inside  a library
+" function.
+" The latter would contain the boilerplate code:
+"
+"     fu! lg#my_opfunc(myfunc, type, ...) abort
+"         let cb_save  = &cb
+"         ...
+"     endfu
+"
+" and it would expect the name of a custom function:
+"
+"     fu! lg#my_opfunc(myfunc, type, ...) abort
+"                      ^^^^^^
+"
+" The latter would be defined in the plugin where you need to implement your operator.
+" It would contain the logic specific to the operator (i.e. not the boilerplate code).
+" The library function would use this name to call `myfunc` (with `call()`).
 "
 " 101 -
 " all your commands should print a usage message when executed without arguments
@@ -9024,9 +9158,6 @@ endfu
 "                    ✔
 "
 " 121 -
-" Read: https://vimways.org/2018/vims-social-life/
-"
-" 122 -
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
@@ -9035,7 +9166,7 @@ endfu
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
 "
-" 123 -
+" 122 -
 " We don't version control our pdfs in `~/wiki`.
 " Suppose one of our  notes has a link to a local pdf,  and we restore our notes
 " on a new machine; the link will be broken.
@@ -9044,7 +9175,7 @@ endfu
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
 "
-" 124 -
+" 123 -
 " Study this (Neovim):
 "     :help nvim_buf_set_virtual_text()
 "
@@ -9053,27 +9184,27 @@ endfu
 "
 " Source: https://vi.stackexchange.com/a/18729/17449
 "
-" 125 -
+" 124 -
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
 "
-" 126 -
+" 125 -
 " Maybe  make `= SPC` comment  the added lines (above  and below) if we're  on a
 " commented line.
 "
-" 127 -
+" 126 -
 " The  `C-n` and  `C-p`  buffer-local  mappings installed  by  fugitive in  some
 " buffers, conflict with our global mappings to cycle through tabpages.
 " We're often distracted, because we wonder why our mappings are not working.
 "
-" 128 -
+" 127 -
 " Watch these videos about using Vim as a diff tool, and as a merge tool:
 " https://www.youtube.com/watch?v=zEah_HDpHzc
 " https://www.youtube.com/watch?v=VxpCgQyUXlI
 "
-" 129 - Read this: https://github.com/neovim/neovim/wiki/FAQ
+" 128 - Read this: https://github.com/neovim/neovim/wiki/FAQ
 "
-" 130 -
+" 129 -
 "
 "     $ vim -d ~/.bashrc ~/.zshrc
 "
@@ -9096,7 +9227,7 @@ endfu
 "
 " So, the statuslines are not reset to be quiet.
 "
-" 131 -
+" 130 -
 " Refactor your `]q` &friends mapping, so that they call `:[cl]above` and `:[cl]below`.
 " But do that only when Nvim has merged the Vim patch 8.1.1256.
 "
@@ -9109,73 +9240,10 @@ endfu
 " arbitrary qfl in the stack, via a count.
 " Once the patch has been ported to Nvim, use this command and get rid of `:CC`, `:LL`.
 "
-" 132 -
-" In `~/.local/share/applications/gvim.desktop`, we write this:
-"
-"     TryExec=gvim -f
-"                  ^^
-"
-" We need `-f` to start gVim from rofi.
-" But why can't we start gVim from the whisker menu.
-" Update: We've used libremenu to edit the menu.
-" Now we have 2 gVim entries. The second one works, but not the first one.
-" And I don't know how to remove it.
-" I've searched for “vim” in the search field, and I've ticked “Hide from menus”
-" for each result; it's still there in the menu.
-" I think the menu is built dynamically from the .desktop files;
-" so try to move all `gvim.desktop` files (`$ mv gvim.desktop{,.bak}`),
-" and see whether it removes the broken gvim entry from the menu.
-" You can also temporarily purge the whisker package:
-"
-"     $ app xfce4-whiskermenu-plugin
-"
-" Btw, we don't need `-f` for the whisker menu. Why?
-"
-" Also, no other desktop file uses `-f` in `TryExec`:
-"
-"     $ grep TryExec /usr/local/share/applications/nvim.desktop
-"     TryExec=nvim~
-"
-"     $ grep TryExec /usr/local/share/applications/gvim.desktop
-"     TryExec=gvim~
-"
-" Besides, when we strace  `$ xdg-open` to open a ftp link, we  can see that the
-" system tries to find the binary `/usr/local/bin/gvim -f` which doesn't exist.
-" It finally finds gVim thanks to `/usr/local/share/applications/gvim.desktop`
-" (which is not our desktop file).
-" And if we temporarily add `-f` in  the latter desktop file, `$ xdg-open` fails
-" to open the ftp link with gvim; it falls back on mousepad.
-"
-" Is it an error to use `-f`?
-"
-" 133 -
-"
-"     ✔
-"     $ xdg-open ftp://ftp.vim.org/pub/vim/patches/8.0/README
-"
-"     ✘
-"     $ gvim [-f] ftp://ftp.vim.org/pub/vim/patches/8.0/README
-"
-" How does `$ xdg-open` run gVim to succeed in opening the link?
-" Have a look at strace.
-"
-"     $ strace -f -o ./log2 -e trace=execve xdg-open ftp://ftp.vim.org/pub/vim/patches/8.0/README
-"     $ vim log2
-"
-" Btw: I can see that the system did pass `-f` to gVim!
-" Where does it come from?
-"
-" Also: why is it so slow?
-" Update: It's fast if you use `$ gvim` instead of `$ xdg-open`, *and*
-" you provide the username 'anonymous' and any non-empty password.
-"
-" Also: why does strace needs to be killed with C-c?
-" It doesn't if we disable our vimrc (:finish at the top).
-"
-" 134 -
+" 131 -
 " Assimilate the `Yank()` function, and the `~/bin/yank` script.
 "
-" 135 -
+" 132 -
 " Document the fact  that you need to put  `<esc>` at the start of the  rhs of a
 " `:ono` mapping if it presses `v:operator`.
 "
@@ -9213,14 +9281,14 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 136 -
+" 133 -
 " We have too many comments in this file about the bracketed paste mode.
 " Plus two fixmes.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
 " I don't  care about  the fixmes  right now,  because I  don't use  the builtin
 " terminal, and because I never paste from insert mode.
 "
-" 137 -
+" 134 -
 " Diff 2 files (cod).
 " Close both windows by pressing `SPC q`.
 " The syntax highlighting has not been restored.
@@ -9235,82 +9303,13 @@ endfu
 " Also, maybe you should colorize the  `[Diff]` indicator, so that it stands out
 " better. Right now, I barely notice it.
 "
-" 138 -
-"
-"     $ ./build/bin/nvim -Nu NONE +'cno <c-a> <home>' +'let @+ = "\r"'
-"     :
-"     C-S-v
-"     :echo
-"     C-a
-"
-" I would expect the cursor to jump to the start of the line.
-" Instead, it inserts all completions of `echo`:
-"
-"     :echo echoerr echohl echomsg echon
-"
-" Nvim uses the default `C-a` which suggests all possible completions.
-" This is because the 'paste' option has been set.
-"
-" ---
-"
-" Is it a known issue?
-"
-" It definitely looks similar to the issue #7212:
-" https://github.com/neovim/neovim/issues/7212
-"
-" which has been closed and merged with the issue #7066:
-" https://github.com/neovim/neovim/issues/7066
-"
-" The latter is the reverse issue.
-" Basically, the devs  consider #7212 and #7066 as two  opposite issues with the
-" same root.
-"
-" Both issues should be addressed by the PR #4448:
-" https://github.com/neovim/neovim/pull/4448
-"
-" ---
-"
-" I tried this, but it doesn't work:
-"
-"     augroup fix_bug
-"         au!
-"         au CmdlineLeave : if has('nvim') && getcmdline() =~# '\r$'
-"             \ | call timer_start(0, {-> execute('set nopaste')})
-"             \ | endif
-"     augroup END
-"
-" I don't know why the autocmd fails, but it's not because of a plugin.
-" It still fails with no config (`$ nvim -Nu /tmp/vimrc`).
-"
-" Also, if you replace `\r` in the regex with `.`, the autocmd works.
-" So, there's definitely sth weird going on in the command which is run.
-"
-" Update:
-" I've included this in the autocmd:
-"
-"     \ | call writefile([getcmdline()], '/tmp/log', 'ab')
-"
-" and run Nvim with no config.
-" After reading  the log file,  it seems the command  which is written  has been
-" stripped from the trailing carriage return.
-" I think the  latter is consumed by  Nvim, and interpreted as the  Enter key we
-" press to validate a command.
-"
-" In  the meantime,  maybe we  should  simply reset  'paste' whenever  we run  a
-" command in Nvim. But is it safe? Could there be unexpected side effects?
-"
-" Fun fact:
-" If you repaste the command, the option is reset.
-" So,  pasting the  command does  not make Nvim  set the  option; it  makes Nvim
-" toggle the option.
-"
-" 139 -
+" 135 -
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
 " Maybe we should ask for  some built-in functions (`getsynlist()`?, `gethi()`?)
 " which would give this info in a nice dictionary.
 "
-" 140 -
+" 136 -
 " To resize a window we press `z c-h` then `;` or `,`.
 " Compared to tmux, it's confusing.
 " In tmux, we press pfx + `c-h`, then we can press `c-h`, `c-l`, `c-j`, `c-k` repeatedly.
@@ -9319,7 +9318,7 @@ endfu
 " To do so,  you'll need to create  a submode, and maybe  tweak `vim-submode` so
 " that we quit a submode automatically after 1 or 2 seconds.
 "
-" 141 -
+" 137 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -9335,15 +9334,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 142 -
-"
-" Revisit the gitcommit plugin.
-" We  should  not  save  the  index  of   the  message  to  use  to  populate  a
-" gitcommit  buffer. This is  unreliable  if  we remove  some  message files  in
-" `~/.vim/tmp/commit_messages/`.
-" Instead, we should save the name of the file, and infer the index from the name.
-"
-" 143 -
+" 138 -
 "
 " Find a way to prevent `$ par` from breaking a codespan on multiple lines.
 "
@@ -9351,13 +9342,23 @@ endfu
 " codespan with  C-b; this should  prevent `$ par`  from breaking a  codespan on
 " multiple lines. Then after the formatting, you would replace C-b with spaces.
 "
-" 144 -
+" 139 -
 "
 " Improve  the `-$`  mapping  to  support commented  lines  and commands  inside
 " codespans.   Also,  only process  a  shell  command in  a  codeblock  or in  a
 " codespan.
 "
 " Update: We really need a library function to get a comment leader.
+"
+"     if &ft is# 'markdown'
+"         return ''
+"     else
+"         let cml = matchstr(&l:cms, '\S*\ze\s*%s')
+"         return '\V'..escape(cml, '\')..'\m'
+"     endif
+"
+" ---
+"
 " We  also need  a  library function  to  get  a commented  shell  command in  a
 " codeblock (and maybe in a codespan).
 " It should support continuation lines (see how we did it in vim-tmux for `|x`).
@@ -9370,73 +9371,6 @@ endfu
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
-"
-" 145 -
-"
-" Implement a refactoring command in:
-"
-"     ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
-"
-" to replace `.` concatenation operator with `..`.
-"
-" Try this pattern:
-"
-"     \%(^\%('[^']*'\|[^']\)*\)\@<=\%(^\%("[^"]*"\|[^"]\)*\)\@<=\%(^\s*".*\)\@<!\s*\.\@<!\.\.\@!\s*
-"
-" Broken down:
-"
-"     " a dot not followed or preceded by another dot
-"     \s*\.\@<!\.\.\@!\s*
-"
-"     " not on a commented line
-"     \%(^\s*".*\)\@<!
-"
-"     " outside a single-quoted string
-"     \%(^\%('[^']*'\|[^']\)*\)\@<=
-"
-"     " outside a double-quoted string
-"     \%(^\%("[^"]*"\|[^"]\)*\)\@<=
-"
-" This could give false positives:
-"
-"     echo '
-"     \ a . b
-"     \ '
-"
-" which is why you should use `:s` and pass it the `c` flag.
-" This could  also fail to  find some  dots because of  the part of  the pattern
-" which ignores dots inside strings:
-"
-"     echo 'a
-"     \ ' . 'b . c'
-"
-" But I think this kind of snippets are rare.
-" And I  prefer failing to double  some dots, rather than  wrongly doubling some
-" dots which I shouldn't  in a regex string for example  (could happen even with
-" the `c` flag of `:s` when there are many matches and you're tired).
-"
-" 146 -
-"
-" Write a minimal vimrc sourcing only the vim-man plugin.
-" Then:
-"
-"     $ export MANPAGER="vim -M +Man -"
-"     $ man ls
-"     q
-"     E169: Command too recursive~
-"
-" I think we should stop writing `norm 1 q`.
-" This seems to cause too many issues (this one and the one with the 't' flag of
-" `feedkeys()`).
-"
-"     :vim /\m\C\<norm 1\%( \|<space>\)q/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc
-"
-" 147 -
-"
-" You don't need an `:exe` to break fold markers in a Vimscript.
-" You can use `\%x7b` and `\%x7d`.
-"
-"     vim /'{{\|{{'\|'}}\|}}'/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc
 
 
 

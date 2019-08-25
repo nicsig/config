@@ -1,11 +1,11 @@
 # Warning: ANY script in this directory will be automatically sourced. Even if it's inside a subdirectory.
 
-        $ mkdir -p ~/.vim/after/plugin/foo/bar/ \
-          && echo 'let g:set_from_vim_after_plugin = 1' >>~/.vim/after/plugin/foo/bar/baz.vim
+    $ mkdir -p ~/.vim/after/plugin/foo/bar/ && \
+      echo 'let g:set_from_vim_after_plugin = 1' >>~/.vim/after/plugin/foo/bar/baz.vim
 
-        $ vim
-        :echo set_from_vim_after_plugin
-            → 1
+    $ vim
+    :echo set_from_vim_after_plugin
+    1~
 
 So, do NOT try to lazy-load anything from this directory.
 Use `autoload/` instead.
@@ -52,19 +52,19 @@ The only possible guard, is an ad-hoc one:
 
 ## Which template should I follow?
 
-           ┌ load the script only if it makes sense
-           │ (i.e. the plugin it configures has been loaded)
-           │
-           ├───────────────────┐
-        if !exists(g:loaded_...) || exists('g:no_after_plugin')
-            finish
-        endif
+       ┌ load the script only if it makes sense
+       │ (i.e. the plugin it configures has been loaded)
+       │
+       ├───────────────────┐
+    if !exists(g:loaded_...) || exists('g:no_after_plugin')
+        finish
+    endif
 
 Or:
 
-        if stridx(&rtp, 'vim-...') == -1 || exists('g:no_after_plugin')
-            finish
-        endif
+    if stridx(&rtp, 'vim-...') == -1 || exists('g:no_after_plugin')
+        finish
+    endif
 
 Note that the  name of the plugin  does not necessarily begin  with 'vim-', it's
 just a widely adopted convention.
@@ -80,17 +80,17 @@ The first time a script is sourced here, the plugin it configures will *already*
 have been sourced.
 So `g:loaded_...` will exist, and you won't be able to write this:
 
-        if exists('g:loaded_...')
-            finish
-        endif
+    if exists('g:loaded_...')
+        finish
+    endif
 
 It would *always* prevent your script from being sourced.
 
 OTOH, you can write this:
 
-        if !exists('g:loaded_...')
-            finish
-        endif
+    if !exists('g:loaded_...')
+        finish
+    endif
 
 But it serves another purpose.
 It prevents the script from being sourced,  if the plugin it configures has been

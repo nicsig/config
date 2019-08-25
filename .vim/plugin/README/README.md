@@ -1,11 +1,11 @@
-# Warning: ANY script in this directory will be automatically sourced. Even if it's inside a subdirectory.
+# Warning: ANY script in this directory will be automatically sourced.  Even if it's inside a subdirectory.
 
-        $ mkdir -p ~/.vim/plugin/foo/bar/ \
-          && echo 'let g:set_from_vim_plugin = 1' >>~/.vim/plugin/foo/bar/baz.vim
+    $ mkdir -p ~/.vim/plugin/foo/bar/ && \
+      echo 'let g:set_from_vim_plugin = 1' >>~/.vim/plugin/foo/bar/baz.vim
 
-        $ vim
-        :echo set_from_vim_plugin
-            → 1
+    $ vim
+    :echo set_from_vim_plugin
+    1~
 
 So, do NOT try to lazy-load anything from this directory.
 Use `autoload/` instead.
@@ -87,7 +87,7 @@ For example, if you have the scripts:
 
 Even though they have the same name, they will be both sourced.
 
-## Can I use `<unique>` if I install a mapping here?in one of the scripts in this directory?
+## Can I use `<unique>` if I install a mapping in one of the scripts in this directory?
 
 No.
 
@@ -101,6 +101,7 @@ directory of a user (you).
 You never use `<unique>` in your `vimrc`,  so be consistent and don't do it here
 either.
 
+---
 
 In `~/.vim/after/plugin/`, there's another reason not to use it:
 you want to have the last word on some mappings.

@@ -238,7 +238,16 @@ aptitude purge whoopsie update-notifier
 #                                              └ you can write several mime types
 #}}}
 xdg-mime default mpv.desktop video/mp4
-# Useful for starting gVim when we try to open a ftp link with `$ xdg-open`.
+# Useful for starting gVim when we try to open a ftp link with `$ xdg-open`:{{{
+#
+#     $ xdg-open ftp://ftp.vim.org/pub/vim/patches/8.0/README
+#
+# Although, for some reason, gVim takes ≈ 10s to load the buffer.
+#
+# Invoking `gVim` directly is faster:
+#
+#     $ gvim ftp://ftp.vim.org/pub/vim/patches/8.0/README
+#}}}
 xdg-mime default gvim.desktop application/octet-stream
 
 # Symlinks creation {{{1

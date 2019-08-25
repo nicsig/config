@@ -126,6 +126,8 @@ endfu
 "     - a hypertext link,  or a heading, sounds  like something more important
 "}}}
 
+noremap  <expr>  <silent><unique>  [`  lg#motion#regex#rhs('codespan', 0)
+noremap  <expr>  <silent><unique>  ]`  lg#motion#regex#rhs('codespan', 1)
 noremap  <expr>  <silent><unique>  [h  lg#motion#regex#rhs('path', 0)
 noremap  <expr>  <silent><unique>  ]h  lg#motion#regex#rhs('path', 1)
 noremap  <expr>  <silent><unique>  [r  lg#motion#regex#rhs('ref', 0)

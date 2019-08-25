@@ -1,3 +1,15 @@
+# TODO: Remove this alias once you've debugged tmux issue 1854.{{{
+#
+# https://github.com/tmux/tmux/issues/1854
+#
+# In the meantime, if you need to update tmux, follow this procedure:
+#
+# https://github.com/tmux/tmux/issues/1840#issuecomment-513273184
+#}}}
+if [[ -z "$TMUX" ]]; then
+  alias tmux='LD_LIBRARY_PATH=~/libeventbuild/lib ~/GitRepos/tmux/tmux new'
+fi
+
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
 #
@@ -2980,7 +2992,7 @@ alias qmv='\qmv --format=destination-only'
 
 # ranger {{{3
 
-alias fm='[[ -n "${TMUX}" ]] && [[ $(tmux display -p "#W") == "zsh" ]] && tmux rename-window fm; ranger'
+alias fm='[[ -n "${TMUX}" ]] && [[ $(\tmux display -p "#W") == "zsh" ]] && \tmux rename-window fm; ranger'
 
 # rg {{{3
 

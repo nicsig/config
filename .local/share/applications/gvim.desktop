@@ -1,124 +1,55 @@
 [Desktop Entry]
 Name=gVim
 GenericName=Text Editor
-GenericName[da]=Teksteditor
-GenericName[de]=Texteditor
-GenericName[eo]=Tekstoredaktilo
 GenericName[fr]=Éditeur de texte
-GenericName[pl]=Edytor tekstu
 Comment=Edit text files
-Comment[af]=Redigeer tekslêers
-Comment[am]=የጽሑፍ ፋይሎች ያስተካክሉ
-Comment[ar]=حرّر ملفات نصية
-Comment[az]=Mətn fayllarını redaktə edin
-Comment[be]=Рэдагаваньне тэкставых файлаў
-Comment[bg]=Редактиране на текстови файлове
-Comment[bn]=টেক্স্ট ফাইল এডিট করুন
-Comment[bs]=Izmijeni tekstualne datoteke
-Comment[ca]=Edita fitxers de text
-Comment[cs]=Úprava textových souborů
-Comment[cy]=Golygu ffeiliau testun
-Comment[da]=Rediger tekstfiler
-Comment[de]=Textdateien bearbeiten
-Comment[el]=Επεξεργασία αρχείων κειμένου
-Comment[en_CA]=Edit text files
-Comment[en_GB]=Edit text files
-Comment[eo]=Redakti tekstajn dosierojn
-Comment[es]=Edita archivos de texto
-Comment[et]=Redigeeri tekstifaile
-Comment[eu]=Editatu testu-fitxategiak
-Comment[fa]=ویرایش پرونده‌های متنی
-Comment[fi]=Muokkaa tekstitiedostoja
 Comment[fr]=Éditer des fichiers textes
-Comment[ga]=Eagar comhad Téacs
-Comment[gu]=લખાણ ફાઇલોમાં ફેરફાર કરો
-Comment[he]=ערוך קבצי טקסט
-Comment[hi]=पाठ फ़ाइलें संपादित करें
-Comment[hr]=Uređivanje tekstualne datoteke
-Comment[hu]=Szövegfájlok szerkesztése
-Comment[id]=Edit file teks
-Comment[it]=Modifica file di testo
-Comment[ja]=テキストファイルを編集します
-Comment[kn]=ಪಠ್ಯ ಕಡತಗಳನ್ನು ಸಂಪಾದಿಸು
-Comment[ko]=텍스트 파일을 편집합니다
-Comment[lt]=Redaguoti tekstines bylas
-Comment[lv]=Rediģēt teksta failus
-Comment[mk]=Уреди текстуални фајлови
-Comment[ml]=വാചക രചനകള് തിരുത്തുക
-Comment[mn]=Текст файл боловсруулах
-Comment[mr]=गद्य फाइल संपादित करा
-Comment[ms]=Edit fail teks
-Comment[nb]=Rediger tekstfiler
-Comment[ne]=पाठ फाइललाई संशोधन गर्नुहोस्
-Comment[nl]=Tekstbestanden bewerken
-Comment[nn]=Rediger tekstfiler
-Comment[no]=Rediger tekstfiler
-Comment[or]=ପାଠ୍ଯ ଫାଇଲଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ
-Comment[pa]=ਪਾਠ ਫਾਇਲਾਂ ਸੰਪਾਦਨ
-Comment[pl]=Edytuj pliki tekstowe
-Comment[pt]=Editar ficheiros de texto
-Comment[pt_BR]=Edite arquivos de texto
-Comment[ro]=Editare fişiere text
-Comment[ru]=Редактор текстовых файлов
-Comment[sk]=Úprava textových súborov
-Comment[sl]=Urejanje datotek z besedili
-Comment[sq]=Përpuno files teksti
-Comment[sr]=Измени текстуалне датотеке
-Comment[sr@Latn]=Izmeni tekstualne datoteke
-Comment[sv]=Redigera textfiler
-Comment[ta]=உரை கோப்புகளை தொகுக்கவும்
-Comment[th]=แก้ไขแฟ้มข้อความ
-Comment[tk]=Metin faýllary editle
-Comment[tr]=Metin dosyalarını düzenle
-Comment[uk]=Редактор текстових файлів
-Comment[vi]=Soạn thảo tập tin văn bản
-Comment[wa]=Asspougnî des fitchîs tecses
-Comment[zh_CN]=编辑文本文件
-Comment[zh_TW]=編輯文字檔
-# Why do we have 2 different commands?{{{
+# What's the purpose of `TryExec`?{{{
 #
-# The first command is used when we start gVim from a menu like rofi.
-# The second  command is  used when  we start  gVim from  a file  manager, after
-# selection one or several files.
+# It's used by the system to determine whether the program is actually installed.
 #
-# At least that's what seems to happen.
+# > Path to  an executable  file on  disk used  to determine  if the  program is
+# > actually installed. If the path is not  an absolute path, the file is looked
+# > up in the $PATH environment variable. If the file is not present or if it is
+# > not  executable,  the entry  may  be  ignored (not  be  used  in menus,  for
+# > example).
 #
-# See the specifications of a desktop file for more info:
-# https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
+# See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
 #
-# See also how the default Nvim desktop file is written:
+# ---
 #
-#     $ grep -i 'exec' /usr/local/share/applications/nvim.desktop
-#     TryExec=nvim~
-#     Exec=nvim %F~
+# Do *not* pass any argument to `gvim` here (e.g. `-f`).
+# As an example, the system would fail to find a binary named `gvim -f`.
 #}}}
-# Why must I use `-f`? {{{
+TryExec=gvim
+# What's the purpose of `Exec`?{{{
 #
-# Without, you couldn't run gVim from a menu like rofi.
+# It's the command which will actually be run if the system did find the program
+# mentioned in `TryExec`.
+#}}}
+#   How is it defined in the default gVim desktop file?{{{
 #
-# It's also used in the default `/usr/local/share/applications/gvim.desktop`.
-# Here's what the helps says at `:h -f`:
+#     $ grep -i 'exec' /usr/local/share/applications/gvim.desktop
+#     TryExec=gvim~
+#     Exec=gvim -f %F~
+#
+# Here's how `-f` is documented at `:h -f`:
 #
 # > GUI: Do not  disconnect from the  program that  started Vim. 'f'  stands for
 # > "foreground".  If omitted, the GUI forks a new process and exits the current
 # > one. "-f" should  be used when gvim  is started by a program  that will wait
 # > for the edit session to finish (e.g., mail or readnews).
+#}}}
+# Do *not* use `--remote-tab-silent`!{{{
+#
+#     Exec=gvim --remote-tab-silent -f %F
+#     # gVim opens a file named `-f`
+#
+#     Exec=gvim -f --remote-tab-silent %F
+#     Exec=gvim -f %F --remote-tab-silent
+#     # gVim is not started
 # }}}
-TryExec=gvim -f
-# What does `--remote-tab-silent`?{{{
-#
-# `tab` makes gVim use one tabpage per selected file.
-#
-# `remote` makes  gVim try to  open the file(s) in  a running server  if there's
-# one.
-#
-# `silent` prevents gVim from complaining if no server is running:
-#
-#     E247: no registered server named "GVIM"~
-#
-# A local gVim process will be started.
-# }}}
-Exec=gvim -f --remote-tab-silent %F
+Exec=gvim -f %F
 Terminal=false
 Type=Application
 Keywords=Text;editor;

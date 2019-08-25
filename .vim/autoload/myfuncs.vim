@@ -262,7 +262,7 @@ fu! myfuncs#block_select_box() abort "{{{1
         " if we're on the first line of the box:
         "         __________
         "                  ^
-        " … then `bhj` should position us on the first `|` character of the box
+        " ... then `bhj` should position us on the first `|` character of the box
         "         __________
         "       >|
         norm! bhj
@@ -475,7 +475,7 @@ fu! s:box_create_separations() abort
     "
     "     |    |    |    |
     "
-    " … useful to make our table more readable.
+    " ... useful to make our table more readable.
     norm! '{++yyp
     keepj keepp sil! s/[^│┼]/ /g
 
@@ -487,7 +487,7 @@ fu! s:box_create_separations() abort
     "
     "     ├────┼────┼────┤
     "
-    " … and store it inside `x` register.
+    " ... and store it inside `x` register.
     " So that we can paste it wherever we want.
     let @x = getline(line("'{")+1)
     let @x = substitute(@x, '\S', '├', '')
@@ -572,13 +572,13 @@ fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
             " The problem seems to come from :lvim and the g flag.
             "
             " MWE:    :lvim /\v%1l%2v/g %
-            " … adds 2 duplicate entries in the location list instead of one.
+            " ... adds 2 duplicate entries in the location list instead of one.
             "
             "               :lvim /\v%1l%2v|%1l%3v/g %
-            " … adds 2 duplicate entries in the location list, 3 in total instead of two.
+            " ... adds 2 duplicate entries in the location list, 3 in total instead of two.
             "
             "               :lvim /\v%1l%2v|%1l%4v/g %
-            " … adds 2 couple of duplicate entries in the location list, 4 in total instead of two.
+            " ... adds 2 couple of duplicate entries in the location list, 4 in total instead of two.
             " It seems each time a `%{digit}v` anchor matches the beginning of a group
             " of consecutive characters, it adds 2 duplicate entries instead of one.
 
@@ -935,13 +935,13 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             " When you have a command whose arguments can contain special characters,
             " and you want to protect them from:
             "
-            "    - Vim       use `fnameescape(…)`
-            "    - the shell use `shellescape(…)`
-            "    - both      use `shellescape(…, 1)`
-            "                                   │
-            "                                   └─ only needed after a `:!` command; not in `system(...)`
-            "                                      `:!` is the only command to remove the backslashes
-            "                                      added by the 2nd non-nul argument
+            "    - Vim       use `fnameescape(...)`
+            "    - the shell use `shellescape(...)`
+            "    - both      use `shellescape(..., 1)`
+            "                                     │
+            "                                     └ only needed after a `:!` command; not in `system(...)`
+            "                                       `:!` is the only command to remove the backslashes
+            "                                       added by the 2nd non-nul argument
             "
             "                             MWE:
             "                             :sp /tmp/foo\%bar
@@ -1043,23 +1043,18 @@ fu! myfuncs#op_replace_without_yank(type) abort
         " indentation.
 
         if a:type is# 'line' || replace_current_line
-            " TODO: Should we use `:keepj` in all our operators?
             exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
 
         elseif a:type is# 'block'
             exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
 
         elseif a:type is# 'char'
-            " DWIM:
-            "       DWIM = Do What I Mean.
+            " If  pasting linewise  contents in  a *characterwise*  motion, trim
+            " surrounding whitespace from the content to be pasted.
             "
-            "       If pasting linewise contents in a _characterwise_ motion, trim
-            "       surrounding whitespace from the content to be pasted.
-            "
-            "       NOT the trailing whitespace on each line. JUST the leading
-            "       whitespace of the first line, and the ending whitespace of the
-            "       last.
-
+            " *Not* the trailing whitespace on each line.
+            " *Just* the  leading whitespace of  the first line, and  the ending
+            " whitespace of the last.
             if replace_reg_type is# 'V'
                 call setreg(s:replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
             endif
@@ -1072,14 +1067,6 @@ fu! myfuncs#op_replace_without_yank(type) abort
     finally
         let &cb  = cb_save
         let &sel = sel_save
-        " Now, the unnamed register contains the old text over which we pasted the
-        " new text.
-        " We don't want that, we want it to contain its original contents.
-        " Luckily, we saved at the beginning of the function.
-        " We restore it.
-        "
-        " We do the same for the replacement register, because we may have trimmed it
-        " in the process (type is# 'char' && replace_reg_type is# 'V').
         call lg#reg#restore(['"', s:replace_reg_name])
         call setpos("'<", visual_marks_save[0])
         call setpos("'>", visual_marks_save[1])
@@ -1147,7 +1134,7 @@ fu! myfuncs#plugin_install(url) abort "{{{1
     let plugin_on_current_line = ''
 
     while to_install >? plugin_on_current_line && search('call plug#end()', 'nW')
-        " test if there's still another 'Plug …' line afterwards, AND move the
+        " test if there's still another 'Plug ...' line afterwards, AND move the
         " cursor there, if there's one
         if !search('\v^\s*"?\s*Plug ''.{-}/.{-}/?''', 'W')
             break
@@ -1330,7 +1317,7 @@ fu! s:search_todo_text(dict) abort
         "
         "     ^\s*$
         "
-        " … and which doesn't contain only the comment character:
+        " ... and which doesn't contain only the comment character:
         "
         "     ^\s*#\s*$    (example in a bash buffer)
         let pat = '^\s*\C\V'.escape(get(split(getbufvar(bufnr, '&cms', ''),
@@ -1601,7 +1588,7 @@ fu! myfuncs#unicode_toggle(line1, line2) abort
 
     call cursor(a:line1, 1)
     " replace  '\u0041'  with  'A'
-    " or       '…'       with  '\u2026'
+    " or       '...'     with  '\u2026'
     "
     " `char2nr(submatch(0))` =
     "         decimal  code point of a character who  is not in the extended ascii table.
