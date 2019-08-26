@@ -1,10 +1,5 @@
 let b:did_ftplugin = 1
 
-" To avoid issue #4862
-" https://github.com/vim/vim/issues/4862
-" TODO: Has been fixed. Wait for the patch to be merged in Neovim, then remove the line.
-setl cole=1
-
 " to be able to make a search from several Vim instances
 setl noswf
 
@@ -53,7 +48,7 @@ nmap <buffer><nowait><silent>  ZZ    <cr>
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
-    \ | setl bh< bl< cole< cul< swf< wrap<
+    \ | setl bh< bl< cul< swf< wrap<
     \ | unlet! b:url
     \ | exe 'au! my_websearch * <buffer>'
     \ | exe 'nunmap <buffer> q'

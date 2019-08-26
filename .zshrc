@@ -7,7 +7,7 @@
 # https://github.com/tmux/tmux/issues/1840#issuecomment-513273184
 #}}}
 if [[ -z "$TMUX" ]]; then
-  alias tmux='LD_LIBRARY_PATH=~/libeventbuild/lib ~/GitRepos/tmux/tmux new'
+  alias tmux='LD_LIBRARY_PATH=~/libeventbuild/lib ~/GitRepos/tmux/tmux -vv'
 fi
 
 # Use emacs keybindings even if our EDITOR is set to vi.

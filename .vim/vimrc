@@ -475,7 +475,7 @@ let $MANSECT = $MYMANSECT
 
 " TODO: We should probably remove this assignment.{{{
 "
-" To create RELIABLE links inside a wiki, we should use tags:
+" To create *reliable* links inside a wiki, we should use tags:
 " https://stackoverflow.com/q/25742396
 "
 " Indeed, with  regular links (filepaths),  if we rename  a file, or  change its
@@ -489,19 +489,20 @@ let $MANSECT = $MYMANSECT
 " to tags.
 "
 " See also:
-"     https://maximewack.com/post/tagbar/
-"     https://github.com/vimwiki/utils/blob/master/vwtags.py
-"     https://gist.github.com/MaximeWack/cdbdcd373d68d1fe5b3aca22e3dcfe46
-"     https://gist.github.com/MaximeWack/388c393b7db290dd732f0a2d403118c5
 "
-"     https://github.com/majutsushi/tagbar
-"     https://github.com/majutsushi/tagbar/wiki#markdown
-"     https://github.com/jszakmeister/markdown2ctags
-"     https://github.com/lvht/tagbar-markdown
+" https://maximewack.com/post/tagbar/
+" https://github.com/vimwiki/utils/blob/master/vwtags.py
+" https://gist.github.com/MaximeWack/cdbdcd373d68d1fe5b3aca22e3dcfe46
+" https://gist.github.com/MaximeWack/388c393b7db290dd732f0a2d403118c5
 "
-"     http://docs.ctags.io/en/latest/extending.html
-"     https://gist.github.com/romainl/085b4db4a26a06ec7e16
-"     https://www.reddit.com/r/vim/comments/4d2fos/if_you_use_tags_whats_your_workflow_like/
+" https://github.com/majutsushi/tagbar
+" https://github.com/majutsushi/tagbar/wiki#markdown
+" https://github.com/jszakmeister/markdown2ctags
+" https://github.com/lvht/tagbar-markdown
+"
+" http://docs.ctags.io/en/latest/extending.html
+" https://gist.github.com/romainl/085b4db4a26a06ec7e16
+" https://www.reddit.com/r/vim/comments/4d2fos/if_you_use_tags_whats_your_workflow_like/
 "
 " Update:
 "
@@ -515,9 +516,7 @@ let $MANSECT = $MYMANSECT
 "
 "     $ cd ~/wiki/vim/ ctags -R .
 "
-" Source:
-"
-"     https://stackoverflow.com/a/25742823/9780968
+" Source: https://stackoverflow.com/a/25742823/9780968
 "
 " Write `| foobar |` in one of your notes, and one line below write `foobar`.
 " Press `C-]` on `foobar`: the cursor jumps onto `| foobar |`.
@@ -642,24 +641,20 @@ set backspace=indent,eol,start
 " We need to inspect the value of  the option to decide how to properly set some
 " custom HGs.
 
-" My current version of xfce4-terminal doesn't support true color.
+" Atm, the only terminals which support true  color on my machine are st, xterm,
+" konsole, gnome-terminal and a recent version of urxvt (compiled from source).
+" Note that for gnome-terminal to have its TERM set to `gnome-256color`, you need to configure it like so:{{{
 "
-" FIXME: We should use a whitelist, not a blacklist.
-"
-" Atm,  the only  terminals which  I  can install  and support  true color,  are
-" Konsole, gnome-terminal and a recent version of urxvt (compiled from source).
-" I know how  to detect Konsole, but not gnome-terminal  (there's no environment
-" variable we could inspect).
-" If I need to detect urxvt, how would I do it? {{{
-"
-" Inspect `$COLORTERM`:
-"
-"     " this guard will prevent the code from being run in urxvt
-"     if $COLORTERM isnot# 'rxvt-xpm'
-"         ...
-"     endif
+"     Edit
+"     > Profile Preferences
+"     > Command
+"     > tick "Run a custom command instead of my shell"
+"     > inside the "Custom command" field, write "/usr/bin/env TERM=gnome-256color /usr/bin/zsh"
 "}}}
-if $COLORTERM isnot# 'xfce4-terminal'
+if index(map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'xterm'], {_,v -> v..'-256color'}), $TERM) >= 0
+    "\ xfce4-terminal lies about its identity
+    "\ and doesn't support true color on Ubuntu 16.04
+    \ && $COLORTERM isnot# 'xfce4-terminal'
     set termguicolors
     if has('vim_starting') && !has('gui_running') && !has('nvim')
         " In Vim, if `$TERM` is not  'xterm', Vim won't automatically set 't_8f'
@@ -1534,35 +1529,7 @@ set kp=:Man
 "
 " Example:    C-g j    (scroll-window; vim-submode)
 "}}}
-" Why do you check whether we're in gVim?{{{
-"
-" In gVim,  if you set 'lz'  and 'showcmd', then when  you press `j` and  `k` in
-" normal mode, you see `gj` and `gk` being spammed on the command-line.
-" I don't like that, and it could have a bad impact on performance.
-"
-" TODO:
-" Why does resetting 'lz' in Vim does NOT make `gj` being displayed when I press `j`?
-" And why does setting 'lz' in gVim DOES make `gj` being displayed when I press `j`?
-" MWE:
-"
-"     nno  j  gj
-"     nno  k  gk
-"     set lazyredraw
-"     set showcmd
-"
-" Update: I can't reproduce anymore.
-" Was the issue due to gtk3? (now we use gtk2, for a latency reason)
-"}}}
-" TODO: Is 'lazyredraw' broken in Neovim?{{{
-"
-" In the past, I think it caused the  index message after a search to be weirdly
-" displayed.
-"
-" https://github.com/neovim/neovim/pull/6366#issuecomment-289273001
-"
-" Revisit this when the PR is merged.
-"}}}
-if !has('gui_running') && has('vim_starting')
+if has('vim_starting')
     " Why do you delay the 'lazyredraw' setting?{{{
     "
     " Start neovim like this:
@@ -1602,31 +1569,29 @@ if !has('gui_running') && has('vim_starting')
         \ | endif
 endif
 
-" match (showmatch / matchtime) {{{2
+" showmatch {{{2
 
-" Show matching brackets.
-
-set showmatch
-
-" If I have the following html buffer:
+" don't show matching brackets;
+" it makes the cursor jumps unexpectedly which is too distracting
+set noshowmatch
+" Note that if you set the option in the future, you may face an issue (github #4867).{{{
 "
-"     foobar
-"     foo
+" You may fix it if you:
 "
-" then type {}, C-b to go back inside the curly brackets, the cursor stays where
-" it is. I have to hit C-b twice (or wait half a second, &matchtime).
-" The pb comes from the fact that the cursor jumps to the opening bracket for
-" &matchtime. So, I set this option to 0.
+"    - reset `'showcmd'`
+"    - reset `'showmatch'`
+"    - set `'matchtime'` to 0
+"    - empty `'indentexpr'`
+"    - replace `normal! ^` with `call search('^\s*\zs\S', 'b')` in $VIMRUNTIME/indent/html.vim
+"      (function `HtmlIndent()`)
 "
-" FIXME: matchtime bug
+" Or you could install this autocmd which resets `'showmatch'` in html buffers:
 "
-" Why does the pb appear only in html file?
-" And why only with curly brackets, and not with round / square brackets?
-" Edit:
-" It seems to happen  in any file ...
-" And it's not an issue with 'matchtime' but with 'showmatch'.
-
-set matchtime=0
+"     augroup disable_showmatch_in_html_files
+"         au!
+"         au BufEnter,WinEnter * let &showmatch = &ft is# 'html' ? 0 : 1
+"     augroup END
+"}}}
 
 " matchpairs {{{2
 
@@ -1666,9 +1631,42 @@ set nrformats-=octal
 " path {{{2
 
 " Where should `:find` and `gf` look for a file?
-" TODO: Should we add a limit on the recursion of `**`?
-" https://begriffs.com/posts/2019-07-19-history-use-vim.html#include-and-path
-set path=.,**
+" Why the numeric suffix after `**`?{{{
+"
+" It adds a limit on the recursion of `**`.
+"
+" At the moment, we have this file in our filesystem:
+"
+"     ~/.vim/plugged/vimtex/autoload/unite/sources/vimtex.vim
+"
+" Suppose our  current working directory  in Vim is  `~/.vim`, and this  path is
+" written in a file:
+"
+"     sources/vimtex.vim
+"
+" As you can see, between the path of the cwd and this path, 4 directories are missing:
+"
+"     ~/.vim/plugged/vimtex/autoload/unite/sources/vimtex.vim
+"            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"
+" So, if you write `3` after `**`, you won't be able to open `sources/vimtex.vim`
+" in a new split, by pressing `C-w f`.
+" But you will if you write `4` instead of `3`.
+"
+" The bigger the number,  the more directories Vim will have to  look into for a
+" path, when you press `gf`, `C-w f`, ... or when you run `:find`, `:sfind`, ...
+" and the more time it may take to find a file.
+" This is especially annoying  when the file path can't be  found; Vim will have
+" to look into  *all* subdirectories of the  cwd, up to the  given depth, before
+" realizing it's not there.
+"
+" Inspiration: https://begriffs.com/posts/2019-07-19-history-use-vim.html#include-and-path
+"
+" >     The `**`  with a  number like `**3`  bounds the depth  of the  search in
+" >     subdirectories. It’s wise  to add  depth bounds where  you can  to avoid
+" >     identifier searches that lock up.
+"}}}
+set path=.,**5
 "        │ │
 "        │ └ and in the working directory recursively
 "        └ look in the directory of the current buffer, non-recursively
@@ -1763,15 +1761,17 @@ set shortmess+=W
 
 " showbreak {{{2
 
+" `'showbreak'` is a global option.
+"
+" We would need it to be global-local to get a different value in some types of buffers.
+" For example, atm, we want it to be reset in markdown buffers, but set in other buffers.
+"
+" To achieve this, we install an autocmd which inspects a buffer-local variable;
+" the latter is used  to memorize the last value we've given to  the option in a
+" buffer (manually or via the `cob` mapping).
 augroup my_showbreak
     au!
-    " FIXME: Suppose we reset the option in a man buffer.
-    " Then we temporarily visit another window, and we come back to our man buffer.
-    " The autocmd will set the option; it shouldn't. It should restore the original value.
-    " Solution:
-    " Make `cob` create a buffer-local variable used as a flag.
-    " And make the autocmd inspect this flag to decide whether set or reset the option.
-    au BufEnter,WinEnter * if &ft is# 'markdown' | set showbreak= | else | set showbreak=↪ | endif
+    au BufEnter,WinEnter * let &showbreak = get(b:, 'showbreak', 1) ? '↪' : ''
 augroup END
 
 " signcolumn {{{2
@@ -1902,7 +1902,7 @@ set synmaxcol=250
 " It correctly and automatically sets its internal terminfo db.
 "
 "     $ nvim -V3/tmp/log +'call timer_start(0, {-> execute("q")})'
-"     $ nvim -es +'exe "1,/{{{$/g/^/d_" | /}}}$/,$g/^/d_' +'%p | qa!' /tmp/log | nvim -
+"     $ nvim -es +'exe "1,/{{\\%x7b$/g/^/d_" | /}}\\%x7d$/,$g/^/d_' +'%p | qa!' /tmp/log | nvim -
 "     /paste
 "     ext.enable_bpaste         = <Esc>[?2004h~
 "     ext.disable_bpaste        = <Esc>[?2004l~
@@ -2063,7 +2063,7 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 "}}}
 "     Now you're talking about yet another mode!  What's this raw mode?{{{
 "
-" A mode in which the terminal doesn't interpret the characters it receives.
+" A mode in which the terminal driver doesn't interpret the characters it receives.
 "
 " > The  terminal can  be placed  into  "raw" mode  where the  characters are  not
 " > processed by the terminal driver, but are sent straight through (it can be set
@@ -2165,7 +2165,7 @@ endif
 
 " RV {{{3
 
-" If we don't clear `'t_RV'`, our `vim-search` plugin is broken in xterm.{{{
+" If we don't clear `'t_RV'`, our `vim-search` plugin is broken in xterm. (github issue 4836){{{
 "
 " More specifically, it raises this error when we press `*` on a word:
 "
@@ -2248,7 +2248,7 @@ set t_RV=
 
 " We don't really need this atm.
 " It's only useful if you start Vim inside `xterm-kitty` (and outside tmux).
-if &term =~# '-256color$\|^xterm-kitty$'
+if $TERM =~# '-256color$\|^xterm-kitty$'
   " Disable Background Color  Erase (BCE) so that color  schemes render properly
   " when inside 256-color tmux and GNU screen.
   " See: http://snk.tuxfamily.org/log/vim-256color-bce.html
@@ -2377,62 +2377,104 @@ augroup END
 
 " FIXME:
 " Review all this section.
-" Finish implementing proper backup.
+" Finish  implementing proper  backup (you  probably don't  want to  backup huge
+" files though, nor temporary files; it would quickly take too much space).
 " Read files in `backup` session.
 "
 " And read these:
 " https://www.zachpfeffer.com/single-post/Practice-Recovering-a-File-in-Vim
 " https://begriffs.com/posts/2019-07-19-history-use-vim.html#backups-and-undo
 
-" TODO:
-" Read this:
-" https://vi.stackexchange.com/a/53/13370
-" Add a cron job to delete temp files when they've been changed for a long time
-" (3 months?).
+" TODO: The undo/backup files are never removed by Vim, and that they can take a lot of space over time.{{{
+"
+" You probably want to remove:
+"
+"    - the ones which were written for files in `/tmp/` or `/run/`:
+"
+"         $ find ~/.vim/tmp/undo -path '*/%run%*' -print0 | xargs -0 rm
+"         $ find ~/.vim/tmp/undo -path '*/%tmp%*' -print0 | xargs -0 rm
+"
+"    - the ones written for a pdf:
+"
+"         $ find ~/.vim/tmp/undo -name '*.pdf' -print0 | xargs -0 rm
+"
+"    - the ones written for a file which has not been modified since a long time (3 months?)
+"
+"    - the ones written for a file doesn't exist anymore
+"
+"      For example if this undo file exists:
+"
+"         ~/.vim/tmp/undo/%path%to%file
+"
+"      But `/path/to/file` does not exist anymore, then we should remove the undo file.
+"
+"    - the ones written for a file which takes more than 20 megs
+"      Atm, my biggest "valid" undo file takes 5 megs.
+"      The ones above are not valid (pdfs, non-existing files, ...).
+"
+" Find a way to run the right shell commands (sth like `$ find ... -exec rm ... +`)
+" automatically via a cron job once a week/month.
+"
+" ---
+"
+" Maybe we should disable `'undofile'` in certain directories (not sure I want that).
+" Or, enable `'undofile'` only in our home (not sure I want that either).
+"
+" ---
+"
+" Read this: https://vi.stackexchange.com/a/53/13370
+"
+" ---
+"
+" The same issue will apply to backup files, once we enable their creation.
+"}}}
 
-
-" In neovim, there's no need to create directories for backup, undo, swap.
-" The default value of the relevant options are set so that all the temp files
-" are created inside `~/.local/share/nvim`.
-
-
+" Note that by default, Nvim uses these directories:{{{
+"
+"     ~/.local/share/nvim/swap//
+"     ~/.local/share/nvim/undo
+"     .,~/.local/share/nvim/backup
+"     │
+"     └ directory of the edited file
+"
+" In the future, if you mainly use Nvim, consider using them instead...
+" But make sure to remove the `.` at the front of `'directory'`.
+"}}}
 if !isdirectory($HOME.'/.vim')
     call mkdir($HOME.'/.vim', '', 0770)
 endif
 
-" 'directory' ('dir') est une option dont la valeur est une suite de chemins
-" séparés par des virgules.
-" Quand on commence à éditer le fichier bar, et que Vim doit créer un fichier
-" d'échange pour ce dernier (.bar.swp), il utilise le 1er dossier présent dans
-" l'option 'dir' et dans lequel il peut écrire (existe + droits suffisants).
+" Put all swap files in `~/.vim/tmp/swap/`.{{{
 "
-" La valeur par défaut de 'dir' est:
+" The default value is:
 "
 "     .,~/tmp,/var/tmp,/tmp
+"     ^
 "
-" Ça signifie que Vim crée le fichier d'échange dans le même dossier que bar.
-" Le problème est que ça pollue le système de fichiers avec des fichiers
-" d'échange un peu partout.
+" With this  value, if you  edit a file,  the swap file  will be created  in the
+" parent directory of the file.
+" IOW, your  swap files will be  scattered across your whole  filesystem; that's
+" untidy, especially when Vim crashes, and the swap files persist.
+"}}}
+" Why the trailing double slash?{{{
 "
-" On veut les confiner dans un dossier qui leur sera dédié, pex:
+" It's  useful if  you edit  two  files with  the  same name,  but in  different
+" directories.
+" Suppose you edit `/tmp/dir1/file` and `/tmp/dir2/file`.
 "
-"     ~/.vim/tmp/swap
+" Without the trailing double slash, both swap files would have the same name.
+" The last one to be created would probably overwrite the previous one.
 "
-" Pour ce faire, on ajoute au début (^=) de 'dir' la valeur:
+" With the trailing double slash, the name  of each swap file is unique, because
+" it includes  the full  path to the  file it's associated  to; the  slashes are
+" replaced with percent signs.
+" From `:h 'dir`:
 "
-"     "$HOME/.vim/tmp/swap//"
-"
-" Pk un double slash à la fin ?
-" Par défaut, le fichier d'échange créé s'appellera: .bar.swp
-" Ceci peut poser pb, si on édite plusieurs fichiers bar dans des dossiers
-" différents. Leurs fichiers d'échange auront tous le même nom.
-" Le double backslash demande à Vim d'utiliser le chemin vers bar pour créer
-" un nom de fichier d'échange unique:
-"
-"     %path%to%.bar.swp
-"
-" Au passage, on remarque que les slashs séparant les dossiers du chemin vers
-" bar sont remplacés par des %.
+" >     For Unix and Win32, if a directory ends in two path separators "//", the
+" >     swap file name will be built from the complete path to the file with all
+" >     path separators substituted to percent  '%' signs. This will ensure file
+" >     name uniqueness in the preserve directory.
+"}}}
 set directory=$HOME/.vim/tmp/swap//
 
 " make sure the swap directory exists
@@ -2440,45 +2482,6 @@ if !isdirectory(&directory)
     call mkdir(&directory, 'p', 0700)
 endif
 
-
-" TODO: The undo files are never removed by Vim, and that they can take a lot of space over time (e.g. 1 gig).{{{
-"
-" Here's a way to remove the ones which were written for files in `/tmp/` or `/run/`:
-"
-"     $ find ~/.vim/tmp/undo -path '*/%run%*' -print0 | xargs -0 rm
-"     $ find ~/.vim/tmp/undo -path '*/%tmp%*' -print0 | xargs -0 rm
-"
-" And the ones written for a pdf:
-"
-"     $ find ~/.vim/tmp/undo -name '*.pdf' -print0 | xargs -0 rm
-"
-" How to merge them in a single shell command?
-"
-" ---
-"
-" Find  a command  to remove  all  undo files  which  are not  associated to  an
-" existing file anymore.
-" For example if this undo file exists:
-"
-"     ~/.vim/tmp/undo/%path%to%file
-"
-" But `/path/to/file` does not exist anymore, then we should remove the undo file.
-"
-" ---
-"
-" Find a way to run these commands automatically via a cron job once a week/month.
-"
-" ---
-"
-" Maybe we should also automatically remove the undo files which take more than 20 megs.
-" Atm, my biggest "valid" undo file takes 5 megs.
-" The ones above are not valid (pdfs, non-existing files, ...).
-"
-" ---
-"
-" Maybe we should disable `'undofile'` in certain directories (not sure I want that).
-" Or, enable `'undofile'` only in our home (not sure I want that either).
-"}}}
 " enable persistent undo
 set undofile
 
@@ -2490,66 +2493,58 @@ if !isdirectory(&undodir)
     call mkdir(&undodir, 'p', 0700)
 endif
 
-
-" Why don't we enable 'backup'?{{{
+" Why don't you enable 'backup'?{{{
 "
 " Because  of  a bug,  'backupdir'  doesn't  support  the correct  double  slash
 " filename expansion: the  name of a backup  file contains only the  name of the
 " original file, not its whole path. If you  edit 2 files with the same name, in
 " 2 different directories, only the last one will have a backup (overwrite).
 " See:
-"     https://code.google.com/p/vim/issues/detail?id=179
-"     https://stackoverflow.com/a/38479550/8243465
+" https://code.google.com/p/vim/issues/detail?id=179
+" https://stackoverflow.com/a/38479550/8243465
+"
+" Update: It was fixed in Vim (but not in Nvim):
+" https://github.com/vim/vim/releases/tag/v8.1.0251
 "}}}
 set nobackup
 " Future Workaround:{{{
-
+"
 " This is the workaround for the backup filename expansion problem.
-augroup my_backup
-    au!
-    " au BufWritePre * call s:save_backups()
-augroup END
-
-fu! s:save_backups() abort
-    for pat in split(&backupskip, ',')
-        if expand('%:p') =~# pat | return | endif
-    endfor
-
-    " If this is a newly created file, don't try to create a backup
-    if !filereadable(expand('%:p')) | return | endif
-
-    for backupdir in split(&backupdir, ',')
-        if s:save_backup(backupdir)
-            break
-        endif
-    endfor
-endfu
-
-fu! s:save_backup(backupdir) abort
-    let filename = expand('%:p')
-    let backup = a:backupdir =~# '//$'
-             \ ?     escape(substitute(filename, '/', '%', 'g').&backupext, '%')
-             \ :     escape(expand('%').&backupext, '%')
-    let backup_path = a:backupdir.backup
-    sil! exe '!cp '.resolve(filename).' '.backup_path
-    if v:shell_error
-        " reset `v:shell_error`
-        call system('')
-        return 1
-    endif
-endfu
+"
+"     augroup my_backup
+"         au!
+"         au BufWritePre * call s:save_backups()
+"     augroup END
+"
+"     fu! s:save_backups() abort
+"         for pat in split(&backupskip, ',')
+"             if expand('%:p') =~# pat | return | endif
+"         endfor
+"         " If this is a newly created file, don't try to create a backup
+"         if !filereadable(expand('%:p')) | return | endif
+"         for backupdir in split(&backupdir, ',')
+"             if s:save_backup(backupdir)
+"                 break
+"             endif
+"         endfor
+"     endfu
+"
+"     fu! s:save_backup(backupdir) abort
+"         let filename = expand('%:p')
+"         let backup = a:backupdir =~# '//$'
+"                  \ ?     escape(substitute(filename, '/', '%', 'g').&backupext, '%')
+"                  \ :     escape(expand('%').&backupext, '%')
+"         let backup_path = a:backupdir.backup
+"         sil! exe '!cp '.resolve(filename).' '.backup_path
+"         if v:shell_error
+"             " reset `v:shell_error`
+"             call system('')
+"             return 1
+"         endif
+"     endfu
 "}}}
 
-" Vim peut créer parfois un fichier de backup qui correspond à une copie du
-" fichier tq qu'il était avant qu'on ne l'édite.
-" La création d'un fichier de backup est déterminée par plusieurs options
-" (dont 'backup' et 'writebackup') et expliquée dans l'aide: :h backup-table
-"
-" Par défaut, le chemin du backup du fichier bar est:
-"         ./.bar~~
-" L'emplacement des fichiers de backup est déterminé par l'option 'backupdir'
-" / 'bdir'.
-" On veut qu'ils soient tous confinés dans ~/.vim/tmp/backup
+" See `:h backup-table` to understand when Vim creates a backup file.
 set backupdir=~/.vim/tmp/backup//
 
 " make sure the backup directory exists
@@ -2644,42 +2639,26 @@ set ttimeoutlen=6
 
 " ttymouse {{{2
 
-" Pour redimensionner les viewports à la souris, il faut que 'ttymouse' ait pour
-" valeur `xterm2` ou `sgr`. Par défaut, sa valeur dépend de `$TERM`.
-
-" Atm, dans xfce4-terminal et dans guake :
-"     TERM=xterm ⇒ ttym=sgr
+" This option may help when you need to interact with Vim with your mouse.{{{
 "
-" Et dans Tmux :
-"     TERM=screen ⇒ ttym=xterm
-
-" Résultat, le redimensionnement des viewports à la souris fonctionne dans Vim
-" qd il tourne ds xfce4-terminal et ds guake mais pas dans Tmux.
-
-" Pour résoudre ce pb, le code qui suit vérifie la valeur de l'option term, et
-" si elle débute par screen il donne la valeur xterm2 à ttymouse.
-
-" Source:
-" http://superuser.com/a/550482
-
-" FIXME:
-" Is it really still needed?
-" It seems we can resize viewports without.
+" In  particular, it  may help  resizing a  tmux pane  where Vim  is running  by
+" dragging its status line: http://superuser.com/a/550482
 "
-" However:
-"    1. resizing is brittle/wonky no matter what
-"    2. `xterm2` might be a better value than default `xterm`:
-"
-"         “This works much faster and more precise.”
-"
-"    3. why do we sometimes get into visual mode when we try to resize?
+" It may also help clicking after the 223rd column.
 "
 " ---
 "
-"        ┌ nvim doesn't have this issue, and 'ttym' has been removed from it
-"        │
-if !has('nvim') && &term =~# '^\%(screen\|tmux\)'
-    set ttymouse=xterm2
+" The best value seems to be `sgr`.
+" From `:h 'ttym`:
+"
+" >    The "sgr"  value will be set  if Vim detects Mac  Terminal.app, iTerm2 or
+" >    mintty, and when the xterm version is 277 **or higher**.
+"
+" It's the value used by Vim when it detects a recent xterm.
+"}}}
+" 'ttym' has been removed from Nvim
+if !has('nvim')
+    set ttymouse=sgr
 endif
 
 " updatetime {{{2
@@ -2806,18 +2785,19 @@ set wildmenu
 " 1st/2nd/3rd/4th time.
 set wildmode=full
 
-" What's `'wildchar'`?{{{
+" What's 'wildchar'?{{{
 "
 " The  key to  press for  Vim to  start a  wildcard expansion  (which opens  the
 " wildmenu).
 "}}}
-" What's `'wildcharm'`?{{{
+"   'wildcharm'?{{{
 "
 " The key to press for Vim to start a wildcard expansion, from:
 "
 "    - the recording of a macro
 "    - the rhs of a mapping
 "}}}
+
 " What does the value `26` stand for?{{{
 "
 "     C-z
@@ -2831,18 +2811,18 @@ set wildmode=full
 " Tab  characters  they  contain  will be  interpreted  literally  (no  wildcard
 " expansion).
 "}}}
-" Is there an alternative value?{{{
+"   Is there an alternative value?{{{
 "
 " Yes, you could write:
 "
 "     set wildcharm=9
 "}}}
-" Would it be better?{{{
+"     Why would it be better?{{{
 "
-" Yes, because  you could write/press Tab  in your mappings/macros, to  make Vim
-" start a wildcard expansion, exactly like you would the rest of the time.
+" Because you could write/press Tab in your mappings/macros, to make Vim start a
+" wildcard expansion, exactly like you would the rest of the time.
 "}}}
-" Then, why don't you use it?{{{
+"     Why don't you use it?{{{
 "
 " Suppose your macro contains Tab characters.
 " While on the command-line, *any* one  of them will start a wildcard expansion.
@@ -2866,7 +2846,6 @@ set wildmode=full
 "}}}
 set wildchar=9
 set wildcharm=26
-" FIXME: Giving a different value to `'wcm'` breaks our `M-n` mapping in command-line mode (vim-readline).
 
 " winaltkeys {{{2
 
@@ -3149,6 +3128,8 @@ nno <expr> <m-l> <sid>m_hl('l')
 xno <expr> <m-h> <sid>m_hl('h')
 xno <expr> <m-l> <sid>m_hl('l')
 
+" FIXME: When we're running Vim without config (`-Nu NONE`), we can't focus another tmux window.
+" This is because those custom mappings are not installed then.
 fu! s:m_hl(seq) abort
     if mode() =~# '^[ic]$'
         return ''
@@ -3400,14 +3381,16 @@ fu! s:goyo_start(without_syntax_hl) abort
 endfu
 
 fu! s:goyo_enter() abort
-    sil !tmux set status off
+    sil call system('tmux set status off')
     " FIXME:
-    " If we have 2 panes in the same window, and Vim is one of them, when we
-    " start goyo mode, we only see half of the screen. We probably need to
-    " resize the Tmux pane from the plugin, earlier.
-    sil !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
+    " If we have 2  tmux panes in the same window, Vim is  one of them, and it's
+    " not zoomed, when we start goyo mode, we see much less text as usual.
+    " If we have 2 vertical panes, the lines are shorter.
+    " If we have 2 horizontal panes, there are fewer lines.
+    " We probably need to resize the Tmux pane from the plugin, earlier.
+    sil call system('[[ $(tmux display -p "#{window_zoomed_flag}") -eq 0 ]] && tmux resizep -Z')
     let s:cul_save = &l:cul
-    norm ]oL
+    setl nocursorline
     set scrolloff=999
     set noshowcmd
 
@@ -3458,10 +3441,10 @@ fu! s:goyo_enter() abort
 endfu
 
 fu! s:goyo_leave() abort
-    sil !tmux set status on
-    sil !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
+    sil call system('tmux set status on')
+    sil call system('[[ $(tmux display -p "#{window_zoomed_flag}") -eq 0 ]] && tmux resizep -Z')
     set  showcmd
-    exe 'norm '.(s:cul_save ? '[' : ']').'oL'
+    let &l:cul = s:cul_save
     set  scrolloff=3
 
     let &l:concealcursor = s:goyo_cocu_save
@@ -3761,7 +3744,8 @@ nno  <silent>  U<c-r>  :<c-u>exe 'undo '.undotree().seq_last<cr>
 " We need to unmap `U` in a fugitive buffer because it's used by fugitive
 " (`:h fugitive_U`) to unstage everything; this prevents us from using `U`
 " as a prefix key in the next mappings.
-" TODO: Maybe we should remove this autocmd and map all our prefix keys to `<nop>` in *buffer-local* mappings.{{{
+" TODO: Maybe  we should  remove this  autocmd and  map all  our prefix  keys to
+" `<nop>` in *buffer-local* mappings.{{{
 "
 " This would be a more general solution to this particular problem.
 " To implement this idea, you need to write this autocmd:
@@ -4378,7 +4362,7 @@ nno  <expr><silent>  <cr>  !empty(&buftype)
 " While the `x` is there because it seems that `xterm` can send codes in
 " 2 forms.
 
-if &term =~# '^\%(screen\|tmux\)'
+if $TERM =~# '^\%(screen\|tmux\)'
     sil! exe "set <xUp>=\e[1;*A"
     sil! exe "set <xDown>=\e[1;*B"
     sil! exe "set <xRight>=\e[1;*C"
@@ -4860,45 +4844,42 @@ nno  <silent>  ^  g^
 nno  <silent>  0  g0
 
 " To draw freely, sometimes we need to enable 'virtualedit'.
-" And then, when we hit `$`, the cursor moves to the very end of the screen.
+" And then, when we press `$`, the cursor moves to the very end of the screen.
 " We never want that. We want the cursor on the last non whitespace.
-nno  <expr>  $  &virtualedit is# 'block' ? 'g$' : 'g_'
-
-" FIXME:
-" Consider the following buffer:
+nno  <expr>  $  &virtualedit is# 'block' ? '$' : 'g_'
+" Do *not* use `g$` in the lhs!{{{
+"
+" It would break the dot command when you've pressed `$` right before.
+"
+" MWE:
+"
+"     $ vim -Nu NONE =(cat <<'EOF'
 "     foo = a
 "           ab
 "           abc
-
-" If I want to surround a, ab and abc with single quotes, I could do:
-"         :set startofline
-"         C-v G h A '
-"         :nunmap $
-"         $ .
-
-" But if instead of hitting `$`, I hit `g$`, the ending quote is too far:
-"       foo = 'a     '
-"             'ab    '
-"             'abc   '
-
-" Why does the dot command changes its behavior when we hit `g$`.
-" According to :h g$, `g$` differs from `$` when:
+"     EOF
+"     )
 "
-"    - preceded with a count
-"    - on a wrapped line
-"    - on a line longer than the screen
-"    - if 'virtualedit' is enabled
+"     / a$
+"     C-v G h A '
+"     g$ .
 "
-" Here, none of these conditions is met. So what happens?
-" Should I unmap `$` in normal mode?
+" Result:
 "
-" Hypothesis:
-" Maybe it has something to do with :h visual-repeat:
+"     foo = 'a'
+"           'a'b
+"           'a'bc
 "
-" > If  the "$"  command was  used as  one of  the last  commands to  extend the
-" > highlighted text, the  repeating will be applied up to  the rightmost column
-" > of the longest line.
-
+" Expected:
+"
+"     foo = 'a'
+"           'a'b
+"           'abc'
+"
+" Theory: Maybe `$` moves the cursor on the  newline, while `g$` moves it on the
+" last character of the screen line (excluding the newline).
+" And for the dot command to work as expected, we need to be on the newline...
+"}}}
 
 " Same mappings for visual mode.
 xno  <silent>  j  gj
@@ -5099,9 +5080,8 @@ ono  <silent>  iE  :<c-u>norm ViE<cr>
 
 " Vim function
 
-" FIXME:
-" not reliable text objects (check out kana plugin)
-" fix also `o_il` and `o_al` (i.e. add support for visual mode)
+" FIXME: Not reliable text objects (check out kana plugin).
+" Fix also `o_il` and `o_al` (i.e. add support for visual mode).
 xno  <silent>  if  :<c-u>call <sid>textobj_func(1)<cr>
 ono  <silent>  if  :<c-u>norm Vif<cr>
 
@@ -6991,44 +6971,44 @@ call s:mkspell()
 "
 " http://vi.stackexchange.com/a/5052/6960
 
-" Swapfile Handling "{{{2
+" Swap file handling "{{{2
 
 " What does it do?{{{
 "
-" It answers automatically to the question asked when a swapfile is found.
-" If the swapfile is older than the  file, it's removed because useless, and the
+" It answers automatically to the question asked when a swap file is found.
+" If the swap file is older than the file, it's removed because useless, and the
 " file is editd as if nothing happened.
 "
-" If the swapfile is newer, the file is opened in readonly mode, so that you can
-" see its contents, but not change it (without being warned).
+" If the swap  file is newer, the file  is opened in readonly mode,  so that you
+" can see its contents, but not change it (without being warned).
 "}}}
 " Why do you use this autocmd, instead of `set shm+=A`?{{{
 "
-" `set  shm+=A` would  completely bypass  the question  and the  existence of  a
-" swapfile would never be brought to our attention.
+" `set shm+=A` would completely bypass the  question and the existence of a swap
+" file would never be brought to our attention.
 "
-" In contrast, this autocmd will still warn us whenever a swapfile is found, and
-" write the warning in  the messages, so that we can review it  later if we need
-" to debug some unexpected behavior from Vim.
+" In contrast, this  autocmd will still warn  us whenever a swap  file is found,
+" and write the  warning in the messages, so  that we can review it  later if we
+" need to debug some unexpected behavior from Vim.
 "
-" Besides, it won't let us edit a file for which a newer swapfile exists.
+" Besides, it won't let us edit a file for which a newer swap file exists.
 " There could be valuable information in there.
 "}}}
-" A swapfile has been found, and the file has been loaded in readonly mode!  What should I do?{{{
+" A swap file has been found, and the file has been loaded in readonly mode!  What should I do?{{{
 "
 " If you only need to read the file, nothing. Just read it.
 "
 " If you need to edit the file, you have an issue.
-" Indeed, if  the autocmd hasn't  removed the swapfile,  it means the  latter is
+" Indeed, if  the autocmd hasn't  removed the swap file,  it means the  latter is
 " more recent than the file (or has the same timestamp).
 "
 " So, it could  contain valuable information, that you need  to recover *before*
 " doing  any further  change (because  this valuable  information may  radically
 " alter the change you intend to do).
 "}}}
-" How do I recover the contents of a swapfile?{{{
+" How do I recover the contents of a swap file?{{{
 "
-"     # recover swapfile
+"     # recover swap file
 "     $ vim -r file
 "
 "     " save the result in another file
@@ -8202,12 +8182,12 @@ endfu
 " 65 -
 " prevent vim-session from checking swap files.
 " annoying when a session crashed, and we can't restore a session.
-" or disable swapfiles entirely:
+" or disable swap files entirely:
 "
 "     set noswapfile
 "
 " Update:
-" I don't think you should disable swapfiles.
+" I don't think you should disable swap files.
 "
 " 66 -
 " In  neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
@@ -8771,8 +8751,12 @@ endfu
 " Should we use `:keepj` in all our operators?
 " See `myfuncs#op_replace_without_yank()`.
 "
-" Answer: I think so.
-" It doesn't seem useful for the jumplist, but it is for the changelist.
+" It doesn't seem useful for the  jumplist (update: now it seems useful...), but
+" it is for the changelist.
+" It seems that if you use `:keepj`  for every edition performed in your opfunc,
+" then no entry is added in the changelist.
+" OTOH, if  you omit `:keepj` for  *any* edition performed by  your opfunc, then
+" *one* entry is added in the changelist.
 "
 " ---
 "
@@ -9525,7 +9509,7 @@ fu! s:save_last_qfl() abort
     " I think  that without,  sometimes, we  had entries in  a qfl  which didn't
     " match any existing file:
     "
-    "         call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
+    "     call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
     "}}}
     let qfl = getqflist()
     call map(qfl,
