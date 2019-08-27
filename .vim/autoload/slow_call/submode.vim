@@ -1,3 +1,9 @@
+call submode#enter_with('my-capitalize', 'n', 'r', '<m-u>i', '<plug>(my-capitalize)' )
+call submode#map(       'my-capitalize', 'n', 'r',      'i', '<plug>(my-capitalize)')
+nno <plug>(my-capitalize) :<c-u>set opfunc=readline#move_by_words<cr>g@l
+" nno <plug>(my-capitalize) :<c-u>set opfunc=readline#change_case_word<cr>g@l
+finish
+
 if stridx(&rtp, 'vim-submode') ==# -1
     finish
 endif
@@ -9,6 +15,24 @@ endif
 "     call submode#map(       'undo/redo', 'n', '',  '-', 'g-')
 "     call submode#map(       'undo/redo', 'n', '',  '+', 'g+')
 "     call submode#leave_with('undo/redo', 'n', '', '<Esc>')
+
+call submode#enter_with('my-uppercase', 'nic', 'r', '<m-u>u', '<plug>(my-uppercase)' )
+call submode#map(       'my-uppercase', 'nic', 'r',      'u', '<plug>(my-uppercase)')
+nno <silent> <plug>(my-uppercase) :<c-u>call readline#change_case_save(1)<bar>set opfunc=readline#change_case_word<cr>g@l
+ino <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'i')<cr>
+cno <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'c')<cr>
+
+call submode#enter_with('my-capitalize', 'nic', 'r', '<m-u>i', '<plug>(my-capitalize)' )
+call submode#map(       'my-capitalize', 'nic', 'r',      'i', '<plug>(my-capitalize)')
+nno <silent> <plug>(my-capitalize) :<c-u>set opfunc=readline#move_by_words<cr>g@l
+ino <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('i', 1, 1)<cr>
+cno <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('c', 1, 1)<cr>
+
+call submode#enter_with('my-lowercase', 'nic', 'r', '<m-u>o', '<plug>(my-lowercase)' )
+call submode#map(       'my-lowercase', 'nic', 'r',      'o', '<plug>(my-lowercase)')
+nno <silent> <plug>(my-lowercase) :<c-u>call readline#change_case_save(0)<bar>set opfunc=readline#change_case_word<cr>g@l
+ino <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'i')<cr>
+cno <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'c')<cr>
 
 
 " TODO:
@@ -47,8 +71,7 @@ endif
 " you want to be sure where you are (inside/outside the submode).
 
 
-" TODO:
-" Do the same work for C-n, C-p, and C-h, j, k, l
+" TODO: Do the same work for C-n, C-p, and C-h, j, k, l
 
 
 " C-w g[hjkl] (tradewinds) {{{1
@@ -64,7 +87,7 @@ call submode#map(       'foobar', 'n', 'r',       'l', '<plug>(tradewinds-l)')
 
 " schlepp {{{1
 
-"                                        ┌─ recursive (remap {rhs})
+"                                        ┌ recursive (remap {rhs})
 "                                        │
 call submode#enter_with('schlepp', 'x', 'r', 'H', '<plug>(schlepp_left)' )
 call submode#enter_with('schlepp', 'x', 'r', 'J', '<plug>(schlepp_down)' )
@@ -79,8 +102,8 @@ call submode#map(       'schlepp', 'x', 'r', 'l', '<plug>(schlepp_right)')
 " to quit visual mode? Would be useful to quit to normal mode and undo with UU.
 " Tweak the code of the functions directly if necessary.
 "
-"         ✘
-"         call submode#leave_with('schlepp', 'x', '', 'U')
+"     ✘
+"     call submode#leave_with('schlepp', 'x', '', 'U')
 "
 " Update:
 " For the moment, we don't need this  anymore, because we've tweaked the code of

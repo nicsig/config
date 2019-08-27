@@ -3111,33 +3111,6 @@ fu! s:move_by_sentence(is_fwd) abort
     return ''
 endfu
 
-" M-h  M-l {{{3
-
-" Ignore a `M-h` or `M-l` keypress in insert mode or command-line mode.
-" In normal or visual mode, make tmux focus the next/previous window.
-if !has('nvim')
-    " Warning: These lines prevent you from inserting `è` and `ì`.
-    exe "set <m-h>=\eh"
-    exe "set <m-l>=\el"
-endif
-
-noremap! <expr> <m-h> <sid>m_hl('h')
-noremap! <expr> <m-l> <sid>m_hl('l')
-nno <expr> <m-h> <sid>m_hl('h')
-nno <expr> <m-l> <sid>m_hl('l')
-xno <expr> <m-h> <sid>m_hl('h')
-xno <expr> <m-l> <sid>m_hl('l')
-
-" FIXME: When we're running Vim without config (`-Nu NONE`), we can't focus another tmux window.
-" This is because those custom mappings are not installed then.
-fu! s:m_hl(seq) abort
-    if mode() =~# '^[ic]$'
-        return ''
-    endif
-    call system('tmux '..(a:seq is# 'l' ? 'next' : 'prev'))
-    return ''
-endfu
-
 " \ {{{3
 
 ino  <silent>  <bslash>  <c-r>=<sid>indent_before_backslash()<cr>
@@ -3468,7 +3441,6 @@ augroup my_goyo
     " Why?
     " Should we get rid of `nested` in the 2nd autocmd (GoyoLeave)?
     " Why do we need `nested` anyway?
-
     au User GoyoEnter        call s:goyo_enter()
     au User GoyoLeave ++nested call s:goyo_leave()
 augroup END
@@ -4847,7 +4819,7 @@ nno  <silent>  0  g0
 " And then, when we press `$`, the cursor moves to the very end of the screen.
 " We never want that. We want the cursor on the last non whitespace.
 nno  <expr>  $  &virtualedit is# 'block' ? '$' : 'g_'
-" Do *not* use `g$` in the lhs!{{{
+" Do *not* use `g$` by default (i. e. don't write `g$` in the lhs when 've' is 'block')!  Keep using `$`.{{{
 "
 " It would break the dot command when you've pressed `$` right before.
 "

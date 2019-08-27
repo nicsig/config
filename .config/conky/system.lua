@@ -29,6 +29,22 @@
 -- si l'affichage d'un nom de processus trop long entraîne un décalage régulier de tout le panneau d'infos
 -- augmenter la valeur du paramètre minimum_size
 
+-- FIXME: The percentage usage seems wrong (too high).{{{
+--
+-- I think it comes from the configuration setting `memprc`:
+--
+--     ~/.conky/system_rings.lua:55
+--
+-- From `$ man conky /memperc`:
+--
+--     memperc
+--            Percentage of memory in use
+--
+-- On google, they suggest to set `no_buffers` to yes.
+-- So, I tried  to add `no_buffers = yes,` inside  `conky.config`, but it didn't
+-- reduce the memory percentage.
+--}}}
+
 conky.config = {
     background = true,
     update_interval = 1,

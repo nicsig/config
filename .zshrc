@@ -4,6 +4,13 @@
 #
 # In the meantime, if you need to update tmux, follow this procedure:
 #
+#     $ chown2me
+#     $ make clean; make distclean; git stash; git pull
+#     $ PKG_CONFIG_PATH=$HOME/libeventbuild/lib/pkgconfig ./configure --prefix=$HOME/tmuxbuild
+#     $ make
+#
+# Do *not* install the binary. The alias will use it automatically.
+#
 # https://github.com/tmux/tmux/issues/1840#issuecomment-513273184
 #}}}
 if [[ -z "$TMUX" ]]; then
@@ -4297,7 +4304,7 @@ insert-last-word-forward() zle insert-last-word 1
 zle -N insert-last-word-forward
 bindkey '\e;' insert-last-word-forward
 
-# M-c/l/u       change-Case {{{3
+# M-u u/i/o       change-case {{{3
 
 # zle provides several functions to modify the case of a word:
 #
@@ -4310,22 +4317,22 @@ bindkey '\e;' insert-last-word-forward
 # We start by removing the default key binding using `M-u` to upcase a word.
 bindkey -r '\eu'
 
-# M-u c
-# upcase a word (by default it's M-c)
-bindkey '\euc' capitalize-word
-
-# M-u l
-# downcase a word (by default it's M-l)
-bindkey '\eul' down-case-word
-
 # M-u u
 # upcase a word (by default it's M-u)
 bindkey '\euu' up-case-word
 
+# M-u i
+# upcase a word (by default it's M-c)
+bindkey '\eui' capitalize-word
+
+# M-u o
+# downcase a word (by default it's M-l)
+bindkey '\euo' down-case-word
+
 # TODO:
 # Try to emulate a “submode” so that it's easier to repeat these mappings.
 # We could press `M-u` to enter the submode, then, for a brief period of time,
-# `c`, `l` or `u` would change the case of words.
+# `u`, `i` or `o` would change the case of words.
 
 # M-e         __expand_aliases {{{3
 

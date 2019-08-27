@@ -41,16 +41,16 @@ killall conky
 #
 # This prevents the rings from being displayed.
 #}}}
-cd "${HOME}/.conky/" || exit
+cd "${HOME}/.config/conky/" || exit
 
 # What's this `-c` option?{{{
 #
-# Usually, conky reads its config in `~/.conkyrc`.
+# Usually, conky reads its config in `~/.config/conky/conky.conf`.
 # With the `-c` option, you can specify another path.
 # This allows you to start several conky modules with different configs.
 #}}}
-conky -c "${HOME}/.conky/time.lua" &
-conky -c "${HOME}/.conky/system.lua" &
+conky -c "${HOME}/.config/conky/time.lua" &
+conky -c "${HOME}/.config/conky/system.lua" &
 }
 
 main 2>&1 | tee -a "${LOGFILE}"
