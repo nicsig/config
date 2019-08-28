@@ -936,8 +936,7 @@ set diffopt+=algorithm:patience
 " Again, this gives more readable diffs.
 set diffopt+=indent-heuristic
 " For more info, see:
-"
-"     https://vimways.org/2018/the-power-of-diff/
+" https://vimways.org/2018/the-power-of-diff/
 
 augroup customize_diff
     au!
@@ -978,12 +977,12 @@ fu! s:customize_diff() abort
         "}}}
         " Do *not* use a guard such as `if &l:diff` in the callback of the timer!{{{
         "
-        "     \ execute('windo if &l:diff | call s:restore_highlighting_after_diff() | endif') + win_gotoid(winid)})
+        "     \ execute('windo if &l:diff | call Restore_highlighting_after_diff() | endif') + win_gotoid(winid)})
         "                      ^^^^^^^^^^
         "
         " It would  create issues, because  when the callback is  processed, you
         " have no idea what the value of `&l:diff` is.
-        " This   matters  because   `s:restore_highlighting_after_diff()`  calls
+        " This   matters   because   `Restore_highlighting_after_diff()`   calls
         " `s:get_number_of_windows_in_diff_mode()`, which inspects  the value of
         " `'diff'` in each window.
         "
@@ -1005,7 +1004,7 @@ fu! s:customize_diff() abort
         " This can be manually fixed by pressing `=d`.
         "}}}
         call timer_start(0, {->
-            \ execute('windo call s:restore_highlighting_after_diff()') + win_gotoid(winid)})
+            \ execute('windo call Restore_highlighting_after_diff()') + win_gotoid(winid)})
     endif
 endfu
 
@@ -1016,7 +1015,11 @@ fu! s:get_number_of_windows_in_diff_mode() abort
     return number_of_windows_in_diff_mode
 endfu
 
-fu! s:restore_highlighting_after_diff() abort
+" Why a public function?{{{
+"
+" We need to call it from `lg#window#quit()`.
+"}}}
+fu! Restore_highlighting_after_diff() abort
     let view = winsaveview()
     " What's the purpose of this guard? {{{
     "
@@ -1046,8 +1049,9 @@ fu! s:restore_highlighting_after_diff() abort
     "
     " See `:h :diffoff`:
     "
-    " > The `:diffoff` command resets the relevant options to the values they had when
-    " > using `:diffsplit`, `:diffpatch` , `:diffthis`. or starting Vim in diff mode.
+    " >     The `:diffoff`  command resets  the relevant  options to  the values
+    " >     they  had when  using `:diffsplit`,  `:diffpatch` ,  `:diffthis`. or
+    " >     starting Vim in diff mode.
     "
     " We could also run `:setl fdm=marker`, but other options could suffer from the same
     " issue in the future. Indeed, currently `:diffoff` affects:
@@ -1078,10 +1082,6 @@ endfu
 "}}}
 if has('vim_starting') && &l:diff
     syn off
-    " We need a flag to know that Vim was started as `$ vimdiff` (or `$ vim -d`).
-    " This is useful, for  example, to quit the whole Vim  session when we press
-    " `SPC q`, instead of just closing the current window. See `lg#window#quit()`.
-    let g:is_started_as_vimdiff = 1
 endif
 
 " display {{{2
@@ -2137,31 +2137,6 @@ if &t_BE is# ''
     let &t_PS = "\e[200~"
     let &t_PE = "\e[201~"
 endif
-" FIXME: Nvim's bracketed paste mode doesn't prevent the interpretation of some special keys.{{{
-"
-" The issue is specific to some terminals.
-" I can't reproduce in xterm, but I can in st/urxvt/konsole/xfce4-terminal.
-"
-" MWE:
-"
-"     $ nvim -Nu NONE +'let @+ = "hello\e:echom \"malicious code injected\"\ri"' +startinsert
-"     C-S-v
-"     Esc
-"     :mess
-"     malicious code injected~
-"
-" Note that setting 'paste' doesn't fix the issue (neither in Vim, nor in Nvim).
-"
-" It's possible that the cause of this issue is the same as the cause of this other issue:
-" https://github.com/neovim/neovim/issues/8395
-"
-" Besides, Nvim misses some Vim patches regarding the bracketed paste mode:
-" https://gist.github.com/janlazo/cea7acf2711e89a9bc4f7c79612c6e54#bracketed-paste
-"
-" Before submitting  an issue, wait for  #8395 to be  fixed, and have a  look at
-" issues tagged with 'clipboard':
-" https://github.com/neovim/neovim/labels/clipboard
-"}}}
 
 " RV {{{3
 
@@ -3696,20 +3671,23 @@ endfu
 " U                   (prefix) {{{3
 
 " go to previous save
-" TODO:
+nno <silent> UH :<c-u>ea 1f <bar> sil call save#toggle_auto(0)<cr>
 " Previously, we used `UU`, but I suspect we pressed it by accident too often.
-" So, now, we use `U C-o` (C-o like to move in the jumplist).
-" For convenience, maybe install a submode, so that we can repeat the mapping,
-" simply by pressing `C-o`.
-nno  <silent>  U<c-o>  :<c-u>ea 1f<cr>
-" we use `M-u u` to upcase a visual selection, so don't worry about shadowing `U`
-xno  U<c-o>  :<c-u>ea 1f<cr>
+" So now, we use `UH`.
 
 " go to next save
-nno  <silent>  U<c-i>  :<c-u>later 1f<cr>
+nno <silent> UL :<c-u>later 1f <bar> sil call save#toggle_auto(0)<cr>
 
-" go to most recent version of the file
-nno  <silent>  U<c-r>  :<c-u>exe 'undo '.undotree().seq_last<cr>
+" go to Most recent version of the file
+" Mnemonic:{{{
+"
+" We use `H` to get an older version of the file.
+" We use `L` to get a more recent version of the file.
+" `M` is on the right of `L` on our keyboard.
+"
+" So it makes sense that `M` gets us the most recent version of the file.
+"}}}
+nno <silent> UM :<c-u>exe 'undo '.undotree().seq_last <bar> sil call save#toggle_auto(0)<cr>
 
 " fugitive
 
@@ -4010,6 +3988,11 @@ nno <silent> -$ :<c-u>call <sid>shell_command_help()<cr>
 xno <silent> -$ :<c-u>call <sid>shell_command_help('vis')<cr>
 
 fu! s:shell_command_help(...) abort
+    " You can test the function on these lines:{{{
+    "
+    "     $ ls -larth
+    " foo `$ ls -larth` bar
+    "}}}
     let reg_save = [getreg('"'), getregtype('"')]
     try
         if a:0
@@ -4017,19 +4000,22 @@ fu! s:shell_command_help(...) abort
             let cmd = @"
         else
             let cml = &ft is# 'markdown' ? '' : matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
-            "     $ ls -larth
-            " foo `$ ls -larth` bar
-            let cmd_in_codeblock = matchstr(getline('.'), '^\s*\V'.escape(cml, '\').'\m\s\{5}\$\s*\zs.*')
-            let cmd_in_codespan = matchstr(getline('.'), '^\s*\V'.escape(cml, '\').'\m\s\{5}\$\s*\zs.*')
+            let [line, col] = [getline('.'), col('.')]
+            let cmd_in_codeblock = matchstr(line, '^\s*\V'.escape(cml, '\').'\m\s\{5}\$\s\+\zs.*')
+            let pat =
+                "\ the cursor is right on the opening backtick
+                \ '\%'..col..'c`\$\s\+\zs.\{-}\ze`'
+                \ ..'\|'
+                "\ the cursor is in the middle of the codespan (but not on the last backtick)
+                \ ..'`\$\s\+\zs[^`]*\%'..col..'c[^`]\+\ze`'
+            let cmd_in_codespan = matchstr(line, pat)
             if cmd_in_codeblock is# '' && cmd_in_codespan is# ''
                 echo 'no shell command on this line'
                 return
+            elseif cmd_in_codeblock isnot# ''
+                let cmd = cmd_in_codeblock
             else
-                if cmd_in_codespan is# ''
-                    let cmd = cmd_in_codeblock
-                else
-                    let cmd = cmd_in_codespan
-                endif
+                let cmd = cmd_in_codespan
             endif
         endif
         let @o = system('ch '..cmd)
@@ -4537,7 +4523,7 @@ endfu
 "     endtry
 " endfu
 
-" >b  <b              create/destroy box {{{3
+" <b  >b              destroy/create box {{{3
 
 " Draw a box around the text inside the paragraph.
 " The fields must be separated with `|`.
@@ -7030,10 +7016,11 @@ endfu
 " Terminal {{{2
 
 augroup my_terminal
-    if !has('nvim')
-        au TerminalOpen  *  call s:setup_vim_terminal()
-    else
+    au!
+    if has('nvim')
         au TermOpen * call s:setup_neovim_terminal() | startinsert
+    else
+        au TerminalOpen * call s:setup_vim_terminal()
     endif
 augroup END
 
@@ -7042,7 +7029,7 @@ fu! s:setup_vim_terminal() abort
     " Not Vim. We do it in this function.
     setl nowrap
     call s:setup_neovim_terminal()
-    exe 'nno  <buffer><nowait><silent>  p  i<c-e>' . &l:termwinkey . '""'
+    exe 'nno <buffer><nowait><silent> p i<c-e>'..&l:termwinkey..'""'
 endfu
 
 fu! s:setup_neovim_terminal() abort
@@ -7058,29 +7045,6 @@ fu! s:setup_neovim_terminal() abort
     xno  <buffer><nowait><silent>  p  <nop>
     xno  <buffer><nowait><silent>  x  <nop>
 endfu
-
-" By default, a terminal buffer is not modifiable. We could change this with
-" an autocmd. Useful to copy some text, and then paste it to execute it as a command.
-" However, if we delete one or 2 lines, neovim may crash.
-" So, for the moment, we don't want a terminal buffer to be modifiable.
-" It may change in the future though:
-"
-" https://github.com/neovim/neovim/issues/5431
-" https://github.com/neovim/neovim/pull/6142
-"
-" We can still paste text on the command-line though.
-" No matter what we copy, no matter where we are, it will be put on the command
-" line, without our cursor to move.
-
-" if has('nvim')
-"     augroup my_neovim_terminal
-"         au!
-"         DANGEROUS
-"         au TermOpen * setlocal modifiable
-"         DOESN'T WORK (why?)
-"         au TermOpen * setlocal bufhidden=hide
-"     augroup END
-" endif
 
 " Trailing Whitespace {{{2
 
@@ -8383,8 +8347,8 @@ endfu
 " the fact that we prefix a lot of our commands with `:noa` has an effect on the
 " issue:
 "
-"         noa vim /pattern/j $VIMRUNTIME/**/*.vim | cw
-"         no indicator in the statusline because of `:noa`~
+"     noa vim /pattern/j $VIMRUNTIME/**/*.vim | cw
+"     no indicator in the statusline because of `:noa`~
 "
 " 79 -
 " try to remove as many `virtcol()` as possible everywhere.
@@ -8740,18 +8704,12 @@ endfu
 "
 " ---
 "
-" Have you saved and restored the visual marks?
-"
-" ---
-"
 " Do you need to save and restore `v:register` every time?
-"
-" ---
-"
 " Do you need to save and restore `v:count` every time?
 "
 " ---
 "
+" Have you saved and restored the visual marks?
 " Have you used `:s`, while you should have used `setline()`?
 "
 " ---
@@ -9036,14 +8994,16 @@ endfu
 "
 " MWE:
 "
-"     vim -Nu NONE \
+"     $ cd
+"
+"     $ vim -Nu NONE \
 "       +'set path=.,**' \
 "       +"set inex=substitute(v:fname,'.*=','','')" \
 "       <(hash)
 "
 "     press `gf` on a path: it's slow
 "
-"     vim -Nu NONE \
+"     $ vim -Nu NONE \
 "       +'cd ~/.vim/plugged/vim-awk' \
 "       +'set path=.,**' \
 "       +"set inex=substitute(v:fname,'.*=','','')" \
@@ -9053,6 +9013,15 @@ endfu
 " We need to make `gf` smarter.
 " When it sees a directory such as `~`, it should not search in it.
 " Or, we should stop using such a broad 'path'... (vim-apathy to the rescue?)
+"
+" Update:
+" Now we use a different value for 'path':
+"
+"     path=.,**5
+"              ^
+" This numeric prefix limits the depth of subdirectories in which Vim searches.
+" It seems to help a lot in our previous MWE.
+" Do we still have an issue? Or does the numeric prefix fix everything?
 "
 " 117 -
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
@@ -9164,7 +9133,7 @@ endfu
 "
 "     $ vim -d ~/.bashrc ~/.zshrc
 "
-" Why does the statusline in the right window is noisy?
+" Why is the statusline in the right window noisy?
 " Focus it, then get  back to the first window: it gets quiet,  which is what we
 " wanted right from the start.
 "
@@ -9239,42 +9208,19 @@ endfu
 "
 " 133 -
 " We have too many comments in this file about the bracketed paste mode.
-" Plus two fixmes.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
-" I don't  care about  the fixmes  right now,  because I  don't use  the builtin
-" terminal, and because I never paste from insert mode.
+" Also, document somewhere `:h vim.paste` (Nvim only):
+"
+" > Extensibility: users can control paste behavior by redefining vim.paste (Lua)
+" https://github.com/neovim/neovim/pull/4448
 "
 " 134 -
-" Diff 2 files (cod).
-" Close both windows by pressing `SPC q`.
-" The syntax highlighting has not been restored.
-"
-" You'll need  to make `s:restore_highlighting_after_diff()` a  public function,
-" so that it can be called by our vim-lg plugin (with `:windo call ...`).
-" Indeed, you need to call this  function for everything to work again properly;
-" it's not as simple as running `:syn enable`.
-"
-" ---
-"
-" Also, maybe you should colorize the  `[Diff]` indicator, so that it stands out
-" better. Right now, I barely notice it.
-"
-" 135 -
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
 " Maybe we should ask for  some built-in functions (`getsynlist()`?, `gethi()`?)
 " which would give this info in a nice dictionary.
 "
-" 136 -
-" To resize a window we press `z c-h` then `;` or `,`.
-" Compared to tmux, it's confusing.
-" In tmux, we press pfx + `c-h`, then we can press `c-h`, `c-l`, `c-j`, `c-k` repeatedly.
-" We should do sth  similar in Vim to be more consistent,  and also because it's
-" more powerful.
-" To do so,  you'll need to create  a submode, and maybe  tweak `vim-submode` so
-" that we quit a submode automatically after 1 or 2 seconds.
-"
-" 137 -
+" 135 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -9290,7 +9236,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 138 -
+" 136 -
 "
 " Find a way to prevent `$ par` from breaking a codespan on multiple lines.
 "
@@ -9298,13 +9244,9 @@ endfu
 " codespan with  C-b; this should  prevent `$ par`  from breaking a  codespan on
 " multiple lines. Then after the formatting, you would replace C-b with spaces.
 "
-" 139 -
+" 137 -
 "
-" Improve  the `-$`  mapping  to  support commented  lines  and commands  inside
-" codespans.   Also,  only process  a  shell  command in  a  codeblock  or in  a
-" codespan.
-"
-" Update: We really need a library function to get a comment leader.
+" We really need a library function to get a comment leader.
 "
 "     if &ft is# 'markdown'
 "         return ''
@@ -9323,10 +9265,21 @@ endfu
 "
 "     ~/.vim/plugged/vim-tmux/autoload/tmux/run.vim:36
 "
+" A library function to detect whether a given line is commented would also be helpful.
+"
 " Also, we need a library function to install these kind of `q` mappings:
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
+"
+" 138 -
+" We often make this error:
+"
+"     " insert this
+"     getline()
+"     " press M-b instead of C-b to get inside the parentheses
+"
+" What could be done to reduce the frequency of such errors?
 
 
 

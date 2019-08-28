@@ -4304,7 +4304,7 @@ insert-last-word-forward() zle insert-last-word 1
 zle -N insert-last-word-forward
 bindkey '\e;' insert-last-word-forward
 
-# M-u u/i/o       change-case {{{3
+# M-[io]        capitalize-word  down-case-word  {{{3
 
 # zle provides several functions to modify the case of a word:
 #
@@ -4312,27 +4312,59 @@ bindkey '\e;' insert-last-word-forward
 #    * m-l    downcase
 #    * m-u    upcase
 #
-# Unfortunately, we can't use some of them because they're already used in tmux / fzf.
-# So, we want to use `M-u` as a prefix to change the case of a word.
-# We start by removing the default key binding using `M-u` to upcase a word.
-bindkey -r '\eu'
+# But we can't use `M-l` nor `M-c`, because they're already used by tmux / fzf.
 
-# M-u u
-# upcase a word (by default it's M-u)
-bindkey '\euu' up-case-word
+bindkey '\ei' capitalize-word
+bindkey '\eo' down-case-word
 
-# M-u i
-# upcase a word (by default it's M-c)
-bindkey '\eui' capitalize-word
-
-# M-u o
-# downcase a word (by default it's M-l)
-bindkey '\euo' down-case-word
-
-# TODO:
-# Try to emulate a “submode” so that it's easier to repeat these mappings.
-# We could press `M-u` to enter the submode, then, for a brief period of time,
-# `u`, `i` or `o` would change the case of words.
+# Alternative: Use `M-u` as a prefix, and create a submode in which you don't need the prefix.{{{
+#
+# For example, this code allows you to enter a submode by pressing `M-u`.
+# In this submode, you can change the case of a word by pressing `u`, `i` or `o`.
+# The submode is quit automatically after a few seconds.
+#
+#     TMOUT=6
+#     trap __catch_signal_alrm ALRM
+#     __catch_signal_alrm() {
+#       M_U_SUBMODE=0
+#     }
+#
+#     __enter-m-u-submode() {
+#       M_U_SUBMODE=1
+#     }
+#     zle -N __enter-m-u-submode
+#     bindkey '\eu' __enter-m-u-submode
+#
+#     __insert-u-or-up-case-word() {
+#       if [[ $M_U_SUBMODE -eq 1 ]]; then
+#         zle up-case-word
+#       else
+#         zle self-insert u
+#       fi
+#     }
+#     zle -N __insert-u-or-up-case-word
+#     bindkey 'u' __insert-u-or-up-case-word
+#
+#     __insert-i-or-capitalize-word() {
+#       if [[ $M_U_SUBMODE -eq 1 ]]; then
+#         zle capitalize-word
+#       else
+#         zle self-insert i
+#       fi
+#     }
+#     zle -N __insert-i-or-capitalize-word
+#     bindkey 'i' __insert-i-or-capitalize-word
+#
+#     __insert-o-or-down-case-word() {
+#       if [[ $M_U_SUBMODE -eq 1 ]]; then
+#         zle down-case-word
+#       else
+#         zle self-insert o
+#       fi
+#     }
+#     zle -N __insert-o-or-down-case-word
+#     bindkey 'o' __insert-o-or-down-case-word
+#}}}
 
 # M-e         __expand_aliases {{{3
 

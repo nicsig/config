@@ -326,7 +326,7 @@ call lg#motion#repeatable#make#all({
 \                   ]
 \ })
 
-" fold more|less / move tabpage / resize window / rotate window
+" fold more|less / move tabpage / rotate window
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
@@ -334,8 +334,6 @@ call lg#motion#repeatable#make#all({
 \        'motions': [
 \                     {'bwd': '<f'    ,  'fwd': '>f'},
 \                     {'bwd': '<t'    ,  'fwd': '>t'},
-\                     {'bwd': 'z<c-h>',  'fwd': 'z<c-l>'},
-\                     {'bwd': 'z<c-k>',  'fwd': 'z<c-j>'},
 \                     {'bwd': '<c-w>R',  'fwd': '<c-w>r'},
 \                   ]
 \ })

@@ -1,9 +1,3 @@
-call submode#enter_with('my-capitalize', 'n', 'r', '<m-u>i', '<plug>(my-capitalize)' )
-call submode#map(       'my-capitalize', 'n', 'r',      'i', '<plug>(my-capitalize)')
-nno <plug>(my-capitalize) :<c-u>set opfunc=readline#move_by_words<cr>g@l
-" nno <plug>(my-capitalize) :<c-u>set opfunc=readline#change_case_word<cr>g@l
-finish
-
 if stridx(&rtp, 'vim-submode') ==# -1
     finish
 endif
@@ -16,24 +10,29 @@ endif
 "     call submode#map(       'undo/redo', 'n', '',  '+', 'g+')
 "     call submode#leave_with('undo/redo', 'n', '', '<Esc>')
 
-call submode#enter_with('my-uppercase', 'nic', 'r', '<m-u>u', '<plug>(my-uppercase)' )
-call submode#map(       'my-uppercase', 'nic', 'r',      'u', '<plug>(my-uppercase)')
-nno <silent> <plug>(my-uppercase) :<c-u>call readline#change_case_save(1)<bar>set opfunc=readline#change_case_word<cr>g@l
-ino <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'i')<cr>
-cno <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'c')<cr>
-
-call submode#enter_with('my-capitalize', 'nic', 'r', '<m-u>i', '<plug>(my-capitalize)' )
-call submode#map(       'my-capitalize', 'nic', 'r',      'i', '<plug>(my-capitalize)')
-nno <silent> <plug>(my-capitalize) :<c-u>set opfunc=readline#move_by_words<cr>g@l
-ino <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('i', 1, 1)<cr>
-cno <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('c', 1, 1)<cr>
-
-call submode#enter_with('my-lowercase', 'nic', 'r', '<m-u>o', '<plug>(my-lowercase)' )
-call submode#map(       'my-lowercase', 'nic', 'r',      'o', '<plug>(my-lowercase)')
-nno <silent> <plug>(my-lowercase) :<c-u>call readline#change_case_save(0)<bar>set opfunc=readline#change_case_word<cr>g@l
-ino <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'i')<cr>
-cno <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'c')<cr>
-
+" TODO: Consider getting rid of vim-submode.{{{
+"
+" You could set a variable when entering  the submode, then reset it later (when
+" a certain event is  fired, when a key is pressed, or when  a certain amount of
+" time has elapsed).
+" Then, you would inspect this variable to decide how a given key should behave.
+"
+" Example:
+"
+"     ino <c-g>j <c-r>=C_g_j()<cr>
+"     ino j      <c-r>=J()<cr>
+"     fu! C_g_j()
+"         let s:in_submode = 1
+"         let s:timer_id = timer_start(3000, {-> execute('let s:in_submode = 0')})
+"         if exists('s:timer_id')
+"             call timer_stop(s:timer_id)
+"         endif
+"         return "\<c-x>\<c-e>"
+"     endfu
+"     fu! J() abort
+"         return get(s:, 'in_submode', 0) ? "\<c-x>\<c-e>" : 'j'
+"     endfu
+"}}}
 
 " TODO:
 " Create a submode to move half a screen with `d`, `u`:
@@ -76,14 +75,105 @@ cno <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#ch
 
 " C-w g[hjkl] (tradewinds) {{{1
 
-call submode#enter_with('foobar', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-h)')
-call submode#enter_with('foobar', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-j)')
-call submode#enter_with('foobar', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-k)')
-call submode#enter_with('foobar', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-l)')
-call submode#map(       'foobar', 'n', 'r',       'h', '<plug>(tradewinds-h)')
-call submode#map(       'foobar', 'n', 'r',       'j', '<plug>(tradewinds-j)')
-call submode#map(       'foobar', 'n', 'r',       'k', '<plug>(tradewinds-k)')
-call submode#map(       'foobar', 'n', 'r',       'l', '<plug>(tradewinds-l)')
+call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-h)')
+call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-j)')
+call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-k)')
+call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-l)')
+call submode#map(       'tradewinds', 'n', 'r',       'h', '<plug>(tradewinds-h)')
+call submode#map(       'tradewinds', 'n', 'r',       'j', '<plug>(tradewinds-j)')
+call submode#map(       'tradewinds', 'n', 'r',       'k', '<plug>(tradewinds-k)')
+call submode#map(       'tradewinds', 'n', 'r',       'l', '<plug>(tradewinds-l)')
+
+" M-u [uio] (change case) {{{1
+
+" Update: We don't use this code anymore, because we simply press `M-u`, `M-i`, `M-o`, to change the case of a word.
+"
+" In the past, we  pressed `M-u u`, `M-u i`, `M-u o`; so  we needed a submode to
+" avoid pressing  the prefix  several times  when changing  the case  of several
+" words.
+" Nevertheless, I keep this commented code for the moment, because it contains 2
+" fixmes which may be interesting to fix.
+
+" FIXME: Press `M-u`, then keep pressing `i`.  Eventually, you enter insert mode and insert the `i` character.{{{
+"
+" Write a single word on a line, and position your cursor on its last character.
+"
+" Press `M-u i`: the last character is uppercased.
+" Press `i`: you enter insert mode.
+"
+" This is unexpected; the last `i` keypress should have no effect.
+" Exactly like for `M-u u u`.
+"
+" Press `M-u u`: the last character is uppercased.
+" Press `u`: nothing happens (in particular, no undo).
+"
+" ---
+"
+" The issue is not in the lhs of the key binding.
+" You can  choose `M-u <key>`,  `<key>` being any  key character, and  the issue
+" persists.
+"
+" ---
+"
+" Try this experiment:
+"
+" At the top of `readline#move_by_words()`, write this:
+"
+"     let g:d_counter = get(g:, 'd_counter', 0) + 1
+"     if g:d_counter == 1
+"         ...
+"         return ''
+"     endif
+"
+" Replace `...` with the code inside `readline#change_case_word()`.
+"
+" Here's the effect of this change:
+" When you press `M-u i`, `readline#move_by_words()` will execute the code
+" of `readline#change_case_word()`.
+" When you  press `i`  right afterward, `readline#move_by_words()`  will execute
+" its own code.
+"
+" Now, press `M-u i` on the last character of the last word on a line: it's uppercased.
+" Next, press `i`: nothing happens (in particular you don't enter insert mode).
+" This  seems to  suggest that  the issue  is due  to something  that the  first
+" invocation of `readline#move_by_words()` has done.
+" I thought  it could be  due to the cursor  position, which is  different after
+" I've pressed `M-u u` compared to `M-u i`.
+" But that's not the case: the output of `getcurpos()` is identical.
+"
+" ---
+"
+" I can't reproduce if I press `M-u i` twice.
+" Only if I press `M-u i i`.
+" So the issue is probably due to sth which happens when we're in the submode.
+" The submode plugin may contain some bug.
+"}}}
+" FIXME: Press `M-u u` then `M-b`: `b` is inserted.{{{
+"
+" I would expect `M-b` to make the cursor move one word backward.
+"
+" The issue also applies to other key  bindings, like `C-x j` and `C-x k`; press
+" `C-x k` to duplicate the character above then `M-b`, and `b` is inserted.
+"
+" I can't reproduce in Nvim.
+"}}}
+"     call submode#enter_with('my-uppercase', 'nic', 'r', '<m-u>u', '<plug>(my-uppercase)' )
+"     call submode#map(       'my-uppercase', 'nic', 'r',      'u', '<plug>(my-uppercase)')
+"     nno <silent> <plug>(my-uppercase) :<c-u>call readline#change_case_save(1)<bar>set opfunc=readline#change_case_word<cr>g@l
+"     ino <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'i')<cr>
+"     cno <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'c')<cr>
+
+"     call submode#enter_with('my-capitalize', 'nic', 'r', '<m-u>i', '<plug>(my-capitalize)' )
+"     call submode#map(       'my-capitalize', 'nic', 'r',      'i', '<plug>(my-capitalize)')
+"     nno <silent> <plug>(my-capitalize) :<c-u>set opfunc=readline#move_by_words<cr>g@l
+"     ino <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('i', 1, 1)<cr>
+"     cno <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('c', 1, 1)<cr>
+
+"     call submode#enter_with('my-lowercase', 'nic', 'r', '<m-u>o', '<plug>(my-lowercase)' )
+"     call submode#map(       'my-lowercase', 'nic', 'r',      'o', '<plug>(my-lowercase)')
+"     nno <silent> <plug>(my-lowercase) :<c-u>call readline#change_case_save(0)<bar>set opfunc=readline#change_case_word<cr>g@l
+"     ino <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'i')<cr>
+"     cno <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'c')<cr>
 
 " schlepp {{{1
 
@@ -120,6 +210,8 @@ call submode#map(       'schlepp', 'x', 'r', 'l', '<plug>(schlepp_right)')
 " Try to make Esc quit the schlepp submode AND visual mode at the same time.
 " It's tiring to press Esc twice all the time.
 " Implement this as a feature by refactoring `vim-submode` if needed.
+"
+" Do we need sth similar in other key bindings?
 
 " <  > {{{1
 
