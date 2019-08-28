@@ -695,15 +695,19 @@ edit ~/.vim/autoload/myfuncs.vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
 setlocal fdm=marker
 setlocal fde=0
@@ -717,12 +721,12 @@ setlocal fen
 normal! zo
 979
 normal! zo
-let s:l = 1000 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1015 - ((7 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1000
-normal! 0
+1015
+normal! 01|
 lcd ~/.vim
 wincmd w
 argglobal
@@ -735,23 +739,42 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-7105
+7122
 normal! zo
-let s:l = 9113 - ((14 * winheight(0) + 14) / 28)
+let s:l = 7377 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-9113
+7377
+normal! 06|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/Desktop/diagram") | buffer ~/Desktop/diagram | else | edit ~/Desktop/diagram | endif
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
 normal! 0
 lcd ~/.vim
 wincmd w
-2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+3wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
 tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
-badd +2144 ~/.vim/vimrc
 badd +963 ~/wiki/awk/sed.md
 badd +2 ~/wiki/man/examples/pathfind.1
 badd +173 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
@@ -762,7 +785,7 @@ badd +892 ~/wiki/tmux/command.md
 badd +1 ~/bin/yank
 badd +192 ~/Desktop/session.md
 badd +171 ~/wiki/shell/job.md
-badd +1000 ~/.vim/autoload/myfuncs.vim
+badd +997 ~/.vim/autoload/myfuncs.vim
 badd +4507 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +153 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -774,6 +797,8 @@ badd +1280 ~/wiki/tmux/format.md
 badd +612 ~/wiki/terminal/capabilities.md
 badd +118 ~/Desktop/ask.md
 badd +1680 ~/wiki/shell/process.md
+badd +6949 ~/.vim/vimrc
+badd +0 ~/Desktop/diagram
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
