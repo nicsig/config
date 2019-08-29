@@ -8397,6 +8397,17 @@ endfu
 "
 " ---
 "
+" You should always install these mappings:
+"
+"     nno <buffer><nowait><silent> <tab> <c-w><c-p>
+"     nno <buffer><nowait><silent> <c-h> :<c-u>echo 'press Tab'<cr>
+"     nno <buffer><nowait><silent> <c-l> :<c-u>echo 'press Tab'<cr>
+"
+" Otherwise, if you simply  press `C-h` or `C-l`, you won't  always focus back the
+" window from which you came.
+"
+" ---
+"
 " If you don't need to interact with the temp buffer, only read it, make it use
 " a preview window:
 "

@@ -102,6 +102,7 @@ fu! s:set_recipes() abort
                          \ + [{'buns': ['`', "'"], 'input': ['g']}]
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
+                         \ + [{'buns': ['«', '»'], 'input': ['<<']}]
                          \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
                          \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
 

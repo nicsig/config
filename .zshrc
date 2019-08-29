@@ -1108,7 +1108,7 @@ EOF
 
   # Where is `pygments` documentation? {{{
   #
-  #     http://pygments.org/docs/
+  # http://pygments.org/docs/
   #}}}
   # What's a lexer?{{{
   #
@@ -1152,26 +1152,37 @@ EOF
   #}}}
   encoding="$(printf -- "$@" | base64)"
 
-  # Alternative using `highlight`:{{{
-  #
-  #     curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
-  #     | highlight -O xterm256 -S bash -s bright | less -iR
-  #                  │           │       │
-  #                  │           │       └ we want the 'olive' highlighting style
-  #                  │           │         (to get the list of available styles: `highligh -w`)
-  #                  │           │
-  #                  │           └ the syntax of the input file is bash
-  #                  │
-  #                  └ output the file for a terminal
-  #                    (you can use other formats: html, latex ...)
-  #}}}
-  #     ┌ download silently (no errors, no progression){{{
-  #     │
-  #     │┌ if the url page has changed, try the new address
-  #     ││}}}
-  curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
-  | pygmentize -l shell \
-  | less -iR
+  if pygmentize -l shell <<<test >/dev/null 2>&1; then
+    # Alternative using `highlight`:{{{
+    #
+    #     curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
+    #     | highlight -O xterm256 -S bash -s bright | less -iR
+    #                  │           │       │
+    #                  │           │       └ we want the 'olive' highlighting style
+    #                  │           │         (to get the list of available styles: `highligh -w`)
+    #                  │           │
+    #                  │           └ the syntax of the input file is bash
+    #                  │
+    #                  └ output the file for a terminal
+    #                    (you can use other formats: html, latex ...)
+    #}}}
+    #     ┌ download silently (no errors, no progression){{{
+    #     │
+    #     │┌ if the url page has changed, try the new address
+    #     ││}}}
+    curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
+    | pygmentize -l shell \
+    | less -iR
+  else
+      cat <<'EOF' >&2
+Install `pygmentize` to get syntax highlighting:
+
+  $ sudo aptitude install python-pygments (✔)
+  $ python3 -m pip install --user pygments (✔✔)
+EOF
+    curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
+    | less -iR
+  fi
   #       ││{{{
   #       │└ --RAW-CONTROL-CHARS
   #       │
@@ -1187,7 +1198,7 @@ EOF
 }
 
 environ() { #{{{2
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
   purpose: print the environment variables of an arbitrary process
   usage: $0 PID
@@ -1248,7 +1259,7 @@ EOF
 # tab-complete `$ fasd`; this may help us remembering its existence.
 fasd_add() {
   emulate -L zsh
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 0 ]]; then
     cat <<EOF >&2
   usage: $0 <filepath to add in fasd's database>
 EOF
@@ -1263,7 +1274,7 @@ EOF
 
 fasd_remove() {
   emulate -L zsh
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
   usage: $0 <filepath to remove from fasd's database>
 EOF
@@ -1434,7 +1445,7 @@ EOF
 
 ff_sub_extract() { #{{{2
   emulate -L zsh
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 2 ]]; then
     cat <<EOF >&2
 usage:    $0  <video file>  [<subtitle number>]
 EOF
@@ -1459,8 +1470,7 @@ EOF
     printf -- "The subtitles have been extracted in:  '%s'\n" "${out}"
   fi
 
-  # In case of an issue, see:
-  #     https://superuser.com/a/927507/913143
+  # In case of an issue, see: https://superuser.com/a/927507/913143
 }
 
 ff_video_to_gif() { #{{{2
@@ -1486,7 +1496,7 @@ find_pgm() { #{{{2
   #}}}
   unsetopt NOMATCH
 
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
 usage: $0 <command name>
 example: $0 edit
@@ -1711,7 +1721,7 @@ EOF
   #
   # If the pattern is absent, I don't want any error message to be printed.
   #}}}
-  shift
+  shift 1
   vim \
   +'argdo do BufWinEnter' \
   +"sil! noa vim /${pat}/gj ## | cw" \
@@ -1732,7 +1742,7 @@ help() { #{{{2
 
 in_fileA_but_not_in_fileB() { #{{{2
   emulate -L zsh
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 2 ]]; then
     cat <<EOF >&2
 usage:
     $0 <file_a> <file_b>
@@ -1757,7 +1767,7 @@ EOF
 
 gpg_key_check() { #{{{2
   emulate -L zsh
-  if [[ $# -lt 2 ]]; then
+  if [[ $# -ne 2 ]]; then
     cat <<EOF >&2
   usage: $0 /path/to/key.asc <expected fingerprint>
 EOF
@@ -1804,7 +1814,7 @@ logout() { #{{{2
 
 man_pdf() { #{{{2
   emulate -L zsh
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
   usage: $0 <command name>
 EOF
@@ -2145,11 +2155,46 @@ palette(){ #{{{2
     fi
   done
 }
+
+pdf_merge() { #{{{2
+  emulate -L zsh
+  if [[ $# -lt 2 ]]; then
+    cat <<EOF >&2
+  usage: $0 <output file> <input files>
+  example: $0 output.pdf *.pdf
+EOF
+    return 64
+  fi
+
+  output_file="$1"
+  shift 1
+
+  # https://stackoverflow.com/a/19358402/9780968
+  # TODO: Make it preserve hyperlinks.{{{
+  #
+  # For some people, the output pdf preserve the hyperlinks.
+  # https://stackoverflow.com/questions/2507766/merge-convert-multiple-pdf-files-into-one-pdf/19358402#comment94073595_19358402
+  #
+  # Not for me.
+  #}}}
+  gs \
+     -sDEVICE=pdfwrite \
+     -dCompatibilityLevel=1.4 \
+     -dPDFSETTINGS=/default \
+     -dNOPAUSE \
+     -dQUIET \
+     -dBATCH \
+     -dDetectDuplicateImages \
+     -dCompressFonts=true \
+     -r150 \
+     -sOutputFile="$output_file" \
+     $@
+}
 #}}}2
 
 ppa_what_can_i_install() { #{{{2
   emulate -L zsh
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
 usage:
     $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
@@ -2162,7 +2207,7 @@ EOF
 
 ppa_what_have_i_installed() { #{{{2
   emulate -L zsh
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
 usage:
     $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
@@ -2430,7 +2475,7 @@ whichcomp() { #{{{2
   # Go to the irc channel `#zsh` and run the command `!whichcomp`.
   # A bot will print the code.
   #}}}
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
   usage: $0 <command name>
   example: $0 ls
@@ -2618,6 +2663,22 @@ _fzf_compgen_path() { #{{{2
 #     $ echo bar; foo~
 #                 ^^^
 #}}}
+
+# TODO: Invoke `$ less` whenever the output of a command doesn't fit on a single screen.{{{
+#
+# Take the  habit of invoking `$  less`, every time you  write an alias/function
+# whose goal is  to print some info which  can be very long, and  require you to
+# scroll back with tmux copy mode.
+#
+# Example:
+#
+#     ✘
+#     alias pss='\ps xfo pid,tty=TTY,stat=STATE,args'
+#     ✔
+#     alias pss='\ps xfo pid,tty=TTY,stat=STATE,args | less'
+#                                                    ^^^^^^
+#}}}
+
 # TODO: regular aliases seem really shitty. Convert as many of them as possible into functions.
 
 # regular {{{2
@@ -2975,12 +3036,12 @@ alias options='vim -O =(setopt) =(unsetopt)'
 # ps {{{3
 
 # display only our processes, and with a minimum of noise
-alias pss='\ps xfo pid,tty=TTY,stat=STATE,args'
+alias pss='\ps xfo pid,tty=TTY,stat=STATE,args | less'
 # For some reason, the last character of the `TTY` and `STATE` column headers is
 # omitted, so we set those two column headers explicitly.
 
 # http://0pointer.de/blog/projects/systemd-for-admins-2.html
-alias psc='\ps axfo pid,user,cgroup,args'
+alias psc='\ps axfo pid,user,cgroup,args | less'
 
 # qmv {{{3
 
@@ -3174,7 +3235,15 @@ alias tlmgr_gui='tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/nu
 
 # top {{{3
 
-alias top='htop'
+# TODO: Remove the TERM assignment once this issue is fixed:
+# https://github.com/hishamhm/htop/issues/942
+# `M-j` and `M-k` don't work even with the alias!{{{
+#
+# You need a recent version of htop.
+# If needed, compile the latest release from here:
+# http://hisham.hm/htop/releases/
+#}}}
+alias top='TERM=xterm-256color htop'
 
 # trash {{{3
 
@@ -4607,26 +4676,9 @@ typeset -Ag abbrev
 #     $ echo V C-v SPC some text
 #}}}
 abbrev=(
-  # ring the BelL
-  'bl'    '; tput bel'
-  # Align Columns
-  'ac'    '| column -t'
-  # printf FieLd
-  'fl'   "| awk '{ print $"
+  # Grep (and ignore the `$ grep` process if we grep the output of `$ ps`)
+  'G' '| grep -v grep | grep'
   'L'    '2>&1 | less'
-  # No Errors
-  'ne'   '2>/dev/null'
-  'pf'    "printf -- '"
-
-  # silence!
-  #        ┌ redirect output to /dev/null
-  #        │          ┌ same thing for errors
-  #        ├────────┐ ├──┐
-  'sl'    '>/dev/null 2>&1'
-
-  # Do *not* use `T`; it would be expanded when you try to (un)bind a tmux key binding:
-  #     $ tmux bind -T ...
-  'tl'    '| tail -20'
   # Warning: If `cmd V` opens an empty buffer,{{{
   # then later opens the right buffer (the  one containing the output of `$ cmd`),
   # try to delete `~/.fasd-init-zsh`, and restart the shell.
@@ -4645,6 +4697,26 @@ abbrev=(
   'V'     '2>&1 | vipe >/dev/null'
   #                     │
   #                     └ don't write on the terminal, the Vim buffer is enough
+
+  # Align Columns
+  'ac'    '| column -t'
+  # ring the BelL
+  'bl'    '; tput bel'
+  # printf FieLd
+  'fl'   "| awk '{ print $"
+  # No Errors
+  'ne'   '2>/dev/null'
+  'pf'    "printf -- '"
+
+  # silence!
+  #        ┌ redirect output to /dev/null
+  #        │          ┌ same thing for errors
+  #        ├────────┐ ├──┐
+  'sl'    '>/dev/null 2>&1'
+
+  # Do *not* use `T`; it would be expanded when you try to (un)bind a tmux key binding:
+  #     $ tmux bind -T ...
+  'tl'    '| tail -20'
 )
 
 __abbrev_expand() {
