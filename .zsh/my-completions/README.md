@@ -53,8 +53,8 @@ It works thanks to these lines in `~/.zshrc`:
     autoload -Uz bashcompinit
     bashcompinit
 
-Note that  whether it succeeds  or not depends on  which features does  the bash
-function rely on.
+Note that whether it succeeds or not depends on which features the bash function
+relies on.
 
 Source: <https://unix.stackexchange.com/a/417143/289772>
 
@@ -91,10 +91,10 @@ For more info: <https://unix.stackexchange.com/a/2184/289772>
 # Todo
 ## Better understand `_zathura`.
 
-I've copied it from `/usr/share/zsh/functions/Completion/X/_zathura`, because it
-didn't suggest epub files.
-But we've installed a zathura plugin (zathura-pdf-mupdf) which allows us to do that.
+I've copied it from `/usr/share/zsh/functions/Completion/X/_zathura`.
 
+By default, it doesn't suggest epub  files, but we've installed a zathura plugin
+(zathura-pdf-mupdf) which allows us to do that.
 So, after the `for pf ...` loop, I've added this line:
 
     supported_filetypes+="epub"

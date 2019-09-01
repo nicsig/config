@@ -355,11 +355,12 @@ endif
 " It  also   automatically  enables   saner  encoding  detection   settings  for
 " 'fileencodings':
 "
-"         https://vi.stackexchange.com/a/17326/17449
+" https://vi.stackexchange.com/a/17326/17449
 set encoding=utf-8
 
 " To avoid errors, we could also write:
-"         scriptencoding utf-8
+"
+"     scriptencoding utf-8
 "
 " This would tell Vim to convert the following lines in `vimrc` to utf-8.
 " But setting `encoding` seems to have a broader scope, and hence be better,
@@ -1004,14 +1005,14 @@ fu! s:customize_diff() abort
         " This can be manually fixed by pressing `=d`.
         "}}}
         call timer_start(0, {->
-            \ execute('windo call Restore_highlighting_after_diff()') + win_gotoid(winid)})
+            \ execute('tabdo windo call Restore_highlighting_after_diff()') + win_gotoid(winid)})
     endif
 endfu
 
 fu! s:get_number_of_windows_in_diff_mode() abort
     let all_windows = range(1, winnr('$'))
-    let windows_in_diff_mode = map(all_windows, {i,v -> getwinvar(v, '&diff')})
-    let number_of_windows_in_diff_mode = len(filter(windows_in_diff_mode, {i,v -> v}))
+    let windows_in_diff_mode = map(all_windows, {_,v -> getwinvar(v, '&diff')})
+    let number_of_windows_in_diff_mode = len(filter(windows_in_diff_mode, {_,v -> v}))
     return number_of_windows_in_diff_mode
 endfu
 
@@ -1036,12 +1037,12 @@ fu! Restore_highlighting_after_diff() abort
     if !exists('g:syntax_on') && s:get_number_of_windows_in_diff_mode() <= 1
         " `syn enable` must be run *before* `s:styled_comments()`
         syn enable
-        " Restore our custom HGs from `~/.vim/autoload/colorscheme.vim`
+        " restore our custom HGs from `~/.vim/autoload/colorscheme.vim`
         do ColorScheme
     endif
-    " restore the syntax groups which have been cleared
+    " restore our comments-related syntax groups which have been cleared
     call s:styled_comments() | do Syntax
-    " Without this, `norm! zMzv` may fail.{{{
+    " Without `do BufWinEnter`, `norm! zMzv` may fail.{{{
     "
     " It would fail when you start Vim with `$ vimdiff`.
     " This is because, after running  `:diffoff`, the value of `'foldmethod'` is
@@ -1068,9 +1069,8 @@ fu! Restore_highlighting_after_diff() abort
     " usually set  window-local options  by installing  an autocmd  listening to
     " `BufWinEnter`, it seems more reliable to manually fire the latter.
     "}}}
-    do BufWinEnter
+    do BufWinEnter | norm! zMzv
     call winrestview(view)
-    norm! zMzv
 endfu
 
 " We need this when we start Vim in diff mode right from the shell.{{{
@@ -3273,7 +3273,7 @@ nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<c
 " because it's not present in:
 "
 "     :h i_^g C-d
-"     :echo map(taglist('^i_CTRL-G'), { i,v -> v.name })
+"     :echo map(taglist('^i_CTRL-G'), {_,v -> v.name})
 "
 " There is no default equivalent for visual mode, but we often use `m` for
 " visual mode mappings. So, here again, we'll use `m` as a prefix.
@@ -3281,144 +3281,6 @@ nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<c
 imap  <c-g>m  <plug>(fzf-maps-i)
 xmap  mm      <plug>(fzf-maps-x)
 omap  m       <plug>(fzf-maps-o)
-
-" g                             goyo {{{4
-
-xno  <silent>  <space>gg  :<c-u>call <sid>clear_view()<cr>
-
-fu! s:clear_view() abort
-    let should_collapse =
-        \    line("'<") > 2 && getline(line("'<")-1) =~# '^\s*$' && getline(line("'<")-2) =~# '^\s*$'
-        \ && line("'>") < line('$') - 1 && getline(line("'>")+1) =~# '^\s*$' && getline(line("'>")+2) =~# '^\s*$'
-    if should_collapse
-        " remove superflous empty lines below
-        keepj keepp '>+s/^\%(\_s*\n\)\+/\r/e
-        " same thing above
-        " The order of removal is important.{{{
-        "
-        " We need to remove the empty lines below, before the ones above.
-        " That is because removing the lines  above will change the addresses of
-        " the line below.
-        "}}}
-        keepj keepp '<?^\s*\S?+s/^\%(\_s*\n\)\+/\r/e
-        " the mark set on the start of  the selection has been moved to the next line;
-        " restore it
-        '<-mark <
-    else
-        " add empty lines to clear the view
-        let cnt = winheight(0)/2
-        call append(line("'<")-1, repeat([''], cnt))
-        call append(line("'>"), repeat([''], cnt))
-    endif
-    norm! '<zz
-endfu
-
-" If you have weird thick borders around the window (especially visible in a light colorscheme):{{{
-"
-" You need to temporarily disable `'tgc'`, before running `:Goyo`.
-" The  issue is specific  to urxvt. I can't  reproduce in other  terminals, like
-" xterm and st.
-"}}}
-nno  <silent>  <space>gg  :<c-u>call <sid>goyo_start(1)<cr>
-nno  <silent>  <space>gG  :<c-u>call <sid>goyo_start(0)<cr>
-
-fu! s:goyo_start(without_syntax_hl) abort
-    let s:goyo_without_syntax_hl = a:without_syntax_hl
-    " If you don't disable `'tgc'`, some weird borders around the window are displayed.
-    exe 'Goyo'.(!exists('#goyo') ? ' 110' : '!')
-endfu
-
-fu! s:goyo_enter() abort
-    sil call system('tmux set status off')
-    " FIXME:
-    " If we have 2  tmux panes in the same window, Vim is  one of them, and it's
-    " not zoomed, when we start goyo mode, we see much less text as usual.
-    " If we have 2 vertical panes, the lines are shorter.
-    " If we have 2 horizontal panes, there are fewer lines.
-    " We probably need to resize the Tmux pane from the plugin, earlier.
-    sil call system('[[ $(tmux display -p "#{window_zoomed_flag}") -eq 0 ]] && tmux resizep -Z')
-    let s:cul_save = &l:cul
-    setl nocursorline
-    set scrolloff=999
-    set noshowcmd
-
-    let s:goyo_cocu_save = &l:concealcursor
-    let s:goyo_cole_save = &l:conceallevel
-    setl concealcursor=nc conceallevel=3
-
-    " FIXME: need to find another way to change the shape of the cursor in Neovim
-    " And what about the gui?
-    if !has('gui_running') && !has('nvim')
-        let &t_EI = "\e[4 q"
-        exe "norm! r\e"
-    endif
-
-    let pos = getcurpos()
-    " The new window created by `:tab sp` inherits the window-local options of
-    " the original window. But `:tab sp` doesn't fire `BufWinEnter` so we lose
-    " our position in the changelist.
-    "
-    " FIXME: We should  use the function `s:restore_change_position()`  but it's
-    " local to `vim-window`.
-    sil! exe 'norm! '.(exists('b:my_change_position') ? '99g;' : '99g,')
-        \ .(b:my_change_position - 1) .'g,'
-    call setpos('.', pos)
-
-    if get(s:, 'goyo_without_syntax_hl', 1)
-        let syntax_groups = [
-            \ 'Conditional',
-            \ 'Delimiter',
-            \ 'Function',
-            \ 'Identifier',
-            \ 'MatchParen',
-            \ 'Number',
-            \ 'Operator',
-            \ 'PreProc',
-            \ 'Special',
-            \ 'Statement',
-            \ 'String',
-            \ 'Type',
-            \ 'snipSnippet',
-            \ ]
-
-        for group in syntax_groups
-            exe 'hi '.group.' term=NONE cterm=NONE ctermfg=NONE ctermbg=NONE gui=NONE guifg=NONE guibg=NONE'
-        endfor
-    endif
-    Limelight
-endfu
-
-fu! s:goyo_leave() abort
-    sil call system('tmux set status on')
-    sil call system('[[ $(tmux display -p "#{window_zoomed_flag}") -eq 0 ]] && tmux resizep -Z')
-    set  showcmd
-    let &l:cul = s:cul_save
-    set  scrolloff=3
-
-    let &l:concealcursor = s:goyo_cocu_save
-    let &l:conceallevel = s:goyo_cole_save
-    unlet! s:goyo_cocu_save s:goyo_cole_save
-
-    if !has('gui_running') && !has('nvim')
-        let &t_EI = "\e[2 q"
-        exe "norm! r\e"
-    endif
-
-    exe 'colo '.g:colors_name
-    Limelight!
-endfu
-
-augroup my_goyo
-    au!
-    " FIXME:
-    " If we use `nested`, `:NoMatchParen` doesn't work.
-    " It doesn't work, even if we type the command later, while in goyo mode.
-    " Why?
-    " Should we get rid of `nested` in the 2nd autocmd (GoyoLeave)?
-    " Why do we need `nested` anyway?
-    au User GoyoEnter        call s:goyo_enter()
-    au User GoyoLeave ++nested call s:goyo_leave()
-augroup END
 
 " i x                           ixquick, tmux prompt {{{4
 
@@ -4149,7 +4011,7 @@ fu! s:faq() abort
     endif
 
     let this_tab = tabpagenr()
-    let win_in_this_tab = filter(getwininfo(), {i,v -> v.tabnr ==# this_tab})
+    let win_in_this_tab = filter(getwininfo(), {_,v -> v.tabnr ==# this_tab})
     let faq_file = $XDG_RUNTIME_VIM.'/faq'
 
     for win in win_in_this_tab
@@ -4160,12 +4022,12 @@ fu! s:faq() abort
         endif
     endfor
 
-    call map(deepcopy(win_in_this_tab), {i,v -> getwinvar(v.winnr, '&pvw', 0)})
+    call map(deepcopy(win_in_this_tab), {_,v -> getwinvar(v.winnr, '&pvw', 0)})
     if index(win_in_this_tab , 1) !=# -1
         return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
-    if index(map(deepcopy(win_in_this_tab), {i,v -> bufname(v.bufnr)}), faq_file) !=# -1
+    if index(map(deepcopy(win_in_this_tab), {_,v -> bufname(v.bufnr)}), faq_file) !=# -1
         echo 'a window displaying  '.faq_file.'  already exists'
         return ''
     endif
@@ -4191,7 +4053,7 @@ fu! s:edit_readme() abort
     let files = glob(expand('%:p:h').'/*', 0, 1)
     let kwd = '\%(readme\|contents\)'
     let pat = '\c/'.kwd.'\%(\..\{-}\)\=$'
-    let readmes = filter(files, {i,v -> v =~# pat})
+    let readmes = filter(files, {_,v -> v =~# pat})
     let readme = get(readmes, 0, '')
     if filereadable(readme) || isdirectory(readme)
         exe 'sp '.readme
@@ -4547,15 +4409,12 @@ xno  <silent>  =A  :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
 " So, we need to bind `:redraw!` to another key, `=d` could be a good
 " candidate.
 
-nno  <silent>  =d  :<c-u>call <sid>fix_display()<cr>
+nno <silent> =d :<c-u>call <sid>fix_display()<cr>
 
 fu! s:fix_display() abort
     let view = winsaveview()
 
-    " redraw screen
-    redraw!
-    " redraw all status lines
-    redraws!
+    redraw! | redraws!
 
     " update differences between windows in diff mode
     diffupdate!
@@ -4847,11 +4706,8 @@ xno  <silent>  0  g0
 
 " H  L  M             collapse/expand folds {{{3
 
-" collapse all
-nno  H  zMzz
-" expand all
-nno  L  zRzz
-" expand just enough to see where we are
+nno <expr> H v:count ? 'H' : 'zMzz'
+nno <expr> L v:count ? 'L' : 'zRzz'
 nno  M  zMzvzz
 
 " J        gJ         join without moving {{{3
@@ -4881,18 +4737,8 @@ nno <expr> gJ "m'" . v:count1 . 'gJ``'
 
 " Q        q {{{3
 
-" Par défaut, Q fait passer en mode Ex, un mode d'édition dans lequel:
-" on n'interagit qu'avec des commandes Ex
-" pas besoin de taper : au début de chaque nouvelle commande
-" l'écran n'est pas mis à jour après chaque édition
-"
-" C'est un mode adapté lorsqu'on travaille sur une machine distante avec
-" laquelle il y a beaucoup de lag.
-"
-" On entre souvent dans ce mode par erreur. Pour en sortir, il faut taper
-" :vi[sual]
-" Pour ne plus entrer dans ce mode par accident, on remap Q à q.
-nno  Q  q
+" no more entering Ex command by accident
+nno Q q
 
 " Y        y$ {{{3
 
@@ -5006,8 +4852,8 @@ fu! s:select_percent_object() abort
     let sym = matchstr(getline('.'), '\%'.col('.').'c.')
     " Maybe we could speed the process by storing the next 2 values in buffer-local
     " variables every time `FileType *` is fired. Not sure it's worth it.
-    let opening_syms = map(split(&l:mps, ','), {i,v -> matchstr(v, '.')})
-    let closing_syms = map(split(&l:mps, ','), {i,v -> matchstr(v, '.$')} )
+    let opening_syms = map(split(&l:mps, ','), {_,v -> matchstr(v, '.')})
+    let closing_syms = map(split(&l:mps, ','), {_,v -> matchstr(v, '.$')} )
     " check it is indeed in 'mps'
     if index(opening_syms, sym) < 0 && index(closing_syms, sym) < 0
         return
@@ -5679,7 +5525,7 @@ endfu
 "             if ! is_valid_topic
 "                 exe 'h ' . a:topic
 "             endif
-"             let no_help_window = index(map(tabpagebuflist(), {i,v -> getbufvar(v, '&ft')}), 'help') == -1
+"             let no_help_window = index(map(tabpagebuflist(), {_,v -> getbufvar(v, '&ft')}), 'help') == -1
 "             if no_help_window
 "                 exe 'h ' . a:topic
 "             else
@@ -5870,20 +5716,20 @@ fu! s:plugins_to_commit() abort
     endif
 
     let my_plugins = readfile($MYVIMRC)
-    call filter(my_plugins, {i,v -> v =~# '^\s*Plug\s\+''lacygoill/'})
-    call map(my_plugins, {i,v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
+    call filter(my_plugins, {_,v -> v =~# '^\s*Plug\s\+''lacygoill/'})
+    call map(my_plugins, {_,v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
     let my_plugins = join(my_plugins)
     sil let output = systemlist('commit-these-vim-plugins.sh '.my_plugins)
     " we may have removed a plugin, but not executed `:Plugclean` yet
-    call filter(output, {i,v -> v !~# 'No such file or directory'})
+    call filter(output, {_,v -> v !~# 'No such file or directory'})
     if output == []
         echom '[PluginsToCommit]: nothing to commit'
         return
     endif
 
-    call filter(output, {i,v -> v =~# '^\S'})
-    call map(output, {i,v -> glob($HOME.'/.vim/plugged/'.v.'/*', 0, 1)[0]})
-    call map(output, {i,v -> {'filename': v, 'valid': 1}})
+    call filter(output, {_,v -> v =~# '^\S'})
+    call map(output, {_,v -> glob($HOME.'/.vim/plugged/'.v.'/*', 0, 1)[0]})
+    call map(output, {_,v -> {'filename': v, 'valid': 1}})
     call setqflist(output)
     call setqflist([], 'a', {'title': 'Plugins to commit'})
     cw
@@ -6196,10 +6042,10 @@ com! -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | 
 
 " Tldr {{{2
 
-" TODO: Add completion
-" https://unix.stackexchange.com/a/310970/289772
-" https://github.com/Valodim/zsh-capture-completion
-com! -bar -nargs=1 Tldr call s:tldr(<q-args>)
+com! -bar -complete=custom,s:tldr_completion -nargs=1 Tldr call s:tldr(<q-args>)
+fu! s:tldr_completion(_arglead, _cmdline, _pos) abort
+    return system('tldr --list 2>/dev/null | tr -s "[ \t]" "\n"')
+endfu
 
 fu! s:tldr(shellcmd) abort
     let out = systemlist('tldr ' . a:shellcmd)
@@ -6207,9 +6053,9 @@ fu! s:tldr(shellcmd) abort
         echo out[0]
         return
     endif
-    call map(out, {i,v -> substitute(v, '\e.\{-}m\|\%x0f', '', 'g')})
-    call map(out, {i,v -> substitute(v, '^-', '#', '')})
-    call map(out, {i,v -> substitute(v, '^  ', '    ', '')})
+    call map(out, {_,v -> substitute(v, '\e.\{-}m\|\%x0f', '', 'g')})
+    call map(out, {_,v -> substitute(v, '^-', '#', '')})
+    call map(out, {_,v -> substitute(v, '^  ', '    ', '')})
     sp /tmp/.tldr.md
     %d_
     call setline(1, out)
@@ -6217,9 +6063,9 @@ fu! s:tldr(shellcmd) abort
     update
     norm! gg
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
-    let g:fold_autoclose = &foldclose isnot# ''
+    let s:fold_autoclose = &foldclose isnot# ''
     if &foldclose is# ''
-        norm coz
+        sil norm coz
     endif
 endfu
 
@@ -6229,11 +6075,11 @@ augroup autoclose_fold_tldr
 augroup END
 
 fu! s:tldr_autoclose_restore() abort
-    if get(g:, 'fold_autoclose', 0) && &foldclose is# ''
-    \ || !get(g:, 'fold_autoclose', 1) && &foldclose isnot# ''
+    if get(s:, 'fold_autoclose', 0) && &foldclose is# ''
+    \ || !get(s:, 'fold_autoclose', 1) && &foldclose isnot# ''
         norm coz
     endif
-    unlet! g:fold_autoclose
+    unlet! s:fold_autoclose
 endfu
 
 " TW {{{2
@@ -6357,7 +6203,7 @@ fu! s:update_history() abort
     " update history of CURRENT session
     "                              remove any command 5 characters long or shorter ┐
     "                                                               ┌──────────────┤
-    let new_hist = filter(getline(1, '$'), {i,v -> v !~# '^\s*$' && v !~# '^.\{,5}$'})
+    let new_hist = filter(getline(1, '$'), {_,v -> v !~# '^\s*$' && v !~# '^.\{,5}$'})
     call histdel(':')
     for line in new_hist
         call histadd(':', line)
@@ -6376,16 +6222,16 @@ fu! s:update_history() abort
     "
     "                            ┌ take the old history
     "                            ├──────────────────┐
-    let deleted_entries = filter(copy(s:old_cmd_hist), {i,v -> index(new_hist, v) ==# -1})
+    let deleted_entries = filter(copy(s:old_cmd_hist), {_,v -> index(new_hist, v) ==# -1})
     "                                                          └───────────────────────┤
     "            ... and keep only the entries which aren't in the new history anymore ┘
     "
     " convert the text entries to delete, into their numeric indexes inside
     " the list `info`
-    call map(deleted_entries, {i,v -> index(info, ':'.v)})
+    call map(deleted_entries, {_,v -> index(info, ':'.v)})
 
     " sort them, and check they were all found (no -1)
-    call sort(filter(deleted_entries, {i,v -> v >= 0}))
+    call sort(filter(deleted_entries, {_,v -> v >= 0}))
     if empty(deleted_entries)
         return
     endif
@@ -6534,10 +6380,10 @@ fu! s:wipe_noname() abort
     endif
 
     " Source: http://stackoverflow.com/a/6561076
-    let to_wipe = filter(range(1, bufnr('$')), { i,v ->
+    let to_wipe = filter(range(1, bufnr('$')), {_,v ->
     \    buflisted(v)
     \ && empty(bufname(v))
-    \ && empty(win_findbuf(v)) })
+    \ && empty(win_findbuf(v))})
     "    │
     "    └─ make sure the buffer is NOT displayed in any window
 
@@ -7891,7 +7737,7 @@ endfu
 " The toc  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " `qf#open()`). We could  compute the longest line:
 "
-"     echo max(map(range(1, line('$')), {i,v -> virtcol([v, '$'])}))
+"     echo max(map(range(1, line('$')), {_,v -> virtcol([v, '$'])}))
 "
 " and set the width of the toc window dynamically.
 "
@@ -9188,6 +9034,9 @@ endfu
 " Maybe we should ask for  some built-in functions (`getsynlist()`?, `gethi()`?)
 " which would give this info in a nice dictionary.
 "
+" Also, `:verbose syn list ...` doesn't print the script location from which the
+" syntax group was installed. Maybe ask for an improvement of `:verb`.
+"
 " 130 -
 "
 " *Maybe*, our notes about plugins should be in help files.
@@ -9424,11 +9273,11 @@ fu! s:save_last_qfl() abort
     " I think  that without,  sometimes, we  had entries in  a qfl  which didn't
     " match any existing file:
     "
-    "     call map(qfl, {i,v -> extend(v, {'filename': bufname(v.bufnr)})})
+    "     call map(qfl, {_,v -> extend(v, {'filename': bufname(v.bufnr)})})
     "}}}
     let qfl = getqflist()
     call map(qfl,
-        \    {i,v -> extend(v,
+        \    {_,v -> extend(v,
         \        {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
     let g:MY_LAST_QFL = {'qfl': qfl,
         \ 'title': get(getqflist({'title': 1}), 'title', ':setqflist()')}

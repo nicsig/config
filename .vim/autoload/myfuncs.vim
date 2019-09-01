@@ -64,18 +64,22 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
 
     " Why ?{{{
     "
-    " We already have a similar autocmd in our vimrc (but it deals with `@+`, not `@"`).
+    " We already have a similar autocmd in our vimrc.
     " I don't want it to interfere.
     " I don't want a race condition where the winning `$ xclip` process is the last one.
     " It's probably unnecessary but better be safe than sorry.
     "}}}
     au! make_clipboard_persist_after_quitting_vim
-    " Write the  unnamed register in the  X clipboard selection, so  that we can
-    " copy sth in Nvim without the `""`  prefix, and paste it in the shell after
-    " quitting Nvim.
-    au VimLeave <buffer> ++once
-        \   if executable('xclip') && strlen(@") != 0 && strlen(@") <= 999
-        \ |     call system('xclip -selection clipboard', @")
+    " Do *not* use the pattern `<buffer>`!{{{
+    "
+    " Atm, we open the qf window.
+    " If you use `<buffer>`, the autocmd would be installed for the qf buffer.
+    " But if we copy some text, it will probably be in the other buffer.
+    " Anyway, no matter the buffer where we copy some text, we want it in xclip.
+    "}}}
+    au VimLeave * ++once
+        \   if executable('xclip') && strlen(@+) != 0 && strlen(@+) <= 999
+        \ |     call system('xclip -selection clipboard', @+)
         \ | endif
 endfu
 
@@ -659,8 +663,8 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         let tempdir = substitute(tempname(), '\v.*/\zs.{-}', '', '')
         sil call system('git clone '.shellescape(url).' '.tempdir)
         let files = glob(tempdir.'/*', 0, 1)
-        call map(files, { i,v -> substitute(v, '^\C\V'.tempdir.'/', '', '')})
-        call filter(files, { i,v -> v !~# '\v\c_?footer%(.md)?$'})
+        call map(files, {_,v -> substitute(v, '^\C\V'.tempdir.'/', '', '')})
+        call filter(files, {_,v -> v !~# '\v\c_?footer%(.md)?$'})
 
         mark x
         call append('.', files+[''])
@@ -752,7 +756,7 @@ fu! myfuncs#in_A_not_in_B(...) abort "{{{1
     "}}}
     sil let output = systemlist('diff -U $(wc -l < '.fileA.') '.fileA.' '.fileB." | grep '^-' | sed 's/^-//g'")
 
-    call map(output, {i,v -> {'text': v}})
+    call map(output, {_,v -> {'text': v}})
     call setloclist(0, output)
     call setloclist(0, [], 'a', {'title': 'in  '.fileA.'  but not in  '.fileB})
 
@@ -1207,8 +1211,8 @@ fu! myfuncs#populate_list(list, cmd) abort "{{{1
 
     elseif a:list is# 'arglist'
         sil exe 'tab args '.join(map(filter(systemlist(a:cmd),
-            \     {i,v -> filereadable(v)}),
-            \ {i,v -> fnameescape(v)}))
+            \     {_,v -> filereadable(v)}),
+            \ {_,v -> fnameescape(v)}))
         " enable item indicator in the statusline
         let g:my_stl_list_position = 2
     endif
@@ -1257,8 +1261,8 @@ fu! myfuncs#search_internal_variables() abort "{{{1
     let view = winsaveview()
 
     let help_file = readfile($VIMRUNTIME.'/doc/eval.txt')
-    call filter(help_file, {i,v -> v =~ '^\s*v:\S\+'})
-    call map(help_file, {i,v -> matchstr(v, 'v:\zs\S\+')})
+    call filter(help_file, {_,v -> v =~ '^\s*v:\S\+'})
+    call map(help_file, {_,v -> matchstr(v, 'v:\zs\S\+')})
     call uniq(sort(help_file))
 
     call cursor(1,1)
@@ -1296,7 +1300,7 @@ fu! myfuncs#search_todo(where) abort "{{{1
     "                                             │ with just `todo` or `fixme`;
     "                                             │ replace it with the text of the next non empty line instead
     "                                             │
-    call setloclist(0, map(getloclist(0), {i,v -> s:search_todo_text(v)}), 'r')
+    call setloclist(0, map(getloclist(0), {_,v -> s:search_todo_text(v)}), 'r')
     call setloclist(0, [], 'a', {'title': 'FIX'.'ME & TO'.'DO'})
 
     if &bt isnot# 'quickfix'
@@ -1334,7 +1338,7 @@ fu! s:search_todo_text(dict) abort
         " is currently listed.
         "}}}
         let lines = readfile(bufname(bufnr), 0, dict.lnum + 4)[-4:]
-        let dict.text = get(filter(lines, {i,v -> v !~ pat}), 0, '')
+        let dict.text = get(filter(lines, {_,v -> v !~ pat}), 0, '')
     endif
     return dict
 endfu
@@ -1656,10 +1660,10 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     "
     "     - not containing any letter
 
-    call filter(words, {i,v -> strchars(v) >= min_length && strchars(v) <= 30 && v =~ '\a'})
+    call filter(words, {_,v -> strchars(v) >= min_length && strchars(v) <= 30 && v =~ '\a'})
 
     " put all of them in lowercase
-    call map(words, {i,v -> tolower(v)})
+    call map(words, {_,v -> tolower(v)})
 
     let freq = {}
     for word in words
@@ -1709,7 +1713,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     sil! %!column -t
     sil! %!sort -rn -k2
 
-    exe 'vert res '.(max(map(getline(1, '$'), {i,v -> strchars(v, 1)}))+4)
+    exe 'vert res '.(max(map(getline(1, '$'), {_,v -> strchars(v, 1)}))+4)
 
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
     exe winnr('#').'windo call winrestview(view)'

@@ -378,8 +378,7 @@ compinit
 # tells zsh to complete `foo` like it would complete `bar`.
 #
 # For more info, see:
-#
-#     https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command
+# https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org#copying-completions-from-another-command
 #}}}
 compdef environ=kill
 compdef ppa_what_have_i_installed=ppa_what_can_i_install
@@ -501,7 +500,7 @@ select-word-style bash
 # Info: `backward-kill-word` is bound to C-w
 #
 # More flexible, easier solution (and more robust?):
-#     http://stackoverflow.com/a/11200998
+# http://stackoverflow.com/a/11200998
 
 
 # load `cdr` function to go back to previously visited directories
@@ -1095,35 +1094,6 @@ EOF
   #
   # Look up keywords on `www.commandlinefu.com`.
   #}}}
-  # Dependencies:{{{
-  #
-  # It needs the `highlight` or `pygments` package:
-  #
-  #     $ sudo aptitude install highlight (✔)
-  # OR
-  #     $ sudo aptitude install python-pygments (✔✔)
-  # OR
-  #     $ python3 -m pip install --user pygments (✔✔✔)
-  #}}}
-
-  # Where is `pygments` documentation? {{{
-  #
-  # http://pygments.org/docs/
-  #}}}
-  # What's a lexer?{{{
-  #
-  # A program performing a lexical analysis:
-  #
-  #     https://en.wikipedia.org/wiki/Lexical_analysis#Lexer_generator
-  #}}}
-  # How to list all available lexers?{{{
-  #
-  #     $ pygmentize -L
-  #}}}
-  # How to select a lexer?{{{
-  #
-  #     $ pygmentize -l <my_lexer>
-  #}}}
 
   # store our keywords in the variable `keywords`, replacing spaces with dashes
   keywords="$(sed 's/ /-/g' <<< "$@")"
@@ -1152,33 +1122,30 @@ EOF
   #}}}
   encoding="$(printf -- "$@" | base64)"
 
-  if pygmentize -l shell <<<test >/dev/null 2>&1; then
+  if highlight --syntax sh <<<test >/dev/null 2>&1; then
     # Alternative using `highlight`:{{{
     #
     #     curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
     #     | highlight -O xterm256 -S bash -s bright | less -iR
-    #                  │           │       │
-    #                  │           │       └ we want the 'olive' highlighting style
-    #                  │           │         (to get the list of available styles: `highligh -w`)
-    #                  │           │
-    #                  │           └ the syntax of the input file is bash
-    #                  │
-    #                  └ output the file for a terminal
-    #                    (you can use other formats: html, latex ...)
     #}}}
     #     ┌ download silently (no errors, no progression){{{
     #     │
     #     │┌ if the url page has changed, try the new address
     #     ││}}}
     curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
-    | pygmentize -l shell \
-    | less -iR
+    | highlight --syntax sh -O truecolor --style seashell | less -iR
+    #             │          │             │{{{
+    #             │          │             └ we want the 'seashell' highlighting style
+    #             │          │               (to get the list of available styles: `highligh -w`)
+    #             │          │
+    #             │          └ output the file for a truecolor terminal
+    #             │            (you can use other formats: html, latex ...)
+    #             │
+    #             └ the syntax of the input file is bash
+    #}}}
   else
       cat <<'EOF' >&2
-Install `pygmentize` to get syntax highlighting:
-
-  $ sudo aptitude install python-pygments (✔)
-  $ python3 -m pip install --user pygments (✔✔)
+Install `highlight` to get syntax highlighting.
 EOF
     curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
     | less -iR
@@ -2003,9 +1970,9 @@ nv() { #{{{2
 
       vim --remote "$@"
       vim --remote-send ":argdo split<cr>:q<cr><cr>"
-      #                                  └────┤
-      #                                       └ close last window, because the last file
-      #                                         is displayed twice, in 2 windows
+      #                                  ├────┘
+      #                                  └ close last window, because the last file
+      #                                    is displayed twice, in 2 windows
 
     # If the 1st argument is `-O`, we want to open each file in a dedicated vertical split
     elif [[ $1 == -O ]]; then
@@ -3226,6 +3193,12 @@ alias jc='journalctl'
 # Mnemonic: SystemCtl List services
 # Tip: If you want only the running services, expand the alias and remove `--all`.
 alias scl='systemctl list-units --type service --all'
+
+# tldr {{{3
+
+# TODO: Replace this alias with a function invoking: `$ vim +"Tldr $1"`.
+# Take inspiration from what we did with `$ cs`.
+alias 'td=tldr'
 
 # tlmgr_gui {{{3
 

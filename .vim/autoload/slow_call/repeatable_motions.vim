@@ -85,7 +85,7 @@ fu! s:get_jump_height(is_fwd) abort
     " then one where there IS
     let lnum2 = search('\v^%(.*'.vcol.'.)@!.*\n.*\zs'.vcol, flags)
 
-    let lnums = filter([lnum1, lnum2], {i,v -> v > 0})
+    let lnums = filter([lnum1, lnum2], {_,v -> v > 0})
 
     return a:is_fwd
     \    ?     min(lnums) - line('.')

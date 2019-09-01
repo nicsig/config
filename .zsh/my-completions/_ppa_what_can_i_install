@@ -14,4 +14,3 @@ _alternative \
 # Each candidate was present twice, one for the i386 architecture, the other for amd64.
 # We don't use the i386 cpu architecture; it's noise.
 #}}}
-

@@ -42,7 +42,6 @@ alias conky_reload='killall -SIGUSR1 conky'
 alias xresources_reload='xrdb -cpp "$(command -v cpp) -traditional-cpp" ~/.Xresources'
 alias web='WWW_HOME=new.startpage.com w3m'
 
-
 # Recovered Functions:
 alert() {
   notify-send --urgency=low \

@@ -1,3 +1,6 @@
 #compdef tldr
 
-complete -W "$(tldr 2>/dev/null --list)" tldr && return 0
+_alternative "tldr:commands:($(tldr --list 2>/dev/null))" && return 0
+#             ^^^^
+#             not sure what to write here...
+

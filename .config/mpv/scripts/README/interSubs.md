@@ -9,7 +9,8 @@
    - `interSubs_config.py`
 
 ##
-# How to change the keys to press to start/quit interSubs?
+# How to
+## change the keys to press to start/quit interSubs?
 
 By default, the keys are `F5` and `F6`.
 If you wanted to use `F1` and `F2` instead:
@@ -17,11 +18,11 @@ If you wanted to use `F1` and `F2` instead:
     $ sed -i "s/keybinding\s*=\s*'F5'/keybinding = 'F1'/" interSubs.lua
     $ sed -i "s/keybinding\s*=\s*'F6'/keybinding = 'F2'/" interSubs.lua
 
-# How to make interSubs start automatically when I watch a video in a directory containing `XDCC` in its path?
+## make interSubs start automatically when I watch a video in a directory containing `XDCC` in its path?
 
     $ sed -i "s/^autostart_in = {'.*'}/autostart_in = {'XDCC'}/" interSubs.lua
 
-# How to change the browser and the site opened when I left-click on a word?
+## change the browser and the site opened when I left-click on a word?
 
 Edit `interSubs_config.py`, and replace this line:
 
@@ -31,7 +32,7 @@ With this one:
 
     show_in_browser = 'firefox "https://www.linguee.com/english-french/search?query=${word}"'
 
-# How to increase the distance between the subtitles and the bottom of the video?
+## increase the distance between the subtitles and the bottom of the video?
 
 Edit `interSubs_config.py`, and replace this line:
 
@@ -41,7 +42,7 @@ With this one:
 
     subs_screen_edge_padding = 40
 
-# How to change the appearance of the subtitles?
+## change the appearance of the subtitles?
 
 Change the value of the `style_subs` variable in `interSubs_config.py`.
 
@@ -59,7 +60,7 @@ A working value is:
             }
     '''
 
-# How to get the audio pronunciation of a word?
+## get the audio pronunciation of a word?
 
 That's what the `f_listen` function is for.
 
@@ -71,7 +72,7 @@ For example, to bind it to a right click:
             ['RightButton',              'NoModifier',           'f_listen'],
             ...
 
-# How to change the webservice used to pronounce words?
+## change the webservice used to pronounce words?
 
 Edit `interSubs_config.py`, and assign one these values to `'forvo'`:
 
