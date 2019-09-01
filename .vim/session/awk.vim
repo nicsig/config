@@ -22,7 +22,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -67,7 +66,7 @@ setlocal fdn=20
 setlocal fen
 3266
 normal! zo
-let s:l = 4507 - ((1184 * winheight(0) + 14) / 28)
+let s:l = 4507 - ((23 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -154,7 +153,7 @@ normal! zo
 normal! zo
 466
 normal! zo
-let s:l = 31 - ((25 * winheight(0) + 14) / 28)
+let s:l = 31 - ((3 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -257,7 +256,7 @@ setlocal fen
 normal! zo
 197
 normal! zo
-let s:l = 104 - ((15 * winheight(0) + 13) / 27)
+let s:l = 104 - ((3 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -285,7 +284,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 155 - ((154 * winheight(0) + 15) / 30)
+let s:l = 155 - ((91 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -412,7 +411,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 408 - ((407 * winheight(0) + 14) / 28)
+let s:l = 408 - ((40 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -465,7 +464,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1280 - ((162 * winheight(0) + 14) / 28)
+let s:l = 1280 - ((50 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -554,7 +553,7 @@ setlocal fdn=20
 setlocal fen
 581
 normal! zo
-let s:l = 613 - ((5 * winheight(0) + 13) / 27)
+let s:l = 613 - ((3 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -652,7 +651,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1551 - ((147 * winheight(0) + 13) / 26)
+let s:l = 1551 - ((57 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -687,11 +686,11 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 15 - ((0 * winheight(0) + 0) / 1)
+let s:l = 43 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-15
+43
 normal! 0
 lcd ~/.vim/plugged/vim-cheat40
 wincmd w
@@ -707,7 +706,7 @@ setlocal fdn=20
 setlocal fen
 33
 normal! zo
-let s:l = 60 - ((8 * winheight(0) + 14) / 28)
+let s:l = 60 - ((3 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -718,7 +717,7 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
-edit ~/.vim/vimrc
+edit ~/.vim/autoload/colorscheme.vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -729,9 +728,27 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
+setlocal fdm=marker
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=0
+setlocal fdn=20
+setlocal fen
+let s:l = 1 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -742,131 +759,33 @@ setlocal fdn=20
 setlocal fen
 339
 normal! zo
-900
+639
 normal! zo
-let s:l = 1013 - ((44 * winheight(0) + 14) / 28)
+let s:l = 671 - ((14 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1013
-normal! 042|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.vim/autoload/colorscheme.vim") | buffer ~/.vim/autoload/colorscheme.vim | else | edit ~/.vim/autoload/colorscheme.vim | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-282
-normal! zo
-295
-normal! zo
-295
-normal! zc
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
+671
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-tabnext
-edit ~/.vim/plugged/vim-cheat40/Readme.md
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-wincmd =
-argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-1
-normal! zo
-let s:l = 1 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim/plugged/vim-cheat40
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-cheat40/.git/index") | buffer ~/.vim/plugged/vim-cheat40/.git/index | else | edit ~/.vim/plugged/vim-cheat40/.git/index | endif
-setlocal fdm=syntax
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=1
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5
-normal! 0
-lcd ~/.vim/plugged/vim-cheat40
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-cheat40/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-cheat40/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-cheat40/.git/COMMIT_EDITMSG | endif
-setlocal fdm=manual
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 8) / 16)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim/plugged/vim-cheat40/.git
-wincmd w
-3wincmd w
-wincmd =
-tabnext 13
+2wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
+tabnext 12
 set stal=1
 badd +1 ~/Desktop/countries
-badd +8593 ~/.vim/vimrc
-badd +296 ~/.vim/autoload/colorscheme.vim
-badd +209 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
-badd +963 ~/wiki/awk/sed.md
+badd +1 ~/.vim/autoload/colorscheme.vim
+badd +1588 ~/wiki/awk/sed.md
 badd +2 ~/wiki/man/examples/pathfind.1
+badd +173 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 badd +155 ~/wiki/st.md
 badd +12 ~/.config/st/patches/README.md
 badd +1 ~/bin/upp.sh
 badd +892 ~/wiki/tmux/command.md
 badd +2 ~/bin/yank
 badd +3 ~/Desktop/session.md
-badd +15 ~/.vim/plugged/vim-cheat40/syntax/cheat.vim
+badd +43 ~/.vim/plugged/vim-cheat40/syntax/cheat.vim
 badd +4507 ~/wiki/awk/awk.md
 badd +31 ~/wiki/man/man.md
 badd +153 ~/Dropbox/vim_plugins/vimrc_grepper.vim
@@ -876,13 +795,11 @@ badd +293 ~/.Xresources
 badd +408 ~/wiki/vim/install.md
 badd +1280 ~/wiki/tmux/format.md
 badd +613 ~/wiki/terminal/capabilities.md
-badd +118 ~/Desktop/ask.md
+badd +101 ~/Desktop/ask.md
 badd +149 ~/wiki/terminal/glossary.md
-badd +1762 ~/wiki/admin/process.md
-badd +71 ~/.vim/plugged/goyo.vim/autoload/goyo.vim
-badd +0 ~/.vim/plugged/vim-cheat40/Readme.md
-badd +0 ~/.vim/plugged/vim-cheat40/.git/index
-badd +0 ~/.vim/plugged/vim-cheat40/.git/COMMIT_EDITMSG
+badd +1551 ~/wiki/admin/process.md
+badd +60 ~/.vim/plugged/goyo.vim/autoload/goyo.vim
+badd +670 ~/.vim/vimrc
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

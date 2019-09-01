@@ -689,8 +689,7 @@ augroup my_color_scheme
     "     ~/.vim/plugged/seoul256.vim/colors/seoul256.vim:201
     "
     " More generally, any HG whose attributes  are defined in a syntax plugin is
-    " cleared.
-    " The issue doesn't affect linked HGs:
+    " cleared; but the issue doesn't affect linked HGs:
     "
     "     " ✔
     "     :hi [def] link SomeGroup OtherGroup
@@ -707,11 +706,10 @@ fu! s:reinstall_cleared_hg() abort
     " Why don't you simply run `:do Syntax`?{{{
     "
     " Suppose you have two windows, one with a python buffer, and the other with
-    " a markdown buffer.
+    " an html buffer.
     " You change the color scheme while in the python buffer.
     " The HGs whose attributes are defined in `$VIMRUNTIME/syntax/html.vim` will
-    " be cleared, which may have an effect  on the rendering of some text in the
-    " markdown buffer.
+    " be cleared.
     " But since you're  in a python buffer, `:do Syntax`  will reload the python
     " syntax plugin, while you need to reload the html syntax plugin.
     "}}}
@@ -723,12 +721,9 @@ fu! s:reinstall_cleared_hg() abort
     " inconsistency.
     "
     " Besides, we would be constantly chasing new cleared HGs, and even then, we
-    " could miss some of them.
-    " It's not reliable.
+    " could miss some of them; it's not reliable.
     "}}}
-    " Is there an alternative?{{{
-    "
-    " Yes:
+    " Which alternative could I use?{{{
     "
     "     :doautoall syntax
     "
@@ -1025,8 +1020,8 @@ fu! Restore_highlighting_after_diff() abort
     " What's the purpose of this guard? {{{
     "
     " First, it prevents those commands to be run several times.
-    " Because of  `:windo`, the  current function will  be called  several times
-    " when `OptionSet diff` is fired; once per window in diff mode.
+    " Because of  `:tabdo windo`,  the current function  will be  called several
+    " times when `OptionSet diff` is fired; once per window in diff mode.
     " But we only need to fire the next few commands once.
     "
     " ---
@@ -1037,8 +1032,6 @@ fu! Restore_highlighting_after_diff() abort
     if !exists('g:syntax_on') && s:get_number_of_windows_in_diff_mode() <= 1
         " `syn enable` must be run *before* `s:styled_comments()`
         syn enable
-        " restore our custom HGs from `~/.vim/autoload/colorscheme.vim`
-        do ColorScheme
     endif
     " restore our comments-related syntax groups which have been cleared
     call s:styled_comments() | do Syntax

@@ -156,8 +156,11 @@ fu! colorscheme#customize() abort "{{{2
     " the `SpecialKey` HG set by seoul256 is barely readable
     hi! link SpecialKey Special
 
-    " the `VertSplit`  HG set  by seoul256  has a dark  background which  is too
-    " visible in the light color scheme, and not enough in the dark one
+    " The `VertSplit` HG set by seoul256 is black by default.
+    " When you split a window vertically, Vim  uses it to draw 2 vertical lines,
+    " and in the middle it puts a white vertical line.
+    " That's too much. I only need one black vertical line.
+    " For some reason, linking VertSplit gets us the desired result.
     hi! link VertSplit Normal
 
     " `Underlined` is meant to be used to highlight html links.{{{
@@ -177,7 +180,8 @@ fu! colorscheme#customize() abort "{{{2
     " Why this second substitution?{{{
     "
     " When starting Vim in debug mode `$ vim -D ...`, this error is raised:
-    "     E416: missing equal sign: line 123: hi Conditional
+    "
+    "     E416: missing equal sign: line 123: hi Conditional~
     "
     " This is because, in this particular case, the value of `cmd` contains noise at the end:
     "
@@ -249,9 +253,9 @@ fu! colorscheme#customize() abort "{{{2
     "
     " gVim encounters some errors when trying to set up too early some of our custom HGs:
     "
-    "     E417: missing argument: guifg=
-    "     E254: Cannot allocate color 95
-    "     E254: Cannot allocate color 187
+    "     E417: missing argument: guifg=~
+    "     E254: Cannot allocate color 95~
+    "     E254: Cannot allocate color 187~
     "
     " The issue  seems to be  that the HGs whose  attributes we need  to inspect
     " ('StatusLine', 'TabLine', ...), are not (correctly) defined yet.
@@ -430,7 +434,7 @@ fu! s:tabline() abort "{{{2
         \ 'reverse' : 0,
         \ }
 
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('Tabline')), k)})
+    call map(attributes, {k -> synIDattr(synIDtrans(hlID('Tabline')), k)})
 
     if has('gui_running')
         let cmd = 'hi TabLine gui=none guifg=%s'
@@ -505,7 +509,7 @@ fu! s:user() abort "{{{2
         \ 'reverse' : 0,
         \ }
 
-    call map(attributes, {k,v -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
+    call map(attributes, {k -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
 
     if has('gui_running')
         let cmd1 = 'hi User1 gui=%s guifg=%s guibg=%s'
@@ -558,6 +562,6 @@ fu! s:get_attributes(hg) abort "{{{2
         \ 'bold'    : 0,
         \ 'reverse' : 0,
         \ }
-    return map(attributes, {k,v -> synIDattr(synIDtrans(hlID(a:hg)), k)})
+    return map(attributes, {k -> synIDattr(synIDtrans(hlID(a:hg)), k)})
 endfu
 
