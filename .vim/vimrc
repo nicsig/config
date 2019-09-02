@@ -934,148 +934,29 @@ set diffopt+=indent-heuristic
 " For more info, see:
 " https://vimways.org/2018/the-power-of-diff/
 
-augroup customize_diff
+augroup no_syntax_in_diff_mode
     au!
-    au OptionSet diff call s:customize_diff()
-augroup END
-
-fu! s:customize_diff() abort
-    if v:option_new == 1 && s:get_number_of_windows_in_diff_mode() > 1
-        " Why do you disable the syntax?{{{
-        "
-        " When  you're  comparing  the  differences between  two  files,  you're
-        " interested in the text which has changed.
-        " You're not interested in the semantics of the code.
-        "
-        " IOW, the syntax  adds visual clutter, which makes it  hard to focus on
-        " what is really important.
-        "}}}
-        " Ok, but why only if there're more than one window?{{{
-        "
-        " If there's  only one window,  there's nothing  to compare yet,  so the
-        " visual clutter is not an issue yet.
-        "
-        " Besides, if  we lose  the syntax highlighting,  then there's  no color
-        " anymore in the buffer (no syntax colors, no diff colors).
-        " So, we may think there's an issue somewhere in our config.
-        "}}}
-        syn off
-    elseif v:option_new == 0
-        " `:windo` is going to change the currently focused window; we need to restore it
-        let winid = win_getid()
-        " Why the timer?{{{
-        "
-        " It seems we can't switch to another window right now.
-        "
-        "     E788: Not allowed to edit another buffer now~
-        "
-        " But `:windo` needs to visit all windows of the current tabpage.
-        "}}}
-        " Do *not* use a guard such as `if &l:diff` in the callback of the timer!{{{
-        "
-        "     \ execute('windo if &l:diff | call Restore_highlighting_after_diff() | endif') + win_gotoid(winid)})
-        "                      ^^^^^^^^^^
-        "
-        " It would  create issues, because  when the callback is  processed, you
-        " have no idea what the value of `&l:diff` is.
-        " This   matters   because   `Restore_highlighting_after_diff()`   calls
-        " `s:get_number_of_windows_in_diff_mode()`, which inspects  the value of
-        " `'diff'` in each window.
-        "
-        " MWE:
-        "
-        "     $ vim ~/.bashrc
-        "     :diffsplit
-        "     :q
-        "     :diffoff
-        "
-        " The syntax is not restored.
-        "
-        " MWE:
-        "
-        "     $ vim -d ~/.zshrc ~/.bashrc
-        "     :diffoff
-        "
-        " The fold markers are not concealed anymore in `~/.zshrc`.
-        " This can be manually fixed by pressing `=d`.
-        "}}}
-        call timer_start(0, {->
-            \ execute('tabdo windo call Restore_highlighting_after_diff()') + win_gotoid(winid)})
-    endif
-endfu
-
-fu! s:get_number_of_windows_in_diff_mode() abort
-    let all_windows = range(1, winnr('$'))
-    let windows_in_diff_mode = map(all_windows, {_,v -> getwinvar(v, '&diff')})
-    let number_of_windows_in_diff_mode = len(filter(windows_in_diff_mode, {_,v -> v}))
-    return number_of_windows_in_diff_mode
-endfu
-
-" Why a public function?{{{
-"
-" We need to call it from `lg#window#quit()`.
-"}}}
-fu! Restore_highlighting_after_diff() abort
-    let view = winsaveview()
-    " What's the purpose of this guard? {{{
+    " Why do you clear the syntax in a diff'ed buffer?{{{
     "
-    " First, it prevents those commands to be run several times.
-    " Because of  `:tabdo windo`,  the current function  will be  called several
-    " times when `OptionSet diff` is fired; once per window in diff mode.
-    " But we only need to fire the next few commands once.
+    " When  you're  comparing  the  differences between  two  files,  you're
+    " interested in the text which has changed.
+    " You're not interested in the semantics of the code.
     "
-    " ---
-    "
-    " Second,  it  prevents  the  syntax highlighting  from  being  restored  if
-    " there're still two or more windows in diff mode.
-    " }}}
-    if !exists('g:syntax_on') && s:get_number_of_windows_in_diff_mode() <= 1
-        " `syn enable` must be run *before* `s:styled_comments()`
-        syn enable
-    endif
-    " restore our comments-related syntax groups which have been cleared
-    call s:styled_comments() | do Syntax
-    " Without `do BufWinEnter`, `norm! zMzv` may fail.{{{
-    "
-    " It would fail when you start Vim with `$ vimdiff`.
-    " This is because, after running  `:diffoff`, the value of `'foldmethod'` is
-    " reset to the value it had when Vim started, i.e. `manual`.
-    "
-    " See `:h :diffoff`:
-    "
-    " >     The `:diffoff`  command resets  the relevant  options to  the values
-    " >     they  had when  using `:diffsplit`,  `:diffpatch` ,  `:diffthis`. or
-    " >     starting Vim in diff mode.
-    "
-    " We could also run `:setl fdm=marker`, but other options could suffer from the same
-    " issue in the future. Indeed, currently `:diffoff` affects:
-    "
-    "    - `'diff'`
-    "    - `'scrollbind'`
-    "    - `'cursorbind'`
-    "    - `'scrollopt'`
-    "    - `'wrap'`
-    "    - `'foldmethod'`
-    "    - `'foldcolumn'`
-    "
-    " Since  most  of  these  options  are  local to  a  window,  and  since  we
-    " usually set  window-local options  by installing  an autocmd  listening to
-    " `BufWinEnter`, it seems more reliable to manually fire the latter.
+    " IOW, the syntax  adds visual clutter, which makes it  hard to focus on
+    " what is really important.
     "}}}
-    do BufWinEnter | norm! zMzv
-    call winrestview(view)
-endfu
-
-" We need this when we start Vim in diff mode right from the shell.{{{
-"
-"     $ vimdiff file1 file2
-"
-" This is because the previous autocmd is not fired in that case.
-" Probably because the option is set before the autocmd is installed.
-"}}}
-if has('vim_starting') && &l:diff
-    syn off
-endif
+    au OptionSet diff exe v:option_new ? 'syn clear' : 'do Syntax'
+    " We need this when we start Vim in diff mode right from the shell.{{{
+    "
+    "     $ vimdiff file1 file2
+    "
+    " This is because the previous autocmd is not fired in that case.
+    " Probably because the option is set before the autocmd is installed.
+    "}}}
+    if has('vim_starting') && &l:diff
+        au VimEnter * windo syn clear
+    endif
+augroup END
 
 " display {{{2
 
@@ -4409,14 +4290,30 @@ fu! s:fix_display() abort
 
     redraw! | redraws!
 
-    " update differences between windows in diff mode
-    diffupdate!
-    "         │
-    "         └ check if the file was changed externally and needs to be reloaded
+    if &l:diff
+        " update differences between windows in diff mode
+        diffupdate!
+        "         │
+        "         └ check if the file was changed externally and needs to be reloaded
+        call winrestview(view)
+        return
+    endif
+
+    " Purpose:{{{
+    "
+    " We (or a plugin) may  temporarily disable the syntax highlighting globally
+    " with `:syn off`, then restore it with `:syn on`.
+    " In  that case,  the position  of the  autocmd which  installs the  default
+    " syntax  groups is  moved *after*  our  custom autocmd  which installs  the
+    " syntax groups related to comments.
+    "
+    " Because of this new order, the default autocmd undoes our custom one.
+    " We need to re-install our custom autocmd *after* the default one.
+    "}}}
+    call s:styled_comments()
 
     " update folds
     norm! zx
-
     " update title in folds
     do BufWinEnter
 
@@ -4446,17 +4343,27 @@ fu! s:fix_display() abort
     "     some error
     "     EOF
     "
-    "     " press `]ol` to change the lightness / color scheme
-    "     " make sure no `.conf` file is currently displayed in a window
-    "
-    "     :sp /tmp/conf.conf
+    "     $ vim ~/.bashrc /tmp/conf.conf
+    "     :bn|bp " to source conf syntax plugin
+    "     ]ol
+    "     [ol
+    "     :bn
     "
     " `some error` should be highlighted in red; it's not.
-    " The `confError` HG has been cleared when we pressed `]ol`.
+    " The `confError` HG has been cleared when we pressed `]ol` and `[ol`.
     " It has not been re-installed by  our autocmd, because there was no `.conf`
     " file displayed anywhere.
     "}}}
-    do Syntax
+    "   Ok, but why `tabdo windo`?{{{
+    "
+    " We (or a plugin) may  temporarily disable the syntax highlighting globally
+    " with `:syn off`, then restore it with `:syn on`.
+    " In that  case, we need  to reinstall our  custom syntax groups  related to
+    " comments in *all* buffers currently displayed in a window.
+    "}}}
+    let winid = win_getid()
+    tabdo windo do Syntax
+    call win_gotoid(winid)
 
     " Purpose:{{{
     "
@@ -6286,50 +6193,50 @@ augroup END
 " Temporarily commented, because I find it annoying now with `.vim`.
 " Keep it, because it could still be useful for other extensions.
 
-" augroup DefaultExtension
-"     au!
-"     au BufNewFile * ++nested call s:default_extension(expand('<afile>:p'))
-" augroup END
+"     augroup DefaultExtension
+"         au!
+"         au BufNewFile * ++nested call s:default_extension(expand('<afile>:p'))
+"     augroup END
 
-" fu! s:default_extension(buffer) abort
+"     fu! s:default_extension(buffer) abort
 "
-"     " If the buffer name ends with a dot, it's probably a mistake.
-"     " We don't want to add a default extension.
-"     " We would end up with a buffer whose name contains a sequence of
-"     " consecutive dots.
+"         " If the buffer name ends with a dot, it's probably a mistake.
+"         " We don't want to add a default extension.
+"         " We would end up with a buffer whose name contains a sequence of
+"         " consecutive dots.
 "
-"     if a:buffer[-1:-1] is# '.'
-"         return
-"     endif
+"         if a:buffer[-1:-1] is# '.'
+"             return
+"         endif
 "
-"     " If the buffer is created inside /tmp and has no extension
-"     if strpart(fnamemodify(a:buffer, ':p:h'),0,4) is# '/tmp' && empty(fnamemodify(a:buffer, ':e'))
+"         " If the buffer is created inside /tmp and has no extension
+"         if strpart(fnamemodify(a:buffer, ':p:h'),0,4) is# '/tmp' && empty(fnamemodify(a:buffer, ':e'))
 "
-"         " make sure it will be wiped when it's hidden
-"         " which will happen after the next command
-"         setlocal bufhidden=wipe
+"             " make sure it will be wiped when it's hidden
+"             " which will happen after the next command
+"             setlocal bufhidden=wipe
 "
-"         " edit a new buffer with the same name + the .vim extension
-"         exe 'keepalt edit ' . fnameescape(a:buffer) . '.vim'
+"             " edit a new buffer with the same name + the .vim extension
+"             exe 'keepalt edit ' . fnameescape(a:buffer) . '.vim'
 "
-"         " Why fnameescape()? Suppose we type :e foo\ bar to open a buffer
-"         " whose name is 'foo bar'.
-"         " The function will receive as an argument 'foo bar' (the backslash
-"         " has been removed once Vim processed the :edit command).
-"         " Then, the previous instruction will result in: :edit foo bar.vim
-"         " and Vim will complain with: E172: Only one file name allowed
-"         " We have to reprotect the space with fnameescape().
-"         "
-"         " Security_measure:
-"         " if the previous command fails without  giving an error, and we stay in
-"         " our current buffer  whose 'bufhidden' option's local  value is 'wipe',
-"         " we want to  remove the latter (so  that the global value  is used like
-"         " before). If it fails with an error,  the rest of the function won't be
-"         " executed though.
-"         set bufhidden<
+"             " Why fnameescape()? Suppose we type :e foo\ bar to open a buffer
+"             " whose name is 'foo bar'.
+"             " The function will receive as an argument 'foo bar' (the backslash
+"             " has been removed once Vim processed the :edit command).
+"             " Then, the previous instruction will result in: :edit foo bar.vim
+"             " and Vim will complain with: E172: Only one file name allowed
+"             " We have to reprotect the space with fnameescape().
+"             "
+"             " Security_measure:
+"             " if the previous command fails without  giving an error, and we stay in
+"             " our current buffer  whose 'bufhidden' option's local  value is 'wipe',
+"             " we want to  remove the latter (so  that the global value  is used like
+"             " before). If it fails with an error,  the rest of the function won't be
+"             " executed though.
+"             set bufhidden<
 "
-"     endif
-" endfu
+"         endif
+"     endfu
 
 " Delete Noname Buffers {{{2
 
@@ -7832,6 +7739,11 @@ endfu
 "       vs
 "         arg->funcA()->funcB()->funcC()
 "
+"    Surprisingly, there are not that many refactorings atm (only 600):
+"
+"         :vim /)\_s*\\\=\s*))\@!/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** ~/.vim/vimrc
+"         :Cfilter! -other_plugins
+"
 "    - `'wincolor'`: in Vim, could be used to dim the unfocused windows
 "    (I think the equivalent in Nvim is `'winhighlight'`;
 "    see also `:h hl-NormalNC` and `:h hl-NormalFloat`)
@@ -9106,6 +9018,8 @@ endfu
 "     " press M-b instead of C-b to get inside the parentheses
 "
 " What could be done to reduce the frequency of such errors?
+" Idea: Every time you make such a mistake, undo, and re-insert `getline()` 3 times;
+" each time make sure to press C-b.
 "
 " 134 -
 " In a markdown file, `gc` should behave slightly differently.

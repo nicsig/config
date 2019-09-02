@@ -3208,15 +3208,7 @@ alias tlmgr_gui='tlmgr gui -font "helvetica 20" -geometry=1920x1080-0+0 >/dev/nu
 
 # top {{{3
 
-# TODO: Remove the TERM assignment once this issue is fixed:
-# https://github.com/hishamhm/htop/issues/942
-# `M-j` and `M-k` don't work even with the alias!{{{
-#
-# You need a recent version of htop.
-# If needed, compile the latest release from here:
-# http://hisham.hm/htop/releases/
-#}}}
-alias top='TERM=xterm-256color htop'
+alias top='htop'
 
 # trash {{{3
 

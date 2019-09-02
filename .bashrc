@@ -20,8 +20,8 @@
 # If not running interactively, don't do anything
 # Why don't you use the single line `[[ $- = *i* ]] || return` (shorter)?{{{
 #
-#     1. It's not posix-compliant.
-#     2. The `case` syntax seems more powerful.
+#    1. It's not posix-compliant.
+#    2. The `case` syntax seems more powerful.
 #}}}
 case "$-" in
   *i*) ;;

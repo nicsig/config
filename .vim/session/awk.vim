@@ -21,7 +21,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -66,7 +65,7 @@ setlocal fdn=20
 setlocal fen
 3266
 normal! zo
-let s:l = 4507 - ((23 * winheight(0) + 14) / 28)
+let s:l = 4507 - ((1184 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -651,7 +650,7 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-let s:l = 1551 - ((57 * winheight(0) + 13) / 26)
+let s:l = 1551 - ((147 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -704,81 +703,26 @@ setlocal fdl=0
 setlocal fml=0
 setlocal fdn=20
 setlocal fen
-33
+245
 normal! zo
-let s:l = 60 - ((3 * winheight(0) + 14) / 28)
+let s:l = 254 - ((134 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-60
-normal! 0
+254
+normal! 025|
 lcd ~/.vim/plugged/goyo.vim
 wincmd w
+2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit ~/.vim/autoload/colorscheme.vim
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
-argglobal
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
-setlocal fdm=marker
-setlocal fde=0
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-339
-normal! zo
-639
-normal! zo
-let s:l = 671 - ((14 * winheight(0) + 14) / 29)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-671
-normal! 0
-lcd ~/.vim
-wincmd w
-2wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
-tabnext 12
+tabnext 11
 set stal=1
 badd +1 ~/Desktop/countries
-badd +1 ~/.vim/autoload/colorscheme.vim
+badd +254 ~/.vim/plugged/goyo.vim/autoload/goyo.vim
+badd +209 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 badd +1588 ~/wiki/awk/sed.md
 badd +2 ~/wiki/man/examples/pathfind.1
-badd +173 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 badd +155 ~/wiki/st.md
 badd +12 ~/.config/st/patches/README.md
 badd +1 ~/bin/upp.sh
@@ -798,8 +742,6 @@ badd +613 ~/wiki/terminal/capabilities.md
 badd +101 ~/Desktop/ask.md
 badd +149 ~/wiki/terminal/glossary.md
 badd +1551 ~/wiki/admin/process.md
-badd +60 ~/.vim/plugged/goyo.vim/autoload/goyo.vim
-badd +670 ~/.vim/vimrc
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

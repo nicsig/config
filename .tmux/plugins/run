@@ -5,6 +5,7 @@ source "$HOME/.tmux/plugins_config/fingers" ; run "$HOME/.tmux/plugins/tmux-fing
 # We disable the logging plugin for now, because it overwrites our `P` key binding.
 # Besides, we don't use any of its key bindings.
 # We still keep it to study how it works later.
+#
 #     source "$HOME/.tmux/plugins_config/logging" ; run "$HOME/.tmux/plugins/tmux-logging/logging.tmux"
 
 # 260 sloc
