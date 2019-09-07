@@ -267,7 +267,7 @@ fu! s:save_info() abort
     if &ft isnot# 'markdown' || exists('g:my_ultisnips_info')
         return
     endif
-    let g:my_ultisnips_info = {
+    sil let g:my_ultisnips_info = {
         \ 'lsb_release -d': matchstr(systemlist('lsb_release -d')[0], '\s\+\zs.*'),
         \ 'vim --version': system('vim --version | sed -n "1s/VIM - Vi IMproved\|(.*//gp ; 2p" | tr -d "\n"'),
         \ 'st -v': systemlist('st -v')[0],

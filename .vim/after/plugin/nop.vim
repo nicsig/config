@@ -132,8 +132,8 @@ ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
 vno  <c-z>  <nop>
 
 " Same thing in normal mode, because of some bugs:
-"     https://unix.stackexchange.com/questions/q/445051/289772
-"     https://unix.stackexchange.com/questions/q/445239/289772
+" https://unix.stackexchange.com/questions/q/445051/289772
+" https://unix.stackexchange.com/questions/q/445239/289772
 nno  <c-z>  <nop>
 
 " do  dp {{{1

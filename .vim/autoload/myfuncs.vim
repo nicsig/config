@@ -79,7 +79,7 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     "}}}
     au VimLeave * ++once
         \   if executable('xclip') && strlen(@+) != 0 && strlen(@+) <= 999
-        \ |     call system('xclip -selection clipboard', @+)
+        \ |     sil call system('xclip -selection clipboard', @+)
         \ | endif
 endfu
 
@@ -315,11 +315,11 @@ fu! myfuncs#block_select_box() abort "{{{1
     " if the box we've selected doesn't contain the line where we were
     " originally, revert everything
     "
-    "            ┌─ original line is before the box
+    "            ┌ original line is before the box
     "            │
     if view.lnum < line("'<") || view.lnum > line("'>")
     "                                      │
-    "                                      └─ original line is after the box
+    "                                      └ original line is after the box
         exe "norm! \e"
         call winrestview(view)
     endif
@@ -1161,7 +1161,7 @@ fu! myfuncs#plugin_install(url) abort "{{{1
     PlugInstall
     let win_plug = win_getid()
 
-    call win_gotoid(win_vimrc) | close
+    call win_gotoid(win_vimrc) | q
 
     " Before going back to the `vim-plug` window, we go back to the original
     " one. This way, once we are in `vim-plug`, the previous window will be
@@ -1651,14 +1651,14 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 
     " remove anything which is:
     "
-    "     - shorter than `min_length` characters
+    "    - shorter than `min_length` characters
     "
-    "     - longer than 30 characters;
-    "       probably not words;
-    "       it  could be  for example  a long  sequence of  underscores used  to
-    "       divide 2 sections of text
+    "    - longer than 30 characters;
+    "      probably not words;
+    "      it  could be  for example  a long  sequence of  underscores used  to
+    "      divide 2 sections of text
     "
-    "     - not containing any letter
+    "    - not containing any letter
 
     call filter(words, {_,v -> strchars(v) >= min_length && strchars(v) <= 30 && v =~ '\a'})
 
@@ -1700,7 +1700,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     " put the result in a vertical viewport
     let tempfile = tempname().'/WordFrequency'
     exe 'lefta '.(&columns/3).'vnew '.tempfile
-    setl bh=delete bt=nofile nobl noswf nowrap
+    setl bh=delete bt=nofile nobl noswf wfw nowrap
 
     " for item in items(freq)
     for item in flags.weighted ? weighted_freq : items(freq)
@@ -1715,7 +1715,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
 
     exe 'vert res '.(max(map(getline(1, '$'), {_,v -> strchars(v, 1)}))+4)
 
-    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
+    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
     exe winnr('#').'windo call winrestview(view)'
 endfu
 

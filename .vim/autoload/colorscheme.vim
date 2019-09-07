@@ -297,6 +297,29 @@ fu! s:diff() abort "{{{2
 endfu
 
 fu! s:styled_comments() abort "{{{2
+    " Need this to be able to make a distinction between comments and code highlighted by `PreProc`.{{{
+    "
+    " By default, `PreProc` can be used to highlight both comment and code.
+    " As an  example, it  highlights comment  titles in  Vim, and  some variable
+    " references in shell.
+    "
+    " This causes an issue when we enter goyo mode.
+    " In this mode, we're only interested in code, not comments.
+    " So, we want to ignore a *comment* highlighted by `PreProc` (`:hi link xFoo Ignore`),
+    " but not the *code* highlighted by `PreProc`.
+    "
+    " We can't blindly ignore any text highlighted by `PreProc`.
+    " We need a way to distinguish between comment and code.
+    " To achieve this, we install this `CommentPreProc` HG.
+    " In `~/plugged/vim-lg-lib/autoload/lg/styled_comment.vim`, we use it
+    " to highlight comment titles and outputs of commands.
+    "
+    " This way,  we retain  the same  highlighting (because  `CommentPreProc` is
+    " linked to `PreProc`), but we can  ignore it in goyo mode without affecting
+    " the code highlighted by `PreProc`.
+    "}}}
+    hi link CommentPreProc PreProc
+
     " Why `Underlined`?{{{
     "
     " From `:h group-name`:

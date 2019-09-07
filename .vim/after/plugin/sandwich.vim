@@ -84,8 +84,8 @@ fu! s:set_recipes() abort
     "
     " It's often used to quote some word in man pages.
     " See here for more info:
-    "     https://english.stackexchange.com/q/17695/313834
-    "     https://www.cl.cam.ac.uk/~mgk25/ucs/quotes.html
+    " https://english.stackexchange.com/q/17695/313834
+    " https://www.cl.cam.ac.uk/~mgk25/ucs/quotes.html
     "}}}
     " Why the input 'g'?{{{
     "
@@ -102,7 +102,7 @@ fu! s:set_recipes() abort
                          \ + [{'buns': ['`', "'"], 'input': ['g']}]
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
-                         \ + [{'buns': ['«', '»'], 'input': ['<<']}]
+                         \ + [{'buns': ['«', '»'], 'input': ['u<']}]
                          \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
                          \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
 

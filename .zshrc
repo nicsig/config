@@ -5,7 +5,7 @@
 # In the meantime, if you need to update tmux, follow this procedure:
 #
 #     $ chown2me
-#     $ make clean; make distclean; git stash; git pull
+#     $ make clean; make distclean; git checkout master; git stash; git pull
 #     $ PKG_CONFIG_PATH=$HOME/libeventbuild/lib/pkgconfig ./configure --prefix=$HOME/tmuxbuild
 #     $ make
 #
@@ -996,6 +996,10 @@ example:  $0  tmux
 EOF
     return 64
   fi
+  if [[ ! -f $HOME/wiki/cheat/$1.txt ]]; then
+    printf -- 'no cheatsheet for %s\n' "$1"
+    return
+  fi
   vim +"Cheat $1"
 }
 
@@ -1900,9 +1904,9 @@ nv() { #{{{2
 #    │
 #    └ You want to prevent the  change of `IFS` from affecting the current shell?
 # Ok. Then, use `local IFS`.
-# Do NOT  use parentheses  to surround  the body  of the  function and  create a
+# Do *not*  use parentheses  to surround  the body  of the  function and  create a
 # subshell. It could cause an issue when we suspend then restart Vim.
-#      https://unix.stackexchange.com/a/445192/289772
+# https://unix.stackexchange.com/a/445192/289772
 
   emulate -L zsh
 
@@ -2031,84 +2035,71 @@ nv() { #{{{2
   fi
 }
 
-# Set a trap for when we send the signal `USR1` from our Vim mapping `SPC R`.
+# FIXME: If we restart Vim, then suspend it, we can't resume it by executing `$ fg`.{{{
+#
+# MWE:
+#
+#     $ vim
+#     :call system('kill -USR1 $(ps -p '.getpid().' -o ppid=)') | q
+#     :stop
+#     $ fg
+#     fg: no current job~
+#     # you may need to repeat the process twice before seeing this error
+#
+# https://unix.stackexchange.com/a/445192/289772
+#}}}
+# Which solution could I try?{{{
+#
+# You could restart Vim from a hook.
+#
+#     restarting_vim=
+#     trap __catch_signal_usr1 USR1
+#     __catch_signal_usr1() {
+#       trap __catch_signal_usr1 USR1
+#       clear
+#       restarting_vim=1
+#     }
+#     __restart_vim() {
+#       emulate -L zsh
+#       if [[ -n "${restarting_vim}" ]]; then
+#         restarting_vim=
+#         nv
+#       fi
+#     }
+#     # See: `$ man zshmisc /SPECIAL FUNCTIONS /Hook Functions`
+#     precmd_functions=(__restart_vim)
+#}}}
+#   Why don't you use it?{{{
+#
+# Vim is restarted the first time, but *not* the next times.
+# The issue is not with the trap, nor  with the flag, because if I execute any
+# command  (ex:  `$  ls`), causing  a  new  prompt  to  be displayed,  Vim  is
+# restarted.
+# Besides, if we add some command after `nv` (ex: `echo 'hello'`), the message
+# is correctly displayed even when Vim is not restarted, which means that this
+# `if` block is always correctly processed.
+#
+# For some reason, `nv` is ignored.
+# Replacing `nv` with `vim` doesn't fix the issue.
+#
+# ---
+#
+# The issue seems specific to zsh; the code works fine in bash.
+#
+# ---
+#
+# If you suspend + `$ fg` Vim after every restart, you can restart as many times
+# as you want.
+#}}}
+# set a trap for when we send the signal `USR1` from our Vim mapping `SPC R`
 trap __catch_signal_usr1 USR1
-# Function invoked by our trap.
 __catch_signal_usr1() {
   # reset a trap for next time
   trap __catch_signal_usr1 USR1
-  # useful to get rid of error messages which were displayed during last Vim
-  # session
+  # useful to get rid of error messages which were displayed during last Vim session
   clear
-  # Why don't you restart Vim directly from the trap?{{{
-  #
-  # If we restart Vim, then suspend it, we can't resume it by executing `$ fg`.
-  # The issue doesn't come from the code inside `nv()`, it comes from the trap.
-  # MWE:
-  #
-  #   func() {
-  #     vim
-  #   }
-  #
-  #   $ func
-  #   SPC R
-  #   :stop
-  #   $ fg ✘
-  #
-  # https://unix.stackexchange.com/a/445192/289772
-  #
-  # So, instead, we'll restart Vim from a hook
-  #}}}
-  # Set the flag with `1` to let zsh know that it should automatically restart
-  # Vim the next time we're at the prompt.
-  # restarting_vim=1
+  # TODO: If we quit Neovim, we should restart Neovim, not Vim.
   nv
-}
-
-# Set an empty flag.
-# We'll test it to determine whether Vim is being restarted.
-# restarting_vim=
-# What's this function?{{{
-#
-# Any function whose  name is `precmd` or inside  the array `$precmd_functions`.
-# is special.
-# It's automatically executed by zsh before every new prompt.
-#
-# Note that a prompt which is redrawn, for example, when a notification about an
-# exiting job is displayed, is NOT a new prompt.
-# So `precmd()` is not executed in this case.
-#
-# For more info: `$ man zshmisc /SPECIAL FUNCTIONS /Hook Functions`
-#}}}
-# Why do you use it?{{{
-#
-# To restart  Vim automatically, when we're  at the shell prompt  after pressing
-# `SPC R` from Vim.
-#}}}
-__restart_vim() {
-  emulate -L zsh
-  if [[ -n "${restarting_vim}" ]]; then
-    # reset the flag
-    # restarting_vim=
-    # FIXME: If we quit Neovim, we should restart Neovim, not Vim.
-    # FIXME: Vim IS restarted the first time, but NOT the next times.{{{
-    #
-    # The issue is  not with the trap,  nor with the flag, because  if I execute
-    # any command  (ex: `$ ls`),  causing a new prompt  to be displayed,  Vim is
-    # restarted.
-    # Besides,  if we  add some  command after  `nv` (ex:  `echo 'hello'`),  the
-    # message is correctly displayed even when Vim is not restarted, which means
-    # that this `if` block is always correctly processed.
-    #
-    # For some reason, `nv` is ignored.
-    # Replacing `nv` with `vim` doesn't fix the issue.
-    #}}}
-    # Warning: don't use `vim`.{{{
-    #
-    # It wouldn't restart a Vim server.
-    #}}}
-    nv
-  fi
 }
 
 palette(){ #{{{2
@@ -5009,12 +5000,6 @@ if [[ "${TERM}" == 'xterm' ]]; then
     export TERM=xterm-256color
   fi
 fi
-
-# It doesn't seem necessary to export the variable.
-# `precmd_functions` is a variable specific to the zsh shell.
-# No subprocess could understand it.
-# https://stackoverflow.com/a/1158231/9780968
-# precmd_functions=(__restart_vim)
 # }}}1
 
 # TODO: Try to customize the theme for the linux console (then remove `[[ -n "$DISPLAY" ]]`).
@@ -5051,6 +5036,9 @@ fi
 #
 # Try to fix this issue:
 # https://unix.stackexchange.com/questions/97920/how-to-cd-automatically-after-git-clone/276472#comment972969_276472
+#
+# Or use a different solution:
+# https://unix.stackexchange.com/a/97958/289772
 #
 # Document the code:
 clone_check() {
