@@ -14,7 +14,7 @@
 # https://github.com/tmux/tmux/issues/1840#issuecomment-513273184
 #}}}
 if [[ -z "$TMUX" ]]; then
-  alias tmux='LD_LIBRARY_PATH=~/libeventbuild/lib ~/GitRepos/tmux/tmux -vv'
+  alias tmux='LD_LIBRARY_PATH=~/libeventbuild/lib ~/GitRepos/tmux/tmux -v'
 fi
 
 # Use emacs keybindings even if our EDITOR is set to vi.
@@ -122,7 +122,7 @@ stty quit undef
 #
 # It sets the color to blue.
 #
-#     $ man zshmisc /SIMPLE PROMPT ESCAPES /Shell state
+#     man zshmisc /SIMPLE PROMPT ESCAPES/;/Shell state
 #}}}
 # What's `%~`?{{{
 #
@@ -402,12 +402,12 @@ compdef vboxheadless=VBoxHeadless
 
 # What's the purpose of these commands?{{{
 #
-# For some commands, like  `$ tldr`, there's no easy way  to find/generate a zsh
+# For some  commands, like `tldr`,  there's no easy  way to find/generate  a zsh
 # completion function. But there's one for bash.
 # In this case, it can be useful to use the bash completion function.
 # To do so, we need to install a compatibility layer to emulate `compgen` and `complete`.
 #
-# Source: `$ man zshcompsys`.
+# Source: `man zshcompsys`.
 #}}}
 # Will it always work as expected?{{{
 #
@@ -426,7 +426,7 @@ bashcompinit
 # We want the `run-help` shell function  which, before printing a manpage, tries
 # to find a help file in case the argument is a builtin command name.
 #}}}
-# Why silently?{{{
+#   Why silently?{{{
 #
 # To avoid error messages when we reload zshrc.
 #}}}
@@ -731,7 +731,7 @@ zstyle ':completion:*' menu select=long
 zstyle ':completion:*' use-compctl false
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
-# This zstyle is important to make our `$ environ` function be completed with *all* the running processes.{{{
+# This zstyle is important to make our `environ` function be completed with *all* the running processes.{{{
 #
 # And not just the processes running in the current shell.
 # Found here: https://unix.stackexchange.com/a/281614/289772
@@ -744,7 +744,7 @@ zstyle ':completion:*:processes' command 'ps -A'
 zstyle ':completion:*' menu select
 # enable case-insensitive search (useful for the `zaw` plugin)
 zstyle ':filter-select' case-insensitive yes
-# Suggest us only video files when we tab complete `$ mpv`.
+# Suggest us only video files when we tab complete `mpv(1)`.
 #
 # TODO: To explain.
 # Source: https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
@@ -806,7 +806,7 @@ if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
   # refer to existing files or directories.
   # If yes, fasd will add them to its database.
   #
-  # See `$ man fasd` for more info.
+  # See `man fasd` for more info.
   #}}}
   # Why caching the code?{{{
   #
@@ -850,7 +850,7 @@ if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
     zsh-wcomp-install >| "${fasd_cache}"
     #                 │{{{
     #                 └ >| word
-    # From `$ man zshmisc`:
+    # From `man zshmisc`:
     #
     # > Same  as >,  except that  the file  is truncated  to zero  length if  it
     # > exists, even if CLOBBER is unset.
@@ -1227,7 +1227,7 @@ EOF
 #
 # Don't try to shorten its name.
 # Keep  the  `fasd`  prefix,  so  that  we see  the  function  when  we  try  to
-# tab-complete `$ fasd`; this may help us remembering its existence.
+# tab-complete `fasd(1)`; this may help us remembering its existence.
 fasd_add() {
   emulate -L zsh
   if [[ $# -ne 0 ]]; then
@@ -1501,9 +1501,9 @@ fix() { #{{{2
   #
   # A Reset String.
   #
-  #     $ man -Kw rs1
-  #     $ man infocmp /rs1
-  #     $ man tput /rs1
+  #     man -Kw rs1
+  #     man infocmp /rs1
+  #     man tput /rs1
   #}}}
   tput rs1
   tput rs2
@@ -1729,8 +1729,8 @@ EOF
   #     $ wc -l < file
   #     5
   #
-  # I think that when you reconnect the  input of `$ wc` like this, it doesn't
-  # see a  file anymore, only  its contents, which  removes some noise  in the
+  # I think that when  you reconnect the input of `wc(1)`  like this, it doesn't
+  # see  a file  anymore, only  its contents,  which removes  some noise  in the
   # output.
   #}}}
   diff -U $(wc -l <"$1") "$1" "$2" | grep '^-' | sed 's/^-//g'
@@ -2035,7 +2035,7 @@ nv() { #{{{2
   fi
 }
 
-# FIXME: If we restart Vim, then suspend it, we can't resume it by executing `$ fg`.{{{
+# FIXME: If we restart Vim, then suspend it, we can't resume it by executing `fg`.{{{
 #
 # MWE:
 #
@@ -2066,15 +2066,14 @@ nv() { #{{{2
 #         nv
 #       fi
 #     }
-#     # See: `$ man zshmisc /SPECIAL FUNCTIONS /Hook Functions`
+#     # See: `man zshmisc /SPECIAL FUNCTIONS/;/Hook Functions`
 #     precmd_functions=(__restart_vim)
 #}}}
 #   Why don't you use it?{{{
 #
 # Vim is restarted the first time, but *not* the next times.
-# The issue is not with the trap, nor  with the flag, because if I execute any
-# command  (ex:  `$  ls`), causing  a  new  prompt  to  be displayed,  Vim  is
-# restarted.
+# The issue is  not with the trap, nor  with the flag, because if  I execute any
+# command (ex: `ls(1)`), causing a new prompt to be displayed, Vim is restarted.
 # Besides, if we add some command after `nv` (ex: `echo 'hello'`), the message
 # is correctly displayed even when Vim is not restarted, which means that this
 # `if` block is always correctly processed.
@@ -2088,7 +2087,7 @@ nv() { #{{{2
 #
 # ---
 #
-# If you suspend + `$ fg` Vim after every restart, you can restart as many times
+# If you suspend +  `fg` Vim after every restart, you can  restart as many times
 # as you want.
 #}}}
 # set a trap for when we send the signal `USR1` from our Vim mapping `SPC R`
@@ -2395,6 +2394,24 @@ var_what_have_you() { #{{{2
 }
 #}}}2
 
+vim_fix_vimrc() { #{{{2
+  # Purpose:{{{
+  #
+  # Sometimes, you write something in your  vimrc which causes an issue, and you
+  # can't start  Vim with your  config anymore (e.g.  an autocmd which  is fired
+  # very often and runs a buggy command).
+  #
+  # When that happens, you need to edit your vimrc with no config:
+  #
+  #     $ vim -Nu NONE
+  #
+  # But  doing so  will make  you lose  the undo  history (unless  the vimrc  is
+  # currently loaded in your Vim session).
+  # To avoid this, you need to set `'undofile'` and `'undodir'` appropriately.
+  #}}}
+  vim -Nu NONE --cmd 'set udf udir=$HOME/.vim/tmp/undo' "${HOME}/.vim/vimrc"
+}
+
 vim_prof() { #{{{2
   emulate -L zsh
   local tmp
@@ -2561,10 +2578,10 @@ zsh_sourced_files() { #{{{2
   emulate -L zsh
   local logfile='zsh_log'
   script -c 'zsh -o SOURCE_TRACE' "${logfile}"
-  # FIXME: How to exit the subshell started by `$ script`?{{{
+  # FIXME: How to exit the subshell started by `script(1)`?{{{
   #
-  # If I execute  `$ exit` here, not  only will the subshell  be terminated, but
-  # the current function too.
+  # If I execute `exit` here, not only  will the subshell be terminated, but the
+  # current function too.
   #}}}
   sed -i '/^+/!d' "${logfile}"
   "${EDITOR}" "${logfile}"
@@ -2622,9 +2639,9 @@ _fzf_compgen_path() { #{{{2
 #                 ^^^
 #}}}
 
-# TODO: Invoke `$ less` whenever the output of a command doesn't fit on a single screen.{{{
+# TODO: Invoke `less(1)` whenever the output of a command doesn't fit on a single screen.{{{
 #
-# Take the  habit of invoking `$  less`, every time you  write an alias/function
+# Take the habit  of invoking `less(1)`, every time you  write an alias/function
 # whose goal is  to print some info which  can be very long, and  require you to
 # scroll back with tmux copy mode.
 #
@@ -2672,7 +2689,7 @@ alias ..5='cd ../../../../..'
 
 # I want colors too!{{{
 #
-# Use `$ dfc`.
+# Use `dfc(1)`.
 #}}}
 alias df='\df -h -x tmpfs -T'
 #              │  ├─────┘  │{{{
@@ -2691,7 +2708,7 @@ alias dirs='\dirs -v'
 #
 # If the filename contains spaces, we  want them to be replaced with underscores
 # automatically.
-# Otherwise,  when you  read a  file containing  spaces with  `$ mpv`,  it's not
+# Otherwise, when  you read  a file  containing spaces  with `mpv(1)`,  it's not
 # logged by  fasd (unless you  quote it,  but we always  forget to quote  such a
 # file).
 #}}}
@@ -3085,7 +3102,7 @@ alias sh='$HOME/.local/bin/dash -E'
 #
 #     $ sudo vim /path/to/file/owned/by/root
 #
-# *Yeah, I know, we should use `$ sudoedit` instead, but in that case the cwd would be*
+# *Yeah, I know, we should use `sudoedit` instead, but in that case the cwd would be*
 # *`/var/tmp` which would prevent us from visiting neighbor files with vim-dirvish*.
 #
 # Press `got` to make tmux split the window; instead, a new terminal will be opened.
@@ -3104,7 +3121,7 @@ alias sh='$HOME/.local/bin/dash -E'
 #
 # Suppose your file  contains a vimscript function; you position  your cursor in
 # it, and press `gl` to count how many lines it contains.
-# Atm,  it   will  fail,   because  `$   cloc`  is   `/home/user/bin/cloc`,  and
+# Atm,   it   will   fail,   because  `cloc`   is   `/home/user/bin/cloc`,   and
 # `/home/user/bin` is not in root's PATH.
 # So, we need to tell sudo to also preserve PATH (`-E` doesn't preserve it).
 #
@@ -3115,14 +3132,14 @@ alias sh='$HOME/.local/bin/dash -E'
 #
 # It overrides our PATH.
 # This is confirmed by the fact that PATH  is one of the few variables listed at
-# `$ man sudo /ENVIRONMENT`.
+# `man sudo /ENVIRONMENT`.
 # Also, if you add `/home/user/bin` to `secure_path`, you don't need `env` anymore.
 #}}}
 #   Couldn't we just use `PATH=$PATH`?{{{
 #
 # It's  a special syntax  (usually variable  assignments are written  before the
 # command name), but yes, sudo can be followed by `VAR=value`.
-# From `$ man sudo /DESCRIPTION /VAR=value`:
+# From `man sudo /DESCRIPTION/;/VAR=value`:
 #
 # > Environment variables to be set for the command may also be passed on the
 # > command line in the form of VAR=value, e.g.
@@ -3168,7 +3185,7 @@ alias sh='$HOME/.local/bin/dash -E'
 #
 # The shell doesn't check  for an alias beyond the first word,  so it didn't use
 # our `ls` alias (`ls` is only the second word, not the first).
-# The solution is given at `$ man zshbuiltins /^\s*alias`:
+# The solution is given at `man zshbuiltins /^\s*alias`:
 #
 # > A trailing space in value causes the next word to be checked for alias expansion.
 #}}}
@@ -3188,7 +3205,7 @@ alias scl='systemctl list-units --type service --all'
 # tldr {{{3
 
 # TODO: Replace this alias with a function invoking: `$ vim +"Tldr $1"`.
-# Take inspiration from what we did with `$ cs`.
+# Take inspiration from what we did with `cs`.
 alias 'td=tldr'
 
 # tlmgr_gui {{{3
@@ -3345,7 +3362,7 @@ ignore_these_cmds() {
   #
   # For more info, see:
   #
-  #     $ man zshexpn /PARAMETER EXPANSION /Parameter Expansion Flags
+  #     man zshexpn /PARAMETER EXPANSION/;/Parameter Expansion Flags
   #}}}
 
   # now we check whether it's somewhere in our array of commands to ignore
@@ -3445,7 +3462,7 @@ bindkey '^T' transpose-chars
 #     . "${HOME}/.zkbd/${TERM}"
 #     [[ -n ${key[Delete]} ]] && bindkey "${key[Delete]}" delete-char
 #
-# This calls the zkbd utility – documented at `$ man zshcontrib /zkbd`.
+# This calls the zkbd utility – documented at `man zshcontrib /zkbd`.
 #
 # The first time the code  is run in a new terminal, it will  ask you to press a
 # few keys.
@@ -3498,7 +3515,7 @@ fi
 #
 # See also:
 #
-#     $ man terminfo /smkx
+#     man terminfo /smkx
 #     :h t_ks
 #}}}
 #     When I inspect the escape sequence sent by a function key, it's the same in both modes!{{{
@@ -3582,7 +3599,7 @@ fi
 # The  second function  is  executed every  time the  line  editor has  finished
 # reading a new line of input.
 #
-# See `$ man zshzle /zle-line-init`
+# See `man zshzle /zle-line-init`
 #}}}
 
 # S-Tab {{{2
@@ -3906,7 +3923,7 @@ bindkey '^X^D' end-of-list
 autoload -Uz edit-command-line
 zle -N edit-command-line
 
-# Why this wrapper function around the `$ vim` command?{{{
+# Why this wrapper function around the `vim(1)` command?{{{
 #
 # It allows us to customize the environment.
 #
@@ -3980,7 +3997,19 @@ __sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call source#fi
 
 sane-edit-command-line() {
   emulate -L zsh
-  local EDITOR='__sane_vim'
+  # Do *not* replace `VISUAL` with `EDITOR`.{{{
+  #
+  # To  determine   which  editor   to  invoke,   `edit-command-line`  evaluates
+  # `${VISUAL:-${EDITOR:-vi}}`:
+  #
+  #     /usr/share/zsh/functions/Zle/edit-command-line:20
+  #
+  # This gives the priority to `VISUAL` over `EDITOR`.
+  # So, if you don't set `VISUAL` (only `EDITOR`), the latter will be used.
+  # We've set it with the value `vim`, so `vim(1)` will be invoked.
+  # But that's not what we want; we want `__sane_vim` to be invoked.
+  #}}}
+  local VISUAL='__sane_vim'
   zle edit-command-line
 }
 zle -N sane-edit-command-line
@@ -3997,8 +4026,8 @@ bindkey '^X^E' sane-edit-command-line
 # Explain what tags are, and how to read the output of `_complete_help`.
 #
 # See:
-#     $ man zshcompsys /COMPLETION SYSTEM CONFIGURATION /Overview
-#     $ man zshcompsys /BINDABLE COMMANDS
+#     man zshcompsys /COMPLETION SYSTEM CONFIGURATION/;/Overview
+#     man zshcompsys /BINDABLE COMMANDS
 bindkey '^X^H' _complete_help
 
 # The  `_complete_help` widget  shows all  the contexts  and tags  available for
@@ -4062,7 +4091,7 @@ my-run-help() {
   #
   #    1. pushes the current buffer (command line) onto the buffer stack
   #    2. looks for a help page for the command name on the current command line (in case it's a builtin)
-  #    3. if it doesn't find one, it invokes `$ man`
+  #    3. if it doesn't find one, it invokes `man(1)`
   #
   # For more info, see `$ man zshzle /run-help`.
   #}}}
@@ -4142,7 +4171,7 @@ bindkey '^Z' __fancy_ctrl_z
 # What's this “unnamed” function?{{{
 #
 # An anonymous function.
-# See `$ man zshmisc` for more info.
+# See `man zshmisc` for more info.
 #}}}
 # Why such a function?{{{
 #
@@ -4217,7 +4246,7 @@ bindkey '^Z' __fancy_ctrl_z
 #
 # This is a Xorg issue.
 # For some reason, pressing `Alt AltGr key` doesn't work for some keys (i, u, x, ...).
-# Run `$ xev_terse_terse`, then press `Alt AltGr`:
+# Run `xev_terse_terse`, then press `Alt AltGr`:
 #
 #     64 Alt_L~
 #     108 ISO_Level3_Shift~
@@ -4254,7 +4283,7 @@ bindkey '^Z' __fancy_ctrl_z
 #
 # Update:
 # If you go into the keyboard settings and choose the English layout (move it to
-# the top), then repeat the experiment  with `$ xev`, the issue persists, except
+# the top), then repeat the experiment with `xev(1)`, the issue persists, except
 # this time, you'll see AltL and AltR:
 #
 #     (our custom layout)
@@ -4461,7 +4490,7 @@ bindkey '\em' __normalize_command_line
 #
 # See:
 #
-#     $ man zshcontrib /up-line-or-beginning-search
+#     man zshcontrib /up-line-or-beginning-search
 #     /usr/share/zsh/functions/Zle/up-line-or-beginning-search
 #     /usr/share/zsh/functions/Zle/down-line-or-beginning-search
 #}}}
@@ -4632,11 +4661,11 @@ typeset -Ag abbrev
 #     $ echo V C-v SPC some text
 #}}}
 abbrev=(
-  # Grep (and ignore the `$ grep` process if we grep the output of `$ ps`)
+  # Grep (and ignore the `grep(1)` process if we grep the output of `ps(1)`)
   'G' '| grep -v grep | grep'
   'L'    '2>&1 | less'
   # Warning: If `cmd V` opens an empty buffer,{{{
-  # then later opens the right buffer (the  one containing the output of `$ cmd`),
+  # then later opens the right buffer  (the one containing the output of `cmd`),
   # try to delete `~/.fasd-init-zsh`, and restart the shell.
   #
   # It worked in the past.
@@ -4689,13 +4718,13 @@ __abbrev_expand() {
   LBUFFER=${LBUFFER%%(#m)[a-zA-Z]#}
   #                ├┘├──┘        │{{{
   #                │ │           └ matches 0 or more of the previous pattern (word character)
-  #                │ │             See: `$ man zshexpn /^\s*x#\s`
+  #                │ │             See: `man zshexpn /^\s*x#\s`
   #                │ │
   #                │ └ populate `$MATCH` with the suffix removed by `%%`
-  #                │   See: `$ man zshexpn /\C^\s*m\s*Set`
+  #                │   See: `man zshexpn /\C^\s*m\s*Set`
   #                │
   #                └ remove longest suffix matching the following pattern
-  #                  See: `$ man zshexpn /%%pat`
+  #                  See: `man zshexpn /%%pat`
   #}}}
 
   # Only trigger abbreviation if the previous character is a space.{{{
@@ -4707,7 +4736,7 @@ __abbrev_expand() {
   #}}}
   if [[ "${LBUFFER: -1}" == ' ' ]]; then
   #                │{{{
-  #                └ `$ man zshexpn /${name:offset}`
+  #                └ `man zshexpn /${name:offset}`
   #
   # > If offset  is negative, the  - may not appear  immediately after the  : as
   # > this indicates the ${name:-word} form of substitution.
@@ -4716,7 +4745,7 @@ __abbrev_expand() {
     LBUFFER+=${abbrev[$MATCH]:-$MATCH}
     #        │{{{
     #        └ expands into `abbrev[$MATCH]` if the latter is set, `$MATCH` otherwise
-    #          See: `$ man zshexpn /${name:-word}`
+    #          See: `man zshexpn /${name:-word}`
     #}}}
 
     # Append some text for some abbreviations.{{{
@@ -4749,7 +4778,7 @@ __abbrev_expand() {
   zle self-insert
   #   │
   #   └ run the `self-insert` widget to insert a character into the buffer at
-  #     the cursor position (`$ man zshzle`)
+  #     the cursor position (`man zshzle`)
 }
 
 # define a widget to expand when inserting a space
@@ -5026,8 +5055,8 @@ fi
 # TODO:
 # When we clone a git repo, it would be useful to automatically cd into it.
 # Install a hook to do that.
-# Read `$ man zshcontrib /Manipulating Hook Functions`.
-# Also `$ man zshmisc /SPECIAL FUNCTIONS`.
+# Read `man zshcontrib /Manipulating Hook Functions`.
+# Also `man zshmisc /SPECIAL FUNCTIONS`.
 #
 # ---
 #

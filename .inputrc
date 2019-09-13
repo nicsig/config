@@ -5,12 +5,12 @@
 #}}}
 # Where to find information to configure it?{{{
 #
-#     $ man 3 readline
+#     man 3 readline
 #}}}
 
 # TODO: Learn all readline key bindings:{{{
 #
-#     $ man bash /Readline Command Names
+#     man bash /Readline Command Names
 #
 # If some of them don't work, rebind them to key sequences recognized by the terminal.
 # Find a way to replicate the same functionalities provided by `readline` in `zle`.
@@ -72,7 +72,7 @@ set enable-bracketed-paste on
 
 # What does it do?{{{
 #
-# From `$ man 3 readline /enable-keypad`:
+# From `man 3 readline /enable-keypad`:
 #
 # > When set to On, readline will try  to enable the application keypad when it is
 # > called.  Some systems need this to enable the arrow keys.
@@ -121,7 +121,7 @@ set expand-tilde on
 #     press left arrow key, 4 times, then insert `x` (between foo and bar)
 #     *user@ubuntu:~$ printf 'fooxbar'bar'~
 #
-# The issue is due to an interaction between `mark-modified-lines` and `$ printf`
+# The issue is due to  an interaction between `mark-modified-lines` and `printf`
 # when the string it prints doesn't end with a new line.
 # I think this is because, without trailing  newline, the start of the prompt is
 # shifted to the right.

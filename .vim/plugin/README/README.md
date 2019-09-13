@@ -141,7 +141,7 @@ For example:
     :Time sil echo filereadable('/run/user/1000/gvfs/ftp:host=ftp.vim.org/pub/vim/patches/8.1/README')
     0.125 seconds to run :echo filereadable('/run/user/1000/gvfs/ftp:host=ftp.vim.org/pub/vim/patches/8.1/README')~
       │
-      └ if you don't get such a slow time, try to open a ftp link with `$ (g)vim`
+      └ if you don't get such a slow time, try to open a ftp link with `vim(1)`
 
 This is way too much; compare with a regular filepath:
 

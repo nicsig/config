@@ -8,10 +8,10 @@ _FASD_FUZZY=2
 # The default value is 'fasd ls echo'.
 # Why do you add `touch`?{{{
 #
-# When you run `$  touch` to create a file, fasd  doesn't register anything into
+# When you run `touch(1)` to create  a file, fasd doesn't register anything into
 # its database, because the file doesn't exist yet.
 # But if you run it on an existing file, fasd will register it.
-# I don't like that, because I suspect  I sometimes run `$ touch` on an existing
+# I don't like that, because I suspect I sometimes run `touch(1)` on an existing
 # file while studying some shell concept.
 #}}}
 _FASD_IGNORE='fasd ls echo touch'

@@ -199,7 +199,7 @@ clean() { #{{{2
   rm -f backup*.tgz "${PGM}"*.deb
 
   if [[ "${PGM}" == 'weechat' ]]; then
-    # Clean last `$ cmake` command:
+    # Clean last `cmake(1)` command:
     # https://stackoverflow.com/a/9680493/9780968
     if [[ -d 'build' ]]; then
       rm -rf build
@@ -714,8 +714,8 @@ xdg_mime_default() { #{{{2
       #     $ xdg-mime default gvim.desktop text/english text/plain text/x-makefile ...
       #
       # In effect, it makes gVim the default program to open various types of text files.
-      # This matters when using `$ xdg-open` or double-clicking on the icon of a
-      # file in a GUI file manager.
+      # This matters when using `xdg-open(1)`  or double-clicking on the icon of
+      # a file in a GUI file manager.
       #}}}
       # Is it needed?{{{
       #

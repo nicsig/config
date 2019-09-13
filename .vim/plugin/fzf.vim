@@ -47,7 +47,7 @@ let g:fzf_command_prefix = 'Fz'
 "
 "     {"options": "--delimiter=: --nth=4.."}
 "
-" Which, in turn, pass `--delimiter: --nth=4..` to `$ fzf`.
+" Which, in turn, pass `--delimiter: --nth=4..` to `fzf(1)`.
 "
 " See: https://www.reddit.com/r/vim/comments/b88ohz/fzf_ignore_directoryfilename_while_searching/ejwn384/
 "}}}
@@ -65,7 +65,7 @@ exe 'com! -bang -nargs=? -complete=dir '.g:fzf_command_prefix.'Files call fzf#vi
 " The  issue  is  due to  `:FzSnippets`  which  uses  the  `-n 1`  option  in  the
 " `'options'` key of a dictionary.
 " To fix this, we replace `-n 1` with `-n ..`.
-" From `$ man fzf`:
+" From `man fzf`:
 "
 "     /OPTIONS
 "     /Search mode

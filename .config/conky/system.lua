@@ -35,7 +35,7 @@
 --
 --     ~/.conky/system_rings.lua:55
 --
--- From `$ man conky /memperc`:
+-- From `man conky /memperc`:
 --
 --     memperc
 --            Percentage of memory in use
@@ -94,7 +94,7 @@ conky.config = {
 -- -- System information using conky capabilities
 
 -- TODO: We use `$ sensors | awk '/Package id/{print $4}'` to get the cpu temperature. Is it reliable?
--- There are many temperatures in the output of `$ sensors`. Which one should we extract?
+-- There are many temperatures in the output of `sensors(1)`. Which one should we extract?
 
 conky.text = [[
 ${voffset -10}

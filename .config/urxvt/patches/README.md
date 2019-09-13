@@ -16,8 +16,8 @@
     11_fix_lexgrog.diff~
     12_hyphen_minus_sign.diff~
 
-Don't run `$ apt-get source` with `$ sudo`; it raises a (harmless?) error at the
-end of the download:
+Don't run  `$ apt-get source` with  `sudo(8)`; it raises a  (harmless?) error at
+the end of the download:
 
     W: Can't drop privileges for downloading as file 'rxvt-unicode_9.22.orig.tar.bz2' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)~
 

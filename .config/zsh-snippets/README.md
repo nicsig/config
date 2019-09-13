@@ -25,7 +25,7 @@ Just in case we've edited a file.
 We want to undo any modification.
 
 This matters, for example, if you need a tmux binary with debugging information,
-but you've edited `configure.ac` with `$ sed` in `~/bin/upp.sh`.
+but you've edited `configure.ac` with `sed(1)` in `~/bin/upp.sh`.
 Indeed,  for  some  reason,  changing  the  version  prevents  the  binary  from
 containing debugging information.
 
@@ -93,13 +93,13 @@ shell quits again.
 # About `sudo -E env "PATH=$PATH" zsh -c "!!"`
 ## why `-E`?
 
-To preserve some variables in current environment (`$ man sudo /^\s*-E\>`).
+To preserve some variables in current environment (`man sudo /^\s*-E\>`).
 
 ## why `env "PATH=$PATH"`?
 
 To make sure `PATH` is preserved, in case `-E` was not enough.
 
-`$ env` runs the next command (here bash), in an arbitrarily modified environment.
+`env(1)` runs the next command (here bash), in an arbitrarily modified environment.
 
 ## why `bash -c`?
 
@@ -120,7 +120,7 @@ owned by root.
 ## when do I need this snippet?
 
 Whenever you have a custom zsh function which needs root privileges.
-For example, `$ environ` works fine for a user process, but not for a root process:
+For example, `environ` works fine for a user process, but not for a root process:
 
     $ environ 1
     environ:9: permission denied: /proc/1/environ~

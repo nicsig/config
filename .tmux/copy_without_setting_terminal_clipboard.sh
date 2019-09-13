@@ -10,9 +10,9 @@
 #     $ infocmp -x | sed -n '/Ms/s/,.*//p'
 #     Ms=\E]52;%p1%s;%p2%s\007~
 #
-# This is an issue if you want to set the terminal clipboard yourself via `$ xsel` (or `$ xclip`),
-# with a modified version of the selection, because there may be a race condition between
-# `$ xsel` and tmux; and tmux may win.
+# This  is an  issue if  you want  to set  the terminal  clipboard yourself  via
+# `xsel(1x)` (or `xclip(1)`), with a  modified version of the selection, because
+# there may be a race condition between `xsel(1x)` and tmux; and tmux may win.
 # If  tmux wins,  it's  the original  selection  which will  be  written in  the
 # terminal clipboard, not your modified version.
 #
@@ -48,7 +48,7 @@
 #
 # For more info, see:
 #
-# `$ man tmux /^\s*set-clipboard`
+# `man tmux /^\s*set-clipboard`
 # https://sunaku.github.io/tmux-yank-osc52.html
 #}}}
 # Synopsis:{{{

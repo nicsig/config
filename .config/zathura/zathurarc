@@ -162,7 +162,7 @@ set statusbar-basename true
 #}}}
 # Where did you find this option?{{{
 #
-#     $ man zathurarc /selection-clipboard
+#     man zathurarc /selection-clipboard
 #
 # The  'selection-clipboard'   option  defines   the  X  clipboard   into  which
 # mouse-selected data  will be written.   When it is "clipboard",  selected data

@@ -90,8 +90,8 @@ fu! colorscheme#set() abort "{{{2
     "
     " Then, open a terminal, and run `$ echo $TERM`; the output is `xterm`.
     " So, one would expect that Vim is using xterm's default palette.
-    " And yet, if you  run `$ palette`, and use Gpick to get  the hex color code
-    " of the  color 11; it's  `#ffff40`, which I  can't find in  xterm's default
+    " And yet, if you run `palette`, and use  Gpick to get the hex color code of
+    " the  color 11;  it's  `#ffff40`, which  I can't  find  in xterm's  default
     " palette:
     "
     " https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
@@ -371,7 +371,7 @@ fu! s:styled_comments() abort "{{{2
     "
     "     $ palette
     "
-    " And to get the hex equivalent of the decimal code, I used `$ gpick`.
+    " And to get the hex equivalent of the decimal code, I used `gpick(1)`.
     "}}}
     let guibg = &bg is# 'light' ? '#bcbcbc' : '#626262'
     let ctermbg = &bg is# 'light' ? 250 : 241

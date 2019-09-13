@@ -1,4 +1,4 @@
-# This file customizes the default key bindings in `$ info`.
+# This file customizes the default key bindings in `info(1)`.
 # https://www.gnu.org/software/texinfo/manual/info-stnd/html_node/Custom-Key-Bindings.html#Custom-Key-Bindings
 
 # You can learn some basic motions from this link:
@@ -6,7 +6,7 @@
 
 # Where can I find the name of the commands which can be used in the rhs of the key bindings?{{{
 #
-# Run `$ info`, and invoke `get-help-window` (currently bound to `C-h`).
+# Run `info(1)`, and invoke `get-help-window` (currently bound to `C-h`).
 # Scroll down until you find either of these lines:
 #
 #     Commands available in Info windows:

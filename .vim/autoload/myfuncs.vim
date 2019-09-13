@@ -66,7 +66,7 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
     "
     " We already have a similar autocmd in our vimrc.
     " I don't want it to interfere.
-    " I don't want a race condition where the winning `$ xclip` process is the last one.
+    " I don't want a race condition where the winning `xclip(1)` process is the last one.
     " It's probably unnecessary but better be safe than sorry.
     "}}}
     au! make_clipboard_persist_after_quitting_vim
@@ -750,7 +750,7 @@ fu! myfuncs#in_A_not_in_B(...) abort "{{{1
     "     $ wc -l < file
     "     5
     "
-    " I think that when you reconnect the  input of `$ wc` like this, it doesn't
+    " I think that when you reconnect the input of `wc(1)` like this, it doesn't
     " see a  file anymore, only  its contents, which  removes some noise  in the
     " output.
     "}}}
@@ -929,8 +929,8 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             "    └───────────────────┴──────────┴─────────────┴────────────┘
             "
             " `fnameescape()` would not protect `;`.
-            " The shell would interpret the semicolon as the end of the `$ grep`
-            " command, and would execute the rest as another command.
+            " The  shell  would  interpret  the  semicolon as  the  end  of  the
+            " `grep(1)` command, and would execute the rest as another command.
             " This can be dangerous:
             "
             "     foo;rm -rf

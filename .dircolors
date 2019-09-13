@@ -2,7 +2,7 @@
 #
 # A configuration file for `/usr/bin/dircolors`.
 #}}}
-# What's `$ dircolors`?{{{
+# What's `dircolors(1)`?{{{
 #
 # A utility to help you set `$LS_COLORS`.
 #}}}
@@ -153,7 +153,7 @@
 #}}}
 # Why should I avoid the style attribute `02`?{{{
 #
-# Here's how it's documented at `$ man console_codes`:
+# Here's how it's documented at `man console_codes`:
 #
 # > 2       set half-bright (simulated with color on a color display)
 #
@@ -165,8 +165,8 @@
 #}}}
 # Where can I find more information about all the numeric codes used in the settings?{{{
 #
-# See `$ man console_codes`
-# See also `$ man dir_colors`.
+# See `man console_codes`
+# See also `man dir_colors`.
 #}}}
 
 

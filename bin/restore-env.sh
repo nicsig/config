@@ -13,7 +13,7 @@
 #     $ tic -x terminfo.src
 #
 # Or maybe we should rely on `up.sh` to do that?
-# Or maybe we should version control `~/.terminfo/` (`$ config` would restore them)?
+# Or maybe we should version control `~/.terminfo/` (`config` would restore them)?
 
 # TODO: Finish reading this: https://www.atlassian.com/git/tutorials/dotfiles
 #
@@ -63,7 +63,7 @@
 # TODO: add PPAs (or better yet, get rid of all PPAs in your current installation)
 
 # TODO:  suppression des  fichiers /  dossiers avant  leur remplacement  par des
-# liens symboliques, car l'option `-n` de `$ ln` ne semble pas fonctionner
+# liens symboliques, car l'option `-n` de `ln(1)` ne semble pas fonctionner
 
 # TODO: restore system files backed up in:
 #
@@ -238,7 +238,7 @@ aptitude purge whoopsie update-notifier
 #                                              └ you can write several mime types
 #}}}
 xdg-mime default mpv.desktop video/mp4
-# Useful for starting gVim when we try to open a ftp link with `$ xdg-open`:{{{
+# Useful for starting gVim when we try to open a ftp link with `xdg-open(1)`:{{{
 #
 #     $ xdg-open ftp://ftp.vim.org/pub/vim/patches/8.0/README
 #

@@ -28,7 +28,7 @@ let b:url = 'https://www.startpage.com/do/search?cat=&language=english&cmd=proce
 nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 " Why do you remove all double quotes in the search?{{{
 "
-" Double quotes can break `$ xdg-open`.
+" Double quotes can break `xdg-open(1)`.
 "
 " Remove `substitute()` and try to search for `"foo bar"`.
 " xdg-open will start a second web browser window, in which one tab searches for

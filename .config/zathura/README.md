@@ -13,7 +13,7 @@ Example:
 
     map [fullscreen] f toggle_fullscreen
 
-For more info, `$ man zathurarc /Mode`.
+For more info, `man zathurarc /Mode`.
 
 ##
 ## Am I in fullscreen mode when I press Alt-F10?

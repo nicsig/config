@@ -30,7 +30,7 @@ seq="\e[200~${selection}\e[201~"
 #     XTerm*allowSendEvents: true
 #
 # But, it would disable `allowWindowOps`.
-# From `$ man xterm /allowSendEvents (`:
+# From `man xterm /allowSendEvents (`:
 #
 # > Note that  allowing such  events would  create a  very large  security hole,
 # > therefore  enabling  this  resource   forcefully  disables  the  allowXXXOps
@@ -47,7 +47,7 @@ seq="\e[200~${selection}\e[201~"
 # ---
 #
 # Solution: Try  to get  the  primary selection,  then use  it  to populate  the
-# clipboard selection, and finally run `$ xdotool` to simulate `C-S-v`.
+# clipboard selection, and finally run `xdotool(1)` to simulate `C-S-v`.
 #
 #     # get the primary selection
 #     text="\e[200~$(xsel -p)\e[201~"
@@ -56,19 +56,20 @@ seq="\e[200~${selection}\e[201~"
 #     # simulate a press on C-S-v
 #     xdotool key 'ctrl+shift+v'
 #
-# The code works, except for the last `$ xdotool` command.
+# The code works, except for the last `xdotool(1)` command.
 # The syntax seems good, since the command works when run in an interactive shell.
 #
-# The issue can be reproduced with just the `$ xdotool` command.
+# The issue can be reproduced with just the `xdotool(1)` command.
 # But  only  if  we invoke  this  script  via  the  key binding  installed  from
 # `~/.config/keyboard/xbindkeys.conf`.
-# Btw, in the latter file, right above the key binding, we've written that `$ xdotool`
-# was to avoid; I wonder whether that has something to do with our current issue.
+# Btw,  in the  latter file,  right above  the key  binding, we've  written that
+# `xdotool(1)` was to avoid; I wonder whether  that has something to do with our
+# current issue.
 #}}}
 printf -- '%b' "${seq}" | xvkbd -xsendevent -file - 2>/dev/null
 
 # Rewrite the  text in the primary  clipboard, because for some  reason, it gets
-# erased after `$ kvkbd` is invoked.
+# erased after `xvkbd(1)` is invoked.
 printf -- '%s' "${selection}" | xsel -i -p
 
 # `-xsendevent` {{{

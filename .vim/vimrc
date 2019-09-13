@@ -180,11 +180,11 @@ Plug 'lacygoill/vim-graph'
 " Not in projects using other VCS systems (`.hg/`, `.bzr/`, ...).
 "
 " Also:
-" Use `$  entr` to automatically  rename files  whose names contain  spaces, and
+" Use `entr(1)`  to automatically rename  files whose names contain  spaces, and
 " replace them with underscores.
 " Don't do that everywhere; just in some specific directories like `~/Downloads/`.
-" The purpose is to make it easier for `$ fasd` to log files we open with `$ mpv`,
-" `$ zathura`, ...
+" The purpose  is to  make it  easier for `fasd(1)`  to log  files we  open with
+" `mpv(1)`, `zathura(1)`, ...
 " Indeed, by default, fasd ignore files  with spaces, unless you quote the name,
 " but we always forget to quote it.
 "}}}
@@ -523,12 +523,12 @@ let $MANSECT = $MYMANSECT
 " But it doesn't work when `foobar` is above `| foobar |`, nor across files...
 "}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
-let $MY_WIKI = $HOME.'/wiki'
+let $MY_WIKI = $HOME..'/wiki'
 
-if !isdirectory($XDG_RUNTIME_DIR.'/vim')
-    call mkdir($XDG_RUNTIME_DIR.'/vim', 'p', '0700')
+if !isdirectory($XDG_RUNTIME_DIR..'/vim')
+    call mkdir($XDG_RUNTIME_DIR..'/vim', 'p', '0700')
 endif
-let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR.'/vim'
+let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR..'/vim'
 " For more info about `$XDG_RUNTIME_DIR`:
 "
 " https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
@@ -787,8 +787,8 @@ if has('vim_starting')
         "
         "      au VimEnter * ++nested call s:set_colorscheme()
         "                  │
-        "                  └─ the autocmds need to nest, so that when we set the colorscheme,
-        "                     `ColorScheme` is fired, and our customizations are sourced
+        "                  └ the autocmds need to nest, so that when we set the colorscheme,
+        "                    `ColorScheme` is fired, and our customizations are sourced
         "
         " Also, you'll need to use a variable name in uppercase.
         "}}}
@@ -810,9 +810,9 @@ if has('vim_starting')
         au my_color_scheme VimLeavePre * call colorscheme#save_last_version()
 
         " try to restore the exact version of the last color scheme used
-        let s:file = $HOME.'/.vim/colors/my/last_version.vim'
+        let s:file = $HOME..'/.vim/colors/my/last_version.vim'
         if filereadable(s:file)
-            exe 'so '.s:file
+            exe 'so '..s:file
             unlet! s:file
         endif
         call colorscheme#set()
@@ -1160,7 +1160,7 @@ fu! s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
 
-let &includeexpr = s:snr().'inex()'
+let &includeexpr = s:snr()..'inex()'
 
 fu! s:inex() abort
     let line = getline('.')
@@ -1168,23 +1168,28 @@ fu! s:inex() abort
     " the path could contain an environment variable surrounded by curly brackets
     " What's the purpose of the second branch?{{{
     "
-    "     '\|${'.v:fname.'}\f\+'
-    "
-    " It handles the case where our cursor is on the environment variable name:
+    " Handle the case where the cursor is on the environment variable name:
     "
     "     ${HOME}/bin/README.md
     "      ^^^^^^
     "}}}
-    let pat = '\m\C${\w\+}'.'\V'.v:fname.'\|${'.v:fname.'}\f\+'
-    "                         │
-    "                         └ `v:fname` could contain a tilde
-    let cursor_after = '\m\%(.*\%'.col('.').'c\)\@='
-    let cursor_before = '\m\%(\%'.col('.').'c.*\)\@<='
-    let pat = cursor_after . pat . cursor_before
+    "   The third branch?{{{
+    "
+    " Handle the case where the cursor is on `$`:
+    "
+    "     ${HOME}/bin/README.md
+    "     ^
+    "}}}
+    let pat = '\m\C${\f\+}'..'\V'..v:fname..'\|${'..v:fname..'}\f\+\|\%'..col('.')..'c${\f\+}\f\+'
+    "                          │
+    "                          └ `v:fname` could contain a tilde
+    let cursor_after = '\m\%(.*\%'..col('.')..'c\)\@='
+    let cursor_before = '\m\%(\%'..col('.')..'c.*\)\@<='
+    let pat = cursor_after..pat..cursor_before
     if line =~# pat
         let pat = matchstr(line, pat)
         let env = matchstr(pat, '\w\+')
-        return substitute(pat, '${'.env.'}', eval('$'.env), '')
+        return substitute(pat, '${'..env..'}', eval('$'..env), '')
 
     " Why?{{{
     "
@@ -1281,7 +1286,7 @@ set smarttab
 " By default, (when `smarttab` is not enabled), 'sts' controls how many spaces
 " are added/removed when we hit `Tab` or `BS`.
 "
-"               ┌─ disable 'sts'; use 'sw' instead
+"               ┌ disable 'sts'; use 'sw' instead
 "               │
 set softtabstop=-1
 
@@ -1372,7 +1377,7 @@ set nojoinspaces
 " First, as  the previous MWE  showed you, this can  lead to Vim  invoking Nvim,
 " which is awkward, and can create a "frankenstein" environment.
 "
-" Second, there's no reason to invoke `$ man`.
+" Second, there's no reason to invoke `man(1)`.
 " We are in Vim, and we can read manpages via `:Man`; why bother invoking a shell?
 " Let's use `:Man`.
 "}}}
@@ -1902,7 +1907,7 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 "
 "     $ typeset zle_bracketed_paste
 "
-" See: `$ man zshparam /zle_bracketed_paste`
+" See: `man zshparam /zle_bracketed_paste`
 "
 " OTOH, for bash, you need to set the readline variable `enable-bracketed-paste`.
 " It is not set by default.
@@ -2184,7 +2189,7 @@ set tags=./tags;
 " 1. Try  to configure  `vim-gutentags` and  prevent it  from including  the
 "    global value of 'tags' inside the local one.
 "
-" 2. Remove wrong tags files (`$ rm`), and make sure there's no `.git/`
+" 2. Remove wrong tags files (`rm(1)`), and make sure there's no `.git/`
 "    directory outside a valid  repository.
 "    Otherwise, `vim-gutentags` may recreate a tags file.
 "}}}
@@ -2195,8 +2200,8 @@ augroup tags_vimrc
     au!
     au BufReadPost $HOME/.vim/vimrc setl tags=$HOME/.vim/autoload/tags
     " update the tags file whenever we write `myfuncs.vim`
-    exe 'au BufWritePost '.resolve($HOME.'/.vim/autoload/myfuncs.vim')
-    \ . ' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
+    exe 'au BufWritePost '..resolve($HOME..'/.vim/autoload/myfuncs.vim')
+    \ ..' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
 
     " Don't source the zshrc automatically.{{{
     "
@@ -2289,8 +2294,8 @@ augroup END
 " In the future, if you mainly use Nvim, consider using them instead...
 " But make sure to remove the `.` at the front of `'directory'`.
 "}}}
-if !isdirectory($HOME.'/.vim')
-    call mkdir($HOME.'/.vim', '', 0770)
+if !isdirectory($HOME..'/.vim')
+    call mkdir($HOME..'/.vim', '', 0770)
 endif
 
 " Put all swap files in `~/.vim/tmp/swap/`.{{{
@@ -2578,14 +2583,14 @@ set wildignore+=*.pyc,*/__pycache__/*
 
 " undo files
 "
-"                                 ┌─ `*` can match any string/path
-"                                 │  (including as many `/` as you want, but not a dot)
-"                                 │
-let &wildignore .= ','.&undodir.'/*'
-let &wildignore .= ','.&undodir.'/*.*'
-let &wildignore .= ','.&undodir.'/*.*.*,'
-"                                 │
-"                                 └─ `*` can't match a dot, and the path of an
+"                                   ┌ `*` can match any string/path
+"                                   │ (including as many `/` as you want, but not a dot)
+"                                   │
+let &wildignore .= ','..&undodir..'/*'
+let &wildignore .= ','..&undodir..'/*.*'
+let &wildignore .= ','..&undodir..'/*.*.*,'
+"                                   │
+"                                   └ `*` can't match a dot, and the path of an
 "                                     undofile often contains 1 or 2 dots
 
 " Why don't you ignore archives?{{{
@@ -2727,13 +2732,13 @@ set whichwrap=h,l
 
 fu! s:remember_new_mappings(some_lhs) abort
     for lhs in a:some_lhs
-        exe 'nno  <silent>  '.lhs[0].'  :<c-u>call <sid>reminder_new_mapping('.string(lhs[1]).')<cr>'
+        exe 'nno  <silent>  '..lhs[0]..'  :<c-u>call <sid>reminder_new_mapping('..string(lhs[1])..')<cr>'
     endfor
 endfu
 
 fu! s:reminder_new_mapping(new_lhs) abort
     echohl WarningMsg
-    echo 'Press '.a:new_lhs.'    [3 times to make it stick faster]'
+    echo 'Press '..a:new_lhs..'    [3 times to make it stick faster]'
     echohl NONE
 endfu
 
@@ -2830,8 +2835,8 @@ cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHi
 cno  <c-r><c-l>  <c-r><c-r>=<sid>insert_current_line()<cr>
 fu! s:insert_current_line() abort
     let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
-    let cml = '\%(\V'.escape(cml, '\').'\m\)\='
-    return substitute(getline('.'), '^\s*'.cml.'\s*:\=', '', '')
+    let cml = '\%(\V'..escape(cml, '\')..'\m\)\='
+    return substitute(getline('.'), '^\s*'..cml..'\s*:\=', '', '')
 endfu
 " }}}2
 " Insert {{{2
@@ -2872,10 +2877,10 @@ fu! s:compact_whitespace() abort
     if empty(&l:cms)
         return ''
     endif
-    let cml = '\V'.matchstr(split(&l:cms, '%s')[0], '\S*').'\m'
+    let cml = '\V'..matchstr(split(&l:cms, '%s')[0], '\S*')..'\m'
 
-    if getline('.') =~# cml.'\s\s' && &filetype isnot# 'markdown'
-        let pat = '\s*'.cml.'\zs\s\+'
+    if getline('.') =~# cml..'\s\s' && &filetype isnot# 'markdown'
+        let pat = '\s*'..cml..'\zs\s\+'
         let rep = ' '
     else
         let pat = '^\s*\ze\S'
@@ -2914,7 +2919,7 @@ fu! s:c_m() abort
         return "\<c-g>u\<cr>"
     endif
 
-    if getline('.') =~ '^\s*\V'.escape(cml, '\').'\m\s*$'
+    if getline('.') =~ '^\s*\V'..escape(cml, '\')..'\m\s*$'
         " We can't invoke `setline()` immediately, because of `<expr>`.
         call timer_start(0, {-> setline('.', '')})
         return ''
@@ -2969,7 +2974,7 @@ fu! s:indent_before_backslash() abort
         return '\'
     endif
 
-    let has_text_before_cursor = matchstr(getline('.'), '.*\%'.col('.').'c') =~# '\S'
+    let has_text_before_cursor = matchstr(getline('.'), '.*\%'..col('.')..'c') =~# '\S'
     let prev_indent            = matchstr(getline(line('.')-1), '^\s*\\')
     let next_indent            = matchstr(getline(line('.')+1), '^\s*\\')
 
@@ -2985,13 +2990,13 @@ fu! s:indent_before_backslash() abort
     "       ┌ if the cursor is in the middle of the indentation,
     "       │ `0 C-d` removes all whitespace before the cursor AND after
     "       ├─────┐
-    return "0\<c-d>".current_indent.' '
-    "                │               │
-    "                │               └ to avoid that `\?` or `\:`
-    "                │                 which can cause a bug when Vim parses
-    "                │                 the ternary operator `?:` in a lambda
-    "                │
-    "                └ includes a backslash at the end
+    return "0\<c-d>"..current_indent..' '
+    "                 │                │
+    "                 │                └ to avoid that `\?` or `\:`
+    "                 │                  which can cause a bug when Vim parses
+    "                 │                  the ternary operator `?:` in a lambda
+    "                 │
+    "                 └ includes a backslash at the end
 endfu
 
 " }}}2
@@ -3025,7 +3030,7 @@ fu! s:repeat_last_edit_on_last_text() abort
 
     "                                      ┌ last changed text
     "                                      │
-    let last_text = '\V'.substitute(escape(@", '\'), '\n', '\\n', 'g')
+    let last_text = '\V'..substitute(escape(@", '\'), '\n', '\\n', 'g')
     " The last changed text may contain newlines, but if it ENDs with one, we
     " usually don't want it.
     let last_text = substitute(last_text, '\\n$', '', '')
@@ -3086,7 +3091,7 @@ fu! s:fuzzy_mappings() abort
                          \ }
 
     for [l:char, cmd] in items(fuzzy_mappings)
-        exe 'nno  <space>f'.l:char.'  :<c-u>Fz'.cmd.'<cr>'
+        exe 'nno  <space>f'..l:char..'  :<c-u>Fz'..cmd..'<cr>'
     endfor
 
     nno <silent> <space>fF :<c-u>FZF $HOME<cr>
@@ -3179,8 +3184,8 @@ fu! s:run_current_line(type) abort
     if &ft is# a:type
         return
     endif
-    let dir = $HOME . '/.vim/tmp'
-    let file = dir . '/' . a:type
+    let dir = $HOME..'/.vim/tmp'
+    let file = dir..'/'..a:type
     let max_history = 100
     if !isdirectory(dir)
         call mkdir(dir, 'p', '0700')
@@ -3192,7 +3197,7 @@ fu! s:run_current_line(type) abort
             call writefile(lines[: max_history - 1], file)
         endif
     endif
-    exe 'bo sp ' . file
+    exe 'bo sp '..file
 endfu
 
 " s S                           saiw  saiW{{{4
@@ -3202,7 +3207,7 @@ nmap  <space>S  saiW
 
 " t                             new tab page {{{4
 
-nno  <silent>  <space>t  :<c-u>exe (v:count ? v:count.'tabnew' : 'tabnew')<cr>
+nno  <silent>  <space>t  :<c-u>exe (v:count ? v:count..'tabnew' : 'tabnew')<cr>
 "}}}3
 " [    ]              (prefix) {{{3
 " ]kj                           various alignments {{{4
@@ -3319,7 +3324,7 @@ fu! s:try_to_edit_plugin_config(cmd) abort
 
     if empty(plugin)
         try
-            exe 'norm! '.a:cmd.'zv'
+            exe 'norm! '..a:cmd..'zv'
         catch
             echohl ErrorMsg
             echom v:exception
@@ -3327,18 +3332,18 @@ fu! s:try_to_edit_plugin_config(cmd) abort
         endtry
     else
         let split = a:cmd[0] is# 'g' ? 'edit' : a:cmd[1] is# 'g' ? 'tabedit' : 'split'
-        let files =  [$HOME.'/.vim/plugin/'.plugin.'.vim']
-        let files += [$HOME.'/.vim/after/plugin/'.plugin.'.vim']
-        let files += [$HOME.'/.vim/autoload/slow_call/'.plugin.'.vim']
+        let files =  [$HOME..'/.vim/plugin/'..plugin..'.vim']
+        let files += [$HOME..'/.vim/after/plugin/'..plugin..'.vim']
+        let files += [$HOME..'/.vim/autoload/slow_call/'..plugin..'.vim']
         call filter(files, {_,v -> filereadable(v)})
         if empty(files)
-            echo 'There''s no config file for '.string(plugin)
+            echo 'There''s no config file for '..string(plugin)
             return
         endif
 
         let a_file_is_opened = 0
         for f in files
-            exe (a_file_is_opened ? 'sp ' : split).f
+            exe (a_file_is_opened ? 'sp ' : split)..f
             norm! zv
             let a_file_is_opened = 1
         endfor
@@ -3362,12 +3367,12 @@ nno  <silent>  goT  :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
 " So, we  install a wrapper around  `gQ` to temporarily disable  all mappings in
 " command-line mode.
 
-"                   ┌ make sure we have visited the command-line at least once since Vim's startup
-"                   │ otherwise E501:
-"                   │ probably because custom command-line mappings haven't been installed yet,
-"                   │ so `ToggleEditingCommands 0` is useless / too soon
-"               ┌───┤
-nno  <expr>  gQ ":\e".execute('ToggleEditingCommands 0', 'silent!').'gQ'
+"               ┌ make sure we have visited the command-line at least once since Vim's startup
+"               │ otherwise E501:
+"               │ probably because custom command-line mappings haven't been installed yet,
+"               │ so `ToggleEditingCommands 0` is useless / too soon
+"               ├───┐
+nno  <expr>  gQ ":\e"..execute('ToggleEditingCommands 0', 'silent!')..'gQ'
 
 " gt  gT      search todo/fixme (Tags) {{{4
 
@@ -3423,7 +3428,7 @@ nno <silent> UL :<c-u>later 1f <bar> sil call save#toggle_auto(0)<cr>
 "
 " So it makes sense that `M` gets us the most recent version of the file.
 "}}}
-nno <silent> UM :<c-u>exe 'undo '.undotree().seq_last <bar> sil call save#toggle_auto(0)<cr>
+nno <silent> UM :<c-u>exe 'undo '..undotree().seq_last <bar> sil call save#toggle_auto(0)<cr>
 
 " fugitive
 
@@ -3464,7 +3469,7 @@ nno  <silent>  Up  :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
 nno  <silent>  Us  :<c-u>call <sid>try_fugitive_cmd('Gstatus')<cr>
 
 fu! s:try_fugitive_cmd(cmd) abort
-    if exists(':'.a:cmd) !=# 2
+    if exists(':'..a:cmd) !=# 2
         echo 'Not in a git repo'
         return
     endif
@@ -3517,7 +3522,7 @@ fu! s:z_equal(_) abort
     try
         setl spell
         if s:z_equal_count
-            return feedkeys(s:z_equal_count . 'z=', 'in')
+            return feedkeys(s:z_equal_count..'z=', 'in')
         endif
         " Why not `norm! z=`?{{{
         "
@@ -3535,7 +3540,7 @@ fu! s:z_equal(_) abort
     catch
         return lg#catch_error()
     finally
-        call timer_start(0, {-> execute('let &l:spell = '.spell_save)})
+        call timer_start(0, {-> execute('let &l:spell = '..spell_save)})
     endtry
 endfu
 
@@ -3593,21 +3598,21 @@ fu! s:repeatable_spell_commands(type) abort
     let cmd = s:repeat_this_spell_command
     let last_char = cmd[-1:-1]
     let last_char_is_uppercase = last_char is# toupper(cmd[-1:-1])
-    let cmd_to_repeat = cmd[:-2].(last_char_is_uppercase
+    let cmd_to_repeat = cmd[:-2]..(last_char_is_uppercase
         \ ? tolower(last_char)
         \ : toupper(last_char))
-    exe 'norm! '.cmd
+    exe 'norm! '..cmd
 endfu
 " }}}3
 " |                   (prefix) {{{3
 " |C  |F     open html file in firefox/chrome {{{4
 
-nno  <silent>  <bar>F  :<c-u>exe ':sil !firefox localhost/' .
-                       \ substitute(expand('%'), $HOME . '/htdocs/', '', '') <bar>
+nno  <silent>  <bar>F  :<c-u>exe ':sil !firefox localhost/'..
+                       \ substitute(expand('%'), $HOME..'/htdocs/', '', '') <bar>
                        \ redraw!<cr>
 
-nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/' .
-                       \ substitute(expand('%'), $HOME . '/htdocs/', '', '') <bar>
+nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/'..
+                       \ substitute(expand('%'), $HOME..'/htdocs/', '', '') <bar>
                        \ redraw!<cr>
 
 " |c         execute the Compiler {{{4
@@ -3642,7 +3647,7 @@ nno  <silent>  <bar>c  :<c-u>call <sid>run_compiler()<cr>
 fu! s:run_compiler() abort
     if &l:mp =~# '\m\C^desktop-file-validate\>'
         sil update
-        sil let out = system('desktop-file-validate ' . shellescape(expand('%:p')))
+        sil let out = system('desktop-file-validate '..shellescape(expand('%:p')))
         if out is# ''
             echo '[desktop-file-validate] OK'
         else
@@ -3667,7 +3672,7 @@ fu! s:gx_shellcheck() abort
     let error_number = matchstr(getline('.'), '.\{-}|.\{-}\zs\d\+\ze\s*|')
     " `:ShellCheckWiki` is defined only in a shell buffer (i.e. in the previous window).
     wincmd p
-    exe 'ShellCheckWiki' . error_number
+    exe 'ShellCheckWiki'..error_number
     wincmd p
 endfu
 
@@ -3756,7 +3761,7 @@ nno <silent>  -f  :<c-u>call <sid>print_filetype()<cr>
 fu! s:print_filetype() abort
     let @o = !empty(&ft) ? &ft : '∅'
     echohl Title
-    echo '[filetype] ' . @o
+    echo '[filetype] '..@o
     echohl NONE <cr>
 endfu
 
@@ -3777,7 +3782,7 @@ nno  <silent> -P  :<c-u>call <sid>print_cwd()<cr>
 fu! s:print_cwd() abort
     let @o = execute('pwd', 'silent!')[1:]
     let def = matchstr(execute('hi Directory'), 'xxx\zs.*')
-    exe 'hi BoldDirectory cterm=bold gui=bold' . def
+    exe 'hi BoldDirectory cterm=bold gui=bold'..def
     echohl BoldDirectory
     echo @o
     echohl NONE
@@ -3797,7 +3802,7 @@ fu! s:print_full_path() abort
     else
         if fname[0] is# '/' || fname =~# '^\l\+://'
             let resolved = resolve(fname)
-            let @o = resolved is# fname ? fname : fname.' -> '.resolved
+            let @o = resolved is# fname ? fname : fname..' -> '..resolved
         else
             " Why is adding the current working directory sometimes necessary?{{{
             "
@@ -3808,7 +3813,7 @@ fu! s:print_full_path() abort
             "     :e foo/bar
             "     :echo expand('%:p')
             "}}}
-            let @o = getcwd().'/'.fname
+            let @o = getcwd()..'/'..fname
         endif
     endif
 
@@ -3835,17 +3840,17 @@ endfu
 nno  <silent>  -q  :<c-u>exe <sid>faq()<cr>
 
 fu! s:faq() abort
-    if stridx(expand('%:p'), '/wiki/') ==# -1 && expand('%:p') isnot# $XDG_RUNTIME_VIM.'/faq'
+    if stridx(expand('%:p'), '/wiki/') ==# -1 && expand('%:p') isnot# $XDG_RUNTIME_VIM..'/faq'
         return 'echo "you''re not in a wiki"'
     endif
 
     let this_tab = tabpagenr()
     let win_in_this_tab = filter(getwininfo(), {_,v -> v.tabnr ==# this_tab})
-    let faq_file = $XDG_RUNTIME_VIM.'/faq'
+    let faq_file = $XDG_RUNTIME_VIM..'/faq'
 
     for win in win_in_this_tab
         if bufname(get(win, 'bufnr', '')) is# faq_file
-            exe win.winnr . 'q'
+            exe win.winnr..'q'
             sil norm ]oz
             return ''
         endif
@@ -3857,11 +3862,11 @@ fu! s:faq() abort
     endif
 
     if index(map(deepcopy(win_in_this_tab), {_,v -> bufname(v.bufnr)}), faq_file) !=# -1
-        echo 'a window displaying  '.faq_file.'  already exists'
+        echo 'a window displaying  '..faq_file..'  already exists'
         return ''
     endif
 
-    exe 'sp '.faq_file
+    exe 'sp '..faq_file
     sil norm [oP
     sil norm [oz
     wincmd p
@@ -3879,13 +3884,13 @@ endfu
 nno  <silent>  -r  :<c-u>call <sid>edit_readme()<cr>
 
 fu! s:edit_readme() abort
-    let files = glob(expand('%:p:h').'/*', 0, 1)
+    let files = glob(expand('%:p:h')..'/*', 0, 1)
     let kwd = '\%(readme\|contents\)'
-    let pat = '\c/'.kwd.'\%(\..\{-}\)\=$'
+    let pat = '\c/'..kwd..'\%(\..\{-}\)\=$'
     let readmes = filter(files, {_,v -> v =~# pat})
     let readme = get(readmes, 0, '')
     if filereadable(readme) || isdirectory(readme)
-        exe 'sp '.readme
+        exe 'sp '..readme
         " Why `:exe`?{{{
         "
         " If later  you add  a bar  after the  command, `1`  will be  interpreted as
@@ -3944,7 +3949,7 @@ xno  <silent>  +<  :<c-u>call myfuncs#long_data_join('vis')<cr>
 
 nno  <silent>  +t   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
 xno  <silent>  +t   :<c-u>call myfuncs#op_trim_ws('vis')<cr>
-nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '.v:count1.'g@_'<cr>
+nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '..v:count1..'g@_'<cr>
 " }}}3
 " CR / Tab / Shift / Control / Meta {{{3
 " CR                  move cursor on 80/100 column {{{4
@@ -3966,7 +3971,7 @@ nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '.v:count
 
 nno  <expr><silent>  <cr>  !empty(&buftype)
                        \ ?     '<cr>'
-                       \ :     ':<c-u>'.getbufvar('%', 'cr_command', 'norm! 80<bar>').'<cr>'
+                       \ :     ':<c-u>'..getbufvar('%', 'cr_command', 'norm! 80<bar>')..'<cr>'
 "                                 │
 "                                 └ important, otherwise, if we hit a nr
 "                                 (e.g. 42) by accident before `CR`, it would do:    :42norm! 100|
@@ -4088,7 +4093,7 @@ fu! s:join_tab_page(cnt) abort
             redraw | if cnt isnot# '' | echo 'not a valid number' | endif | return
         " parse a `+2` or `-3` number as an index relative to the current tabpage
         elseif cnt[0] =~# '+\|-'
-            let cnt = eval(tabpagenr() . cnt[0] . matchstr(cnt, '\d\+'))
+            let cnt = eval(tabpagenr()..cnt[0]..matchstr(cnt, '\d\+'))
         else
             let cnt = matchstr(cnt, '\d\+')
         endif
@@ -4099,11 +4104,11 @@ fu! s:join_tab_page(cnt) abort
     " we use our `lg#window#quit()` function to be able to undo
     call lg#window#quit()
     if cnt < tabpagenr()
-        exe 'tabnext '.min([cnt, tabpagenr('$')])
+        exe 'tabnext '..min([cnt, tabpagenr('$')])
     else
-        exe 'tabnext '.min([cnt - 1, tabpagenr('$')])
+        exe 'tabnext '..min([cnt - 1, tabpagenr('$')])
     endif
-    exe 'sb '.bufnr
+    exe 'sb '..bufnr
 endfu
 
 " M-m                 matchadd / matchdelete search pattern {{{4
@@ -4113,7 +4118,7 @@ fu! s:where_are_my_matches() abort
         sil! call matchdelete(w:my_matches)
         unlet! w:my_matches
     else
-        let w:my_matches = matchadd('WildMenu', '\c'.@/, 10)
+        let w:my_matches = matchadd('WildMenu', '\c'..@/, 10)
     endif
 endfu
 
@@ -4135,8 +4140,8 @@ nno  <m-p>  ['
 " We could probably use `']` and the `>` operator in our function,
 " but `v:count1` seems simpler.
 "}}}
-nno  <silent>  >>  :<c-u>call <sid>indent_without_shiftround_save('increase')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '.v:count1.'g@l'<cr>
-nno  <silent>  <<  :<c-u>call <sid>indent_without_shiftround_save('decrease')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '.v:count1.'g@l'<cr>
+nno  <silent>  >>  :<c-u>call <sid>indent_without_shiftround_save('increase')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '..v:count1..'g@l'<cr>
+nno  <silent>  <<  :<c-u>call <sid>indent_without_shiftround_save('decrease')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '..v:count1..'g@l'<cr>
 
 fu! s:indent_without_shiftround_save(dir) abort
     let s:indent_without_shiftround_dir = a:dir
@@ -4147,7 +4152,7 @@ fu! s:indent_without_shiftround(type) abort
     let sr_save = &shiftround
     try
         set shiftround
-        exe 'norm! '.v:count1.op
+        exe 'norm! '..v:count1..op
     catch
         return lg#catch_error()
     finally
@@ -4495,7 +4500,7 @@ nno  <silent>  dr  :<c-u>call myfuncs#set_reg(v:register)
 
 nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
                    \ <bar>set opfunc=myfuncs#op_replace_without_yank
-                   \ <bar>exe 'norm! '.v:count1.'g@_'<cr>
+                   \ <bar>exe 'norm! '..v:count1..'g@_'<cr>
 
 " j  k  ^  0  $       gj  gk  ... {{{3
 
@@ -4704,7 +4709,7 @@ fu! s:select_percent_object() abort
         return
     endif
     " save closing/opening symbol
-    let sym = matchstr(getline('.'), '\%'.col('.').'c.')
+    let sym = matchstr(getline('.'), '\%'..col('.')..'c.')
     " Maybe we could speed the process by storing the next 2 values in buffer-local
     " variables every time `FileType *` is fired. Not sure it's worth it.
     let opening_syms = map(split(&l:mps, ','), {_,v -> matchstr(v, '.')})
@@ -4752,7 +4757,7 @@ fu! s:textobj_func(inside) abort
         k<
         call search('^\s*endf\%[unction]\s*$', 'eW')
         k>
-        exe 'norm! gv$'.(a:inside ? 'koj' : '')
+        exe 'norm! gv$'..(a:inside ? 'koj' : '')
         " we want a linewise selection no matter the original visual mode
         exe (mode() isnot# 'V' ? 'norm! V' : '')
     endif
@@ -4803,7 +4808,7 @@ fu! s:around_number() abort "{{{4
     let stopline = line('.')
 
     " create pattern matching any binary, hex, decimal number
-    let pat = join(s:pat_numbers, '\+\|') . '\+'
+    let pat = join(s:pat_numbers, '\+\|')..'\+'
 
     " move cursor to end of number
     if !search(pat, 'ce', stopline)
@@ -4812,7 +4817,7 @@ fu! s:around_number() abort "{{{4
     endif
 
     " move cursor to end of any trailing whitespace (if there is any)
-    call search('\%'.(virtcol('.')+1).'v\s*', 'ce', stopline)
+    call search('\%'..(virtcol('.')+1)..'v\s*', 'ce', stopline)
 
     " start visually selecting from end of number + potential trailing whitspace
     norm! v
@@ -4821,7 +4826,7 @@ fu! s:around_number() abort "{{{4
     call search(pat, 'bc', stopline)
 
     " move cursor to beginning of any whitespace preceding number (if any)
-    call search('\s*\%'.virtcol('.').'v', 'b', stopline)
+    call search('\s*\%'..virtcol('.')..'v', 'b', stopline)
 endfu
 " }}}4
 
@@ -4835,7 +4840,7 @@ fu! s:in_number() abort "{{{4
     let stopline = line('.')
 
     " Create pattern matching any binary, hex, decimal number.
-    let pat = join(s:pat_numbers, '\+\|') . '\+'
+    let pat = join(s:pat_numbers, '\+\|')..'\+'
 
     " move cursor to end of number
     if !search(pat, 'ce', stopline)
@@ -5035,7 +5040,7 @@ xno  <silent>  .  :norm! .<cr>
 " The solution would be to use  `inputsave()` / `inputrestore()`, but that would
 " make the mapping uselessly complex.
 "}}}
-xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar())<cr>
+xno  <silent>  @  :<c-u>exe "'<,'>norm @"..nr2char(getchar())<cr>
 "                                    │
 "                                    └─ Do NOT add a bang:{{{
 "
@@ -5053,13 +5058,42 @@ xno  <silent>  @  :<c-u>exe "'<,'>norm @".nr2char(getchar())<cr>
 "    - Make |v_b_I| and |v_b_A| available in all kinds of Visual mode.
 "    - Adjust the selected area to be intuitive before doing blockwise insertion.
 
+" Why appending `h` for the `$` motion in characterwise and blockwise visual mode?{{{
+"
+" In characterwise visual mode, `$` selects the trailing newline.
+" We don't want that; `h` makes sure we leave it alone.
+"
+" ---
+"
+" In blockwise visual mode,  if you set `'ve'` with the  value `block` (which we
+" do by default), then something unexpected happens.
+"
+" MWE:
+"
+"     abc
+"     def
+"     ghi
+"
+" Position the cursor on `a` and press `C-vjj$`, then yank or delete the block.
+" Paste it below by running `:pu` (or pressing our custom `]p`):
+" a trailing space is added on every pasted line.
+"
+" What's weird,  is that the  contents and type of  the unnamed register  is not
+" affected by our custom `'ve'`.
+" You only see a difference when you paste.
+"
+" Anyway, I don't like that trailing space.
+" That's not how  Vim behave without config;  so this makes it  harder to follow
+" instructions found on forums.
+" Besides, a trailing space is useless.
+"}}}
 let s:niceblock_keys = {
-    \   '$'    : {'v': 'g$h',      'V': '$',          "\<c-v>": '$'},
-    \   'I'    : {'v': "\<c-v>I",  'V': "\<c-v>^o^I", "\<c-v>": 'I'},
-    \   'A'    : {'v': "\<c-v>A",  'V': "\<c-v>0o$A", "\<c-v>": 'A'},
-    \   'gI'   : {'v': "\<c-v>0I", 'V': "\<c-v>0o$I", "\<c-v>": '0I'},
-    \   '>'    : {'v': "\<c-v>>",  'V': "0\<c-v>>",   "\<c-v>": '>'},
-    \   '<'    : {'v': "\<c-v><",  'V': "0\<c-v><",   "\<c-v>": '<'},
+    \   '$'  : {'v': 'g$h',      'V': '$',          "\<c-v>": '$h'},
+    \   'I'  : {'v': "\<c-v>I",  'V': "\<c-v>^o^I", "\<c-v>": 'I'},
+    \   'A'  : {'v': "\<c-v>A",  'V': "\<c-v>0o$A", "\<c-v>": 'A'},
+    \   'gI' : {'v': "\<c-v>0I", 'V': "\<c-v>0o$I", "\<c-v>": '0I'},
+    \   '>'  : {'v': "\<c-v>>",  'V': "0\<c-v>>",   "\<c-v>": '>'},
+    \   '<'  : {'v': "\<c-v><",  'V': "0\<c-v><",   "\<c-v>": '<'},
     \ }
 
 fu! s:niceblock(key) abort
@@ -5069,26 +5103,26 @@ endfu
 
 " The purpose of this mapping is to not include a newline when selecting
 " a characterwise text until the end of the line.
-xno  <expr>  $  <sid>niceblock('$')
+xno <expr> $ <sid>niceblock('$')
 
-xno  <expr>  I   <sid>niceblock('I')
-xno  <expr>  gI  <sid>niceblock('gI')
-xno  <expr>  A   <sid>niceblock('A')
+xno <expr> I  <sid>niceblock('I')
+xno <expr> gI <sid>niceblock('gI')
+xno <expr> A  <sid>niceblock('A')
 
 " Why these assignments:
 "
-"         niceblock_keys['>']['V'] = "0\<c-v>>"
-"         niceblock_keys['<']['V'] = "0\<c-v><"
+"     niceblock_keys['>']['V'] = "0\<c-v>>"
+"     niceblock_keys['<']['V'] = "0\<c-v><"
 "
 " ... and not simply:
 "
-"         niceblock_keys['>']['V'] = ">"
-"         niceblock_keys['<']['V'] = "<"
+"     niceblock_keys['>']['V'] = ">"
+"     niceblock_keys['<']['V'] = "<"
 "
 " ? Because, without "\<c-v>", sometimes the alignment is lost.
 
-xno  <expr>  >  <sid>niceblock('>')
-xno  <expr>  <  <sid>niceblock('<')
+xno <expr> > <sid>niceblock('>')
+xno <expr> < <sid>niceblock('<')
 
 " d y         preserve last deleted/yanked visual selected text through registers {{{3
 
@@ -5099,10 +5133,10 @@ xno  <expr>  <  <sid>niceblock('<')
 
 " With this  mapping, we can  always access the last  text we deleted  in visual
 " mode, from the `v` register.
-xno  <expr><silent>  d  'd'.timer_start(0, {-> execute('let @v=@"')})[-1]
+xno  <expr><silent>  d  'd'..timer_start(0, {-> execute('let @v=@"')})[-1]
 
 " same thing when we yank
-xno  <expr><silent>  y  'y'.timer_start(0, {-> execute('let @v=@"')})[-1]
+xno  <expr><silent>  y  'y'..timer_start(0, {-> execute('let @v=@"')})[-1]
 
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
@@ -5161,7 +5195,7 @@ xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 " you'll get an unexpected result.
 " I'm ok with an unexpected result when pressing `P`, but not when pressing `p`.
 "}}}
-xno <expr> P '"_d"' . v:register . 'P'
+xno <expr> P '"_d"'..v:register..'P'
 " }}}1
 " Commands {{{1
 " Warning: Here, do NOT create commands which are only relevant for a specific type of buffer. {{{2
@@ -5173,13 +5207,13 @@ xno <expr> P '"_d"' . v:register . 'P'
 
 " Grep for a pattern below the cwd.
 
-" Usage: `:CGrep 'pat' file ...` (like `$ grep`).
+" Usage: `:CGrep 'pat' file ...` (like `grep(1)`).
 
 " I have an improvement idea!  I just need to tweak the definitions of the commands...{{{
 "
 " Ok, but remember:
 "
-"    1. The new synopsis should be identical to the one of `$ grep`.
+"    1. The new synopsis should be identical to the one of `grep(1)`.
 "
 "       I.e.:
 "       It should allow us to pass a quoted pattern, or an unquoted one.
@@ -5190,7 +5224,7 @@ xno <expr> P '"_d"' . v:register . 'P'
 "}}}
 " How to search for a pattern containing a single quote?{{{
 "
-" Like with `$ grep`.
+" Like with `grep(1)`.
 " For example, if you want to grep `a'b"c`, run:
 "
 "     :CGrep 'a'\''b"c'
@@ -5224,8 +5258,8 @@ fu! s:diff_orig() abort
     let cole_save = &l:conceallevel
     setl conceallevel=0
 
-    let tempfile = tempname().'/Original File'
-    exe 'vnew '.tempfile
+    let tempfile = tempname()..'/Original File'
+    exe 'vnew '..tempfile
     setl buftype=nofile nobuflisted noswapfile nowrap
 
     sil 0r #
@@ -5243,12 +5277,12 @@ fu! s:diff_orig() abort
             \ |                    call timer_start(0, s:tmp_partial)
     augroup END
 
-    exe winnr('#').'windo diffthis'
+    exe winnr('#')..'windo diffthis'
     return ''
 endfu
 
 fu! s:diff_orig_restore_settings(conceallevel,_) abort
-    exe 'setl conceallevel='.a:conceallevel
+    exe 'setl conceallevel='..a:conceallevel
     diffoff!
     norm! zvzz
     aug! diff_orig_restore_settings
@@ -5266,13 +5300,13 @@ com! -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
 com! -bar -range=%  FormatManpage  call s:format_manpage(<line1>, <line2>)
 
 fu! s:format_manpage(line1, line2) abort
-    let range = a:line1 . ',' . a:line2
+    let range = a:line1..','..a:line2
     " create folds
-    exe 'sil keepj keepp ' . range . 's/^\u\+/# &/e'
+    exe 'sil keepj keepp '..range..'s/^\u\+/# &/e'
     " titlecase headers
-    exe 'sil keepj keepp ' . range . 's/\%(^#.*\)\@<=\(\u\)\(\u\+\)/\1\L\2/ge'
+    exe 'sil keepj keepp '..range..'s/\%(^#.*\)\@<=\(\u\)\(\u\+\)/\1\L\2/ge'
     " make sure there's an empty line between a header and the next non-empty line
-    exe range . 'g/^#.*\n.*\S/call append(".", "")'
+    exe range..'g/^#.*\n.*\S/call append(".", "")'
 endfu
 
 " GotoChar {{{2
@@ -5296,7 +5330,7 @@ com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 "     $ sed -i "s:^:$HOME/:" /tmp/listing
 "
-" Feed them to `$ grep` via `$ xargs`, and in turn feed the result to `$ vim` via `-q`:
+" Feed them to `grep(1)` via `xargs(1)`, and in turn feed the result to `vim(1)` via `-q`:
 "
 "     $ vim -q <(xargs rg --vimgrep -i -L pattern </tmp/listing) +cw
 "
@@ -5304,7 +5338,7 @@ com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 "     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs rg -i -L --vimgrep pattern) +cw
 "
-" We need `$ sed`,  because the paths output by `$ git  ls-tree` are relative to
+" We need `sed(1)`,  because the paths output by `$ git  ls-tree` are relative to
 " the root of the repo, which here is our home.
 " But if we're not  in our home, the relative paths  will be interpreted wrongly
 " by `$ vim -q`.
@@ -5315,14 +5349,14 @@ com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 " Note the usage of quotes around the pattern.
 " We could get rid of them if  we defined the command with `<q-args>`, but doing
-" so would introduce an inconsistency between `:GrepCfg` and `$ grep`.
-" We use  quotes around a pattern after  `$ grep`, so we should do  the same for
+" so would introduce an inconsistency between `:GrepCfg` and `grep(1)`.
+" We use quotes around  a pattern after `grep(1)`, so we should  do the same for
 " `:GrepCfg`.
 "}}}
 " Do *not* use `-bar`!{{{
 "
 " It  would force  you  to  double a  backslash  in front  of  a  bar, which  is
-" inconsistent with `$ grep`:
+" inconsistent with `grep(1)`:
 "
 "     " with `-bar`
 "     :GrepCfg 'hello\\|world'
@@ -5351,12 +5385,12 @@ fu! s:grep_cfg(pat) abort
               \ ]
     " TODO: How to get the column position?{{{
     "
-    " We could pass the  `-b` option to `$ grep`, but it would  give us the byte
+    " We could pass the `-b` option to  `grep(1)`, but it would give us the byte
     " offset from the start of the file.
     " We need the character offset from the start of the line.
     "}}}
     sil cgetexpr system(join(cmd)) | cw
-    call setqflist([], 'a', {'title': ':GrepCfg ' . pat})
+    call setqflist([], 'a', {'title': ':GrepCfg '..pat})
 endfu
 
 " H {{{2
@@ -5458,7 +5492,7 @@ com! -bar -nargs=* Info call s:info(<q-args>)
 
 fu! s:info(topic) abort
     new
-    exe '.!info ' . a:topic
+    exe '.!info '..a:topic
     if bufname('%') is# ''
         " We need to be able to recognize an info buffer (e.g. in `s:show_doc()`).
         setf info
@@ -5566,7 +5600,7 @@ com! -bar -nargs=0 PluginsToCommit  call s:plugins_to_commit()
 fu! s:plugins_to_commit() abort
     let script = 'commit-these-vim-plugins.sh'
     if !executable(script)
-        echom '[PluginsToCommit]: '.script.' is not available'
+        echom '[PluginsToCommit]: '..script..' is not available'
         return
     endif
 
@@ -5574,7 +5608,7 @@ fu! s:plugins_to_commit() abort
     call filter(my_plugins, {_,v -> v =~# '^\s*Plug\s\+''lacygoill/'})
     call map(my_plugins, {_,v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
     let my_plugins = join(my_plugins)
-    sil let output = systemlist('commit-these-vim-plugins.sh '.my_plugins)
+    sil let output = systemlist('commit-these-vim-plugins.sh '..my_plugins)
     " we may have removed a plugin, but not executed `:Plugclean` yet
     call filter(output, {_,v -> v !~# 'No such file or directory'})
     if output == []
@@ -5583,7 +5617,7 @@ fu! s:plugins_to_commit() abort
     endif
 
     call filter(output, {_,v -> v =~# '^\S'})
-    call map(output, {_,v -> glob($HOME.'/.vim/plugged/'.v.'/*', 0, 1)[0]})
+    call map(output, {_,v -> glob($HOME..'/.vim/plugged/'..v..'/*', 0, 1)[0]})
     call map(output, {_,v -> {'filename': v, 'valid': 1}})
     call setqflist(output)
     call setqflist([], 'a', {'title': 'Plugins to commit'})
@@ -5607,9 +5641,9 @@ com! -bar -nargs=1 PluginGlobalVariables call myfuncs#plugin_global_variables(<q
 
 " We already have `:CGrep`, so why `:PQ`?{{{
 "
-" `:CGrep` (and `|g`) relies on `$ rg` and `'efm'` (because we use `:cgetexpr`).
+" `:CGrep` (and `|g`) relies on `rg(1)` and `'efm'` (because we use `:cgetexpr`).
 " `:PQ` gives us more control on the grep program.
-" For example, it allows us to pass the argument `-w` to `$ rg`:
+" For example, it allows us to pass the argument `-w` to `rg(1)`:
 "
 "    ┌─────────────────────────┬──────────────────────────────────────────────────────┐
 "    │ :CGrep              pat │ search any `pat` using   `$ ripgrep --vimgrep -i -L` │
@@ -5679,9 +5713,10 @@ endfu
 
 com! -bar -nargs=1 PI call myfuncs#plugin_install(<q-args>)
 
-" PU    update (N)Vim plugins {{{2
+" PUP    update (N)Vim plugins {{{2
 
-com! -bar PU call s:plugins_update()
+" Don't name the command `:PU`; it could shadow the default `:pu[t]`.
+com! -bar PUP call s:plugins_update()
 
 fu! s:plugins_update() abort
     " :h spellfile-cleanup
@@ -5690,21 +5725,21 @@ fu! s:plugins_update() abort
     " Install `wfrench` package. Useful for dictionary completion.
     if expand('`aptitude show wfrench | grep "^State"`') =~? 'state:\s*not\s\+installed'
         echom 'Need to install the wfrench package for the french dictionary.'
-        let password = inputsecret('Enter sudo password:')."\n"
+        let password = inputsecret('Enter sudo password:').."\n"
         sil let out = system('sudo -S aptitude install wfrench', password)
         echo out
     endif
 
-    if !isdirectory($HOME.'/.vim/tmp/snapshot')
-        call mkdir($HOME.'/.vim/tmp/snapshot', 'p')
+    if !isdirectory($HOME..'/.vim/tmp/snapshot')
+        call mkdir($HOME..'/.vim/tmp/snapshot', 'p')
     endif
-    "                                                                       ┌ put the month before the day
-    "                                                                       │ so that, in the output of `$ ls`,
-    "                                                                       │ the files are listed chronologically
-    "                                                                       │
-    exe 'PlugSnapshot! '.fnameescape($HOME.'/.vim/tmp/snapshot/'.strftime('%m-%d__%H-%M').'.vim')
-    "                                                                               │
-    "                                    don't put a colon, it could be problematic ┘
+    "                                                                          ┌ put the month before the day
+    "                                                                          │ so that, in the output of `ls(1)`,
+    "                                                                          │ the files are listed chronologically
+    "                                                                          │
+    exe 'PlugSnapshot! '..fnameescape($HOME..'/.vim/tmp/snapshot/'..strftime('%m-%d__%H-%M')..'.vim')
+    "                                                                                  │
+    "                                       don't put a colon, it could be problematic ┘
     " Why a colon is a bad idea in a filename?{{{
     "
     " 1. It's not inside  the default value of 'isf'. Which means  that Vim
@@ -5761,7 +5796,7 @@ com! -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
 com! -bar RemoveSwapFiles call s:remove_swapfiles()
 
 fu! s:remove_swapfiles() abort
-    for swapfile in glob($HOME.'/.vim/tmp/swap/*', 1, 1)
+    for swapfile in glob($HOME..'/.vim/tmp/swap/*', 1, 1)
         call delete(swapfile)
     endfor
 endfu
@@ -5794,9 +5829,9 @@ com! -bar -bang -range=% Retab call s:retab(<line1>,<line2>, <bang>0)
 fu! s:retab(line1, line2, bang) abort
     let view = winsaveview()
     if !a:bang
-        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:^\t\+:\=repeat(" ", &ts * len(submatch(0))):e'
+        exe 'sil keepj keepp '..a:line1..','..a:line2..'s:^\t\+:\=repeat(" ", &ts * len(submatch(0))):e'
     else
-        exe 'sil keepj keepp '.a:line1.','.a:line2.'s:\v^( {' . &tabstop . '})+:\=repeat("\t", len(submatch(0))/&ts):e'
+        exe 'sil keepj keepp '..a:line1..','..a:line2..'s:\v^( {'..&tabstop..'})+:\=repeat("\t", len(submatch(0))/&ts):e'
     endif
     call winrestview(view)
 endfu
@@ -5807,9 +5842,9 @@ com! -bar -range=% -nargs=1 ReverseEveryNLines call s:reverse_every_n_lines(<arg
 
 fu! s:reverse_every_n_lines(n, line1, line2) abort
     let mods = 'keepj keepp'
-    let range = a:line1.','.a:line2
+    let range = a:line1..','..a:line2
     let l:Address = {-> ( line('.')- a:line1 + 1 ) % a:n ? ( line('.') - a:line1 + 1 ) % a:n : a:n}
-    sil exe mods.' '.range.'g/^/exe "m .-".l:Address()'
+    sil exe mods..' '..range..'g/^/exe "m .-".l:Address()'
 endfu
 
 " SearchInternalVariables {{{2
@@ -5853,7 +5888,7 @@ com! -bar -nargs=? ShowLongLines echo s:shll(<args>)
 
 fu! s:shll(...) abort
     if !exists('w:shll')
-        let w:shll = matchadd('Error', '\v%'.((a:0 ? a:1 : 80)+1).'v', 20)
+        let w:shll = matchadd('Error', '\v%'..((a:0 ? a:1 : 80)+1)..'v', 20)
     else
         call matchdelete(w:shll)
         unlet w:shll
@@ -5904,7 +5939,7 @@ fu! s:tldr_completion(_arglead, _cmdline, _pos) abort
 endfu
 
 fu! s:tldr(shellcmd) abort
-    sil let out = systemlist('tldr ' . a:shellcmd)
+    sil let out = systemlist('tldr '..a:shellcmd)
     if get(out, 0, '') =~# '^tldr page.*not found$'
         echo out[0]
         return
@@ -5943,7 +5978,7 @@ endfu
 com! -bar -range=% TW call s:trim_whitespace(<line1>,<line2>)
 fu! s:trim_whitespace(line1,line2) abort
     let view = winsaveview()
-    sil exe 'keepj keepp '.a:line1.','.a:line2.'s/\s\+$//e'
+    sil exe 'keepj keepp '..a:line1..','..a:line2..'s/\s\+$//e'
     call winrestview(view)
 endfu
 
@@ -6032,7 +6067,7 @@ augroup my_cmdline_window
     " But, it doesn't erases the command-line window.
     " Our `C-c` mapping takes care of that.
     "}}}
-    au CmdWinEnter * nno  <buffer><expr><nowait>    <c-c>  '<c-c>'.timer_start(0, {-> execute('redraw')})[-1]
+    au CmdWinEnter * nno  <buffer><expr><nowait>    <c-c>  '<c-c>'..timer_start(0, {-> execute('redraw')})[-1]
 
     " Purpose:{{{
     "
@@ -6042,6 +6077,18 @@ augroup my_cmdline_window
     " window.
     "}}}
     au CmdWinEnter : let s:old_cmd_hist = getline(1, line('$')-1)
+    " TODO: It seems that `CmdWinLeave` is fired just before the window is closed:{{{
+    " https://github.com/vim/vim/pull/4762
+    "
+    " Since patch 8.1.2017, `BufEnter` and  `WinEnter` are fired right after you
+    " close the command-line window.
+    " Maybe we should install this autocmd instead:
+    "
+    "     au CmdWinLeave : au WinEnter * ++once call s:update_history()
+    "
+    " Maybe it would make the code more reliable, and fix the next fixme.
+    " Wait for Nvim to merge the patch, then make some tests.
+    "}}}
     au CmdWinLeave : call s:update_history()
     "              │
     "              └ only Ex command-line window
@@ -6066,7 +6113,7 @@ fu! s:update_history() abort
     endfor
 
     " no need to try to update `~/.viminfo` if the latter isn't readable
-    let viminfo = expand($HOME.'/.viminfo')
+    let viminfo = expand($HOME..'/.viminfo')
     if !filereadable(viminfo)
         return
     endif
@@ -6084,7 +6131,7 @@ fu! s:update_history() abort
     "
     " convert the text entries to delete, into their numeric indexes inside
     " the list `info`
-    call map(deleted_entries, {_,v -> index(info, ':'.v)})
+    call map(deleted_entries, {_,v -> index(info, ':'..v)})
 
     " sort them, and check they were all found (no -1)
     call sort(filter(deleted_entries, {_,v -> v >= 0}))
@@ -6120,8 +6167,8 @@ fu! s:make_missing_dir(file, buf) abort
             catch /^Vim\%((\a\+)\)\=:E739/
                 " If the directory is in a root directory, `mkdir()` will fail.
                 " We need to run `$ sudo mkdir`.
-                let pass = inputsecret('[sudo] password for '.$USER.': ')
-                sil call system('sudo -S mkdir '.dir, pass."\n")
+                let pass = inputsecret('[sudo] password for '..$USER..': ')
+                sil call system('sudo -S mkdir '..dir, pass.."\n")
                 "                      │{{{
                 "                      └ ... read the password from the standard input
                 "                        instead of using the terminal device.
@@ -6244,7 +6291,72 @@ fu! s:wipe_noname() abort
     "    └─ make sure the buffer is NOT displayed in any window
 
     if !empty(to_wipe)
-        sil! exe 'bw! '.join(to_wipe, ' ')
+        sil! exe 'bw! '..join(to_wipe, ' ')
+    endif
+endfu
+
+" Fast Fold {{{2
+
+augroup folding_toggle_in_insert_mode
+    au!
+    " Purpose:{{{
+    "
+    " I've written it to make Vim faster when
+    " Editing text in insert mode in a markdown buffer is sometimes very slow.
+    "
+    " MWE:
+    "
+    "     $ vim +"put='text' | norm! yy200pG200Ax" /tmp/md.md
+    "
+    " Vim takes several seconds to start.
+    " This is because of our `'fdm'` and `'fde'` options, and because of `200Ax`.
+    " Repeating  the insertion  of some  text  can take  a long  time; the  more
+    " repetitions, and the more lines above, the longer it takes.
+    "
+    " Now, enter insert mode  at the start of the `xxx...`  line, and press `C-k C-k`
+    " to delete the rest of the line.
+    " Again, it takes several seconds.
+    "
+    " It  seems  the  issue  is `fold#md#fde#heading_depth()`  which,  for  some
+    " reason, is called more than 80000 times.
+    "
+    " I think that every time a character is inserted or removed while in insert
+    " mode, Vim has to recompute the folding level of each line above.
+    " That would explain why  the issue gets worse as the  number of lines above
+    " increases,  and  why it  gets  worse  as  the number  of  inserted/removed
+    " characters increases.
+    "}}}
+    " TODO: We should also listen to `WinLeave`.{{{
+    "
+    " In case we focus another window while in insert mode (maybe with the mouse).
+    " But then in `s:toggle_folding()`, we would  need to make sure we're insert
+    " mode before resetting `fdm` to 'manual':
+    "
+    "     if a:action is# 'disable' && mode() is# 'i'
+    "                                  ^^^^^^^^^^^^^^
+    " This would not work, probably because the function is called from command-line mode.
+    "
+    " ---
+    "
+    " More  generally, I  don't  trust  this code;  there  are probably  several
+    " special cases that it doesn't properly handle.
+    "
+    " Study the fastfold plugin: https://github.com/Konfekt/FastFold/blob/master/plugin/fastfold.vim
+    " Improve the code.
+    "}}}
+    au InsertEnter * call s:toggle_folding('disable')
+    au InsertLeave,WinLeave * call s:toggle_folding('restore')
+augroup END
+
+fu! s:toggle_folding(action) abort
+    if a:action is# 'disable'
+        let w:fdm_save = &l:fdm
+        setl fdm=manual
+    else
+        if exists('w:fdm_save')
+            let &l:fdm = w:fdm_save
+            unlet! w:fdm_save
+        endif
     endif
 endfu
 
@@ -6336,8 +6448,8 @@ endfu
 " With the autocmd,  if you yank some  text in the clipboard then  quit Vim, you
 " will find this running process.
 " It will persist for as long as you don't yank some other text in the clipboard.
-" For example, if  you copy sth from  Firefox, then re-run the  previous `$ ps`,
-" you won't find xclip anymore.
+" For example, if  you copy sth from Firefox, then  re-run the previous `ps(1)`,
+" you won't find `xclip(1)` anymore.
 "}}}
 
 "     Why doesn't it affect urxvt?{{{
@@ -6429,7 +6541,7 @@ fu! s:make_clipboard_persist_after_quitting_vim() abort
     " But it would be cumbersome, and maybe brittle.
     " What if for some  reason the file is removed before xclip  has a chance to
     " read it,  or it does not  have the right permissions  (`writefile()` can't
-    " write into it, `$ xclip` can't read it)?
+    " write into it, `xclip(1)` can't read it)?
     "
     " ---
     "
@@ -6438,8 +6550,9 @@ fu! s:make_clipboard_persist_after_quitting_vim() abort
     "     call system('printf -- ' . shellescape(@+) . ' | xclip -selection clipboard')
     "
     " But note that we already have 3 pitfalls to avoid.
-    " We don't want a trailing newline to be appended, so we have to use `$ printf` instead
-    " of `$ echo` (you could use `$ echo -n`, but in general `$ echo` is not reliable).
+    " We  don't want  a trailing  newline  to be  appended,  so we  have to  use
+    " `printf` instead of `echo` (you could use `echo -n`, but in general `echo`
+    " is not reliable).
     "
     " We don't the  beginning of the text  to be interpreted as an  option if it
     " begins with a hyphen, so we need `--`.
@@ -6503,19 +6616,19 @@ fu! s:filter_special_file() abort
     let fname = expand('%:p:S')
     let ext = expand('%:e')
     let ext2cmd = {
-        \ 'doc' : '%!antiword '.fname,
-        \ 'docx': '%!pandoc -f docx -t markdown '.fname,
-        \ 'epub': '%!pandoc -f epub -t markdown '.fname,
-        \ 'odp' : '%!odt2txt '.fname,
-        \ 'odt' : '%!odt2txt '.fname,
-        \ 'pdf' : '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' -',
+        \ 'doc' : '%!antiword '..fname,
+        \ 'docx': '%!pandoc -f docx -t markdown '..fname,
+        \ 'epub': '%!pandoc -f epub -t markdown '..fname,
+        \ 'odp' : '%!odt2txt '..fname,
+        \ 'odt' : '%!odt2txt '..fname,
+        \ 'pdf' : '%!pdftotext -nopgbrk -layout -q -eol unix '..fname..' -',
         \ 'rtf' : '%!unrtf --text',
         \ }
 
     if has_key(ext2cmd, ext)
         let filter = matchstr(ext2cmd[ext], '%!\zs\S*')
         if !executable(filter)
-            echom 'cannot filter '.expand('%:p').'; please install '.filter
+            echom 'cannot filter '..expand('%:p')..'; please install '..filter
             return
         endif
 
@@ -6553,7 +6666,7 @@ endfu
 
 augroup regenerate_helptags
     au!
-    au BufWritePost ~/.vim/plugged/*/doc/*.txt exe 'helptags '.expand('<amatch>:p:h')
+    au BufWritePost ~/.vim/plugged/*/doc/*.txt exe 'helptags '..expand('<amatch>:p:h')
 augroup END
 
 " Reload config {{{2
@@ -6570,7 +6683,7 @@ augroup source_files
     " See `xrdb -query` to get a list of all existing resources.
     "}}}
     au BufWritePost  ~/.Xresources  sil call system('xrdb ~/.Xresources')
-    au BufWritePost  ~/.vim/autoload/myfuncs.vim  exe 'source '.expand('<afile>:p')
+    au BufWritePost  ~/.vim/autoload/myfuncs.vim  exe 'source '..expand('<afile>:p')
 
     " Why shouldn't I write any autocmd listening to `BufWritePost` after this one?{{{
     "
@@ -6582,9 +6695,9 @@ augroup source_files
     " When you write `myfuncs.vim`, this augroup is not cleared.
     " Still, don't do it.
     "}}}
-    au BufWritePost  $MYVIMRC  exe 'source '.expand('<afile>:p')
+    au BufWritePost  $MYVIMRC  exe 'source '..expand('<afile>:p')
     if has('nvim')
-        au BufWritePost  ~/.vim/vimrc  exe 'source '.expand('<afile>:p')
+        au BufWritePost  ~/.vim/vimrc  exe 'source '..expand('<afile>:p')
     endif
 augroup END
 
@@ -6617,9 +6730,9 @@ augroup END
 
 fu! s:mkspell() abort
     for spell_file in glob('~/.vim/spell/*.add', 1, 1)
-        if filereadable(spell_file) && !filereadable(spell_file.'.spl')
-      \ || (getftime(spell_file) > getftime(spell_file.'.spl'))
-            exe 'mkspell! '.fnameescape(spell_file)
+        if filereadable(spell_file) && !filereadable(spell_file..'.spl')
+      \ || (getftime(spell_file) > getftime(spell_file..'.spl'))
+            exe 'mkspell! '..fnameescape(spell_file)
         endif
     endfor
 endfu
@@ -6716,11 +6829,11 @@ augroup END
 fu! s:handle_swapfile(filename) abort
     " If the swap file is older than the file itself, just get rid of it.
     if getftime(v:swapname) < getftime(a:filename)
-        call s:warning_msg('Old swap file detected, and deleted:   '.a:filename)
+        call s:warning_msg('Old swap file detected, and deleted:   '..a:filename)
         call delete(v:swapname)
         let v:swapchoice = 'e'
     else
-        call s:warning_msg('Swap file detected, opening read-only:   '.a:filename)
+        call s:warning_msg('Swap file detected, opening read-only:   '..a:filename)
         let v:swapchoice = 'o'
     endif
 endfu
@@ -6966,7 +7079,7 @@ endfu
 " 10 -
 " Why `:FzRg!` + `foobar` (in interactive mode) gives much more results than
 " `:FzRg! foobar`?
-" More generally, I don't know how `:Rg` and `$ rg` interpret metacharacters.
+" More generally, I don't know how `:Rg` and `rg(1)` interpret metacharacters.
 " Make some tests, read doc.
 " Example: compare `:FzRg! foo.*bar` and `:FzRg!` + `foo.*bar`
 "
@@ -7071,7 +7184,7 @@ endfu
 " https://vi.stackexchange.com/a/541/13370
 " http://melp.nl/2013/08/flow-charts-in-code-enter-graphviz-and-the-dot-language/
 " https://github.com/wannesm/wmgraphviz.vim
-" `$ man graph-easy`
+" `man graph-easy`
 "
 " Update:
 " This is really useful with vim-schlepp, and vim-draw.
@@ -7188,7 +7301,7 @@ endfu
                   au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
                   au FileType qf ++once sil! call s:ltag(2)
               augroup END
-              return ':ltag / | lw'.repeat("\<left>", 5)
+              return ':ltag / | lw'..repeat("\<left>", 5)
           elseif a:step ==# 2
               let pat = '|.\{-}|'
               " FIXME:
@@ -7673,6 +7786,7 @@ endfu
 "    - `expandcmd()`: https://github.com/vim/vim/releases/tag/v8.1.1510
 "
 "    - `win_execute()`: https://github.com/vim/vim/releases/tag/v8.1.1418
+"    - `win_splitmove()`: https://github.com/vim/vim/releases/tag/v8.1.2020
 "
 "    - `:scriptversion`; https://github.com/vim/vim/releases/tag/v8.1.1116
 "
@@ -7900,7 +8014,7 @@ endfu
 " past.
 "
 " 68 -
-" Document `$ paste` as a filter:
+" Document `paste(1)` as a filter:
 " https://vi.stackexchange.com/a/16096/17270
 "
 " Also, make some cleaning in our mappings:
@@ -8780,10 +8894,10 @@ endfu
 "
 " 127 -
 "
-" Find a way to prevent `$ par` from breaking a codespan on multiple lines.
+" Find a way to prevent `par(1)` from breaking a codespan on multiple lines.
 "
 " Idea: If you can't,  then maybe you could temporarily replace  all spaces in a
-" codespan with  C-b; this should  prevent `$ par`  from breaking a  codespan on
+" codespan with  C-b; this should prevent  `par(1)` from breaking a  codespan on
 " multiple lines. Then after the formatting, you would replace C-b with spaces.
 "
 " 128 -
@@ -8849,8 +8963,47 @@ endfu
 " 130 -
 " In a markdown file, `gc` should behave slightly differently.
 " It  should  make sure  there  are  4 spaces  between  `>`  and the  first  non
-" whitespace on each line; and reformat the quote with `$ par`.
+" whitespace on each line; and reformat the quote with `par(1)`.
 " Because that's what we do all the time; so better automate it.
+"
+" 131 -
+"
+" Bug in the Nvim man plugin:
+"
+"     $ man git-credential-cache
+"     man.vim: command error (7) man -w git-credential-cac: No manual entry for git-credential-cac~
+"
+" The name of the man page is already truncated when this autocmd is run:
+"
+"     /usr/local/share/nvim/runtime/plugin/man.vim:14
+"
+" The issue is due to `man(1)` which truncates the name of the file.
+"
+"     $ MANPAGER='vim -R +":set ft=man" -' man git-credential-cache
+"     :echo bufname('%')
+"     man://git-credential-cac(1)~
+"                             ^
+"                             `he` is missing
+"
+" 132 -
+" Make sure `~/.zshenv` is not loaded in any Vim instance.
+" Open it in a new Vim instance.
+" Open a tmux pane, and focus back the Vim where `~/.zshenv` is displayed.
+" The cursor has moved a few characters forward.
+" Focus back the tmux pane and press `C-d` to close the shell and the pane.
+" Again, in Vim the cursor has moved a few characters forward.
+" Can reproduce in Nvim too.
+"
+" MWE:
+"
+"     $ vim -Nu NONE --cmd 'syntax on' --cmd 'setl cocu=n cole=3' \
+"     --cmd 'au Syntax zsh syn region zshCommentCodeSpan matchgroup=Comment start=/\z(`\+\)/ end=/\z1/ concealends containedin=zshComment' \
+"     ~/.zshenv
+"     # put your cursor on a commented line where there is a codespan
+"     # open a tmux pane
+"     # focus back Vim
+"
+" Finish the MWE so that it uses a `<(cat <<'EOF'...`.
 
 
 
@@ -8873,7 +9026,7 @@ fu! s:yank(text) abort
     "   Why don't you move it at the top?{{{
     "
     " In addition to producing an OSC 52 sequence, `yank` copies the text in the
-    " clipboard via `$ xsel`; this last feature may still be useful in gVim.
+    " clipboard via `xsel(1x)`; this last feature may still be useful in gVim.
     "}}}
     if has('gui_running')
         return
@@ -8918,7 +9071,7 @@ nno <silent> <space>y y:<c-u>call <sid>yank(@0)<cr>
 "    4.  tag
 "    5.  arglist (improve our arglist mappings)
 "    6.  breakdown
-"    7.  paragraph (master `$ par`)
+"    7.  paragraph (master `par(1)`)
 "    8.  tree
 "    9.  keyboard
 "    10. systemd

@@ -5,7 +5,7 @@
 
 # What should I do after writing a desktop file?
 
-Pass it to `$ desktop-file-validate` to check whether it contains errors.
+Pass it to `desktop-file-validate(1)` to check whether it contains errors.
 
     $ desktop-file-validate mypgm.desktop
 
@@ -24,13 +24,13 @@ I looked at the desktop file of gVim, and copied the most useful keys.
 ### Why do you run `$ sh -c`?
 
 To expand the environment variable `$HOME`.
-It's not expanded by default, so we rely on `$ sh` to do it instead.
+It's not expanded by default, so we rely on `sh(1)` to do it instead.
 
 See: <https://stackoverflow.com/a/8980518/9780968>
 
 ### Why double quotes (`$ sh -c "..."`) and not single quotes (`$ sh -c '...'`)?
 
-If you use single quotes, `$ desktop-file-validate` will complain:
+If you use single quotes, `desktop-file-validate(1)` will complain:
 
     /home/user/.local/share/applications/typometer.desktop: error: value "sh -c 'java -jar $HOME/bin/typometer-1.0.1.jar'" for key "Exec" in group "Desktop Entry" contains a reserved character ''' outside of a quote
     /home/user/.local/share/applications/typometer.desktop: error: value "sh -c 'java -jar $HOME/bin/typometer-1.0.1.jar'" for key "Exec" in group "Desktop Entry" contains a reserved character '$' outside of a quote
@@ -38,7 +38,7 @@ If you use single quotes, `$ desktop-file-validate` will complain:
 
 ### Why the double backslash (`\\$HOME`)?
 
-Without, `$ desktop-file-validate` will complain:
+Without, `desktop-file-validate(1)` will complain:
 
     /home/user/.local/share/applications/typometer.desktop: error: value "sh -c "java -jar $HOME/bin/typometer-1.0.1.jar"" for key "Exec" in group "Desktop Entry" contains a non-escaped character '$' in a quote, but it should be escaped with two backslashes ("\\$")
 
@@ -125,7 +125,7 @@ See: <https://developer.gnome.org/integration-guide/stable/icons.html.en>
 
 ### How do I get a picture with the right size and weight?
 
-Download a  picture which represents your  application, then use `$  convert` to
+Download a picture  which represents your application, then  use `convert(1)` to
 resize and compress it:
 
     $ convert your_pic.png -resize 48x48! your_resized_pic.png
@@ -148,7 +148,7 @@ Nor the right weight:
     $ ls -lh
     ... 38K ... typometer.png~
 
-After running `$ convert`:
+After running `convert(1)`:
 
     $ convert typometer.png -resize 48x48! resized_typometer.png
 

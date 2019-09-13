@@ -35,7 +35,7 @@
 
 # bat {{{1
 
-# Where can I download `$ bat`?{{{
+# Where can I download `bat(1)`?{{{
 #
 #     https://github.com/sharkdp/bat/releases
 #}}}
@@ -72,9 +72,45 @@ export BAT_STYLE=changes,grid,header
 #}}}
 export BAT_THEME='GitHub'
 
+# BROWSER {{{1
+
+# Some programs inspect this variable to determine which program to start.{{{
+#
+# For example, `man(1)` when we run `$ man --html man`.
+# If it's not set, they fall back on some value.
+# `man(1)` seems to fall back on `links(1)`.
+# We don't know `links(1)` well, and we haven't configured it.
+#}}}
+# Do *not* use the value `w3m`!{{{
+#
+# It would break `urlview(1)`.
+#}}}
+export BROWSER='firefox'
+
 # editor {{{1
 
-export EDITOR='vim'
+# What is the difference between `EDITOR` and `VISUAL`?{{{
+#
+# Historically, `EDITOR` and `VISUAL` are meant to set resp. your preferred line
+# editor (e.g.  `sed(1)`), and  your preferred  TUI/GUI editor  (e.g. `vim(1)`):
+# https://unix.stackexchange.com/a/334022/289772
+#}}}
+
+export VISUAL='vim'
+export EDITOR="$VISUAL"
+
+# For some applications, it could be useful to use full paths (e.g. `/usr/local/bin/vim`):{{{
+# https://unix.stackexchange.com/questions/4859/visual-vs-editor-what-s-the-difference#comment5812_4861
+#
+# I don't do it, because we would need to:
+#
+#    1. run `$ which vim` to get the full path programmatically
+#    2. build the `export` statements
+#    3. save them in a cache
+#    4. source the cache if it exists and is not too old
+#
+# Too cumbersome.
+#}}}
 
 # fzf {{{1
 
@@ -103,14 +139,45 @@ export SAVEHIST=$HISTSIZE
 
 # locale {{{1
 
-# to get the name of the day/month in english
-export LC_TIME=en_US.UTF-8
+# Let's tell our applications that our OS is configured for an english-speaking user.
+# What about other locale-related variables, like `LC_TIME`?{{{
+#
+# `LC_ALL` has priority over those.
+#
+#     $ LC_ALL=en_US.UTF-8 LC_TIME=fr_FR.UTF-8 date
+#     Thu Sep 12 00:40:10 CEST 2019~
+#
+# So setting it, is like setting all the other ones.
+#}}}
+# Why do we need to set this?{{{
+#
+# Atm, some of our locale variables are set as for a french-speaking user.
+#
+# I don't know why, but the shell inherits it from its ancestors.
+# The first process in the ancestor which  has a locale variable set for french,
+# is  the first  `lightdm(1)` (we  have 2  such processes;  the first  being the
+# parent of the second).
+# This process is started by `systemd(1)`, with a simple command-line (no argument):
+#
+#     $ cat /proc/$(pgrep lightdm|head -n1)/cmdline
+#     /usr/sbin/lightdm~
+#
+# I don't know from where lightdm picks up those french locale values.
+#
+# Anyway, we want a consistent environment.
+# We do everything in english (read man pages in english, take notes in english,
+# comment in english, ...),  in part because when we have an  issue, we can find
+# help more easily: there is more information in english on the internet.
+# So, our locale  variables should reflect our choice, so  that all applications
+# know it, and respect it.
+#}}}
+export LC_ALL=en_US.UTF-8
 
 # less {{{1
 
 # What does this variable do?{{{
 #
-# It passes options automatically to `$ less`.
+# It passes options automatically to `less(1)`.
 #}}}
 # What does `i` mean?{{{
 #
@@ -148,7 +215,7 @@ export LC_TIME=en_US.UTF-8
 # Without, you would see things like `ESC[33m ... ESC[m`.
 #
 # If you still see control characters, you can use `r` instead of `R`.
-# However, from `$ man less`:
+# However, from `man less`:
 #
 # > Warning: when the  -r option is used,  less cannot keep track  of the actual
 # > appearance of the  screen (since this depends on how  the screen responds to
@@ -158,7 +225,7 @@ export LC_TIME=en_US.UTF-8
 #}}}
 #   `S`?{{{
 #
-# It's a `$ less` option which prevents long lines from being wrapped.
+# It's a `less(1)` option which prevents long lines from being wrapped.
 #}}}
 export LESS=i~FMRS
 # How to make the cursor jump at the bottom of the screen, on startup?{{{
@@ -181,11 +248,11 @@ export LESS=i~FMRS
 # As a result, when we try to  open an archive file, `lesspipe` will pre-process
 # it and write its uncompressed text on a pipe which `less` will read.
 #
-# For more information, see `$ man lesspipe` or `$ man lessopen`.
+# For more information, see `man lesspipe` or `man lessopen`.
 #}}}
 # Why the guard?{{{
 #
-# The `$ eval` has a big impact on performance.
+# The `eval` has a big impact on performance.
 # You can measure it with this command:
 #
 #     $ time zsh -c 'repeat 1000 source ~/.zshenv'
@@ -205,19 +272,19 @@ if [[ -z "${LESSOPEN}" ]]; then
 
   # Why inside the guard?{{{
   #
-  # `$ lesskey` doesn't seem  to have a big impact on  performance at the moment
+  # `lesskey(1)` doesn't seem to have a  big impact on performance at the moment
   # (probably  because our  lesskey file  is very  short), but  it could  in the
   # future.
-  # Besides, its purpose is to compile the config of `$ less` in a binary format
-  # (in `~/.less`), and  it doesn't make sense  to do that every time  we open a
-  # new shell.
+  # Besides,  its purpose  is to  compile the  config of  `less(1)` in  a binary
+  # format (in `~/.less`),  and it doesn't make  sense to do that  every time we
+  # open a new shell.
   #}}}
   lesskey "${HOME}/.config/lesskey"
 fi
 
 # ls {{{1
 
-# Ask `$  dircolors` to  read its  config from `~/.dircolors`,  so that  it sets
+# Ask `dircolors(1)`  to read its  config from  `~/.dircolors`, so that  it sets
 # `$LS_COLORS`.
 # The latter controls the colors in the output of `$ ls --color`.
 if [[ -z "${LS_COLORS}" ]]; then
@@ -251,20 +318,20 @@ fi
 #
 #     export MANPAGER="vim -M +MANPAGER -"
 #
-# If you try it, `$ man` will fail because we remove the `:MANPAGER` command in:
+# If you try it, `man(1)` will fail because we remove the `:MANPAGER` command in:
 #
 #     ~/.vim/after/plugin/tidy_tab_completion.vim
 #
 # But you can try it if you set `g:no_after_plugin`:
 #
-#     $ MANPAGER="vim -Nu NORC --cmd 'filetype on | runtime ftplugin/man.vim | let g:no_after_plugin = 1' -M +MANPAGER -" man man
+#     $ MANPAGER="vim -Nu NORC --cmd 'filetype on | let g:no_after_plugin = 1' -M +MANPAGER -" man man
 #}}}
 export MANPAGER='nvim +Man!'
 
 # Purpose:{{{
 #
 # Write the word `printf` in a markdown buffer, then press `K`.
-# `$ man` will give to Vim the `printf` page from the section 1.
+# `man(1)` will give to Vim the `printf` page from the section 1.
 #
 # But what if you prefer to give the priority to the section 3?
 # That's where `$MANSECT` comes in.
@@ -275,11 +342,11 @@ export MANPAGER='nvim +Man!'
 #
 # Use this `export` statement to change the priority of the sections.
 #
-# Note that pressing `3K`  or executing `$ man 3 printf` will  give you the page
+# Note that  pressing `3K` or  executing `man 3 printf`  will give you  the page
 # from the section 3, no matter what `$MANSECT` contains.
 # This variable is only useful for when you don't provide the section number.
 #
-# See `$ man 1 man` for more info.
+# See `man 1 man` for more info.
 #}}}
 export MANSECT=1:n:l:8:3:2:3posix:3pm:3perl:5:4:9:6:7
 # See `~/wiki/shell/environment.md` for an explanation as to why we do that.
@@ -328,6 +395,20 @@ export PARINIT='rTbgqR B=.,?_A_a Q=_s>|'
 #               └ boolean and numerics options (probably)
 #}}}
 
+# PAGER {{{1
+
+# Some scripts/programs may rely on this variable to determine which pager they should invoke.{{{
+#
+# If `PAGER` is not set, they may fall back on `more(1)`.
+# That's the case, for example, with the zsh script `run-help` (bound to `C-x H` atm):
+#
+#     /usr/share/zsh/functions/Misc/run-help
+#
+# We don't want that, because we're not used to its key bindings, and it's too limited.
+# We always want `less(1)` to be invoked.
+#}}}
+export PAGER=less
+
 # PATH {{{1
 
 # Why don't you set `CDPATH`?{{{
@@ -350,11 +431,11 @@ export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 # Why do you put a colon at the end?{{{
 #
 # When `$MANPATH` contains  an empty component, for every  `<path>/bin` which is
-# in your `$PATH`, `$ man` will also look for manpages in `<path>/share/man`:
+# in your `$PATH`, `man(1)` will also look for manpages in `<path>/share/man`:
 #
 #     https://askubuntu.com/a/633924/867754
 #
-# This means that since  we have `~/bin` in our `$PATH`, `$  man` will look into
+# This means that since we have `~/bin`  in our `$PATH`, `man(1)` will look into
 # `~/share/man`; IOW, this allows us to install manpages locally (!= system-wide
 # in `/usr/share/man`).
 #}}}
@@ -396,7 +477,7 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 #     $ cat /proc/1006/cmdline
 #     /sbin/upstart --user~
 #
-# From `$ man upstart /--user`:
+# From `man upstart /--user`:
 #
 # > --user Starts  in user mode, as used for user sessions. Upstart will be
 # >        run as an unprivileged user, reading  configuration  files  from
@@ -430,8 +511,8 @@ export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux
 # }}}
 #   Why do you use a cache? {{{
 #
-# Because to get the path to the ruby gems programmatically, we need to run a
-# `$ ruby` command, which is slow.
+# Because to get  the path to the  ruby gems programmatically, we need  to run a
+# `ruby(1)` command, which is slow.
 # We don't want the shell startup time to be impacted.
 # }}}
 # What is `-s` in `[[ -s file ]]`? {{{
@@ -454,11 +535,11 @@ if [[ ! -s "${HOME}/.ruby_user_dir_cache" ]]; then
   #
   # It specifies  the script  from the  command-line while  telling Ruby  not to
   # search the rest of the arguments for a script file name.
-  # See `$ man ruby /^\C\s*-e\>`.
+  # See `man ruby /^\C\s*-e\>`.
   # }}}
   #     `puts`? {{{
   #
-  # A ruby command similar to `$ printf`.
+  # A ruby command similar to `printf`.
   # }}}
   #     `Gem.user_dir`? {{{
   #
@@ -492,7 +573,7 @@ export REPORTTIME=15
 #     sudo: no tty present and no askpass program specified~
 #
 # According to the message, we need to specify an askpass program.
-# If you search `askpass` in `$ man sudo`, you'll find the `-A` option (which we
+# If you search `askpass`  in `man sudo`, you'll find the  `-A` option (which we
 # use in our `vim-unix` plugin) and the `SUDO_ASKPASS` environment variable.
 #}}}
 # Where did you find this `/usr/lib/ssh/x11-ssh-askpass` file?{{{
@@ -515,7 +596,7 @@ export REPORTTIME=15
 #
 # Once  you've  given  your  credentials,   you  won't  be  asked  again  before
 # some  time  (look for  'timeout'  in  `~/.config/git/config`), thanks  to  the
-# `$ git-credential-cache` agent.
+# `git-credential-cache(1)` agent.
 #}}}
 export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 
@@ -547,7 +628,7 @@ fi
 
 # tldr {{{1
 
-# Configure the colors and styles of the output of `$ tldr`.
+# Configure the colors and styles of the output of `tldr`.
 export TLDR_HEADER='green bold'
 export TLDR_QUOTE='italic'
 # You can configure it further with these variables:

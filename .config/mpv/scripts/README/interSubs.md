@@ -184,8 +184,8 @@ To be sure that you install your library for the same interpreter that interSubs
 will run later.
 
 When you run  `$ python3 -m pip  install ...`, you install a  python library for
-the interpreter called by `$ python3`.
-interSubs will *also* call `$ python3`, and so should run the same interpreter.
+the interpreter called by `python3`.
+interSubs will *also* call `python3`, and so should run the same interpreter.
 
 ---
 

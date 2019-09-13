@@ -34,8 +34,8 @@ showcolors() { #{{{1
     # In the next iteration of the  loop, the terminal will redraw another line,
     # in another color.
     # We don't want the previous color to “bleed” into the number column.
-    # And  we don't want the  color on the last  line of the screen  contents to
-    # bleed into `$ less`'s status line.
+    # And we  don't want the color  on the last  line of the screen  contents to
+    # bleed into `less(1)`'s status line.
     #}}}
     tput sgr0
     # move to next line
@@ -79,17 +79,17 @@ case ${1:-none} in
   -v)
     # Why `--raw-control-chars`?{{{
     #
-    # To make `$ less` relay some  escape sequences to the terminal, unmodified,
+    # To make `less(1)` relay some escape sequences to the terminal, unmodified,
     # instead of displaying their caret notations.
     #
     # Note   that  we   already  include   `R`  inside   `$LESS`  which   passes
-    # `--RAW-CONTROL-CHARS` to `$ less`, but  that's not enough; it only affects
+    # `--RAW-CONTROL-CHARS` to `less(1)`, but that's not enough; it only affects
     # ANSI color escape sequences.
     #}}}
     # Why `--no-init`?{{{
     #
-    # When we quit `$ less`, it sends the termcap deinitialization string to the
-    # terminal, which clears the screen.
+    # When we  quit `less(1)`, it  sends the termcap deinitialization  string to
+    # the terminal, which clears the screen.
     # For the  moment, we  don't want  that; we  want the  last contents  of the
     # screen to be preserved.
     #}}}
@@ -101,10 +101,10 @@ case ${1:-none} in
     #}}}
     #   Why don't you do it?{{{
     #
-    # I don't want `$ less` to be run in all cases.
-    # In particular, if the script just outputs a number, `$ less` is useless.
+    # I don't want `less(1)` to be run in all cases.
+    # In particular, if the script just outputs a number, `less(1)` is useless.
     #
-    # You  could pass  `--QUIT-AT-EOF`  to `$  less`: this  would  make it  quit
+    # You  could pass  `--QUIT-AT-EOF` to  `less(1)`:  this would  make it  quit
     # automatically when there's just a number to display.
     # But, this would also make it quit when  we reach the end of a long list of
     # colors; I don't like that.

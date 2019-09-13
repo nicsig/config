@@ -69,12 +69,12 @@
 ! Google: “urxvt unicode character missing”
 ! First result: https://github.com/powerline/fonts/issues/176
 !
-! Also, see `$ man urxvt /font`.
+! Also, see `man urxvt /font`.
 !}}}
 
 ! How to check whether a character can be displayed by a given font?{{{
 !
-!    - run `$ gucharmap`
+!    - run `gucharmap(1)`
 !    - select your font (e.g. `DejaVu Sans Mono`)
 !    - select a size (e.g. `20`, which seems equivalent to `pixelsize=27`)
 !    - search for the glyph (C-f)
@@ -111,7 +111,7 @@ URxvt.scrollBar: false
 ! Scroll with `M-j` and `M-k`, instead of `S-PgDown` and `S-PgUp`.
 ! Where is the syntax `URxvt.keysym.<sym>: command: ...` documented?{{{
 !
-!     $ man urxvt /RESOURCES /keysym.sym: action /command:STRING
+!     man urxvt /RESOURCES/;/keysym.sym: action/;/command:STRING
 !}}}
 ! Where is the sequence `\033]720;1\007` documented?{{{
 !
@@ -134,7 +134,7 @@ URxvt.scrollBar: false
 !
 ! Source:
 !
-!     $ man 7 urxvt /RXVT-UNICODE TECHNICAL REFERENCE /XTerm Operating System Commands
+!     man 7 urxvt /RXVT-UNICODE TECHNICAL REFERENCE/;/XTerm Operating System Commands
 !}}}
 ! Why did you comment these lines?{{{
 !
@@ -156,7 +156,7 @@ URxvt.scrollBar: false
 !
 ! Source:
 !
-!     $ man 7 urxvt /RXVT-UNICODE\/URXVT FREQUENTLY ASKED QUESTIONS /Terminal Configuration
+!     man 7 urxvt /RXVT-UNICODE\/URXVT FREQUENTLY ASKED QUESTIONS/;/Terminal Configuration
 !
 ! By default, its size is limited to 1000 lines.
 !}}}
@@ -298,7 +298,7 @@ URxvt.iso14755_52: false
 ! 'allowWindowOps' is false.
 ! Its value is a comma-separated list of names or operation numbers.
 !
-! See `$ man xterm /^\s*disallowedWindowOps`.
+! See `man xterm /^\s*disallowedWindowOps`.
 !
 ! ---
 !
@@ -319,7 +319,7 @@ URxvt.iso14755_52: false
 ! write arbitrary text in xterm's clipboard, probably because it doesn't include
 ! the name 'SetSelection'.
 !
-! Also, this value is recommended in `$ man tmux /set-clipboard`:
+! Also, this value is recommended in `man tmux /set-clipboard`:
 !
 ! > Note  that this  feature needs  to  be enabled  in xterm(1)  by setting  the
 ! > resource:
@@ -493,7 +493,7 @@ directColor: true
 *cursorColor: #373b41
 ! Color of the character under the cursor.{{{
 !
-! From `$ man urxvt /cursorColor2`:
+! From `man urxvt /cursorColor2`:
 !
 ! > cursorColor2: colour
 ! >     Use the specified colour for the colour of the cursor text. For
@@ -548,7 +548,7 @@ URxvt*cursorColor2: #dadada
 
 ! color of bold text{{{
 !
-! From `$ man urxvt /colorBD`
+! From `man urxvt /colorBD`
 !
 ! > colorBD: colour
 ! >     Use the specified colour to display bold or italic characters when

@@ -39,7 +39,7 @@ import weechat
 #}}}
 # Why do you call the 2nd argument `buffer_cb` instead of simply `buffer` (like in the doc)?{{{
 #
-# Because of a warning given by `$ pylint`:
+# Because of a warning given by `pylint(1)`:
 #
 #     W: xx,xx: Redefining built-in 'buffer' (redefined-builtin)
 #}}}

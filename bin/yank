@@ -29,14 +29,14 @@
 # in a tmux buffer (in addition to the clipboard selection).
 #
 # And if the  script is run from a  shell where `$DISPLAY` is set,  it will also
-# try to write the text in the clipboard selection via `$ xclip` or `$ xsel`.
+# try to write the text in the clipboard selection via `xclip(1)` or `xsel(1x)`.
 #}}}
 #   Where did you find it?{{{
 #
 # https://github.com/sunaku/home/blob/master/bin/yank
 # https://sunaku.github.io/tmux-yank-osc52.html
 #}}}
-#   Why does it write in the clipboard selection via `$ xsel` *and* via OSC 52?{{{
+#   Why does it write in the clipboard selection via `xsel(1x)` *and* via OSC 52?{{{
 #
 # Most of the time, this is indeed redundant.
 # That is, when you're  copying some short text from a local  shell, only one of
@@ -45,10 +45,10 @@
 # However, there're 2 special cases where only one of them will work.
 #
 # - If the script is run locally, OSC 52 may truncate the text if it's too long (>75k).
-#   In that case, `$ xsel` is useful as a more reliable fallback.
+#   In that case, `xsel(1x)` is useful as a more reliable fallback.
 #
 # - If the script is run on a remote server, there's probably no display server (Xorg).
-#   In that case, `$ xsel` will fail.
+#   In that case, `xsel(1x)` will fail.
 #   And even if there  is a display server, you probably want to  copy the text in
 #   the *local* clipboard selection, not the remote one.
 #   Only OSC 52 can do that.
@@ -60,18 +60,18 @@
 # But in all other cases (see `Usage:`), the script is useful.
 #}}}
 
-# Why `$ rlwrap`?{{{
+# Why `rlwrap(1)`?{{{
 #
 # It's convenient when we type the text interactively.
 #}}}
-# Why `$ cat`?{{{
+# Why `cat(1)`?{{{
 #
 # The input could be some file(s).
 #}}}
 #   Why does it still work when the input is not a file?{{{
 #
 # When the script's input is a pipe, or the terminal, `"$@"` is empty.
-# And  `$ cat`,  without arguments,  reads its  standard input  – which  here is
+# And `cat(1)`,  without arguments,  reads its  standard input  – which  here is
 # inherited from the script.
 #
 #     # the input is a pipe
@@ -98,7 +98,7 @@ buf=$(rlwrap cat "$@")
 #     $ echo $?
 #     0~
 #
-# It's documented at `$ man bash /SHELL BUILTIN COMMANDS`:
+# It's documented at `man bash /SHELL BUILTIN COMMANDS`:
 #
 # > : [arguments]
 # >        No effect; the command does nothing beyond  expanding  arguments
@@ -107,7 +107,7 @@ buf=$(rlwrap cat "$@")
 #}}}
 [ -n "$TMUX" ] && tmux set-buffer "${buf}" ||:
 
-# copy to clipboard selection via `$ xsel` {{{1
+# copy to clipboard selection via `xsel(1x)` {{{1
 
 [ -n "$DISPLAY" ] && printf -- '%s' "${buf}" | { xsel -i -b || xclip -selection clipboard ;} ||:
 #                                                      │  │{{{
@@ -167,7 +167,7 @@ fi
 #}}}
 # Why `$ tr -d '\n'`?{{{
 #
-# To remove the trailing newline added by `$ base64`.
+# To remove the trailing newline added by `base64(1)`.
 #}}}
 base64_encoded_text="$(printf -- "%s" "${buf}" | head -c "${max}" | base64 | tr -d '\n')"
 put() {
@@ -197,12 +197,12 @@ put() {
   fi
   # Why `%b`?{{{
   #
-  # To make `$ printf` translate `\033` and `\007` into `Esc` and `ST`.
-  # Remember  that `$  printf` translates  a backslash  escape sequence  iff the
-  # latter is in the format, or in  an argument associated to `%b`; and *not* if
-  # it's inside an argument bound to any other specifier (like e.g. `%s`).
+  # To make `printf` translate `\033` and `\007` into `Esc` and `ST`.
+  # Remember that `printf` translates a backslash escape sequence iff the latter
+  # is in the  format, or in an  argument associated to `%b`; and  *not* if it's
+  # inside an argument bound to any other specifier (like e.g. `%s`).
   #
-  # From `$ man bash /printf /%b`:
+  # From `man bash /printf/;/%b`:
   #
   # > %b     causes printf to expand backslash escape sequences in the
   # >        corresponding argument (except that \c terminates output,

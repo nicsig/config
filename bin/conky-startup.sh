@@ -12,7 +12,7 @@
 #}}}
 # How to print info about the weather?{{{
 #
-# Look at `$ man conky` / wiki (there're weather functions built-in).
+# Look at `man conky` / wiki (there're weather functions built-in).
 # Or for inspiration, look here:
 # https://github.com/edusig/conky-weather
 #

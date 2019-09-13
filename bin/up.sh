@@ -52,8 +52,8 @@ update_system() { #{{{1
   #
   # It's a good habit.
   # If you have files  whose name begin with a date, it's easier  to find a file
-  # dating from a particular time in the  output of `$ ls` (or in `ranger`) when
-  # the month comes before the day.
+  # dating from a  particular time in the output of  `ls(1)` (or in `ranger(1)`)
+  # when the month comes before the day.
   #}}}
   cat <<EOF
 ---
@@ -176,7 +176,7 @@ update_git_programs() { #{{{1
   #
   #         → abc
   #
-  # `$ printf` repeats the format as many times as necessary.
+  # `printf` repeats the format as many times as necessary.
   # So:
   #
   #     $ printf -- '-%s' {1..5}

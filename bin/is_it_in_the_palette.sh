@@ -6,8 +6,8 @@
 # You get its hex color code with Gpick, and you wonder where it comes from.
 # Maybe the terminal's palette?
 #
-# Manually comparing your hex color code with each color in the output of `$ palette`
-# is tedious.
+# Manually  comparing your  hex color  code  with each  color in  the output  of
+# `palette` is tedious.
 # You  can   speed  up  the   process  by   reading  the  “Issues”   section  in
 # `~/wiki/terminal/colors.md`.
 #

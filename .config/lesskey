@@ -1,7 +1,7 @@
 # What's this file?{{{
 #
-# A config file that `$ lesskey` can  compile into a binary format in `~/.less`.
-# The latter is used by `$ less` to change its config.
+# A config file that `lesskey(1)` can  compile into a binary format in `~/.less`.
+# The latter is used by `less(1)` to change its config.
 #
 # From: https://unix.stackexchange.com/a/59194/289772
 #
@@ -27,11 +27,11 @@
 #
 # ---
 #
-# Also, from `$ man lesskey /PRECEDENCE`:
+# Also, from `man lesskey /PRECEDENCE`:
 #
 # > a key may be defined to do nothing by using the action "noaction".
 #
-# And from `$ man lesskey /COMMAND SECTION`:
+# And from `man lesskey /COMMAND SECTION`:
 #
 # > An action may be followed by an "extra" string.
 # > When such a command is entered  while running less, the action is performed,
