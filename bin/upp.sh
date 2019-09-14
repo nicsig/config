@@ -601,12 +601,10 @@ install() { #{{{2
     #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)~
     #}}}
     if [[ ${PGM} == 'nvim' ]]; then
-      # In a manpage, open the TOC on the *left* rather than at the bottom.
-      # Also, when you run `:Man man`, the manpage is not prettified like with `$ man man`; let's fix that.
+      # In a  manpage, when we press  the default `gO` command, open  the TOC on
+      # the *left* rather than at the bottom.
       sed -i.bak \
           -e '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
-          -e '/function! man#init_pager()/,/endfunction/{/endfunction/i \  do <nomodeline> man BufReadCmd' \
-          -e '}' \
           /usr/local/share/nvim/runtime/autoload/man.vim
     fi
   fi

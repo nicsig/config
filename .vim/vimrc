@@ -5240,10 +5240,6 @@ if has('nvim')
     com! -bar CheckHealth checkhealth | do bufwinenter
 endif
 
-" CtlSeqs {{{2
-
-com! -bar CtlSeqs tabe /usr/share/doc/xterm/ctlseqs.txt.gz
-
 " DiffLines {{{2
 
 com! -bar -bang -range -nargs=? DiffLines call myfuncs#diff_lines(<bang>0, <line1>, <line2>, <q-args>)
@@ -5485,20 +5481,6 @@ endfu
 " A filename can contain whitespace.
 "}}}
 com! -bar -nargs=+ -complete=buffer InAButNotInB call myfuncs#in_A_not_in_B(<f-args>)
-
-" Info {{{2
-
-com! -bar -nargs=* Info call s:info(<q-args>)
-
-fu! s:info(topic) abort
-    new
-    exe '.!info '..a:topic
-    if bufname('%') is# ''
-        " We need to be able to recognize an info buffer (e.g. in `s:show_doc()`).
-        setf info
-        nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
-    endif
-endfu
 
 " IsPrime {{{2
 
@@ -6880,8 +6862,8 @@ endfu
 
 " Trailing Whitespace {{{2
 
-" Trailing whitespace in red but not in insert mode, and not if the filetype
-" is in the list:
+" Trailing whitespace in red but not in  insert mode, and not if the filetype is
+" blacklisted:
 let s:NO_TRAILING_WHITESPACE_FT = ['', 'fzf', 'git', 'help', 'qf']
 
 augroup trailing_whitespace
@@ -8967,44 +8949,20 @@ endfu
 " Because that's what we do all the time; so better automate it.
 "
 " 131 -
-"
-" Bug in the Nvim man plugin:
-"
-"     $ man git-credential-cache
-"     man.vim: command error (7) man -w git-credential-cac: No manual entry for git-credential-cac~
-"
-" The name of the man page is already truncated when this autocmd is run:
-"
-"     /usr/local/share/nvim/runtime/plugin/man.vim:14
-"
-" The issue is due to `man(1)` which truncates the name of the file.
-"
-"     $ MANPAGER='vim -R +":set ft=man" -' man git-credential-cache
-"     :echo bufname('%')
-"     man://git-credential-cac(1)~
-"                             ^
-"                             `he` is missing
-"
-" 132 -
-" Make sure `~/.zshenv` is not loaded in any Vim instance.
-" Open it in a new Vim instance.
-" Open a tmux pane, and focus back the Vim where `~/.zshenv` is displayed.
-" The cursor has moved a few characters forward.
-" Focus back the tmux pane and press `C-d` to close the shell and the pane.
-" Again, in Vim the cursor has moved a few characters forward.
-" Can reproduce in Nvim too.
-"
-" MWE:
-"
-"     $ vim -Nu NONE --cmd 'syntax on' --cmd 'setl cocu=n cole=3' \
-"     --cmd 'au Syntax zsh syn region zshCommentCodeSpan matchgroup=Comment start=/\z(`\+\)/ end=/\z1/ concealends containedin=zshComment' \
-"     ~/.zshenv
-"     # put your cursor on a commented line where there is a codespan
-"     # open a tmux pane
-"     # focus back Vim
-"
-" Finish the MWE so that it uses a `<(cat <<'EOF'...`.
+" In a fugitive buffer, when we need to  stage many files, I would like to press
+" `-` very fast. We can't because – for  some reason – it would trigger our `--`
+" mapping which opens a dirvish buffer.
 
+
+
+"     augroup test_sth
+"         au!
+"         au VimResized * call Func()
+"     augroup END
+"     fu! Func() abort
+"         let curpos = getcurpos()
+"         call setpos('.', curpos)
+"     endfu
 
 
 

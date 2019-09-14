@@ -210,7 +210,6 @@ fu! myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
 endfu
 
 fu! myfuncs#op_yank_matches(type) abort
-    let cb_save  = &cb
     let reg_save = ['z', getreg('z'), getregtype('z')]
     try
         let @z = ''
@@ -248,7 +247,6 @@ fu! myfuncs#op_yank_matches(type) abort
         return lg#catch_error()
 
     finally
-        let &cb  = cb_save
         call call('setreg', reg_save)
     endtry
 endfu

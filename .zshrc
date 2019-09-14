@@ -1777,10 +1777,51 @@ logout() { #{{{2
   # Note that  this function  shadows the  `logout` builtin,  but we  don't care
   # because it's a synonym for `exit`.
   emulate -L zsh
+  if [[ $# -ne 1 ]]; then
+    cat <<EOF >&2
+  usage: $0 session
+         $0 reboot
+         $0 poweroff
+EOF
+    return 64
+  fi
 
-  # https://unix.stackexchange.com/a/321096/289772
-  session="$(loginctl session-status | awk 'NR==1{print $1}')"
-  loginctl terminate-session "${session}"
+  case $1 in
+    session)
+      # https://unix.stackexchange.com/a/321096/289772
+      session="$(loginctl session-status | awk 'NR==1{print $1}')"
+      loginctl terminate-session "${session}"
+      ;;
+    reboot)
+      # Why not just `$ systemctl reboot`?{{{
+      #
+      # We have an issue which makes the OS hang when we reboot/poweroff.
+      # It's related to the swap partition.
+      # To avoid the issue, we need to disable it before rebooting.
+      #
+      # Also, if it fails or there's  another issue, having a debug shell during
+      # a  reboot/poweroff can  be useful,  so we  also start  the `debug-shell`
+      # service.
+      # To access the debug shell, simply press `Ctrl-Alt-F9`.
+      #
+      # ---
+      #
+      # Try  to avoid  enabling the  `debug-shell` service;  it would  start the
+      # debug  shell  permanently  which  is  a *security  hole*  as  it  allows
+      # unauthenticated and  unrestricted root  access to  your computer  if you
+      # forget to disable it.
+      #
+      # Source: /usr/share/doc/systemd/README.Debian.gz
+      #}}}
+      # TODO: Remove `swapoff -a` once our poweroff hanging issue is fixed.
+      # I guess that'll be when you upgrade Ubuntu.
+      # Keep `systemctl start debug-shell`; could still be useful.
+      sudo systemctl start debug-shell && sudo swapoff -a && systemctl reboot
+      ;;
+    poweroff)
+      sudo systemctl start debug-shell && sudo swapoff -a && systemctl poweroff
+      ;;
+  esac
 }
 
 man_pdf() { #{{{2

@@ -1,0 +1,5 @@
+#compdef logout
+
+local actions
+actions=(session reboot poweroff)
+_values 'actions' ${actions} && return 0
