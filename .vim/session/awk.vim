@@ -22,6 +22,7 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/Desktop/countries
 set splitbelow splitright
@@ -34,8 +35,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
@@ -55,8 +55,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/awk
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -85,8 +84,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 2 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
@@ -106,8 +104,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/man
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 set splitbelow splitright
@@ -123,9 +120,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 173 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
@@ -155,9 +151,8 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/wiki/st.md
 set splitbelow splitright
@@ -189,9 +184,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 12 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
@@ -221,9 +215,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/bin/upp.sh
 set splitbelow splitright
@@ -236,8 +229,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
@@ -257,8 +249,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/wiki/tmux/command.md
 set splitbelow splitright
@@ -271,8 +262,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 892 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
@@ -292,8 +282,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/tmux
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/bin/yank
 set splitbelow splitright
@@ -309,9 +298,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 2 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
@@ -341,9 +329,8 @@ normal! zt
 normal! 0
 lcd ~/wiki/terminal
 wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/Desktop/session.md
 set splitbelow splitright
@@ -359,9 +346,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 argglobal
 let s:l = 3 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
@@ -391,9 +377,8 @@ normal! zt
 normal! 0
 lcd ~/wiki/admin
 wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 1 + 8) / 16)
 tabnext
 edit ~/.vim/plugged/vim-cheat/autoload/cheat.vim
 set splitbelow splitright
@@ -417,7 +402,23 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-tabnext 12
+tabnext
+edit ~/.vim/vimrc
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+argglobal
+let s:l = 1 - ((0 * winheight(0) + 6) / 13)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+tabnext 13
 set stal=1
 badd +1 ~/Desktop/countries
 badd +963 ~/wiki/awk/sed.md
@@ -441,6 +442,7 @@ badd +1280 ~/wiki/tmux/format.md
 badd +613 ~/wiki/terminal/capabilities.md
 badd +149 ~/wiki/terminal/glossary.md
 badd +615 ~/wiki/admin/process.md
+badd +0 ~/.vim/vimrc
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

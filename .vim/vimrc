@@ -8947,6 +8947,7 @@ endfu
 "     " press M-b instead of C-b to get inside the parentheses
 "
 " What could be done to reduce the frequency of such errors?
+"
 " Idea: Every time you make such a mistake, undo, and re-insert `getline()` 3 times;
 " each time make sure to press C-b.
 "
