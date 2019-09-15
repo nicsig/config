@@ -37,7 +37,7 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
 
     " We need the buffer to be saved into a file, for `:lvim /pat/ %` to work.
     let tempfile = tempname()
-    sil exe 'sav ' . tempfile
+    sil exe 'sav '..tempfile
 
     let pat_cmd = '\m\C/MSG\s\+.\{-}XDCC\s\+SEND\s\+\d\+'
     " Format the buffer if it contains commands to downloads files via xdcc.{{{
@@ -93,7 +93,7 @@ fu! s:format_shell_buffer() abort
     " this match.
     "}}}
     call matchadd('Statement', pat, 0)
-    sil exe 'lvim /' . pat . '/j %'
+    sil exe 'lvim /'..pat..'/j %'
     " the location list window is automatically opened by one of our autocmds;
     " conceal the location
     call qf#set_matches('after_tmux_capture_pane:format_shell_buffer', 'Conceal', 'location')
@@ -102,7 +102,7 @@ endfu
 
 fu! s:format_xdcc_buffer(pat_cmd) abort
     " remove noise
-    exe 'sil keepj keepp v@'. a:pat_cmd . '@d_'
+    exe 'sil keepj keepp v@'..a:pat_cmd..'@d_'
     sil keepj keepp %s/^.\{-}\d\+)\s*//e
     sil update
 
@@ -111,7 +111,7 @@ fu! s:format_xdcc_buffer(pat_cmd) abort
     call matchadd('Underlined', pat_file)
 
     " conceal commands
-    call matchadd('Conceal', a:pat_cmd . '\s*|\s*')
+    call matchadd('Conceal', a:pat_cmd..'\s*|\s*')
     setl cole=3 cocu=nc
 
     " make filenames interactive{{{
@@ -154,8 +154,8 @@ fu! s:copy_cmd_to_get_file_via_xdcc() abort
     "
     "     cmd1 ; cmd2
     "}}}
-    let cmd = '/moviegods_send_me_file ' . msg
-    let @" = cmd
+    let cmd = '/moviegods_send_me_file '..msg
+    let @+ = cmd
     q!
 endfu
 
@@ -1280,7 +1280,7 @@ fu! myfuncs#search_todo(where) abort "{{{1
     try
         sil noa exe 'lvim /\CFIX'.'ME\|TO'.'DO/j '.(a:where is# 'buffer' ? '%' : './**/*')
         sil! call lg#motion#repeatable#make#set_last_used(']l')
-    catch /^Vim\%((\a\+)\)\?:E480/
+    catch /^Vim\%((\a\+)\)\?:E480:/
         echom 'no TO'.'DO or FIX'.'ME'
         return
     catch

@@ -145,7 +145,7 @@ nno  <silent>  >t  :<c-u>call <sid>move_tabpage('+1')<cr>
 fu! s:move_tabpage(where) abort
     try
         exe 'tabmove '.a:where
-    catch /^Vim\%((\a\+)\)\?:E474/
+    catch /^Vim\%((\a\+)\)\?:E474:/
     catch
         return lg#catch_error()
     endtry

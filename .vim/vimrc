@@ -891,6 +891,14 @@ set cpoptions+=y
 " When appending to a register, put a line break before the appended text.
 set cpoptions+=>
 
+" cursorlineopt {{{2
+
+" When the cursor is on a long soft-wrapped line, and we enable `'cul'`, we want
+" only the current *screen* line to be highlighted, not the whole *text* line.
+if !has('nvim')
+    setl culopt=screenline
+endif
+
 " diffopt {{{2
 
 " only 3 lines of context above/below a changed line (instead of 6)
@@ -6146,7 +6154,7 @@ fu! s:make_missing_dir(file, buf) abort
         if !isdirectory(dir)
             try
                 call mkdir(dir, 'p')
-            catch /^Vim\%((\a\+)\)\=:E739/
+            catch /^Vim\%((\a\+)\)\=:E739:/
                 " If the directory is in a root directory, `mkdir()` will fail.
                 " We need to run `$ sudo mkdir`.
                 let pass = inputsecret('[sudo] password for '..$USER..': ')
@@ -8953,16 +8961,6 @@ endfu
 " `-` very fast. We can't because – for  some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
 
-
-
-"     augroup test_sth
-"         au!
-"         au VimResized * call Func()
-"     augroup END
-"     fu! Func() abort
-"         let curpos = getcurpos()
-"         call setpos('.', curpos)
-"     endfu
 
 
 
