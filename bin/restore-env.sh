@@ -172,11 +172,11 @@ aptitude install \
 
 # Installation of some git repos {{{1
 
-mkdir "${HOME}/GitRepos"
+mkdir "${HOME}/Vcs"
 
 printf -- '\nInstalling ranger\n'
 
-git clone git://git.savannah.nongnu.org/ranger.git "${HOME}/GitRepos/ranger"
+git clone git://git.savannah.nongnu.org/ranger.git "${HOME}/Vcs/ranger"
 cd ranger || exit
 git checkout stable
 git pull
@@ -184,8 +184,8 @@ ranger --copy-config=all
 
 printf -- '\nInstalling fasd\n'
 
-git clone https://github.com/clvv/fasd "${HOME}/GitRepos/fasd"
-cd "${HOME}/GitRepos/fasd" && checkinstall
+git clone https://github.com/clvv/fasd "${HOME}/Vcs/fasd"
+cd "${HOME}/Vcs/fasd" && checkinstall
 
 printf -- '\nInstalling pathogen: https://github.com/tpope/vim-pathogen#installation\n'
 
@@ -204,7 +204,7 @@ printf -- '\nCreate the directory ~/.zsh/completion\n' &&
   mkdir "${HOME}/.zsh/completion"
 
 printf -- '\nInstalling zsh-syntax-highlighting\n'
-git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${HOME}/GitRepos/zsh-syntax-highlighting"
+git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${HOME}/Vcs/zsh-syntax-highlighting"
 
 # Removal of some deb packages {{{1
 

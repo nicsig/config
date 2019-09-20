@@ -415,7 +415,7 @@ export PAGER=less
 #
 # In the past, we assigned it this value:
 #
-#     export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/GitRepos:${HOME}/wiki:/run/user/${UID}
+#     export CDPATH=:${HOME}:${HOME}/Downloads:${HOME}/Vcs:${HOME}/wiki:/run/user/${UID}
 #
 # But I don't like the fact that it makes `cd` somewhat unpredictable.
 # Besides, the `j` alias (provided by the fasd plugin) serves a similar purpose,
@@ -439,7 +439,7 @@ export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 # `~/share/man`; IOW, this allows us to install manpages locally (!= system-wide
 # in `/usr/share/man`).
 #}}}
-export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/man:${MANPATH}:
+export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/Vcs/dasht/man:${MANPATH}:
 # add the `texlive` and `dasht` binaries to our path
 # Aren't `~/bin` and `~/.local/bin` already in `$PATH` by default?{{{
 #
@@ -493,7 +493,7 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/GitRepos/dasht/ma
 #
 #     /etc/skel/.profile
 #}}}
-export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/GitRepos/dasht/bin
+export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/Vcs/dasht/bin
 
 # What is the purpose of this block? {{{
 #

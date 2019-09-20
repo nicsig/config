@@ -179,78 +179,6 @@ fu! myfuncs#align_with_end_save_dir(dir) abort
     let s:align_with_end_dir = a:dir
 endfu
 
-fu! myfuncs#op_trim_ws(type) abort "{{{2
-    if &l:binary || &ft is# 'diff'
-        return
-    endif
-
-    if a:type is# 'vis'
-        sil! exe line("'<").','.line("'>").'TW'
-    else
-        sil! exe line("'[").','.line("']").'TW'
-    endif
-endfu
-
-" op_yank_matches {{{2
-
-" `s:yank_where_match` is a boolean flag:
-"
-"     1 → yank the lines where a match is found
-"     0 → yank the other lines
-"
-" `s:yank_comments` is another boolean flag:
-"
-"     1 → the pattern describes commented lines
-"     0 → the pattern is simply @/
-
-fu! myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
-    let s:yank_matches_view = winsaveview()
-    let s:yank_where_match = a:yank_where_match
-    let s:yank_comments    = a:yank_comments
-endfu
-
-fu! myfuncs#op_yank_matches(type) abort
-    let reg_save = ['z', getreg('z'), getregtype('z')]
-    try
-        let @z = ''
-
-        let mods  = 'keepj keepp'
-        let range = (a:type is# 'char' || a:type is# 'line')
-                \ ?     line("'[").','.line("']")
-                \ :     line("'<").','.line("'>")
-
-        let cmd = s:yank_where_match ? 'g' : 'v'
-        let pat = s:yank_comments
-              \ ?     '^\s*\C\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
-              \ :     @/
-
-        exe mods.' '.range.cmd.'/'.pat.'/y Z'
-
-        " Remove empty lines.
-        " We can't use the pattern `\_^\s*\n` to describe an empty line, because
-        " we aren't in a buffer:    `@z` is just a big string
-        if !s:yank_where_match
-            let @z = substitute(@z, '\v\n%(\s*\n)+', '\n', 'g')
-        endif
-
-        " the first time we've appended a match to `@z`, it created a newline
-        " we don't want this one; remove it
-        let @z = substitute(@z, "^\n", '', '')
-
-        call setreg('"', @z, 'l')
-        if exists('s:yank_matches_view')
-            call winrestview(s:yank_matches_view)
-            unlet! s:yank_matches_view
-        endif
-
-    catch
-        return lg#catch_error()
-
-    finally
-        call call('setreg', reg_save)
-    endtry
-endfu
-
 fu! myfuncs#block_select_box() abort "{{{1
 " this function selects an ascii box that we drew with our `draw-it` plugin
     let view = winsaveview()
@@ -841,16 +769,16 @@ fu! myfuncs#long_data_split(type, ...) abort "{{{1
     let is_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
     let has_comma = stridx(line, ',') > -1
     if is_list_or_dict
-        let data_indent = repeat(' ', match(line, '\m[[{].*[\]}]$'))
+        let first_line_indent = repeat(' ', match(line, '\S'))
         " If the  first item in the  list/dictionary begins right after  the opening
         " symbol (`[` or `{`), add a space:
         sil keepj keepp s/\m[\[{]\s\@!\zs/ /e
         " Move the first item in the list on a dedicated line.
-        sil keepj keepp s/\m[\[{]\zs/\="\n".data_indent."\\"/e
+        sil keepj keepp s/\m[\[{]\zs/\="\n"..first_line_indent.."    \\"/e
         " split the data
-        sil keepj keepp s/,\zs/\="\n".data_indent.'\'/ge
+        sil keepj keepp s/,\zs/\="\n"..first_line_indent..'    \'/ge
         " move the closing symbol on a dedicated line
-        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n".data_indent."\\ "/e
+        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n"..first_line_indent.."    \\ "/e
 
     elseif has_comma
         " We use `strdisplaywidth()` because the indentation could contain tabs.
@@ -858,8 +786,8 @@ fu! myfuncs#long_data_split(type, ...) abort "{{{1
         let indent_txt = repeat(' ', indent_lvl)
         sil keepj keepp s/\m\ze\S/- /e
         let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
-        let l:Rep = {-> "\n".indent_txt.'- '}
-        sil exe 'keepj keepp s/'.pat.'/\=l:Rep()/ge'
+        let l:Rep = {-> "\n"..indent_txt..'- '}
+        sil exe 'keepj keepp s/'..pat..'/\=l:Rep()/ge'
     endif
 endfu
 
@@ -1106,6 +1034,78 @@ fu! myfuncs#op_toggle_alignment(type) abort
         exe mark1.','.mark2.'right'
     endif
 endfu
+fu! myfuncs#op_trim_ws(type) abort "{{{2
+    if &l:binary || &ft is# 'diff'
+        return
+    endif
+
+    if a:type is# 'vis'
+        sil! exe line("'<").','.line("'>").'TW'
+    else
+        sil! exe line("'[").','.line("']").'TW'
+    endif
+endfu
+
+" op_yank_matches {{{2
+
+" `s:yank_where_match` is a boolean flag:
+"
+"     1 → yank the lines where a match is found
+"     0 → yank the other lines
+"
+" `s:yank_comments` is another boolean flag:
+"
+"     1 → the pattern describes commented lines
+"     0 → the pattern is simply @/
+
+fu! myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
+    let s:yank_matches_view = winsaveview()
+    let s:yank_where_match = a:yank_where_match
+    let s:yank_comments    = a:yank_comments
+endfu
+
+fu! myfuncs#op_yank_matches(type) abort
+    let reg_save = ['z', getreg('z'), getregtype('z')]
+    try
+        let @z = ''
+
+        let mods  = 'keepj keepp'
+        let range = (a:type is# 'char' || a:type is# 'line')
+                \ ?     line("'[").','.line("']")
+                \ :     line("'<").','.line("'>")
+
+        let cmd = s:yank_where_match ? 'g' : 'v'
+        let pat = s:yank_comments
+              \ ?     '^\s*\C\V'.escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
+              \ :     @/
+
+        exe mods.' '.range.cmd.'/'.pat.'/y Z'
+
+        " Remove empty lines.
+        " We can't use the pattern `\_^\s*\n` to describe an empty line, because
+        " we aren't in a buffer:    `@z` is just a big string
+        if !s:yank_where_match
+            let @z = substitute(@z, '\v\n%(\s*\n)+', '\n', 'g')
+        endif
+
+        " the first time we've appended a match to `@z`, it created a newline
+        " we don't want this one; remove it
+        let @z = substitute(@z, "^\n", '', '')
+
+        call setreg('"', @z, 'l')
+        if exists('s:yank_matches_view')
+            call winrestview(s:yank_matches_view)
+            unlet! s:yank_matches_view
+        endif
+
+    catch
+        return lg#catch_error()
+
+    finally
+        call call('setreg', reg_save)
+    endtry
+endfu
+
 " }}}1
 fu! myfuncs#plugin_install(url) abort "{{{1
     let pattern =  '\vhttps?://github.com/(.{-})/(.*)/?'
@@ -1453,7 +1453,7 @@ endfu
 
 " Update:
 " Have a look at this plugin:
-"     https://github.com/echuraev/translate-shell.vim
+" https://github.com/echuraev/translate-shell.vim
 
 " TODO:
 " add `| C-t` mapping, to replay last text
@@ -1613,13 +1613,13 @@ fu! myfuncs#unicode_toggle(line1, line2) abort
 endfu
 
 fu! s:vim_parent() abort "{{{1
-    " ┌────────────────────────────┬─────────────────────────────────────┐
-    " │ :echo getpid()             │ print the PID of Vim                │
-    " ├────────────────────────────┼─────────────────────────────────────┤
-    " │ $ ps -p <Vim PID> -o ppid= │ print the PID of the parent of Vim  │
-    " ├────────────────────────────┼─────────────────────────────────────┤
-    " │ $ ps -p $(..^..) -o comm=  │ print the name of the parent of Vim │
-    " └────────────────────────────┴─────────────────────────────────────┘
+    "    ┌────────────────────────────┬─────────────────────────────────────┐
+    "    │ :echo getpid()             │ print the PID of Vim                │
+    "    ├────────────────────────────┼─────────────────────────────────────┤
+    "    │ $ ps -p <Vim PID> -o ppid= │ print the PID of the parent of Vim  │
+    "    ├────────────────────────────┼─────────────────────────────────────┤
+    "    │ $ ps -p $(..^..) -o comm=  │ print the name of the parent of Vim │
+    "    └────────────────────────────┴─────────────────────────────────────┘
     return expand('`ps -p $(ps -p '.getpid().' -o ppid=) -o comm=`')
 endfu
 

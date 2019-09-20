@@ -306,8 +306,8 @@ EOF
 }
 
 update_ranger() { #{{{1
-  update_git_programs 'https://github.com/ranger/ranger' "${HOME}/GitRepos/"
-  cd "${HOME}/GitRepos/ranger" || return
+  update_git_programs 'https://github.com/ranger/ranger' "${HOME}/Vcs/"
+  cd "${HOME}/Vcs/ranger" || return
   # Why installing ranger as a pip package?{{{
   #
   # You  could just  use  the  script `ranger.py`,  but  you  wouldn't have  the

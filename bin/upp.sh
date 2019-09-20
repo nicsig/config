@@ -43,7 +43,7 @@ PGM="$1"
 #}}}
 COMMIT_HASH="$2"
 SUPPORTED_PGMS=(ansifilter gawk jumpapp mpv nvim tmux trans surfraw vim weechat zsh)
-GIT_REPOS="${HOME}/GitRepos/"
+GIT_REPOS="${HOME}/Vcs/"
 
 typeset -A URLS=( \
   [ansifilter]=https://gitlab.com/saalen/ansifilter.git \
@@ -596,7 +596,7 @@ install() { #{{{2
     # in a different version).
     # If that happens, the installation will fail:
     #
-    #     dpkg: error processing archive /home/user/GitRepos/zsh/zsh_9999.9999-1_amd64.deb (--install):~
+    #     dpkg: error processing archive /home/user/Vcs/zsh/zsh_9999.9999-1_amd64.deb (--install):~
     #      trying to overwrite '/usr/share/man/man1/zshmodules.1.gz', which is also in package myzsh 999-1~
     #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)~
     #}}}

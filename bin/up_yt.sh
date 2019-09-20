@@ -7,19 +7,19 @@ main() { #{{{1
   curl -Ls 'https://yt-dl.org/downloads/latest/youtube-dl' -o "${HOME}/bin/youtube-dl"
   chmod a+rx "${HOME}/bin/youtube-dl"
 
-  if [[ ! -d "${HOME}/GitRepos/youtube-dl/" ]]; then
-    mkdir -p "${HOME}/GitRepos/"
-    git -C "${HOME}/GitRepos/" clone 'https://github.com/rg3/youtube-dl'
+  if [[ ! -d "${HOME}/Vcs/youtube-dl/" ]]; then
+    mkdir -p "${HOME}/Vcs/"
+    git -C "${HOME}/Vcs/" clone 'https://github.com/rg3/youtube-dl'
   fi
 
-  cd "${HOME}/GitRepos/youtube-dl" || exit
+  cd "${HOME}/Vcs/youtube-dl" || exit
   git stash
   git checkout master
   git pull
 
   printf -- '\n%s\n\n' 'installing zsh completion function'
   make youtube-dl.zsh && \
-    mv "${HOME}/GitRepos/youtube-dl/youtube-dl.zsh" "${HOME}/.zsh/my-completions/_youtube-dl.zsh"
+    mv "${HOME}/Vcs/youtube-dl/youtube-dl.zsh" "${HOME}/.zsh/my-completions/_youtube-dl.zsh"
 
   # Source:{{{
   #

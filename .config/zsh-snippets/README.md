@@ -12,8 +12,8 @@ snippets:
 We can't use `#`.
 It appears in one of our snippets atm:
 
-    cd ~/GitRepos/vim/ && { git stash; make clean; make distclean; sed -i 's/#ABORT_CFLAGS ...
-                                                                             ^
+    cd ~/Vcs/vim/ && { git stash; make clean; make distclean; sed -i 's/#ABORT_CFLAGS ...
+                                                                        ^
 
 We need some character which will never appear in our snippets.
 If you have a better idea for the comment marker, feel free to change it.
@@ -153,7 +153,7 @@ The code is for a *zsh* function, since we're in zsh.
 So, zsh is the most appropriate shell to run it.
 
 ##
-# About `cd ~/GitRepos/vim && { ... make ... ;}`
+# About `cd ~/Vcs/vim && { ... make ... ;}`
 ## Why `sed -i 's/#ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/'`?
 
 To make Vim crash and dump a core as soon as it detects an internal error (`:h E315`).

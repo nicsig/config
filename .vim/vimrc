@@ -428,6 +428,7 @@ fu! s:styled_comments() abort
     let s:styled_comments_filetypes = [
         \ 'awk',
         \ 'c',
+        \ 'cheat',
         \ 'conf',
         \ 'css',
         \ 'desktop',
@@ -896,7 +897,7 @@ set cpoptions+=>
 " When the cursor is on a long soft-wrapped line, and we enable `'cul'`, we want
 " only the current *screen* line to be highlighted, not the whole *text* line.
 if !has('nvim')
-    setl culopt=screenline
+    set culopt=screenline
 endif
 
 " diffopt {{{2
@@ -5944,23 +5945,6 @@ fu! s:tldr(shellcmd) abort
     update
     norm! gg
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
-    let s:fold_autoclose = &foldclose isnot# ''
-    if &foldclose is# ''
-        sil norm coz
-    endif
-endfu
-
-augroup autoclose_fold_tldr
-    au!
-    au BufHidden /tmp/.tldr.md call s:tldr_autoclose_restore()
-augroup END
-
-fu! s:tldr_autoclose_restore() abort
-    if get(s:, 'fold_autoclose', 0) && &foldclose is# ''
-    \ || !get(s:, 'fold_autoclose', 1) && &foldclose isnot# ''
-        norm coz
-    endif
-    unlet! s:fold_autoclose
 endfu
 
 " TW {{{2
@@ -6291,7 +6275,6 @@ augroup folding_toggle_in_insert_mode
     au!
     " Purpose:{{{
     "
-    " I've written it to make Vim faster when
     " Editing text in insert mode in a markdown buffer is sometimes very slow.
     "
     " MWE:
@@ -6339,14 +6322,12 @@ augroup folding_toggle_in_insert_mode
 augroup END
 
 fu! s:toggle_folding(action) abort
-    if a:action is# 'disable'
+    if a:action is# 'disable' && !exists('w:fdm_save')
         let w:fdm_save = &l:fdm
         setl fdm=manual
-    else
-        if exists('w:fdm_save')
-            let &l:fdm = w:fdm_save
-            unlet! w:fdm_save
-        endif
+    elseif a:action is# 'restore' && exists('w:fdm_save')
+        let &l:fdm = w:fdm_save
+        unlet! w:fdm_save
     endif
 endfu
 
@@ -7791,6 +7772,9 @@ endfu
 "    - `CompleteChanged` event
 "    - `complete_info()`; https://github.com/vim/vim/releases/tag/v8.1.1068
 "    - `TextChangedP` event
+"    - `SafeState` event
+"    - `SafeStateAgain` event
+"    - `state()`
 "
 "    - `'varsofttabstop'`, `'vartabstop'`
 "
@@ -8961,6 +8945,34 @@ endfu
 " In a fugitive buffer, when we need to  stage many files, I would like to press
 " `-` very fast. We can't because – for  some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
+"
+" 132 -
+" `:Logevents *` doesn't work when `vim-logevents` is used in a minimal vimrc.
+" This is because `$XDG_RUNTIME_VIM` is not set.
+" We have other plugins which rely on this variable.
+" They should all work in a minimal vimrc.
+"
+" Solution1:
+" Get rid of the variable.
+" Use `/tmp` or `/run/user/1000/vim` explicitly.
+" If you  use the latter value,  you'll need to make sure  the directory exists,
+" and create it if necessary.
+"
+" Solution2:
+" Use `getenv()` to check whether it's defined.
+" If it's not, fall back on some default value using `setenv()`.
+
+
+
+" nno <silent> j :<c-u>call FFunc()<cr>
+" fu! FFunc() abort
+"     " set foldclose=all " close a fold if we leave it with any command
+"     " set foldopen=all  " open  a fold if we enter it with any command
+"     " set foldenable
+"     " set foldlevel=0   " close all folds by default
+"     norm! gj
+"     let g:d_ebug = get(g:, 'd_ebug', []) + [deepcopy(winline())]
+" endfu
 
 
 

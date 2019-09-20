@@ -1,22 +1,3 @@
-# TODO: Remove this alias once you've debugged tmux issue 1854.{{{
-#
-# https://github.com/tmux/tmux/issues/1854
-#
-# In the meantime, if you need to update tmux, follow this procedure:
-#
-#     $ chown2me
-#     $ make clean; make distclean; git checkout master; git stash; git pull
-#     $ PKG_CONFIG_PATH=$HOME/libeventbuild/lib/pkgconfig ./configure --prefix=$HOME/tmuxbuild
-#     $ make
-#
-# Do *not* install the binary. The alias will use it automatically.
-#
-# https://github.com/tmux/tmux/issues/1840#issuecomment-513273184
-#}}}
-if [[ -z "$TMUX" ]]; then
-  alias tmux='LD_LIBRARY_PATH=~/libeventbuild/lib ~/GitRepos/tmux/tmux -v'
-fi
-
 # Use emacs keybindings even if our EDITOR is set to vi.
 # Warning:{{{
 #
@@ -300,7 +281,7 @@ fpath=( ${HOME}/.zsh/my-completions ${HOME}/.zsh/zsh-completions/src $fpath )
 
 # Add completion for the `dasht` command:
 # https://github.com/sunaku/dasht
-fpath+=${HOME}/GitRepos/dasht/etc/zsh/completions
+fpath+=${HOME}/Vcs/dasht/etc/zsh/completions
 
 # Why loading this module?{{{
 #
@@ -971,8 +952,8 @@ chown2me() { #{{{2
   # It's too easy to run the command by accident in the wrong directory.
   # We need some logic to make sure we're in the right kind of directory.
   # }}}
-  if [[ ! "${PWD}" =~ "^${HOME}/GitRepos" ]]; then
-    printf -- "you need to be somewhere below ${HOME}/GitRepos\n"
+  if [[ ! "${PWD}" =~ "^${HOME}/Vcs" ]]; then
+    printf -- "you need to be somewhere below ${HOME}/Vcs\n"
     return 64
   fi
   sudo chown -R $USER:$USER .
@@ -996,11 +977,11 @@ example:  $0  tmux
 EOF
     return 64
   fi
-  if [[ ! -f $HOME/wiki/cheat/$1.txt ]]; then
+  if [[ ! -f $HOME/wiki/cheat/$1 ]]; then
     printf -- 'no cheatsheet for %s\n' "$1"
     return
   fi
-  vim +"Cheat $1"
+  vim +"Cs $1"
 }
 
 # cfg_* {{{2
@@ -2939,7 +2920,7 @@ alias jobs='\jobs -l'
 #     $ sudo aptitude install source-highlight
 #     $ cp /usr/share/source-highlight/src-hilite-lesspipe.sh ~/bin/src-hilite-lesspipe.sh
 #     $ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
-#     $ lessh ~/GitRepos/ranger/ranger.py
+#     $ lessh ~/Vcs/ranger/ranger.py
 #
 # Source: https://unix.stackexchange.com/a/139787/289772
 #}}}
