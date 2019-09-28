@@ -472,7 +472,7 @@ endif
 " Environment "{{{2
 
 " See `~/wiki/shell/environment.md` for an explanation as to why we do that.
-let $MANSECT = $MYMANSECT
+call setenv('MANSECT', $MYMANSECT)
 
 " TODO: We should probably remove this assignment.{{{
 "
@@ -524,24 +524,25 @@ let $MANSECT = $MYMANSECT
 " But it doesn't work when `foobar` is above `| foobar |`, nor across files...
 "}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
-let $MY_WIKI = $HOME..'/wiki'
+call setenv('MY_WIKI', $HOME..'/wiki')
 
 if !isdirectory($XDG_RUNTIME_DIR..'/vim')
     call mkdir($XDG_RUNTIME_DIR..'/vim', 'p', '0700')
 endif
-let $XDG_RUNTIME_VIM = $XDG_RUNTIME_DIR..'/vim'
-" For more info about `$XDG_RUNTIME_DIR`:
+call setenv('XDG_RUNTIME_VIM', $XDG_RUNTIME_DIR..'/vim')
+" For more info about `$XDG_RUNTIME_DIR` and `/run`:
 "
 " https://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
+" https://unix.stackexchange.com/a/316166/289772
 
 " backspace {{{2
 
 " Allow BS, Del, C-w, C-u to delete:
 "
-"             ┌─ whitespace (autoindent)
-"             │      ┌─ end of line (join line)
-"             │      │   ┌─ text which was before the cursor when we went
-"             │      │   │  into insert mode
+"             ┌ whitespace (autoindent)
+"             │      ┌ end of line (join line)
+"             │      │   ┌ text which was before the cursor when we went
+"             │      │   │ into insert mode
 "             │      │   │
 set backspace=indent,eol,start
 
@@ -631,10 +632,10 @@ set backspace=indent,eol,start
 "
 " Nothing happens. The issue:
 "
-"         - does NOT come the fact that vim-surround forgets to temporarily resets 'cb';
-"           vim-surround does NOT forget it
+"    - does NOT come the fact that vim-surround forgets to temporarily resets 'cb';
+"      vim-surround does NOT forget it
 "
-"         - is fixed if you don't tweak 'cb' (set cb&vim)
+"    - is fixed if you don't tweak 'cb' (set cb&vim)
 "}}}
 " color scheme {{{2
 
@@ -1281,10 +1282,10 @@ set expandtab
 "
 " It controls the number of spaces added/removed when you hit:
 "
-"          - {count}>>
-"          - {count}<<
-"          - >{motion}
-"          - <{motion}
+"    - {count}>>
+"    - {count}<<
+"    - >{motion}
+"    - <{motion}
 "}}}
 set shiftwidth=4
 
@@ -1403,7 +1404,7 @@ set kp=:Man
 "
 " - Because of the previous description.
 "
-" - Setting this option prevents the screen to “flash” when we use a custom
+" - Setting this option prevents the screen to flicker when we use a custom
 "   mapping which makes the cursor move far from its initial position, then
 "   come back. Example:  zv  *
 "
@@ -1700,13 +1701,13 @@ endif
 set nostartofline
 
 " switchbuf {{{2
-"         How to configure 'swb'?{{{
+"         How to configure 'swb'?{{{
 
 " You give it a list of values. Example:
 "
 "     set switchbuf=useopen,usetab
 "}}}
-"         What does it do?{{{
+"         What does it do?{{{
 
 " If you  try to open a  split to display  a loaded buffer with  `:sbuffer`, Vim
 " will first check  whether the buffer is  already displayed in a  window of the
@@ -1714,12 +1715,12 @@ set nostartofline
 " And if  it finds one,  instead of  creating a split,  it will simply  give the
 " focus to this window.
 "}}}
-"         Which commands honor 'swb'?{{{
+"         Which commands honor 'swb'?{{{
 
 " |quickfix| commands, when jumping to errors (`:cc`, `:cn`, `cp`, etc.).
 " All buffer related split commands: `:sbuffer`, `:sbnext`, `:sbrewind`...
 "}}}
-"         Are there pitfalls?{{{
+"         Are there pitfalls?{{{
 
 " When we move in the qfl quickly, the focus can change from a window to another
 " and it's distracting.
@@ -1741,46 +1742,46 @@ set nostartofline
 "     :vim /./ % | copen
 "     C-w CR
 "}}}
-"         Are there workarounds?{{{
+"         Are there workarounds?{{{
 
 " You could temporarily reset 'swb' while:
 "
-"         - the qf window is opened; in a qf filetype plugin:
+"    - the qf window is opened; in a qf filetype plugin:
 "
-"                   if !exists('s:swb_save')
-"                       let s:swb_save = &swb
-"                       set swb=
-"                   endif
+"         if !exists('s:swb_save')
+"             let s:swb_save = &swb
+"             set swb=
+"         endif
 "
-"                   au BufWinLeave <buffer> let &swb = get(s:, 'swb_save', &swb) | unlet! s:swb_save
+"         au BufWinLeave <buffer> let &swb = get(s:, 'swb_save', &swb) | unlet! s:swb_save
 "
-"         - when you execute some commands / mappings
+"    - when you execute some commands / mappings
 "
-"           you would need to create wrapper around default normal commands
-"           with a try conditional, and a finally clause, to empty 'swb'
-"           and/or,
-"           you would need to install an autocmd listening to CmdlineLeave,
-"           to set 'swb' only when you use some Ex commands
+"      you would need to create wrapper around default normal commands
+"      with a try conditional, and a finally clause, to empty 'swb'
+"      and/or,
+"      you would need to install an autocmd listening to CmdlineLeave,
+"      to set 'swb' only when you use some Ex commands
 "
 " You could install unimpaired-like mappings to toggle the value of 'swb'.
 "}}}
-"         Why don't we set it?{{{
+"         Why don't we set it?{{{
 "
-"     - Too many issues.
-"     - I don't need it atm.
-"     - To give the focus to an already displayed buffer, there are alternatives:
+"    - Too many issues.
+"    - I don't need it atm.
+"    - To give the focus to an already displayed buffer, there are alternatives:
 "
-"           :FzWindows  (<space>fw)
-"           :drop       (:drop ~/**/*some_file)
+"         :FzWindows  (<space>fw)
+"         :drop       (:drop ~/**/*some_file)
 "}}}
 " synmaxcol {{{2
 
 " don't syntax-highlight long lines
 set synmaxcol=250
 "             │
-"             └─ weight in bytes
-"                any character prefixed by a string heavier than that
-"                will NOT be syntax highlighted
+"             └ weight in bytes
+"               any character prefixed by a string heavier than that
+"               will NOT be syntax highlighted
 " }}}2
 
 " t_ {{{2
@@ -2127,15 +2128,15 @@ set tagcase=smart
 
 " What's the default value? {{{
 "
-"         ./tags,./TAGS,tags,TAGS
+"     ./tags,./TAGS,tags,TAGS
 "
 " Explanation:
 "
-"        ┌────────┬──────────────────────────────────────────────────────────────────┐
-"        │ ./tags │ file in the directory of the CURRENT FILE and whose name is tags │
-"        ├────────┼──────────────────────────────────────────────────────────────────┤
-"        │ tags   │ file in the WORKING DIRECTORY             and whose name is tags │
-"        └────────┴──────────────────────────────────────────────────────────────────┘
+"    ┌────────┬──────────────────────────────────────────────────────────────────┐
+"    │ ./tags │ file in the directory of the CURRENT FILE and whose name is tags │
+"    ├────────┼──────────────────────────────────────────────────────────────────┤
+"    │ tags   │ file in the WORKING DIRECTORY             and whose name is tags │
+"    └────────┴──────────────────────────────────────────────────────────────────┘
 "}}}
 " What's the effect of this new value?{{{
 "
@@ -2526,7 +2527,7 @@ endif
 
 " updatetime {{{2
 
-"              ┌─ our current chosen value
+"              ┌ our current chosen value
 "              │  if you change it, do the same in:
 "              │
 "              │          ~/.vim/plugged/vim-readline/autoload/readline.vim
@@ -2561,9 +2562,9 @@ set virtualedit=block
 "
 " We never want to see them:
 "
-"         - in a dirvish listing
-"         - on the command-line after a tab completion
-"         - in the output of `expand()`, `glob()`, `globpath()`
+"    - in a dirvish listing
+"    - on the command-line after a tab completion
+"    - in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 
 set wildignore&vim
@@ -2722,9 +2723,15 @@ set winaltkeys=no
 " don't wrap long lines by default
 set nowrap
 
-" a soft-wrapped line will be displayed with the same level of indentation as
-" the first one
+" a soft-wrapped line should be displayed with the same level of indentation as the first one
 set breakindent
+set breakindentopt=min:40,sbr
+"                  │      │
+"                  │      └ display the 'showbreak' character *before* the indentation
+"                  │        this helps keeping all the start of lines aligned
+"                  │
+"                  └ make sure a soft-wrapped line contains at least 40 characters
+"                    shift it to the right if necessary
 
 " soft-wrap long lines at a character in 'breakat' (punctuation, math
 " operators, tab, @) rather than at the last character that fits on the screen
@@ -2760,8 +2767,8 @@ call s:remember_new_mappings([
 
 " A key can be used as a prefix iff one of these conditions is true:
 "
-"           - it's useless for you (ex: U)
-"           - it's used as a prefix by default (ex: Z)
+"    - it's useless for you (ex: U)
+"    - it's used as a prefix by default (ex: Z)
 "
 " This means that you can NOT use `!` as a good prefix.
 " Not useless, and not a prefix by default, so it would lead to too many issues.
@@ -2859,23 +2866,23 @@ endfu
 "
 " Sometimes, we want to do this:{{{
 "
-"        ┌ exceeding amount of whitespace
-" ┌──────┤
+" ┌ exceeding amount of whitespace
+" ├──────┐
 "         some text
 "     ↓
 " some text
 "│
-"└─ compacted whitespace
+"└ compacted whitespace
 "}}}
 " Also, sometimes we want to do this:{{{
 "
-"       ┌ exceeding amount of whitespace
-" ┌─────┤
+" ┌ exceeding amount of whitespace
+" ├─────┐
 "        " some text
 "     ↓
 " " some text
 " │
-" └─ compacted whitespace
+" └ compacted whitespace
 "}}}
 
 " This  mapping  tries  to  perform  both edits,  depending  on  the  amount  of
@@ -2904,14 +2911,17 @@ endfu
 " }}}3
 " C-m             more granular undo {{{3
 
-" When we write a paragraph then hit `u` to undo, Vim removes the whole
+" Make `C-m` break the undo sequence.{{{
+"
+" When  we write  a paragraph  then press  `u` to  undo, Vim  removes the  whole
 " paragraph. I want it to remove only the last line. Then the one before, etc.
-" To get a more granular undo, we need to hit `c-g u` every time we hit Enter.
-" This will break the undo block into smaller blocks.
-" Every time we hit `c-g u`, the current state of the buffer is accessible
+" To get a more granular undo, we need to press `c-g u` every time we press `C-m`.
+" This will break the undo sequence into smaller undo sequences.
+" Every time  we press `c-g  u`, the current state  of the buffer  is accessible
 " with `u`/`c-r`.
 "
-" :h i_ctrl-g_u
+" See: `:h i_ctrl-g_u`
+"}}}
 
 fu! s:c_m() abort
     " If the  completion menu is  active, we want  `Enter` to validate  the item
@@ -2920,37 +2930,36 @@ fu! s:c_m() abort
         return "\<c-y>\<c-r>=completion#snippet_or_complete(1)\<cr>"
     endif
 
-    " If we hit Enter on a commented line with nothing in it, we want to
+    " If we  press Enter  on a  commented line with  nothing in  it, we  want to
     " delete everything.
     let cml = get(split(&l:cms, '%s'), 0, '')
 
-    if empty(cml)
-        return "\<c-g>u\<cr>"
-    endif
+    if empty(cml) | return "\<c-g>u\<cr>" | endif
 
     if getline('.') =~ '^\s*\V'..escape(cml, '\')..'\m\s*$'
         " We can't invoke `setline()` immediately, because of `<expr>`.
         call timer_start(0, {-> setline('.', '')})
-        return ''
-
-        " OLD:
+        " Why don't you simply press `BS`?{{{
+        "
+        "     return "0\<c-d>"..repeat("\<BS>", strchars(cml) + 1)
+        "
         " Not reliable, because sometimes BS deletes more than one char.
         " Happens after a sequence of whitespace.
-        "
-        "         return "0\<c-d>".repeat("\<BS>", strchars(cml) + 1)
+        "}}}
+        return ''
     endif
 
     return "\<c-g>u\<cr>"
 endfu
 
-ino  <expr>  <c-m>  <sid>c_m()
+ino <silent> <expr> <c-m> <sid>c_m()
 
 " C-q             exit completion menu {{{3
 
 " Because  of a  mapping in  `vim-readline`, we've  lost the  ability to  exit a
 " completion menu. Restore it on `c-q`.
 
-ino  <c-q>  <c-e>
+ino <c-q> <c-e>
 
 " C-s             save {{{3
 
@@ -3250,11 +3259,10 @@ nno  \f  f
 " \p            select paragraph in a block {{{4
 
 " Select a box around the current paragraph.
-" Useful to write some text FIRST, then hit `\p` and `mb` (draw-it plugin)
-" to draw a box around it.
+" Useful to write some text FIRST, then  press `\p` and `mb` (draw-it plugin) to
+" draw a box around it.
 
 nno  <expr><silent>  \p  myfuncs#block_select_paragraph()
-
 " }}}3
 " g                   (prefix) {{{3
 " g^ g$       first/last tabpage {{{4
@@ -3335,9 +3343,7 @@ fu! s:try_to_edit_plugin_config(cmd) abort
         try
             exe 'norm! '..a:cmd..'zv'
         catch
-            echohl ErrorMsg
-            echom v:exception
-            echohl NONE
+            return lg#catch_error()
         endtry
     else
         let split = a:cmd[0] is# 'g' ? 'edit' : a:cmd[1] is# 'g' ? 'tabedit' : 'split'
@@ -3411,8 +3417,8 @@ fu! s:add_to_loclist(populate) abort
     else
         let s:my_marks = []
     endif
-    "                               ┌─ without this, Vim would create a new
-    "                               │  loclist every time we invoke the function
+    "                               ┌ without this, Vim would create a new
+    "                               │ loclist every time we invoke the function
     "                               │
     call setloclist(0, s:my_marks, 'r')
     call setloclist(0, [], 'a', {'title': 'My marks'})
@@ -3527,7 +3533,7 @@ fu! s:z_equal_save_count(cnt) abort
 endfu
 
 fu! s:z_equal(_) abort
-    let spell_save = &l:spell
+    let [spell_save, winid, bufnr] = [&l:spell, win_getid(), bufnr('%')]
     try
         setl spell
         if s:z_equal_count
@@ -3549,7 +3555,8 @@ fu! s:z_equal(_) abort
     catch
         return lg#catch_error()
     finally
-        call timer_start(0, {-> execute('let &l:spell = '..spell_save)})
+        call timer_start(0, {-> winbufnr(winid) == bufnr
+            \ && call('settabwinvar', win_id2tabwin(winid) + ['&spell', spell_save])})
     endtry
 endfu
 
@@ -3700,25 +3707,25 @@ xno  <silent>  <bar>g  :<c-u>call myfuncs#op_grep('vis')<cr>
 
 " |t         translate {{{4
 
-"                                               ┌─ 1st invocation
+"                                               ┌ 1st invocation
 "                                               │
 nno  <silent>  <bar>t  :<c-u>call myfuncs#trans(1)<cr>
 nno  <silent>  <bar>T  :<c-u>call myfuncs#trans_stop()<cr>
 xno  <silent>  <bar>t  :<c-u>call myfuncs#trans(1, 1)<cr>
 "              │                                   │
-"              │                                   └─ visual mode
+"              │                                   └ visual mode
 "              │
-"              └─ do NOT use `!t`, it would prevent you from writing a visual selection
-"                 on the standard input of a shell command whose name begins with a `t`
+"              └ do NOT use `!t`, it would prevent you from writing a visual selection
+"                on the standard input of a shell command whose name begins with a `t`
 "
-"                 do NOT use `!<c-t>`, it would introduce lag when we press `!` in visual mode
+"                do NOT use `!<c-t>`, it would introduce lag when we press `!` in visual mode
 "
-"                 do NOT use `<c-t>!`, it would be inconsistent with other similar mappings
-"                 Ex:
+"                do NOT use `<c-t>!`, it would be inconsistent with other similar mappings
+"                Ex:
 "
-"                         xno <silent>  <bar>x  "my:TxSend(@m)<cr>
-"                                       │
-"                                       └─ can't use `<c-x>!`, it would introduce lag when decreasing numbers
+"                        xno <silent>  <bar>x  "my:TxSend(@m)<cr>
+"                                      │
+"                                      └ can't use `<c-x>!`, it would introduce lag when decreasing numbers
 
 " cycle through several types of translations
 nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
@@ -3778,10 +3785,10 @@ endfu
 "
 " C-g does sth similar (:h ^g), but its output is:
 "
-"     - noisy
-"     - not colored
-"     - unable to expand `~`
-"     - relative to the working directory
+"    - noisy
+"    - not colored
+"    - unable to expand `~`
+"    - relative to the working directory
 
 " -p  -P           show filePath / :pwd {{{4
 
@@ -3849,6 +3856,18 @@ endfu
 nno  <silent>  -q  :<c-u>exe <sid>faq()<cr>
 
 fu! s:faq() abort
+    " If you move this function outside the vimrc, there's no guarantee that `$XDG_RUNTIME_VIM` is set.{{{
+    "
+    " In that case, rewrite the code like so:
+    "
+    "     " outside the function
+    "     let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
+    "
+    "     ...
+    "
+    "     " inside the function
+    "     if stridx(expand('%:p'), '/wiki/') ==# -1 && expand('%:p') isnot# s:DIR..'/faq'
+    "}}}
     if stridx(expand('%:p'), '/wiki/') ==# -1 && expand('%:p') isnot# $XDG_RUNTIME_VIM..'/faq'
         return 'echo "you''re not in a wiki"'
     endif
@@ -4268,6 +4287,12 @@ fu! s:fix_display() abort
         return
     endif
 
+    " reload filetype plugins to update title in folds
+    do filetypeplugin filetype
+    " for some filetypes, we set 'fdt' via an autocmd in the `styled_comments` augroup
+    " (and not via a traditional filetype plugin)
+    do styled_comments filetype
+
     " Purpose:{{{
     "
     " We (or a plugin) may  temporarily disable the syntax highlighting globally
@@ -4283,8 +4308,6 @@ fu! s:fix_display() abort
 
     " update folds
     norm! zx
-    " update title in folds
-    do BufWinEnter
 
     " Re-install HGs which may have been cleared after changing the color scheme.{{{
     "
@@ -4396,7 +4419,25 @@ fu! s:fix_macro() abort
         " prevent Vim from interfering with our macros.
         "}}}
         au QuitPre <buffer> call setreg(s:fix_macro_c, substitute(getline(1), "\e\\@<!$", "\e", ''))
-            \ | unlet! s:fix_macro_c
+        " Don't remove `s:fix_macro_c`.{{{
+        "
+        " For some reason, it would be removed before `setreg()` is invoked.
+        "
+        " You could fix the issue with a timer:
+        "
+        "     \ | call timer_start(0, {-> execute('unlet! s:fix_macro_c')})
+        "
+        " And with a one-shot autocmd listening to the appropriate event.
+        "
+        "     au BufLeave <buffer> ++once unlet! s:fix_macro_c
+        "        │
+        "        └ try also:
+        "
+        "            WinLeave
+        "            BufWinLeave
+        "            BufUnload
+        "            BufWipeout
+        "}}}
     augroup END
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>do QuitPre <bar> q<cr>'
     nmap <buffer><nowait><silent>  <cr>  q
@@ -4460,20 +4501,20 @@ nno  <silent>  }  :<c-u>call search('\v\S+.*\ze\n\s*$', 'W')<cr>zv
 "       so, it will be stupid, and we need to make it clever:
 "               /<up><cr>``
 "               │
-"               └─ fixes `*` stupidity
+"               └ fixes `*` stupidity
 
 
-"        ┌─ populate search register with word under cursor
+"        ┌ populate search register with word under cursor
 "        │
-"        │┌─ get back where we were
+"        │┌ get back where we were
 "        ││
-"        ││          ┌─ get back where we were
+"        ││          ┌ get back where we were
 "        ││          │
-"        ││          │   ┌ change next occurrence of pattern
-"        ││          │ ┌─┤
+"        ││          │ ┌ change next occurrence of pattern
+"        ││          │ ├─┐
 nno  c*  *``/<up><cr>``cgn
-"           └───────┤
-"                   └ take 'smartcase' into account
+"           ├───────┘
+"           └ take 'smartcase' into account
 
 nno  c#  #``/<up><cr>``cgN
 
@@ -4516,13 +4557,16 @@ nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
 " By default, we can't move across several lines of a long wrapped line with
 " `j` and `k`.
 "
-"                    ┌─ if we used a count, we probably don't care about wrapped lines
+"                    ┌ if we used a count, we probably don't care about wrapped lines
 "                    │
 nno <expr><silent> j v:count ? (v:count >= 5 ? "m'".v:count : '').'j' : 'gj'
 nno <expr><silent> k v:count ? (v:count >= 5 ? "m'".v:count : '').'k' : 'gk'
 "                              ├────────────────────────────────┘
 "                              └ if the count was bigger than 5,
 "                                we consider the motion as a jump useful to come back with `c-o`
+
+nmap <down> j
+nmap <up> k
 
 " If we're inside a long wrapped line, `^` and `0` should go the beginning
 " of the line of the screen (not the beginning of the long line of the file).
@@ -4992,9 +5036,9 @@ augroup END
 " What difference with :*ilist! foobar ?
 " `:ilist`:
 "
-"     - searches in all included files. :g only in current buffer.
-"     - can ignore comment if we don't put a bang
-"     - automatically adds \<,\> around the pattern, if we don't surround it with slashes
+"    - searches in all included files. :g only in current buffer.
+"    - can ignore comment if we don't put a bang
+"    - automatically adds \<,\> around the pattern, if we don't surround it with slashes
 
 xno  <c-s>  <esc>:keepj keepp *g/\%V/#<left><left>
 
@@ -5051,7 +5095,7 @@ xno  <silent>  .  :norm! .<cr>
 "}}}
 xno  <silent>  @  :<c-u>exe "'<,'>norm @"..nr2char(getchar())<cr>
 "                                    │
-"                                    └─ Do NOT add a bang:{{{
+"                                    └ Do NOT add a bang:{{{
 "
 " We want the recursiveness, for one of our mapping to be used.
 " It temporarily disables some keysyms which may break the replay of a macro.
@@ -5191,8 +5235,8 @@ xno  g<c-j>  gJ
 xno  <silent>  mJ      :<c-u>call myfuncs#join_blocks(0)<cr>
 xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
 "                                                     │
-"                                                     └─ first, reverse the order of the blocks
-"                                                        then, join them
+"                                                     └ first, reverse the order of the blocks
+"                                                       then, join them
 
 " P           paste without yanking selection in unnamed register {{{3
 
@@ -5244,9 +5288,7 @@ com! -nargs=1 LGrep call myfuncs#op_grep('Ex', <q-args>, 1)
 " CheckHealth {{{2
 
 if has('nvim')
-    "                                      ┌ to set window-local options (so that sections are folded)
-    "                                      │
-    com! -bar CheckHealth checkhealth | do bufwinenter
+    com! -bar CheckHealth checkhealth
 endif
 
 " DiffLines {{{2
@@ -5296,7 +5338,7 @@ endfu
 
 " DumpWiki {{{2
 " Usage:
-"         DumpWiki https://github.com/oniony/TMSU/
+"     :DumpWiki https://github.com/oniony/TMSU/
 
 com! -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
 
@@ -5426,9 +5468,7 @@ endfu
 "                 exe 'sp | h ' . a:topic
 "             endif
 "         catch
-"             echohl ErrorMsg
-"             echom v:exception
-"             echohl NONE
+"             return lg#catch_error()
 "         endtry
 "     endfu
 
@@ -5500,9 +5540,9 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " The following command joins 2 blocks of lines.
 " To use it, you must:
 "
-"     - remove possible empty lines between the blocks
-"     - be on the 1st line of the 1st block
-"     - provide the nr of lines of a block as an argument to the command
+"    - remove possible empty lines between the blocks
+"    - be on the 1st line of the 1st block
+"    - provide the nr of lines of a block as an argument to the command
 "
 " After an initial join, you can repeat it with @:
 
@@ -5510,13 +5550,13 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 "
 " If the blocks are 5 lines long, the command will execute:
 "
-"             ┌ for each line of the first block (.,.+4g/^/)
-"     ┌───────┤
+"     ┌ for each line of the first block (.,.+4g/^/)
+"     ├───────┐
 "     .,.+4g/^/''+5m.|-j
-"              └────┤ └┤
-"                   │  └─ then join the two lines
-"                   │
-"                   └ move the first line of the second block (''+5) under the current one (m.)
+"              ├────┘ ├┘
+"              │      └ then join the two lines
+"              │
+"              └ move the first line of the second block (''+5) under the current one (m.)
 
 
 " We can notice that the address of the 1st line of the 1st block is expressed
@@ -5551,11 +5591,11 @@ com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 "
 " But, the contents of this line will constantly change. It will be successively:
 "
-"     - the 1st of the 2nd block
-"     - the 2nd one (after the 1st has been joined)
-"     - the 3rd one ("         2nd ")
-"     - the 4th one ("         3rd ")
-"     - the 5th one ("         4rd ")
+"    - the 1st of the 2nd block
+"    - the 2nd one (after the 1st has been joined)
+"    - the 3rd one ("         2nd ")
+"    - the 4th one ("         3rd ")
+"    - the 5th one ("         4rd ")
 "
 " Why `-j`, and not simply `j` ?
 " Because, when `:m` moves a line, the cursor doesn't stay where it is; it jumps
@@ -5851,14 +5891,13 @@ endfu
 " In reality,  it seems that  Vim puts a variable  inside a function  (and whose
 " scope is not explicit) inside `v:` only for a very narrow set of variables:
 "
-"     - count
-"     - errmsg
-"     - shell_error
-"     - this_session
-"     - version
+"    - count
+"    - errmsg
+"    - shell_error
+"    - this_session
+"    - version
 "
-" Source:
-"     https://github.com/Kuniwak/vint/issues/245#issuecomment-337296606
+" Source: https://github.com/Kuniwak/vint/issues/245#issuecomment-337296606
 "
 " It seems to be true, if you look at this file:
 "
@@ -6073,8 +6112,8 @@ augroup END
 " It seems Vim merges both search history (/ + ?) in the window.
 " Also, in `~/.viminfo`, an entry corresponding to a:
 "
-"         - forward  search,  begins with  `?/`
-"         - backward search,  begins with  `? `  (note the space)
+"    - forward  search,  begins with  `?/`
+"    - backward search,  begins with  `? `  (note the space)
 "}}}
 fu! s:update_history() abort
     " update history of CURRENT session
@@ -6128,8 +6167,8 @@ endfu
 fu! s:make_missing_dir(file, buf) abort
     " Before creating a directory, make sure that the current buffer:
     "
-    "     - is not a special one    :h special-buffers
-    "     - is not a remote file    ftp://...
+    "    - is not a special one    :h special-buffers
+    "    - is not a remote file    ftp://...
     "
     " Found here:    http://stackoverflow.com/a/4294176
 
@@ -6262,7 +6301,7 @@ fu! s:wipe_noname() abort
     \ && empty(bufname(v))
     \ && empty(win_findbuf(v))})
     "    │
-    "    └─ make sure the buffer is NOT displayed in any window
+    "    └ make sure the buffer is NOT displayed in any window
 
     if !empty(to_wipe)
         sil! exe 'bw! '..join(to_wipe, ' ')
@@ -6832,6 +6871,8 @@ fu! s:setup_vim_terminal() abort
     " Not Vim. We do it in this function.
     setl nowrap
     call s:setup_neovim_terminal()
+    " Here, 'termwinkey' seems to behave a little like `C-r` in insert mode.
+    " With one difference though: when specifying the register, you need to prefix it with `"`.
     exe 'nno <buffer><nowait><silent> p i<c-e>'..&l:termwinkey..'""'
 endfu
 
@@ -7205,12 +7246,7 @@ endfu
 "             do sth which can fail
 "
 "         catch
-"             do sth if it fails
-"             typically show error:
-"
-"                     echohl errormsg
-"                     echom v:exception.' | '.v:throwpoint
-"                     echohl none
+"             return lg#catch_error()
 "
 "         finally
 "             mandatory conclusion (like restoring options)
@@ -7512,7 +7548,7 @@ endfu
 " And check whether some mappings would be better suited as commands.
 "
 " 43 -
-" Install autocmd listening to `bufreadpost */after/ftplugin/*.vim`
+" Install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `bufwritepost`
 " which would give us a warning when we forget to undo a
 " mapping/abbreviation/command/autocmd/variable
@@ -8428,15 +8464,10 @@ endfu
 " We don't need to save/restore @+ anymore.
 "
 " 97 -
-" When  is  it   better  to  use  `$XDG_RUNTIME_DIR`  instead   of  `/tmp`  (via
-" `tempname()`)?
-" https://unix.stackexchange.com/a/316166/289772
-"
-" 98 -
 " Be  consistent  in  how  you  chose  the  priority  of  matches  created  with
 " `matchadd()`.
 "
-" 99 -
+" 98 -
 " Saving an option,  changing it, then restoring  it via a timer is  a bad idea.
 " Check where you did it; remove the timer.
 "
@@ -8444,7 +8475,7 @@ endfu
 " in a try conditional, and restore it in the finally clause
 " (for example, we didn't in vim-breakdown)
 "
-" 100 -
+" 99 -
 " We have 4 plugins which use `repeat#set()`:
 "
 "     vim-abolish
@@ -8460,12 +8491,12 @@ endfu
 "    - submitting a bug report/PR
 "    - re-implementing the plugin
 "
-" 101 -
+" 100 -
 " Every  time you open a  window, be aware that  an error may be  raised because
 " you're in the command-line window.
 " You may want to catch that error to avoid a stack trace.
 "
-" 102 -
+" 101 -
 " Watch out for this anti-pattern:
 "
 "     echo var is# 'foo'
@@ -8490,7 +8521,7 @@ endfu
 "     (before it was implicit/not mentioned at all)
 "   - easier to expand later if `var` can have more values
 "
-" 103 -
+" 102 -
 " Add  spaces  around  all  concatenation  operators: it  makes  the  code  more
 " readable?
 "
@@ -8552,7 +8583,7 @@ endfu
 " > For String concatenation ".." is preferred, since "." is ambiguous, it is also
 " > used for |Dict| member access and floating point numbers.
 "
-" 104 -
+" 103 -
 " Remove all `==#`, `!=#`, `==?`, `!=?`.
 " Replace them with `==`, `!=`.
 " The `#` and `?` is useless now.
@@ -8571,7 +8602,7 @@ endfu
 " Besides, the automatic conversion (string →  number) may be disabled in future
 " scripts: https://github.com/vim/vim/pull/3857
 "
-" 105 -
+" 104 -
 " - remove `&l:` when it's not necessary?  (or the opposite: add it everywhere?)
 " - use full name of commands and options?
 " - switch from 4 spaces to 2 spaces for indentation?
@@ -8589,12 +8620,12 @@ endfu
 " Then, you  should be able to  use your refactoring command  wherever you want,
 " without breaking our diagrams.
 "
-" 106 -
+" 105 -
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
 "
-" 107 -
+" 106 -
 "
 " This mapping works in Vim, but not in Neovim:
 "
@@ -8610,7 +8641,7 @@ endfu
 " Btw, it looks similar to another issue we opened:
 " https://github.com/neovim/neovim/issues/9006
 "
-" 108 -
+" 107 -
 "
 "     % hash | vipe
 "
@@ -8651,12 +8682,12 @@ endfu
 " It seems to help a lot in our previous MWE.
 " Do we still have an issue? Or does the numeric prefix fix everything?
 "
-" 109 -
+" 108 -
 " The  `C-n` and  `C-p`  buffer-local  mappings installed  by  fugitive in  some
 " buffers, conflict with our global mappings to cycle through tabpages.
 " We're often distracted, because we wonder why our mappings are not working.
 "
-" 110 -
+" 109 -
 " Read:
 "
 " https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
@@ -8670,7 +8701,7 @@ endfu
 " https://github.com/prabirshrestha/async.vim (243)
 " https://github.com/metakirby5/codi.vim (747)
 "
-" 111 -
+" 110 -
 " Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
 " between `~/.vim/plugin` and `~/.vim/after/plugin/`?
 "
@@ -8692,7 +8723,7 @@ endfu
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
 " https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
 "
-" 112 -
+" 111 -
 " Whenever you used `system()`, `systemlist()`, or  `:!` to run a shell command,
 " and it  contained a filename, make  sure you used the  filename modifiers `:p`
 " and `:S`.
@@ -8708,7 +8739,7 @@ endfu
 "                    ^
 "                    ✔
 "
-" 113 -
+" 112 -
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
@@ -8717,7 +8748,7 @@ endfu
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
 "
-" 114 -
+" 113 -
 " We don't version control our pdfs in `~/wiki`.
 " Suppose one of our  notes has a link to a local pdf,  and we restore our notes
 " on a new machine; the link will be broken.
@@ -8726,7 +8757,7 @@ endfu
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
 "
-" 115 -
+" 114 -
 " Study this (Neovim):
 "     :help nvim_buf_set_virtual_text()
 "
@@ -8735,27 +8766,27 @@ endfu
 "
 " Source: https://vi.stackexchange.com/a/18729/17449
 "
-" 116 -
+" 115 -
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
 "
-" 117 -
+" 116 -
 " Maybe  make `= SPC` comment  the added lines (above  and below) if we're  on a
 " commented line.
 "
-" 118 -
+" 117 -
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
 " Maybe  you should  use other  keys to  handle folds,  so that  you can  decide
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 119 -
+" 118 -
 " Watch these videos about using Vim as a diff tool, and as a merge tool:
 " https://www.youtube.com/watch?v=zEah_HDpHzc
 " https://www.youtube.com/watch?v=VxpCgQyUXlI
 "
-" 120 -
+" 119 -
 "
 "     $ vim -d ~/.bashrc ~/.zshrc
 "
@@ -8778,7 +8809,7 @@ endfu
 "
 " So, the statuslines are not reset to be quiet.
 "
-" 121 -
+" 120 -
 " Refactor your `]q` &friends mapping, so that they call `:[cl]above` and `:[cl]below`.
 " But do that only when Nvim has merged the Vim patch 8.1.1256.
 "
@@ -8787,14 +8818,19 @@ endfu
 " If so, try the `:[cl]before` and the `:[cl]after` commands, introduced in the Vim patch
 " 8.1.1275.
 "
+" Update:
+" I'm not sure to understand what those commands are supposed to do.
+" I've run `:helpg foo`,  then I've pressed Enter on the  first entry, and tried
+" to run every of those commands; they all raise an error...
+"
 " Also: Vim  patch 8.1.1281  has extended  `:[cl]history` to  make it  select an
 " arbitrary qfl in the stack, via a count.
 " Once the patch has been ported to Nvim, use this command and get rid of `:CC`, `:LL`.
 "
-" 122 -
+" 121 -
 " Assimilate the `Yank()` function, and the `~/bin/yank` script.
 "
-" 123 -
+" 122 -
 " Document the fact  that you need to put  `<esc>` at the start of the  rhs of a
 " `:ono` mapping if it presses `v:operator`.
 "
@@ -8832,7 +8868,7 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 124 -
+" 123 -
 " We have too many comments in this file about the bracketed paste mode.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
 " Also, document somewhere `:h vim.paste` (Nvim only):
@@ -8841,7 +8877,7 @@ endfu
 "
 " https://github.com/neovim/neovim/pull/4448
 "
-" 125 -
+" 124 -
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
 " Maybe we should ask for  some built-in functions (`getsynlist()`?, `gethi()`?)
@@ -8850,7 +8886,7 @@ endfu
 " Also, `:verbose syn list ...` doesn't print the script location from which the
 " syntax group was installed. Maybe ask for an improvement of `:verb`.
 "
-" 126 -
+" 125 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -8866,7 +8902,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 127 -
+" 126 -
 "
 " Find a way to prevent `par(1)` from breaking a codespan on multiple lines.
 "
@@ -8874,7 +8910,7 @@ endfu
 " codespan with  C-b; this should prevent  `par(1)` from breaking a  codespan on
 " multiple lines. Then after the formatting, you would replace C-b with spaces.
 "
-" 128 -
+" 127 -
 "
 " We really need a library function to get a comment leader.
 "
@@ -8923,7 +8959,7 @@ endfu
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 "
-" 129 -
+" 128 -
 " We often make this error:
 "
 "     " insert this
@@ -8935,44 +8971,16 @@ endfu
 " Idea: Every time you make such a mistake, undo, and re-insert `getline()` 3 times;
 " each time make sure to press C-b.
 "
-" 130 -
+" 129 -
 " In a markdown file, `gc` should behave slightly differently.
 " It  should  make sure  there  are  4 spaces  between  `>`  and the  first  non
 " whitespace on each line; and reformat the quote with `par(1)`.
 " Because that's what we do all the time; so better automate it.
 "
-" 131 -
+" 130 -
 " In a fugitive buffer, when we need to  stage many files, I would like to press
 " `-` very fast. We can't because – for  some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
-"
-" 132 -
-" `:Logevents *` doesn't work when `vim-logevents` is used in a minimal vimrc.
-" This is because `$XDG_RUNTIME_VIM` is not set.
-" We have other plugins which rely on this variable.
-" They should all work in a minimal vimrc.
-"
-" Solution1:
-" Get rid of the variable.
-" Use `/tmp` or `/run/user/1000/vim` explicitly.
-" If you  use the latter value,  you'll need to make sure  the directory exists,
-" and create it if necessary.
-"
-" Solution2:
-" Use `getenv()` to check whether it's defined.
-" If it's not, fall back on some default value using `setenv()`.
-
-
-
-" nno <silent> j :<c-u>call FFunc()<cr>
-" fu! FFunc() abort
-"     " set foldclose=all " close a fold if we leave it with any command
-"     " set foldopen=all  " open  a fold if we enter it with any command
-"     " set foldenable
-"     " set foldlevel=0   " close all folds by default
-"     norm! gj
-"     let g:d_ebug = get(g:, 'd_ebug', []) + [deepcopy(winline())]
-" endfu
 
 
 
@@ -9001,9 +9009,7 @@ fu! s:yank(text) abort
         return
     endif
     if v:shell_error
-        echohl ErrorMsg
-        echom v:exception
-        echohl NONE
+        return lg#catch_error()
     else
         " TODO: Document why this line is needed.{{{
         "

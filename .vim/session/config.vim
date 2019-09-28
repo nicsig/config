@@ -8,9 +8,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +33 ~/wiki/vim/package_rtp.md
 argglobal
-silent! argdel *
+%argdel
 edit ~/wiki/vim/package_rtp.md
 set splitbelow splitright
 wincmd t
@@ -19,26 +18,20 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
-setlocal fmr={{{,}}}
-setlocal fdi=#
-setlocal fdl=0
-setlocal fml=0
-setlocal fdn=20
-setlocal fen
-let s:l = 40 - ((39 * winheight(0) + 15) / 31)
+let s:l = 40 - ((29 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 40
 normal! 0
+lcd ~/wiki/vim
 tabnext 1
+badd +40 ~/wiki/vim/package_rtp.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=1 shortmess=filnxtToOAacFIsW
+set winheight=1 winwidth=1 shortmess=filnxtToOSacFIsW
 set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)

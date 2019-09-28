@@ -18,10 +18,7 @@ setl bh=wipe nobl
 
 setl nowrap
 
-augroup my_websearch
-    au! * <buffer>
-    au BufWinEnter <buffer> setl cul
-augroup END
+setl cul
 
 let b:url = 'https://www.startpage.com/do/search?cat=&language=english&cmd=process_search&query='
 
@@ -50,7 +47,6 @@ let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
     \ | setl bh< bl< cul< swf< wrap<
     \ | unlet! b:url
-    \ | exe 'au! my_websearch * <buffer>'
     \ | exe 'nunmap <buffer> q'
     \ | exe 'nunmap <buffer> <cr>'
     \ | exe 'nunmap <buffer> ZZ'

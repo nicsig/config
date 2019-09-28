@@ -27,17 +27,17 @@ fu! colorscheme#set() abort "{{{2
         "    │                             │                                                                  │
         "    │                             │         Valid values: 233 … 237 … 239                            │
         "    │                             │                       │     │     │                              │
-        "    │                             │                       │     │     └─ lightest                    │
-        "    │                             │                       │     └─ default                           │
-        "    │                             │                       └─ darkest                                 │
+        "    │                             │                       │     │     └ lightest                     │
+        "    │                             │                       │     └ default                            │
+        "    │                             │                       └ darkest                                  │
         "    ├─────────────────────────────┼──────────────────────────────────────────────────────────────────┤
         "    │ g:seoul256_light_background │ value to be used the NEXT time we execute `:colo seoul256-light` │
         "    │                             │                                                                  │
         "    │                             │         Valid values: 252 … 253 … 256                            │
         "    │                             │                       │     │     │                              │
-        "    │                             │                       │     │     └─ lightest                    │
-        "    │                             │                       │     └─ default                           │
-        "    │                             │                       └─ darkest                                 │
+        "    │                             │                       │     │     └ lightest                     │
+        "    │                             │                       │     └ default                            │
+        "    │                             │                       └ darkest                                  │
         "    └─────────────────────────────┴──────────────────────────────────────────────────────────────────┘
         "}}}
         let g:seoul256_background = seoul_bg

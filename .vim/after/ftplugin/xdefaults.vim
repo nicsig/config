@@ -2,19 +2,15 @@
 
 setl cms=!\ %s
 
-augroup my_xdefaults
-    au! *            <buffer>
-    au  BufWinEnter  <buffer>  setl fdm=marker
-                           \ | setl fdt=fold#fdt#get()
-                           \ | setl cocu=nc
-                           \ | setl cole=3
-augroup END
+setl fdm=marker
+setl fdt=fold#fdt#get()
+setl cocu=nc
+setl cole=3
 
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
     \ | setl cms< cocu< cole< fdm< fdt<
-    \ | exe 'au! my_xdefaults * <buffer>'
     \ "
 

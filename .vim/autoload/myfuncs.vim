@@ -706,10 +706,9 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
     let range_second_block = (end_first_block + 1).','.line2
     let mods               = 'keepj keepp '
 
-    let fen_save = &l:fen
+    let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
+    let &l:fen = 0
     try
-        let &l:fen = 0
-
         if a:first_reverse
             sil exe range_first_block.'d'
             sil exe end_first_block.'put'
@@ -723,7 +722,10 @@ fu! myfuncs#join_blocks(first_reverse) abort "{{{1
     catch
         return lg#catch_error()
     finally
-        let &l:fen = fen_save
+        if winbufnr(winid) == bufnr
+            let [tabnr, winnr] = win_id2tabwin(winid)
+            call settabwinvar(tabnr, winnr, '&fen', fen_save)
+        endif
     endtry
 endfu
 
@@ -823,7 +825,7 @@ fu! myfuncs#op_grep(type, ...) abort "{{{2
             " Why `:lgetexpr` instead of `:lgrep!`?{{{
             "
             " The latter shows us the output of the shell command (`$ ag ...`).
-            " This makes the screen “flash”, which is distracting.
+            " This makes the screen flicker, which is distracting.
             "
             " `:lgetexpr` executes the shell command silently.
             "}}}
@@ -1431,8 +1433,8 @@ endfu
 "         let x = winnr()
 "         call s:vim_navigate(a:dir)
 "         if winnr() ==# x
-"             "                                       ┌ path to tmux socket
-"             "                    ┌──────────────────┤
+"                                  ┌ path to tmux socket
+"                                  ├──────────────────┐
 "             let cmd = 'tmux -S '.split($TMUX, ',')[0].' '.
 "                         \ 'select-pane -' . tr(a:dir, 'hjkl', 'LDUR')
 "             sil! call system(cmd)
@@ -1443,9 +1445,7 @@ endfu
 "         try
 "             exe 'wincmd '.a:dir
 "         catch
-"             echohl ErrorMsg
-"             echo 'E11: Invalid in command-line window; <cr> executes, CTRL-C quits: wincmd ' . a:dir
-"             echohl None
+"             return lg#catch_error()
 "         endtry
 "     endfu
 
@@ -1458,10 +1458,10 @@ endfu
 " TODO:
 " add `| C-t` mapping, to replay last text
 
-"                 ┌─ the function is called for the 1st time;
-"                 │  if the text is too long for `trans`, it will be
-"                 │  split into chunks, and the function will be called
-"                 │  several times
+"                 ┌ the function is called for the 1st time;
+"                 │ if the text is too long for `trans`, it will be
+"                 │ split into chunks, and the function will be called
+"                 │ several times
 "                 │
 fu! myfuncs#trans(first_time, ...) abort
     let s:trans_tempfile = tempname()
@@ -1469,11 +1469,11 @@ fu! myfuncs#trans(first_time, ...) abort
     if a:first_time
         let text = a:0 ? s:trans_grab_visual() : expand('<cword>')
         "          │
-        "          └─ visual mode
+        "          └ visual mode
 
         let s:trans_chunks = split(text, '\v.{100}\zs[.?!]')
         "                                     │
-        "                                     └─ split the text into chunks of around 100 characters
+        "                                     └ split the text into chunks of around 100 characters
     endif
 
     " remove characters which cause issue during the translation
@@ -1630,8 +1630,8 @@ fu! myfuncs#webpage_read(url) abort "{{{1
     "
     "     $ lynx -dump -width=1000 url
     "                         │
-    "                         └─ high nr to be sure that
-    "                         `lynx` won't break long lines of code
+    "                         └ high nr to be sure that
+    "                           `lynx` won't break long lines of code
     "}}}
     sil! exe 'r !w3m -cols 100 '.shellescape(a:url, 1)
     setl bt=nofile nobl noswf nowrap

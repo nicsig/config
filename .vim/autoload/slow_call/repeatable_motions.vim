@@ -61,11 +61,17 @@ fu! s:vertical_jump_go(is_fwd, mode) abort
     endif
 
     " temporarily disable folds before we move
-    let fen_save = &l:fen
-    setl nofen
-    exe 'norm! '.(a:is_fwd ? n.'j' : n.'k')
-    " restore folds
-    let &l:fen = fen_save
+    let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
+    let &l:fen = 0
+    try
+        exe 'norm! '.(a:is_fwd ? n.'j' : n.'k')
+    finally
+        " restore folds
+        if winbufnr(winid) == bufnr
+            let [tabnr, winnr] = win_id2tabwin(winid)
+            call settabwinvar(tabnr, winnr, '&fen', fen_save)
+        endif
+    endtry
 
     " open just enough folds to see where we are
     if a:mode is# 'n' || index(['v', 'V', "\<c-v>"], a:mode) >= 0
@@ -120,10 +126,10 @@ endfu
 "
 " Besides, there are other arguments in favor of this choice:
 "
-"     - a path is a universal concept,  while an option tag is specific  to
-"       documentation; its mapping  should be  easier to type
+"    - a path is a universal concept,  while an option tag is specific  to
+"      documentation; its mapping  should be  easier to type
 "
-"     - a hypertext link,  or a heading, sounds  like something more important
+"    - a hypertext link,  or a heading, sounds  like something more important
 "}}}
 
 noremap  <expr>  <silent><unique>  [`  lg#motion#regex#rhs('codespan', 0)
@@ -234,10 +240,10 @@ fu! s:fts(cmd) abort
     "
     " This function can be called:
     "
-    "     -   directly from a  [ftFT]  mapping
-    "     - indirectly from a  [;,]    mapping
-    "       │
-    "       └ move_again()  →  s:move()  →  fts()
+    "    -   directly from a  [ftFT]  mapping
+    "    - indirectly from a  [;,]    mapping
+    "      │
+    "      └ move_again()  →  s:move()  →  fts()
     "
     " It needs to distinguish from where it was called.
     " Because in  the first  case, it  needs to  ask the  user for  a character,

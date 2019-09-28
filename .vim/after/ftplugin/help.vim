@@ -8,15 +8,12 @@
 " Also, it would be nice if we had different levels of indentation between titles
 " and subtitles, like in our markdown notes.
 
-augroup my_notes
-    au!
-    au BufWinEnter <buffer> if expand('%:p') =~# $HOME.'/.vim/doc/misc/\%(notes\|galore\)'
-                        \ |     setl fdm=expr
-                        \ |     let &l:fdt = s:snr().'fold_text()'
-                        \ |     let &l:fde = s:snr().'fold_expr()'
-                        \ |     sil exe 'norm coH'
-                        \ | endif
-augroup END
+if expand('%:p') =~# $HOME.'/.vim/doc/misc/\%(notes\|galore\)'
+    setl fdm=expr
+    let &l:fdt = s:snr().'fold_text()'
+    let &l:fde = s:snr().'fold_expr()'
+    sil exe 'norm coH'
+endif
 
 fu! s:fold_expr() abort "{{{1
     return getline(v:lnum) =~# '^=\+$'
@@ -37,6 +34,5 @@ endfu
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
     \ | setl fde< fdm< fdt<
-    \ | exe 'au! my_notes * <buffer>'
     \ "
 

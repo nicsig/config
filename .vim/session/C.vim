@@ -10,7 +10,7 @@ endif
 set shortmess=aoO
 argglobal
 %argdel
-edit ~/wiki/c/practice/C_Programming_A_Modern_Approach/2_C_Fundamentals/01_pun.c
+edit ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -23,18 +23,16 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
-arglocal
-%argdel
+argglobal
 let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/wiki
+lcd ~/wiki/c
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/wiki/c/c.md") | buffer ~/wiki/c/c.md | else | edit ~/wiki/c/c.md | endif
 let s:l = 1 - ((0 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
@@ -48,14 +46,14 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
-badd +1 ~/wiki/c/practice/C_Programming_A_Modern_Approach/2_C_Fundamentals/01_pun.c
-badd +1 ~/wiki/c/c.md
+" badd +1 ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
+" badd +1 ~/wiki/c/c.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=1 shortmess=filnxtToOSacFIsW
-set winminheight=0 winminwidth=0
+set winheight=1 winwidth=20 shortmess=filnxtToOSacFIsW
+set winminheight=1 winminwidth=1
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)

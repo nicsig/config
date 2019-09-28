@@ -8,10 +8,7 @@ setl bh=wipe nobl
 
 setl nowrap
 
-augroup my_tmux_prompt
-    au! * <buffer>
-    au BufWinEnter <buffer> setl cul
-augroup END
+setl cul
 
 nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 " Why `command-prompt`?  Why not running the command directly (`system('tmux ' . getline('.'))`)?{{{
@@ -104,7 +101,6 @@ nmap <buffer><nowait><silent> ZZ <cr>
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
     \ | setl bh< bl< cul< swf< wrap<
-    \ | exe 'au! my_tmux_prompt * <buffer>'
     \ | exe 'nunmap <buffer> q'
     \ | exe 'nunmap <buffer> <cr>'
     \ | exe 'nunmap <buffer> ZZ'
