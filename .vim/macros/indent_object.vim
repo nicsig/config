@@ -32,7 +32,7 @@ fu! s:in_indentation() abort "{{{1
     " next, find first match (forwards & don't wrap or move cursor)
     let end = search(pat, 'Wn')
 
-    if end !=# 0
+    if end != 0
         " if search succeeded, it went too far, so subtract 1
         let end -= 1
     endif
@@ -106,7 +106,7 @@ fu! s:around_indentation() abort "{{{1
     " LATTER: end  is not 0,  so the search()  must have succeeded,  which means
     " that end will match a different line than line('.')
 
-    if end !=# 0
+    if end != 0
         " if end is 0, then the search() failed; if we subtract 1, then it
         " will effectively do "norm! -1G" which is definitely not what is
         " desired for probably every circumstance; therefore, only subtract one

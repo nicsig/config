@@ -103,8 +103,6 @@ fu! s:set_recipes() abort
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
                          \ + [{'buns': ['«', '»'], 'input': ['u<']}]
-                         \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
-                         \ + [{'buns': ['<kbd>', '</kbd>'], 'input': ['k']}]
 
     " TODO:
     " Instead of removing some problematic  recipes, we should add recipes which

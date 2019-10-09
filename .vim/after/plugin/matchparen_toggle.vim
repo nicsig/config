@@ -15,7 +15,7 @@
 " The default script would undo our toggling.
 "}}}
 
-if exists(':DoMatchParen') !=# 2 || exists('g:no_after_plugin')
+if exists(':DoMatchParen') != 2 || exists('g:no_after_plugin')
     finish
 endif
 

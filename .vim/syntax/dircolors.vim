@@ -144,24 +144,24 @@ function! s:preview_color(linenr) abort
             call add(hi_attrs, 'inverse')
         elseif item >= 30 && item <= 37
             " ANSI SGR foreground color
-            let hi_str .= s:get_hi_str(item - 30, 'fg')
+            let hi_str ..= s:get_hi_str(item - 30, 'fg')
         elseif item >= 40 && item <= 47
             " ANSI SGR background color
-            let hi_str .= s:get_hi_str(item - 40, 'bg')
+            let hi_str ..= s:get_hi_str(item - 40, 'bg')
         elseif item == 38
             " Foreground for terminals with 88/256 color support
             let color = s:get_256color(colors)
             if color == -1
                 break
             endif
-            let hi_str .= s:get_hi_str(color, 'fg')
+            let hi_str ..= s:get_hi_str(color, 'fg')
         elseif item == 48
             " Background for terminals with 88/256 color support
             let color = s:get_256color(colors)
             if color == -1
                 break
             endif
-            let hi_str .= s:get_hi_str(color, 'bg')
+            let hi_str ..= s:get_hi_str(color, 'bg')
         endif
     endwhile
 

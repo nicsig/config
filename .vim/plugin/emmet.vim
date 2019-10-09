@@ -72,7 +72,7 @@ fu! s:install_mappings() abort "{{{2
     " Besides, if  `emmet.vim` is disabled,  there's no point in  installing the
     " next mappings (C-g, ...).
     "}}}
-    if exists(':EmmetInstall') !=# 2
+    if exists(':EmmetInstall') != 2
         return
     endif
 
@@ -143,7 +143,7 @@ fu! s:install_mappings() abort "{{{2
     "
     " You could execute `:EmmetInstall` from a filetype plugin:
     "
-    "     if exists(':EmmetInstall') ==# 2
+    "     if exists(':EmmetInstall') == 2
     "         EmmetInstall
     "     endif
     "

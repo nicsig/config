@@ -3,7 +3,7 @@
 " It causes several `autoload/` files to be sourced. Too slow.
 "}}}
 
-if stridx(&rtp, 'vim-sandwich') ==# -1
+if stridx(&rtp, 'vim-sandwich') == -1
     finish
 endif
 

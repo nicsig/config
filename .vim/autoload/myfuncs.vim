@@ -62,25 +62,28 @@ fu! myfuncs#after_tmux_capture_pane() abort "{{{1
         call s:format_shell_buffer()
     endif
 
-    " Why ?{{{
+    " Do *not* change the name of the augroup.{{{
     "
     " We already have a similar autocmd in our vimrc.
     " I don't want it to interfere.
     " I don't want a race condition where the winning `xclip(1)` process is the last one.
+    " So, I want this autocmd to replace the one in the vimrc.
     " It's probably unnecessary but better be safe than sorry.
     "}}}
-    au! make_clipboard_persist_after_quitting_vim
-    " Do *not* use the pattern `<buffer>`!{{{
-    "
-    " Atm, we open the qf window.
-    " If you use `<buffer>`, the autocmd would be installed for the qf buffer.
-    " But if we copy some text, it will probably be in the other buffer.
-    " Anyway, no matter the buffer where we copy some text, we want it in xclip.
-    "}}}
-    au VimLeave * ++once
+    augroup make_clipboard_persist_after_quitting_vim
+        au!
+        " Do *not* use the pattern `<buffer>`!{{{
+        "
+        " Atm, we open the qf window.
+        " If you use `<buffer>`, the autocmd would be installed for the qf buffer.
+        " But if we copy some text, it will probably be in the other buffer.
+        " Anyway, no matter the buffer where we copy some text, we want it in xclip.
+        "}}}
+        au VimLeave *
         \   if executable('xclip') && strlen(@+) != 0 && strlen(@+) <= 999
         \ |     sil call system('xclip -selection clipboard', @+)
         \ | endif
+    augroup END
 endfu
 
 fu! s:format_shell_buffer() abort
@@ -211,7 +214,7 @@ fu! myfuncs#block_select_box() abort "{{{1
         let guard += 1
     endwhile
 
-    if guard ==# 99
+    if guard == 99
         call winrestview(view)
         return
     endif
@@ -457,7 +460,7 @@ fu! myfuncs#box_destroy(type) abort
     exe 'norm! '.lnum1.'Gj_'
 endfu
 
-fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
+fu! myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
     if a:option is# '-h' || a:option is# '--help'
         echo printf("%s\n\nusage:\n    %s\n    %s\n    %s\n\n%s",
         \ ':DiffLines allows you to see and cycle through the differences between 2 lines',
@@ -478,18 +481,14 @@ fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
         return
     endif
 
-    " Get some info: ln1/ln2       = line numbers
-    "                l1/l2         = lines
-    "                chars1/chars2 = lists of characters
-    "
-    " If a:line1 = a:line2, it means :XorLines was called without a range
-    if a:line1 ==# a:line2
-        let [ln1, ln2] = [line('.'), line('.')+1]
+    " If `a:lnum1 == a:lnum2`, it means `:XorLines` was called without a range.
+    if a:lnum1 == a:lnum2
+        let [lnum1, lnum2] = [line('.'), line('.')+1]
     else
-        let [ln1, ln2] = [a:line1, a:line2]
+        let [lnum1, lnum2] = [a:lnum1, a:lnum2]
     endif
-    let [l1, l2] = [getline(ln1), getline(ln2)]
-    let [chars1, chars2] = [split(l1, '\zs'), split(l2, '\zs')]
+    let [line1, line2] = [getline(lnum1), getline(lnum2)]
+    let [chars1, chars2] = [split(line1, '\zs'), split(line2, '\zs')]
     let min_chars = min([len(chars1), len(chars2)])
 
     " Build a pattern matching the characters which are different
@@ -512,8 +511,8 @@ fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
             " It seems each time a `%{digit}v` anchor matches the beginning of a group
             " of consecutive characters, it adds 2 duplicate entries instead of one.
 
-            let pattern .= (empty(pattern) ? '' : '\|').'\%'.ln1.'l'.'\%'.(i+1).'v.'
-            let pattern .= (empty(pattern) ? '' : '\|').'\%'.ln2.'l'.'\%'.(i+1).'v.'
+            let pattern ..= (empty(pattern) ? '' : '\|').'\%'.lnum1.'l'.'\%'.(i+1).'v.'
+            let pattern ..= (empty(pattern) ? '' : '\|').'\%'.lnum2.'l'.'\%'.(i+1).'v.'
         endif
     endfor
 
@@ -530,10 +529,10 @@ fu! myfuncs#diff_lines(bang, line1, line2, option) abort "{{{1
         " `\%50v.*` = the WHOLE set of characters after the 50th:
         "             this will add only ONE entry in the loclist
 
-        let pattern .= (!empty(pattern) ? '\|' : '').'\%'.ln1.'l'.'\%>'.len(chars2).'v.'
+        let pattern ..= (!empty(pattern) ? '\|' : '').'\%'.lnum1.'l'.'\%>'.len(chars2).'v.'
 
     elseif len(chars1) < len(chars2)
-        let pattern .= (!empty(pattern) ? '\|' : '').'\%'.ln2.'l'.'\%>'.len(chars1).'v.'
+        let pattern ..= (!empty(pattern) ? '\|' : '').'\%'.lnum2.'l'.'\%>'.len(chars1).'v.'
     endif
 
     " Give the result
@@ -694,7 +693,7 @@ endfu
 fu! myfuncs#join_blocks(first_reverse) abort "{{{1
     let [line1, line2] = [line("'<"), line("'>")]
 
-    if (line2 - line1 + 1) % 2 ==# 1
+    if (line2 - line1 + 1) % 2 == 1
         echohl ErrorMsg
         echo ' Total number of lines must be even'
         echohl None
@@ -956,9 +955,9 @@ fu! myfuncs#op_replace_without_yank(type) abort
 
         " build condition to check if we're replacing the current line
 
-        let replace_current_line =     line("'[") ==# line("']")
-        \                          &&  col("'[") ==# 1
-        \                          && (col("']") ==# col('$')-1 || col('$') ==# 1)
+        let replace_current_line =     line("'[") == line("']")
+        \                          &&  col("'[") == 1
+        \                          && (col("']") == col('$')-1 || col('$') == 1)
 
         " If we copy a line containing leading whitespace, and try to replace
         " another line like this: `0dr$`
@@ -1016,7 +1015,7 @@ fu! s:is_right_aligned(line1, line2) abort
     let first_non_empty_line = search('\S', 'cnW', a:line2)
     let length               = strlen(getline(first_non_empty_line))
     for line in getline(a:line1, a:line2)
-        if strlen(line) !=# length && line !~# '^\s*$'
+        if strlen(line) != length && line !~# '^\s*$'
             return 0
         endif
     endfor
@@ -1180,10 +1179,10 @@ fu! myfuncs#plugin_global_variables(keyword) abort "{{{1
 
     let msg = ''
     for option in options
-        let msg .=  option[0]
+        let msg ..=  option[0]
                  \ .' = '
                  \ .string(option[1])
-                 \ .(index(options, option) !=# len(options) - 1 ? "\n\n" : '')
+                 \ .(index(options, option) != len(options) - 1 ? "\n\n" : '')
     endfor
 
     echo msg
@@ -1344,7 +1343,7 @@ fu! s:search_todo_text(dict) abort
 endfu
 
 fu! myfuncs#tab_toc() abort "{{{1
-    if index(['help', 'man', 'markdown'], &ft) ==# -1
+    if index(['help', 'man', 'markdown'], &ft) == -1
         return
     endif
 
@@ -1363,7 +1362,7 @@ fu! myfuncs#tab_toc() abort "{{{1
     let toc = []
     for lnum in range(1, line('$'))
         let col = match(getline(lnum), patterns[&ft])
-        if col !=# -1 && synIDattr(synID(lnum, col, 0), 'name') =~? syntaxes[&ft]
+        if col != -1 && synIDattr(synID(lnum, col, 0), 'name') =~? syntaxes[&ft]
             let text = substitute(getline(lnum), '\s\+', ' ', 'g')
             call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
         endif
@@ -1432,7 +1431,7 @@ endfu
 "     fu! s:tmux_navigate(dir) abort
 "         let x = winnr()
 "         call s:vim_navigate(a:dir)
-"         if winnr() ==# x
+"         if winnr() == x
 "                                  ┌ path to tmux socket
 "                                  ├──────────────────┐
 "             let cmd = 'tmux -S '.split($TMUX, ',')[0].' '.
@@ -1529,17 +1528,17 @@ fu! myfuncs#trans_cycle() abort
 endfu
 
 fu! s:trans_grab_visual() abort
-    let [l1, l2] = [line("'<"), line("'>")]
+    let [lnum1, lnum2] = [line("'<"), line("'>")]
     let [c1, c2] = [col("'<"),  col("'>)")]
 
     " single line visual selection
-    if l1 ==# l2
-        let text = matchstr(getline(l1), '\v%'.c1.'c.*%'.c2.'c.?\ze.*$')
+    if lnum1 == lnum2
+        let text = matchstr(getline(lnum1), '\v%'.c1.'c.*%'.c2.'c.?\ze.*$')
     else
         " multi lines
-        let first  = matchstr(getline(l1), '\v%'.c1.'c.*$')
-        let last   = ' '.matchstr(getline(l2), '\v^.{-}%'.c2.'c.?')
-        let middle = (l2 - l1) > 1 ? ' '.join(getline(l1+1,l2-1), ' ') : ''
+        let first  = matchstr(getline(lnum1), '\v%'.c1.'c.*$')
+        let last   = ' '.matchstr(getline(lnum2), '\v^.{-}%'.c2.'c.?')
+        let middle = (lnum2 - lnum1) > 1 ? ' '.join(getline(lnum1+1,lnum2-1), ' ') : ''
 
         let text = first.middle.last
     endif
@@ -1548,7 +1547,7 @@ endfu
 " pyrolysis
 
 fu! s:trans_output(job,exit_status) abort
-    if a:exit_status ==# -1
+    if a:exit_status == -1
         return
     endif
     " FIXME:
@@ -1640,7 +1639,7 @@ endfu
 fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     let flags  = {
         \  'min_length': matchstr(a:1, '-min_length\s\+\zs\d\+'),
-        \  'weighted': stridx(a:1, '-weighted') !=# -1,
+        \  'weighted': stridx(a:1, '-weighted') != -1,
         \ }
 
     let view       = winsaveview()
@@ -1683,7 +1682,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         "   - otherwise, by default, an abbreviation should be 3 characters long
 
         let abbrev_length = '(
-            \     strchars(v:key) ==# 4
+            \     strchars(v:key) == 4
             \   ?     2
             \   : v:key[-1:-1] is# "s" && index(keys(freq), v:key[:strlen(v:key)-1]) >= 0
             \   ?     4

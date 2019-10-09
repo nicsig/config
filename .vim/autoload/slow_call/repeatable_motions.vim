@@ -1,4 +1,4 @@
-if stridx(&rtp, 'vim-lg-lib') ==# -1
+if stridx(&rtp, 'vim-lg-lib') == -1
     finish
 endif
 
@@ -193,7 +193,7 @@ endfu
 "     we press `f`  → `s:move()`       must press `f`
 "     we press `;`  → `s:move_again()` must press `;`
 "                                                  │
-"                                                  └ special case (because !=# f)
+"                                                  └ special case (because != f)
 "
 " We  need to  redefine the  `f`  motion with  the  output of  a function  which
 " returns:
@@ -234,7 +234,7 @@ fu! s:fts(cmd) abort
     " `feedkeys('zv', 'int')` would IMMEDIATELY press `zv` (✘).
     " The autocmd also presses `zv`, but only after a motion has occurred (✔).
     "}}}
-    au CursorMoved * ++once sil! exe 'norm! zv'
+    au CursorMoved * ++once sil! norm! zv
 
     " What's the purpose of this `if` conditional?{{{
     "

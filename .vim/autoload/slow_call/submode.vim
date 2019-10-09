@@ -1,4 +1,4 @@
-if stridx(&rtp, 'vim-submode') ==# -1
+if stridx(&rtp, 'vim-submode') == -1
     finish
 endif
 
