@@ -80,16 +80,16 @@ fu! s:vertical_jump_go(is_fwd, mode) abort
 endfu
 
 fu! s:get_jump_height(is_fwd) abort
-    let vcol  = '%'.virtcol('.').'v'
+    let vcol  = '\%'.virtcol('.').'v'
     let flags = a:is_fwd ? 'nW' : 'bnW'
 
     " a line where there IS a character in the same column,
     " then one where there is NOT
-    let lnum1 = search('\v'.vcol.'.*\n%(.*'.vcol.'.)@!', flags)
+    let lnum1 = search(vcol.'.*\n\%(.*'.vcol.'.\)\@!', flags)
 
     " a line where there is NOT a character in the same column,
     " then one where there IS
-    let lnum2 = search('\v^%(.*'.vcol.'.)@!.*\n.*\zs'.vcol, flags)
+    let lnum2 = search('^\%(.*'.vcol.'.\)\@!.*\n.*\zs'.vcol, flags)
 
     let lnums = filter([lnum1, lnum2], {_,v -> v > 0})
 

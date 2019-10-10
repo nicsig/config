@@ -500,14 +500,19 @@ fu! myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
             " branch of the pattern, so we add 'v.' at the end instead of just 'v'.
             " The problem seems to come from :lvim and the g flag.
             "
-            " MWE:    :lvim /\v%1l%2v/g %
-            " ... adds 2 duplicate entries in the location list instead of one.
+            " MWE:
+            " This adds 2 duplicate entries in the location list instead of one:
             "
-            "               :lvim /\v%1l%2v|%1l%3v/g %
-            " ... adds 2 duplicate entries in the location list, 3 in total instead of two.
+            "     :lvim /\%1l\%2v/g %
             "
-            "               :lvim /\v%1l%2v|%1l%4v/g %
-            " ... adds 2 couple of duplicate entries in the location list, 4 in total instead of two.
+            " This adds 2 duplicate entries in the location list, 3 in total instead of two:
+            "
+            "     :lvim /\%1l\%2v\|\%1l\%3v/g %
+            "
+            " This adds 2 couple of duplicate entries in the location list, 4 in total instead of two.
+            "
+            "     :lvim /\%1l\%2v\|\%1l\%4v/g %
+            "
             " It seems each time a `%{digit}v` anchor matches the beginning of a group
             " of consecutive characters, it adds 2 duplicate entries instead of one.
 
@@ -585,11 +590,11 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
     let [x_save, y_save] = [getpos("'x"), getpos("'y")]
     try
         let url = substitute(a:url, '/$', '', '').'.wiki'
-        let tempdir = substitute(tempname(), '\v.*/\zs.{-}', '', '')
+        let tempdir = substitute(tempname(), '.*/\zs.\{-}', '', '')
         sil call system('git clone '.shellescape(url).' '.tempdir)
         let files = glob(tempdir.'/*', 0, 1)
         call map(files, {_,v -> substitute(v, '^\C\V'.tempdir.'/', '', '')})
-        call filter(files, {_,v -> v !~# '\v\c_?footer%(.md)?$'})
+        call filter(files, {_,v -> v !~# '\c_\=footer\%(\.md\)\=$'})
 
         mark x
         call append('.', files+[''])
@@ -600,7 +605,7 @@ fu! myfuncs#dump_wiki(url) abort "{{{1
         sil keepj keepp 'x+,'y-g/^./exe 'keepalt r '.tempdir.'/'.getline('.')[2:]
         sil keepj keepp 'x+,'y-g/^=\+\s*$/d_ | -s/^/## /
         sil keepj keepp 'x+,'y-g/^-\+\s*$/d_ | -s/^/### /
-        sil keepj keepp 'x+,'y-s/\v^#.{-}\n\zs\s*\n\ze##//
+        sil keepj keepp 'x+,'y-s/^#.\{-}\n\zs\s*\n\ze##//
 
         sil keepj keepp 'x+,'y-g/^#\%(#\)\@!/call append(line('.')-1, '#')
         sil update
@@ -1006,7 +1011,7 @@ endfu
 
 " TRIM WhiteSpace Multi-Line
 fu! s:trimws_ml(s) abort
-    return substitute(a:s, '\v^\_s*(.{-})\_s*$', '\1', '')
+    return substitute(a:s, '^\_s*\(.\{-}\)\_s*$', '\1', '')
 endfu
 
 " op_toggle_alignment {{{2
@@ -1086,7 +1091,7 @@ fu! myfuncs#op_yank_matches(type) abort
         " We can't use the pattern `\_^\s*\n` to describe an empty line, because
         " we aren't in a buffer:    `@z` is just a big string
         if !s:yank_where_match
-            let @z = substitute(@z, '\v\n%(\s*\n)+', '\n', 'g')
+            let @z = substitute(@z, '\n\%(\s*\n\)\+', '\n', 'g')
         endif
 
         " the first time we've appended a match to `@z`, it created a newline
@@ -1109,14 +1114,14 @@ endfu
 
 " }}}1
 fu! myfuncs#plugin_install(url) abort "{{{1
-    let pattern =  '\vhttps?://github.com/(.{-})/(.*)/?'
-    if a:url !~# pattern
+    let pat = 'https\=://github.com/\(.\{-}\)/\(.*\)/\='
+    if a:url !~# pat
         echo 'invalid url'
         return
     endif
-    let replacement = 'Plug ''\1/\2'''
-    let plug_line   = substitute(a:url, pattern, replacement, '')
-    let to_install  = matchstr(plug_line, '\vPlug ''.{-}/(vim-)?\zs.{-}\ze''')
+    let rep = 'Plug ''\1/\2'''
+    let plug_line   = substitute(a:url, pat, rep, '')
+    let to_install  = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
 
     let win_orig = win_getid()
     vnew | e $MYVIMRC
@@ -1139,10 +1144,10 @@ fu! myfuncs#plugin_install(url) abort "{{{1
     while to_install >? plugin_on_current_line && search('call plug#end()', 'nW')
         " test if there's still another 'Plug ...' line afterwards, AND move the
         " cursor there, if there's one
-        if !search('\v^\s*"?\s*Plug ''.{-}/.{-}/?''', 'W')
+        if !search('^\s*"\=\s*Plug ''.\{-}/.\{-}/\=''', 'W')
             break
         endif
-        let plugin_on_current_line = matchstr(getline('.'), '\vPlug ''.{-}/(vim-)?\zs.{-}\ze/?''')
+        let plugin_on_current_line = matchstr(getline('.'), 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze/\=''')
     endwhile
 
     call append(line('.')-1, plug_line)
@@ -1256,27 +1261,6 @@ fu! myfuncs#remove_tabs(line1, line2) abort "{{{1
     call winrestview(view)
 endfu
 
-fu! myfuncs#search_internal_variables() abort "{{{1
-    let view = winsaveview()
-
-    let help_file = readfile($VIMRUNTIME.'/doc/eval.txt')
-    call filter(help_file, {_,v -> v =~ '^\s*v:\S\+'})
-    call map(help_file, {_,v -> matchstr(v, 'v:\zs\S\+')})
-    call uniq(sort(help_file))
-
-    call cursor(1,1)
-    for var in help_file
-        if search('let\s\+'.var.'\s', 'cnW')
-            let addr = search('let\s\+'.var.'\s', 'cW')
-            echom 'line '.addr
-            echom var. ' is an internal variable'
-            return
-        endif
-    endfor
-
-    call winrestview(view)
-endfu
-
 fu! myfuncs#search_todo(where) abort "{{{1
     try
         sil noa exe 'lvim /\CFIX'.'ME\|TO'.'DO/j '.(a:where is# 'buffer' ? '%' : './**/*')
@@ -1314,7 +1298,7 @@ endfu
 fu! s:search_todo_text(dict) abort
     let dict = a:dict
     " if the text only contains `fixme` or `todo`
-    if dict.text =~# '\v\c%(fixme|todo):?\s*%(\{\{'.'\{)?\s*$'
+    if dict.text =~# '\c\%(fixme\|todo\):\=\s*\%({{\%x7b\)\=\s*$'
         let bufnr = dict.bufnr
         " get the text of the next line, which is not empty:
         "
@@ -1327,7 +1311,7 @@ fu! s:search_todo_text(dict) abort
         \                                     '%s'),
         \                               0, ''),
         \                           '\')
-        \                   .'\v\s*$|^\s*$'
+        \                   .'\s*$\|^\s*$'
 
         " Why using `readfile()` instead of `getbufline()`?{{{
         "
@@ -1349,7 +1333,7 @@ fu! myfuncs#tab_toc() abort "{{{1
 
     let patterns = {
         \ 'man'     : '\S\zs',
-        \ 'markdown': '\v^%(#+)?\S.\zs',
+        \ 'markdown': '^\%(#\+\)\=\S.\zs',
         \ 'help'    : '\S\ze\*$\|^\s*\*\zs\S',
         \ }
 
@@ -1470,13 +1454,13 @@ fu! myfuncs#trans(first_time, ...) abort
         "          │
         "          └ visual mode
 
-        let s:trans_chunks = split(text, '\v.{100}\zs[.?!]')
-        "                                     │
-        "                                     └ split the text into chunks of around 100 characters
+        let s:trans_chunks = split(text, '.\{100}\zs[.?!]')
+        "                                    │
+        "                                    └ split the text into chunks of around 100 characters
     endif
 
     " remove characters which cause issue during the translation
-    let garbage = '\v"|`|*'.(!empty(&l:cms) ? '|'.split(&l:cms, '%s')[0] : '')
+    let garbage = '["`*]'.(!empty(&l:cms) ? '\|'.split(&l:cms, '%s')[0] : '')
     let chunk   = substitute(s:trans_chunks[0], garbage, '', 'g')
 
     " reduce excessive whitespace
@@ -1533,11 +1517,11 @@ fu! s:trans_grab_visual() abort
 
     " single line visual selection
     if lnum1 == lnum2
-        let text = matchstr(getline(lnum1), '\v%'.c1.'c.*%'.c2.'c.?\ze.*$')
+        let text = matchstr(getline(lnum1), '\%'.c1.'c.*\%'.c2.'c.\=\ze.*$')
     else
         " multi lines
-        let first  = matchstr(getline(lnum1), '\v%'.c1.'c.*$')
-        let last   = ' '.matchstr(getline(lnum2), '\v^.{-}%'.c2.'c.?')
+        let first  = matchstr(getline(lnum1), '\%'.c1.'c.*$')
+        let last   = ' '.matchstr(getline(lnum2), '^.\{-}\%'.c2.'c.\=')
         let middle = (lnum2 - lnum1) > 1 ? ' '.join(getline(lnum1+1,lnum2-1), ' ') : ''
 
         let text = first.middle.last
@@ -1643,7 +1627,7 @@ fu! myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         \ }
 
     let view       = winsaveview()
-    let words      = split(join(getline(a:line1, a:line2), "\n"), '\v%(%(\k@!|\d).)+')
+    let words      = split(join(getline(a:line1, a:line2), "\n"), '\%(\%(\k\@!\|\d\).\)\+')
     let min_length = !empty(flags.min_length) ? flags.min_length : 4
 
     " remove anything which is:

@@ -39,6 +39,8 @@ if file_readable(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
 nohlsearch
+let g:my_session = v:this_session
+let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

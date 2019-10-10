@@ -23,13 +23,12 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
-let s:l = 428 - ((3 * winheight(0) + 15) / 30)
+argglobal
+let s:l = 426 - ((311 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-428
+426
 normal! 0
 lcd ~/wiki/vim
 tabnext
@@ -46,24 +45,22 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
-let s:l = 5 - ((3 * winheight(0) + 0) / 1)
+argglobal
+let s:l = 3 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5
+3
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-cmdline/autoload/cmdline.vim") | buffer ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim | else | edit ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim | endif
-let s:l = 142 - ((64 * winheight(0) + 14) / 28)
+let s:l = 85 - ((81 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-142
+85
 normal! 0
 lcd ~/.vim/plugged/vim-cmdline
 wincmd w
@@ -83,18 +80,16 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
-let s:l = 191 - ((62 * winheight(0) + 0) / 1)
+argglobal
+let s:l = 189 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-191
+189
 normal! 0
 lcd ~/.vim/plugged/vim-markdown
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("/usr/local/share/vim/vim80/doc/usr_44.txt") | buffer /usr/local/share/vim/vim80/doc/usr_44.txt | else | edit /usr/local/share/vim/vim80/doc/usr_44.txt | endif
 let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
@@ -124,18 +119,16 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
-arglocal
-%argdel
-let s:l = 25 - ((4 * winheight(0) + 0) / 1)
+argglobal
+let s:l = 22 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-25
-normal! 0
+22
+normal! 05|
 lcd ~/.vim/plugged/vim-debug
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-debug/syntax/timer_info.vim") | buffer ~/.vim/plugged/vim-debug/syntax/timer_info.vim | else | edit ~/.vim/plugged/vim-debug/syntax/timer_info.vim | endif
 let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
@@ -145,14 +138,13 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-debug
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-debug/ftplugin/timer_info.vim") | buffer ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim | else | edit ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim | endif
-let s:l = 2 - ((1 * winheight(0) + 13) / 26)
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2
+1
 normal! 0
 lcd ~/.vim/plugged/vim-debug
 wincmd w
@@ -173,18 +165,16 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
-let s:l = 164 - ((2 * winheight(0) + 0) / 1)
+argglobal
+let s:l = 161 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-164
+161
 normal! 0
 lcd ~/wiki/python
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-debug/ftplugin/timer_info.vim") | buffer ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim | else | edit ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim | endif
 let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
@@ -199,15 +189,14 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 5
 set stal=1
-badd +1 ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim
-badd +1 ~/wiki/vim/arglist.md
-badd +1 ~/wiki/vim/command.md
-badd +1 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +1 ~/.vim/plugged/vim-debug/autoload/debug/timer.vim
-badd +1 ~/wiki/python/python.md
-badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
-badd +1 ~/.vim/plugged/vim-debug/syntax/timer_info.vim
-badd +0 /usr/local/share/vim/vim80/doc/usr_44.txt
+" badd +426 ~/wiki/vim/arglist.md
+" badd +3 ~/wiki/vim/command.md
+" badd +85 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+" badd +189 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
+" badd +1 ~/.vim/plugged/vim-debug/autoload/debug/timer.vim
+" badd +1 ~/.vim/plugged/vim-debug/syntax/timer_info.vim
+" badd +2 ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim
+" badd +162 ~/wiki/python/python.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -220,6 +209,8 @@ if file_readable(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
 nohlsearch
+let g:my_session = v:this_session
+let g:my_session = v:this_session
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
