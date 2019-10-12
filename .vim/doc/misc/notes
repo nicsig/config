@@ -315,7 +315,7 @@ List modification ~
 
         Ex de fonction de tri custom:
 
-                fu! MySort(i1, i2)
+                fu MySort(i1, i2)
                     return a:i1 - a:i2
                     " ou return a:i1 == a:i2 ? 0 : a:i1 > a:i2 ? 1 : -1
                 endfu
@@ -407,7 +407,7 @@ Now you might use a language that isn't supported.  You can overrule the
 translate() function to do nothing: >
 
     :let uk2uk = copy(transdict)
-    :fu! uk2uk.translate(line)
+    :fu uk2uk.translate(line)
     :  return a:line
     :endfu
     :echo uk2uk.translate('three one wladiwostok')
@@ -1315,7 +1315,7 @@ aug my_tab_focus
     au TabClosed * call s:tab_focus_restore()
 aug END
 
-fu! s:tab_focus_restore() abort
+fu s:tab_focus_restore() abort
     if s:my_last_tab < tabpagenr()
         let g:debug = { 'my_last_tab' : s:my_last_tab, 'cmd' : 'tabnext '.(s:my_last_tab - 1) }
     else
@@ -1882,7 +1882,7 @@ input({prompt} [, {text} [, {completion}]])     *input()*
         Example with a mapping: >
 
             nmap \x :call GetFoo()<CR>:exe '/' . Foo<CR>
-            fu! GetFoo()
+            fu GetFoo()
                 call inputsave()
                 let g:Foo = input('enter search pattern: ')
                 call inputrestore()

@@ -33,6 +33,18 @@ DEBUG_LOGFILE=/tmp/debug
 # TODO: Add python (+ruby?) integration for Neovim.
 # And maybe use update-alternatives to make Neovim our default editor in the future.
 
+# TODO: The script has failed to compile the right Vim version in the past.
+# I think  it happened because  we had checked  out a particular  commit without
+# getting back to master before the compilation.
+# Anyway, the issue was not obvious to understand.
+# Add some messages to let us know when the script is doing what; like:
+#
+#     "running `$ git checkout master`"
+#     "running `$ git pull`"
+#     ...
+#
+# So that when we see an error in the log, we know which exact command is the cause.
+
 # Init {{{1
 
 PGM="$1"
@@ -386,10 +398,11 @@ download() { #{{{2
   # check a master branch exists (trans has no master branch)
   # https://stackoverflow.com/q/5167957/9780968
   if [[ -n "${COMMIT_HASH}" ]]; then
-    git checkout "${COMMIT_HASH}"
+    git checkout -f "${COMMIT_HASH}"
     return
   elif git show-ref --verify --quiet refs/heads/master; then
-    git checkout master
+    # https://stackoverflow.com/a/19778940/9780968
+    git checkout -f master
   fi
   # To prevent this kind of error:{{{
   #

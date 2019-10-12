@@ -14,7 +14,7 @@ endif
 " https://github.com/derekwyatt/vim-scala/pull/59
 " https://github.com/vim-pandoc/vim-pandoc-syntax/issues/54
 
-fu! s:fix_embedding() abort
+fu s:fix_embedding() abort
     if execute('syn list @markdownEmbedzsh', 'silent!') !~# 'markdownEmbedzsh'
         return
     endif

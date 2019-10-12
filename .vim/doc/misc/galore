@@ -389,8 +389,8 @@ Quickly change font size in GUI
 
    I think this was taken from tpope's config:
 
-        com! Bigger  :let &guifont = substitute(&guifont, '\d\+$', '\=submatch(0)+1', '')
-        com! Smaller :let &guifont = substitute(&guifont, '\d\+$', '\=submatch(0)-1', '')
+        com Bigger  :let &guifont = substitute(&guifont, '\d\+$', '\=submatch(0)+1', '')
+        com Smaller :let &guifont = substitute(&guifont, '\d\+$', '\=submatch(0)-1', '')
 
 ==============================================================================
 Debugging

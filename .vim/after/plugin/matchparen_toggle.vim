@@ -37,7 +37,7 @@ if exists('g:loaded_matchparen')
     "
     "     $ cat <<'EOF' >/tmp/vimrc
     "     nno <expr> "" Func()
-    "     fu! Func() abort
+    "     fu Func() abort
     "         augroup format_automatic_link
     "             au!
     "             au TextChanged * s/^\s*\zshttp.*/<&>/e | au! format_automatic_link
@@ -72,13 +72,13 @@ if exists('g:loaded_matchparen')
     " Otherwise, we could encounter bugs which  are hard to understand, and that
     " other people can't reproduce.
     "}}}
-    let events = [
-                 \ 'CursorMoved',
-                 \ 'CursorMovedI',
-                 \ 'WinEnter',
-                 \ 'TextChanged',
-                 \ 'TextChangedI',
-                 \ ]
+    let events =<< trim END
+        CursorMoved
+        CursorMovedI
+        WinEnter
+        TextChanged
+        TextChangedI
+    END
     for event in events
         " Why not using a guard to only install the autocmd if there's none?{{{
         "

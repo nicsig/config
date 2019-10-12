@@ -19,7 +19,7 @@
 "}}}
 
 
-fu! s:hitest() abort "{{{1
+fu s:hitest() abort "{{{1
     call s:options_save()
     call s:options_set()
 
@@ -99,7 +99,7 @@ fu! s:hitest() abort "{{{1
     call s:options_restore()
 endfu
 
-fu! s:pretty_formatting() abort "{{{1
+fu s:pretty_formatting() abort "{{{1
     keepj keepp g/^/exe "norm! Wi\r\t\egww"
     keepj keepp g/^\S/j
 
@@ -121,13 +121,13 @@ fu! s:pretty_formatting() abort "{{{1
     call cursor(1,1)
 endfu
 
-fu! s:options_save() abort "{{{1
+fu s:options_save() abort "{{{1
     let s:report   = &report
     let s:wrapscan = &wrapscan
     let s:ww       = &ww
 endfu
 
-fu! s:options_set() abort "{{{1
+fu s:options_set() abort "{{{1
     " be silent when we execute substitutions, deletions, ...
     set report=99999
     " could be necessary for `norm! ...#...` later
@@ -136,7 +136,7 @@ fu! s:options_set() abort "{{{1
     set ww&vim
 endfu
 
-fu! s:options_restore() abort "{{{1
+fu s:options_restore() abort "{{{1
     let &report   = s:report
     let &wrapscan = s:wrapscan
     let &ww       = s:ww

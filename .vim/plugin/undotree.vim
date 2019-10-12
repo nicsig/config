@@ -8,7 +8,7 @@ let g:undotree_SetFocusWhenToggle = 1
 " Don't open automatically the diff window.
 let g:undotree_DiffAutoOpen = 0
 
-fu! g:Undotree_CustomMap() abort
+fu g:Undotree_CustomMap() abort
     nmap <buffer><nowait><silent> } <plug>UndotreePreviousSavedState
     nmap <buffer><nowait><silent> { <plug>UndotreeNextSavedState
     nmap <buffer><nowait><silent> ) <plug>UndotreePreviousState

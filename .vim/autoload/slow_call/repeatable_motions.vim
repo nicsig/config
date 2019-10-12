@@ -31,13 +31,13 @@ nno  <unique>  g,  g;zv
 noremap  <expr><silent><unique>  gk  <sid>vertical_jump_rhs(0)
 noremap  <expr><silent><unique>  gj  <sid>vertical_jump_rhs(1)
 
-fu! s:snr()
+fu s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
 
 let s:snr = s:snr()
 
-fu! s:vertical_jump_rhs(is_fwd) abort
+fu s:vertical_jump_rhs(is_fwd) abort
     let mode = mode(1)
 
     if mode is# "\<c-v>"
@@ -48,7 +48,7 @@ fu! s:vertical_jump_rhs(is_fwd) abort
     \             a:is_fwd, string(mode))
 endfu
 
-fu! s:vertical_jump_go(is_fwd, mode) abort
+fu s:vertical_jump_go(is_fwd, mode) abort
     if a:mode is# 'n'
         norm! m'
     elseif index(['v', 'V', "\<c-v>"], a:mode) >= 0
@@ -79,7 +79,7 @@ fu! s:vertical_jump_go(is_fwd, mode) abort
     endif
 endfu
 
-fu! s:get_jump_height(is_fwd) abort
+fu s:get_jump_height(is_fwd) abort
     let vcol  = '\%'.virtcol('.').'v'
     let flags = a:is_fwd ? 'nW' : 'bnW'
 
@@ -148,7 +148,7 @@ noremap  <expr>  <silent><unique>  ]U  lg#motion#regex#rhs('concealed_url', 1)
 nno  <silent>  <t  :<c-u>call <sid>move_tabpage('-1')<cr>
 nno  <silent>  >t  :<c-u>call <sid>move_tabpage('+1')<cr>
 
-fu! s:move_tabpage(where) abort
+fu s:move_tabpage(where) abort
     try
         exe 'tabmove '.a:where
     catch /^Vim\%((\a\+)\)\?:E474:/
@@ -218,7 +218,7 @@ noremap  <expr><unique>  F   <sid>fts('F')
 noremap  <expr><unique>  ss  <sid>fts('s')
 noremap  <expr><unique>  SS  <sid>fts('S')
 
-fu! s:fts(cmd) abort
+fu s:fts(cmd) abort
     " Why not `call feedkeys('zv', 'int')`?{{{
     "
     " It  would interfere  with  `vim-sneak`,  when the  latter  asks for  which

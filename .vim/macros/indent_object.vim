@@ -11,7 +11,7 @@
 " >    copy up to / down to a line  which has a lower indentation level than the
 " >    current one.
 
-fu! s:in_indentation() abort "{{{1
+fu s:in_indentation() abort "{{{1
     " select all text in current indentation level excluding any empty lines
     " that precede or follow the current indentationt level
     "
@@ -58,7 +58,7 @@ endfu
 xno  <silent>  ii :<c-u>call <sid>in_indentation()<cr>
 ono  <silent>  ii :<c-u>call <sid>in_indentation()<cr>
 
-fu! s:around_indentation() abort "{{{1
+fu s:around_indentation() abort "{{{1
     " select all text in the current indentation level including any emtpy
     " lines that precede or follow the current indentation level;
     "

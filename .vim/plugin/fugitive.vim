@@ -9,7 +9,7 @@ augroup my_fugitive
     au CmdlineLeave : if getcmdline() is# 'Glog' | call s:glog_conceal('on_quickfixcmdpost') | endif
 augroup END
 
-fu! s:glog_conceal(when) abort
+fu s:glog_conceal(when) abort
     if a:when is# 'on_quickfixcmdpost'
         au QuickFixCmdPost * ++once sil! call s:glog_conceal('now')
     else

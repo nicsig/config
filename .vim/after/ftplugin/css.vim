@@ -10,15 +10,15 @@ setl sw=2
 
 " Variables {{{1
 
-let b:mc_chain = [
-    \ 'file',
-    \ 'omni',
-    \ 'keyp',
-    \ 'dict',
-    \ 'ulti',
-    \ 'abbr',
-    \ 'c-p',
-    \ ]
+const b:mc_chain =<< trim END
+    file
+    omni
+    keyn
+    dict
+    ulti
+    abbr
+    c-n
+END
 
 " Teardown {{{1
 

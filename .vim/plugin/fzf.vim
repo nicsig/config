@@ -51,14 +51,14 @@ let g:fzf_command_prefix = 'Fz'
 "
 " See: https://www.reddit.com/r/vim/comments/b88ohz/fzf_ignore_directoryfilename_while_searching/ejwn384/
 "}}}
-exe 'com! -bang -nargs=* ' . g:fzf_command_prefix . 'Rg
+exe 'com -bang -nargs=* ' . g:fzf_command_prefix . 'Rg
   \ call fzf#vim#grep(
   \   "rg 2>/dev/null --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1,
   \   <bang>0 ? fzf#vim#with_preview({"options": "--delimiter=: --nth=4.."}, "up:60%")
   \           : fzf#vim#with_preview({"options": "--delimiter=: --nth=4.."}, "right:50%:hidden", "?"),
   \   <bang>0)'
 
-exe 'com! -bang -nargs=? -complete=dir '.g:fzf_command_prefix.'Files call fzf#vim#files(<q-args>, fzf#vim#with_preview("right:50%"), <bang>0)'
+exe 'com -bang -nargs=? -complete=dir '.g:fzf_command_prefix.'Files call fzf#vim#files(<q-args>, fzf#vim#with_preview("right:50%"), <bang>0)'
 
 " `:FzSnippets` prints the description of the snippets (✔), but doesn't use it when filtering the results (✘).{{{
 
@@ -76,5 +76,5 @@ exe 'com! -bang -nargs=? -complete=dir '.g:fzf_command_prefix.'Files call fzf#vi
 "     /FIELD INDEX EXPRESSION
 "     ..     All the fields
 "}}}
-exe 'com! -bar -bang '.g:fzf_command_prefix.'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
+exe 'com -bar -bang '.g:fzf_command_prefix.'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
 

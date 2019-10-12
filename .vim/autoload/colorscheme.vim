@@ -1,5 +1,5 @@
 " Interface {{{1
-fu! colorscheme#set() abort "{{{2
+fu colorscheme#set() abort "{{{2
     " Purpose:{{{
     "
     " If `g:seoul256_srgb` is set to 1, the color mapping is altered to suit the
@@ -118,24 +118,24 @@ fu! colorscheme#set() abort "{{{2
     " a  hex  color  code, but  it  would  make  Vim  choose the  color  in  its
     " builtin/fallback palette, which will be ugly/flashy.
     "}}}
-    let g:terminal_ansi_colors = [
-        \ '#1d1f21',
-        \ '#cc342b',
-        \ '#198844',
-        \ '#af8760',
-        \ '#3971ed',
-        \ '#a36ac7',
-        \ '#3971ed',
-        \ '#f5f5f5',
-        \ '#989698',
-        \ '#cc342b',
-        \ '#198844',
-        \ '#d8865f',
-        \ '#3971ed',
-        \ '#a36ac7',
-        \ '#3971ed',
-        \ '#ffffff',
-        \ ]
+    let g:terminal_ansi_colors =<< trim END
+        #1d1f21
+        #cc342b
+        #198844
+        #af8760
+        #3971ed
+        #a36ac7
+        #3971ed
+        #f5f5f5
+        #989698
+        #cc342b
+        #198844
+        #d8865f
+        #3971ed
+        #a36ac7
+        #3971ed
+        #ffffff
+    END
 
     " Nvim needs the same kind of configuration.
     " Why do you run the previous code even in Nvim?{{{
@@ -152,7 +152,7 @@ fu! colorscheme#set() abort "{{{2
     endif
 endfu
 
-fu! colorscheme#customize() abort "{{{2
+fu colorscheme#customize() abort "{{{2
     " the `SpecialKey` HG set by seoul256 is barely readable
     hi! link SpecialKey Special
 
@@ -270,7 +270,7 @@ fu! colorscheme#customize() abort "{{{2
     endif
 endfu
 
-fu! s:customize() abort
+fu s:customize() abort
     call s:diff()
     call s:styled_comments()
     call s:tabline()
@@ -278,13 +278,13 @@ fu! s:customize() abort
     call s:user()
 endfu
 
-fu! colorscheme#save_last_version() abort "{{{2
+fu colorscheme#save_last_version() abort "{{{2
     let line = 'let g:my_last_color_scheme = '.get(g:, 'seoul256_current_bg', 253)
     call writefile([line], $HOME.'/.vim/colors/my/last_version.vim')
 endfu
 " }}}1
 " Core {{{1
-fu! s:diff() abort "{{{2
+fu s:diff() abort "{{{2
     " Why do you clear `DiffChange`?{{{
     "
     " When  you compare  two  windows  in diff  mode,  `DiffChange`  is used  to
@@ -296,7 +296,7 @@ fu! s:diff() abort "{{{2
     hi! clear DiffChange
 endfu
 
-fu! s:styled_comments() abort "{{{2
+fu s:styled_comments() abort "{{{2
     " Need this to be able to make a distinction between comments and code highlighted by `PreProc`.{{{
     "
     " By default, `PreProc` can be used to highlight both comment and code.
@@ -446,7 +446,7 @@ fu! s:styled_comments() abort "{{{2
     endif
 endfu
 
-fu! s:tabline() abort "{{{2
+fu s:tabline() abort "{{{2
     " the purpose of this function is to remove the underline value from the HG
     " TabLine
 
@@ -477,7 +477,7 @@ fu! s:tabline() abort "{{{2
     exe printf(cmd, attributes.fg)
 endfu
 
-fu! s:title() abort "{{{2
+fu s:title() abort "{{{2
     " Purpose: We need some HGs to get the bold, italic, bold+italic styles in a markdown header.
     let title_fg = s:get_attributes('Title').fg
     if has('gui_running')
@@ -504,7 +504,7 @@ fu! s:title() abort "{{{2
     endif
 endfu
 
-fu! s:user() abort "{{{2
+fu s:user() abort "{{{2
     " We're going to define 2 HGs: User1 and User2.{{{
     "
     " We use them in the status line to customize the appearance of:
@@ -578,7 +578,7 @@ fu! s:user() abort "{{{2
 endfu
 " }}}1
 " Utilities {{{1
-fu! s:get_attributes(hg) abort "{{{2
+fu s:get_attributes(hg) abort "{{{2
     let attributes = {
         \ 'fg'      : 0,
         \ 'bg'      : 0,

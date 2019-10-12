@@ -45,7 +45,7 @@
 " Con: not reliable, because it doesn't handle nested parentheses properly
 cno <expr>  <c-z>  <sid>delete_inside_parentheses()
 
-fu! s:delete_inside_parentheses() abort "{{{2
+fu s:delete_inside_parentheses() abort "{{{2
     let pos        = getcmdpos()
     let not_before = '%(%'.pos.'c.*)@<!'
     let not_after  = '%(.*%'.pos.'c)@!'
@@ -71,7 +71,7 @@ endfu
 
 cno <expr>  <c-z>  <sid>delete_inside_parentheses()
 
-fu! s:find_parenthesis(fwd) abort "{{{2
+fu s:find_parenthesis(fwd) abort "{{{2
     let found = 0
     let unbalanced = 0
     for i in a:fwd
@@ -93,7 +93,7 @@ fu! s:find_parenthesis(fwd) abort "{{{2
     return [ found, i ]
 endfu
 
-fu! s:delete_inside_parentheses() abort "{{{2
+fu s:delete_inside_parentheses() abort "{{{2
     let pos = getcmdpos()
     let line = getcmdline()
     if pos > len(line)

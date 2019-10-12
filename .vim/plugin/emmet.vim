@@ -61,7 +61,7 @@ augroup my_emmet
 augroup END
 
 " Functions {{{1
-fu! s:install_mappings() abort "{{{2
+fu s:install_mappings() abort "{{{2
     " The default mappings are not silent (and they probably don't use `<nowait>` either).
     " We prefer to make them silent.
 
@@ -174,7 +174,7 @@ fu! s:install_mappings() abort "{{{2
     call s:set_undo_ftplugin()
 endfu
 
-fu! s:set_undo_ftplugin() abort "{{{2
+fu s:set_undo_ftplugin() abort "{{{2
     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
         \ . "
         \ | exe 'iunmap <buffer> <c-g>,'

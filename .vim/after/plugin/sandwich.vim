@@ -52,7 +52,7 @@ endif
 "         xno sr  <nop>
 "}}}
 
-fu! s:set_recipes() abort
+fu s:set_recipes() abort
     " Don't we need `deepcopy()`?{{{
     "
     " If we executed this simple assignment:

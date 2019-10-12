@@ -58,7 +58,7 @@ sil! delc LPR
 
 sil! delc LogiPatFlags
 
-com! -nargs=+  LogiPat  echomsg LogiPat(<q-args>)
+com! -nargs=+ LogiPat echomsg LogiPat(<q-args>)
 
 " man.vim {{{1
 "

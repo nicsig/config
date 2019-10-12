@@ -61,7 +61,7 @@
 "                               lightcyan_on_black      black_on_lightcyan
 
 let s:fname = expand('<sfile>:p')
-fu! s:main() abort
+fu s:main() abort
     " Open this file in a window if it isn't edited yet.
     " Use the current window if it's empty.
     if expand('%:p') isnot# s:fname
@@ -94,7 +94,7 @@ fu! s:main() abort
     nohlsearch
 endfu
 
-fu! s:highlight() abort
+fu s:highlight() abort
     let cword = expand('<cword>')
     exe printf('hi col_%s ctermfg=%s guifg=%s', cword, cword, cword)
     exe printf('syn keyword col_%s %s', cword, cword)

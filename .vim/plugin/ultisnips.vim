@@ -181,7 +181,7 @@ xno  <silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
 " We need a way to enable UltiSnips's autotrigger on-demand.
 nno <silent> cou :<c-u>call <sid>ultisnips_toggle_autotrigger()<cr>
-fu! s:ultisnips_toggle_autotrigger() abort
+fu s:ultisnips_toggle_autotrigger() abort
     if exists('#UltiSnips_AutoTrigger')
         au! UltiSnips_AutoTrigger
         aug! UltiSnips_AutoTrigger
@@ -263,7 +263,7 @@ augroup ulti_save_info
     autocmd User UltiSnipsEnterFirstSnippet call s:save_info()
 augroup END
 
-fu! s:save_info() abort
+fu s:save_info() abort
     if &ft isnot# 'markdown' || exists('g:my_ultisnips_info')
         return
     endif

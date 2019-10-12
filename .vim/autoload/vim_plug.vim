@@ -1,4 +1,4 @@
-fu! vim_plug#move_between_commits(is_fwd) abort "{{{1
+fu vim_plug#move_between_commits(is_fwd) abort "{{{1
     " There's no commit in the main / initial window.
     "
     " We're going to press `o` later  to open the preview window showing details
@@ -20,7 +20,7 @@ fu! vim_plug#move_between_commits(is_fwd) abort "{{{1
     norm o
 endfu
 
-fu! vim_plug#show_documentation() abort "{{{1
+fu vim_plug#show_documentation() abort "{{{1
     let name = matchstr(getline('.'), '^- \zs\S\+\ze:')
     if has_key(g:plugs, name)
         for doc in split(globpath(g:plugs[name].dir, 'doc/*.txt'), '\n')

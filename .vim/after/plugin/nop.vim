@@ -46,7 +46,7 @@ endif
 
 " Various keys used as a prefix {{{1
 
-fu! s:cancel_prefix(prefixes) abort
+fu s:cancel_prefix(prefixes) abort
     for pfx in a:prefixes
         " We may let the timeout elapse.
         " In this case, the key should have no effect.
@@ -83,7 +83,7 @@ fu! s:cancel_prefix(prefixes) abort
         "}}}
     endfor
 endfu
-call s:cancel_prefix(['+', '-', '<space>','<bar>', 'U', 's', 'S'])
+call s:cancel_prefix(['+', '-', '<space>', '<bar>', 'U', 's', 'S'])
 
 " You've disabled `s` and `S`. What about `sS` and `Ss`?{{{
 "

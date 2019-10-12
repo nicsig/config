@@ -1,6 +1,6 @@
 " TODO: Move the `notes` and `galore` files into markdown files.
 
-fu! s:snr()
+fu s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
 
@@ -10,11 +10,11 @@ if expand('%:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
     let &l:fde = s:snr()..'fold_expr()'
 endif
 
-fu! s:fold_expr() abort "{{{1
+fu s:fold_expr() abort "{{{1
     return getline(v:lnum) =~# '^=\+$' ? '>1' : '='
 endfu
 
-fu! s:fold_text() abort "{{{1
+fu s:fold_text() abort "{{{1
     return getline(nextnonblank(v:foldstart+1))
 endfu
 

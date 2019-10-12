@@ -2417,6 +2417,7 @@ var_what_have_you() { #{{{2
 #}}}2
 
 vim_fix_vimrc() { #{{{2
+  emulate -L zsh
   # Purpose:{{{
   #
   # Sometimes, you write something in your  vimrc which causes an issue, and you
@@ -2440,6 +2441,22 @@ vim_prof() { #{{{2
   tmp="$(mktemp /tmp/.vim_profile.XXXXXXXXXX)"
   vim --cmd "prof start ${tmp}" --cmd 'prof! file ~/.vim/vimrc' -cq
   vim "${tmp}" -c 'syn off' -c 'norm +tiE' -c 'update'
+}
+
+vim_read_plugin_help() { #{{{2
+  emulate -L zsh
+  # Purpose:{{{
+  #
+  # Read the help of a plugin which you don't want to install yet.
+  #}}}
+  # Usage example:{{{
+  #
+  #     $ git clone https://github.com/AndrewRadev/splitjoin.vim
+  #     $ cd splitjoin.vim
+  #     $ vim_read_plugin_help
+  #     :h splitjoin
+  #}}}
+  vim +"set rtp+=$PWD|sil! helpt ALL"
 }
 
 vim_recover() { #{{{2

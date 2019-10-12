@@ -21,7 +21,7 @@ endif
 "
 "     ino <c-g>j <c-r>=C_g_j()<cr>
 "     ino j      <c-r>=J()<cr>
-"     fu! C_g_j()
+"     fu C_g_j()
 "         let s:in_submode = 1
 "         let s:timer_id = timer_start(3000, {_ -> execute('let s:in_submode = 0')})
 "         if exists('s:timer_id')
@@ -29,7 +29,7 @@ endif
 "         endif
 "         return "\<c-x>\<c-e>"
 "     endfu
-"     fu! J() abort
+"     fu J() abort
 "         return get(s:, 'in_submode', 0) ? "\<c-x>\<c-e>" : 'j'
 "     endfu
 "}}}
@@ -264,7 +264,7 @@ call submode#enter_with('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-cha
 call submode#map(       'char-around', 'i', 'r',      'k', '<plug>(duplicate-char-above)')
 ino  <expr>  <plug>(duplicate-char-above)  <sid>duplicate_char_around(1)
 
-fu! s:duplicate_char_around(above) abort
+fu s:duplicate_char_around(above) abort
     " By default, `c-y` only duplicate the character right above.
     " If there's nothing, but there IS a character on the 2nd line above,
     " `c-y` ignores it.

@@ -159,7 +159,7 @@ To fix this, you can clear every problematic filepath from `v:oldfiles`:
 But this will not persist after restarting Vim.
 To remove the problematic filepaths definitively, you also need to edit `~/.viminfo`:
 
-    fu! MakeFzHistoryFastAgain() abort
+    fu MakeFzHistoryFastAgain() abort
         for i in range(0, 99)
             if v:oldfiles[i] =~# '/gvfs/'
                 let v:oldfiles[i] = ''
