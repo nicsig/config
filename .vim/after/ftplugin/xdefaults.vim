@@ -10,7 +10,7 @@ setl cole=3
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ . "
+    \ ..'
     \ | setl cms< cocu< cole< fdm< fdt<
-    \ "
+    \ '
 

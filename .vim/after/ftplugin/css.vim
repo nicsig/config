@@ -11,21 +11,21 @@ setl sw=2
 " Variables {{{1
 
 const b:mc_chain =<< trim END
-    file
-    omni
-    keyn
-    dict
-    ulti
-    abbr
-    c-n
+file
+omni
+keyn
+dict
+ulti
+abbr
+c-n
 END
 
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ . "
+    \ ..'
     \ | setl sw<
     \ | set fp< kp<
     \ | unlet! b:mc_chain
-    \ "
+    \ '
 

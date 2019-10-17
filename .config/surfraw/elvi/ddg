@@ -18,17 +18,17 @@ w3_config_hook () {
 }
 
 w3_usage_hook () {
-    cat <<EOF
-Usage: $w3_argv0 [options] [search words]...
-Description:
-  Surfraw search the web using DuckDuckGo (www.duckduckgo.com)
-Local options:
-    -d,-ducky,-l,-lucky         use in case of overwhelming feeling of duckiness
-    -j,-javascript              use javascript
-    -safe                       enable safe search
-    -r,-redirect                use redirection
-    -s,-insecure                disable SSL search
-EOF
+    cat <<-EOF
+		Usage: $w3_argv0 [options] [search words]...
+		Description:
+		  Surfraw search the web using DuckDuckGo (www.duckduckgo.com)
+		Local options:
+		    -d,-ducky,-l,-lucky         use in case of overwhelming feeling of duckiness
+		    -j,-javascript              use javascript
+		    -safe                       enable safe search
+		    -r,-redirect                use redirection
+		    -s,-insecure                disable SSL search
+		EOF
     w3_global_usage
 }
 

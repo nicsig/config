@@ -113,13 +113,13 @@ fi
 
 # Functions {{{1
 main() { #{{{2
-  cat <<EOF
+  cat <<-EOF
 
------------
-$(date +%m-%d\ %H:%M)
------------
+	-----------
+	$(date +%m-%d\ %H:%M)
+	-----------
 
-EOF
+	EOF
 
   download
   get_version
@@ -198,10 +198,10 @@ check_we_are_root() { #{{{2
   #      │  0 is the EUID of the root user.
   #      │
   if [[ "${EUID}" -ne 0 ]]; then
-    cat <<EOF >&2
-Please run as root:
-    sudo "$0" "${PGM}"
-EOF
+    cat <<-EOF >&2
+	Please run as root:
+	    sudo "$0" "${PGM}"
+	EOF
     # 77 = not sufficient permission
     exit 77
   fi

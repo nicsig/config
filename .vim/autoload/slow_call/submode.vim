@@ -159,19 +159,19 @@ call submode#map(       'tradewinds', 'n', 'r',       'l', '<plug>(tradewinds-l)
 "}}}
 "     call submode#enter_with('my-uppercase', 'nic', 'r', '<m-u>u', '<plug>(my-uppercase)' )
 "     call submode#map(       'my-uppercase', 'nic', 'r',      'u', '<plug>(my-uppercase)')
-"     nno <silent> <plug>(my-uppercase) :<c-u>call readline#change_case_save(1)<bar>set opfunc=readline#change_case_word<cr>g@l
+"     nno <silent> <plug>(my-uppercase) :<c-u>call readline#change_case_save(1)<bar>set opfunc=readline#change_case_word<bar>norm! g@l<cr>
 "     ino <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'i')<cr>
 "     cno <silent> <plug>(my-uppercase) <c-r>=readline#change_case_save(1).readline#change_case_word('', 'c')<cr>
 
 "     call submode#enter_with('my-capitalize', 'nic', 'r', '<m-u>i', '<plug>(my-capitalize)' )
 "     call submode#map(       'my-capitalize', 'nic', 'r',      'i', '<plug>(my-capitalize)')
-"     nno <silent> <plug>(my-capitalize) :<c-u>set opfunc=readline#move_by_words<cr>g@l
+"     nno <silent> <plug>(my-capitalize) :<c-u>set opfunc=readline#move_by_words<bar>norm! g@l<cr>
 "     ino <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('i', 1, 1)<cr>
 "     cno <silent> <plug>(my-capitalize) <c-r>=readline#move_by_words('c', 1, 1)<cr>
 
 "     call submode#enter_with('my-lowercase', 'nic', 'r', '<m-u>o', '<plug>(my-lowercase)' )
 "     call submode#map(       'my-lowercase', 'nic', 'r',      'o', '<plug>(my-lowercase)')
-"     nno <silent> <plug>(my-lowercase) :<c-u>call readline#change_case_save(0)<bar>set opfunc=readline#change_case_word<cr>g@l
+"     nno <silent> <plug>(my-lowercase) :<c-u>call readline#change_case_save(0)<bar>set opfunc=readline#change_case_word<bar>norm! g@l<cr>
 "     ino <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'i')<cr>
 "     cno <silent> <plug>(my-lowercase) <c-r>=readline#change_case_save(0).readline#change_case_word('', 'c')<cr>
 
@@ -258,11 +258,11 @@ call submode#map(       'change-indent', 'i', '',      '<', '<c-d>')
 
 call submode#enter_with('char-around', 'i', 'r', '<c-x>j', '<plug>(duplicate-char-below)' )
 call submode#map(       'char-around', 'i', 'r',      'j', '<plug>(duplicate-char-below)')
-ino  <expr>  <plug>(duplicate-char-below)  <sid>duplicate_char_around(0)
+ino <expr> <plug>(duplicate-char-below) <sid>duplicate_char_around(0)
 
 call submode#enter_with('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-char-above)' )
 call submode#map(       'char-around', 'i', 'r',      'k', '<plug>(duplicate-char-above)')
-ino  <expr>  <plug>(duplicate-char-above)  <sid>duplicate_char_around(1)
+ino <expr> <plug>(duplicate-char-above) <sid>duplicate_char_around(1)
 
 fu s:duplicate_char_around(above) abort
     " By default, `c-y` only duplicate the character right above.
@@ -283,21 +283,21 @@ endfu
 
 call submode#enter_with('scroll-window', 'n', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
 call submode#map(       'scroll-window', 'n', 'r',      'j', '<plug>(scroll-window-down)')
-nno  <silent>  <plug>(scroll-window-down)  <c-e>:redraw<cr>
-"                                               │
-"                                               └ needed because of 'lz'
+nno <silent> <plug>(scroll-window-down) <c-e>:redraw<cr>
+"                                            │
+"                                            └ needed because of 'lz'
 
 call submode#enter_with('scroll-window', 'n', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
 call submode#map(       'scroll-window', 'n', 'r',      'k', '<plug>(scroll-window-up)')
-nno  <silent>  <plug>(scroll-window-up)  <c-y>:redraw<cr>
+nno <silent> <plug>(scroll-window-up) <c-y>:redraw<cr>
 
 
 " Do the same for insert mode.
 call submode#enter_with('scroll-window', 'i', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
 call submode#map(       'scroll-window', 'i', 'r',      'j', '<plug>(scroll-window-down)')
-ino  <plug>(scroll-window-down)  <c-x><c-e>
+ino <plug>(scroll-window-down) <c-x><c-e>
 
 call submode#enter_with('scroll-window', 'i', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
 call submode#map(       'scroll-window', 'i', 'r',      'k', '<plug>(scroll-window-up)')
-ino  <plug>(scroll-window-up)  <c-x><c-y>
+ino <plug>(scroll-window-up) <c-x><c-y>
 

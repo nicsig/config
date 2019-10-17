@@ -103,7 +103,7 @@ call s:cancel_prefix(['+', '-', '<space>', '<bar>', 'U', 's', 'S'])
 " by accident instead. Very annoying (slow popup menu; breaks workflow).
 " We can still use C-p though.
 "}}}
-ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
+ino <expr> <c-n> pumvisible() ? '<c-n>' : ''
 
 " i_C-r_. {{{1
 
@@ -129,32 +129,32 @@ ino  <expr>  <c-n>  pumvisible() ? '<c-n>' : ''
 " C-z {{{1
 
 " Don't suspend if I press C-z by accident from visual mode.
-vno  <c-z>  <nop>
+vno <c-z> <nop>
 
 " Same thing in normal mode, because of some bugs:
 " https://unix.stackexchange.com/questions/q/445051/289772
 " https://unix.stackexchange.com/questions/q/445239/289772
-nno  <c-z>  <nop>
+nno <c-z> <nop>
 
 " do  dp {{{1
 
 " I often hit `do` and `dp` by accident, when in fact I only wanted to hit
 " `o` or `p`.
 " Anyway, `do` and `dp` are only useful in a buffer which is in diff mode.
-nno  <expr>  do  &l:diff ? 'do' : ''
-nno  <expr>  dp  &l:diff ? 'dp' : ''
+nno <expr> do &l:diff ? 'do' : ''
+nno <expr> dp &l:diff ? 'dp' : ''
 
 " go Esc {{{1
 
 " When we cancel `go` with Escape, Vim moves the cursor to the top of the
 " buffer (1st byte, see `:h go`). Annoying.
-nno  go<esc>  <nop>
+nno go<esc> <nop>
 
 " Uu {{{1
 
 " I think we often press `Uu` by accident.
 " When that happens, Vim undo our edits, which I don't want.
-nno  Uu  <nop>
+nno Uu <nop>
 
 " {{{1
 " Remove mappings {{{1

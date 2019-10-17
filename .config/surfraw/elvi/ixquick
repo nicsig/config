@@ -22,39 +22,39 @@ defyn SURFRAW_ixquick_ssl   yes
 }
 
 w3_usage_hook () {
-    cat <<EOF
-Usage: $w3_argv0 [options] [search words]...
-Description:
-  Surfraw search the web using Ixquick metasearch [HTTPS] (www.ixquick.com)
-Local options:
-  -nossl                        Don't use https
-                                Environment: SURFRAW_ixquick_ssl
-  -search=                      Specialized search on topic
-          web		|       web
-          pics		|       images
-                                Environment: SURFRAW_ixquick_search
+    cat <<-EOF
+		Usage: $w3_argv0 [options] [search words]...
+		Description:
+		  Surfraw search the web using Ixquick metasearch [HTTPS] (www.ixquick.com)
+		Local options:
+		  -nossl                        Don't use https
+		                                Environment: SURFRAW_ixquick_ssl
+		  -search=                      Specialized search on topic
+		          web		|       web
+		          pics		|       images
+		                                Environment: SURFRAW_ixquick_search
 
-  -lang=                      	Language interface of ixquick
-	english
-	dansk
-	deutsch
-	espanol
-	francais
-	italiano
-	nederlands
-	norsk
-	polski
-	portugues
-	suomi
-	svenska
-	turkce
-	jiantizhongwen
-	nihongo
-	fantizhengwen
-	hangul
-                                Default: english
-                                Environment: SURFRAW_ixquick_lang, SURFRAW_lang
-EOF
+		  -lang=                      	Language interface of ixquick
+			english
+			dansk
+			deutsch
+			espanol
+			francais
+			italiano
+			nederlands
+			norsk
+			polski
+			portugues
+			suomi
+			svenska
+			turkce
+			jiantizhongwen
+			nihongo
+			fantizhengwen
+			hangul
+		                                Default: english
+		                                Environment: SURFRAW_ixquick_lang, SURFRAW_lang
+		EOF
     w3_global_usage
 }
 

@@ -10,26 +10,26 @@ def   SURFRAW_git_lang         any
 }
 
 w3_usage_hook () {
-    cat <<EOF
+    cat <<-EOF
 
-Usage: $w3_argv0 [options] [search-string]
-Description:
-	Search Github (https://github.com)
+		Usage: $w3_argv0 [options] [search-string]
+		Description:
+			Search Github (https://github.com)
 
-	Local options:
-	-l=LANGUAGE   |  -lang=LANGUAGE
-	Languages are case sensitive, eg., C, Shell, Python etc.
-	Languages with spaces must be conjoined with a "+", eg, Common+Lisp
-	Default: Any
+			Local options:
+			-l=LANGUAGE   |  -lang=LANGUAGE
+			Languages are case sensitive, eg., C, Shell, Python etc.
+			Languages with spaces must be conjoined with a "+", eg, Common+Lisp
+			Default: Any
 
-	-type=SEARCH  | -t=SEARCH
-	every  |   Everything
-	repo   |   Repositories
-	user   |   Users
-	code   |   Code
-	           Default: Everything
+			-type=SEARCH  | -t=SEARCH
+			every  |   Everything
+			repo   |   Repositories
+			user   |   Users
+			code   |   Code
+			           Default: Everything
 
-EOF
+		EOF
     w3_global_usage
 }
 

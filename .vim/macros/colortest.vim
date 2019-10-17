@@ -67,7 +67,7 @@ fu s:main() abort
     if expand('%:p') isnot# s:fname
         let fname = fnameescape(s:fname)
         unlet s:fname
-        if &mod || line('$') != 1 || getline(1) != ''
+        if &mod || line('$') != 1 || getline(1) isnot# ''
             exe 'new ' . fname
         else
             exe 'edit ' . fname
@@ -76,8 +76,8 @@ fu s:main() abort
 
     syn clear
     call cursor(1,1)
-    let lnum1 = search('black_on_white')
-    let lnum2 = search('lightcyan_on_black', 'n') + 1
+    let lnum1 = search('black_on_white', 'cW')
+    let lnum2 = search('lightcyan_on_black', 'cnW') + 1
 
     while search('_on_', 'W') < lnum2 + 2
         let col1 = substitute(expand('<cword>'), '\(\a\+\)_on_\a\+', '\1', '')

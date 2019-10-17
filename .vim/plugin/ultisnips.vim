@@ -151,7 +151,7 @@ let g:UltiSnipsRemoveSelectModeMappings = 1
 "
 " https://github.com/SirVer/ultisnips/issues/1017#issuecomment-452154595
 "}}}
-ino  <silent>  <c-g><s-tab>  <c-r>=execute(g:_uspy . ' UltiSnips_Manager._current_snippet_is_done()', 'silent!')[-1]<cr>
+ino <silent> <c-g><s-tab> <c-r>=execute(g:_uspy . ' UltiSnips_Manager._current_snippet_is_done()', 'silent!')[-1]<cr>
 " TODO: Find a way to end the expansion of a snippet when we leave insert mode.{{{
 "
 " Hint: If you install a one-shot autocmd listening to InsertLeave,
@@ -177,7 +177,7 @@ ino  <silent>  <c-g><s-tab>  <c-r>=execute(g:_uspy . ' UltiSnips_Manager._curren
 "
 " Because, we purposefully gave an invalid value to `g:UltiSnipsExpandTrigger`.
 "}}}
-xno  <silent>  <tab>  :call UltiSnips#SaveLastVisualSelection()<cr>gvs
+xno <silent> <tab> :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
 " We need a way to enable UltiSnips's autotrigger on-demand.
 nno <silent> cou :<c-u>call <sid>ultisnips_toggle_autotrigger()<cr>

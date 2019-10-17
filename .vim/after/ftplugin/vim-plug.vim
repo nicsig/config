@@ -13,10 +13,10 @@ nmap <buffer> p o
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ . "
-    \ | exe 'nunmap <buffer> H'
-    \ | exe 'nunmap <buffer> o'
-    \ | exe 'nunmap <buffer> )'
-    \ | exe 'nunmap <buffer> ('
-    \ "
+    \ ..'
+    \ | exe "nunmap <buffer> H"
+    \ | exe "nunmap <buffer> o"
+    \ | exe "nunmap <buffer> )"
+    \ | exe "nunmap <buffer> ("
+    \ '
 

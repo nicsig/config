@@ -55,8 +55,8 @@ endfu
 " }}}1
 
 " indentation level sans any surrounding empty lines
-xno  <silent>  ii :<c-u>call <sid>in_indentation()<cr>
-ono  <silent>  ii :<c-u>call <sid>in_indentation()<cr>
+xno <silent> ii :<c-u>call <sid>in_indentation()<cr>
+ono <silent> ii :<c-u>call <sid>in_indentation()<cr>
 
 fu s:around_indentation() abort "{{{1
     " select all text in the current indentation level including any emtpy
@@ -126,5 +126,5 @@ endfu
 " }}}1
 
 " indentation level and any surrounding empty lines
-xno  <silent>  ai :<c-u>call <sid>around_indentation()<cr>
-ono  <silent>  ai :<c-u>call <sid>around_indentation()<cr>
+xno <silent> ai :<c-u>call <sid>around_indentation()<cr>
+ono <silent> ai :<c-u>call <sid>around_indentation()<cr>

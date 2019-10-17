@@ -4,11 +4,11 @@
 . surfraw || exit 1
 
 w3_usage_hook () {
-    cat <<EOF
-Usage: $w3_argv0 [options] [search words]...
-Description:
-  Search general info using Wikipedia FR (https://fr.wikipedia.org)
-EOF
+    cat <<-EOF
+		Usage: $w3_argv0 [options] [search words]...
+		Description:
+		  Search general info using Wikipedia FR (https://fr.wikipedia.org)
+		EOF
     w3_global_usage
 }
 

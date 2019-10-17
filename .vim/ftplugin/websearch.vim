@@ -36,7 +36,7 @@ nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!
 " I care about the search being  more predictable, even when it contains special
 " characters.
 "}}}
-nno  <buffer><nowait><silent>  <cr>  :<c-u>sil call system('xdg-open '
+nno <buffer><nowait><silent> <cr> :<c-u>sil call system('xdg-open '
     \ . shellescape(b:url . substitute(getline('.'), '"', '', 'g')))
     \ <bar>q!<cr>
 nmap <buffer><nowait><silent>  ZZ    <cr>
@@ -44,11 +44,11 @@ nmap <buffer><nowait><silent>  ZZ    <cr>
 " teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ . "
+    \ ..'
     \ | setl bh< bl< cul< swf< wrap<
     \ | unlet! b:url
-    \ | exe 'nunmap <buffer> q'
-    \ | exe 'nunmap <buffer> <cr>'
-    \ | exe 'nunmap <buffer> ZZ'
-    \ "
+    \ | exe "nunmap <buffer> q"
+    \ | exe "nunmap <buffer> <cr>"
+    \ | exe "nunmap <buffer> ZZ"
+    \ '
 

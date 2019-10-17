@@ -99,10 +99,10 @@ nmap <buffer><nowait><silent> ZZ <cr>
 " teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ . "
+    \ ..'
     \ | setl bh< bl< cul< swf< wrap<
-    \ | exe 'nunmap <buffer> q'
-    \ | exe 'nunmap <buffer> <cr>'
-    \ | exe 'nunmap <buffer> ZZ'
-    \ "
+    \ | exe "nunmap <buffer> q"
+    \ | exe "nunmap <buffer> <cr>"
+    \ | exe "nunmap <buffer> ZZ"
+    \ '
 

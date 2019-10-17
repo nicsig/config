@@ -18,13 +18,13 @@
 LOGFILE="${HOME}/log/keyboard_$(basename "$0" .sh).log"
 
 main() {
-  cat <<EOF
+  cat <<-EOF
 
------------
-$(date +%m-%d\ %H:%M)
------------
+	-----------
+	$(date +%m-%d\ %H:%M)
+	-----------
 
-EOF
+	EOF
 
   xkbcomp -I"${HOME}/.config/keyboard/xkb" "${HOME}/.config/keyboard/xkb/map" "${DISPLAY}"
 

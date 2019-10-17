@@ -24,7 +24,7 @@ fu s:hitest() abort "{{{1
     call s:options_set()
 
     " Open a new window if the current one isn't empty
-    if line('$') != 1 || getline(1) != ''
+    if line('$') != 1 || getline(1) isnot# ''
         new
     endif
 

@@ -971,10 +971,10 @@ cs() { #{{{2
 #}}}
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage:    $0  <theme>
-example:  $0  tmux
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <theme>
+		example:  $0  tmux
+		EOF
     return 64
   fi
   if [[ ! -f $HOME/wiki/cheat/$1 ]]; then
@@ -1069,9 +1069,9 @@ cmdfu() { #{{{2
   #}}}
 
   if [[ $# -eq 0 ]]; then
-    cat <<EOF >&2
-  usage: $0 <keyword>
-EOF
+    cat <<-EOF >&2
+		  usage: $0 <keyword>
+		EOF
     return 64
   fi
 
@@ -1129,9 +1129,9 @@ EOF
     #             └ the syntax of the input file is bash
     #}}}
   else
-      cat <<'EOF' >&2
-Install `highlight` to get syntax highlighting.
-EOF
+      cat <<-'EOF' >&2
+		Install `highlight` to get syntax highlighting.
+		EOF
     curl -Ls "http://www.commandlinefu.com/commands/matching/${keywords}/${encoding}/sort-by-votes/plaintext" \
     | less -iR
   fi
@@ -1151,10 +1151,10 @@ EOF
 
 environ() { #{{{2
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-  purpose: print the environment variables of an arbitrary process
-  usage: $0 PID
-EOF
+    cat <<-EOF >&2
+		  purpose: print the environment variables of an arbitrary process
+		  usage: $0 PID
+		EOF
     return 64
   fi
   # https://serverfault.com/a/66366
@@ -1187,15 +1187,15 @@ expand_this() { #{{{2
   # file.
   #}}}
   if [[ $# -eq 0 ]]; then
-    cat <<EOF >&2
-usage:
-    $0 <glob pattern>
-    $0 <expansion parameter>
+    cat <<-EOF >&2
+		usage:
+		    $0 <glob pattern>
+		    $0 <expansion parameter>
 
-examples:
-    $0 *
-    $0 "\${path[@]}"
-EOF
+		examples:
+		    $0 *
+		    $0 "\${path[@]}"
+		EOF
 
     return 64
   fi
@@ -1212,9 +1212,9 @@ EOF
 fasd_add() {
   emulate -L zsh
   if [[ $# -ne 0 ]]; then
-    cat <<EOF >&2
-  usage: $0 <filepath to add in fasd's database>
-EOF
+    cat <<-EOF >&2
+		  usage: $0 <filepath to add in fasd's database>
+		EOF
     return 64
   fi
 
@@ -1227,9 +1227,9 @@ EOF
 fasd_remove() {
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-  usage: $0 <filepath to remove from fasd's database>
-EOF
+    cat <<-EOF >&2
+		  usage: $0 <filepath to remove from fasd's database>
+		EOF
     return 64
   fi
 
@@ -1245,11 +1245,11 @@ EOF
 ff_audio_extract() { #{{{2
   emulate -L zsh
   if [[ $# -ne 3 ]]; then
-    cat <<EOF >&2
-usage:    $0  <video file>  <audio stream number>  <output extension>
-example:  $0  file.mkv  0  mp3
-info:     the streams are indexed from 0
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <video file>  <audio stream number>  <output extension>
+		example:  $0  file.mkv  0  mp3
+		info:     the streams are indexed from 0
+		EOF
     return 64
   fi
 
@@ -1273,11 +1273,11 @@ EOF
 ff_video_extract() { #{{{2
   emulate -L zsh
   if [[ $# -ne 2 ]]; then
-    cat <<EOF >&2
-usage:    $0  <video file>  <video stream number>
-example:  $0  file.mp4  0
-info:     the streams are indexed from 0
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <video file>  <video stream number>
+		example:  $0  file.mp4  0
+		info:     the streams are indexed from 0
+		EOF
     return 64
   fi
 
@@ -1346,9 +1346,9 @@ ff_desktop_record() { #{{{2
 ff_get_stream_info() { #{{{2
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage:    $0  <file>
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <file>
+		EOF
     return 64
   fi
 
@@ -1358,10 +1358,10 @@ EOF
 ff_mux_video_and_audio() { #{{{2
   emulate -L zsh
   if [[ $# -ne 3 ]]; then
-    cat <<EOF >&2
-usage:    $0  <video file>  <audio file>  <name of the audio track>
-example:  $0  file.mkv  audio.aac  eng
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <video file>  <audio file>  <name of the audio track>
+		example:  $0  file.mkv  audio.aac  eng
+		EOF
     return 64
   fi
 
@@ -1398,9 +1398,9 @@ EOF
 ff_sub_extract() { #{{{2
   emulate -L zsh
   if [[ $# -ne 2 ]]; then
-    cat <<EOF >&2
-usage:    $0  <video file>  [<subtitle number>]
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <video file>  [<subtitle number>]
+		EOF
     return 64
   fi
 
@@ -1428,9 +1428,9 @@ EOF
 ff_video_to_gif() { #{{{2
   emulate -L zsh
   if [[ $# -ne 2 ]]; then
-    cat <<EOF >&2
-usage:    $0  <video file>  <output.gif>
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <video file>  <output.gif>
+		EOF
     return 64
   fi
   gifenc.sh "$1" "$2" >/dev/null 2>&1
@@ -1449,10 +1449,10 @@ find_pgm() { #{{{2
   unsetopt NOMATCH
 
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage: $0 <command name>
-example: $0 edit
-EOF
+    cat <<-EOF >&2
+		usage: $0 <command name>
+		example: $0 edit
+		EOF
     return 64
   fi
 
@@ -1515,10 +1515,10 @@ fzf_clipboard() { #{{{2
 fzf_fasd() { #{{{2
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage:    $0  <command>
-example:  $0  vim
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <command>
+		example:  $0  vim
+		EOF
     return 64
   fi
 
@@ -1540,10 +1540,10 @@ EOF
 fzf_locate() { #{{{2
   emulate -L zsh
   if [[ $# -ne 2 ]]; then
-    cat <<EOF >&2
-usage:    $0  <command>  <pattern>
-example:  $0  vim  vimrc
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <command>  <pattern>
+		example:  $0  vim  vimrc
+		EOF
     return 64
   fi
 
@@ -1635,11 +1635,11 @@ grep_pdf() { #{{{2
   #}}}
   emulate -L zsh
   if [[ $# -lt 2 ]]; then
-    cat <<EOF >&2
-usage:
-    $0 'vim regex' file1.pdf file2.pdf ...
-    $0 'vim regex' *.pdf
-EOF
+    cat <<-EOF >&2
+		usage:
+		    $0 'vim regex' file1.pdf file2.pdf ...
+		    $0 'vim regex' *.pdf
+		EOF
     return 64
   fi
   local pat="$1"
@@ -1695,10 +1695,10 @@ help() { #{{{2
 in_fileA_but_not_in_fileB() { #{{{2
   emulate -L zsh
   if [[ $# -ne 2 ]]; then
-    cat <<EOF >&2
-usage:
-    $0 <file_a> <file_b>
-EOF
+    cat <<-EOF >&2
+		usage:
+		    $0 <file_a> <file_b>
+		EOF
     return 64
   fi
   # http://unix.stackexchange.com/a/28159
@@ -1720,9 +1720,9 @@ EOF
 gpg_key_check() { #{{{2
   emulate -L zsh
   if [[ $# -ne 2 ]]; then
-    cat <<EOF >&2
-  usage: $0 /path/to/key.asc <expected fingerprint>
-EOF
+    cat <<-EOF >&2
+		  usage: $0 /path/to/key.asc <expected fingerprint>
+		EOF
     return 64
   fi
 
@@ -1759,11 +1759,11 @@ logout() { #{{{2
   # because it's a synonym for `exit`.
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-  usage: $0 session
-         $0 reboot
-         $0 poweroff
-EOF
+    cat <<-EOF >&2
+		  usage: $0 session
+		         $0 reboot
+		         $0 poweroff
+		EOF
     return 64
   fi
 
@@ -1808,9 +1808,9 @@ EOF
 man_pdf() { #{{{2
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-  usage: $0 <command name>
-EOF
+    cat <<-EOF >&2
+		  usage: $0 <command name>
+		EOF
     return 64
   fi
   manpage="$(locate $1 | sed -n "\%share/man/man[^/]*/$1\.%p")"
@@ -1934,18 +1934,18 @@ nv() { #{{{2
 
   # check whether a Vim server is running
   #
-  #                             ┌─ Why do we look for a server whose name is VIM?
-  #                             │  By default, when we execute:
-  #                             │          vim --remote file
+  #                             ┌ Why do we look for a server whose name is VIM?
+  #                             │ By default, when we execute:
+  #                             │         vim --remote file
   #                             │
-  #                             │  ... without `--servername`, Vim tries to open `file` in a Vim server
-  #                             │  whose name is VIM.
-  #                             │  So, we'll use this name for our default server.
-  #                             │  This way, we won't have to specify the name of the server later.
+  #                             │ ... without `--servername`, Vim tries to open `file` in a Vim server
+  #                             │ whose name is VIM.
+  #                             │ So, we'll use this name for our default server.
+  #                             │ This way, we won't have to specify the name of the server later.
   #                             │
   if vim --serverlist | grep -q VIM; then
   #                           │
-  #                           └─ be quiet (no output); if you find sth, just return 0
+  #                           └ be quiet (no output); if you find sth, just return 0
 
     # From now on, assume a VIM server is running.
 
@@ -2017,9 +2017,9 @@ nv() { #{{{2
     # If the 1st argument is `-q`, we want to populate the qfl with the output
     # of a shell command. The syntax should be:
     #
-    #               ┌─ Use single quotes to prevent the current shell from expanding a glob.
-    #               │  The glob is for the Vim function `system()`, which will send it back
-    #               │  to another shell later.
+    #               ┌ Use single quotes to prevent the current shell from expanding a glob.
+    #               │ The glob is for the Vim function `system()`, which will send it back
+    #               │ to another shell later.
     #               │
     #         nv -q 'grep -Rn foo *'
     #
@@ -2036,23 +2036,23 @@ nv() { #{{{2
       shift 1
       local IFS=' '
 
-      #                                 ┌─ Why not $@?
-      #                                 │  $@ would be expanded into:
+      #                                 ┌ Why not $@?
+      #                                 │ $@ would be expanded into:
       #                                 │
-      #                                 │      '$1' '$2' ...
+      #                                 │     '$1' '$2' ...
       #                                 │
-      #                                 │  ... but `system()` expects a single string.
+      #                                 │ ... but `system()` expects a single string.
       #                                 │
       vim --remote-send ":cexpr system('$*')<cr>"
 
-
-    # If no option was used, -[bdoOpq], we just want to send files to the server.
+    # If no option was used, `-[bdoOpq]`, we just want to send files to the server.
     else
       vim --remote "$@"
     fi
 
   # Finally, if `grep` didn't find any VIM server earlier, start one.
   else
+    # For Nvim, use `--listen` instead of `--servername`.
     vim -w /tmp/.vimkeys --servername VIM "$@"
   fi
 }
@@ -2120,6 +2120,9 @@ __catch_signal_usr1() {
   # useful to get rid of error messages which were displayed during last Vim session
   clear
   # TODO: If we quit Neovim, we should restart Neovim, not Vim.
+  # Idea: Use  `USR2` when  quitting  Nvim;  install a  second  trap; each  trap
+  # invokes `nv`  with an argument  or a variable set  to let the  function know
+  # which program it must invoke.
   nv
 }
 
@@ -2138,10 +2141,10 @@ palette(){ #{{{2
 pdf_merge() { #{{{2
   emulate -L zsh
   if [[ $# -lt 2 ]]; then
-    cat <<EOF >&2
-  usage: $0 <output file> <input files>
-  example: $0 output.pdf *.pdf
-EOF
+    cat <<-EOF >&2
+		  usage: $0 <output file> <input files>
+		  example: $0 output.pdf *.pdf
+		EOF
     return 64
   fi
 
@@ -2174,11 +2177,11 @@ EOF
 ppa_what_can_i_install() { #{{{2
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage:
-    $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
-    $0 <Tab>
-EOF
+    cat <<-EOF >&2
+		usage:
+		    $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
+		    $0 <Tab>
+		EOF
     return 64
   fi
   awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$1"
@@ -2187,25 +2190,25 @@ EOF
 ppa_what_have_i_installed() { #{{{2
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage:
-    $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
-    $0 <Tab>
-EOF
+    cat <<-EOF >&2
+		usage:
+		    $0 /var/lib/apt/lists/fr.archive.ubuntu.com_ubuntu_dists_xenial_universe_binary-amd64_Packages
+		    $0 <Tab>
+		EOF
     return 64
   fi
   packages="$(awk '$1 == "Package:" { if (a[$2]++ == 0) print $2 }' "$1")"
-  cat <<EOF
-  The following packages are currently installed on your machine,
-  and they can be installed from the PPA you provided.
-  So, there's a good chance for them to have been installed from this PPA.
-  However, they could also have been installed from somewhere else
-  (e.g. your default repositories).
-  To be sure, for each of them, execute this command:
+  cat <<-EOF
+		  The following packages are currently installed on your machine,
+		  and they can be installed from the PPA you provided.
+		  So, there's a good chance for them to have been installed from this PPA.
+		  However, they could also have been installed from somewhere else
+		  (e.g. your default repositories).
+		  To be sure, for each of them, execute this command:
 
-      $ apt-cache policy <package>
+		      $ apt-cache policy <package>
 
-EOF
+		EOF
   for package in ${=packages}; do
     if ! dpkg-query -W -f='${status}\n' "${package}" |& grep -E 'not-installed|deinstall|no packages found' >/dev/null 2>&1; then
     #                │  │{{{
@@ -2250,15 +2253,15 @@ script_record() { #{{{2
 script_replay() { #{{{2
   emulate -L zsh
   if [[ ! -f $script_record_dest ]]; then
-    cat <<EOF >&2
-usage:
+    cat <<-EOF >&2
+		usage:
 
-first invoke:
-  \`script_record\` to record an interactive shell session
-OR
-  \`script_record 'cmd'\` to record a specific command
+		first invoke:
+		  \`script_record\` to record an interactive shell session
+		OR
+		  \`script_record 'cmd'\` to record a specific command
 
-EOF
+		EOF
     return 64
   fi
   scriptreplay -s $script_record_dest -t $script_timing_dest
@@ -2273,9 +2276,9 @@ shellcheck_wiki() { #{{{2
 stream() { #{{{2
   emulate -L zsh
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-usage:    $0  <video url>
-EOF
+    cat <<-EOF >&2
+		usage:    $0  <video url>
+		EOF
     return 64
   fi
 
@@ -2490,10 +2493,10 @@ whichcomp() { #{{{2
   # A bot will print the code.
   #}}}
   if [[ $# -ne 1 ]]; then
-    cat <<EOF >&2
-  usage: $0 <command name>
-  example: $0 ls
-EOF
+    cat <<-EOF >&2
+		  usage: $0 <command name>
+		  example: $0 ls
+		EOF
     return 64
   fi
   # TODO: Document how the code works.
@@ -3985,15 +3988,19 @@ zle -N edit-command-line
 # This is  because zle  doesn't properly  restore stty settings  when it  runs a
 # command from within command line edition:
 #
-#     https://unix.stackexchange.com/q/484764/289772
+# https://unix.stackexchange.com/q/484764/289772
 #
 # More specifically, it doesn't remove the terminal line setting `inlcr`.
 # Here's how you can check this:
 #
-#     EDITOR=func
+#     local VISUAL='__sane_vim'
+#     →
+#     local VISUAL='func'
+#
 #     func() {
 #       stty -a >/tmp/stty_zle
 #     }
+#
 #     C-x C-e
 #
 #     $ stty -a >/tmp/stty
@@ -4015,15 +4022,11 @@ zle -N edit-command-line
 #     STTY=-inlcr
 #
 # You would lose the possible future updates of the original function:
-#
-#     https://sourceforge.net/p/zsh/code/ci/ef20425381e83ebd5a10c2ab270a347018371162/log/?path=/Functions/Zle/edit-command-line
+# https://sourceforge.net/p/zsh/code/ci/ef20425381e83ebd5a10c2ab270a347018371162/log/?path=/Functions/Zle/edit-command-line
 #
 # Source: https://unix.stackexchange.com/a/485467/289772
 #}}}
-# Is `"$@"` necessary?{{{
-#
-# Yes, for the temporary filename to be passed.
-#}}}
+# `"$@"` is necessary for the temporary filename to be passed.
 __sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call source#fix_shell_cmd()' "$@"
 #            ├───────┘                 {{{
 #            └ man zshparam

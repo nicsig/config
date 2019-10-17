@@ -119,22 +119,22 @@ fu colorscheme#set() abort "{{{2
     " builtin/fallback palette, which will be ugly/flashy.
     "}}}
     let g:terminal_ansi_colors =<< trim END
-        #1d1f21
-        #cc342b
-        #198844
-        #af8760
-        #3971ed
-        #a36ac7
-        #3971ed
-        #f5f5f5
-        #989698
-        #cc342b
-        #198844
-        #d8865f
-        #3971ed
-        #a36ac7
-        #3971ed
-        #ffffff
+    #1d1f21
+    #cc342b
+    #198844
+    #af8760
+    #3971ed
+    #a36ac7
+    #3971ed
+    #f5f5f5
+    #989698
+    #cc342b
+    #198844
+    #d8865f
+    #3971ed
+    #a36ac7
+    #3971ed
+    #ffffff
     END
 
     " Nvim needs the same kind of configuration.

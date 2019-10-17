@@ -22,14 +22,14 @@ endif
 "}}}
 "    g,  g; {{{2
 
-nno  <unique>  g;  g,zv
-nno  <unique>  g,  g;zv
+nno <unique> g; g,zv
+nno <unique> g, g;zv
 
 "    gj  gk         vertical jump {{{2
 
 " Alternative: https://github.com/haya14busa/vim-edgemotion
-noremap  <expr><silent><unique>  gk  <sid>vertical_jump_rhs(0)
-noremap  <expr><silent><unique>  gj  <sid>vertical_jump_rhs(1)
+noremap <expr><silent><unique> gk <sid>vertical_jump_rhs(0)
+noremap <expr><silent><unique> gj <sid>vertical_jump_rhs(1)
 
 fu s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
@@ -132,21 +132,21 @@ endfu
 "    - a hypertext link,  or a heading, sounds  like something more important
 "}}}
 
-noremap  <expr>  <silent><unique>  [`  lg#motion#regex#rhs('codespan', 0)
-noremap  <expr>  <silent><unique>  ]`  lg#motion#regex#rhs('codespan', 1)
-noremap  <expr>  <silent><unique>  [h  lg#motion#regex#rhs('path', 0)
-noremap  <expr>  <silent><unique>  ]h  lg#motion#regex#rhs('path', 1)
-noremap  <expr>  <silent><unique>  [r  lg#motion#regex#rhs('ref', 0)
-noremap  <expr>  <silent><unique>  ]r  lg#motion#regex#rhs('ref', 1)
-noremap  <expr>  <silent><unique>  [u  lg#motion#regex#rhs('url', 0)
-noremap  <expr>  <silent><unique>  ]u  lg#motion#regex#rhs('url', 1)
-noremap  <expr>  <silent><unique>  [U  lg#motion#regex#rhs('concealed_url', 0)
-noremap  <expr>  <silent><unique>  ]U  lg#motion#regex#rhs('concealed_url', 1)
+noremap <expr> <silent><unique> [` lg#motion#regex#rhs('codespan', 0)
+noremap <expr> <silent><unique> ]` lg#motion#regex#rhs('codespan', 1)
+noremap <expr> <silent><unique> [h lg#motion#regex#rhs('path', 0)
+noremap <expr> <silent><unique> ]h lg#motion#regex#rhs('path', 1)
+noremap <expr> <silent><unique> [r lg#motion#regex#rhs('ref', 0)
+noremap <expr> <silent><unique> ]r lg#motion#regex#rhs('ref', 1)
+noremap <expr> <silent><unique> [u lg#motion#regex#rhs('url', 0)
+noremap <expr> <silent><unique> ]u lg#motion#regex#rhs('url', 1)
+noremap <expr> <silent><unique> [U lg#motion#regex#rhs('concealed_url', 0)
+noremap <expr> <silent><unique> ]U lg#motion#regex#rhs('concealed_url', 1)
 
 "    <t  >t         move tab pages {{{2
 
-nno  <silent>  <t  :<c-u>call <sid>move_tabpage('-1')<cr>
-nno  <silent>  >t  :<c-u>call <sid>move_tabpage('+1')<cr>
+nno <silent> <t :<c-u>call <sid>move_tabpage('-1')<cr>
+nno <silent> >t :<c-u>call <sid>move_tabpage('+1')<cr>
 
 fu s:move_tabpage(where) abort
     try
@@ -211,12 +211,12 @@ endfu
 
 " These mappings must be installed BEFORE `lg#motion#repeatable#make#all()`
 " is invoked to make the motions repeatable.
-noremap  <expr><unique>  t   <sid>fts('t')
-noremap  <expr><unique>  T   <sid>fts('T')
-noremap  <expr><unique>  f   <sid>fts('f')
-noremap  <expr><unique>  F   <sid>fts('F')
-noremap  <expr><unique>  ss  <sid>fts('s')
-noremap  <expr><unique>  SS  <sid>fts('S')
+noremap <expr><unique> t  <sid>fts('t')
+noremap <expr><unique> T  <sid>fts('T')
+noremap <expr><unique> f  <sid>fts('f')
+noremap <expr><unique> F  <sid>fts('F')
+noremap <expr><unique> ss <sid>fts('s')
+noremap <expr><unique> SS <sid>fts('S')
 
 fu s:fts(cmd) abort
     " Why not `call feedkeys('zv', 'int')`?{{{

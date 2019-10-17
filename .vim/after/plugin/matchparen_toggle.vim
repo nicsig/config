@@ -73,11 +73,11 @@ if exists('g:loaded_matchparen')
     " other people can't reproduce.
     "}}}
     let events =<< trim END
-        CursorMoved
-        CursorMovedI
-        WinEnter
-        TextChanged
-        TextChangedI
+    CursorMoved
+    CursorMovedI
+    WinEnter
+    TextChanged
+    TextChangedI
     END
     for event in events
         " Why not using a guard to only install the autocmd if there's none?{{{

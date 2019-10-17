@@ -94,39 +94,39 @@ fu s:install_mappings() abort "{{{2
     "     C-g m    :FzMaps
     "}}}
 
-    imap  <buffer><nowait><silent>  <c-g>,      <plug>(emmet-expand-abbr)
-    imap  <buffer><nowait><silent>  <c-g>;      <plug>(emmet-expand-word)
-    imap  <buffer><nowait><silent>  <c-g><c-u>  <plug>(emmet-update-tag)
+    imap <buffer><nowait><silent> <c-g>,     <plug>(emmet-expand-abbr)
+    imap <buffer><nowait><silent> <c-g>;     <plug>(emmet-expand-word)
+    imap <buffer><nowait><silent> <c-g><c-u> <plug>(emmet-update-tag)
     " mnemonics: `s` for select
-    imap  <buffer><nowait><silent>  <c-g>s      <plug>(emmet-balance-tag-inward)
-    imap  <buffer><nowait><silent>  <c-g>S      <plug>(emmet-balance-tag-outword)
-    "                                                                        ^ necessary typo
-    imap  <buffer><nowait><silent>  <c-g>n      <plug>(emmet-move-next)
-    imap  <buffer><nowait><silent>  <c-g>N      <plug>(emmet-move-prev)
-    imap  <buffer><nowait><silent>  <c-g>i      <plug>(emmet-image-size)
-    imap  <buffer><nowait><silent>  <c-g>/      <plug>(emmet-toggle-comment)
-    imap  <buffer><nowait><silent>  <c-g><c-j>  <plug>(emmet-split-join-tag)
-    imap  <buffer><nowait><silent>  <c-g><c-k>  <plug>(emmet-remove-tag)
-    imap  <buffer><nowait><silent>  <c-g>a      <plug>(emmet-anchorize-url)
-    imap  <buffer><nowait><silent>  <c-g>A      <plug>(emmet-anchorize-summary)
+    imap <buffer><nowait><silent> <c-g>s     <plug>(emmet-balance-tag-inward)
+    imap <buffer><nowait><silent> <c-g>S     <plug>(emmet-balance-tag-outword)
+    "                                                                     ^ necessary typo
+    imap <buffer><nowait><silent> <c-g>n     <plug>(emmet-move-next)
+    imap <buffer><nowait><silent> <c-g>N     <plug>(emmet-move-prev)
+    imap <buffer><nowait><silent> <c-g>i     <plug>(emmet-image-size)
+    imap <buffer><nowait><silent> <c-g>/     <plug>(emmet-toggle-comment)
+    imap <buffer><nowait><silent> <c-g><c-j> <plug>(emmet-split-join-tag)
+    imap <buffer><nowait><silent> <c-g><c-k> <plug>(emmet-remove-tag)
+    imap <buffer><nowait><silent> <c-g>a     <plug>(emmet-anchorize-url)
+    imap <buffer><nowait><silent> <c-g>A     <plug>(emmet-anchorize-summary)
 
-    xmap  <buffer><nowait><silent>  <c-g>,      <plug>(emmet-expand-abbr)
-    xmap  <buffer><nowait><silent>  <c-g>;      <plug>(emmet-expand-word)
-    xmap  <buffer><nowait><silent>  <c-g><c-u>  <plug>(emmet-update-tag)
-    xmap  <buffer><nowait><silent>  <c-g>s      <plug>(emmet-balance-tag-inward)
-    xmap  <buffer><nowait><silent>  <c-g>S      <plug>(emmet-balance-tag-outword)
-    xmap  <buffer><nowait><silent>  <c-g>n      <plug>(emmet-move-next)
-    xmap  <buffer><nowait><silent>  <c-g>N      <plug>(emmet-move-prev)
-    xmap  <buffer><nowait><silent>  <c-g>i      <plug>(emmet-image-size)
-    xmap  <buffer><nowait><silent>  <c-g>/      <plug>(emmet-toggle-comment)
-    xmap  <buffer><nowait><silent>  <c-g><c-j>  <plug>(emmet-split-join-tag)
-    xmap  <buffer><nowait><silent>  <c-g><c-k>  <plug>(emmet-remove-tag)
-    xmap  <buffer><nowait><silent>  <c-g>a      <plug>(emmet-anchorize-url)
-    xmap  <buffer><nowait><silent>  <c-g>A      <plug>(emmet-anchorize-summary)
+    xmap <buffer><nowait><silent> <c-g>,     <plug>(emmet-expand-abbr)
+    xmap <buffer><nowait><silent> <c-g>;     <plug>(emmet-expand-word)
+    xmap <buffer><nowait><silent> <c-g><c-u> <plug>(emmet-update-tag)
+    xmap <buffer><nowait><silent> <c-g>s     <plug>(emmet-balance-tag-inward)
+    xmap <buffer><nowait><silent> <c-g>S     <plug>(emmet-balance-tag-outword)
+    xmap <buffer><nowait><silent> <c-g>n     <plug>(emmet-move-next)
+    xmap <buffer><nowait><silent> <c-g>N     <plug>(emmet-move-prev)
+    xmap <buffer><nowait><silent> <c-g>i     <plug>(emmet-image-size)
+    xmap <buffer><nowait><silent> <c-g>/     <plug>(emmet-toggle-comment)
+    xmap <buffer><nowait><silent> <c-g><c-j> <plug>(emmet-split-join-tag)
+    xmap <buffer><nowait><silent> <c-g><c-k> <plug>(emmet-remove-tag)
+    xmap <buffer><nowait><silent> <c-g>a     <plug>(emmet-anchorize-url)
+    xmap <buffer><nowait><silent> <c-g>A     <plug>(emmet-anchorize-summary)
 
     " these 2 mappings are specific to visual mode
-    xmap  <buffer><nowait><silent>  <c-g><c-m>  <plug>(emmet-merge-lines)
-    xmap  <buffer><nowait><silent>  <c-g>p      <plug>(emmet-code-pretty)
+    xmap <buffer><nowait><silent> <c-g><c-m> <plug>(emmet-merge-lines)
+    xmap <buffer><nowait><silent> <c-g>p     <plug>(emmet-code-pretty)
 
     " now, we also need to install the `<plug>` mappings
     EmmetInstall
@@ -176,36 +176,36 @@ endfu
 
 fu s:set_undo_ftplugin() abort "{{{2
     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-        \ . "
-        \ | exe 'iunmap <buffer> <c-g>,'
-        \ | exe 'iunmap <buffer> <c-g>;'
-        \ | exe 'iunmap <buffer> <c-g><c-u>'
-        \ | exe 'iunmap <buffer> <c-g>s'
-        \ | exe 'iunmap <buffer> <c-g>S'
-        \ | exe 'iunmap <buffer> <c-g>n'
-        \ | exe 'iunmap <buffer> <c-g>N'
-        \ | exe 'iunmap <buffer> <c-g>i'
-        \ | exe 'iunmap <buffer> <c-g>/'
-        \ | exe 'iunmap <buffer> <c-g><c-j>'
-        \ | exe 'iunmap <buffer> <c-g><c-k>'
-        \ | exe 'iunmap <buffer> <c-g>a'
-        \ | exe 'iunmap <buffer> <c-g>A'
+        \ ..'
+        \ | exe "iunmap <buffer> <c-g>,"
+        \ | exe "iunmap <buffer> <c-g>;"
+        \ | exe "iunmap <buffer> <c-g><c-u>"
+        \ | exe "iunmap <buffer> <c-g>s"
+        \ | exe "iunmap <buffer> <c-g>S"
+        \ | exe "iunmap <buffer> <c-g>n"
+        \ | exe "iunmap <buffer> <c-g>N"
+        \ | exe "iunmap <buffer> <c-g>i"
+        \ | exe "iunmap <buffer> <c-g>/"
+        \ | exe "iunmap <buffer> <c-g><c-j>"
+        \ | exe "iunmap <buffer> <c-g><c-k>"
+        \ | exe "iunmap <buffer> <c-g>a"
+        \ | exe "iunmap <buffer> <c-g>A"
         \
-        \ | exe 'xunmap <buffer> <c-g>,'
-        \ | exe 'xunmap <buffer> <c-g>;'
-        \ | exe 'xunmap <buffer> <c-g><c-u>'
-        \ | exe 'xunmap <buffer> <c-g>s'
-        \ | exe 'xunmap <buffer> <c-g>S'
-        \ | exe 'xunmap <buffer> <c-g>n'
-        \ | exe 'xunmap <buffer> <c-g>N'
-        \ | exe 'xunmap <buffer> <c-g>i'
-        \ | exe 'xunmap <buffer> <c-g>/'
-        \ | exe 'xunmap <buffer> <c-g><c-j>'
-        \ | exe 'xunmap <buffer> <c-g><c-k>'
-        \ | exe 'xunmap <buffer> <c-g>a'
-        \ | exe 'xunmap <buffer> <c-g>A'
-        \ | exe 'xunmap <buffer> <c-g><c-m>'
-        \ | exe 'xunmap <buffer> <c-g>p'
-        \ "
+        \ | exe "xunmap <buffer> <c-g>,"
+        \ | exe "xunmap <buffer> <c-g>;"
+        \ | exe "xunmap <buffer> <c-g><c-u>"
+        \ | exe "xunmap <buffer> <c-g>s"
+        \ | exe "xunmap <buffer> <c-g>S"
+        \ | exe "xunmap <buffer> <c-g>n"
+        \ | exe "xunmap <buffer> <c-g>N"
+        \ | exe "xunmap <buffer> <c-g>i"
+        \ | exe "xunmap <buffer> <c-g>/"
+        \ | exe "xunmap <buffer> <c-g><c-j>"
+        \ | exe "xunmap <buffer> <c-g><c-k>"
+        \ | exe "xunmap <buffer> <c-g>a"
+        \ | exe "xunmap <buffer> <c-g>A"
+        \ | exe "xunmap <buffer> <c-g><c-m>"
+        \ | exe "xunmap <buffer> <c-g>p"
+        \ '
 endfu
 

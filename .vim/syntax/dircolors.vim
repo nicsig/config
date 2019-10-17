@@ -77,12 +77,12 @@ function! s:set_guicolors() abort
     let s:termguicolors[15] = "White"
 
     let xterm_palette =<< trim END
-        00
-        5f
-        87
-        af
-        d7
-        ff
+    00
+    5f
+    87
+    af
+    d7
+    ff
     END
 
     let cur_col = 16

@@ -31,8 +31,7 @@ fu myfuncs#after_tmux_capture_pane() abort "{{{1
     "}}}
     norm! zR
     TW
-    $
-    call search('^\S', 'b')
+    exe '$' | call search('^\S')
     sil! keepj keepp .,$g/^\s*$/d_
 
     " We need the buffer to be saved into a file, for `:lvim /pat/ %` to work.
@@ -276,7 +275,7 @@ fu myfuncs#block_select_paragraph() abort
 
         " search the beginning of the text in the current paragraph
         call search('\n\s*\n', 'bW')
-        let [firstline, firstcol] = searchpos('\S')
+        let [firstline, firstcol] = searchpos('\S', 'W')
         " search the end of the text in the current paragraph
         let lastline = search('\n\s*\n', 'nW')
         let lastcol = searchpos('.*\zs\S\s*' ,'nW')[1]
@@ -593,7 +592,7 @@ fu myfuncs#dump_wiki(url) abort "{{{1
 
     let [x_save, y_save] = [getpos("'x"), getpos("'y")]
     try
-        let url = substitute(a:url, '/$', '', '')..'.wiki'
+        let url = trim(a:url, '/')..'.wiki'
         let tempdir = substitute(tempname(), '.*/\zs.\{-}', '', '')
         sil call system('git clone '..shellescape(url)..' '..tempdir)
         let files = glob(tempdir..'/*', 0, 1)
@@ -984,6 +983,7 @@ fu myfuncs#op_replace_without_yank(type) abort
 
         if a:type is# 'line' || replace_current_line
             exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
+            norm! gv=
 
         elseif a:type is# 'block'
             exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
@@ -1132,7 +1132,7 @@ fu myfuncs#plugin_install(url) abort "{{{1
     let win_vimrc = win_getid()
 
     call cursor(1, 1)
-    call search('^\s*Plug')
+    call search('^\s*Plug', 'cW')
     " We should write `zR` to open all  folds, so that the while loop can search
     " in closed folds (it seems it misses the plugins lines inside folds).
     "
@@ -1248,7 +1248,21 @@ fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     " If you want to preserve a tab used to indent a line, use this pattern instead:
     "     let pat = '\%(^\s*\)\@!\&\(.\)\t'
     let pat = '^\t\|\(.\)\t'
-    let l:Rep = {-> submatch(1)..repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.') ))}
+    " Don't remove a leading tab in a heredoc.{{{
+    "
+    " They have a special meaning in bash and zsh.
+    " See `man bash /<<-`.
+    "
+    " ---
+    "
+    " We don't use a complex pattern, just: `heredoc`.
+    " We could try sth like `^\Cz\=shHereDoc$`,  but it seems there exists other
+    " possible syntax groups (e.g. `shHereDoc03`).
+    "}}}
+    let l:Rep = {->
+    \ match(map(synstack(line('.'), col('.')), {_,v -> synIDattr(v, 'name')}), 'heredoc') != -1
+    \ ? submatch(0)
+    \ : submatch(1)..repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))}
     " We need the loop because there may be several tabs consecutively.{{{
     "
     " If that happens, a single substitution would fail to replace all of them, for
@@ -1692,7 +1706,7 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     exe winnr('#')..'windo call winrestview(view)'
 endfu
 
-fu myfuncs#wf_complete(arglead, _cmdline, _pos) abort
+fu myfuncs#wf_complete(_a, _l, _p) abort
     return join(['-min_length', '-weighted'], "\n")
 endfu
 

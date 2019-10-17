@@ -4,12 +4,12 @@
 LOGFILE="${HOME}/log/$(basename "$0" .sh).log"
 
 main() {
-  cat <<EOF
+  cat <<-EOF
 
------------
-$(date +%m-%d\ %H:%M)
------------
-EOF
+	-----------
+	$(date +%m-%d\ %H:%M)
+	-----------
+	EOF
 
   if pidof strace >/dev/null 2>&1; then
     # Where can I find more information about this `USR2` signal?{{{

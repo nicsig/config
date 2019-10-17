@@ -92,7 +92,7 @@ let g:loaded_vimball = 1
 "
 " To know whether vim-plug is installed or not, we check whether the file:
 "
-"        ~/.vim/autoload/plug.vim
+"     ~/.vim/autoload/plug.vim
 "
 " ... exists.
 
@@ -379,13 +379,12 @@ set termencoding=utf-8
 "
 " From: https://github.com/junegunn/vim-plug/wiki/faq
 "
-"         vim-plug does not require any extra statement other than plug#begin()
-"         and plug#end(). You can remove filetype off, filetype plugin indent on
-"         and syntax on from your .vimrc as they are automatically handled by
-"         plug#begin() and plug#end().
+" > vim-plug does not require any extra statement other than plug#begin()
+" > and plug#end(). You can remove filetype off, filetype plugin indent on
+" > and syntax on from your .vimrc as they are automatically handled by
+" > plug#begin() and plug#end().
 "
-" See also:
-"         https://github.com/junegunn/vim-plug/issues/83
+" See also: https://github.com/junegunn/vim-plug/issues/83
 "}}}
 " filetype plugin indent on
 
@@ -425,29 +424,29 @@ set termencoding=utf-8
 "}}}
 fu s:styled_comments() abort
     let s:styled_comments_filetypes =<< trim END
-        awk
-        c
-        cheat
-        conf
-        css
-        desktop
-        dircolors
-        gitconfig
-        html
-        lua
-        nroff
-        python
-        readline
-        sed
-        sh
-        snippets
-        systemd
-        tex
-        tmux
-        vim
-        xdefaults
-        xkb
-        zsh
+    awk
+    c
+    cheat
+    conf
+    css
+    desktop
+    dircolors
+    gitconfig
+    html
+    lua
+    nroff
+    python
+    readline
+    sed
+    sh
+    snippets
+    systemd
+    tex
+    tmux
+    vim
+    xdefaults
+    xkb
+    zsh
     END
     augroup styled_comments
         au!
@@ -503,6 +502,7 @@ call setenv('MANSECT', $MYMANSECT)
 " http://docs.ctags.io/en/latest/extending.html
 " https://gist.github.com/romainl/085b4db4a26a06ec7e16
 " https://www.reddit.com/r/vim/comments/4d2fos/if_you_use_tags_whats_your_workflow_like/
+" https://jdhao.github.io/2019/10/15/tagbar_markdown_setup/
 "
 " Update:
 "
@@ -891,14 +891,6 @@ set cpoptions+=y
 
 " When appending to a register, put a line break before the appended text.
 set cpoptions+=>
-
-" cursorlineopt {{{2
-
-" When the cursor is on a long soft-wrapped line, and we enable `'cul'`, we want
-" only the current *screen* line to be highlighted, not the whole *text* line.
-if !has('nvim')
-    set culopt=screenline
-endif
 
 " diffopt {{{2
 
@@ -2816,11 +2808,11 @@ let maplocalleader = "\<s-f14>"
 "
 " Would cause a timeout when we press C-r C-r to insert a register literally.
 "}}}
-cno  <expr>  <c-r><c-h>  getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHistory:<cr>'
+cno <expr> <c-r><c-h> getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHistory:<cr>'
 
 " C-r C-l       insert current line {{{3
 
-cno  <c-r><c-l>  <c-r><c-r>=<sid>insert_current_line()<cr>
+cno <c-r><c-l> <c-r><c-r>=<sid>insert_current_line()<cr>
 fu s:insert_current_line() abort
     let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
     let cml = '\%(\V'..escape(cml, '\')..'\m\)\='
@@ -2859,7 +2851,7 @@ endfu
 
 " This  mapping  tries  to  perform  both edits,  depending  on  the  amount  of
 " whitespace between the comment leader and the rest of the text.
-ino  <silent>  <c-g><c-h>  <c-r>=<sid>compact_whitespace()<cr>
+ino <silent> <c-g><c-h> <c-r>=<sid>compact_whitespace()<cr>
 
 fu s:compact_whitespace() abort
     if empty(&l:cms)
@@ -2931,13 +2923,13 @@ ino <silent> <expr> <c-m> <sid>c_m()
 " I often type C-s in insert mode to save, and miss/forget the escape
 " to get back in normal mode first.
 " Alternative:
-"     imap  <c-s>  <esc><c-s>
-ino  <silent>  <c-s>  <esc>:sil update<cr>
+"     imap <c-s> <esc><c-s>
+ino <silent> <c-s> <esc>:sil update<cr>
 
 " M-a  M-e {{{3
 
-ino  <silent>  <m-a>  <c-r>=<sid>move_by_sentence(0)<cr>
-ino  <silent>  <m-e>  <c-r>=<sid>move_by_sentence(1)<cr>
+ino <silent> <m-a> <c-r>=<sid>move_by_sentence(0)<cr>
+ino <silent> <m-e> <c-r>=<sid>move_by_sentence(1)<cr>
 
 fu s:move_by_sentence(is_fwd) abort
     if a:is_fwd
@@ -2950,7 +2942,7 @@ endfu
 
 " \ {{{3
 
-ino  <silent>  <bslash>  <c-r>=<sid>indent_before_backslash()<cr>
+ino <silent> <bslash> <c-r>=<sid>indent_before_backslash()<cr>
 
 fu s:indent_before_backslash() abort
     if &filetype isnot# 'vim'
@@ -2987,8 +2979,8 @@ endfu
 " SPC                 (prefix) {{{3
 " SPC                           za {{{4
 
-nno  <space><space>  za
-xno  <space><space>  za
+nno <space><space> za
+xno <space><space> za
 
 " . {{{4
 
@@ -3005,7 +2997,7 @@ xno  <space><space>  za
 
 " After `<space>.`  has been pressed,  you can repeat  with `.`, <space>  is not
 " needed anymore.
-nno  <expr><silent>  <space>.  <sid>repeat_last_edit_on_last_text()
+nno <expr><silent> <space>. <sid>repeat_last_edit_on_last_text()
 
 fu s:repeat_last_edit_on_last_text() abort
     " put the last changed text inside the search register, so that we can refer
@@ -3027,16 +3019,16 @@ endfu
 
 " aa    ac    ad    al    an    arglist {{{4
 
-nno  <silent>  <space>aa  :<c-u>argedit %<cr>
+nno <silent> <space>aa :<c-u>argedit %<cr>
 
 " load Current argument
-nno  <silent>  <space>ac  :<c-u>argument<cr>
+nno <silent> <space>ac :<c-u>argument<cr>
 
 " Delete current argument
-nno  <silent>  <space>ad  :<c-u>.argdelete<cr>
+nno <silent> <space>ad :<c-u>.argdelete<cr>
 
 " create Local arglist (by copying the global one)
-nno  <silent>  <space>al  :<c-u>arglocal<cr>
+nno <silent> <space>al :<c-u>arglocal<cr>
 
 " start New arglist
 "
@@ -3044,7 +3036,7 @@ nno  <silent>  <space>al  :<c-u>arglocal<cr>
 " current window, and containing only the current buffer.
 " This causes the buffer to be reloaded.
 " Add a bang to `:arglocal` to discard unsaved changes in the current buffer.
-nno  <silent>  <space>an  :<c-u>arglocal %<cr>
+nno <silent> <space>an :<c-u>arglocal %<cr>
 
 " f                             fuzzy search {{{4
 
@@ -3122,8 +3114,8 @@ call s:fuzzy_mappings()
 "    - in which we are interested;
 "      let's say, again, the one where the current file belong
 
-nno  <silent>  <space>fbc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzBCommits<cr>
-nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
+nno <silent> <space>fbc :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzBCommits<cr>
+nno <silent> <space>fc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
 
 " Fuzzy search mappings from insert / visual / operator-pending mode.
 
@@ -3140,9 +3132,9 @@ nno  <silent>  <space>fc   :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<c
 " There is no default equivalent for visual mode, but we often use `m` for
 " visual mode mappings. So, here again, we'll use `m` as a prefix.
 
-imap  <c-g>m  <plug>(fzf-maps-i)
-xmap  mm      <plug>(fzf-maps-x)
-omap  m       <plug>(fzf-maps-o)
+imap <c-g>m <plug>(fzf-maps-i)
+xmap mm     <plug>(fzf-maps-x)
+omap m      <plug>(fzf-maps-o)
 
 " i x                           ixquick, tmux prompt {{{4
 
@@ -3157,11 +3149,11 @@ omap  m       <plug>(fzf-maps-o)
 "
 " If you need to read it, it's there: `~/bin/bash/search-engine.sh`.
 "}}}
-nno  <silent>  <space>i  :<c-u>call <sid>run_current_line('websearch')<cr>
+nno <silent> <space>i :<c-u>call <sid>run_current_line('websearch')<cr>
 
 " Tmux command-prompt has too limited editing capabilities.
 " Let's use a Vim buffer to leverage Vim's editing capabilities.
-nno  <silent>  <space>x  :<c-u>call <sid>run_current_line('tmuxprompt')<cr>
+nno <silent> <space>x :<c-u>call <sid>run_current_line('tmuxprompt')<cr>
 
 fu s:run_current_line(type) abort
     if &ft is# a:type
@@ -3185,12 +3177,12 @@ endfu
 
 " s S                           saiw  saiW{{{4
 
-nmap  <space>s  saiw
-nmap  <space>S  saiW
+nmap <space>s saiw
+nmap <space>S saiW
 
 " t                             new tab page {{{4
 
-nno  <silent>  <space>t  :<c-u>exe (v:count ? v:count..'tabnew' : 'tabnew')<cr>
+nno <silent> <space>t :<c-u>exe (v:count ? v:count..'tabnew' : 'tabnew')<cr>
 "}}}3
 " [    ]              (prefix) {{{3
 " ]kj                           various alignments {{{4
@@ -3201,17 +3193,16 @@ nno  <silent>  <space>t  :<c-u>exe (v:count ? v:count..'tabnew' : 'tabnew')<cr>
 "  ]k ]j align the end of the current line with the one of the
 "  previous/next line
 
-nno  <silent>  [k  :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@l
-nno  <silent>  [j  :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@l
-nno  <silent>  ]k  :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
-nno  <silent>  ]j  :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
-
+nno <silent> [k :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<bar>norm! g@l<cr>
+nno <silent> [j :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<bar>norm! g@l<cr>
+nno <silent> ]k :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
+nno <silent> ]j :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
 " }}}3
 " \                   (prefix) {{{3
 " \b            select current box {{{4
 
 " select the current box, so that we can move it quickly with `vim-schlepp`
-nno  <silent>  \b  :<c-u>call myfuncs#block_select_box()<cr>
+nno <silent> \b :<c-u>call myfuncs#block_select_box()<cr>
 
 " \f            find digraph {{{4
 
@@ -3219,7 +3210,7 @@ nno  <silent>  \b  :<c-u>call myfuncs#block_select_box()<cr>
 " But it doesn't work with a digraph, contrary to the default `f` command.
 " Use `\f` when you need to look for a complex character (ex: →).
 
-nno  \f  f
+nno \f f
 
 " \p            select paragraph in a block {{{4
 
@@ -3227,7 +3218,7 @@ nno  \f  f
 " Useful to write some text FIRST, then  press `\p` and `mb` (draw-it plugin) to
 " draw a box around it.
 
-nno  <expr><silent>  \p  myfuncs#block_select_paragraph()
+nno <expr><silent> \p  myfuncs#block_select_paragraph()
 " }}}3
 " g                   (prefix) {{{3
 " g^ g$       first/last tabpage {{{4
@@ -3237,12 +3228,12 @@ nno <silent> g$  :<c-u>$tabnext<cr>
 
 " gV  g C-v   select last changed text {{{4
 
-nno  g<c-v>  `[v`]
-nno  gV      '[V']
+nno g<c-v> `[v`]
+nno gV     '[V']
 
 " g SPC       break line {{{4
 
-nno  <silent>  g<space>  :<c-u>set opfunc=<sid>break_line<cr>g@l
+nno <silent> g<space> :<c-u>set opfunc=<sid>break_line<bar>norm! g@l<cr>
 
 fu s:break_line(_) abort
     " I sometimes press `g SPC` by  accident after getting back to the beginning
@@ -3270,10 +3261,10 @@ endfu
 " ga          easy align {{{4
 
 " Start interactive EasyAlign in visual mode (e.g. vipga)
-xmap  ga  <plug>(EasyAlign)
+xmap ga <plug>(EasyAlign)
 
 " Start interactive EasyAlign for a motion/text object (e.g. gaip)
-nmap  ga  <plug>(EasyAlign)
+nmap ga <plug>(EasyAlign)
 
 " gf          & friends, in vimrc {{{4
 
@@ -3288,16 +3279,16 @@ augroup vimrc_mappings
 augroup END
 
 fu s:install_vimrc_mappings() abort
-    nno  <buffer><nowait><silent>  gf       :<c-u>call <sid>try_to_edit_plugin_config('gf')<cr>
-    nno  <buffer><nowait><silent>  gF       :<c-u>call <sid>try_to_edit_plugin_config('gF')<cr>
-    nno  <buffer><nowait><silent>  <c-w>f   :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>f")<cr>
-    nno  <buffer><nowait><silent>  <c-w>F   :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>F")<cr>
-    nno  <buffer><nowait><silent>  <c-w>gf  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gf")<cr>
-    nno  <buffer><nowait><silent>  <c-w>gF  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gF")<cr>
+    nno <buffer><nowait><silent> gf      :<c-u>call <sid>try_to_edit_plugin_config('gf')<cr>
+    nno <buffer><nowait><silent> gF      :<c-u>call <sid>try_to_edit_plugin_config('gF')<cr>
+    nno <buffer><nowait><silent> <c-w>f  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>f")<cr>
+    nno <buffer><nowait><silent> <c-w>F  :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>F")<cr>
+    nno <buffer><nowait><silent> <c-w>gf :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gf")<cr>
+    nno <buffer><nowait><silent> <c-w>gF :<c-u>call <sid>try_to_edit_plugin_config("\<lt>c-w>gF")<cr>
 
-    nmap <buffer><nowait>          Z        <c-w>
+    nmap <buffer><nowait> Z <c-w>
     " easier to press `ZGF` than `ZgF`
-    nmap <buffer><nowait>          <c-w>GF  <c-w>gF
+    nmap <buffer><nowait> <c-w>GF <c-w>gF
 endfu
 
 fu s:try_to_edit_plugin_config(cmd) abort
@@ -3332,11 +3323,11 @@ endfu
 
 " go {{{4
 
-nno  <silent>  gof  :<c-u>call myfuncs#gtfo_open_gui(expand('%:p:h', 1))<cr>
-nno  <silent>  goF  :<c-u>call myfuncs#gtfo_open_gui(getcwd())<cr>
+nno <silent> gof :<c-u>call myfuncs#gtfo_open_gui(expand('%:p:h', 1))<cr>
+nno <silent> goF :<c-u>call myfuncs#gtfo_open_gui(getcwd())<cr>
 
-nno  <silent>  got  :<c-u>call myfuncs#gtfo_open_term(expand('%:p:h', 1))<cr>
-nno  <silent>  goT  :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
+nno <silent> got :<c-u>call myfuncs#gtfo_open_term(expand('%:p:h', 1))<cr>
+nno <silent> goT :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
 
 " gQ {{{4
 
@@ -3347,17 +3338,17 @@ nno  <silent>  goT  :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
 " So, we  install a wrapper around  `gQ` to temporarily disable  all mappings in
 " command-line mode.
 
-"               ┌ make sure we have visited the command-line at least once since Vim's startup
-"               │ otherwise E501:
-"               │ probably because custom command-line mappings haven't been installed yet,
-"               │ so `ToggleEditingCommands 0` is useless / too soon
-"               ├───┐
-nno  <expr>  gQ ":\e"..execute('ToggleEditingCommands 0', 'silent!')..'gQ'
+"             ┌ make sure we have visited the command-line at least once since Vim's startup
+"             │ otherwise E501:
+"             │ probably because custom command-line mappings haven't been installed yet,
+"             │ so `ToggleEditingCommands 0` is useless / too soon
+"             ├───┐
+nno <expr> gQ ":\e"..execute('ToggleEditingCommands 0', 'silent!')..'gQ'
 
 " gt  gT      search todo/fixme (Tags) {{{4
 
-nno  <silent>  gt  :<c-u>call myfuncs#search_todo('buffer')<cr>
-nno  <silent>  gT  :<c-u>call myfuncs#search_todo('project')<cr>
+nno <silent> gt :<c-u>call myfuncs#search_todo('buffer')<cr>
+nno <silent> gT :<c-u>call myfuncs#search_todo('project')<cr>
 "}}}3
 " m                   (prefix) {{{3
 " m/  m?         put current location in loclist {{{4
@@ -3444,9 +3435,9 @@ augroup unmap_fugitive
     au FileType fugitive nunmap <buffer> U
 augroup END
 
-nno  <silent>  Ud  :<c-u>Gdiff<cr>
-nno  <silent>  Up  :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
-nno  <silent>  Us  :<c-u>call <sid>try_fugitive_cmd('Gstatus')<cr>
+nno <silent> Ud :<c-u>Gdiff<cr>
+nno <silent> Up :<c-u>call <sid>try_fugitive_cmd('Gpush')<cr>
+nno <silent> Us :<c-u>call <sid>try_fugitive_cmd('Gstatus')<cr>
 
 fu s:try_fugitive_cmd(cmd) abort
     try
@@ -3491,7 +3482,7 @@ endfu
 "     repeat the word replacement.  This works like "ciw",
 "     the good word and <Esc>.
 "}}}
-nno  <silent>  z=  :<c-u>call <sid>z_equal_save_count(v:count)<bar>set opfunc=<sid>z_equal<cr>g@l
+nno <silent> z= :<c-u>call <sid>z_equal_save_count(v:count)<bar>set opfunc=<sid>z_equal<cr>g@l
 
 fu s:z_equal_save_count(cnt) abort
     let s:z_equal_count = a:cnt
@@ -3516,6 +3507,11 @@ fu s:z_equal(_) abort
         "     {commands} does not finish a command, the last one
         "     will be aborted as if <Esc> or <C-C> was typed.
         "}}}
+        " TODO: I don't know why, but `t` can't be used here. Find the reason why.{{{
+        "
+        " It would be interesting in our notes, to explain that `t` must only be
+        " used when necessary.
+        "}}}
         call feedkeys('z=', 'in')
     catch
         return lg#catch_error()
@@ -3528,7 +3524,7 @@ endfu
 " zd {{{4
 
 " make `zd` repeatable
-nno  <silent>  zd  :<c-u>set opfunc=<sid>my_zd<cr>g@l
+nno <silent> zd :<c-u>set opfunc=<sid>my_zd<bar>norm! g@l<cr>
 
 fu s:my_zd(type) abort
     norm! zd
@@ -3556,20 +3552,20 @@ endfu
 " commands (easier to type lowercase characters):
 
 " mark word under cursor as good
-nno  <silent>  zg  :<c-u>call <sid>repeat_which_spell_command('zG')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
-nno  <silent>  zG  :<c-u>call <sid>repeat_which_spell_command('zg')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zg :<c-u>call <sid>repeat_which_spell_command('zG')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zG :<c-u>call <sid>repeat_which_spell_command('zg')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
 
 " mark word under cursor as wrong
-nno  <silent>  zw  :<c-u>call <sid>repeat_which_spell_command('zW')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
-nno  <silent>  zW  :<c-u>call <sid>repeat_which_spell_command('zw')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zw :<c-u>call <sid>repeat_which_spell_command('zW')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zW :<c-u>call <sid>repeat_which_spell_command('zw')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
 
 " undo the marking of word under cursor as good
-nno  <silent>  zug :<c-u>call <sid>repeat_which_spell_command('zuG')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
-nno  <silent>  zuG :<c-u>call <sid>repeat_which_spell_command('zug')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zug :<c-u>call <sid>repeat_which_spell_command('zuG')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zuG :<c-u>call <sid>repeat_which_spell_command('zug')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
 
 " undo the marking of word under cursor as wrong
-nno  <silent>  zuw :<c-u>call <sid>repeat_which_spell_command('zuW')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
-nno  <silent>  zuW :<c-u>call <sid>repeat_which_spell_command('zuw')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zuw :<c-u>call <sid>repeat_which_spell_command('zuW')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zuW :<c-u>call <sid>repeat_which_spell_command('zuw')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
 
 fu s:repeat_which_spell_command(cmd) abort
     let s:repeat_this_spell_command = a:cmd
@@ -3588,13 +3584,13 @@ endfu
 " |                   (prefix) {{{3
 " |C  |F     open html file in firefox/chrome {{{4
 
-nno  <silent>  <bar>F  :<c-u>exe ':sil !firefox localhost/'..
-                       \ substitute(expand('%'), $HOME..'/htdocs/', '', '') <bar>
-                       \ redraw!<cr>
+nno <silent> <bar>F :<c-u>exe ':sil !firefox localhost/'..
+                    \ substitute(expand('%'), $HOME..'/htdocs/', '', '') <bar>
+                    \ redraw!<cr>
 
-nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/'..
-                       \ substitute(expand('%'), $HOME..'/htdocs/', '', '') <bar>
-                       \ redraw!<cr>
+nno <silent> <bar>C :<c-u>exe ':sil !google-chrome localhost/'..
+                    \ substitute(expand('%'), $HOME..'/htdocs/', '', '') <bar>
+                    \ redraw!<cr>
 
 " |c         execute the Compiler {{{4
 
@@ -3623,7 +3619,7 @@ nno  <silent>  <bar>C  :<c-u>exe ':sil !google-chrome localhost/'..
 " Instead, simply set the compiler in the filetype plugin with `:compiler foo`.
 " This global `<bar>c` mapping will then use the right compiler.
 "}}}
-nno  <silent>  <bar>c  :<c-u>call <sid>run_compiler()<cr>
+nno <silent> <bar>c :<c-u>call <sid>run_compiler()<cr>
 
 fu s:run_compiler() abort
     if &l:mp =~# '\m\C^desktop-file-validate\>'
@@ -3660,10 +3656,10 @@ endfu
 " |g         grep word under cursor / visual selection {{{4
 
 " grep the word under the cursor, recursively in all the files of cwd
-nno  <silent>  <bar>g  :<c-u>set operatorfunc=myfuncs#op_grep<cr>g@
+nno <silent> <bar>g :<c-u>set operatorfunc=myfuncs#op_grep<cr>g@
 
 " same thing for visual selection
-xno  <silent>  <bar>g  :<c-u>call myfuncs#op_grep('vis')<cr>
+xno <silent> <bar>g :<c-u>call myfuncs#op_grep('vis')<cr>
 
 " Why not `!g` for the `{lhs}` ?
 " Because it would introduce some "lag" whenever we hit `!` to filter some
@@ -3672,28 +3668,28 @@ xno  <silent>  <bar>g  :<c-u>call myfuncs#op_grep('vis')<cr>
 
 " |t         translate {{{4
 
-"                                               ┌ 1st invocation
-"                                               │
-nno  <silent>  <bar>t  :<c-u>call myfuncs#trans(1)<cr>
-nno  <silent>  <bar>T  :<c-u>call myfuncs#trans_stop()<cr>
-xno  <silent>  <bar>t  :<c-u>call myfuncs#trans(1, 1)<cr>
-"              │                                   │
-"              │                                   └ visual mode
-"              │
-"              └ do NOT use `!t`, it would prevent you from writing a visual selection
-"                on the standard input of a shell command whose name begins with a `t`
+"                                            ┌ 1st invocation
+"                                            │
+nno <silent> <bar>t :<c-u>call myfuncs#trans(1)<cr>
+nno <silent> <bar>T :<c-u>call myfuncs#trans_stop()<cr>
+xno <silent> <bar>t :<c-u>call myfuncs#trans(1, 1)<cr>
+"            │                                  │
+"            │                                  └ visual mode
+"            │
+"            └ do NOT use `!t`, it would prevent you from writing a visual selection
+"              on the standard input of a shell command whose name begins with a `t`
 "
-"                do NOT use `!<c-t>`, it would introduce lag when we press `!` in visual mode
+"              do NOT use `!<c-t>`, it would introduce lag when we press `!` in visual mode
 "
-"                do NOT use `<c-t>!`, it would be inconsistent with other similar mappings
-"                Ex:
+"              do NOT use `<c-t>!`, it would be inconsistent with other similar mappings
+"              Ex:
 "
-"                        xno <silent>  <bar>x  "my:TxSend(@m)<cr>
-"                                      │
-"                                      └ can't use `<c-x>!`, it would introduce lag when decreasing numbers
+"                      xno <silent>  <bar>x  "my:TxSend(@m)<cr>
+"                                    │
+"                                    └ can't use `<c-x>!`, it would introduce lag when decreasing numbers
 
 " cycle through several types of translations
-nno  <silent>  coT  :<c-u>call myfuncs#trans_cycle()<cr>
+nno <silent> coT :<c-u>call myfuncs#trans_cycle()<cr>
 
 
 " OLD CODE:
@@ -3732,9 +3728,9 @@ endfu
 " https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
 
 " In Neovim, they use `gO`. Should we do the same?
-nno  <silent>  -c  :<c-u>call myfuncs#tab_toc()<cr>
-"               ^
-"               Contents
+nno <silent> -c :<c-u>call myfuncs#tab_toc()<cr>
+"             ^
+"             Contents
 
 " -f               show filetype {{{4
 
@@ -3757,8 +3753,8 @@ endfu
 
 " -p  -P           show filePath / :pwd {{{4
 
-nno  -p  :<c-u>call <sid>print_full_path()<cr>
-nno  <silent> -P  :<c-u>call <sid>print_cwd()<cr>
+nno -p :<c-u>call <sid>print_full_path()<cr>
+nno <silent> -P :<c-u>call <sid>print_cwd()<cr>
 
 fu s:print_cwd() abort
     let @o = execute('pwd', 'silent!')[1:]
@@ -3818,7 +3814,7 @@ endfu
 "     press `-q` again: stop answering the faq
 "}}}
 
-nno  <silent>  -q  :<c-u>exe <sid>faq()<cr>
+nno <silent> -q :<c-u>exe <sid>faq()<cr>
 
 fu s:faq() abort
     " If you move this function outside the vimrc, there's no guarantee that `$XDG_RUNTIME_VIM` is set.{{{
@@ -3874,7 +3870,7 @@ endfu
 " Use it as  a table of contents,  which briefly explains what each  page of the
 " wiki is about.
 
-nno  <silent>  -r  :<c-u>call <sid>edit_readme()<cr>
+nno <silent> -r :<c-u>call <sid>edit_readme()<cr>
 
 fu s:edit_readme() abort
     let files = glob(expand('%:p:h')..'/*', 0, 1)
@@ -3909,14 +3905,14 @@ endfu
 " It  allows   us  to   fuzzy  search  our   snippets,  and   can  automatically
 " inserts+expands the selected tab trigger.
 "}}}
-nno  <silent>  -s  :<c-u>UltiSnipsEdit<cr>
+nno <silent> -s :<c-u>UltiSnipsEdit<cr>
 
 " -U               show unicode table {{{4
 
 " We define this mappping because  it's more convenient than the `:UnicodeTable`
 " command, and  to install a buffer-local  mapping to close the  “unicode table“
 " window with a single `q` (instead of `:q`).
-nno  <silent>  -U  :<c-u>call <sid>unicode_table()<cr>
+nno <silent> -U :<c-u>call <sid>unicode_table()<cr>
 
 fu s:unicode_table() abort
     UnicodeTable
@@ -3926,23 +3922,22 @@ endfu
 " -u               :UndotreeShow {{{4
 
 " `D` toggles the diff window.
-nno  <silent>  -u  :<c-u>UndotreeShow<cr>
-
+nno <silent> -u :<c-u>UndotreeShow<cr>
 " }}}3
 " plus                (prefix) {{{3
 " +>    +<      split/join listing or long data {{{4
 
 " long data = dictionary, list, bulleted list
 
-nno  <silent>  +>  :<c-u>set opfunc=myfuncs#long_data_split<cr>g@l
-nno  <silent>  +<  :<c-u>set opfunc=myfuncs#long_data_join<cr>g@
-xno  <silent>  +<  :<c-u>call myfuncs#long_data_join('vis')<cr>
+nno <silent> +> :<c-u>set opfunc=myfuncs#long_data_split<bar>norm! g@l<cr>
+nno <silent> +< :<c-u>set opfunc=myfuncs#long_data_join<cr>g@
+xno <silent> +< :<c-u>call myfuncs#long_data_join('vis')<cr>
 
 " +t            trim whitespace {{{4
 
-nno  <silent>  +t   :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
-xno  <silent>  +t   :<c-u>call myfuncs#op_trim_ws('vis')<cr>
-nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '..v:count1..'g@_'<cr>
+nno <silent> +t  :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
+xno <silent> +t  :<c-u>call myfuncs#op_trim_ws('vis')<cr>
+nno <silent> +tt :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '..v:count1..'g@_'<cr>
 " }}}3
 " CR / Tab / Shift / Control / Meta {{{3
 " CR                  move cursor on 80/100 column {{{4
@@ -3962,14 +3957,14 @@ nno  <silent>  +tt  :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '..v:coun
 " If we wrote the previous line in a python ftplugin, hitting CR would display
 " 'hello'.
 
-nno  <expr><silent>  <cr>  !empty(&buftype)
-                       \ ?     '<cr>'
-                       \ :     ':<c-u>'..getbufvar('%', 'cr_command', 'norm! 80<bar>')..'<cr>'
-"                                 │
-"                                 └ important, otherwise, if we hit a nr
-"                                 (e.g. 42) by accident before `CR`, it would do:    :42norm! 100|
-"                                 which would move the cursor 42 lines below the
-"                                 current one
+nno <expr><silent> <cr> !empty(&buftype)
+                     \ ?     '<cr>'
+                     \ :     ':<c-u>'..getbufvar('%', 'cr_command', 'norm! 80<bar>')..'<cr>'
+"                               │
+"                               └ important, otherwise, if we hit a nr
+"                               (e.g. 42) by accident before `CR`, it would do:    :42norm! 100|
+"                               which would move the cursor 42 lines below the
+"                               current one
 
 " S-→    C-↑ ...      modified arrow keys {{{4
 
@@ -4055,12 +4050,12 @@ endfu
 
 " C-g C-g             show info about current file {{{4
 
-nno  <c-g><c-g>  <c-g>
+nno <c-g><c-g> <c-g>
 
 " C-np                move across tab pages {{{4
 
-nno  <silent>  <c-p>  :<c-u>tabprevious<cr>
-nno  <silent>  <c-n>  :<c-u>tabnext<cr>
+nno <silent> <c-p> :<c-u>tabprevious<cr>
+nno <silent> <c-n> :<c-u>tabnext<cr>
 
 " C-w N               join tab page {{{4
 
@@ -4073,7 +4068,7 @@ nno  <silent>  <c-n>  :<c-u>tabnext<cr>
 " 'T' for spli*t*.
 " 'N' for joi*n*.
 "}}}
-nno  <silent>  <c-w>N  :<c-u>call <sid>join_tab_page(v:count)<cr>
+nno <silent> <c-w>N :<c-u>call <sid>join_tab_page(v:count)<cr>
 
 fu s:join_tab_page(cnt) abort
     let cnt = a:cnt
@@ -4131,13 +4126,28 @@ fu s:where_are_my_matches() abort
     endif
 endfu
 
-nno  <silent>  <m-m>  :<c-u>noh <bar> call <sid>where_are_my_matches()<cr>
+nno <silent> <m-m> :<c-u>noh <bar> call <sid>where_are_my_matches()<cr>
 
 " M-n    M-p          navigate between marks {{{4
 
-nno  <m-n>  ]'
-nno  <m-p>  ['
+nno <m-n> ]'
+nno <m-p> ['
 " }}}3
+" _                   0_ {{{3
+
+" Issue:
+"
+"     # start xterm with default geometry (80 columns)
+"     $ vim -Nu NONE +"pu='some short text'" +"pu=repeat(' ', 50)..repeat('some long text ', 10)" +'setl nowrap'
+"     " press `$` to move to the end of the line
+"     " press `_` to move to the first non-whitespace of the line
+"
+"     " the text of the first line is partially hidden:
+"     " you can only read `text`, not `some short text`
+"
+" Solution:
+nno _ 0_
+
 " >>                  indent without 'shiftround' {{{3
 
 " You refer to `v:count1` in the mapping, then in the function. Isn't it too much?{{{
@@ -4149,8 +4159,8 @@ nno  <m-p>  ['
 " We could probably use `']` and the `>` operator in our function,
 " but `v:count1` seems simpler.
 "}}}
-nno  <silent>  >>  :<c-u>call <sid>indent_without_shiftround_save('increase')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '..v:count1..'g@l'<cr>
-nno  <silent>  <<  :<c-u>call <sid>indent_without_shiftround_save('decrease')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '..v:count1..'g@l'<cr>
+nno <silent> >> :<c-u>call <sid>indent_without_shiftround_save('increase')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '..v:count1..'g@l'<cr>
+nno <silent> << :<c-u>call <sid>indent_without_shiftround_save('decrease')<bar>set opfunc=<sid>indent_without_shiftround<bar>exe 'norm! '..v:count1..'g@l'<cr>
 
 fu s:indent_without_shiftround_save(dir) abort
     let s:indent_without_shiftround_dir = a:dir
@@ -4234,15 +4244,15 @@ endfu
 " The fields must be separated with `|`.
 " The function will populate the `s` and `x` registers with 2 kind of
 " separation lines. We can paste them to fine tune the box.
-nno  <silent>  >b  :<c-u>set opfunc=myfuncs#box_create<cr>g@ip
+nno <silent> >b :<c-u>set opfunc=myfuncs#box_create<cr>g@ip
 
 " undo the box, make it come back to just bars between cells
-nno  <silent>  <b  :<c-u>set opfunc=myfuncs#box_destroy<cr>g@ip
+nno <silent> <b :<c-u>set opfunc=myfuncs#box_destroy<cr>g@ip
 
 " =A                  toggle alignment {{{3
 
-nno  <silent>  =A  :<c-u>set opfunc=myfuncs#op_toggle_alignment<cr>g@
-xno  <silent>  =A  :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
+nno <silent> =A :<c-u>set opfunc=myfuncs#op_toggle_alignment<cr>g@
+xno <silent> =A :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
 
 " =d                  fix display {{{3
 
@@ -4257,7 +4267,7 @@ nno <silent> =d :<c-u>call <sid>fix_display()<cr>
 fu s:fix_display() abort
     let view = winsaveview()
 
-    redraw! | redraws!
+    redraw! | redraws! | redrawt
 
     if &l:diff
         " update differences between windows in diff mode
@@ -4377,7 +4387,7 @@ endfu
 
 " Usage:
 "     =ma  →  edit recording a
-nno  <silent>  =m  :<c-u>call <sid>fix_macro()<cr>
+nno <silent> =m :<c-u>call <sid>fix_macro()<cr>
 
 fu s:fix_macro() abort
     let c = getchar()
@@ -4482,25 +4492,25 @@ nno <silent> } :<c-u>call search('\S\+.*\ze\n\s*$', 'W')<cr>zv
 "               └ fixes `*` stupidity
 
 
-"        ┌ populate search register with word under cursor
-"        │
-"        │┌ get back where we were
-"        ││
-"        ││          ┌ get back where we were
-"        ││          │
-"        ││          │ ┌ change next occurrence of pattern
-"        ││          │ ├─┐
-nno  c*  *``/<up><cr>``cgn
-"           ├───────┘
-"           └ take 'smartcase' into account
+"      ┌ populate search register with word under cursor
+"      │
+"      │┌ get back where we were
+"      ││
+"      ││          ┌ get back where we were
+"      ││          │
+"      ││          │ ┌ change next occurrence of pattern
+"      ││          │ ├─┐
+nno c* *``/<up><cr>``cgn
+"         ├───────┘
+"         └ take 'smartcase' into account
 
-nno  c#  #``/<up><cr>``cgN
+nno c# #``/<up><cr>``cgN
 
 
 " We also install `cg*` and `cg#` if we want to look for the word under the
 " cursor WITHOUT the anchors `\<`, `\>`.
-nno  cg*  g*``/<up><cr>``cgn
-nno  cg#  g#``/<up><cr>``cgN
+nno cg* g*``/<up><cr>``cgn
+nno cg# g#``/<up><cr>``cgN
 
 " crg                 coerce to glyph {{{3
 
@@ -4508,8 +4518,8 @@ nno  cg#  g#``/<up><cr>``cgN
 " g:Unicode_ConvertDigraphSubset.
 " Have a look at: ~/.vim/after/plugin/abbrev.vim
 
-nmap  crg   <plug>(MakeDigraph)
-nmap  crgg  <plug>(MakeDigraph)_
+nmap crg  <plug>(MakeDigraph)
+nmap crgg <plug>(MakeDigraph)_
 
 " dr                  replace without yank {{{3
 
@@ -4523,12 +4533,12 @@ nmap  crgg  <plug>(MakeDigraph)_
 
 " TODO: maybe we could get rid of `myfuncs#set_reg()` and use `repeat#setreg()` instead.
 
-nno  <silent>  dr  :<c-u>call myfuncs#set_reg(v:register)
-                  \ <bar>set opfunc=myfuncs#op_replace_without_yank<cr>g@
+nno <silent> dr :<c-u>call myfuncs#set_reg(v:register)
+                \ <bar>set opfunc=myfuncs#op_replace_without_yank<cr>g@
 
-nno  <silent>  drr  :<c-u>call myfuncs#set_reg(v:register)
-                   \ <bar>set opfunc=myfuncs#op_replace_without_yank
-                   \ <bar>exe 'norm! '..v:count1..'g@_'<cr>
+nno <silent> drr :<c-u>call myfuncs#set_reg(v:register)
+                 \ <bar>set opfunc=myfuncs#op_replace_without_yank
+                 \ <bar>exe 'norm! '..v:count1..'g@_'<cr>
 
 " j  k  ^  0  $       gj  gk  ... {{{3
 
@@ -4548,13 +4558,13 @@ nmap <up> k
 
 " If we're inside a long wrapped line, `^` and `0` should go the beginning
 " of the line of the screen (not the beginning of the long line of the file).
-nno  <silent>  ^  g^
-nno  <silent>  0  g0
+nno <silent> ^ g^
+nno <silent> 0 g0
 
 " To draw freely, sometimes we need to enable 'virtualedit'.
 " And then, when we press `$`, the cursor moves to the very end of the screen.
 " We never want that. We want the cursor on the last non whitespace.
-nno  <expr>  $  &virtualedit is# 'block' ? '$' : 'g_'
+nno <expr> $ &virtualedit is# 'block' ? '$' : 'g_'
 " Do *not* use `g$` by default (i. e. don't write `g$` in the lhs when 've' is 'block')!  Keep using `$`.{{{
 "
 " It would break the dot command when you've pressed `$` right before.
@@ -4590,16 +4600,16 @@ nno  <expr>  $  &virtualedit is# 'block' ? '$' : 'g_'
 "}}}
 
 " Same mappings for visual mode.
-xno  <silent>  j  gj
-xno  <silent>  k  gk
-xno  <silent>  ^  g^
-xno  <silent>  0  g0
+xno <silent> j gj
+xno <silent> k gk
+xno <silent> ^ g^
+xno <silent> 0 g0
 
 " H  L  M             collapse/expand folds {{{3
 
 nno <expr> H v:count ? 'H' : 'zMzz'
 nno <expr> L v:count ? 'L' : 'zRzz'
-nno  M  zMzvzz
+nno M zMzvzz
 
 " J        gJ         join without moving {{{3
 
@@ -4633,7 +4643,7 @@ nno Q q
 
 " Y        y$ {{{3
 
-nno  Y  y$
+nno Y y$
 
 " We can't separate a register name from the `y` command, with a motion.
 " They  must be consecutive. Otherwise the  yanking fails to target  the desired
@@ -4645,7 +4655,7 @@ nno  Y  y$
 " As  soon as  we type  the `$`  motion, the  register name  is lost  (watch the
 " command-line).
 " So, we use an  expression, to make sure that they are consecutive.
-xno  <expr>  Y  '$"'.v:register.'y'
+xno <expr> Y '$"'.v:register.'y'
 
 " yc / yC    ym / yM      yank comments / Code  matching / non-matching lines {{{3
 
@@ -4654,30 +4664,30 @@ xno  <expr>  Y  '$"'.v:register.'y'
 " the `+` register (not the unnamed one).
 
 " comments
-nno  <silent>  yc   :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
-                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  myc  :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
-                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
+nno <silent> yc :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
+                \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+xno <silent> myc :<c-u>call myfuncs#op_yank_matches_set_action(1, 1)
+                 \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " Code
-"                      don't yank where a commented line is found ┐
-"                                                                 │
-nno  <silent>  yC   :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
-                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  myC  :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
-                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
+"                  don't yank where a commented line is found ┐
+"                                                             │
+nno <silent> yC :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
+                \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+xno <silent> myC :<c-u>call myfuncs#op_yank_matches_set_action(0, 1)
+                 \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " lines matching last search
-nno  <silent>  ym   :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
-                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  mym  :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
-                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
+nno <silent> ym :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
+                \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+xno <silent> mym :<c-u>call myfuncs#op_yank_matches_set_action(1, 0)
+                 \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 
 " lines which do NOT match last search
-nno  <silent>  yM   :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
-                   \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
-xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
-                   \ <bar> call myfuncs#op_yank_matches('vis')<cr>
+nno <silent> yM :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
+                \ <bar> set opfunc=myfuncs#op_yank_matches<cr>g@
+xno <silent> myM :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
+                 \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 " }}}2
 " Objects {{{2
 " i% {{{3
@@ -4729,8 +4739,8 @@ xno  <silent>  myM  :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 "         xno <silent> a% <Esc>%v%
 "         ono <silent> a% :norm va%<cr>
 "}}}
-xno  <silent>  i%  <esc>:call <sid>select_percent_object()<cr>
-ono  <silent>  i%  :norm vi%<cr>
+xno <silent> i% <esc>:call <sid>select_percent_object()<cr>
+ono <silent> i% :norm vi%<cr>
 
 fu s:select_percent_object() abort
     let pos = getcurpos()
@@ -4768,8 +4778,8 @@ endfu
 " We don't use `ie` but `iE`, because `ie` is too easily typed.
 " We could easily delete the whole buffer `cie`, `die` by mistake.
 
-xno  <silent>  iE  G$ogg0
-ono  <silent>  iE  :<c-u>norm ViE<cr>
+xno <silent> iE G$ogg0
+ono <silent> iE :<c-u>norm ViE<cr>
 
 " if {{{3
 
@@ -4777,11 +4787,11 @@ ono  <silent>  iE  :<c-u>norm ViE<cr>
 
 " FIXME: Not reliable text objects (check out kana plugin).
 " Fix also `o_il` and `o_al` (i.e. add support for visual mode).
-xno  <silent>  if  :<c-u>call <sid>textobj_func(1)<cr>
-ono  <silent>  if  :<c-u>norm Vif<cr>
+xno <silent> if :<c-u>call <sid>textobj_func(1)<cr>
+ono <silent> if :<c-u>norm Vif<cr>
 
-xno  <silent>  af  :<c-u>call <sid>textobj_func(0)<cr>
-ono  <silent>  af  :<c-u>norm Vaf<cr>
+xno <silent> af :<c-u>call <sid>textobj_func(0)<cr>
+ono <silent> af :<c-u>norm Vaf<cr>
 
 fu s:textobj_func(inside) abort
     if search('^\s*fu\%[nction]', 'bcW')
@@ -4799,8 +4809,8 @@ endfu
 " `il` = in line (operate on the text between first and last non-whitespace on the line)
 " Useful to copy a line and paste it characterwise (in the middle of another line)
 
-ono  <silent>  il  :norm! _vg_<cr>
-ono  <silent>  al  _
+ono <silent> il :norm! _vg_<cr>
+ono <silent> al _
 
 " We don't need to create `al` (around line) to operate on the whole line
 " including newline, because `_` can be used instead.
@@ -4822,9 +4832,9 @@ ono  <silent>  al  _
 " The order matters ... Keep `\d` last!.
 " `\+` will be appended to the end of each.
 let s:pat_numbers =<< trim END
-    0b[01]
-    0x\x
-    \d
+0b[01]
+0x\x
+\d
 END
 
 fu s:around_number() abort "{{{4
@@ -4846,22 +4856,22 @@ fu s:around_number() abort "{{{4
     let pat = join(s:pat_numbers, '\+\|')..'\+'
 
     " move cursor to end of number
-    if !search(pat, 'ce', stopline)
+    if !search(pat, 'ceW', stopline)
         " if it fails, there was not match on the line, so return prematurely
         return
     endif
 
     " move cursor to end of any trailing whitespace (if there is any)
-    call search('\%'..(virtcol('.')+1)..'v\s*', 'ce', stopline)
+    call search('\%'..(virtcol('.')+1)..'v\s*', 'ceW', stopline)
 
     " start visually selecting from end of number + potential trailing whitspace
     norm! v
 
     " move cursor to beginning of number
-    call search(pat, 'bc', stopline)
+    call search(pat, 'bcW', stopline)
 
     " move cursor to beginning of any whitespace preceding number (if any)
-    call search('\s*\%'..virtcol('.')..'v', 'b', stopline)
+    call search('\s*\%'..virtcol('.')..'v', 'bW', stopline)
 endfu
 " }}}4
 
@@ -4878,7 +4888,7 @@ fu s:in_number() abort "{{{4
     let pat = join(s:pat_numbers, '\+\|')..'\+'
 
     " move cursor to end of number
-    if !search(pat, 'ce', stopline)
+    if !search(pat, 'ceW', stopline)
         " if it fails, there was not match on the line, so return prematurely
         return
     endif
@@ -4887,7 +4897,7 @@ fu s:in_number() abort "{{{4
     norm! v
 
     " move cursor to beginning of number
-    call search(pat, 'bc', stopline)
+    call search(pat, 'bcW', stopline)
 endfu
 " }}}4
 
@@ -4908,23 +4918,22 @@ ono <silent> in :<c-u>call <sid>in_number()<cr>
 " frequently than  the sandwich objects. So,  I won't remove  the mappings. But,
 " instead, to restore the sentences objects, we install these mappings:
 
-ono  iS  is
-ono  aS  as
+ono iS is
+ono aS as
 
-xno  iS  is
-xno  aS  as
-
+xno iS is
+xno aS as
 " }}}2
 " Select {{{2
 
 " DWIM:
 " move to left/right in select mode (useful for UltiSnips)
-snor  <c-b>  <esc>i<left>
-snor  <c-f>  <esc>i<right>
+snor <c-b> <esc>i<left>
+snor <c-f> <esc>i<right>
 
 " After expanding a snippet, I want to be able to delete the character after
 " the cursor with C-d like in insert mode.
-snor  <c-d>  <esc>i<del>
+snor <c-d> <esc>i<del>
 
 " Terminal {{{2
 
@@ -5022,7 +5031,7 @@ augroup END
 "    - can ignore comment if we don't put a bang
 "    - automatically adds \<,\> around the pattern, if we don't surround it with slashes
 
-xno  <c-s>  <esc>:keepj keepp *g/\%V/#<left><left>
+xno <c-s> <esc>:keepj keepp *g/\%V/#<left><left>
 
 " /           search only in visual selection {{{3
 
@@ -5032,7 +5041,7 @@ xno  <c-s>  <esc>:keepj keepp *g/\%V/#<left><left>
 " quit the visual mode so that they  have been updated.
 " But you can't do that if the function is called while the text is locked.
 "}}}
-xno  <silent>  /  :<c-u>call <sid>visual_slash()<cr>
+xno <silent> / :<c-u>call <sid>visual_slash()<cr>
 fu s:visual_slash() abort
     if line("'<") == line("'>")
         call feedkeys('gv/', 'in')
@@ -5050,8 +5059,8 @@ endfu
 " .    @ {{{3
 
 " Repeat last edit on all the visually selected lines with dot
-xno  <silent>  .  :norm! .<cr>
-"                      ^
+xno <silent> . :norm! .<cr>
+"                   ^
 " Warning: The bang may prevent the repetition of pseudo-operators such as `ys` provided by `vim-surround`.{{{
 "
 " I think that's because `vim-surround` doesn't implement real operators.
@@ -5075,8 +5084,8 @@ xno  <silent>  .  :norm! .<cr>
 " The solution would be to use  `inputsave()` / `inputrestore()`, but that would
 " make the mapping uselessly complex.
 "}}}
-xno  <silent>  @  :<c-u>exe "'<,'>norm @"..nr2char(getchar())<cr>
-"                                    │
+xno <silent> @ :<c-u>exe "'<,'>norm @"..nr2char(getchar())<cr>
+"                                 │
 "                                    └ Do NOT add a bang:{{{
 "
 " We want the recursiveness, for one of our mapping to be used.
@@ -5168,15 +5177,15 @@ xno <expr> < <sid>niceblock('<')
 
 " With this  mapping, we can  always access the last  text we deleted  in visual
 " mode, from the `v` register.
-xno  <expr><silent>  d  'd'..timer_start(0, {_ -> execute('let @v=@"')})[-1]
+xno <expr><silent> d 'd'..timer_start(0, {_ -> execute('let @v=@"')})[-1]
 
 " same thing when we yank
-xno  <expr><silent>  y  'y'..timer_start(0, {_ -> execute('let @v=@"')})[-1]
+xno <expr><silent> y 'y'..timer_start(0, {_ -> execute('let @v=@"')})[-1]
 
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
-xno  <expr>  h  mode() is# '<c-v>' && virtcol('.') == 1            ? '' : 'h'
-xno  <expr>  l  mode() is# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
+xno <expr> h mode() is# '<c-v>' && virtcol('.') == 1            ? '' : 'h'
+xno <expr> l mode() is# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
 
 " ip          disable on empty line {{{3
 
@@ -5184,14 +5193,14 @@ xno  <expr>  l  mode() is# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
 " annoying, because it can make me lose previous visual selection
 " (you can cycle through the last 2 visual selections with `gv`)
 
-nno  <expr><silent>  vip  getline('.') =~# '^\s*$' ? '' : 'vip'
+nno <expr><silent> vip getline('.') =~# '^\s*$' ? '' : 'vip'
 
 " gJ  g C-j   join lines {{{3
 
 " We use J to move the selection down. The J command needs to be restored.
-xno  gJ       J
+xno gJ J
 " Now `gJ` needs to be restored.
-xno  g<c-j>  gJ
+xno g<c-j> gJ
 
 " mJ  m C-j   join blocks {{{3
 
@@ -5214,11 +5223,11 @@ xno  g<c-j>  gJ
 "   - join the 2 blocks
 "   - align the blocks using ^A as a delimiter
 
-xno  <silent>  mJ      :<c-u>call myfuncs#join_blocks(0)<cr>
-xno  <silent>  m<c-j>  :<c-u>call myfuncs#join_blocks(1)<cr>
-"                                                     │
-"                                                     └ first, reverse the order of the blocks
-"                                                       then, join them
+xno <silent> mJ     :<c-u>call myfuncs#join_blocks(0)<cr>
+xno <silent> m<c-j> :<c-u>call myfuncs#join_blocks(1)<cr>
+"                                                  │
+"                                                  └ first, reverse the order of the blocks
+"                                                    then, join them
 
 " P           paste without yanking selection in unnamed register {{{3
 
@@ -5401,15 +5410,15 @@ com -nargs=1 GrepCfg call s:grep_cfg(<args>)
 fu s:grep_cfg(pat) abort
     let pat = shellescape(a:pat)
     let cmd =<< trim END
-        git
-        --git-dir="${HOME}/.cfg/"
-        --work-tree="${HOME}"
-        ls-tree
-        --full-tree
-        --name-only HEAD
-        -r
-        | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
-        | xargs grep -HIins
+    git
+    --git-dir="${HOME}/.cfg/"
+    --work-tree="${HOME}"
+    ls-tree
+    --full-tree
+    --name-only HEAD
+    -r
+    | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
+    | xargs grep -HIins
     END
     let cmd += [pat]
     " TODO: How to get the column position?{{{
@@ -5915,7 +5924,7 @@ com -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | e
 " Tldr {{{2
 
 com -bar -complete=custom,s:tldr_completion -nargs=1 Tldr call s:tldr(<q-args>)
-fu s:tldr_completion(_arglead, _cmdline, _pos) abort
+fu s:tldr_completion(_a, _l, _p) abort
     sil return system('tldr --list 2>/dev/null | tr -s "[ \t]" "\n"')
 endfu
 
@@ -6839,17 +6848,17 @@ fu s:setup_vim_terminal() abort
 endfu
 
 fu s:setup_neovim_terminal() abort
-    nno  <buffer><nowait><silent>  I   I<c-a>
-    nno  <buffer><nowait><silent>  A   A<c-e>
-    nno  <buffer><nowait><silent>  C   i<c-k>
-    nno  <buffer><nowait><silent>  D   i<c-k><c-\><c-n>
-    nno  <buffer><nowait><silent>  cc  i<c-e><c-u>
-    nno  <buffer><nowait><silent>  dd  i<c-e><c-u><c-\><c-n>
+    nno <buffer><nowait><silent> I  I<c-a>
+    nno <buffer><nowait><silent> A  A<c-e>
+    nno <buffer><nowait><silent> C  i<c-k>
+    nno <buffer><nowait><silent> D  i<c-k><c-\><c-n>
+    nno <buffer><nowait><silent> cc i<c-e><c-u>
+    nno <buffer><nowait><silent> dd i<c-e><c-u><c-\><c-n>
 
-    xno  <buffer><nowait><silent>  c  <nop>
-    xno  <buffer><nowait><silent>  d  <nop>
-    xno  <buffer><nowait><silent>  p  <nop>
-    xno  <buffer><nowait><silent>  x  <nop>
+    xno <buffer><nowait><silent> c <nop>
+    xno <buffer><nowait><silent> d <nop>
+    xno <buffer><nowait><silent> p <nop>
+    xno <buffer><nowait><silent> x <nop>
 endfu
 
 " Trailing Whitespace {{{2
@@ -6858,10 +6867,10 @@ endfu
 " blacklisted:
 let s:NO_TRAILING_WHITESPACE_FT =<< trim END
 
-    fzf
-    git
-    help
-    qf
+fzf
+git
+help
+qf
 END
 
 augroup trailing_whitespace
@@ -6901,14 +6910,35 @@ augroup trailing_whitespace
     if !has('nvim')
         au TerminalOpen * call s:trailing_whitespace(0)
     endif
-    " An undesirable match will be installed in a help buffer, even if we include `help` in s:NO_TRAILING_WHITESPACE_FT.{{{
+    " An undesirable match will be installed in a help buffer, even with `help` in `s:NO_TRAILING_WHITESPACE_FT`.{{{
     "
-    " Try `:h 'list`, and you'll see it.
+    " Try `:h :as`, and you'll see it.
     " This is because when `WinEnter` is fired, `&filetype` has not been correctly set yet.
     "
     " So, we must make sure to remove this match with an additional autocmd.
+    "
+    " ---
+    "
+    " You may wonder why we don't listen to `Filetype help`:
+    "
+    "     au FileType help call s:trailing_whitespace(0)
+    "
+    " It's not always fired.
+    "
+    " MWE:
+    "
+    "     $ vim +'LogEvents filetype'
+    "     :h :as
+    "     :q
+    "     :h :as
+    "
+    " Note that if you reset `'hidden'`, `FileType` is always fired.
+    " This is because when  you close the help window, the  help buffer can't be
+    " hidden (`BufHidden`), and Vim has to unload it (`BufUnload`).
+    " As a result, the next time you ask to see the same help file, Vim has to read
+    " the file again, which triggers `BufReadPre`, `FileType` and `BufReadPost`.
     "}}}
-    au FileType help call s:trailing_whitespace(0)
+    au BufWinEnter {$VIMRUNTIME,$HOME/.vim,$HOME/.vim/*}/doc/*.txt call s:trailing_whitespace(0)
 augroup END
 
 fu s:trailing_whitespace(create_match) abort
@@ -7256,7 +7286,7 @@ endfu
 " Create a mapping to populate command-line with `:ltag /`, then open the
 " location window. Ex:
 "
-      nno  <expr>  <c-g>t  <sid>ltag(1)
+      nno <expr> <c-g>t <sid>ltag(1)
       fu s:ltag(step) abort
           if a:step == 1
               augroup my_ltag
@@ -7712,7 +7742,7 @@ endfu
 "     fu s:easy_number() abort
 "         if !empty(maparg('!', 'i'))
 "             for key in ['!', 'u', 'i', 'o', 'j', 'k', 'l', ',', ';', ':']
-"                 exe 'iunmap  <buffer>  '.key
+"                 exe 'iunmap <buffer> '.key
 "             endfor
 "         else
 "             let i = 0
@@ -7820,7 +7850,6 @@ endfu
 "    - str2list() and list2str()
 "    - term_setansicolors(), term_getansicolors(), g:term_ansi_colors
 "    - term_setsize()
-"    - trim()
 "    - winlayout()
 "    - winnr(): new argument `{N}[hjkl]`
 "
@@ -7961,7 +7990,7 @@ endfu
 "
 " We could try sth like this:
 "
-"     ono  <silent>  ie  :<c-u>exe 'norm vie'.(v:operator is# '!' ? '<space>' : '')<cr>
+"     ono <silent> ie :<c-u>exe 'norm vie'.(v:operator is# '!' ? '<space>' : '')<cr>
 "
 " But, why does the issue occur with `![m`, but not with `![z`?
 "
@@ -7981,10 +8010,10 @@ endfu
 " It would not make the cursor move, but it would make the command-line redrawn.
 " MWE:
 "
-"     map  <silent>  ]g  :call search('pat')<cr>
+"     map <silent> ]g :call search('pat')<cr>
 "         !]g → command-line not redrawn
 "
-"     map  <silent>  ]g  :call search('pat') <bar> exe 'norm! '.line('.').'g'<cr>
+"     map <silent> ]g :call search('pat') <bar> exe 'norm! '.line('.').'g'<cr>
 "         !]g → command-line redrawn
 "
 " It seems `vim-textobj-user` doesn't suffer from this issue:
@@ -8636,8 +8665,12 @@ endfu
 " I'm not sure to understand what those commands are supposed to do.
 " I've run `:helpg foo`,  then I've pressed Enter on the  first entry, and tried
 " to run every of those commands; they all raise an error...
-" I think the issue is somewhere in our config; the commands *seem* to work with
-" `-Nu NONE`.
+"
+" Oh...
+" I think `:cbelow` fails when there is no other match in the current file.
+" It works  in a file where  there are still  other matches in the  current file
+" after the current entry.
+" IOW, I think all those commands are limited to the current file.
 "
 " Also: Vim  patch 8.1.1281  has extended  `:[cl]history` to  make it  select an
 " arbitrary qfl in the stack, via a count.
@@ -8829,7 +8862,7 @@ endfu
 " We have  a complex mechanism to disable custom  plugins in `~/.vim/plugin` and
 " `~/.vim/after/plugin`.
 " Maybe we could get rid of it entirely.
-" Instead, we could just add `set rpt-=~/.vim` (without adding it back with
+" Instead, we could just add `set rtp-=~/.vim` (without adding it back with
 " `set  rtp^=~/.vim`) in our  minimal vimrc  to disable `~/.vim/plugin`,  and we
 " could add `set rtp-=~/.vim/after` to disable `~/.vim/plugin/after`.
 "
@@ -8845,12 +8878,139 @@ endfu
 "     ~/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py
 "     ~/.vim/plugged/vim-snippets/UltiSnips/vim.snippets
 "
+" Update: Actually, I think you should only remove `g:no_plugin` and `g:no_after_plugin`.
+" Keep the rest.
+"
 " 124 -
-" I'm not sure, but I think we should  only restore the last qfl in our main Vim
-" instance.  The one where a sessions is tracked.
-" For all the  other ones, I think  it's unexpected to get the  qfl restored; in
-" particular, it's surprising to get a big  list of buffers even after running a
-" simple `$ vim`.
+"
+" Document a few things about debugging with breakpoints:
+"
+" no need to type the whole name of a variable, just run `:echo a:`, `:echo w:`, ...
+"
+" no need to compute the line number where to put a breakpoint; by default, line
+" number 1  is used; from there,  just run `>next`  or `>step` to step  into the
+" code which follows
+"
+" don't think that you enter debugging mode just at the breakpoint; you can stay
+" in debugging mode  as long as Vim  has to process commands,  provided that you
+" don't run `>cont` or `>quit`; those 2  only stop at the next breakpoint, while
+" all the other ones come back to debug mode for some other command
+"
+" `>next` and `>step` are similar (but not identical)
+" `>interrupt` and `>quit` are similar (but not identical)
+"
+" `>finish`  lets  Vim  process  all  the  remaining  commands  in  the  current
+" script/function;  after that  it makes  Vim come  back to  debug mode  for the
+" command B which follows  the command A (A being the  command which had sourced
+" the script/run the function in the first place).
+" IOW,   `>finish`  is   useful  when   you've  stepped   into  a   long  called
+" function/sourced script,  and you don't  want to  inspect it anymore,  but you
+" still want to debug the outer function/script.
+"
+" 125 -
+"
+" In xterm, we may now be able to use the alt modifier in mappings without nasty
+" side-effects:
+"
+" https://github.com/vim/vim/issues/4974#issuecomment-541431801
+"
+" 126 -
+"
+" Does `:RefVval` handle quotes correctly?
+"
+" 127 -
+"
+" Don't use `++once` when you listen to several events.
+"
+" It's too tricky: you need a custom  flag `s:did_shoot`, you may need to remove
+" it before installing the autocmd, and you  probably need to make sure its name
+" is unique  in the script  if you have several  one-shot autocmds each  of them
+" listening to several events.
+"
+" Use old  way (make  autocmd clear  itself): more reliable  (and not  much more
+" complex in this case anyway).
+"
+" 128 -
+"
+" We've just had an issue in `vim-search` because we used `==` instead of `==#`.
+" Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
+" Or maybe we should just do it for comparisons where no operand is a number:
+"
+"     vim /=\@<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
+"
+" 129 -
+"
+" There is an issue with `:RefHeredoc`.
+" If one of the  string is double-quoted and contains sth  like `\t`, the latter
+" is not properly translated.
+" Once you fix this issue, make sure `:RefVval` doesn't suffer from it too.
+"
+" ---
+"
+" Also, if  `:RefHeredoc` refactors  an unpacking, make  sure it  removes spaces
+" around a comma, to avoid Vim's issue 5051.
+"
+" 130 -
+"
+" Write this on the command-line:
+"
+"     sil exe 'lvim /'..pat..'/j %'
+"
+" Press `M-d` in front of `sil` to remove it.
+" Press `M-d` in front of `exe` to remove it:
+"
+"     E20: Mark not set~
+"
+" 131 -
+"
+"     $ C-x C-e
+"     # press `o` to open a new line
+"     # insert `ls`
+"     # press `Esc` and `ZZ`
+"     # press Enter to run the command
+"     # press `M-c` to capture the pane contents:
+"     # notice how `ls(1)` is not visible in the quickfix window
+"     # it should be visible; transform the qfl to replace a long leading sequence of whitespace
+"     # with just one whitespace
+"
+" 132 -
+"
+"     $ vim -o =(echo ruby) =(echo rubyinterp) +'setl dict=/usr/share/dict/words' +startinsert!
+"
+" You want to complete `ruby` into `rubyinterp` (which is displayed in the other window).
+"
+" Press Tab to complete `ruby`.
+" The pum suggests:
+"
+"     Ruby /usr/share/dict/words
+"     ruby /usr/share/dict/words
+"
+" And the text has been changed to `Ruby`.
+" Press `C-j`  to try another  completion command;  you don't get  any different
+" results, and yo don't get `rubyinterp`.
+" We didn't have this  issue in the past; is it due to  our recent change in the
+" value of `'cot'`? Or the order of completion commands in `b:mc_chain`?
+"
+" ---
+"
+" Also,  press `C-q`  to quit  the  pum: `Ruby` stays  in the  buffer, it's  not
+" replaced with the original text `ruby`.
+" That doesn't happen with `-Nu NONE`: bisect your config.
+"
+" ---
+"
+" Update: It's because we include `longest` in `'cot'`, in `vim-completion`.
+" As a result, for some completion  commands (which ones), `'ic'` is used (which
+" we set to on by default).
+"
+" Maybe you could try to temporarily  reset `'ic'` when a completion occurs, via
+" an autocmd (or via a custom mapping)...
+"
+" 133 -
+"
+" Insert `helzo` in a markdown buffer.
+" Press `z=` over it to fix it.
+" Choose `hello`: the word is not fixed.
 
 
 
@@ -8987,6 +9147,25 @@ fu s:save_last_qfl() abort
         " And if the qfl is empty, we don't  want to look for another qfl in the
         " stack.
         if size > 9999 || size == 0
+            " TODO: Don't use `~/.viminfo` to save the qfl. Use a dedicated file.{{{
+            "
+            " Benefits:
+            "
+            " `~/.viminfo` is not altered, and doesn't get too big.
+            " The bigger `~/.viminfo` is, the slower Vim starts.
+            " It  may  not be  an  issue  when you  start  your  first main  Vim
+            " instance, but there's  no reason for other Vim  instances to start
+            " slowly because of a qfl they don't care about.
+            "
+            " Can save and restore multiple qfl, using different files.
+            "
+            " ---
+            "
+            " Also,  consider   the  possibility   of  not  restoring   the  qfl
+            " automatically, even for the first main Vim instance.
+            " It may make a restart slower.
+            " If manually restoring a qfl is easy, that should not be an issue.
+            "}}}
             unlet! g:MY_LAST_QFL
             return
         endif
@@ -9042,8 +9221,17 @@ fu s:restore_last_qfl() abort
     " This is  especially true if the  two qfl which  end on the stack  are very
     " similar, which happens when you're refining an 'efm'.
     "}}}
+    " Why not restoring the qfl if `v:servername` is empty?{{{
+    "
+    " I prefer to restore the last qfl in our main Vim instance; the one where a
+    " sessions is tracked.
+    " For all the other  ones, I think it's unexpected to  get the qfl restored;
+    " in particular,  it's surprising to  get a big  list of buffers  even after
+    " running a simple `$ vim`.
+    "}}}
     if get(getqflist({'size':0}), 'size', 0)
     \ || empty(get(get(g:, 'MY_LAST_QFL', {}), 'qfl', []))
+    \ || v:servername is# ''
         return
     endif
 

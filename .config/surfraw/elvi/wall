@@ -4,11 +4,11 @@
 . surfraw || exit 1
 
 w3_usage_hook () {
-    cat <<EOF
-Usage: $w3_argv0 [options] [search words]...
-Description:
-  Search wallpapers using wallhaven (https://alpha.wallhaven.cc/)
-EOF
+    cat <<-EOF
+		Usage: $w3_argv0 [options] [search words]...
+		Description:
+		  Search wallpapers using wallhaven (https://alpha.wallhaven.cc/)
+		EOF
     w3_global_usage
 }
 

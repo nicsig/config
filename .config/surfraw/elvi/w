@@ -13,24 +13,24 @@ def   SURFRAW_wikipedia_fallback        wikipedia
 }
 
 w3_usage_hook () {
-    cat <<EOF
-Usage: $w3_argv0 [options] [search-string]
-Description:
-  Search the Wikipedia online encyclopedia
-Local options:
-  -s				  Uses experimental HTTPS secure connection.
-                                  Environment: SURFRAW_wikipedia_ssl
-  -language=ISOCODE | -l=ISOCODE  Two letter language code (resembles ISO country codes)
-				  Default: en
-				  Environment: SURFRAW_wikipedia_language, SURFRAW_lang
-  -d                              If page doesn't exist, also search Deletionpedia
-  -f=w|d, -fallback=              If page not found in wikipedia OR deletionpedia,
-             wikipedia |          fallback to searching which site
-             deletionpedia        Default: wikipedia. Implies -d.
+    cat <<-EOF
+		Usage: $w3_argv0 [options] [search-string]
+		Description:
+		  Search the Wikipedia online encyclopedia
+		Local options:
+		  -s				  Uses experimental HTTPS secure connection.
+		                                  Environment: SURFRAW_wikipedia_ssl
+		  -language=ISOCODE | -l=ISOCODE  Two letter language code (resembles ISO country codes)
+						  Default: en
+						  Environment: SURFRAW_wikipedia_language, SURFRAW_lang
+		  -d                              If page doesn't exist, also search Deletionpedia
+		  -f=w|d, -fallback=              If page not found in wikipedia OR deletionpedia,
+		             wikipedia |          fallback to searching which site
+		             deletionpedia        Default: wikipedia. Implies -d.
 
-Examples:
-  $w3_argv0 -language=de Richard Stallman
-EOF
+		Examples:
+		  $w3_argv0 -language=de Richard Stallman
+		EOF
     w3_global_usage
 }
 

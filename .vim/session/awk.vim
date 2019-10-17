@@ -24,42 +24,8 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
-edit ~/Desktop/countries
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-argglobal
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! $
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/wiki/awk/awk.md") | buffer ~/wiki/awk/awk.md | else | edit ~/wiki/awk/awk.md | endif
-let s:l = 671 - ((13 * winheight(0) + 14) / 28)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-671
-normal! 0
-lcd ~/wiki/awk
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-tabnext
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
 wincmd t
@@ -134,7 +100,7 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 166
-normal! 09|
+normal! 0
 lcd ~/.vim/plugged/vim-cmdline
 wincmd w
 argglobal
@@ -149,7 +115,7 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/wiki/vim/async.md") | buffer ~/wiki/vim/async.md | else | edit ~/wiki/vim/async.md | endif
-let s:l = 104 - ((23 * winheight(0) + 13) / 27)
+let s:l = 104 - ((18 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -195,11 +161,11 @@ exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
-let s:l = 1 - ((0 * winheight(0) + 0) / 0)
+let s:l = 2 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+2
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -251,7 +217,7 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/wiki/vim/install.md") | buffer ~/wiki/vim/install.md | else | edit ~/wiki/vim/install.md | endif
-let s:l = 408 - ((40 * winheight(0) + 14) / 28)
+let s:l = 408 - ((81 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -335,7 +301,7 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/wiki/terminal/capabilities.md") | buffer ~/wiki/terminal/capabilities.md | else | edit ~/wiki/terminal/capabilities.md | endif
-let s:l = 613 - ((23 * winheight(0) + 13) / 27)
+let s:l = 613 - ((18 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -365,11 +331,11 @@ exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
-let s:l = 1 - ((0 * winheight(0) + 0) / 0)
+let s:l = 2 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+2
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -470,7 +436,7 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 60
-normal! 05|
+normal! 0
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 exe '1resize ' . ((&lines * 0 + 16) / 33)
@@ -478,7 +444,7 @@ exe '2resize ' . ((&lines * 0 + 16) / 33)
 exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 26 + 16) / 33)
 tabnext
-edit ~/Desktop/answer.md
+edit ~/Desktop/vim.vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -492,49 +458,162 @@ set winwidth=1
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-let s:l = 178 - ((0 * winheight(0) + 0) / 1)
+let s:l = 32 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-178
-normal! 0
+32
+normal! 018|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-vim/autoload/vim.vim") | buffer ~/.vim/plugged/vim-vim/autoload/vim.vim | else | edit ~/.vim/plugged/vim-vim/autoload/vim.vim | endif
-let s:l = 142 - ((24 * winheight(0) + 14) / 28)
+if bufexists("~/Desktop/answer.md") | buffer ~/Desktop/answer.md | else | edit ~/Desktop/answer.md | endif
+let s:l = 194 - ((12 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-142
-normal! 0
-lcd ~/.vim/plugged/vim-vim
+194
+normal! 023|
+lcd ~/.vim
 wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
+edit ~/.vim/vimrc
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-tabnext 14
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+argglobal
+let s:l = 8957 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+8957
+normal! 07|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-search/plugin/search.vim") | buffer ~/.vim/plugged/vim-search/plugin/search.vim | else | edit ~/.vim/plugged/vim-search/plugin/search.vim | endif
+let s:l = 322 - ((13 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+322
+normal! 0
+lcd ~/.vim/plugged/vim-search
+wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext
+edit /tmp/file
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
+argglobal
+let s:l = 1 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("/tmp/dict") | buffer /tmp/dict | else | edit /tmp/dict | endif
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/Desktop/bug.md") | buffer ~/Desktop/bug.md | else | edit ~/Desktop/bug.md | endif
+let s:l = 3 - ((2 * winheight(0) + 13) / 27)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+3
+normal! 0
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 1 + 16) / 33)
+exe '3resize ' . ((&lines * 27 + 16) / 33)
+tabnext
+edit ~/.vim/vimrc
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+argglobal
+let s:l = 4162 - ((0 * winheight(0) + 0) / 1)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+4162
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/wiki/vim/mapping.md") | buffer ~/wiki/vim/mapping.md | else | edit ~/wiki/vim/mapping.md | endif
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/wiki/vim
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+tabnext 15
 set stal=1
-" badd +1 ~/Desktop/countries
-" badd +1 ~/wiki/awk/sed.md
+" badd +936 ~/wiki/awk/sed.md
 " badd +1 ~/wiki/man/examples/pathfind.1
 " badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 " badd +1 ~/wiki/st.md
 " badd +1 ~/.config/st/patches/README.md
-" badd +1 ~/bin/upp.sh
+" badd +287 ~/bin/upp.sh
 " badd +1 ~/wiki/tmux/command.md
 " badd +1 ~/bin/yank
 " badd +1 ~/Desktop/session.md
 " badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 " badd +1 ~/Desktop/ask.md
-" badd +183 ~/Desktop/answer.md
-" badd +1 ~/wiki/awk/awk.md
+" badd +1 ~/Desktop/vim.vim
+" badd +4162 ~/.vim/vimrc
 " badd +1 ~/wiki/man/man.md
 " badd +1 ~/Dropbox/vim_plugins/vimrc_grepper.vim
 " badd +1 ~/wiki/vim/async.md
@@ -548,7 +627,12 @@ set stal=1
 " badd +1 ~/wiki/vim/config.md
 " badd +1 ~/wiki/vim/complete.md
 " badd +1 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
-" badd +155 ~/.vim/plugged/vim-vim/autoload/vim.vim
+" badd +1 ~/Desktop/answer.md
+" badd +1 ~/Desktop/bug.md
+" badd +322 ~/.vim/plugged/vim-search/plugin/search.vim
+" badd +0 /tmp/file
+" badd +0 /tmp/dict
+" badd +0 ~/wiki/vim/mapping.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -560,7 +644,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

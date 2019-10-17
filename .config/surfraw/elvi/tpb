@@ -9,32 +9,32 @@ def   SURFRAW_bay_categories  "$SURFRAW_categories"
 
 
 w3_usage_hook () {
-    cat <<EOF
+    cat <<-EOF
 
-Usage: $w3_argv0 [options] [search words]...
-Description:
-  Search thepiratebay.org for torrents
+		Usage: $w3_argv0 [options] [search words]...
+		Description:
+		  Search thepiratebay.org for torrents
 
- -sort=CATEGORIES | -s=CATEGORIES
+		 -sort=CATEGORIES | -s=CATEGORIES
 
-  Local options:
-	all       | search all categories (default)
-	apps      | search applications
-	games     | search games
-	music     | search music
-	tv        | search TV shows
-	movies    | search movies
-                   Default: All
+		  Local options:
+			all       | search all categories (default)
+			apps      | search applications
+			games     | search games
+			music     | search music
+			tv        | search TV shows
+			movies    | search movies
+		                   Default: All
 
-	Subcategories:
-	flac      | flac audio files
-	books     | audio books
-	
-	dvd       | DVD rips
-	hrm       | High-res movies
-	hrt       | High-res TV
+			Subcategories:
+			flac      | flac audio files
+			books     | audio books
 
-EOF
+			dvd       | DVD rips
+			hrm       | High-res movies
+			hrt       | High-res TV
+
+		EOF
     w3_global_usage
 }
 
@@ -76,12 +76,12 @@ if [ -n "$SURFRAW_bay_categories" ] && [ -z "$w3_args" ]; then
 	# searching category for string
 	elif [ -n "$SURFRAW_bay_categories" ] && [ -n "$w3_args" ]; then
 		w3_browse_url "http://thepiratebay.org/search/${escaped_args}/0/99/${category}"
-	
+
 	# no arguments passed
 	elif [ -z "$w3_args" ]; then
     	w3_browse_url "http://thepiratebay.org/"
-	
+
 # no category specified
 else w3_browse_url "http://thepiratebay.org/search/${escaped_args}"
-		
+
 fi
