@@ -57,7 +57,7 @@ fu myfuncs#after_tmux_capture_pane() abort "{{{1
     "}}}
     if search(pat_cmd) && !search('│')
         call s:format_xdcc_buffer(pat_cmd)
-    elseif search('^٪.\+')
+    elseif search('^٪')
         call s:format_shell_buffer()
     endif
 
@@ -96,6 +96,10 @@ fu s:format_shell_buffer() abort
     "}}}
     call matchadd('Statement', pat, 0)
     sil exe 'lvim /'..pat..'/j %'
+    let loclist = getloclist(0)
+    call map(loclist, {_,v -> extend(v, {'text': substitute(v.text, '٪\zs\s\{2,}', '  ', '')})})
+    call setloclist(0, loclist)
+    call setloclist(0, [], 'a', {'title': 'last shell commands'})
     " the location list window is automatically opened by one of our autocmds;
     " conceal the location
     call qf#set_matches('after_tmux_capture_pane:format_shell_buffer', 'Conceal', 'location')

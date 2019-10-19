@@ -4026,16 +4026,20 @@ zle -N edit-command-line
 #
 # Source: https://unix.stackexchange.com/a/485467/289772
 #}}}
-# `"$@"` is necessary for the temporary filename to be passed.
-__sane_vim() STTY=sane command vim +'au TextChanged <buffer> sil! call source#fix_shell_cmd()' "$@"
-#            ├───────┘                 {{{
-#            └ man zshparam
-#              /PARAMETERS USED BY THE SHELL
+# Why `$@`?{{{
 #
-# Run `stty sane` in order to set up the terminal before executing `vim`.
-# The effect of `stty sane` is local to the `vim` command, and is reset when Vim
-# finishes or is suspended.
+# It's necessary for the temporary filename to be passed.
 #}}}
+
+#            ┌  `man zshparam /PARAMETERS USED BY THE SHELL`{{{
+#            │
+#            │ Run `stty sane` in order to set up the terminal before executing `vim`.
+#            │ The effect of `stty sane` is local to the `vim` command, and is reset when Vim
+#            │ finishes or is suspended.
+#            │
+#            ├───────┐}}}
+__sane_vim() STTY=sane command vim +'au TextChanged,InsertLeave <buffer> sil! call source#fix_shell_cmd()' \
+                                   "$@"
 
 sane-edit-command-line() {
   emulate -L zsh
@@ -4052,6 +4056,20 @@ sane-edit-command-line() {
   # But that's not what we want; we want `__sane_vim` to be invoked.
   #}}}
   local VISUAL='__sane_vim'
+  # TODO: Find a way to prevent the status code `1` from being printed in the shell's prompt.{{{
+  #
+  # It's noise.
+  # It's due to `zle send-break`:
+  #
+  #     /usr/share/zsh/functions/Zle/edit-command-line:37
+  #
+  # I tried to edit the script like so:
+  #
+  #     zle send-break || :
+  #                    ^^^^
+  #
+  # Didn't work.
+  #}}}
   zle edit-command-line
 }
 zle -N sane-edit-command-line

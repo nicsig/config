@@ -3482,6 +3482,12 @@ endfu
 "     repeat the word replacement.  This works like "ciw",
 "     the good word and <Esc>.
 "}}}
+" Do not replace `g@l` with `norm! g@l`.{{{
+"
+" The opfunc invokes `z=` which is an unfinished command (it requires the user input).
+" As a  result, `:norm` would press Escape  and you would not be  able to choose
+" the fixed word.
+"}}}
 nno <silent> z= :<c-u>call <sid>z_equal_save_count(v:count)<bar>set opfunc=<sid>z_equal<cr>g@l
 
 fu s:z_equal_save_count(cnt) abort
@@ -8832,15 +8838,12 @@ endfu
 " mapping which opens a dirvish buffer.
 "
 " 121 -
-" Look for `++once` everywhere.
-" For every match, check whether you could replace the event(s) with `SafeState`.
-" This can greatly simplify the code: no need of `s:did_shoot` guard.
 "
-" Also, look for `timer_start(` everywhere.
-" For every  match, check whether  you could replace  the timer with  a one-shot
-" autocmd listening to `SafeState` or some other event(s).
+" We've just had an issue in `vim-search` because we used `==` instead of `==#`.
+" Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
+" Or maybe we should just do it for comparisons where no operand is a number:
 "
-" Wait for Nvim to support `SafeState`.
+"     vim /=\@<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
 "
 " 122 -
 " The  interface of  your plugins  and custom  config should  be simplified  and
@@ -8916,65 +8919,6 @@ endfu
 "
 " 126 -
 "
-" Does `:RefVval` handle quotes correctly?
-"
-" 127 -
-"
-" Don't use `++once` when you listen to several events.
-"
-" It's too tricky: you need a custom  flag `s:did_shoot`, you may need to remove
-" it before installing the autocmd, and you  probably need to make sure its name
-" is unique  in the script  if you have several  one-shot autocmds each  of them
-" listening to several events.
-"
-" Use old  way (make  autocmd clear  itself): more reliable  (and not  much more
-" complex in this case anyway).
-"
-" 128 -
-"
-" We've just had an issue in `vim-search` because we used `==` instead of `==#`.
-" Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
-" Or maybe we should just do it for comparisons where no operand is a number:
-"
-"     vim /=\@<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
-"
-" 129 -
-"
-" There is an issue with `:RefHeredoc`.
-" If one of the  string is double-quoted and contains sth  like `\t`, the latter
-" is not properly translated.
-" Once you fix this issue, make sure `:RefVval` doesn't suffer from it too.
-"
-" ---
-"
-" Also, if  `:RefHeredoc` refactors  an unpacking, make  sure it  removes spaces
-" around a comma, to avoid Vim's issue 5051.
-"
-" 130 -
-"
-" Write this on the command-line:
-"
-"     sil exe 'lvim /'..pat..'/j %'
-"
-" Press `M-d` in front of `sil` to remove it.
-" Press `M-d` in front of `exe` to remove it:
-"
-"     E20: Mark not set~
-"
-" 131 -
-"
-"     $ C-x C-e
-"     # press `o` to open a new line
-"     # insert `ls`
-"     # press `Esc` and `ZZ`
-"     # press Enter to run the command
-"     # press `M-c` to capture the pane contents:
-"     # notice how `ls(1)` is not visible in the quickfix window
-"     # it should be visible; transform the qfl to replace a long leading sequence of whitespace
-"     # with just one whitespace
-"
-" 132 -
-"
 "     $ vim -o =(echo ruby) =(echo rubyinterp) +'setl dict=/usr/share/dict/words' +startinsert!
 "
 " You want to complete `ruby` into `rubyinterp` (which is displayed in the other window).
@@ -9005,12 +8949,156 @@ endfu
 "
 " Maybe you could try to temporarily  reset `'ic'` when a completion occurs, via
 " an autocmd (or via a custom mapping)...
+" No the, `'ic'` is not the issue.
+" The issue is really `longest`:
+"
+"     $ cat <<'EOF' >/tmp/dict
+"     fooxxa
+"     fooxxb
+"     fooxxc
+"     EOF
+"
+"     $ vim -Nu NONE =(echo foo) +'setl cot+=longest dict=/tmp/dict' +'startinsert!'
+"     " press C-x C-k to complete
+"     " press C-e to cancel: `fooxx` is in the buffer, while originally only `foo` was in the buffer
+"
+" Solution: Install a custom `C-q` mapping which restores the original text.
+" Save the latter before the completion starts.
+" Use your custom mapping in `vim-completion` instead of `C-e`.
+"
+" Issue: It's hard to save the original text.
+" It's not stored in any `v:` variable.
+" And even if you can save it, restoring it would probably break the dot command.
+"
+" Update: I think it could be considered as a bug.
+" Here is what `:h popupmenu-keys` says:
+"
+" > CTRL-E    End completion, go back to what was there before selecting a
+" >           match (what was typed **or longest common string**).
+"
+" I can see why `C-e` behaves like it does (see bold text).
+" And most of the time, it's probably desirable.
+" But  I still  think that  in some  cases  (when you  want to  try a  different
+" completion command next) the behavior is undesirable.
+" Try to ask for `C-e` to restore the original text.
+" Or for an option to do so.
+" Or for a function to give the original text.
+" I guess that the `inserted` item from `:h complete_info(` could help.
+" But not entirely (what if the case of the text has changed too).
+" Also, whatever fix you implement, it would probably break the dot command.
+"
+" 127 -
+"
+" Vim saves anything typed on the  command-line, regardless of how we've left it
+" (including when we've pressed `C-c` or `Esc`).
+"
+" To prevent this, you could install these mappings:
+"
+"              necessary in Vim to not break readline mappings on the command-line
+"              vvvvv
+"     cno <esc><esc> <c-e><c-u><c-c>
+"     cno <c-c> <c-e><c-u><c-c>
+"
+" The  reason why  we use  `C-c`  instead of  `Esc`,  is because  on the  search
+" command-line, pressing `Esc` would search the pattern:
+"
+"     $ vim -Nu NONE +'cno <esc> <esc>' ~/.zshrc
+"     /the
+"     " press Escape: the cursor jumps to the next occurrence of `the`
+"
+" 128 -
+"
+" Look for `++once` everywhere.
+" For every match, check whether you could replace the event(s) with `SafeState`.
+" This can greatly simplify the code: no need of `s:did_shoot` guard.
+"
+" Also, look for `timer_start(` everywhere.
+" For every  match, check whether  you could replace  the timer with  a one-shot
+" autocmd listening to `SafeState` or some other event(s).
+"
+" Wait for Nvim to support `SafeState`.
+"
+" 129 -
+"
+" Don't use `++once` when you listen to several events.
+"
+" It's too tricky: you need a custom  flag `s:did_shoot`, you may need to remove
+" it before installing the autocmd, and you  probably need to make sure its name
+" is unique  in the script  if you have several  one-shot autocmds each  of them
+" listening to several events.
+"
+" Use old  way (make  autocmd clear  itself): more reliable  (and not  much more
+" complex in this case anyway).
+"
+" 130 -
+"
+" Does `:RefVval` handle quotes correctly?
+" Turn it into an operator, so that it can be repeated with the dot command.
+" Just like `:RefHeredoc` is repeatable with dot.
+" Check whether other refactoring commands could be turned into operators.
+"
+" 131 -
+"
+" There is an issue with `:RefHeredoc`.
+" If one of the  string is double-quoted and contains sth  like `\t`, the latter
+" is not properly translated.
+" Once you fix this issue, make sure `:RefVval` doesn't suffer from it too.
+"
+" Solution: Just `eval()` the string when it's double quoted:
+"
+"     let str = "foo\tbar\u00dfbaz"
+"     echo eval('"'..str..'"')
+"     foo     barßbaz~
+"
+" ---
+"
+" Also, if  `:RefHeredoc` refactors  an unpacking, make  sure it  removes spaces
+" around a comma, to avoid Vim's issue 5051.
+"
+" 132 -
+"
+" Set `'winminheight'` to 0 in your vimrc.
+" It gives more space to the current window, and reduces noise.
+"
+" ---
+"
+" When you load a session, `'winminheight'` is set to 0.
+" Thanks to/because  of this, you  can *totally* hide  the contents of  a window
+" when pressing `C-w _`.
+"
+" Wait.
+" Just run `:set wmh=1`, then restart Vim: `&wmh` is still 1.
+" Now run `:set wmh=0`, then restart Vim: `&wmh` is still 0.
+" Does  a session file  created by `:mksession` save  the current value  of this
+" option?
+"
+" If  so, maybe you should  set it in  `vim-session` (in the function  called by
+" `:SLoad`).
+"
+" ---
+"
+" Study whether a session file sets other similar interesting options.
+"
+" Are there other options set by a  session file which are not properly restored
+" as the user set it before?
 "
 " 133 -
 "
-" Insert `helzo` in a markdown buffer.
-" Press `z=` over it to fix it.
-" Choose `hello`: the word is not fixed.
+" In the second window from the bottom (windows split horizontally), if you open
+" the  wildmenu, it's  hard  to distinguish  the latter  from  the status  line,
+" because their  background is  highlighted by the  same HG  (`:hi StatusLine`);
+" it's a bit confusing.
+" There is a  HG for the items  in the wildmenu (`:hi WildMenu`),  but *not* for
+" the background of the wildmenu. Ask for one?
+"
+"     $ vim -Nu NONE +'colo evening' +'set wildmenu wmh=0' +'sp|sp|wincmd w|wincmd _'
+"     :Tab
+"
+" 134 -
+"
+" Try to pause then resume the tracking of your current session.
+" You  won't succeed. You  will have  to  add a  bang for  the second  `:STrack`
+" command which will *delete* the session instead of resuming the tracking.
 
 
 
