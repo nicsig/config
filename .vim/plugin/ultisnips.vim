@@ -189,7 +189,7 @@ fu s:ultisnips_toggle_autotrigger() abort
     else
         augroup UltiSnips_AutoTrigger
             au!
-            au InsertCharPre,TextChangedI * call UltiSnips#TrackChange()
+            au InsertCharPre,TextChangedI,TextChangedP * call UltiSnips#TrackChange()
         augroup END
         echom '[UltiSnips AutoTrigger] ON'
     endif

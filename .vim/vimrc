@@ -424,29 +424,29 @@ set termencoding=utf-8
 "}}}
 fu s:styled_comments() abort
     let s:styled_comments_filetypes =<< trim END
-    awk
-    c
-    cheat
-    conf
-    css
-    desktop
-    dircolors
-    gitconfig
-    html
-    lua
-    nroff
-    python
-    readline
-    sed
-    sh
-    snippets
-    systemd
-    tex
-    tmux
-    vim
-    xdefaults
-    xkb
-    zsh
+        awk
+        c
+        cheat
+        conf
+        css
+        desktop
+        dircolors
+        gitconfig
+        html
+        lua
+        nroff
+        python
+        readline
+        sed
+        sh
+        snippets
+        systemd
+        tex
+        tmux
+        vim
+        xdefaults
+        xkb
+        zsh
     END
     augroup styled_comments
         au!
@@ -4430,7 +4430,7 @@ fu s:fix_macro() abort
         " By making  sure an `Escape`  is always at the  end of a  recording, we
         " prevent Vim from interfering with our macros.
         "}}}
-        au QuitPre <buffer> call setreg(s:fix_macro_c, substitute(getline(1), "\e\\@<!$", "\e", ''))
+        au QuitPre <buffer> call setreg(s:fix_macro_c, substitute(getline(1), "\e"..'\@1<!$', "\e", ''))
         \ | unlet! s:fix_macro_c
     augroup END
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
@@ -4838,9 +4838,9 @@ ono <silent> al _
 " The order matters ... Keep `\d` last!.
 " `\+` will be appended to the end of each.
 let s:pat_numbers =<< trim END
-0b[01]
-0x\x
-\d
+    0b[01]
+    0x\x
+    \d
 END
 
 fu s:around_number() abort "{{{4
@@ -5416,15 +5416,15 @@ com -nargs=1 GrepCfg call s:grep_cfg(<args>)
 fu s:grep_cfg(pat) abort
     let pat = shellescape(a:pat)
     let cmd =<< trim END
-    git
-    --git-dir="${HOME}/.cfg/"
-    --work-tree="${HOME}"
-    ls-tree
-    --full-tree
-    --name-only HEAD
-    -r
-    | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
-    | xargs grep -HIins
+        git
+        --git-dir="${HOME}/.cfg/"
+        --work-tree="${HOME}"
+        ls-tree
+        --full-tree
+        --name-only HEAD
+        -r
+        | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
+        | xargs grep -HIins
     END
     let cmd += [pat]
     " TODO: How to get the column position?{{{
@@ -6873,10 +6873,10 @@ endfu
 " blacklisted:
 let s:NO_TRAILING_WHITESPACE_FT =<< trim END
 
-fzf
-git
-help
-qf
+    fzf
+    git
+    help
+    qf
 END
 
 augroup trailing_whitespace
@@ -8373,6 +8373,15 @@ endfu
 "
 " ---
 "
+" Dirvish uses `keepj` for `tabnext` and `wincmd w`:
+" https://github.com/justinmk/vim-dirvish/blob/fa6197150dbffe0f93028c46cd229bcca83105a9/autoload/dirvish.vim#L4
+"
+" Why?
+" Should we do the same?
+" Are there other commands for which we should have used `keepj` in the past?
+"
+" ---
+"
 " For  an operator  which can  be prefixed  by a  register, should  we save  and
 " restore the register?
 " If so,  consider passing the optional  argument `1` to `getreg()`  to properly
@@ -8843,7 +8852,7 @@ endfu
 " Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
 " Or maybe we should just do it for comparisons where no operand is a number:
 "
-"     vim /=\@<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
+"     vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
 "
 " 122 -
 " The  interface of  your plugins  and custom  config should  be simplified  and
@@ -8886,18 +8895,18 @@ endfu
 "
 " 124 -
 "
-" Document a few things about debugging with breakpoints:
+" Document a few things about debugging with breakpoints.
 "
-" no need to type the whole name of a variable, just run `:echo a:`, `:echo w:`, ...
+" No need to type the whole name of a variable, just run `:echo a:`, `:echo w:`, ...
 "
-" no need to compute the line number where to put a breakpoint; by default, line
+" No need to compute the line number where to put a breakpoint; by default, line
 " number 1  is used; from there,  just run `>next`  or `>step` to step  into the
-" code which follows
+" code which follows.
 "
-" don't think that you enter debugging mode just at the breakpoint; you can stay
+" Don't think that you enter debugging mode just at the breakpoint; you can stay
 " in debugging mode  as long as Vim  has to process commands,  provided that you
 " don't run `>cont` or `>quit`; those 2  only stop at the next breakpoint, while
-" all the other ones come back to debug mode for some other command
+" all the other ones come back to debug mode for some other command.
 "
 " `>next` and `>step` are similar (but not identical)
 " `>interrupt` and `>quit` are similar (but not identical)
@@ -8910,11 +8919,56 @@ endfu
 " function/sourced script,  and you don't  want to  inspect it anymore,  but you
 " still want to debug the outer function/script.
 "
+" Use `>s` only when necessary (i.e. only  when you need to step into a function
+" or a sourced file).
+" Right after executing `>s`, do *not* use any of your readline mappings.
+" You would step into the readline function, which would create noise.
+" The effect is  cumulative: for each of your custom  readline mapping you press
+" right after  executing `>s`, you'll add  a new frame onto  the stacktrace (you
+" can see it with `>bt`); you would then  need to run `>f` to quit each readline
+" frame.
+"
+" Use `>f` as a shortcut to reach the line where the code breaks.
+" Use it as many  times as possible; the more commands you have  run so far, the
+" harder  it will  be to  reach the  vicinity of  your current  location in  the
+" execution path (and you'll need to reach it yet another time because debugging
+" is often an iterative process).
+" In particular, if your buggy line is  run by a function, called by a function,
+" called by a function... it may be tricky to find in which function you need to
+" add a breakpoint.
+" Don't  try  to find  the  right  function, just  add  your  breakpoint in  the
+" interface function. From there, inspect the value of some expression which you
+" know will have – at some point – an unexpected value.
+" Run `>f`, and inspect the same expression again; if the value is still the one
+" you  expect, run  `>f` again;  if it's  not, you'll  know that  the issue  was
+" somewhere in the previous function call.
+" Repeat the process until the value is unexpected.
+" Note somewhere  how many times  you had to  run `>f` – let's  call it N  – and
+" restart a debugging session.
+" Next, run `>f` (N-1) times, then run  `>n` as many times as possible until the
+" value is unexpected.
+" If the value  gets unexpected once you  reach a function call,  you'll need to
+" step into it by running `>s`, then immediately run `>n` again.
+" If you notice  that you've run `>n`  throughout the whole code  of a function,
+" next time replace all the corresponding `n` with a single `f`.
+" Build progressively the  shortest sequence of debugging  commands (`>f`, `>n`,
+" `>s`) to reach the buggy line. Update the sequence somewhere in a scratch buffer.
+"
+" You don't  need to make  a script-local function  temporarily public to  add a
+" breakpoint into it.
+" Just run `:fu *function_name`, then press Tab.
+" The `*`  wildcard should be expanded  into sth like `<snr>123_`;  this assumes
+" that the  function already exists,  which may  not be the  case if it's  in an
+" autoloaded directory (in which case, run  the interface of the plugin to force
+" the sourcing of the autoloaded directory).
+" Now you can run `:breakadd func <snr>123_function_name`.
+"
 " 125 -
 "
 " In xterm, we may now be able to use the alt modifier in mappings without nasty
 " side-effects:
 "
+" `:h modifyOtherKeys`
 " https://github.com/vim/vim/issues/4974#issuecomment-541431801
 "
 " 126 -
@@ -8949,8 +9003,7 @@ endfu
 "
 " Maybe you could try to temporarily  reset `'ic'` when a completion occurs, via
 " an autocmd (or via a custom mapping)...
-" No the, `'ic'` is not the issue.
-" The issue is really `longest`:
+" No, `'ic'` is not the issue; the issue is really `longest`:
 "
 "     $ cat <<'EOF' >/tmp/dict
 "     fooxxa
@@ -9032,73 +9085,24 @@ endfu
 "
 " 130 -
 "
-" Does `:RefVval` handle quotes correctly?
-" Turn it into an operator, so that it can be repeated with the dot command.
-" Just like `:RefHeredoc` is repeatable with dot.
+" Finish `:RefVval`.
+"
+" ---
+"
 " Check whether other refactoring commands could be turned into operators.
+"
+" ---
+"
+" If `:RefHeredoc` refactors an unpacking, make  sure it removes spaces around a
+" comma, to avoid Vim's issue 5051.
 "
 " 131 -
 "
-" There is an issue with `:RefHeredoc`.
-" If one of the  string is double-quoted and contains sth  like `\t`, the latter
-" is not properly translated.
-" Once you fix this issue, make sure `:RefVval` doesn't suffer from it too.
-"
-" Solution: Just `eval()` the string when it's double quoted:
-"
-"     let str = "foo\tbar\u00dfbaz"
-"     echo eval('"'..str..'"')
-"     foo     barßbaz~
-"
-" ---
-"
-" Also, if  `:RefHeredoc` refactors  an unpacking, make  sure it  removes spaces
-" around a comma, to avoid Vim's issue 5051.
-"
-" 132 -
-"
-" Set `'winminheight'` to 0 in your vimrc.
-" It gives more space to the current window, and reduces noise.
-"
-" ---
-"
-" When you load a session, `'winminheight'` is set to 0.
-" Thanks to/because  of this, you  can *totally* hide  the contents of  a window
-" when pressing `C-w _`.
-"
-" Wait.
-" Just run `:set wmh=1`, then restart Vim: `&wmh` is still 1.
-" Now run `:set wmh=0`, then restart Vim: `&wmh` is still 0.
-" Does  a session file  created by `:mksession` save  the current value  of this
-" option?
-"
-" If  so, maybe you should  set it in  `vim-session` (in the function  called by
-" `:SLoad`).
-"
-" ---
-"
-" Study whether a session file sets other similar interesting options.
-"
-" Are there other options set by a  session file which are not properly restored
-" as the user set it before?
-"
-" 133 -
-"
-" In the second window from the bottom (windows split horizontally), if you open
-" the  wildmenu, it's  hard  to distinguish  the latter  from  the status  line,
-" because their  background is  highlighted by the  same HG  (`:hi StatusLine`);
-" it's a bit confusing.
-" There is a  HG for the items  in the wildmenu (`:hi WildMenu`),  but *not* for
-" the background of the wildmenu. Ask for one?
-"
-"     $ vim -Nu NONE +'colo evening' +'set wildmenu wmh=0' +'sp|sp|wincmd w|wincmd _'
-"     :Tab
-"
-" 134 -
-"
-" Try to pause then resume the tracking of your current session.
-" You  won't succeed. You  will have  to  add a  bang for  the second  `:STrack`
-" command which will *delete* the session instead of resuming the tracking.
+" Press `é`: it capitalizes the next word.
+" Also, I don't know how, but we often capitalize a word by accident (in a different way).
+" Change `M-i`?
+" Or use xterm, which now supports  meta sequences OOTB, and doesn't suffer from
+" these kind of issues.
 
 
 

@@ -466,14 +466,14 @@ endfu
 fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
     if a:option is# '-h' || a:option is# '--help'
         let usage =<< trim END
-        :DiffLines allows you to see and cycle through the differences between 2 lines
+            :DiffLines allows you to see and cycle through the differences between 2 lines
 
-        usage:
-            :5,10DiffLines    diff between lines 5 and 10
-            :DiffLines        diff between current line and next one
-            :DiffLines!       clear the match
+            usage:
+                :5,10DiffLines    diff between lines 5 and 10
+                :DiffLines        diff between current line and next one
+                :DiffLines!       clear the match
 
-        The differences are in the location list (press [l, ]l, [L, ]L to visit them)
+            The differences are in the location list (press [l, ]l, [L, ]L to visit them)
         END
         echo join(usage, "\n")
         return
