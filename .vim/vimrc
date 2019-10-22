@@ -8669,12 +8669,10 @@ endfu
 "
 " 110 -
 " Refactor your `]q` &friends mapping, so that they call `:[cl]above` and `:[cl]below`.
-" But do that only when Nvim has merged the Vim patch 8.1.1256.
 "
 " Update: No wait, those commands move relatively to the current *entry* in the qfl.
 " Maybe you would prefer commands which move relatively to the current *cursor position*.
-" If so, try the `:[cl]before` and the `:[cl]after` commands, introduced in the Vim patch
-" 8.1.1275.
+" If so, try the `:[cl]before` and the `:[cl]after` commands.
 "
 " Update:
 " I'm not sure to understand what those commands are supposed to do.
@@ -9085,24 +9083,41 @@ endfu
 "
 " 130 -
 "
-" Finish `:RefVval`.
-"
-" ---
-"
-" Check whether other refactoring commands could be turned into operators.
-"
-" ---
-"
-" If `:RefHeredoc` refactors an unpacking, make  sure it removes spaces around a
-" comma, to avoid Vim's issue 5051.
-"
-" 131 -
-"
 " Press `é`: it capitalizes the next word.
 " Also, I don't know how, but we often capitalize a word by accident (in a different way).
 " Change `M-i`?
 " Or use xterm, which now supports  meta sequences OOTB, and doesn't suffer from
 " these kind of issues.
+"
+" 131 -
+"
+"     $ nvim
+"     :sp $MYVIMRC
+"     SPC q
+"     SPC u
+"
+" The window-local options are not reapplied correctly.
+" The issue is specific to Nvim.
+"
+" 132 -
+"
+" In `~/.vim/plugged/vim-debug/plugin/debug.vim`, replace this mapping:
+"
+"     nno <silent><unique> !d <cmd>call debug#capture#dump()<cr>
+"
+" With this:
+"
+"     nno <silent><unique> !d <cmd>debug#capture#dump()<cr>
+"
+" *Yeah, I know, it's wrong (`call` is missing).*
+" Press `!d` in Nvim; you enter debug mode; run `>fin`:
+"
+"     E5500: autocmd has thrown an exception: Vim(if):E685: Internal error: hash_add()
+"                                                     ^^^^
+" From `:h E685`:
+"
+"     This is an internal error.  If you can reproduce it, please send in a bug
+"     report. |bugs|
 
 
 
