@@ -319,23 +319,23 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/my_repo_are_they_dirty.sh
-    #     ~/bin/next-pane-or-window.sh
     #     ~/bin/no_more_sound.sh
+    #     ~/bin/paste_selection.sh
+    #     ~/bin/signals_disposition.sh
+    #     ~/bin/test_sed.sh
+    #
+    #     ~/bin/next-pane-or-window.sh
     #     ~/bin/npm-pip-update.sh
     #     ~/bin/p2p-browser.sh
-    #     ~/bin/paste_selection.sh
     #     ~/bin/prev-pane-or-window.sh
     #     ~/bin/restore-env.sh
     #     ~/bin/run-or-raise.sh
-    #     ~/bin/signals_disposition.sh
     #     ~/bin/snippy.sh
     #     ~/bin/src-hilite-lesspipe.sh
     #     ~/bin/subs-en.sh
     #     ~/bin/subs-fr.sh
     #     ~/bin/system-clean.sh
     #     ~/bin/term-color-count.sh
-    #     ~/bin/test_sed.sh
     #     ~/bin/twitch.sh
     #     ~/bin/video-downloader.sh
     #     ~/bin/vim-anywhere.sh
