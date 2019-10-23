@@ -2938,8 +2938,8 @@ alias jobs='\jobs -l'
 # We can have syntax highlighting in the less pager:{{{
 #
 #     $ sudo aptitude install source-highlight
-#     $ cp /usr/share/source-highlight/src-hilite-lesspipe.sh ~/bin/src-hilite-lesspipe.sh
-#     $ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
+#     $ cp /usr/share/source-highlight/src-hilite-lesspipe.sh ~/bin/src-hilite-lesspipe
+#     $ alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe %s" less'
 #     $ lessh ~/Vcs/ranger/ranger.py
 #
 # Source: https://unix.stackexchange.com/a/139787/289772
@@ -2955,7 +2955,7 @@ alias jobs='\jobs -l'
 # because this commit introduces a regression:
 # https://github.com/zsh-users/zsh-syntax-highlighting/issues/565
 #}}}
-alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe.sh %s" less'
+alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe %s" less'
 
 # ls {{{3
 
