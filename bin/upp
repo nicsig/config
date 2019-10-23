@@ -319,7 +319,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/twitch.sh
     #     ~/bin/video-downloader.sh
     #     ~/bin/vim-anywhere.sh
     ./configure  \

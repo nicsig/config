@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 025|
+normal! 017|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/twitch.sh") | buffer ~/bin/twitch.sh | else | edit ~/bin/twitch.sh | endif
+if bufexists("~/bin/video-downloader.sh") | buffer ~/bin/video-downloader.sh | else | edit ~/bin/video-downloader.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
 " badd +322 ~/bin/upp
-" badd +0 ~/bin/twitch.sh
+" badd +0 ~/bin/video-downloader.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
