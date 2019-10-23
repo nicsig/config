@@ -9125,6 +9125,11 @@ endfu
 " 133 -
 "
 " When we restart a session, the focused window is not immediately maximized.
+"
+" 134 -
+"
+" Install a `C-l` mapping in command-line mode to generalize `:h /_ctrl-l`.
+" For example, it would be useful when writing the pattern in a `:vimgrep` command.
 
 
 
