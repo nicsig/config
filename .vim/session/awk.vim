@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 317
-normal! 031|
+normal! 025|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/disk_space_monitor") | buffer ~/bin/disk_space_monitor | else | edit ~/bin/disk_space_monitor | endif
+if bufexists("~/bin/dl_ebook.sh") | buffer ~/bin/dl_ebook.sh | else | edit ~/bin/dl_ebook.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -522,6 +522,7 @@ wincmd =
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
+" badd +0 ~/bin/dl_ebook.sh
 " badd +1 ~/wiki/man/examples/pathfind.1
 " badd +166 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 " badd +46 ~/wiki/st.md
@@ -549,7 +550,6 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +317 ~/bin/upp
-" badd +0 ~/bin/disk_space_monitor
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

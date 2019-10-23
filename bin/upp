@@ -314,7 +314,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/disk_space_monitor
     #     ~/bin/dl_ebook.sh
     #     ~/bin/fzfimg.sh
     #     ~/bin/gifenc.sh
