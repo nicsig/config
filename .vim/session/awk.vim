@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 018|
+normal! 028|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/mp3-downloader.sh") | buffer ~/bin/mp3-downloader.sh | else | edit ~/bin/mp3-downloader.sh | endif
+if bufexists("~/bin/my_repo_are_they_dirty.sh") | buffer ~/bin/my_repo_are_they_dirty.sh | else | edit ~/bin/my_repo_are_they_dirty.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -522,7 +522,6 @@ wincmd =
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
-" badd +0 ~/bin/mp3-downloader.sh
 " badd +1 ~/wiki/man/examples/pathfind.1
 " badd +166 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 " badd +46 ~/wiki/st.md
@@ -550,6 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +318 ~/bin/upp
+" badd +0 ~/bin/my_repo_are_they_dirty.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

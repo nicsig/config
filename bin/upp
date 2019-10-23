@@ -319,7 +319,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/mp3-downloader.sh
     #     ~/bin/my_repo_are_they_dirty.sh
     #     ~/bin/next-pane-or-window.sh
     #     ~/bin/no_more_sound.sh
