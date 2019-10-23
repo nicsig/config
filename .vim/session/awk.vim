@@ -23,6 +23,7 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
 tabrewind
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -479,10 +480,7 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
+2wincmd k
 wincmd w
 wincmd w
 wincmd t
@@ -492,10 +490,9 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 27 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-let s:l = 735 - ((98 * winheight(0) + 0) / 0)
+let s:l = 735 - ((66 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -515,30 +512,34 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/bin/upp") | buffer ~/bin/upp | else | edit ~/bin/upp | endif
-let s:l = 310 - ((0 * winheight(0) + 0) / 0)
+let s:l = 311 - ((5 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-310
-normal! 020|
+311
+normal! 022|
 lcd ~/.vim
 wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
+tabnext
+edit ~/bin/upp
+set splitbelow splitright
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
 argglobal
-if bufexists("~/.config/keyboard/setup") | buffer ~/.config/keyboard/setup | else | edit ~/.config/keyboard/setup | endif
-let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+let s:l = 1 - ((0 * winheight(0) + 12) / 25)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 lcd ~/.vim
-wincmd w
-4wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 27 + 16) / 33)
-tabnext 13
+tabnext 14
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
 " badd +1 ~/wiki/man/examples/pathfind.1
@@ -568,8 +569,7 @@ set stal=1
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
 " badd +9123 ~/.vim/vimrc
-" badd +296 ~/bin/upp
-" badd +0 ~/.config/keyboard/setup
+" badd +312 ~/bin/upp
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -581,7 +581,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

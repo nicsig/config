@@ -130,7 +130,7 @@ normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.config/rofi/scripts/bangs.sh") | buffer ~/.config/rofi/scripts/bangs.sh | else | edit ~/.config/rofi/scripts/bangs.sh | endif
+if bufexists("~/.config/rofi/scripts/bangs") | buffer ~/.config/rofi/scripts/bangs | else | edit ~/.config/rofi/scripts/bangs | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -222,7 +222,7 @@ badd +14 ~/.config/rofi/scripts/sh.sh
 badd +34 ~/wiki/rofi.md
 badd +154 ~/.config/rofi/README.md
 badd +95 ~/.config/rofi/config.rasi
-badd +43 ~/.config/rofi/scripts/bangs.sh
+badd +43 ~/.config/rofi/scripts/bangs
 badd +8 ~/.config/rofi/scripts/locate.sh
 badd +14 ~/.config/rofi/scripts/bookmarks.sh
 badd +2 ~/.config/rofi/scripts/README.md

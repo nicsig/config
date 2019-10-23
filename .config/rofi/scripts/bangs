@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Demo: https://www.youtube.com/watch?v=kxJClZIXSnM
+# Purpose: This is a script to launch other rofi scripts.
+# It saves us the  trouble of binding multiple hotkeys for  each script, when we
+# can just use one hotkey for everything.
+
+# show clipboard history
+# source: https://bitbucket.org/pandozer/rofi-clipboard-manager/overview
+#     COMMANDS["clipboard"]='rofi -modi "clipboard:~/.bin/rofi-clipboard-manager/mclip.py menu" -show clipboard && ~/.bin/rofi-clipboard-manager/mclip.py paste'
+#
+# references --------------------------
+#     COMMANDS[";sr2"]="chromium 'wikipedia.org/search-redirect.php?search=\" \${input}\""
+#     COMMANDS[";piratebay"]="chromium --disk-cache-dir=/tmp/cache http://thepiratebay.org/search/\" \${input}\""
+#     COMMANDS[".bin"]="spacefm -r '/home/dka/bin'"
+#     COMMANDS["#screenshot"]='/home/dka/bin/screenshot-scripts/myscreenshot.sh'
+
+# We need to number  the keys, because `choose_cmd` will feed  them to `rofi` in
+# an unordered way.
+# That's why we feed  them first to `sort -n`; but `sort`  can re-order them the
+# way we want only if they're numbered.
+typeset -A COMMANDS=( \
+  [1. websearch]="${HOME}/.config/rofi/scripts/websearch.sh" \
+  [2. bookmarks]="${HOME}/.config/rofi/scripts/bookmarks.sh" \
+  [3. locate]="${HOME}/.config/rofi/scripts/locate.sh" \
+  [4. apps]='rofi -show drun -modi drun' \
+)
+
+choose_cmd() {
+  #             ┌ iterate over the *keys* of the array, and not its values
+  #             │
+  for key in "${!COMMANDS[@]}"; do
+    printf -- "${key}\n"
+  done
+}
+
+choice="$(choose_cmd | sort -n | rofi -dmenu -i -p '')"
+
+# Cancelled? bail out
+if [[ -z "${choice}" ]]; then
+  exit
+fi
+
+# check if choice exists
+if [[ "${COMMANDS[$choice]+isset}" ]]; then
+  # Execute the choice
+  echo "Executing: ${COMMANDS[$choice]}"
+  ${COMMANDS[$choice]}
+fi
+
