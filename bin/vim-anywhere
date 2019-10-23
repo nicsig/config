@@ -34,3 +34,4 @@ xdotool key ctrl+v
 
 #@ head -c -1 "${file}" | xdotool type --clearmodifiers --delay 0 --file -
 #@ rm "${file}"
+
