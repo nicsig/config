@@ -284,9 +284,12 @@ configure() { #{{{2
     # In my limited testing with  typometer, the latency doubles after compiling
     # with gtk3.
     #}}}
+    # TODO: We've just removed this:
+    #
     #     --enable-perlinterp=dynamic    \
     #     --enable-rubyinterp=dynamic    \
-    #     check whether the splitjoin plugin works without the ruby interface
+    #
+    # Check whether the splitjoin plugin works without the ruby interface
     #
     # ---
     #
@@ -306,13 +309,16 @@ configure() { #{{{2
     # Otherwise, `:GrepCfg` may not find what we want later.
     #
     # ---
-    #
-    #     $ fd '.*\.sh$' ~/.config ~/bin ~/Desktop/
-    #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/bangs.sh
     #     ~/.config/rofi/scripts/bookmarks.sh
     #     ~/.config/rofi/scripts/locate.sh
     #     ~/.config/rofi/scripts/sh.sh
+    #     ~/.config/rofi/scripts/websearch.sh
+    #
+    #     $ fd '.*\.sh$' ~/.config ~/bin ~/Desktop/
+    #     ~/.config/ranger/scope.sh
+    #     ~/.config/rofi/scripts/sh.sh
+    #
     #     ~/.config/rofi/scripts/websearch.sh
     #
     #     ~/Desktop/console.sh

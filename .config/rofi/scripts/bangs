@@ -20,9 +20,9 @@
 # That's why we feed  them first to `sort -n`; but `sort`  can re-order them the
 # way we want only if they're numbered.
 typeset -A COMMANDS=( \
-  [1. websearch]="${HOME}/.config/rofi/scripts/websearch.sh" \
-  [2. bookmarks]="${HOME}/.config/rofi/scripts/bookmarks.sh" \
-  [3. locate]="${HOME}/.config/rofi/scripts/locate.sh" \
+  [1. websearch]="${HOME}/.config/rofi/scripts/websearch" \
+  [2. bookmarks]="${HOME}/.config/rofi/scripts/bookmarks" \
+  [3. locate]="${HOME}/.config/rofi/scripts/locate" \
   [4. apps]='rofi -show drun -modi drun' \
 )
 

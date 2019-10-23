@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Info:  rofi-surfraw-websearch  is  a  script  to  do  internet  searches  from
+# different websites, all from the rofi launcher
+# Requirements: rofi surfraw
+# Playlist: rofi      https://www.youtube.com/playlist?list=PLqv94xWU9zZ0LVP1SEFQsLEYjZC_SUB3m
+#           surfraw   https://www.youtube.com/playlist?list=PLqv94xWU9zZ2e-lDbmBpdASA6A6JF4Nyz
+
+# set your browser (uncomment if needed, some GUI does not detect browser variable)
+BROWSER=firefox
+
+# For some reason, if you omit `-browser=`, `acronym test` doesn't give the expected page:
+#
+#     # ✘
+#     sr $(...)
+#
+#     # ✔
+#     sr -browser= $(...)
+#
+# And if you set `-browser` with an empty value, `google test` fails:
+#
+#     # ✔
+#     sr $(...)
+#
+#     # ✘
+#     sr -browser= $(...)
+#
+#     # ✔
+#     sr -browser=firefox $(...)
+#
+# TODO: Explain what `$BROWSER` is.{{{
+#
+#     $ man sensible-editor
+#     /usr/bin/sensible-browser
+#
+# Explain how surfraw uses it.
+# Should we set it? If so, where?
+# Will it be taken into account automatically by `sr`?
+# Will it allow us to get rid of `-browser=`?
+#}}}
+# Don't quote the command substitution.{{{
+#
+# The arguments passed to surfraw (e.g. ‘ixquick test’) must be split.
+#}}}
+# What does `sr -elvi` do?{{{
+#
+# It prints the list of elvis supported by surfraw.
+#}}}
+# What about `awk`?{{{
+#
+# It removes the descriptions of the elvis.
+#}}}
+# What about `sed`?{{{
+#
+# It removes the lines:
+#
+#     GLOBAL ELVI:
+#     GLOBAL ELVI:
+#
+# And trim the trailing whitespaces.
+#}}}
+# What does the `-dmenu` option passed to rofi do?{{{
+#
+# It makes rofi read from STDIN, and output to STDOUT.
+# This allows for interactive scripts.
+#}}}
+# What about `-i`?{{{
+#
+# It makes dmenu searches case-insensitive.
+#}}}
+# What about `-p`?{{{
+#
+# It sets a prompt.
+#}}}
+sr -browser=$BROWSER $(sr -elvi | awk -F'-' '{ print $1 }' | sort | uniq | sed '/^ .*:$/d; s/\s*$//' | rofi -dmenu -i -p 'engine')
+

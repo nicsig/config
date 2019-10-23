@@ -9120,7 +9120,7 @@ endfu
 "
 " 132 -
 "
-" Remove `--enable-perlinterp` and maybe `--enable-rubyinterp` from `upp`.
+" Comment `:badd` (and `:argadd`?) commands from all session files in `~/.vim/session`.
 
 
 

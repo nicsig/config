@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Purpose: this is a script to open your saved surfraw bookmarks with the rofi launcher
+
+# set your browser (uncomment if needed, some GUI does not detect browser variable)
+BROWSER=firefox
+
+#                            ┌ Yes, the initial delimiter needs to be escaped.{{{
+#                            │ It's a special syntax:
+#                            │
+#                            │     \%regexp%
+#                            │     https://www.gnu.org/software/sed/manual/html_node/Regexp-Addresses.html#Regexp-Addresses
+#                            │}}}
+sr -browser=$BROWSER "$(sed '\:^$\|^[#/]:d' "${HOME}/.config/surfraw/bookmarks" | rofi -dmenu -i -p 'url')"
+# TODO: This time, for some reason, `-browser` can't be set to an empty string.
+# Understand why.
+# Note that you don't seem to need `-browser` at all here...
+# But I use it because it's sometimes needed in websearch.sh
+

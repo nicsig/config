@@ -23,7 +23,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -474,103 +473,41 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
-edit ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+edit ~/.vim/vimrc
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-let s:l = 735 - ((66 * winheight(0) + 0) / 0)
+let s:l = 9120 - ((14 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-735
-normal! 0
-lcd ~/.vim/plugged/vim-lg-lib
-wincmd w
-argglobal
-if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
-let s:l = 9123 - ((4 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-9123
+9120
 normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/bin/upp") | buffer ~/bin/upp | else | edit ~/bin/upp | endif
-let s:l = 311 - ((5 * winheight(0) + 14) / 28)
+let s:l = 317 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-311
-normal! 022|
+317
+normal! 020|
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit ~/bin/upp
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-wincmd =
-argglobal
-let s:l = 312 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-312
-normal! 038|
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.config/rofi/scripts/bangs") | buffer ~/.config/rofi/scripts/bangs | else | edit ~/.config/rofi/scripts/bangs | endif
-let s:l = 14 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-14
-normal! 0
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.config/keyboard/xbindkeys.conf") | buffer ~/.config/keyboard/xbindkeys.conf | else | edit ~/.config/keyboard/xbindkeys.conf | endif
-let s:l = 1 - ((0 * winheight(0) + 13) / 27)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim
-wincmd w
-3wincmd w
-wincmd =
-tabnext 14
+tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
 " badd +1 ~/wiki/man/examples/pathfind.1
@@ -584,7 +521,6 @@ set stal=1
 " badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 " badd +484 ~/Desktop/ask.md
 " badd +184 ~/Desktop/answer.md
-" badd +735 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 " badd +31 ~/wiki/man/man.md
 " badd +153 ~/Dropbox/vim_plugins/vimrc_grepper.vim
 " badd +104 ~/wiki/vim/async.md
@@ -599,10 +535,8 @@ set stal=1
 " badd +17 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
-" badd +9123 ~/.vim/vimrc
-" badd +312 ~/bin/upp
-" badd +69 ~/.config/keyboard/xbindkeys.conf
-" badd +0 ~/.config/rofi/scripts/bangs
+" badd +9122 ~/.vim/vimrc
+" badd +317 ~/bin/upp
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -148,7 +148,7 @@ normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.config/rofi/scripts/locate.sh") | buffer ~/.config/rofi/scripts/locate.sh | else | edit ~/.config/rofi/scripts/locate.sh | endif
+if bufexists("~/.config/rofi/scripts/locate") | buffer ~/.config/rofi/scripts/locate | else | edit ~/.config/rofi/scripts/locate | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -166,7 +166,7 @@ normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.config/rofi/scripts/bookmarks.sh") | buffer ~/.config/rofi/scripts/bookmarks.sh | else | edit ~/.config/rofi/scripts/bookmarks.sh | endif
+if bufexists("~/.config/rofi/scripts/bookmarks") | buffer ~/.config/rofi/scripts/bookmarks | else | edit ~/.config/rofi/scripts/bookmarks | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -223,8 +223,8 @@ badd +34 ~/wiki/rofi.md
 badd +154 ~/.config/rofi/README.md
 badd +95 ~/.config/rofi/config.rasi
 badd +43 ~/.config/rofi/scripts/bangs
-badd +8 ~/.config/rofi/scripts/locate.sh
-badd +14 ~/.config/rofi/scripts/bookmarks.sh
+badd +8 ~/.config/rofi/scripts/locate
+badd +14 ~/.config/rofi/scripts/bookmarks
 badd +2 ~/.config/rofi/scripts/README.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
