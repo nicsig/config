@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 021|
+normal! 020|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/test_sed.sh") | buffer ~/bin/test_sed.sh | else | edit ~/bin/test_sed.sh | endif
+if bufexists("~/bin/next-pane-or-window.sh") | buffer ~/bin/next-pane-or-window.sh | else | edit ~/bin/next-pane-or-window.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -522,7 +522,6 @@ wincmd =
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
-" badd +0 ~/bin/test_sed.sh
 " badd +1 ~/wiki/man/examples/pathfind.1
 " badd +166 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 " badd +46 ~/wiki/st.md
@@ -549,7 +548,8 @@ set stal=1
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
-" badd +318 ~/bin/upp
+" badd +322 ~/bin/upp
+" badd +0 ~/bin/next-pane-or-window.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -9,7 +9,7 @@
 # Then, remove them by running `$ rm tmp.*`.
 #}}}
 # Usage:
-#     $ test_sed.sh script.sed file ...
+#     $ test_sed script.sed file ...
 
 SCRIPT="$1"
 EXT="${SCRIPT##*.}"

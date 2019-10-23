@@ -319,8 +319,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/test_sed.sh
-    #
     #     ~/bin/next-pane-or-window.sh
     #     ~/bin/npm-pip-update.sh
     #     ~/bin/p2p-browser.sh
