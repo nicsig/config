@@ -191,40 +191,21 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
 tabnext
-edit ~/bin/upp.sh
+edit ~/wiki/vim/install.md
 set splitbelow splitright
-wincmd _ | wincmd |
-split
-1wincmd k
-wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/wiki/vim/install.md") | buffer ~/wiki/vim/install.md | else | edit ~/wiki/vim/install.md | endif
-let s:l = 408 - ((99 * winheight(0) + 14) / 28)
+let s:l = 408 - ((407 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 408
 normal! 0
 lcd ~/wiki/vim
-wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/wiki/tmux/command.md
 set splitbelow splitright
@@ -498,10 +479,7 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
+2wincmd k
 wincmd w
 wincmd w
 wincmd t
@@ -510,53 +488,41 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 27 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-let s:l = 735 - ((2 * winheight(0) + 0) / 0)
+let s:l = 735 - ((205 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 735
-normal! 01|
+normal! 0
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 argglobal
 if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
-let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+let s:l = 9123 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+9123
 normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/bin/upp") | buffer ~/bin/upp | else | edit ~/bin/upp | endif
-let s:l = 315 - ((0 * winheight(0) + 0) / 0)
+let s:l = 310 - ((11 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-315
-normal! 05|
+310
+normal! 011|
 lcd ~/.vim
 wincmd w
-argglobal
-if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
-let s:l = 5430 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-5430
-normal! 0
-lcd ~/.vim
-wincmd w
-2wincmd w
+3wincmd w
 exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 27 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
@@ -564,20 +530,19 @@ set stal=1
 " badd +166 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 " badd +46 ~/wiki/st.md
 " badd +2 ~/.config/st/patches/README.md
-" badd +289 ~/bin/upp.sh
+" badd +408 ~/wiki/vim/install.md
 " badd +853 ~/wiki/tmux/command.md
 " badd +1 ~/bin/yank
 " badd +2 ~/Desktop/session.md
 " badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 " badd +484 ~/Desktop/ask.md
 " badd +184 ~/Desktop/answer.md
-" badd +737 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+" badd +735 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
 " badd +31 ~/wiki/man/man.md
 " badd +153 ~/Dropbox/vim_plugins/vimrc_grepper.vim
 " badd +104 ~/wiki/vim/async.md
 " badd +33 ~/.config/st/patches/01_custom_config.diff
 " badd +293 ~/.Xresources
-" badd +408 ~/wiki/vim/install.md
 " badd +1280 ~/wiki/tmux/format.md
 " badd +613 ~/wiki/terminal/capabilities.md
 " badd +149 ~/wiki/terminal/glossary.md
@@ -587,8 +552,8 @@ set stal=1
 " badd +17 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
-" badd +0 ~/.vim/vimrc
-" badd +0 ~/bin/upp
+" badd +9123 ~/.vim/vimrc
+" badd +296 ~/bin/upp
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -600,6 +565,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

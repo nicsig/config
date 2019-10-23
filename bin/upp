@@ -301,13 +301,62 @@ configure() { #{{{2
     #
     # Make  sure to edit all  references to these filenames  (`:GrepCfg`, `:vim`
     # for vim plugins, `rg` for the wiki).
-    # Btw, why doesn't `:GrepCfg` find `up_yt` here:
+    # Whenever you change the  name of a file, make sure  to immediately add the
+    # new file in our config repo (`$ config add`), and maybe also push.
+    # Otherwise, `:GrepCfg` may not find what we want later.
     #
-    #     ~/bin/up:373
+    # ---
     #
-    # Vim pattern:
+    #     $ fd '.*\.sh$' ~/.config ~/bin ~/Desktop/
+    #     ~/.config/keyboard/setup.sh
+    #     ~/.config/ranger/scope.sh
+    #     ~/.config/rofi/scripts/bangs.sh
+    #     ~/.config/rofi/scripts/bookmarks.sh
+    #     ~/.config/rofi/scripts/locate.sh
+    #     ~/.config/rofi/scripts/sh.sh
+    #     ~/.config/rofi/scripts/websearch.sh
+    #     ~/Desktop/console.sh
+    #     ~/bin/args.sh
+    #     ~/bin/auto-refresh.sh
+    #     ~/bin/backup.sh
+    #     ~/bin/bash/checkinstall.sh
+    #     ~/bin/bash/installwatch.sh
+    #     ~/bin/bash/search-engine.sh
+    #     ~/bin/commit-these-vim-plugins.sh
+    #     ~/bin/conky-startup.sh
+    #     ~/bin/disk_space_monitor.sh
+    #     ~/bin/dl_ebook.sh
+    #     ~/bin/fzfimg.sh
+    #     ~/bin/gifenc.sh
+    #     ~/bin/gifrec.sh
+    #     ~/bin/is_it_in_the_palette.sh
+    #     ~/bin/ls-colors.sh
+    #     ~/bin/mp3-dl-gotbletu.sh
+    #     ~/bin/mp3-downloader.sh
+    #     ~/bin/my_repo_are_they_dirty.sh
+    #     ~/bin/next-pane-or-window.sh
+    #     ~/bin/no_more_sound.sh
+    #     ~/bin/npm-pip-update.sh
+    #     ~/bin/p2p-browser.sh
+    #     ~/bin/paste_selection.sh
+    #     ~/bin/prev-pane-or-window.sh
+    #     ~/bin/restore-env.sh
+    #     ~/bin/run-or-raise.sh
+    #     ~/bin/signals_disposition.sh
+    #     ~/bin/snippy.sh
+    #     ~/bin/src-hilite-lesspipe.sh
+    #     ~/bin/subs-en.sh
+    #     ~/bin/subs-fr.sh
+    #     ~/bin/system-clean.sh
+    #     ~/bin/term-color-count.sh
+    #     ~/bin/test_sed.sh
+    #     ~/bin/twitch.sh
+    #     ~/bin/video-downloader.sh
+    #     ~/bin/vim-anywhere.sh
     #
-    #     \%(up\|up_yt\|upp\|conky-startup\|setup\)\.sh
+    # ---
+    #
+    # Remove `~/bin/shellcheck` from our config repo.
     ./configure  \
       --enable-cscope                \
       --enable-fail-if-missing       \

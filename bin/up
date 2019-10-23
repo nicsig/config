@@ -370,7 +370,7 @@ update_youtube_dl() { #{{{1
 
 	EOF
 
-  up_yt
+  up-yt
 }
 
 update_zsh_plugins() { #{{{1
