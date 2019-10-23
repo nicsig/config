@@ -477,7 +477,10 @@ edit ~/.vim/vimrc
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
@@ -486,7 +489,7 @@ set winminwidth=0
 set winwidth=1
 wincmd =
 argglobal
-let s:l = 9125 - ((1 * winheight(0) + 0) / 0)
+let s:l = 9125 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -496,15 +499,25 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/bin/upp") | buffer ~/bin/upp | else | edit ~/bin/upp | endif
-let s:l = 317 - ((8 * winheight(0) + 14) / 28)
+let s:l = 322 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-317
-normal! 017|
+322
+normal! 018|
 lcd ~/.vim
 wincmd w
-2wincmd w
+argglobal
+if bufexists("~/bin/is_it_in_the_palette.sh") | buffer ~/bin/is_it_in_the_palette.sh | else | edit ~/bin/is_it_in_the_palette.sh | endif
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+3wincmd w
 wincmd =
 tabnext 13
 set stal=1
@@ -536,6 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +318 ~/bin/upp
+" badd +0 ~/bin/is_it_in_the_palette.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

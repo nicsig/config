@@ -284,16 +284,21 @@ configure() { #{{{2
     # In my limited testing with  typometer, the latency doubles after compiling
     # with gtk3.
     #}}}
-    # TODO: We've just removed this:
+    # We don't compile the perly/ruby interfaces, but if you need them, add this:{{{
     #
     #     --enable-perlinterp=dynamic    \
     #     --enable-rubyinterp=dynamic    \
     #
-    # Check whether the splitjoin plugin works without the ruby interface
-    #
     # ---
     #
-    # Remove the `.sh` suffix from every filename.
+    # We don't need them, and the less code, the fewer bugs.
+    #
+    # Remember we've found an issue  (github 5079) where the syntax highlighting
+    # adds a  lot of latency  when `'cul'` is set  *and* the ruby  interface has
+    # been compiled.
+    #}}}
+    # TODO: Remove the `.sh` suffix from every filename.
+    #
     # We've started with:
     #
     #     up.sh
@@ -338,10 +343,6 @@ configure() { #{{{2
     #     ~/bin/twitch.sh
     #     ~/bin/video-downloader.sh
     #     ~/bin/vim-anywhere.sh
-    #
-    # ---
-    #
-    # Remove `~/bin/shellcheck` from our config repo.
     ./configure  \
       --enable-cscope                \
       --enable-fail-if-missing       \
