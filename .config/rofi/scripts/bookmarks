@@ -15,5 +15,5 @@ sr -browser=$BROWSER "$(sed '\:^$\|^[#/]:d' "${HOME}/.config/surfraw/bookmarks" 
 # TODO: This time, for some reason, `-browser` can't be set to an empty string.
 # Understand why.
 # Note that you don't seem to need `-browser` at all here...
-# But I use it because it's sometimes needed in websearch.sh
+# But I use it because it's sometimes needed in websearch
 

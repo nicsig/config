@@ -9121,6 +9121,10 @@ endfu
 " 132 -
 "
 " Comment `:badd` (and `:argadd`?) commands from all session files in `~/.vim/session`.
+"
+" 133 -
+"
+" When we restart a session, the focused window is not immediately maximized.
 
 
 

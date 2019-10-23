@@ -484,10 +484,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 29 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
-let s:l = 9120 - ((14 * winheight(0) + 14) / 29)
+let s:l = 9120 - ((6 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -497,16 +497,17 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/bin/upp") | buffer ~/bin/upp | else | edit ~/bin/upp | endif
-let s:l = 317 - ((0 * winheight(0) + 0) / 0)
+let s:l = 317 - ((13 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 317
-normal! 020|
+normal! 023|
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 29 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
+2wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
