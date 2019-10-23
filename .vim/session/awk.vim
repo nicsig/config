@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 017|
+normal! 025|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/run-or-raise.sh") | buffer ~/bin/run-or-raise.sh | else | edit ~/bin/run-or-raise.sh | endif
+if bufexists("~/bin/snippy.sh") | buffer ~/bin/snippy.sh | else | edit ~/bin/snippy.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +322 ~/bin/upp
-" badd +0 ~/bin/run-or-raise.sh
+" badd +0 ~/bin/snippy.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

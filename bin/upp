@@ -319,7 +319,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/run-or-raise.sh
     #     ~/bin/snippy.sh
     #     ~/bin/src-hilite-lesspipe.sh
     #     ~/bin/subs-en.sh
