@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 317
-normal! 037|
+normal! 028|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/commit-these-vim-plugins.sh") | buffer ~/bin/commit-these-vim-plugins.sh | else | edit ~/bin/commit-these-vim-plugins.sh | endif
+if bufexists("~/bin/disk_space_monitor.sh") | buffer ~/bin/disk_space_monitor.sh | else | edit ~/bin/disk_space_monitor.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -547,9 +547,9 @@ set stal=1
 " badd +17 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
-" badd +3150 ~/.vim/vimrc
+" badd +5629 ~/.vim/vimrc
 " badd +317 ~/bin/upp
-" badd +0 ~/bin/commit-these-vim-plugins.sh
+" badd +0 ~/bin/disk_space_monitor.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

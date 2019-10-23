@@ -5626,7 +5626,7 @@ com -bar -range=% OnlySelection call myfuncs#only_selection(<line1>,<line2>)
 com -bar -nargs=0 PluginsToCommit  call s:plugins_to_commit()
 
 fu s:plugins_to_commit() abort
-    let script = 'commit-these-vim-plugins.sh'
+    let script = 'commit-these-vim-plugins'
     if !executable(script)
         echom '[PluginsToCommit]: '..script..' is not available'
         return
@@ -5636,7 +5636,7 @@ fu s:plugins_to_commit() abort
     call filter(my_plugins, {_,v -> v =~# '^\s*Plug\s\+''lacygoill/'})
     call map(my_plugins, {_,v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
     let my_plugins = join(my_plugins)
-    sil let output = systemlist('commit-these-vim-plugins.sh '..my_plugins)
+    sil let output = systemlist('commit-these-vim-plugins '..my_plugins)
     " we may have removed a plugin, but not executed `:Plugclean` yet
     call filter(output, {_,v -> v !~# 'No such file or directory'})
     if output ==# []
