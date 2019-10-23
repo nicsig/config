@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 022|
+normal! 026|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/subs-fr.sh") | buffer ~/bin/subs-fr.sh | else | edit ~/bin/subs-fr.sh | endif
+if bufexists("~/bin/system-clean.sh") | buffer ~/bin/system-clean.sh | else | edit ~/bin/system-clean.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
 " badd +322 ~/bin/upp
-" badd +0 ~/bin/subs-fr.sh
+" badd +0 ~/bin/system-clean.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -561,7 +561,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost
