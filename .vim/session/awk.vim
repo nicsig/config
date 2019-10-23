@@ -508,7 +508,7 @@ normal! 016|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/bash/installwatch.sh") | buffer ~/bin/bash/installwatch.sh | else | edit ~/bin/bash/installwatch.sh | endif
+if bufexists("~/bin/bash/search-engine.sh") | buffer ~/bin/bash/search-engine.sh | else | edit ~/bin/bash/search-engine.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +9125 ~/.vim/vimrc
 " badd +317 ~/bin/upp
-" badd +0 ~/bin/bash/installwatch.sh
+" badd +0 ~/bin/bash/search-engine.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
