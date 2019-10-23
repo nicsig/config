@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 021|
+normal! 032|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/no_more_sound.sh") | buffer ~/bin/no_more_sound.sh | else | edit ~/bin/no_more_sound.sh | endif
+if bufexists("~/bin/paste_selection.sh") | buffer ~/bin/paste_selection.sh | else | edit ~/bin/paste_selection.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +318 ~/bin/upp
-" badd +0 ~/bin/no_more_sound.sh
+" badd +0 ~/bin/paste_selection.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

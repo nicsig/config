@@ -319,7 +319,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/no_more_sound.sh
     #     ~/bin/paste_selection.sh
     #     ~/bin/signals_disposition.sh
     #     ~/bin/test_sed.sh
