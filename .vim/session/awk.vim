@@ -508,7 +508,7 @@ normal! 015|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/backup.sh") | buffer ~/bin/backup.sh | else | edit ~/bin/backup.sh | endif
+if bufexists("~/bin/bash/checkinstall.sh") | buffer ~/bin/bash/checkinstall.sh | else | edit ~/bin/bash/checkinstall.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -522,6 +522,7 @@ wincmd =
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
+" badd +0 ~/bin/bash/checkinstall.sh
 " badd +1 ~/wiki/man/examples/pathfind.1
 " badd +166 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 " badd +46 ~/wiki/st.md
@@ -549,7 +550,6 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +9125 ~/.vim/vimrc
 " badd +317 ~/bin/upp
-" badd +0 ~/bin/backup.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

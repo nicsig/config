@@ -314,7 +314,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/backup.sh
     #     ~/bin/bash/checkinstall.sh
     #     ~/bin/bash/installwatch.sh
     #     ~/bin/bash/search-engine.sh
