@@ -8,11 +8,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +74 ~/wiki/debug.md
-badd +45 ~/.vim/plugged/vim-debug/plugin/debug.vim
-badd +1 ~/.vim/plugged/vim-debug/autoload/debug.vim
-badd +1330 ~/wiki/vim/debug.md
-badd +738 ~/wiki/algo.md
+" badd +74 ~/wiki/debug.md
+" badd +45 ~/.vim/plugged/vim-debug/plugin/debug.vim
+" badd +1 ~/.vim/plugged/vim-debug/autoload/debug.vim
+" badd +1330 ~/wiki/vim/debug.md
+" badd +738 ~/wiki/algo.md
 argglobal
 %argdel
 set stal=2

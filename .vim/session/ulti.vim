@@ -7,14 +7,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +2 ~/.vim/UltiSnips/vim.snippets
-badd +1 ~/Desktop/md.md
-badd +1 /tmp/sh.sh
-badd +1 ~/.vim/UltiSnips/markdown.snippets
-badd +20 ~/.vim/pythonx/snippet_helpers.py
-badd +44 ~/.vim/UltiSnips/sh.snippets
-badd +142 ~/.vim/UltiSnips/README.md
-badd +40 ~/.vim/UltiSnips/help.snippets
+" badd +2 ~/.vim/UltiSnips/vim.snippets
+" badd +1 ~/Desktop/md.md
+" badd +1 /tmp/sh.sh
+" badd +1 ~/.vim/UltiSnips/markdown.snippets
+" badd +20 ~/.vim/pythonx/snippet_helpers.py
+" badd +44 ~/.vim/UltiSnips/sh.snippets
+" badd +142 ~/.vim/UltiSnips/README.md
+" badd +40 ~/.vim/UltiSnips/help.snippets
 argglobal
 silent! argdel *
 set stal=2

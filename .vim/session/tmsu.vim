@@ -26,7 +26,7 @@ normal! zt
 normal! 0
 lcd ~/.vim
 tabnext 1
-badd +451 ~/Dropbox/conf/wiki/tmsu
+" badd +451 ~/Dropbox/conf/wiki/tmsu
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

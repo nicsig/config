@@ -8,8 +8,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +466 ~/.vim/plugged/vim-completion/autoload/completion.vim
-badd +8 ~/wiki/vim/complete.md
+" badd +466 ~/.vim/plugged/vim-completion/autoload/completion.vim
+" badd +8 ~/wiki/vim/complete.md
 argglobal
 silent! argdel *
 edit ~/.vim/plugged/vim-completion/autoload/completion.vim

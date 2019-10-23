@@ -26,7 +26,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 tabnext 1
-badd +40 ~/wiki/vim/package_rtp.md
+" badd +40 ~/wiki/vim/package_rtp.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -68,8 +68,8 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
-badd +582 ~/wiki/floating_point/representation.md
-badd +339 ~/wiki/floating_point/glossary.md
+" badd +582 ~/wiki/floating_point/representation.md
+" badd +339 ~/wiki/floating_point/glossary.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

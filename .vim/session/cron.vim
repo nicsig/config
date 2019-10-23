@@ -8,9 +8,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +8 /etc/crontab
-badd +1 ~/wiki/shell/job.md
-badd +1 /etc/anacrontab
+" badd +8 /etc/crontab
+" badd +1 ~/wiki/shell/job.md
+" badd +1 /etc/anacrontab
 argglobal
 silent! argdel *
 set stal=2

@@ -218,14 +218,14 @@ exe '4resize ' . ((&lines * 1 + 16) / 33)
 exe '5resize ' . ((&lines * 25 + 16) / 33)
 tabnext 2
 set stal=1
-badd +14 ~/.config/rofi/scripts/sh.sh
-badd +34 ~/wiki/rofi.md
-badd +154 ~/.config/rofi/README.md
-badd +95 ~/.config/rofi/config.rasi
-badd +43 ~/.config/rofi/scripts/bangs
-badd +8 ~/.config/rofi/scripts/locate
-badd +14 ~/.config/rofi/scripts/bookmarks
-badd +2 ~/.config/rofi/scripts/README.md
+" badd +14 ~/.config/rofi/scripts/sh.sh
+" badd +34 ~/wiki/rofi.md
+" badd +154 ~/.config/rofi/README.md
+" badd +95 ~/.config/rofi/config.rasi
+" badd +43 ~/.config/rofi/scripts/bangs
+" badd +8 ~/.config/rofi/scripts/locate
+" badd +14 ~/.config/rofi/scripts/bookmarks
+" badd +2 ~/.config/rofi/scripts/README.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -6,7 +6,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +15 ~/wiki/git.md
+" badd +15 ~/wiki/git.md
 argglobal
 silent! argdel *
 edit ~/wiki/git.md

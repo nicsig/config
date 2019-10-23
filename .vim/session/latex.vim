@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/wiki/latex/README/latex.md
-badd +1 ~/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex
+" badd +1 ~/wiki/latex/README/latex.md
+" badd +1 ~/wiki/latex/practice/LaTeX_Beginner_Guide/2_Formatting_Words_Lines_and_Paragraphs/01_our_first_document.tex
 argglobal
 silent! argdel *
 edit ~/wiki/latex/README/latex.md

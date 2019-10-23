@@ -7,11 +7,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +2 ~/Desktop/result
-badd +65 ~/Desktop/final_analysis.hydra
-badd +29 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
-badd +49 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
-badd +1 /run/user/1000/hydra/head18.vim
+" badd +2 ~/Desktop/result
+" badd +65 ~/Desktop/final_analysis.hydra
+" badd +29 ~/.vim/plugged/vim-hydra/autoload/hydra.vim
+" badd +49 ~/.vim/plugged/vim-hydra/plugin/hydra.vim
+" badd +1 /run/user/1000/hydra/head18.vim
 argglobal
 silent! argdel *
 set stal=2

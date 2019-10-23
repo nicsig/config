@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +7 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
-badd +5 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
+" badd +7 ~/Dropbox/vim_plugins/vim-yankring/autoload/yankring.vim
+" badd +5 ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim
 argglobal
 silent! argdel *
 edit ~/Dropbox/vim_plugins/vim-yankring/plugin/yankring.vim

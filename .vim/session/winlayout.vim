@@ -8,13 +8,13 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/.bashrc
-badd +61 ~/.shrc
-badd +1812 ~/.zshrc
-badd +1 ~/.tmux.conf
-badd +53 ~/Desktop/ask.md
-badd +1 /tmp/vimrc
-badd +0 ~/Desktop/winlayout.md
+" badd +1 ~/.bashrc
+" badd +61 ~/.shrc
+" badd +1812 ~/.zshrc
+" badd +1 ~/.tmux.conf
+" badd +53 ~/Desktop/ask.md
+" badd +1 /tmp/vimrc
+" badd +0 ~/Desktop/winlayout.md
 argglobal
 silent! argdel *
 set stal=2

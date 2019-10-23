@@ -8,8 +8,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +108 ~/Desktop/backup.md
-badd +1 ~/.vim/doc/misc/galore
+" badd +108 ~/Desktop/backup.md
+" badd +1 ~/.vim/doc/misc/galore
 argglobal
 silent! argdel *
 edit ~/Desktop/backup.md

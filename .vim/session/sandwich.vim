@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +179 ~/.vim/after/plugin/README/sandwich.md
+" badd +179 ~/.vim/after/plugin/README/sandwich.md
 argglobal
 silent! argdel *
 edit ~/.vim/after/plugin/README/sandwich.md

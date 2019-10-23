@@ -7,9 +7,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Desktop/show_toc_help.vim
-badd +5 ~/.vim/after/ftplugin/help.vim
-badd +271 ~/.vim/plugged/vim-lg-lib/doc/lg.txt
+" badd +1 ~/Desktop/show_toc_help.vim
+" badd +5 ~/.vim/after/ftplugin/help.vim
+" badd +271 ~/.vim/plugged/vim-lg-lib/doc/lg.txt
 argglobal
 silent! argdel *
 set stal=2

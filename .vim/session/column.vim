@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
-badd +6 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
+" badd +1 ~/.vim/plugged/vim-column-object/autoload/column_object.vim
+" badd +6 ~/.vim/plugged/vim-column-object/plugin/column_object.vim
 argglobal
 silent! argdel *
 edit ~/.vim/plugged/vim-column-object/autoload/column_object.vim

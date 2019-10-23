@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +8 ~/wiki/vim/package_rtp.md
+" badd +8 ~/wiki/vim/package_rtp.md
 argglobal
 silent! argdel *
 edit ~/wiki/vim/package_rtp.md

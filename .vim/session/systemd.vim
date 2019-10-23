@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +5 ~/wiki/shell/systemd.md
+" badd +5 ~/wiki/shell/systemd.md
 argglobal
 silent! argdel *
 edit ~/wiki/shell/systemd.md

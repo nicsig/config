@@ -8,8 +8,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +117 ~/wiki/web/html_css/emmet.md
-badd +0 ~/.vim/plugin/emmet.vim
+" badd +117 ~/wiki/web/html_css/emmet.md
+" badd +0 ~/.vim/plugin/emmet.vim
 argglobal
 silent! argdel *
 edit ~/.vim/plugin/emmet.vim

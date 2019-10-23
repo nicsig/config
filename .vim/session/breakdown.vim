@@ -6,8 +6,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/.vim/plugged/vim-breakdown/autoload/breakdown.vim
-badd +10 ~/.vim/plugged/vim-breakdown/plugin/breakdown.vim
+" badd +1 ~/.vim/plugged/vim-breakdown/autoload/breakdown.vim
+" badd +10 ~/.vim/plugged/vim-breakdown/plugin/breakdown.vim
 argglobal
 silent! argdel *
 edit ~/.vim/plugged/vim-breakdown/autoload/breakdown.vim

@@ -8,20 +8,20 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/wiki/shell/redirection.md
-badd +1 ~/wiki/shell/shell.md
-badd +1 ~/Dropbox/vim_plugins/pair_complete.vim
-badd +1 ~/.shrc
-badd +52 ~/.bashrc
-badd +1 ~/wiki/weechat/config.md
-badd +1 ~/wiki/weechat/abjects.md
-badd +1 ~/wiki/logic/logic.md
-badd +1 ~/wiki/logic/glossary.md
-badd +1 ~/.config/mpv/input.conf
-badd +1 ~/Desktop/zsh_array.md
-badd +1 ~/wiki/shell/parameter.md
-badd +1 ~/.zshrc
-badd +813 ~/wiki/shell/process.md
+" badd +1 ~/wiki/shell/redirection.md
+" badd +1 ~/wiki/shell/shell.md
+" badd +1 ~/Dropbox/vim_plugins/pair_complete.vim
+" badd +1 ~/.shrc
+" badd +52 ~/.bashrc
+" badd +1 ~/wiki/weechat/config.md
+" badd +1 ~/wiki/weechat/abjects.md
+" badd +1 ~/wiki/logic/logic.md
+" badd +1 ~/wiki/logic/glossary.md
+" badd +1 ~/.config/mpv/input.conf
+" badd +1 ~/Desktop/zsh_array.md
+" badd +1 ~/wiki/shell/parameter.md
+" badd +1 ~/.zshrc
+" badd +813 ~/wiki/shell/process.md
 argglobal
 %argdel
 set stal=2

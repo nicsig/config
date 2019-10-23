@@ -226,14 +226,14 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 3
 set stal=1
-badd +15 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
-badd +24 ~/wiki/vim/syntax_hl.md
-badd +47 /usr/local/share/vim/vim81/colors/README.txt
-badd +1 ~/Desktop/test.vim
-badd +167 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
-badd +726 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +379 ~/.vim/autoload/colorscheme.vim
-badd +785 ~/wiki/vim/highlighting.md
+" badd +15 ~/.vim/plugged/vim-vim/after/syntax/vim.vim
+" badd +24 ~/wiki/vim/syntax_hl.md
+" badd +47 /usr/local/share/vim/vim81/colors/README.txt
+" badd +1 ~/Desktop/test.vim
+" badd +167 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+" badd +726 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
+" badd +379 ~/.vim/autoload/colorscheme.vim
+" badd +785 ~/wiki/vim/highlighting.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

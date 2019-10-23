@@ -7,7 +7,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +869 ~/wiki/vim/exception.md
+" badd +869 ~/wiki/vim/exception.md
 argglobal
 silent! argdel *
 edit ~/wiki/vim/exception.md

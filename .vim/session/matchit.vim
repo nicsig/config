@@ -199,16 +199,16 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 5
 set stal=1
-badd +1 ~/foo
-badd +5 ~/wiki/vim/command.md
-badd +191 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +25 ~/.vim/plugged/vim-debug/autoload/debug/timer.vim
-badd +164 ~/wiki/python/python.md
-badd +428 ~/wiki/vim/arglist.md
-badd +142 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
-badd +0 /usr/local/share/vim/vim80/doc/usr_44.txt
-badd +1 ~/.vim/plugged/vim-debug/syntax/timer_info.vim
-badd +1 ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim
+" badd +1 ~/foo
+" badd +5 ~/wiki/vim/command.md
+" badd +191 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
+" badd +25 ~/.vim/plugged/vim-debug/autoload/debug/timer.vim
+" badd +164 ~/wiki/python/python.md
+" badd +428 ~/wiki/vim/arglist.md
+" badd +142 ~/.vim/plugged/vim-cmdline/autoload/cmdline.vim
+" badd +0 /usr/local/share/vim/vim80/doc/usr_44.txt
+" badd +1 ~/.vim/plugged/vim-debug/syntax/timer_info.vim
+" badd +1 ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -7,14 +7,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +8 ~/wiki/vim/command.md
-badd +1 ~/Desktop/foo
-badd +38 ~/Desktop/file
-badd +1 ~/.vim/plugged/vim-unix/plugin/unix.vim
-badd +20 ~/Desktop/vim.vim
-badd +34 ~/.vim/plugged/vim-unix/autoload/unix/cloc.vim
-badd +1 /tmp/test/foo
-badd +43 ~/.vim/plugged/vim-unix/autoload/unix.vim
+" badd +8 ~/wiki/vim/command.md
+" badd +1 ~/Desktop/foo
+" badd +38 ~/Desktop/file
+" badd +1 ~/.vim/plugged/vim-unix/plugin/unix.vim
+" badd +20 ~/Desktop/vim.vim
+" badd +34 ~/.vim/plugged/vim-unix/autoload/unix/cloc.vim
+" badd +1 /tmp/test/foo
+" badd +43 ~/.vim/plugged/vim-unix/autoload/unix.vim
 argglobal
 silent! argdel *
 set stal=2

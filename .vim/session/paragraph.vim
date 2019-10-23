@@ -8,8 +8,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +360 ~/wiki/par/par.md
-badd +1 ~/.vim/plugged/vim-par/plugin/par.vim
+" badd +360 ~/wiki/par/par.md
+" badd +1 ~/.vim/plugged/vim-par/plugin/par.vim
 argglobal
 silent! argdel *
 edit ~/wiki/par/par.md

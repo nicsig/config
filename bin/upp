@@ -297,29 +297,6 @@ configure() { #{{{2
     # adds a  lot of latency  when `'cul'` is set  *and* the ruby  interface has
     # been compiled.
     #}}}
-    # TODO: Remove the `.sh` suffix from every filename.
-    #
-    # We've started with:
-    #
-    #     up.sh
-    #     up_yt.sh (→ up-yt)
-    #     upp.sh
-    #     conky-startup.sh
-    #     setup.sh (.config/keyboard/)
-    #
-    # Make  sure to edit all  references to these filenames  (`:GrepCfg`, `:vim`
-    # for vim plugins, `rg` for the wiki).
-    # Whenever you change the  name of a file, make sure  to immediately add the
-    # new file in our config repo (`$ config add`), and maybe also push.
-    # Otherwise, `:GrepCfg` may not find what we want later.
-    #
-    # ---
-    #
-    #     $ fd '.*\.sh$' ~/.config ~/bin ~/Desktop/
-    #     ~/.config/ranger/scope.sh
-    #     ~/.config/rofi/scripts/sh.sh
-    #
-    #     ~/bin/vim-anywhere.sh
     ./configure  \
       --enable-cscope                \
       --enable-fail-if-missing       \

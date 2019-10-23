@@ -7,9 +7,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +224 ~/.vim/plugged/vim-submode/autoload/submode.vim
-badd +1 ~/.vim/plugged/vim-schlepp/plugin/schlepp.vim
-badd +15 ~/.vim/plugged/vim-schlepp/autoload/schlepp.vim
+" badd +224 ~/.vim/plugged/vim-submode/autoload/submode.vim
+" badd +1 ~/.vim/plugged/vim-schlepp/plugin/schlepp.vim
+" badd +15 ~/.vim/plugged/vim-schlepp/autoload/schlepp.vim
 argglobal
 silent! argdel *
 set stal=2

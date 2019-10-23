@@ -8,8 +8,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1393 ~/wiki/vim/qf.md
-badd +1 ~/Desktop/vim_vs_nvim_qf.md
+" badd +1393 ~/wiki/vim/qf.md
+" badd +1 ~/Desktop/vim_vs_nvim_qf.md
 argglobal
 %argdel
 edit ~/Desktop/vim_vs_nvim_qf.md

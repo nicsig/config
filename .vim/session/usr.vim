@@ -7,8 +7,8 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +5569 ~/Dropbox/notes
-badd +40 /usr/share/vim/vim80/syntax/syntax.vim
+" badd +5569 ~/Dropbox/notes
+" badd +40 /usr/share/vim/vim80/syntax/syntax.vim
 argglobal
 silent! argdel *
 set stal=2

@@ -7,9 +7,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +1 ~/Dropbox/conf/wiki/ffmpeg
-badd +1 ~/Dropbox/conf/bin/gifrec
-badd +10 ~/Dropbox/conf/bin/gifenc
+" badd +1 ~/Dropbox/conf/wiki/ffmpeg
+" badd +1 ~/Dropbox/conf/bin/gifrec
+" badd +10 ~/Dropbox/conf/bin/gifenc
 argglobal
 silent! argdel *
 set stal=2

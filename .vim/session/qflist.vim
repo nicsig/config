@@ -8,12 +8,12 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +17 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
-badd +1393 ~/wiki/vim/qf.md
-badd +60 ~/wiki/vim/async.md
-badd +761 ~/wiki/vim/funcref.md
-badd +64 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
-badd +1 ~/Dropbox/vim_plugins/qfedit.vim
+" badd +17 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
+" badd +1393 ~/wiki/vim/qf.md
+" badd +60 ~/wiki/vim/async.md
+" badd +761 ~/wiki/vim/funcref.md
+" badd +64 ~/.vim/plugged/vim-qf/after/ftplugin/qf.vim
+" badd +1 ~/Dropbox/vim_plugins/qfedit.vim
 argglobal
 %argdel
 set stal=2

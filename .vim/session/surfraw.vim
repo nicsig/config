@@ -97,9 +97,9 @@ normal! 01|
 lcd ~/.vim
 tabnext 2
 set stal=1
-badd +10 ~/.config/surfraw/conf
-badd +634 ~/bin/upp
-badd +36 ~/wiki/surfraw.md
+" badd +10 ~/.config/surfraw/conf
+" badd +634 ~/bin/upp
+" badd +36 ~/wiki/surfraw.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -66,8 +66,8 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
-badd +1 ~/.vim/plugged/vim-unix/plugin/unix.vim
-badd +43 ~/.vim/plugged/vim-unix/autoload/unix.vim
+" badd +1 ~/.vim/plugged/vim-unix/plugin/unix.vim
+" badd +43 ~/.vim/plugged/vim-unix/autoload/unix.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

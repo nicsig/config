@@ -8,9 +8,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +191 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
-badd +1 ~/wiki/markdown/main.md
-badd +1 ~/.vim/plugged/vim-markdown/ftplugin/markdown.vim
+" badd +191 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
+" badd +1 ~/wiki/markdown/main.md
+" badd +1 ~/.vim/plugged/vim-markdown/ftplugin/markdown.vim
 argglobal
 silent! argdel *
 set stal=2
