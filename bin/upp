@@ -319,8 +319,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/system-clean.sh
-    #     ~/bin/term-color-count.sh
     #     ~/bin/twitch.sh
     #     ~/bin/video-downloader.sh
     #     ~/bin/vim-anywhere.sh
