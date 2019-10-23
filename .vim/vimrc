@@ -3147,7 +3147,7 @@ omap m      <plug>(fzf-maps-o)
 " It can't escape special shell characters such as `*`, so sometimes a search may fail.
 " ...
 "
-" If you need to read it, it's there: `~/bin/bash/search-engine.sh`.
+" If you need to read it, it's there: `~/bin/bash/search-engine`.
 "}}}
 nno <silent> <space>i :<c-u>call <sid>run_current_line('websearch')<cr>
 

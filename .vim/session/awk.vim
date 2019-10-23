@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 317
-normal! 016|
+normal! 037|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/bash/search-engine.sh") | buffer ~/bin/bash/search-engine.sh | else | edit ~/bin/bash/search-engine.sh | endif
+if bufexists("~/bin/commit-these-vim-plugins.sh") | buffer ~/bin/commit-these-vim-plugins.sh | else | edit ~/bin/commit-these-vim-plugins.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -547,9 +547,9 @@ set stal=1
 " badd +17 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
-" badd +9125 ~/.vim/vimrc
+" badd +3150 ~/.vim/vimrc
 " badd +317 ~/bin/upp
-" badd +0 ~/bin/bash/search-engine.sh
+" badd +0 ~/bin/commit-these-vim-plugins.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

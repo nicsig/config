@@ -314,7 +314,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/bash/search-engine.sh
     #     ~/bin/commit-these-vim-plugins.sh
     #     ~/bin/conky-startup.sh
     #     ~/bin/disk_space_monitor.sh
