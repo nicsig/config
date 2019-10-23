@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 020|
+normal! 027|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/next-pane-or-window.sh") | buffer ~/bin/next-pane-or-window.sh | else | edit ~/bin/next-pane-or-window.sh | endif
+if bufexists("~/bin/npm-pip-update.sh") | buffer ~/bin/npm-pip-update.sh | else | edit ~/bin/npm-pip-update.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +322 ~/bin/upp
-" badd +0 ~/bin/next-pane-or-window.sh
+" badd +0 ~/bin/npm-pip-update.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
