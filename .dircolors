@@ -32,7 +32,7 @@
 #}}}
 # But it's still unreadable!{{{
 #
-#     $ ~/bin/ls-colors.sh
+#     $ ~/bin/ls-colors
 #
 # It will display all the values in `$LS_COLORS` in a human readable format.
 # In particular, each color value is colorized with the actual color it stands for.

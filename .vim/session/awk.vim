@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 322
-normal! 028|
+normal! 017|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/ls-colors.sh") | buffer ~/bin/ls-colors.sh | else | edit ~/bin/ls-colors.sh | endif
+if bufexists("~/bin/mp3-dl-gotbletu.sh") | buffer ~/bin/mp3-dl-gotbletu.sh | else | edit ~/bin/mp3-dl-gotbletu.sh | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +318 ~/bin/upp
-" badd +0 ~/bin/ls-colors.sh
+" badd +0 ~/bin/mp3-dl-gotbletu.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
