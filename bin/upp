@@ -307,8 +307,9 @@ configure() { #{{{2
     #
     # ---
     #
+    #     ~/.config/keyboard/setup
+    #
     #     $ fd '.*\.sh$' ~/.config ~/bin ~/Desktop/
-    #     ~/.config/keyboard/setup.sh
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/bangs.sh
     #     ~/.config/rofi/scripts/bookmarks.sh

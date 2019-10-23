@@ -479,7 +479,10 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-2wincmd k
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd t
@@ -489,9 +492,10 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 27 + 16) / 33)
 argglobal
-let s:l = 735 - ((205 * winheight(0) + 0) / 0)
+let s:l = 735 - ((98 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -501,7 +505,7 @@ lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
 argglobal
 if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
-let s:l = 9123 - ((0 * winheight(0) + 0) / 0)
+let s:l = 9123 - ((4 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -511,18 +515,29 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/bin/upp") | buffer ~/bin/upp | else | edit ~/bin/upp | endif
-let s:l = 310 - ((11 * winheight(0) + 14) / 28)
+let s:l = 310 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 310
-normal! 011|
+normal! 020|
 lcd ~/.vim
 wincmd w
-3wincmd w
+argglobal
+if bufexists("~/.config/keyboard/setup") | buffer ~/.config/keyboard/setup | else | edit ~/.config/keyboard/setup | endif
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+4wincmd w
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 27 + 16) / 33)
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
@@ -554,6 +569,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +9123 ~/.vim/vimrc
 " badd +296 ~/bin/upp
+" badd +0 ~/.config/keyboard/setup
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
