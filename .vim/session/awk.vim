@@ -504,11 +504,11 @@ if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 317
-normal! 028|
+normal! 031|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/disk_space_monitor.sh") | buffer ~/bin/disk_space_monitor.sh | else | edit ~/bin/disk_space_monitor.sh | endif
+if bufexists("~/bin/disk_space_monitor") | buffer ~/bin/disk_space_monitor | else | edit ~/bin/disk_space_monitor | endif
 let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -549,7 +549,7 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +5629 ~/.vim/vimrc
 " badd +317 ~/bin/upp
-" badd +0 ~/bin/disk_space_monitor.sh
+" badd +0 ~/bin/disk_space_monitor
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
