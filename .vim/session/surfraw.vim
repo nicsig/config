@@ -68,7 +68,7 @@ wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext
-edit ~/bin/upp.sh
+edit ~/bin/upp
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -98,7 +98,7 @@ lcd ~/.vim
 tabnext 2
 set stal=1
 badd +10 ~/.config/surfraw/conf
-badd +634 ~/bin/upp.sh
+badd +634 ~/bin/upp
 badd +36 ~/wiki/surfraw.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

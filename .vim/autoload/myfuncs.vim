@@ -1568,9 +1568,10 @@ fu s:trans_output(job,exit_status) abort
 endfu
 
 fu myfuncs#trans_stop() abort
-    " FIXME:
-    " Start a new Vim instance and hit `!T` on a word:
-    "         E121: Undefined variable: s:trans_job
+    " FIXME: Start a new Vim instance and hit `!T` on a word:{{{
+    "
+    "     E121: Undefined variable: s:trans_job~
+    "}}}
     call job_stop(s:trans_job)
 endfu
 

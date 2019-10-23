@@ -2246,7 +2246,7 @@ augroup END
 "
 "    - the ones written for a file which has not been modified since a long time (3 months?)
 "
-"    - the ones written for a file doesn't exist anymore
+"    - the ones written for a file which doesn't exist anymore
 "
 "      For example if this undo file exists:
 "
@@ -9091,33 +9091,36 @@ endfu
 "
 " 131 -
 "
-"     $ nvim
-"     :sp $MYVIMRC
-"     SPC q
-"     SPC u
+" Document somewhere that to debug Nvim, you should not do this *from Vim*:
 "
-" The window-local options are not reapplied correctly.
-" The issue is specific to Nvim.
+"     :sp /tmp/vimrc
+"     :r $MYVIMRC
+"     :w
+"
+" But *from Nvim*.
+" Otherwise, when you'll  run `$ nvim -Nu /tmp/vimrc`, you'll  have issues which
+" have nothing to do with what you're trying to debug.
+" This is probably because  – in that case – the rtp  does not contain `~/.vim/`
+" nor `~/.vim/after`; those are included in the rtp via `~/.config/nvim/init.vim`,
+" which is the value of `$MYVIMRC` only in Nvim.
+"
+" Alternatively, if you're in Vim, run this:
+"
+"     :sp /tmp/vimrc
+"     :r ~/.config/nvim/init.vim
+"     :w
+"
+" Maybe we should write a custom command...
+" It would dump the vimrc in a split.
+" In the case of Nvim, it would read `init.vim`, and replace this line:
+"
+"     source $HOME/.vim/vimrc
+"
+" With the contents of `~/.vim/vimrc`.
 "
 " 132 -
 "
-" In `~/.vim/plugged/vim-debug/plugin/debug.vim`, replace this mapping:
-"
-"     nno <silent><unique> !d <cmd>call debug#capture#dump()<cr>
-"
-" With this:
-"
-"     nno <silent><unique> !d <cmd>debug#capture#dump()<cr>
-"
-" *Yeah, I know, it's wrong (`call` is missing).*
-" Press `!d` in Nvim; you enter debug mode; run `>fin`:
-"
-"     E5500: autocmd has thrown an exception: Vim(if):E685: Internal error: hash_add()
-"                                                     ^^^^
-" From `:h E685`:
-"
-"     This is an internal error.  If you can reproduce it, please send in a bug
-"     report. |bugs|
+" Remove `--enable-perlinterp` and maybe `--enable-rubyinterp` from `upp`.
 
 
 

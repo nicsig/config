@@ -12,7 +12,7 @@
 #     $ gunzip terminfo.src.gz
 #     $ tic -x terminfo.src
 #
-# Or maybe we should rely on `up.sh` to do that?
+# Or maybe we should rely on `up` to do that?
 # Or maybe we should version control `~/.terminfo/` (`config` would restore them)?
 
 # TODO: Finish reading this: https://www.atlassian.com/git/tutorials/dotfiles

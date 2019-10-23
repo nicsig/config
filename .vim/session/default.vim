@@ -226,7 +226,7 @@ exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 27 + 16) / 33)
 tabnext
-edit ~/bin/upp.sh
+edit ~/bin/upp
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -484,7 +484,7 @@ set stal=1
 " badd +152 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
 " badd +31 ~/wiki/st.md
 " badd +1 ~/.config/st/patches/README.md
-" badd +1 ~/bin/upp.sh
+" badd +1 ~/bin/upp
 " badd +814 ~/wiki/tmux/command.md
 " badd +1 ~/bin/yank
 " badd +1 ~/Desktop/session.md

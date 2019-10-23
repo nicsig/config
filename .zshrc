@@ -5168,9 +5168,9 @@ clone_check() {
 # various places:
 #
 #     ~/.config/zsh-snippets/main.txt
-#     ~/bin/up.sh
-#     ~/bin/up_yt.sh
-#     ~/bin/upp.sh
+#     ~/bin/up
+#     ~/bin/up-yt
+#     ~/bin/upp
 #}}}
 precmd_functions+=(clone_check)
 

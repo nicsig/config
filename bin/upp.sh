@@ -284,16 +284,38 @@ configure() { #{{{2
     # In my limited testing with  typometer, the latency doubles after compiling
     # with gtk3.
     #}}}
+    #     --enable-perlinterp=dynamic    \
+    #     --enable-rubyinterp=dynamic    \
+    #     check whether the splitjoin plugin works without the ruby interface
+    #
+    # ---
+    #
+    # Remove the `.sh` suffix from every filename.
+    # We've started with:
+    #
+    #     up.sh
+    #     up_yt.sh (→ up-yt)
+    #     upp.sh
+    #     conky-startup.sh
+    #     setup.sh (.config/keyboard/)
+    #
+    # Make  sure to edit all  references to these filenames  (`:GrepCfg`, `:vim`
+    # for vim plugins, `rg` for the wiki).
+    # Btw, why doesn't `:GrepCfg` find `up_yt` here:
+    #
+    #     ~/bin/up:373
+    #
+    # Vim pattern:
+    #
+    #     \%(up\|up_yt\|upp\|conky-startup\|setup\)\.sh
     ./configure  \
       --enable-cscope                \
       --enable-fail-if-missing       \
       --enable-gui=gtk2              \
       --enable-luainterp=dynamic     \
       --enable-multibyte             \
-      --enable-perlinterp=dynamic    \
       --enable-python3interp=dynamic \
       --enable-pythoninterp=dynamic  \
-      --enable-rubyinterp=dynamic    \
       --enable-terminal              \
       --prefix=/usr/local            \
       --with-compiledby=user         \

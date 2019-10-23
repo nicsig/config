@@ -7,7 +7,7 @@ mkdir -p /run/user/$UID/tmp
 # Autostart programs
 
 # conky
-"${HOME}/bin/conky-startup.sh" &
+"${HOME}/bin/conky-startup" &
 
 # redshift
 redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
@@ -69,5 +69,5 @@ xbanish &
 #}}}
 xrdb -cpp "$(command -v cpp) -traditional-cpp" "${HOME}"/.Xresources &
 
-"${HOME}/.config/keyboard/setup.sh" &
+"${HOME}/.config/keyboard/setup" &
 

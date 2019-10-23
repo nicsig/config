@@ -29,5 +29,5 @@ set -g @fingers-highlight-format '#[fg=red,bold,dim]%s'
 set -g @fingers-highlight-format-nocompact '#[fg=red,bold,dim]%s'
 
 # https://github.com/Morantron/tmux-fingers#fingers-patterns-n
-set -g @fingers-pattern-0 'sudo "/home/.*/bin/upp.sh" ".*"'
+set -g @fingers-pattern-0 'sudo "/home/.*/bin/upp" ".*"'
 

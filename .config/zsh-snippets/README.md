@@ -25,7 +25,7 @@ Just in case we've edited a file.
 We want to undo any modification.
 
 This matters, for example, if you need a tmux binary with debugging information,
-but you've edited `configure.ac` with `sed(1)` in `~/bin/upp.sh`.
+but you've edited `configure.ac` with `sed(1)` in `~/bin/upp`.
 Indeed,  for  some  reason,  changing  the  version  prevents  the  binary  from
 containing debugging information.
 
