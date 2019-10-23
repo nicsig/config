@@ -37,7 +37,7 @@ Maybe because shellcheck is improved, and  maybe because bash syntax evolves and
 needs a more recent version of a linter.
 
 ##
-## `fzfimg.sh` script?
+## `fzfimg` script?
 
 <https://github.com/seebye/ueberzug/blob/master/examples/fzfimg.sh>
 
