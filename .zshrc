@@ -1433,7 +1433,7 @@ ff_video_to_gif() { #{{{2
 		EOF
     return 64
   fi
-  gifenc.sh "$1" "$2" >/dev/null 2>&1
+  gifenc "$1" "$2" >/dev/null 2>&1
 }
 #}}}2
 

@@ -9,7 +9,7 @@ endif
 set shortmess=aoO
 badd +1 ~/Dropbox/conf/wiki/ffmpeg
 badd +1 ~/Dropbox/conf/bin/gifrec.sh
-badd +10 ~/Dropbox/conf/bin/gifenc.sh
+badd +10 ~/Dropbox/conf/bin/gifenc
 argglobal
 silent! argdel *
 set stal=2
@@ -61,7 +61,7 @@ normal! zt
 normal! 02|
 wincmd w
 argglobal
-if bufexists('~/Dropbox/conf/bin/gifenc.sh') | buffer ~/Dropbox/conf/bin/gifenc.sh | else | edit ~/Dropbox/conf/bin/gifenc.sh | endif
+if bufexists('~/Dropbox/conf/bin/gifenc') | buffer ~/Dropbox/conf/bin/gifenc | else | edit ~/Dropbox/conf/bin/gifenc | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}

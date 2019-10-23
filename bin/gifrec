@@ -57,7 +57,7 @@
 
 # Functions {{{1
 encode_to_gif() { #{{{2
-  gifenc.sh /tmp/recording_desktop.mkv /tmp/gif.gif >/dev/null 2>&1
+  gifenc /tmp/recording_desktop.mkv /tmp/gif.gif >/dev/null 2>&1
   rm /tmp/recording_desktop.mkv 2>/dev/null
 }
 
