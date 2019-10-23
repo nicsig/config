@@ -526,19 +526,50 @@ exe '3resize ' . ((&lines * 28 + 16) / 33)
 tabnext
 edit ~/bin/upp
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+wincmd =
 argglobal
-let s:l = 1 - ((0 * winheight(0) + 12) / 25)
+let s:l = 312 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+312
+normal! 038|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.config/rofi/scripts/bangs") | buffer ~/.config/rofi/scripts/bangs | else | edit ~/.config/rofi/scripts/bangs | endif
+let s:l = 14 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+14
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.config/keyboard/xbindkeys.conf") | buffer ~/.config/keyboard/xbindkeys.conf | else | edit ~/.config/keyboard/xbindkeys.conf | endif
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 lcd ~/.vim
+wincmd w
+3wincmd w
+wincmd =
 tabnext 14
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
@@ -570,6 +601,8 @@ set stal=1
 " badd +23 ~/Desktop/vim.vim
 " badd +9123 ~/.vim/vimrc
 " badd +312 ~/bin/upp
+" badd +69 ~/.config/keyboard/xbindkeys.conf
+" badd +0 ~/.config/rofi/scripts/bangs
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
