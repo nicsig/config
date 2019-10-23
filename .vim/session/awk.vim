@@ -473,20 +473,32 @@ exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 exe '3resize ' . ((&lines * 28 + 16) / 33)
 tabnext
-edit ~/bin/upp
+edit ~/.vim/vimrc
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+wincmd =
 argglobal
+let s:l = 9125 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+9125
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/bin/upp") | buffer ~/bin/upp | else | edit ~/bin/upp | endif
 let s:l = 317 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -496,8 +508,8 @@ normal! 015|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/bin/auto-refresh.sh") | buffer ~/bin/auto-refresh.sh | else | edit ~/bin/auto-refresh.sh | endif
-let s:l = 1 - ((0 * winheight(0) + 14) / 29)
+if bufexists("~/bin/backup.sh") | buffer ~/bin/backup.sh | else | edit ~/bin/backup.sh | endif
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -505,9 +517,8 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-2wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+3wincmd w
+wincmd =
 tabnext 13
 set stal=1
 " badd +936 ~/wiki/awk/sed.md
@@ -536,8 +547,9 @@ set stal=1
 " badd +17 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
 " badd +68 ~/.vim/plugged/vim-vim/autoload/vim/refactor/if.vim
 " badd +23 ~/Desktop/vim.vim
-" badd +327 ~/bin/upp
-" badd +0 ~/bin/auto-refresh.sh
+" badd +9125 ~/.vim/vimrc
+" badd +317 ~/bin/upp
+" badd +0 ~/bin/backup.sh
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
