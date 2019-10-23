@@ -8,7 +8,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +1 ~/Dropbox/conf/wiki/ffmpeg
-badd +1 ~/Dropbox/conf/bin/gifrec.sh
+badd +1 ~/Dropbox/conf/bin/gifrec
 badd +10 ~/Dropbox/conf/bin/gifenc
 argglobal
 silent! argdel *
@@ -32,7 +32,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabedit ~/Dropbox/conf/bin/gifrec.sh
+tabedit ~/Dropbox/conf/bin/gifrec
 set splitbelow splitright
 wincmd _ | wincmd |
 split

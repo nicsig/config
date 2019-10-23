@@ -314,7 +314,6 @@ configure() { #{{{2
     #     ~/.config/ranger/scope.sh
     #     ~/.config/rofi/scripts/sh.sh
     #
-    #     ~/bin/gifrec.sh
     #     ~/bin/is_it_in_the_palette.sh
     #     ~/bin/ls-colors.sh
     #     ~/bin/mp3-dl-gotbletu.sh

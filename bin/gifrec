@@ -5,7 +5,7 @@
 
 # How to prevent the script from changing the layout of the tmux window?{{{
 #
-#     $ TMUX= gifrec.sh zsh
+#     $ TMUX= gifrec zsh
 #}}}
 
 # TODO: screenkey{{{
@@ -35,7 +35,7 @@
 
 # Warning: If you modify the script to quote the shell command it must record:{{{
 #
-#     gifrec.sh shell_cmd  →  gifrec.sh 'shell_cmd'
+#     gifrec shell_cmd  →  gifrec 'shell_cmd'
 #
 # Make sure your script manually expands a  possible tilde at the beginning of a
 # file path in the command.
@@ -44,13 +44,11 @@
 #
 #     var="${var/#\~/$HOME}"
 #
-# Source:
-#
-#     https://stackoverflow.com/a/27485157/9477010
+# Source: https://stackoverflow.com/a/27485157/9477010
 #}}}
-# My complex command contains many single and double quotes.  `$ gifrec.sh complex_cmd` doesn't work!{{{
+# My complex command contains many single and double quotes.  `$ gifrec complex_cmd` doesn't work!{{{
 #
-#     $ gifrec.sh zsh
+#     $ gifrec zsh
 #     $ complex_cmd
 #     $ C-d
 #}}}
