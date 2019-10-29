@@ -10,6 +10,9 @@ endif
 set shortmess=aoO
 argglobal
 %argdel
+set stal=2
+tabnew
+tabrewind
 edit ~/wiki/vim/async.md
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -24,11 +27,11 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 27 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-let s:l = 128 - ((3 * winheight(0) + 13) / 27)
+let s:l = 128 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -38,7 +41,7 @@ lcd ~/wiki/vim
 wincmd w
 argglobal
 if bufexists("~/.vim/plugged/asyncmake/plugin/asyncmake.vim") | buffer ~/.vim/plugged/asyncmake/plugin/asyncmake.vim | else | edit ~/.vim/plugged/asyncmake/plugin/asyncmake.vim | endif
-let s:l = 8 - ((0 * winheight(0) + 0) / 1)
+let s:l = 8 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -48,7 +51,7 @@ lcd ~/.vim/plugged/asyncmake
 wincmd w
 argglobal
 if bufexists("~/.vim/plugged/asyncmake/autoload/asyncmake.vim") | buffer ~/.vim/plugged/asyncmake/autoload/asyncmake.vim | else | edit ~/.vim/plugged/asyncmake/autoload/asyncmake.vim | endif
-let s:l = 5 - ((0 * winheight(0) + 0) / 1)
+let s:l = 5 - ((4 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -56,24 +59,64 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/asyncmake
 wincmd w
-exe '1resize ' . ((&lines * 27 + 16) / 33)
-exe '2resize ' . ((&lines * 1 + 16) / 33)
-exe '3resize ' . ((&lines * 1 + 16) / 33)
-tabnext 1
-" badd +96 ~/wiki/vim/async.md
-" badd +6 ~/.vim/plugged/asyncmake/plugin/asyncmake.vim
-" badd +1 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
+tabnext
+edit ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
+argglobal
+let s:l = 1 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-cmdline
+wincmd w
+argglobal
+if bufexists("~/Dropbox/vim_plugins/vimrc_grepper.vim") | buffer ~/Dropbox/vim_plugins/vimrc_grepper.vim | else | edit ~/Dropbox/vim_plugins/vimrc_grepper.vim | endif
+let s:l = 1 - ((0 * winheight(0) + 14) / 29)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim
+wincmd w
+2wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
+tabnext 2
+set stal=1
+" badd +1 ~/wiki/vim/async.md
+" badd +1 ~/.vim/plugged/vim-cmdline/autoload/cmdline/cycle/vimgrep.vim
+" badd +0 ~/.vim/plugged/asyncmake/plugin/asyncmake.vim
+" badd +0 ~/.vim/plugged/asyncmake/autoload/asyncmake.vim
+" badd +0 ~/Dropbox/vim_plugins/vimrc_grepper.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=1 shortmess=filnxtToOSacFIsW
-set winminheight=1 winminwidth=1
+set winheight=1 winwidth=20 shortmess=filnxtToOSacFIsW
+set winminheight=0 winminwidth=0
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 let g:my_session = v:this_session
 let g:my_session = v:this_session
 doautoall SessionLoadPost

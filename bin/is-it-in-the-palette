@@ -34,10 +34,10 @@
 #}}}
 
 if [[ $# -eq 0 ]]; then
-  cat <<-EOF >&2
-	usage: $(basename "$0") <hex color code>
-	example: $(basename "$0") 1234ab
-	EOF
+  cat <<EOF >&2
+usage: $(basename "$0") <hex color code>
+example: $(basename "$0") 1234ab
+EOF
   exit 64
 fi
 

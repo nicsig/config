@@ -16,15 +16,15 @@ main() { #{{{1
   # And a script is executed in a subshell.
   builtin cd /tmp || exit
 
-  cat <<-EOF
-	---
-	---
-	$(date +%m-%d\ %H:%M)
-	===========
-	Downloading webpage...
-	---
+  cat <<EOF
+---
+---
+$(date +%m-%d\ %H:%M)
+===========
+Downloading webpage...
+---
 
-	EOF
+EOF
   #         ┌ download even if the ssl certificate is invalid
   #         │
   #         │                                           ┌ print the page on standard output
@@ -37,21 +37,21 @@ main() { #{{{1
     #         └ input format
 
   # See `$ ebook-convert --help`.
-  cat <<-EOF
+  cat <<EOF
 
-	Converting epub into pdf...
-	---
+Converting epub into pdf...
+---
 
-	EOF
+EOF
   ebook-convert doc.epub doc.pdf
 
   # See `$ calibredb add --help`.
-  cat <<-EOF
+  cat <<EOF
 
-	Add the epub inside Calibre library...
-	---
+Add the epub inside Calibre library...
+---
 
-	EOF
+EOF
   calibredb add doc.epub
 
   # Save the id of the epub we've just added to calibre library.
@@ -69,24 +69,24 @@ main() { #{{{1
   #}}}
 
   # Print the id of the document for debugging purpose.
-  cat <<-EOF
+  cat <<EOF
 
-	ID of the document: ${doc_id}
-	---
-	EOF
+ID of the document: ${doc_id}
+---
+EOF
 
-  cat <<-EOF
-	Add the pdf inside Calibre library...
-	---
+  cat <<EOF
+Add the pdf inside Calibre library...
+---
 
-	EOF
+EOF
   calibredb add_format "${doc_id}" doc.pdf
 
-  cat <<-EOF
+  cat <<EOF
 
-	Starting Calibre server...
-	---
-	EOF
+Starting Calibre server...
+---
+EOF
   [[ ! "$(pidof calibre-server)" ]] && calibre-server -p 8080 --daemonize
   #                                                    ├────┘ ├─────────┘
   #                                                    │      └ run process in background as a daemon

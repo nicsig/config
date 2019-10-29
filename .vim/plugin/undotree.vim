@@ -20,6 +20,8 @@ fu g:Undotree_CustomMap() abort
     nno <buffer><nowait><silent> K <nop>
 
     nno <buffer><nowait><silent> <c-l> :<c-u>call lg#window#focus_previous_if_on_right()<cr>
+    " Purpose: Override the builtin help which doesn't take into account our custom mappings.
+    nno <buffer><nowait><silent> ? :<c-u>call <sid>show_help()<cr>
 
     " Purpose:{{{
     "
@@ -39,4 +41,27 @@ let g:undotree_ShortIndicators = 1
 
 " hide "Press ? for help"
 let g:undotree_HelpLine = 0
+
+fu s:show_help() abort
+    let help =<< END
+   ===== Marks =====
+>num< : The current state
+{num} : The next redo state
+[num] : The latest state
+  s   : Saved states
+  S   : The last saved state
+
+  ===== Hotkeys =====
+u : Undo
+<c-r> : Redo
+} : Move to the previous saved state
+{ : Move to the next saved state
+) : Move to the previous undo state
+( : Move to the next undo state
+D : Toggle the diff panel
+T : Toggle relative timestamp
+C : Clear undo history (with confirmation)
+END
+    echo join(help, "\n")
+endfu
 

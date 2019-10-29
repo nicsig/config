@@ -55,12 +55,12 @@ update_system() { #{{{1
   # dating from a  particular time in the output of  `ls(1)` (or in `ranger(1)`)
   # when the month comes before the day.
   #}}}
-  cat <<-EOF
-	---
-	---
-	$(date +%m-%d\ %H:%M)
-	===========
-	EOF
+  cat <<EOF
+---
+---
+$(date +%m-%d\ %H:%M)
+===========
+EOF
 
   update_apt "$1"
   update_mpv_completion_function
@@ -74,11 +74,11 @@ update_system() { #{{{1
 }
 
 update_apt() { #{{{1
-  cat <<-EOF
-	aptitude
-	------
+  cat <<EOF
+aptitude
+------
 
-	EOF
+EOF
 
   sudo aptitude update
   sudo aptitude safe-upgrade
@@ -128,12 +128,12 @@ update_apt() { #{{{1
   # distracting.
   # It does the same thing with other characters such as backspaces.
   #}}}
-  cat <<-EOF
+  cat <<EOF
 
-	apt-file
-	--------
+apt-file
+--------
 
-	EOF
+EOF
   script -a -c 'apt-file update' -q "$1"
   #       │  │                    │   │{{{
   #       │  │                    │   └ log the output in this file
@@ -211,12 +211,12 @@ update_git_programs() { #{{{1
   #     $ echo $(seq 1 ${width})
   #}}}
 
-  cat <<-EOF
+  cat <<EOF
 
-	${plugin_name}
-	${dashes}
+${plugin_name}
+${dashes}
 
-	EOF
+EOF
 
   local path="${2}${plugin_name}"
   [[ -d "${path}" ]] || git -C "$2" clone "$1"
@@ -226,12 +226,12 @@ update_git_programs() { #{{{1
 }
 
 update_mpv_completion_function() { #{{{1
-  cat <<-EOF
+  cat <<EOF
 
-	mpv completion function
-	-----------------------
+mpv completion function
+-----------------------
 
-	EOF
+EOF
 
   curl -Ls 'https://raw.githubusercontent.com/mpv-player/mpv/master/TOOLS/zsh.pl' | \
     perl - \
@@ -240,12 +240,12 @@ update_mpv_completion_function() { #{{{1
 }
 
 update_pip() { #{{{1
-  cat <<-EOF
+  cat <<EOF
 
-	pip
-	---
+pip
+---
 
-	EOF
+EOF
 
   run_until_it_succeeds python  -m pip install --upgrade --user pip
   run_until_it_succeeds python3 -m pip install --upgrade --user pip
@@ -256,20 +256,20 @@ update_pip() { #{{{1
   #
   #     $ python[3] -m pip install -r /tmp/req.txt
   #}}}
-  cat <<-EOF
+  cat <<EOF
 
-	current versions of the python2 packages
-	----------------------------------------
+current versions of the python2 packages
+----------------------------------------
 
-	EOF
+EOF
 
   python -m pip freeze
-  cat <<-EOF
+  cat <<EOF
 
-	update python2 packages
-	-----------------------
+update python2 packages
+-----------------------
 
-	EOF
+EOF
 
   # FIXME: `xargs` can't run a shell function, so it can't run `run_until_it_succeeds`
   python -m pip list --outdated --format=freeze \
@@ -284,20 +284,20 @@ update_pip() { #{{{1
     #          (we need at least one package name)
     #}}}
 
-  cat <<-EOF
+  cat <<EOF
 
-	current versions of the python3 packages
-	----------------------------------------
+current versions of the python3 packages
+----------------------------------------
 
-	EOF
+EOF
 
   python3 -m pip freeze
-  cat <<-EOF
+  cat <<EOF
 
-	update python3 packages
-	-----------------------
+update python3 packages
+-----------------------
 
-	EOF
+EOF
 
   python3 -m pip list --outdated --format=freeze \
     | grep -Ev '^(-e|#)' \
@@ -329,12 +329,12 @@ update_texlive() { #{{{1
   #
   #     https://tex.stackexchange.com/a/55459/169646
   #}}}
-  cat <<-EOF
+  cat <<EOF
 
-	texlive packages
-	----------------
+texlive packages
+----------------
 
-	EOF
+EOF
 
   #       ┌ https://stackoverflow.com/a/677212/9780968
   #       ├────────┐
@@ -352,10 +352,10 @@ update_texlive() { #{{{1
 }
 
 update_tldr() { #{{{1
-  cat <<-EOF
-	tldr
-	----
-	EOF
+  cat <<EOF
+tldr
+----
+EOF
 
     # https://github.com/raylee/tldr#installation
     curl -Lso "${HOME}/bin/tldr" 'https://raw.githubusercontent.com/raylee/tldr/master/tldr'
@@ -363,12 +363,12 @@ update_tldr() { #{{{1
 }
 
 update_youtube_dl() { #{{{1
-  cat <<-EOF
+  cat <<EOF
 
-	youtube-dl
-	----------
+youtube-dl
+----------
 
-	EOF
+EOF
 
   up-yt
 }
@@ -384,6 +384,10 @@ update_zsh_plugins() { #{{{1
 
 # Execution {{{1
 
+if [[ $# -ne 0 ]]; then
+  printf -- '%s\n' "$(basename $0): no arguments allowed"
+  exit 64
+fi
 main
 tput bel
 

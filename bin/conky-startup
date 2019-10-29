@@ -24,12 +24,12 @@
 LOGFILE="${HOME}/log/$(basename "$0" .sh).log"
 
 main() {
-  cat <<-EOF
+  cat <<EOF
 
-	-----------
-	$(date +%m-%d\ %H:%M)
-	-----------
-	EOF
+-----------
+$(date +%m-%d\ %H:%M)
+-----------
+EOF
 
 killall conky
 # Why?{{{

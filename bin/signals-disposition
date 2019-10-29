@@ -1,10 +1,10 @@
 #!/bin/bash
 
 if [[ $# -eq 0 ]]; then
-  cat <<-EOF >&2
-	usage:
-	  $0 <pid>
-	EOF
+  cat <<EOF >&2
+usage:
+  $0 <pid>
+EOF
 
   exit 64
 fi

@@ -30,6 +30,7 @@ text/plain=gvim.desktop
 inode/directory=pcmanfm.desktop;
 text/markdown=gvim.desktop;
 image/png=ristretto.desktop;
+image/gif=ristretto.desktop;
 
 [Default Applications]
 application/x-compressed-tar=org.gnome.FileRoller.desktop

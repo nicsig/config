@@ -283,7 +283,7 @@ Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
 
 " Read Doc:
-Plug 'justinmk/vim-dirvish'
+Plug 'justinmk/vim-dirvish', {'frozen': 1}
 Plug 'mattn/emmet-vim'
 Plug 'machakann/vim-sandwich'
 Plug 'SirVer/ultisnips'
@@ -1148,12 +1148,17 @@ set history=1000
 
 " We define which symbol Vim must use to display certain symbols:
 "
-"     tab                       ▸
-"     end of line               ¬
-"     scroll unwrapped lines    » «
-"     no-break space            ∅
+"    ┌────────────────────────┬───────────────────────────────┐
+"    │ tab                    │ > or <> or <-> or <--> or ... │
+"    ├────────────────────────┼───────────────────────────────┤
+"    │ end of line            │ ¬                             │
+"    ├────────────────────────┼───────────────────────────────┤
+"    │ scroll unwrapped lines │ » «                           │
+"    ├────────────────────────┼───────────────────────────────┤
+"    │ no-break space         │ ∅                             │
+"    └────────────────────────┴───────────────────────────────┘
 
-set listchars=tab:▸\ ,eol:¬,precedes:«,extends:»,nbsp:∅
+set listchars=tab:<->,eol:¬,precedes:«,extends:»,nbsp:∅
 
 " includeexpr (gf) {{{2
 
@@ -2578,7 +2583,6 @@ let &wildignore ..= ','..&undodir..'/*.*.*,'
 " Example:
 "
 "     /usr/share/keymaps/i386/azerty/azerty.kmap.gz
-"
 "}}}
 
 set wildignore+=tags
@@ -2888,10 +2892,32 @@ endfu
 "}}}
 
 fu s:c_m() abort
-    " If the  completion menu is  active, we want  `Enter` to validate  the item
-    " currently selected, and try another completion.
     if pumvisible()
-        return "\<c-y>\<c-r>=completion#snippet_or_complete(1)\<cr>"
+        " If you change the code, make sure not to introduce a regression.{{{
+        "
+        " The code should be able to do this:
+        "
+        " Write `bug_` in a markdown buffer.
+        " Press `Tab` to complete.
+        " Select `bug_vim` in the pum.
+        " Press `Enter`: the snippet should be expanded immediately.
+        "
+        " Expand the `vimrc` snippet.
+        " Press `C-h` when you are at a tabstop containing a file path.
+        " Insert a space.
+        " Insert `/h`.
+        " Press `C-g Tab` to complete the path.
+        " Press `Enter`:  `/h` should be  completed with `/home`,  *and* another
+        " completion should have been performed.
+        "}}}
+        let seq = "\<c-y>"
+        let menu = get(get(get(complete_info(['items']), 'items', []), 0, {}), 'menu', '')
+        if menu is# '[f]'
+            let seq .= "\<c-r>=completion#file#complete()\<cr>"
+        elseif menu[:5] is# '[snip]'
+            let seq .= "\<c-r>=UltiSnips#ExpandSnippet()\<cr>"
+        endif
+        return seq
     endif
 
     " If we  press Enter  on a  commented line with  nothing in  it, we  want to
@@ -4039,7 +4065,7 @@ endif
 " brackets, and with  the closing one written  on a column whose  index is lower
 " than the one of the current cursor position.
 "}}}
-nno <silent>  <c-]>  :call <sid>jump_to_definition()<cr>
+nno <silent> <c-]> :call <sid>jump_to_definition()<cr>
 
 fu s:jump_to_definition() abort
     try
@@ -4048,6 +4074,8 @@ fu s:jump_to_definition() abort
         if &filetype isnot# 'help'
             norm! 1gd
             norm! zvzz
+        else
+            return lg#catch_error()
         endif
     catch
         return lg#catch_error()
@@ -4284,7 +4312,7 @@ fu s:fix_display() abort
         return
     endif
 
-    " reload filetype plugins to update title in folds
+    " reload filetype plugins (to reapply window-local options)
     " Why don't you run `do filetypeplugin filetype`?{{{
     "
     " It would only reload the default filetype plugins.
@@ -4320,6 +4348,8 @@ fu s:fix_display() abort
 
     " update folds
     norm! zx
+    " update fold titles
+    do BufWinEnter
 
     " Re-install HGs which may have been cleared after changing the color scheme.{{{
     "
@@ -4717,36 +4747,35 @@ xno <silent> myM :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 " Why don't we use the old code anymore?{{{
 "
 " The new  one takes  into consideration  all pairs  stored in  the buffer-local
-" value of 'mps'. Including “” and ‘’.
+" value of `'mps'`. Including `“”` and `‘’`.
 "}}}
 " Could the new code be improved?{{{
 "
-" Yes, currently  it doesn't always  work on multiline text-object,  because the
-" initial `%` finds an opening symbol, reliably, only when it's on the last line
-" of the text-object.
+" Yes, currently it doesn't always work  on a multiline text-object, because the
+" initial `%` finds  an opening symbol –  reliably – only when it's  on the last
+" line of the text-object.
 "
 " MWE:
 "
-"         (foo
-"         b|ar
-"         baz)
+"     (foo
+"     b|ar
+"     baz)
 "
-"         “foo
-"         bar
-"         b|az”
+"     “foo
+"     bar
+"     b|az”
 "
 " Press `vi%`, while the cursor is on the bar.
-"
 "}}}
 " Why no `v_a%`?{{{
 "
 " It would shadow `v_a%` from the `matchit` plugin:
 "
-"         xno <silent> a% <Esc>%v%
-"         ono <silent> a% :norm va%<cr>
+"     xno <silent> a% <Esc>%v%
+"     ono <silent> a% :norm va%<cr>
 "}}}
 xno <silent> i% <esc>:call <sid>select_percent_object()<cr>
-ono <silent> i% :norm vi%<cr>
+ono <silent> i% :<c-u>norm vi%<cr>
 
 fu s:select_percent_object() abort
     let pos = getcurpos()
@@ -4776,6 +4805,46 @@ fu s:select_percent_object() abort
         return
     endif
     norm! gvloh
+endfu
+
+" i- {{{3
+
+xno <silent> i- :<c-u>call <sid>horizontal_rules_textobject('inside')<cr>
+xno <silent> a- :<c-u>call <sid>horizontal_rules_textobject('around')<cr>
+
+ono <silent> i- :<c-u>norm vi-<cr>
+ono <silent> a- :<c-u>norm va-<cr>
+
+fu s:horizontal_rules_textobject(adverb) abort
+    if &ft is# 'markdown'
+        if a:adverb is# 'inside'
+            let start = '^\%(---\|#\+.*\)\n\zs'
+            let end = '\ze\n\%(---\|#\+.*\)$'
+        elseif a:adverb is# 'around'
+            " Why the `\zs` in `start`{{{
+            "
+            " To be sure that the cursor is *after* the start of the line.
+            " Otherwise, Vim would find the same  match for the `end` pattern as
+            " it did for the `start` pattern.
+            "}}}
+            let start = '^\%(---\|#\+.*\)\zs$'
+            let end = '^\%(---\|#\+.*\)\zs\n'
+        endif
+    else
+        let cml = matchstr(get(split(&l:cms, '%s', 1), 0, ''), '\S*')
+        let comment = '\%(\V'..escape(cml, '\')..'\m\)\='
+        let fmr = '\%('..join(split(&l:fmr, ','), '\|')..'\)\d*'
+        if a:adverb is# 'inside'
+            let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\n\zs'
+            let end = '\ze\n\s*'..comment..'\s*\%(---\|.*'..fmr..'\)$'
+        elseif a:adverb is# 'around'
+            let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\zs$'
+            let end = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\zs\n'
+        endif
+    endif
+    call search(start, 'bcW')
+    norm! V
+    call search(end, 'W')
 endfu
 
 " iE {{{3
@@ -4815,7 +4884,7 @@ endfu
 " `il` = in line (operate on the text between first and last non-whitespace on the line)
 " Useful to copy a line and paste it characterwise (in the middle of another line)
 
-ono <silent> il :norm! _vg_<cr>
+ono <silent> il :<c-u>norm! _vg_<cr>
 ono <silent> al _
 
 " We don't need to create `al` (around line) to operate on the whole line
@@ -4915,10 +4984,10 @@ ono <silent> in :<c-u>call <sid>in_number()<cr>
 
 " `vim-sandwich` installs the following mappings:
 "
-"         x  is  <plug>(textobj-sandwich-query-i)
-"         x  as  <plug>(textobj-sandwich-query-a)
-"         o  is  <plug>(textobj-sandwich-query-i)
-"         o  as  <plug>(textobj-sandwich-query-a)
+"     x  is  <plug>(textobj-sandwich-query-i)
+"     x  as  <plug>(textobj-sandwich-query-a)
+"     o  is  <plug>(textobj-sandwich-query-i)
+"     o  as  <plug>(textobj-sandwich-query-a)
 "
 " They  shadow  the  built-in  sentences  objects. But I  use  the  latter  less
 " frequently than  the sandwich objects. So,  I won't remove  the mappings. But,
@@ -9120,18 +9189,95 @@ endfu
 "
 " 132 -
 "
-" When we restart a session, the focused window is not immediately maximized.
+" Replace a long `b:undo_ftplugin` with a simple function call:
 "
-"     :SLoad test
+"     /usr/local/share/vim/vim81/ftplugin/vim.vim:38
+"     let b:undo_ftplugin = "call VimFtpluginUndo()"
 "
-" ---
+" Inside the function, the code will be easier to read/maintain.
 "
-"     :SClose
-"     :STrack foo
-"     wrong indicator in status line (no infinity symbol)
+" Update: Done.
+" Now make sure everything works as expected:
 "
-" Also, after running `:STrack` try to  run `:SLoad#` twice, and see whether you
-" can cycle between the foo session and the previous one.
+"    - no error when we reload a buffer
+"    - settings are properly reset when we change the filetype
+"    - function implementing the undo is in the right file
+"
+" 133 -
+"
+" Look for `:windo` and `:wincmd` everywhere.
+" Replace these commands with `lg#win_execute()` whenever possible.
+" Once Nvim  supports `win_execute()`, remove  the `lg#` prefix in  the function
+" calls.
+"
+" 134 -
+"
+" `C-l` works in the  pattern field of a `:s` and  `:g` command (provided `'is'`
+" is set), but not in the one of a `:vim` command or `:helpg`/`:lh` (`:h /^l`).
+"
+" You could try this:
+"
+"     cno <c-l> <c-r>=<sid>c_l()<cr>
+"     fu s:c_l() abort
+"         if getcmdline() =~# '^\m\C\s*\d*l\=vim\%[grepadd]\>'
+"             let [line, col] = [getline('.'), col('.')]
+"             return matchstr(line, '\%'..col..'c.')
+"         else
+"             call feedkeys("\<c-l>", 'in')
+"             return ''
+"         endif
+"     endfu
+"
+" But it fails if there is something after the pattern:
+"
+"     :vim /foo/ files
+"              ^
+"              assuming you have the word `foobar` on the screen,
+"              pressing `C-l` should insert `b`, but that's not what happens
+"              because of `/ files`
+"
+" And it doesn't work at all with `:helpg`/`:lh`.
+"
+" Trick:
+" Temporarily replace `:vim` by `:%s` (the  percent is important if the text you
+" want to copy is not on the current line).
+"
+" 135 -
+"
+" Review all the custom motions you've installed.
+" For each  of them, make  sure you can  jump back with  `C-o` (set mark  `'` on
+" original position).
+"
+" Actually, maybe not for all of them.
+" Think about which motions should add an entry in the jumplist.
+"
+" 136 -
+"
+" Install a `=rm`  mapping in Vim files to refactor  nested function calls using
+" the method call operator (`->`).
+"
+" 137 -
+"
+"     $ cd ; vim
+"     :echo getcwd() → /home/user
+"     " press `--`
+"     :echo getcwd() → /home/user/.vim (why did the cwd change?)
+"     " press `q`
+"     " press `--`
+"     " press `q`: why isn't the dirvish buffer unloaded?
+"
+" 138 -
+"
+"     $ nvim ~/.zshrc +sp +'norm! G'
+"     :wincmd w
+"     :wincmd w
+"
+" Why has the view been changed?
+"
+" Also, if you  run the same shell  command (but not `:wincmd w`)  with a custom
+" vimrc where  `set nowrap`, dirvish,  and `call s:styled_comments()`  have been
+" disabled, the view in the bottom window is unexpected.
+
 
 
 

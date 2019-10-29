@@ -104,6 +104,7 @@ fu s:install_mappings() abort "{{{2
     imap <buffer><nowait><silent> <c-g>n     <plug>(emmet-move-next)
     imap <buffer><nowait><silent> <c-g>N     <plug>(emmet-move-prev)
     imap <buffer><nowait><silent> <c-g>i     <plug>(emmet-image-size)
+    imap <buffer><nowait><silent> <c-g>I     <plug>(emmet-image-encode)
     imap <buffer><nowait><silent> <c-g>/     <plug>(emmet-toggle-comment)
     imap <buffer><nowait><silent> <c-g><c-j> <plug>(emmet-split-join-tag)
     imap <buffer><nowait><silent> <c-g><c-k> <plug>(emmet-remove-tag)
@@ -176,36 +177,42 @@ endfu
 
 fu s:set_undo_ftplugin() abort "{{{2
     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-        \ ..'
-        \ | exe "iunmap <buffer> <c-g>,"
-        \ | exe "iunmap <buffer> <c-g>;"
-        \ | exe "iunmap <buffer> <c-g><c-u>"
-        \ | exe "iunmap <buffer> <c-g>s"
-        \ | exe "iunmap <buffer> <c-g>S"
-        \ | exe "iunmap <buffer> <c-g>n"
-        \ | exe "iunmap <buffer> <c-g>N"
-        \ | exe "iunmap <buffer> <c-g>i"
-        \ | exe "iunmap <buffer> <c-g>/"
-        \ | exe "iunmap <buffer> <c-g><c-j>"
-        \ | exe "iunmap <buffer> <c-g><c-k>"
-        \ | exe "iunmap <buffer> <c-g>a"
-        \ | exe "iunmap <buffer> <c-g>A"
-        \
-        \ | exe "xunmap <buffer> <c-g>,"
-        \ | exe "xunmap <buffer> <c-g>;"
-        \ | exe "xunmap <buffer> <c-g><c-u>"
-        \ | exe "xunmap <buffer> <c-g>s"
-        \ | exe "xunmap <buffer> <c-g>S"
-        \ | exe "xunmap <buffer> <c-g>n"
-        \ | exe "xunmap <buffer> <c-g>N"
-        \ | exe "xunmap <buffer> <c-g>i"
-        \ | exe "xunmap <buffer> <c-g>/"
-        \ | exe "xunmap <buffer> <c-g><c-j>"
-        \ | exe "xunmap <buffer> <c-g><c-k>"
-        \ | exe "xunmap <buffer> <c-g>a"
-        \ | exe "xunmap <buffer> <c-g>A"
-        \ | exe "xunmap <buffer> <c-g><c-m>"
-        \ | exe "xunmap <buffer> <c-g>p"
-        \ '
+        \ ..'| call '..s:snr()..'undo_ftplugin()'
 endfu
 
+fu s:snr() abort "{{{2
+    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
+endfu
+
+fu s:undo_ftplugin() abort "{{{2
+    iunmap <buffer> <c-g>,
+    iunmap <buffer> <c-g>;
+    iunmap <buffer> <c-g><c-u>
+    iunmap <buffer> <c-g>s
+    iunmap <buffer> <c-g>S
+    iunmap <buffer> <c-g>n
+    iunmap <buffer> <c-g>N
+    iunmap <buffer> <c-g>i
+    iunmap <buffer> <c-g>I
+    iunmap <buffer> <c-g>/
+    iunmap <buffer> <c-g><c-j>
+    iunmap <buffer> <c-g><c-k>
+    iunmap <buffer> <c-g>a
+    iunmap <buffer> <c-g>A
+
+    xunmap <buffer> <c-g>,
+    xunmap <buffer> <c-g>;
+    xunmap <buffer> <c-g><c-u>
+    xunmap <buffer> <c-g>s
+    xunmap <buffer> <c-g>S
+    xunmap <buffer> <c-g>n
+    xunmap <buffer> <c-g>N
+    xunmap <buffer> <c-g>i
+    xunmap <buffer> <c-g>/
+    xunmap <buffer> <c-g><c-j>
+    xunmap <buffer> <c-g><c-k>
+    xunmap <buffer> <c-g>a
+    xunmap <buffer> <c-g>A
+    xunmap <buffer> <c-g><c-m>
+    xunmap <buffer> <c-g>p
+endfu

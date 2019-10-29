@@ -18,10 +18,8 @@ fu s:fold_text() abort "{{{1
     return getline(nextnonblank(v:foldstart+1))
 endfu
 
-" teardown {{{1
+" Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'
-    \ | setl fde< fdm< fdt<
-    \ '
+    \ ..'| setl fde< fdm< fdt<'
 

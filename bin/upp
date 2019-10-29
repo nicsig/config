@@ -26,6 +26,43 @@
 DEBUG=1
 DEBUG_LOGFILE=/tmp/debug
 
+# TODO: Get rid of checkinstall:{{{
+#
+# Too buggy.
+#
+# The final  straw was realizing  that it created files  under `/usr/share/doc`,
+# when I installed Vim even with the prefix `/usr/local`.
+# If I  use the prefix  `/usr/local`, that's  because I want  *everything* under
+# `/usr/local` to avoid any conflict with system packages.
+#
+# ---
+#
+# Replace checkinstall with `$ make install`.
+# Make sure every installed files are under `/usr/local`.
+# Get rid of `chown2me`.
+#
+# ---
+#
+# Learn how to uninstall files without using checkinstall.
+#
+# For nvim:
+#
+#     $ sudo rm /usr/local/bin/nvim
+#     $ sudo rm -r /usr/local/share/nvim/
+#
+# https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
+#
+# For mpv:
+#
+#     $ sudo ./uninstall
+#
+# https://github.com/mpv-player/mpv-build/blob/master/uninstall
+#
+# For all the other ones:
+#
+#     $ sudo make uninstall
+#}}}
+
 # TODO: Add support for updating the python interpreter.
 # Updating the latter may help when you have issues to install packages with pip
 # (including pip itself).
@@ -54,7 +91,6 @@ PGM="$1"
 # instead of the very latest version which may be buggy at the moment.
 #}}}
 COMMIT_HASH="$2"
-SUPPORTED_PGMS=(ansifilter gawk jumpapp mpv nvim tmux trans surfraw vim weechat zsh)
 GIT_REPOS="${HOME}/Vcs/"
 
 typeset -A URLS=( \
@@ -86,19 +122,13 @@ if [[ -z "${PGM}" ]]; then
 # How to negate a test with regular expressions?
 # https://stackoverflow.com/a/7846318/9780968
 #
-# TODO: There's a duplication of code here; remove it.{{{
-# Every time we add or remove a program in the array URLS, we must do the same here.
-# Find a way to extract the keys of the array and concatenate them.
-#
-# ---
-#
-# There's also a duplication of code in the definition of `SUPPORTED_PGMS`.
-#}}}
-elif [[ ! 'ansifilter gawk jumpapp mpv nvim surfraw tmux trans vim weechat zsh' =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
+# How to get the keys of an array?
+# https://unix.stackexchange.com/a/91944/289772
+elif [[ ! ${!URLS[@]} =~ (^|[[:space:]])"${PGM}"($|[[:space:]]) ]]; then
   printf -- '%s: the only programs this script can update are:\n' "$(basename "$0")" >&2
   # How to print array elements on separate lines?
   # https://stackoverflow.com/a/15692004/9780968
-  printf -- '    %s\n' "${SUPPORTED_PGMS[@]}" >&2
+  printf -- '    %s\n' "${!URLS[@]}" >&2
   # 65 = input user data is incorrect
   exit 65
   #    │{{{
@@ -113,18 +143,18 @@ fi
 
 # Functions {{{1
 main() { #{{{2
-  cat <<-EOF
+  cat <<EOF
 
-	-----------
-	$(date +%m-%d\ %H:%M)
-	-----------
+-----------
+$(date +%m-%d\ %H:%M)
+-----------
 
-	EOF
+EOF
 
+  install_dependencies
   download
   get_version
   clean
-  install_dependencies
   configure
   build
 
@@ -138,259 +168,61 @@ main() { #{{{2
   xdg_mime_default
 }
 
-build() { #{{{2
-  if [[ "${PGM}" == 'mpv' ]]; then
-    aptitude install devscripts equivs
-    mk-build-deps -s sudo -i
-    # The readme adds the `-j4` flag, to use 4 cores.
-    # I don't use `-j` because it would probably consume too much cpu.
-    # I'm ok with a building process which takes more time (≈ 12 min).
-    dpkg-buildpackage -uc -us -b
+install_dependencies() { #{{{2
+  aptitude install make
 
-  elif [[ "${PGM}" == 'nvim' ]]; then
-    make CMAKE_BUILD_TYPE=Release
-    #    ├──────────────────────┘
-    #    └ Full compiler optimisations and no debug information.
-    #      Expect the best performance from this build type.
-    #      Often used by package maintainers.
-
-  else
-    make
-    # What to do if the zsh manpages are not installed?{{{
-    #
-    # Try:
-    #     sudo make install.info
-    #     sudo make install.man
-    #}}}
-  fi
-
-  # How to check whether the zsh compiled binary is working as expected?{{{
+  # TODO: Make the script edit `/etc/apt/sources.list`. {{{
   #
-  #     $ make check
+  # And uncomment:
+  #
+  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted
+  #
+  # And run `$ sudo aptitude update`, so that `aptitude build-dep` works.
+  #
+  # For weechat, you need to uncomment:
+  #
+  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) universe
+  #
+  # For trans, you need to uncomment:
+  #
+  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) multiverse
+  #
+  # For Vim, you may need to run:
+  #
+  #     $ sudo aptitude build-dep vim-gtk
   #}}}
-  # If you want to test the Vim binary, try sth like this:{{{
-  #
-  #     $ xterm -e 'make test'
-  #
-  # But not this:
-  #
-  #     $ make test
-  #
-  # Because of:
-  #     test1 FAILED - terminal size must be 80x24 or larger~
-  #
-  # Neither this:
-  #
-  #     $ xfce4-terminal -e 'make test'
-  #
-  # Because of:
-  #     xfce4-terminal: Gdk-WARNING: gdk_window_set_icon_list: icons too large~
-  # https://github.com/snwh/paper-icon-theme/issues/340
-  #}}}
-  # TODO: If a test fails, maybe we should make the script fail too.
-}
+  aptitude build-dep "${PGM}"
 
-check_we_are_root() { #{{{2
-  # We need to be root.
-  #
-  #      ┌─ Effective User ID
-  #      │
-  #      │  0 is the EUID of the root user.
-  #      │
-  if [[ "${EUID}" -ne 0 ]]; then
-    cat <<-EOF >&2
-	Please run as root:
-	    sudo "$0" "${PGM}"
-	EOF
-    # 77 = not sufficient permission
-    exit 77
-  fi
-}
-
-clean() { #{{{2
-  rm -f backup*.tgz "${PGM}"*.deb
-
-  if [[ "${PGM}" == 'weechat' ]]; then
-    # Clean last `cmake(1)` command:
-    # https://stackoverflow.com/a/9680493/9780968
-    if [[ -d 'build' ]]; then
-      rm -rf build
-    fi
-    mkdir -p build
-    cd build || exit
-
-  else
-    make clean
-    make distclean
-  fi
-}
-
-configure() { #{{{2
-  if [[ "${PGM}" == 'gawk' ]]; then
-    # `--enable-mpfr` allows us to use the `-M` command-line option.
-    # Requires a package (`libmpfr4`?) which should be installed by
-    # `$ aptitude build-dep gawk`.
-    ./bootstrap.sh && ./configure --enable-mpfr
-
-  # If the build fails, check whether all dependencies are installed:{{{
-  #
-  # https://github.com/mpv-player/mpv-build#dependencies
-  #
-  # In particular the 'yasm' package.
-  #}}}
-  # Procedure to compile `mpv`:{{{
-  #
-  # https://github.com/mpv-player/mpv-build#generic-instructions
-  #
-  #     $ ./rebuild
-  #     $ cp ./mpv/build/mpv ~/bin
-  #
-  # Or: https://github.com/mpv-player/mpv-build#instructions-for-debian--ubuntu-package (used in this script)
-  #}}}
-  elif [[ "${PGM}" == 'mpv' ]]; then
-    ./update
-
-  elif [[ "${PGM}" == 'surfraw' ]]; then
-    autoreconf -f -i
-    ./configure
-
-  elif [[ "${PGM}" == 'tmux' ]]; then
-    # Uncomment to get more info in your backtraces.
-    #     sed -i 's/-O2/-O0/' Makefile.am
-    sh autogen.sh
-    ./configure
-
-  elif [[ "${PGM}" == 'vim' ]]; then
-    # We could add the `--enable-autoservername` option,{{{
-    # to start Vim with an autogenerated servername.
+  if [[ "${PGM}" == 'vim' ]]; then
+    # `build-dep vim` is not enough{{{
     #
-    # But it would increase the startuptime by a few ms:
-    #
-    #         https://github.com/vim/vim/pull/2317#issue-273094230
+    # Actually it seems it does nothing.
+    # Is it because we don't uncomment the right lines in `/etc/apt/sources.list`?
     #}}}
-    # Do *not* use gtk3. Prefer gtk2; it gives a lower latency.{{{
+    # In case of a missing dependency, see:
+    # https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+    # TODO: Should we also install:{{{
     #
-    # > We can also  note that Vim using GTK3 is slower  than its GTK2 counterpart
-    # > by  an order  of magnitude. It  might therefore  be possible  that the  GTK3
-    # > framework  introduces extra  latency,  as  we can  also  observe other  that
-    # > GTK3-based terminals  (Terminator, Xfce4  Terminal, and GNOME  Terminal, for
-    # > example) have higher latency.
-    #
-    # Source: https://lwn.net/Articles/751763/
-    #
-    # ---
-    #
-    # I can corroborate what the article states.
-    # In my limited testing with  typometer, the latency doubles after compiling
-    # with gtk3.
-    #}}}
-    # We don't compile the perly/ruby interfaces, but if you need them, add this:{{{
-    #
-    #     --enable-perlinterp=dynamic    \
-    #     --enable-rubyinterp=dynamic    \
-    #
-    # ---
-    #
-    # We don't need them, and the less code, the fewer bugs.
-    #
-    # Remember we've found an issue  (github 5079) where the syntax highlighting
-    # adds a  lot of latency  when `'cul'` is set  *and* the ruby  interface has
-    # been compiled.
-    #}}}
-    ./configure  \
-      --enable-cscope                \
-      --enable-fail-if-missing       \
-      --enable-gui=gtk2              \
-      --enable-luainterp=dynamic     \
-      --enable-multibyte             \
-      --enable-python3interp=dynamic \
-      --enable-pythoninterp=dynamic  \
-      --enable-terminal              \
-      --prefix=/usr/local            \
-      --with-compiledby=user         \
-      --with-features=huge           \
-      --with-luajit                  \
-      --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
-      --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
-
-  # If you want the online documentation, add this option:{{{
-  #
-  #     -DENABLE_DOC:BOOL=ON                             \
-  #
-  # The doc should be in `/usr/share/doc/weechat/doc/en`
-  #}}}
-  elif [[ "${PGM}" == 'weechat' ]]; then
-    cmake .. -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo         \
-             -DWEECHAT_HOME:STRING="${HOME}/.config/weechat"  \
-             -DENABLE_MAN:BOOL=ON                             \
-             -DENABLE_TESTS:BOOL=ON
-
-  elif [[ "${PGM}" == 'zsh' ]]; then
-    # Where did you find the configuration options?{{{
-    #
-    # I read the INSTALL file:
-    # https://github.com/zsh-users/zsh/blob/master/INSTALL
-    #
-    # I also read this link:
-    # https://gist.github.com/nicoulaj/715855
-    #
-    # I also read how the ubuntu devs compiled `zsh-5.2`:
-    #
-    # https://launchpad.net/ubuntu/+source/zsh
-    #
-    # link found by clicking on the button below “Latest upload”
-    # https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1
-    #
-    # link found by clicking on the button “amd64” in the section “Builds”
-    # https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1/+build/10653977
-    #
-    # link found by clicking on the button “buildlog”
-    # https://launchpadlibrarian.net/280509421/buildlog_ubuntu-yakkety-amd64.zsh_5.2-5ubuntu1_BUILDING.txt.gz
-    #}}}
-    # How to get more information about the configuration options?{{{
-    #
-    #     $ ./configure --help
-    #}}}
-
-    # TODO:{{{
-    # Atm, these directories are empty:
-    #
-    #     /usr/local/share/zsh/site-functions
-    #     /usr/share/zsh/vendor-functions
-    #
-    # Should we remove them from:
-    #
-    #     --enable-site-fndir
-    #     --enable-additional-fpath
-    #
+    #    - libgtk2.0-dev
+    #    - libx11-dev
+    #    - libxpm-dev
+    #    - libxt-dev
     # ?
     #}}}
-    ./Util/preconfig
-    ./configure --build=x86_64-linux-gnu \
-      --prefix=/usr \
-      --includedir=/usr/include \
-      --mandir=/usr/share/man \
-      --infodir=/usr/share/info \
-      --sysconfdir=/etc \
-      --localstatedir=/var \
-      --libdir=/usr/lib/x86_64-linux-gnu \
-      --libexecdir=/usr/lib/x86_64-linux-gnu \
-      --bindir=/bin \
-      LDFLAGS="-Wl,--as-needed -g" \
-      --enable-maildir-support \
-      --enable-etcdir=/etc/zsh \
-      --enable-function-subdirs \
-      --enable-site-fndir=/usr/local/share/zsh/site-functions \
-      --enable-fndir=/usr/share/zsh/functions \
-      --with-tcsetpgrp \
-      --with-term-lib="ncursesw tinfo" \
-      --enable-cap \
-      --enable-pcre \
-      --enable-readnullcmd=pager \
-      --enable-custom-patchlevel=Debian \
-      --enable-additional-fpath=/usr/share/zsh/vendor-functions,/usr/share/zsh/vendor-completions \
-      --disable-ansi2knr
-        fi
+    aptitude install libncurses5-dev \
+      luajit libluajit-5.1-dev \
+      libperl-dev \
+      python-dev \
+      python3-dev \
+      ruby-dev
+  elif [[ "${PGM}" == 'nvim' ]]; then
+    aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
+  elif [[ "${PGM}" == 'tmux' ]]; then
+    # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
+    aptitude install bison debhelper autotools-dev dh-autoreconf file libncurses5-dev libevent-dev pkg-config libutempter-dev build-essential
+  elif [[ "${PGM}" == 'mpv' ]]; then
+    aptitude install devscripts equivs
+  fi
 }
 
 download() { #{{{2
@@ -406,11 +238,10 @@ download() { #{{{2
   # We may have edited some file (`configure`, `Makefile`, ...).
   # Stash those edits.
   git stash
-  # check a master branch exists (trans has no master branch)
-  # https://stackoverflow.com/q/5167957/9780968
   if [[ -n "${COMMIT_HASH}" ]]; then
     git checkout -f "${COMMIT_HASH}"
-    return
+  # check a master branch exists (trans has no master branch)
+  # https://stackoverflow.com/q/5167957/9780968
   elif git show-ref --verify --quiet refs/heads/master; then
     # https://stackoverflow.com/a/19778940/9780968
     git checkout -f master
@@ -511,6 +342,208 @@ get_version() { #{{{2
   fi
 }
 
+clean() { #{{{2
+  rm -f backup*.tgz "${PGM}"*.deb
+
+  if [[ "${PGM}" == 'weechat' ]]; then
+    # Clean last `cmake(1)` command:
+    # https://stackoverflow.com/a/9680493/9780968
+    if [[ -d 'build' ]]; then
+      rm -rf build
+    fi
+    mkdir -p build
+    cd build || exit
+
+  else
+    make clean
+    make distclean
+  fi
+}
+
+configure() { #{{{2
+  if [[ "${PGM}" == 'gawk' ]]; then
+    # `--enable-mpfr` allows us to use the `-M` command-line option.
+    # Requires a package (`libmpfr4`?) which should be installed by
+    # `$ aptitude build-dep gawk`.
+    ./bootstrap.sh && ./configure --enable-mpfr
+
+  # If the build fails, check whether all dependencies are installed:{{{
+  #
+  # https://github.com/mpv-player/mpv-build#dependencies
+  #
+  # In particular the 'yasm' package.
+  #}}}
+  # Procedure to compile `mpv`:{{{
+  #
+  # https://github.com/mpv-player/mpv-build#generic-instructions
+  #
+  #     $ ./rebuild
+  #     $ cp ./mpv/build/mpv ~/bin
+  #
+  # Or: https://github.com/mpv-player/mpv-build#instructions-for-debian--ubuntu-package (used in this script)
+  #}}}
+  elif [[ "${PGM}" == 'mpv' ]]; then
+    ./update
+
+  elif [[ "${PGM}" == 'surfraw' ]]; then
+    autoreconf -f -i
+    ./configure
+
+  elif [[ "${PGM}" == 'tmux' ]]; then
+    # Uncomment to get more info in your backtraces.
+    #     sed -i 's/-O2/-O0/' Makefile.am
+    sh autogen.sh
+    ./configure
+
+  elif [[ "${PGM}" == 'vim' ]]; then
+    ./configure  \
+      --enable-cscope                \
+      --enable-fail-if-missing       \
+      --enable-gui=gtk2              \
+      --enable-luainterp=dynamic     \
+      --enable-multibyte             \
+      --enable-perlinterp=yes \
+      --enable-python3interp=dynamic \
+      --enable-pythoninterp=dynamic  \
+      --enable-terminal              \
+      --prefix=/usr/local            \
+      --with-compiledby=user         \
+      --with-features=huge           \
+      --with-luajit                  \
+      --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
+      --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
+
+  # If you want the online documentation, add this option:{{{
+  #
+  #     -DENABLE_DOC:BOOL=ON                             \
+  #
+  # The doc should be in `/usr/share/doc/weechat/doc/en`
+  #}}}
+  elif [[ "${PGM}" == 'weechat' ]]; then
+    cmake .. -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo         \
+             -DWEECHAT_HOME:STRING="${HOME}/.config/weechat"  \
+             -DENABLE_MAN:BOOL=ON                             \
+             -DENABLE_TESTS:BOOL=ON
+
+  elif [[ "${PGM}" == 'zsh' ]]; then
+    # Where did you find the configuration options?{{{
+    #
+    # I read the INSTALL file:
+    # https://github.com/zsh-users/zsh/blob/master/INSTALL
+    #
+    # I also read this link:
+    # https://gist.github.com/nicoulaj/715855
+    #
+    # I also read how the ubuntu devs compiled `zsh-5.2`:
+    #
+    # https://launchpad.net/ubuntu/+source/zsh
+    #
+    # link found by clicking on the button below “Latest upload”
+    # https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1
+    #
+    # link found by clicking on the button “amd64” in the section “Builds”
+    # https://launchpad.net/ubuntu/+source/zsh/5.2-5ubuntu1/+build/10653977
+    #
+    # link found by clicking on the button “buildlog”
+    # https://launchpadlibrarian.net/280509421/buildlog_ubuntu-yakkety-amd64.zsh_5.2-5ubuntu1_BUILDING.txt.gz
+    #}}}
+    # How to get more information about the configuration options?{{{
+    #
+    #     $ ./configure --help
+    #}}}
+
+    # TODO:{{{
+    # Atm, these directories are empty:
+    #
+    #     /usr/local/share/zsh/site-functions
+    #     /usr/share/zsh/vendor-functions
+    #
+    # Should we remove them from:
+    #
+    #     --enable-site-fndir
+    #     --enable-additional-fpath
+    #
+    # ?
+    #}}}
+    ./Util/preconfig
+    # --mandir=/usr/local/share/man \
+    # --infodir=/usr/local/share/info \
+    ./configure --build=x86_64-linux-gnu \
+      --prefix=/usr/local \
+      --enable-fndir=/usr/local/share/zsh/functions \
+      --includedir=/usr/include \
+      --sysconfdir=/etc \
+      --localstatedir=/var \
+      --libdir=/usr/lib/x86_64-linux-gnu \
+      --libexecdir=/usr/lib/x86_64-linux-gnu \
+      --bindir=/usr/local/bin \
+      LDFLAGS="-Wl,--as-needed -g" \
+      --enable-maildir-support \
+      --enable-etcdir=/etc/zsh \
+      --enable-function-subdirs \
+      --enable-site-fndir=/usr/local/share/zsh/site-functions \
+      --with-tcsetpgrp \
+      --with-term-lib="ncursesw tinfo" \
+      --enable-cap \
+      --enable-pcre \
+      --enable-readnullcmd=pager \
+      --enable-custom-patchlevel=Debian \
+      --enable-additional-fpath=/usr/local/share/zsh/vendor-functions,/usr/local/share/zsh/vendor-completions \
+      --disable-ansi2knr
+        fi
+}
+
+build() { #{{{2
+  if [[ "${PGM}" == 'mpv' ]]; then
+    mk-build-deps -s sudo -i
+    # The readme adds the `-j4` flag, to use 4 cores.
+    # I don't use `-j` because it would probably consume too much cpu.
+    # I'm ok with a building process which takes more time (≈ 12 min).
+    dpkg-buildpackage -uc -us -b
+
+  elif [[ "${PGM}" == 'nvim' ]]; then
+    make CMAKE_BUILD_TYPE=Release
+    #    ├──────────────────────┘
+    #    └ Full compiler optimisations and no debug information.
+    #      Expect the best performance from this build type.
+    #      Often used by package maintainers.
+
+  else
+    make
+    # What to do if the zsh manpages are not installed?{{{
+    #
+    # Try:
+    #     sudo make install.info
+    #     sudo make install.man
+    #}}}
+  fi
+
+  # How to check whether the zsh compiled binary is working as expected?{{{
+  #
+  #     $ make check
+  #}}}
+  # If you want to test the Vim binary, try sth like this:{{{
+  #
+  #     $ xterm -e 'make test'
+  #
+  # But not this:
+  #
+  #     $ make test
+  #
+  # Because of:
+  #     test1 FAILED - terminal size must be 80x24 or larger~
+  #
+  # Neither this:
+  #
+  #     $ xfce4-terminal -e 'make test'
+  #
+  # Because of:
+  #     xfce4-terminal: Gdk-WARNING: gdk_window_set_icon_list: icons too large~
+  # https://github.com/snwh/paper-icon-theme/issues/340
+  #}}}
+  # TODO: If a test fails, maybe we should make the script fail too.
+}
+
 install() { #{{{2
   # TODO: We don't  need the compiled  binary in  the source repository,  once a
   # debian package has been installed; try to remove it.
@@ -547,37 +580,6 @@ install() { #{{{2
     if [[ "${DEBUG}" -ne 0 ]]; then
       echo checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no -y >>"${DEBUG_LOGFILE}"
     fi
-    # If this command fails for Nvim, try this:{{{
-    #
-    # Recompile and replace:
-    #
-    #     $ make CMAKE_BUILD_TYPE=Release
-    #
-    # With:
-    #
-    #     $ make CMAKE_BUILD_TYPE=Release CMAKE_EXTRA_FLAGS=-DENABLE_JEMALLOC=OFF
-    #
-    # See:
-    # https://github.com/neovim/neovim/issues/2364#issuecomment-113966180
-    # https://github.com/serverwentdown/env/commit/a05a31733443fcb0979fecf18f2aa8e9e2722c7c
-    #
-    # Note that I  don't know whether there's a performance  cost if you disable
-    # jemalloc.
-    #
-    # See here to understand what jemalloc is:
-    # https://stackoverflow.com/a/1624744/9780968
-    #
-    # Note that Nvim is multi-threaded:
-    # > `thread apply all bt` may be necessary because **Neovim is multi-threaded**.
-    #
-    # Source: https://github.com/neovim/neovim/wiki/Development-tips/fd1582128edb0130c1d5c828a3a9b55aa9107030
-    #
-    # ---
-    #
-    # Alternatively, you  could try  to pass  an option to  checkinstall, and  make it
-    # generate a deb without installing it.
-    # Then, you could try to force its installation with `dpkg` and the right options.
-    #}}}
     checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no -y
     #                                 │
     #                                 └ don't overwrite my package
@@ -631,61 +633,6 @@ install() { #{{{2
           -e '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
           /usr/local/share/nvim/runtime/autoload/man.vim
     fi
-  fi
-}
-
-install_dependencies() { #{{{2
-  aptitude install make checkinstall
-
-  # TODO: Make the script edit `/etc/apt/sources.list`. {{{
-  #
-  # And uncomment:
-  #
-  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted
-  #
-  # And run `$ sudo aptitude update`, so that `aptitude build-dep` works.
-  #
-  # For weechat, you need to uncomment:
-  #
-  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) universe
-  #
-  # For trans, you need to uncomment:
-  #
-  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) multiverse
-  #
-  # For Vim, you may need to run:
-  #
-  #     $ sudo aptitude build-dep vim-gtk
-  #}}}
-  aptitude build-dep "${PGM}"
-
-  if [[ "${PGM}" == 'vim' ]]; then
-    # `build-dep vim` is not enough{{{
-    #
-    # Actually it seems it does nothing.
-    # Is it because we don't uncomment the right lines in `/etc/apt/sources.list`?
-    #}}}
-    # In case of a missing dependency, see:
-    # https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
-    # TODO: Should we also install:{{{
-    #
-    #    - libgtk2.0-dev
-    #    - libx11-dev
-    #    - libxpm-dev
-    #    - libxt-dev
-    # ?
-    #}}}
-    aptitude install libncurses5-dev \
-      luajit libluajit-5.1-dev \
-      libperl-dev \
-      python-dev \
-      python3-dev \
-      ruby-dev
-  elif [[ "${PGM}" == 'nvim' ]]; then
-    aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
-  elif [[ "${PGM}" == 'tmux' ]]; then
-    # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
-    aptitude install bison debhelper autotools-dev dh-autoreconf file libncurses5-dev libevent-dev pkg-config libutempter-dev build-essential
   fi
 }
 
@@ -762,21 +709,6 @@ xdg_mime_default() { #{{{2
 # }}}1
 # Execution {{{1
 
-# Why do you check the root privileges outside `main()`?{{{
-#
-# Suppose the logfile is owned by root.
-# `tee` will report an error, before `check_we_are_root` tells us to restart the
-# script as root; this is noise.
-#}}}
-# And why the guard?{{{
-#
-# If we intend to  compile against a specific commit hash,  we won't install the
-# binary (because we're probably bisecting a bug  and we just need the binary to
-# make some tests). So, we don't need root privileges.
-#}}}
-if [[ -z "$COMMIT_HASH" ]]; then
-  check_we_are_root
-fi
 main "$1" 2>&1 | tee -a "${LOGFILE}"
 tput bel
 

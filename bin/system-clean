@@ -35,12 +35,12 @@ while [[ -n "${orphan}" ]]; do
 
   clear
 
-  cat <<-EOF
-	Some orphan packages are present.
-	The next orphan package is:
-	    ${orphan}
+  cat <<EOF
+Some orphan packages are present.
+The next orphan package is:
+    ${orphan}
 
-	EOF
+EOF
 
   printf -- "\n'%s' paquet est installé pour la raison suivante :\n" "${orphan}"
   aptitude why "${orphan}"

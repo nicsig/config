@@ -41,14 +41,8 @@ nno <buffer><nowait><silent> <cr> :<c-u>sil call system('xdg-open '
     \ <bar>q!<cr>
 nmap <buffer><nowait><silent>  ZZ    <cr>
 
-" teardown {{{1
+" Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'
-    \ | setl bh< bl< cul< swf< wrap<
-    \ | unlet! b:url
-    \ | exe "nunmap <buffer> q"
-    \ | exe "nunmap <buffer> <cr>"
-    \ | exe "nunmap <buffer> ZZ"
-    \ '
+    \ ..'| call websearch#undo_ftplugin()'
 

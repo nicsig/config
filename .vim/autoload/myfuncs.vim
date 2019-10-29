@@ -94,7 +94,7 @@ fu s:format_shell_buffer() abort
     " To allow  a search to highlight  text even if it's  already highlighted by
     " this match.
     "}}}
-    call matchadd('Statement', pat, 0)
+    call matchadd('Title', pat, 0)
     sil exe 'lvim /'..pat..'/j %'
     let loclist = getloclist(0)
     call map(loclist, {_,v -> extend(v, {'text': substitute(v.text, '٪\zs\s\{2,}', '  ', '')})})
@@ -1320,7 +1320,7 @@ endfu
 fu s:search_todo_text(dict) abort
     let dict = a:dict
     " if the text only contains `fixme` or `todo`
-    if dict.text =~# '\c\%(fixme\|todo\):\=\s*\%({{\%x7b\)\=\s*$'
+    if dict.text =~# '\c\%(fixme\|todo\):\=\s*\%('..split(&l:fmr, ',')[0]..'\)\=\s*$'
         let bufnr = dict.bufnr
         " get the text of the next line, which is not empty (contains at least one keyword character)
         " Why using `readfile()` instead of `getbufline()`?{{{
@@ -1637,8 +1637,7 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         \  'weighted': stridx(a:1, '-weighted') != -1,
         \ }
 
-    let view       = winsaveview()
-    let words      = split(join(getline(a:line1, a:line2), "\n"), '\%(\%(\k\@!\|\d\).\)\+')
+    let words = split(join(getline(a:line1, a:line2), "\n"), '\%(\%(\k\@!\|\d\).\)\+')
     let min_length = !empty(flags.min_length) ? flags.min_length : 4
 
     " remove anything which is:
@@ -1663,36 +1662,37 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     endfor
 
     if flags.weighted
-
-        " `abbrev_length` is the length of an abbreviation we could create for
-        " a given word. Its value depends on the word:
+        let weighted_freq = deepcopy(freq)
+        " What's the ternary expression after the minus sign?{{{
+        "
+        " The length of an abbreviation we could create for a given word.
+        " Its value depends on the word:
         "
         "   - if the word is 4 characters long, then the abbreviation should be
         "     2 characters long,
         "
-        "   - if the word ends with an 's', and the same word, without the ending
-        "     's', is also present, then the abbreviation should be 4 characters
+        "   - if the word ends with an 's', and the same word without the ending
+        "     's' is also present, then the abbreviation should be 4 characters
         "     long (because it's probably a plural),
         "
         "   - otherwise, by default, an abbreviation should be 3 characters long
-
-        let abbrev_length = '(
-            \     strchars(v:key) == 4
-            \   ?     2
-            \   : v:key[-1:-1] is# "s" && index(keys(freq), v:key[:strlen(v:key)-1]) >= 0
-            \   ?     4
-            \   :     3
-            \ )'
-
-        let weighted_freq = deepcopy(freq)
-        call map(weighted_freq, {k,v -> v * (strchars(k) - abbrev_length)})
+        "}}}
+        call map(weighted_freq, {k,v ->
+        \ v * (strchars(k)
+        \ -
+        \ strchars(k) == 4
+        \ ? 2
+        \   : k[-1:-1] is# "s" && index(keys(freq), k[:strlen(k)-1]) >= 0
+        \   ?     4
+        \   :     3
+        \ )})
         let weighted_freq = sort(items(weighted_freq), {a, b -> b[1] - a[1]})
     endif
 
     " put the result in a vertical viewport
     let tempfile = tempname()..'/WordFrequency'
     exe 'lefta '..(&columns/3)..'vnew '..tempfile
-    setl bh=delete bt=nofile nobl noswf wfw nowrap
+    setl bh=delete bt=nofile nobl noswf wfw nowrap pvw
 
     " for item in items(freq)
     for item in flags.weighted ? weighted_freq : items(freq)
@@ -1706,9 +1706,8 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     sil! %!sort -rn -k2
 
     exe 'vert res '..(max(map(getline(1, '$'), {_,v -> strchars(v, 1)}))+4)
-
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
-    exe winnr('#')..'windo call winrestview(view)'
+    wincmd p
 endfu
 
 fu myfuncs#wf_complete(_a, _l, _p) abort

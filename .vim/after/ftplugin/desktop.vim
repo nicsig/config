@@ -2,10 +2,8 @@ setl cms=#\ %s
 
 setl mp=desktop-file-validate
 
-" teardown {{{1
+" Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'
-    \ | setl cms< mp<
-    \ '
+    \ ..'| setl cms< mp<'
 

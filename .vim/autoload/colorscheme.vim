@@ -163,6 +163,10 @@ fu colorscheme#customize() abort "{{{2
     " For some reason, linking VertSplit gets us the desired result.
     hi! link VertSplit Normal
 
+    " useful when `'rnu'` is set; only available in Vim atm
+    hi! link LineNrAbove DiffDelete
+    hi! link LineNrBelow DiffAdd
+
     " `Underlined` is meant to be used to highlight html links.{{{
     "
     " In a webbrowser, usually those are blue.
