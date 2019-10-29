@@ -4819,7 +4819,7 @@ fu s:horizontal_rules_textobject(adverb) abort
     if &ft is# 'markdown'
         if a:adverb is# 'inside'
             let start = '^\%(---\|#\+.*\)\n\zs'
-            let end = '\ze\n\%(---\|#\+.*\)$'
+            let end = '\ze\n\%(---\|#\+.*\|.*\%$\)$'
         elseif a:adverb is# 'around'
             " Why the `\zs` in `start`{{{
             "
@@ -4827,16 +4827,16 @@ fu s:horizontal_rules_textobject(adverb) abort
             " Otherwise, Vim would find the same  match for the `end` pattern as
             " it did for the `start` pattern.
             "}}}
-            let start = '^\%(---\|#\+.*\)\zs$'
+            let start = '^\%(---\|#\+.*\)\n\zs'
             let end = '^\%(---\|#\+.*\)\zs\n'
         endif
     else
         let cml = matchstr(get(split(&l:cms, '%s', 1), 0, ''), '\S*')
-        let comment = '\%(\V'..escape(cml, '\')..'\m\)\='
+        let comment = '\V'..escape(cml, '\')..'\m'
         let fmr = '\%('..join(split(&l:fmr, ','), '\|')..'\)\d*'
         if a:adverb is# 'inside'
             let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\n\zs'
-            let end = '\ze\n\s*'..comment..'\s*\%(---\|.*'..fmr..'\)$'
+            let end = '\ze\n\s*'..comment..'\s*\%(---\|.*'..fmr..'\|.*\%$\)$'
         elseif a:adverb is# 'around'
             let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\zs$'
             let end = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\zs\n'
@@ -7876,6 +7876,7 @@ endfu
 "    - 'filewinid' (location list property)
 "    - :swapname
 "    - :unl[et] ${env-name} (:h :unlet-$)
+"    - v:argv
 "
 "    - `CompleteChanged` event
 "    - `complete_info()`; https://github.com/vim/vim/releases/tag/v8.1.1068
@@ -9265,19 +9266,6 @@ endfu
 "     " press `q`
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
-"
-" 138 -
-"
-"     $ nvim ~/.zshrc +sp +'norm! G'
-"     :wincmd w
-"     :wincmd w
-"
-" Why has the view been changed?
-"
-" Also, if you  run the same shell  command (but not `:wincmd w`)  with a custom
-" vimrc where  `set nowrap`, dirvish,  and `call s:styled_comments()`  have been
-" disabled, the view in the bottom window is unexpected.
-
 
 
 

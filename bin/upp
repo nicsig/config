@@ -23,9 +23,6 @@
 # And I think that `$ git describe` fails on such a commit...
 #}}}
 
-DEBUG=1
-DEBUG_LOGFILE=/tmp/debug
-
 # TODO: Get rid of checkinstall:{{{
 #
 # Too buggy.
@@ -153,7 +150,7 @@ EOF
 
   install_dependencies
   download
-  get_version
+  uninstall
   clean
   configure
   build
@@ -169,7 +166,7 @@ EOF
 }
 
 install_dependencies() { #{{{2
-  aptitude install make
+  sudo aptitude install make
 
   # TODO: Make the script edit `/etc/apt/sources.list`. {{{
   #
@@ -191,7 +188,7 @@ install_dependencies() { #{{{2
   #
   #     $ sudo aptitude build-dep vim-gtk
   #}}}
-  aptitude build-dep "${PGM}"
+  sudo aptitude build-dep "${PGM}"
 
   if [[ "${PGM}" == 'vim' ]]; then
     # `build-dep vim` is not enough{{{
@@ -209,19 +206,19 @@ install_dependencies() { #{{{2
     #    - libxt-dev
     # ?
     #}}}
-    aptitude install libncurses5-dev \
+    sudo aptitude install libncurses5-dev \
       luajit libluajit-5.1-dev \
       libperl-dev \
       python-dev \
       python3-dev \
       ruby-dev
   elif [[ "${PGM}" == 'nvim' ]]; then
-    aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
+    sudo aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
   elif [[ "${PGM}" == 'tmux' ]]; then
     # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
-    aptitude install bison debhelper autotools-dev dh-autoreconf file libncurses5-dev libevent-dev pkg-config libutempter-dev build-essential
+    sudo aptitude install bison debhelper autotools-dev dh-autoreconf file libncurses5-dev libevent-dev pkg-config libutempter-dev build-essential
   elif [[ "${PGM}" == 'mpv' ]]; then
-    aptitude install devscripts equivs
+    sudo aptitude install devscripts equivs
   fi
 }
 
@@ -229,7 +226,7 @@ download() { #{{{2
   [[ -d "${GIT_REPOS}" ]] || mkdir -p "${GIT_REPOS}"
   cd "${GIT_REPOS}" || exit
 
-  aptitude install git
+  sudo aptitude install git
   if [[ ! -d "${PGM}" ]]; then
     git clone "${URLS[${PGM}]}" "${PGM}"
   fi
@@ -260,91 +257,20 @@ download() { #{{{2
   git pull
 }
 
-get_version() { #{{{2
-  if [[ "${PGM}" == 'gawk' ]]; then
-    VERSION="$(git describe --tags)"
-  elif [[ "${PGM}" == 'nvim' ]]; then
-    VERSION="$(git describe)"
-  elif [[ "${PGM}" == 'tmux' ]]; then
-    # Don't add `--tags`! You would get the invalid “version” `to-merge`.
-    VERSION="$(git describe --abbrev=0)"
-  elif [[ "${PGM}" == 'trans' ]]; then
-    VERSION="$(git describe)"
+uninstall() { #{{{2
+  if [[ "$PGM" == 'nvim' ]]; then
+    # https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
+    sudo rm /usr/local/bin/nvim
+    sudo rm -r /usr/local/share/nvim/
+  elif [[ "$PGM" == 'mpv' ]]; then
+    # https://github.com/mpv-player/mpv-build/blob/master/uninstall
+    sudo ./uninstall
   else
-    # Why `--tags`?{{{
-    #
-    # To avoid this kind of error:
-    #
-    #     fatal: No annotated tags can describe 'ab18673731522c18696b9b132d3841646904e1bd'.
-    #}}}
-    # Why `--abbrev=0`?{{{
-    #
-    # Most of the time `$ git describe --tags` will return something like:
-    #
-    #     v8.1.0648
-    #
-    # But sometimes, it will return something like:
-    #
-    #     v8.1.0648-1-gc8c884926
-    #
-    # I think it happens  when the latest commit was not  tagged, which seems to
-    # be always the case when Bram commits lots of changes in `$VIMRUNTIME`.
-    #
-    # I prefer `v8.1.0648`.
-    #}}}
-    VERSION="$(git describe --tags --abbrev=0)"
-  fi
-
-  if [[ "${PGM}" == 'gawk' || "${PGM}" == 'surfraw' ]]; then
-    VERSION="${VERSION#*-}"
-    VERSION="9:${VERSION%-*}"
-
-  elif [[ "${PGM}" == 'ansifilter' || "${PGM}" == 'jumpapp' || "${PGM}" == 'trans' || "${PGM}" = 'weechat' ]]; then
-    # for `dpkg  -i mpv_*.deb` to success  later, the version number  must begin
-    # with a digit
-    VERSION="${VERSION#v}"
-
-  elif [[ "${PGM}" == 'vim' || "${PGM}" == 'nvim' ]]; then
-    # What's this `9:`?{{{
-    #
-    # Atm, the  Vim packages in the  offical repositories have a  version number
-    # which looks like this:
-    #
-    #     2:8.0.0134-1ubuntu1~ppa1~x 500
-    #
-    # The `2:` is what is called the *epoch*.
-    # From: https://serverfault.com/a/604549
-    #
-    # > This is a single (generally small) unsigned integer.
-    # > It may be omitted, in which case zero is assumed.
-    # > If it is omitted then the `upstream_version` may not contain any colons.
-    # > It  is provided  to  allow  mistakes in  the  version  numbers of  older
-    # > versions of a  package, and also a package's  previous version numbering
-    # > schemes, to be left behind.
-    #
-    # If you  don't include an  epoch in the version  of your Vim  package, `0:`
-    # will be assumed:
-    #
-    #     0:X.Y.Z
-    #
-    # As a result, your package will be overwritten by `$ aptitude safe-upgrade`.
-    #}}}
-    VERSION="9:${VERSION#v}"
-
-  elif [[ "${PGM}" == 'zsh' ]]; then
-    # for `checkinstall` to success later, the  version number must begin with a
-    # digit
-    VERSION="${VERSION#zsh-}"
-  fi
-
-  if [[ "${DEBUG}" -ne 0 ]]; then
-    echo "${VERSION}" >>"${DEBUG_LOGFILE}"
+    sudo make uninstall
   fi
 }
 
 clean() { #{{{2
-  rm -f backup*.tgz "${PGM}"*.deb
-
   if [[ "${PGM}" == 'weechat' ]]; then
     # Clean last `cmake(1)` command:
     # https://stackoverflow.com/a/9680493/9780968
@@ -545,6 +471,9 @@ build() { #{{{2
 }
 
 install() { #{{{2
+  sudo make install
+  return
+
   # TODO: We don't  need the compiled  binary in  the source repository,  once a
   # debian package has been installed; try to remove it.
   # This could make you save a little space, which could add up after the compilation
@@ -562,24 +491,15 @@ install() { #{{{2
 
   # We don't have any version number for `mpv` (because `git describe` fails).
   if [[ "${PGM}" == 'mpv' ]]; then
-    if [[ "${DEBUG}" -ne 0 ]]; then
-      echo checkinstall --pkgname="${PGM}" --backup=no -y >>"${DEBUG_LOGFILE}"
-    fi
     checkinstall --pkgname="${PGM}" --backup=no -y
 
   elif [[ "${PGM}" == 'tmux' ]]; then
-    if [[ "${DEBUG}" -ne 0 ]]; then
-      echo checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no --strip=no -y >>"${DEBUG_LOGFILE}"
-    fi
     checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no --strip=no -y
     #                                                                                        │
     #                                                                                        └ necessary to get
     #                                                                                          meaningful backtraces
 
   else
-    if [[ "${DEBUG}" -ne 0 ]]; then
-      echo checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no -y >>"${DEBUG_LOGFILE}"
-    fi
     checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no -y
     #                                 │
     #                                 └ don't overwrite my package
@@ -709,6 +629,10 @@ xdg_mime_default() { #{{{2
 # }}}1
 # Execution {{{1
 
-main "$1" 2>&1 | tee -a "${LOGFILE}"
+if [[ ! -w "$LOGFILE" ]]; then
+  sudo chown "$USER:$USER" "$LOGFILE"
+fi
+
+main "$1" 2>&1 | tee -a "$LOGFILE"
 tput bel
 
