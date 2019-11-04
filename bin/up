@@ -66,6 +66,7 @@ EOF
   update_mpv_completion_function
   update_pip
   update_ranger
+  update_shellcheck
   update_terminfo
   update_texlive
   update_tldr
@@ -221,7 +222,10 @@ EOF
   local path="${2}${plugin_name}"
   [[ -d "${path}" ]] || git -C "$2" clone "$1"
   git -C "${path}" stash
-  git -C "${path}" checkout master
+  git -C "${path}" clean -d -f .
+  if git -C "${path}" show-ref --verify --quiet refs/heads/master; then
+    git -C "${path}" -f checkout master
+  fi
   git -C "${path}" pull
 }
 
@@ -316,6 +320,19 @@ update_ranger() { #{{{1
   python3 -m pip install --user --upgrade .
   # You may enhance ranger by installing some optional dependencies:
   # https://github.com/ranger/ranger#dependencies
+}
+
+update_shellcheck() { #{{{1
+  # https://github.com/koalaman/shellcheck#installing-a-pre-compiled-binary
+  scversion='stable'
+  wget -qO- "https://storage.googleapis.com/shellcheck/shellcheck-${scversion?}.linux.x86_64.tar.xz" | tar -xJv >/dev/null
+  sudo cp "shellcheck-${scversion}/shellcheck" /usr/local/bin/
+
+  # https://github.com/koalaman/shellcheck#installing
+  update_git_programs 'https://github.com/koalaman/shellcheck' "${HOME}/Vcs/"
+  cd "${HOME}/Vcs/shellcheck" || return
+  pandoc -s -f markdown-smart -t man shellcheck.1.md -o shellcheck.1
+  sudo mv shellcheck.1 /usr/local/share/man/man1
 }
 
 update_terminfo() { #{{{1

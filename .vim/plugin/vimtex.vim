@@ -72,6 +72,31 @@ let g:vimtex_compiler_latexmk = {
     \ ],
     \ }
 
+" In Nvim, some features need the `neovim-remote` tool, and `g:vimtex_compiler_progname` to be set to `nvr`.{{{
+"
+" Otherwise, vimtex will give a warning when you run `:checkhealth`.
+"
+" ---
+"
+" You can download the tool from here: https://github.com/mhinz/neovim-remote
+"
+" ---
+"
+" From `:h vimtex-faq-neovim`:
+"
+" > For backward search from PDF viewer to neovim, one needs the `neovim-remote`
+" > tool as described below.
+"
+" ...
+"
+" > If one downloads this tool  and sets the option |g:vimtex_compiler_progname|
+" > to `nvr`  (or the full  path, if `nvr` is  not in `$PATH`),  then everything
+" > should work.
+"}}}
+if has('nvim')
+    let g:vimtex_compiler_progname = 'nvr'
+endif
+
 " Mappings {{{1
 
 " Why?{{{

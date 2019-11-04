@@ -379,6 +379,7 @@ call lg#motion#repeatable#make#all({
 \        'motions': [
 \                     {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
 \                     {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
+\                     {'bwd': '[-'    ,  'fwd': ']-'},
 \                     {'bwd': '[a'    ,  'fwd': ']a'},
 \                     {'bwd': '[b'    ,  'fwd': ']b'},
 \                     {'bwd': '[f'    ,  'fwd': ']f'},

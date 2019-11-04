@@ -19,65 +19,9 @@
 #}}}
 # Tmux: Do *not* compile from a commit which has not been checked by travis!{{{
 #
-# This kind of commit doesn't have a `autogen.sh` file.
+# This kind of commit doesn't have an `autogen.sh` file.
 # And I think that `$ git describe` fails on such a commit...
 #}}}
-
-# TODO: Get rid of checkinstall:{{{
-#
-# Too buggy.
-#
-# The final  straw was realizing  that it created files  under `/usr/share/doc`,
-# when I installed Vim even with the prefix `/usr/local`.
-# If I  use the prefix  `/usr/local`, that's  because I want  *everything* under
-# `/usr/local` to avoid any conflict with system packages.
-#
-# ---
-#
-# Replace checkinstall with `$ make install`.
-# Make sure every installed files are under `/usr/local`.
-# Get rid of `chown2me`.
-#
-# ---
-#
-# Learn how to uninstall files without using checkinstall.
-#
-# For nvim:
-#
-#     $ sudo rm /usr/local/bin/nvim
-#     $ sudo rm -r /usr/local/share/nvim/
-#
-# https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
-#
-# For mpv:
-#
-#     $ sudo ./uninstall
-#
-# https://github.com/mpv-player/mpv-build/blob/master/uninstall
-#
-# For all the other ones:
-#
-#     $ sudo make uninstall
-#}}}
-
-# TODO: Add support for updating the python interpreter.
-# Updating the latter may help when you have issues to install packages with pip
-# (including pip itself).
-
-# TODO: Add python (+ruby?) integration for Neovim.
-# And maybe use update-alternatives to make Neovim our default editor in the future.
-
-# TODO: The script has failed to compile the right Vim version in the past.
-# I think  it happened because  we had checked  out a particular  commit without
-# getting back to master before the compilation.
-# Anyway, the issue was not obvious to understand.
-# Add some messages to let us know when the script is doing what; like:
-#
-#     "running `$ git checkout master`"
-#     "running `$ git pull`"
-#     ...
-#
-# So that when we see an error in the log, we know which exact command is the cause.
 
 # Init {{{1
 
@@ -105,12 +49,12 @@ typeset -A URLS=( \
   )
 
 LOGDIR="${HOME}/log"
-[[ -d "${LOGDIR}" ]] || mkdir "${LOGDIR}"
+[[ -d "$LOGDIR" ]] || mkdir "$LOGDIR"
 LOGFILE="${LOGDIR}/$(basename "$0" .sh)-${PGM}.log"
 
 # Sanitize input {{{1
 
-if [[ -z "${PGM}" ]]; then
+if [[ -z "$PGM" ]]; then
   printf -- '%s: you must provide the name of the program you want to update\n' "$(basename "$0")" >&2
   exit 1
 # How to check if a variable exists in a list?
@@ -140,13 +84,7 @@ fi
 
 # Functions {{{1
 main() { #{{{2
-  cat <<EOF
-
------------
-$(date +%m-%d\ %H:%M)
------------
-
-EOF
+  print_msg "$(date +%m-%d\ %H:%M)"
 
   install_dependencies
   download
@@ -165,32 +103,23 @@ EOF
   xdg_mime_default
 }
 
+print_msg() { #{{{2
+  width=${#1}
+  dashes="$(printf -- '-%.0s' $(seq 1 "${width}"))"
+  cat <<EOF
+
+$dashes
+$1
+$dashes
+
+EOF
+}
+
 install_dependencies() { #{{{2
+  print_msg 'install dependencies'
   sudo aptitude install make
 
-  # TODO: Make the script edit `/etc/apt/sources.list`. {{{
-  #
-  # And uncomment:
-  #
-  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main restricted
-  #
-  # And run `$ sudo aptitude update`, so that `aptitude build-dep` works.
-  #
-  # For weechat, you need to uncomment:
-  #
-  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) universe
-  #
-  # For trans, you need to uncomment:
-  #
-  #     deb-src http://fr.archive.ubuntu.com/ubuntu/ $(lsb_release -sc) multiverse
-  #
-  # For Vim, you may need to run:
-  #
-  #     $ sudo aptitude build-dep vim-gtk
-  #}}}
-  sudo aptitude build-dep "${PGM}"
-
-  if [[ "${PGM}" == 'vim' ]]; then
+  if [[ "$PGM" == 'vim' ]]; then
     # `build-dep vim` is not enough{{{
     #
     # Actually it seems it does nothing.
@@ -206,44 +135,80 @@ install_dependencies() { #{{{2
     #    - libxt-dev
     # ?
     #}}}
-    sudo aptitude install libncurses5-dev \
+    sudo aptitude install \
+      libncurses5-dev \
       luajit libluajit-5.1-dev \
-      libperl-dev \
       python-dev \
-      python3-dev \
-      ruby-dev
-  elif [[ "${PGM}" == 'nvim' ]]; then
+      python3-dev
+  elif [[ "$PGM" == 'nvim' ]]; then
     sudo aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
-  elif [[ "${PGM}" == 'tmux' ]]; then
+    # `:h python-provider`
+    python -m pip install --user --upgrade pynvim
+    python3 -m pip install --user --upgrade pynvim
+    # `:h vimtex-faq-neovim`
+    python -m pip install --user --upgrade neovim-remote
+    python3 -m pip install --user --upgrade neovim-remote
+  elif [[ "$PGM" == 'tmux' ]]; then
     # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
-    sudo aptitude install bison debhelper autotools-dev dh-autoreconf file libncurses5-dev libevent-dev pkg-config libutempter-dev build-essential
-  elif [[ "${PGM}" == 'mpv' ]]; then
-    sudo aptitude install devscripts equivs
+    sudo aptitude install
+      autotools-dev \
+      bison \
+      build-essential \
+      debhelper \
+      dh-autoreconf \
+      file \
+      libevent-dev \
+      libncurses5-dev \
+      libutempter-dev \
+      pkg-config
+  elif [[ "$PGM" == 'mpv' ]]; then
+    # Warning: You probably need other packages.{{{
+    #
+    # I tried to find which ones in a VM, but the compilation keeps failing:
+    #
+    #     No OpenGL video output found or enabled. Aborting. If you really mean to compile without OpenGL video outputs use --disable-gl.~
+    #
+    # I suspect it has sth to do with the VM, because the output of
+    # `$ glxinfo | grep OpenGL` is different there; in particular,
+    # it contains:
+    #
+    #     OpenGL vendor string: VMware, Inc.~
+    #     OpenGL renderer string: llvmpipe (LLVM 7.0, 256 bits)~
+    #
+    # While on the host OS, these lines are:
+    #
+    #     OpenGL vendor string: Intel Open Source Technology Center~
+    #     OpenGL renderer string: Mesa DRI Intel(R) Ivybridge Desktop~
+    #}}}
+    # TODO: find all the dependencies
+    # You probably need `luajit` and/or `libluajit-5.1-dev` for plugins.
+    sudo aptitude install \
+      autoconf \
+      libfontconfig1-dev \
+      libfreetype6-dev \
+      libfribidi-dev \
+      libtool \
+      nasm \
+      pkg-config \
+      python3-docutils
   fi
 }
 
 download() { #{{{2
-  [[ -d "${GIT_REPOS}" ]] || mkdir -p "${GIT_REPOS}"
-  cd "${GIT_REPOS}" || exit
+  print_msg 'download'
+  [[ -d "$GIT_REPOS" ]] || mkdir -p "$GIT_REPOS"
+  cd "$GIT_REPOS" || exit
 
   sudo aptitude install git
-  if [[ ! -d "${PGM}" ]]; then
-    git clone "${URLS[${PGM}]}" "${PGM}"
+  if [[ ! -d "$PGM" ]]; then
+    git clone "${URLS[$PGM]}" "$PGM"
   fi
 
-  cd "${PGM}" || exit
+  cd "$PGM" || exit
   # We may have edited some file (`configure`, `Makefile`, ...).
   # Stash those edits.
   git stash
-  if [[ -n "${COMMIT_HASH}" ]]; then
-    git checkout -f "${COMMIT_HASH}"
-  # check a master branch exists (trans has no master branch)
-  # https://stackoverflow.com/q/5167957/9780968
-  elif git show-ref --verify --quiet refs/heads/master; then
-    # https://stackoverflow.com/a/19778940/9780968
-    git checkout -f master
-  fi
-  # To prevent this kind of error:{{{
+  # To prevent this kind of error when running `$ git pull`:{{{
   #
   #     error: The following untracked working tree files would be overwritten by merge:~
   #       path/to/file~
@@ -254,10 +219,19 @@ download() { #{{{2
   # Source: https://stackoverflow.com/a/8362346/9780968
   #}}}
   git clean -d -f .
+  if [[ -n "$COMMIT_HASH" ]]; then
+    git checkout -f "$COMMIT_HASH"
+  # check a master branch exists (trans has no master branch)
+  # https://stackoverflow.com/q/5167957/9780968
+  elif git show-ref --verify --quiet refs/heads/master; then
+    # https://stackoverflow.com/a/19778940/9780968
+    git checkout -f master
+  fi
   git pull
 }
 
 uninstall() { #{{{2
+  print_msg 'uninstall'
   if [[ "$PGM" == 'nvim' ]]; then
     # https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
     sudo rm /usr/local/bin/nvim
@@ -271,13 +245,14 @@ uninstall() { #{{{2
 }
 
 clean() { #{{{2
-  if [[ "${PGM}" == 'weechat' ]]; then
+  print_msg 'clean'
+  if [[ "$PGM" == 'weechat' ]]; then
     # Clean last `cmake(1)` command:
     # https://stackoverflow.com/a/9680493/9780968
     if [[ -d 'build' ]]; then
       rm -rf build
     fi
-    mkdir -p build
+    mkdir build
     cd build || exit
 
   else
@@ -287,48 +262,33 @@ clean() { #{{{2
 }
 
 configure() { #{{{2
-  if [[ "${PGM}" == 'gawk' ]]; then
+  print_msg 'configure'
+  if [[ "$PGM" == 'ansifilter' ]]; then
+    sed -i.bak 's:^PREFIX.*:PREFIX = /usr/local:' makefile
+
+  elif [[ "$PGM" == 'gawk' ]]; then
     # `--enable-mpfr` allows us to use the `-M` command-line option.
     # Requires a package (`libmpfr4`?) which should be installed by
     # `$ aptitude build-dep gawk`.
     ./bootstrap.sh && ./configure --enable-mpfr
 
-  # If the build fails, check whether all dependencies are installed:{{{
-  #
-  # https://github.com/mpv-player/mpv-build#dependencies
-  #
-  # In particular the 'yasm' package.
-  #}}}
-  # Procedure to compile `mpv`:{{{
-  #
-  # https://github.com/mpv-player/mpv-build#generic-instructions
-  #
-  #     $ ./rebuild
-  #     $ cp ./mpv/build/mpv ~/bin
-  #
-  # Or: https://github.com/mpv-player/mpv-build#instructions-for-debian--ubuntu-package (used in this script)
-  #}}}
-  elif [[ "${PGM}" == 'mpv' ]]; then
-    ./update
-
-  elif [[ "${PGM}" == 'surfraw' ]]; then
+  elif [[ "$PGM" == 'surfraw' ]]; then
     autoreconf -f -i
     ./configure
 
-  elif [[ "${PGM}" == 'tmux' ]]; then
+  elif [[ "$PGM" == 'tmux' ]]; then
     # Uncomment to get more info in your backtraces.
     #     sed -i 's/-O2/-O0/' Makefile.am
     sh autogen.sh
     ./configure
 
-  elif [[ "${PGM}" == 'vim' ]]; then
+  elif [[ "$PGM" == 'vim' ]]; then
     ./configure  \
       --enable-cscope                \
       --enable-fail-if-missing       \
       --enable-gui=gtk2              \
       --enable-luainterp=dynamic     \
       --enable-multibyte             \
-      --enable-perlinterp=yes \
       --enable-python3interp=dynamic \
       --enable-pythoninterp=dynamic  \
       --enable-terminal              \
@@ -345,13 +305,14 @@ configure() { #{{{2
   #
   # The doc should be in `/usr/share/doc/weechat/doc/en`
   #}}}
-  elif [[ "${PGM}" == 'weechat' ]]; then
+  elif [[ "$PGM" == 'weechat' ]]; then
     cmake .. -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo         \
              -DWEECHAT_HOME:STRING="${HOME}/.config/weechat"  \
              -DENABLE_MAN:BOOL=ON                             \
              -DENABLE_TESTS:BOOL=ON
 
-  elif [[ "${PGM}" == 'zsh' ]]; then
+  elif [[ "$PGM" == 'zsh' ]]; then
+    ./Util/preconfig
     # Where did you find the configuration options?{{{
     #
     # I read the INSTALL file:
@@ -377,57 +338,39 @@ configure() { #{{{2
     #
     #     $ ./configure --help
     #}}}
-
-    # TODO:{{{
-    # Atm, these directories are empty:
-    #
-    #     /usr/local/share/zsh/site-functions
-    #     /usr/share/zsh/vendor-functions
-    #
-    # Should we remove them from:
-    #
-    #     --enable-site-fndir
-    #     --enable-additional-fpath
-    #
-    # ?
-    #}}}
-    ./Util/preconfig
-    # --mandir=/usr/local/share/man \
-    # --infodir=/usr/local/share/info \
-    ./configure --build=x86_64-linux-gnu \
-      --prefix=/usr/local \
-      --enable-fndir=/usr/local/share/zsh/functions \
-      --includedir=/usr/include \
-      --sysconfdir=/etc \
-      --localstatedir=/var \
-      --libdir=/usr/lib/x86_64-linux-gnu \
-      --libexecdir=/usr/lib/x86_64-linux-gnu \
-      --bindir=/usr/local/bin \
-      LDFLAGS="-Wl,--as-needed -g" \
-      --enable-maildir-support \
-      --enable-etcdir=/etc/zsh \
-      --enable-function-subdirs \
-      --enable-site-fndir=/usr/local/share/zsh/site-functions \
-      --with-tcsetpgrp \
-      --with-term-lib="ncursesw tinfo" \
+    ./configure \
       --enable-cap \
+      --enable-custom-patchlevel=Debian \
+      --enable-fndir=/usr/local/share/zsh/functions \
+      --enable-function-subdirs \
+      --enable-maildir-support \
       --enable-pcre \
       --enable-readnullcmd=pager \
-      --enable-custom-patchlevel=Debian \
-      --enable-additional-fpath=/usr/local/share/zsh/vendor-functions,/usr/local/share/zsh/vendor-completions \
-      --disable-ansi2knr
+      --with-tcsetpgrp \
+      --with-term-lib='ncursesw tinfo' \
+      LDFLAGS='-Wl,--as-needed -g'
         fi
 }
 
 build() { #{{{2
-  if [[ "${PGM}" == 'mpv' ]]; then
-    mk-build-deps -s sudo -i
-    # The readme adds the `-j4` flag, to use 4 cores.
-    # I don't use `-j` because it would probably consume too much cpu.
+  print_msg 'build'
+  if [[ "$PGM" == 'mpv' ]]; then
+    # Procedure to compile `mpv`:{{{
+    #
+    # https://github.com/mpv-player/mpv-build#generic-instructions
+    #}}}
+    # The readme adds the `-j4` flag, to use 4 cores.{{{
+    #
+    # I don't, because it would probably consume too much cpu.
     # I'm ok with a building process which takes more time (≈ 12 min).
-    dpkg-buildpackage -uc -us -b
+      #}}}
+    # If the build fails, check whether all dependencies are installed:{{{
+    #
+    # https://github.com/mpv-player/mpv-build#dependencies
+    #}}}
+    ./rebuild
 
-  elif [[ "${PGM}" == 'nvim' ]]; then
+  elif [[ "$PGM" == 'nvim' ]]; then
     make CMAKE_BUILD_TYPE=Release
     #    ├──────────────────────┘
     #    └ Full compiler optimisations and no debug information.
@@ -471,163 +414,109 @@ build() { #{{{2
 }
 
 install() { #{{{2
-  sudo make install
-  return
+  print_msg 'install'
 
-  # TODO: We don't  need the compiled  binary in  the source repository,  once a
-  # debian package has been installed; try to remove it.
-  # This could make you save a little space, which could add up after the compilation
-  # of several programs.
-  #
-  # For example, the mpv binary weighs 22M (if stripped).
-  if [[ "${PGM}" == 'mpv' ]]; then
-    rm -f ../mpv_*.changes
-    mv ../mpv_*.deb .
-    # We can't use `checkinstall` for `mpv`, because the compilation has already
-    # produced a `.deb` package.
-    dpkg -i mpv_*.deb
-    return
+  if [[ "$PGM" == 'mpv' ]]; then
+    sudo ./install
+  else
+    sudo make install
   fi
 
-  # We don't have any version number for `mpv` (because `git describe` fails).
-  if [[ "${PGM}" == 'mpv' ]]; then
-    checkinstall --pkgname="${PGM}" --backup=no -y
-
-  elif [[ "${PGM}" == 'tmux' ]]; then
-    checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no --strip=no -y
-    #                                                                                        │
-    #                                                                                        └ necessary to get
-    #                                                                                          meaningful backtraces
-
-  else
-    checkinstall --pkgname="${PGM}" --pkgversion="${VERSION}" --spec=/dev/null --backup=no -y
-    #                                 │
-    #                                 └ don't overwrite my package
-    #                                   with an old version from the official repositories
-    #                                   when I execute `aptitude safe-upgrade`
-    # Why can aptitude overwrite our compiled package?{{{
-    #
-    # When aptitude  finds several  candidates for the  same package,  it checks
-    # their version to decide which one is the newest.
-    # By default, checkinstall uses the current date as the package version:
-    #
-    #     20180914
-    #
-    # This would cause an issue for Vim:
-    #
-    #     $ apt-cache policy vim
-    #     vim:~
-    #       Installed: (none)~
-    #       Candidate: 2:8.0.0134-1ubuntu1~ppa1~x~
-    #       Version table:~
-    #          2:8.0.0134-1ubuntu1~ppa1~x 500~
-    #             500 http://ppa.launchpad.net/pi-rho/dev/ubuntu xenial/main amd64 Packages~
-    #     ...~
-    #
-    # Here the version of the Vim package in the ppa is `2:8.0.0134`.
-    # If the version of our compiled package is `20180914`, it will be considered
-    # older than the one in the ppa.
-    # I think that's because the format of a date is different.
-    # `apt` expects a number before a colon, but there's no colon in a date.
-    # So it assumes that the date should be prefixed by `0:` or `1:` which gives:
-    #
-    #     0:20180914
-    #         <
-    #     2:8.0.0134-1ubuntu1~ppa1~x
-    #}}}
-    # Why don't you use `--pkgname="my{PGM}"` anymore?{{{
-    #
-    # When checkinstall tries to install `myPGM`, it may try to overwrite a file
-    # belonging to `PGM` (it will probably  happen if `PGM` is already installed
-    # in a different version).
-    # If that happens, the installation will fail:
-    #
-    #     dpkg: error processing archive /home/user/Vcs/zsh/zsh_9999.9999-1_amd64.deb (--install):~
-    #      trying to overwrite '/usr/share/man/man1/zshmodules.1.gz', which is also in package myzsh 999-1~
-    #     dpkg-deb: error: subprocess paste was killed by signal (Broken pipe)~
-    #}}}
-    if [[ ${PGM} == 'nvim' ]]; then
-      # In a  manpage, when we press  the default `gO` command, open  the TOC on
-      # the *left* rather than at the bottom.
-      sed -i.bak \
-          -e '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
-          /usr/local/share/nvim/runtime/autoload/man.vim
-    fi
+  if [[ $PGM == 'nvim' ]]; then
+    # In a  manpage, when we press  the default `gO` command, open  the TOC on
+    # the *left* rather than at the bottom.
+    sudo sed -i.bak \
+         -e '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
+         /usr/local/share/nvim/runtime/autoload/man.vim
+  elif [[ $PGM == 'zsh' ]] && ! grep -qx '/usr/local/bin/zsh' /etc/shells; then
+    # https://unix.stackexchange.com/a/111367/289772
+    echo '/usr/local/bin/zsh' | sudo tee -a /etc/shells
+    chsh
   fi
 }
 
 update_alternatives(){ #{{{2
-  if [[ "${PGM}" == 'awk' || "${PGM}" == 'vim' ]]; then
-    update-alternatives --get-selections >"${LOGDIR}/update-alternatives-get-selections.bak"
+  if [[ "$PGM" != 'awk' && "$PGM" != 'vim' ]]; then
+    return
+  fi
 
-    if [[ "${PGM}" == 'awk' ]]; then
-    # Why the `--slave` option?{{{
-    #
-    # So that when we run `$ man awk`, the gawk manpage is opened.
-    # Otherwise it would fail, because we don't have any manpage for awk.
-    #}}}
-    update-alternatives --log "${LOGFILE}" \
-      --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
-      --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
-    # Note the order of the arguments `--log` and `--install`/`--set`.
-    # `--log` should  come first because  it's an option, while  `--install` and
-    # `--set` are subcommands.
-    update-alternatives --log "${LOGFILE}" --set awk /usr/local/bin/gawk
+  print_msg 'update-alternatives'
+  update-alternatives --get-selections >"${LOGDIR}/update-alternatives-get-selections.bak"
 
-    elif [[ "${PGM}" == 'vim' ]]; then
-      # Vim can be invoked with any of these commands.
-      # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
-      typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)
-      for name in "${names[@]}"; do
-        # add our compiled Vim to each group of alternatives
-        update-alternatives --log "${LOGFILE}" \
-          --install /usr/bin/"${name}" "${name}" /usr/local/bin/vim 60
-        # set our compiled Vim to be the master link
-        update-alternatives --log "${LOGFILE}" --set "${name}" /usr/local/bin/vim
-      done
-    fi
+  if [[ "$PGM" == 'awk' ]]; then
+  # Why the `--slave` option?{{{
+  #
+  # So that when we run `$ man awk`, the gawk manpage is opened.
+  # Otherwise it would fail, because we don't have any manpage for awk.
+  #}}}
+  sudo update-alternatives --log "$LOGFILE" \
+    --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
+    --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
+  # Note the order of the arguments `--log` and `--install`/`--set`.
+  # `--log` should  come first because  it's an option, while  `--install` and
+  # `--set` are subcommands.
+  sudo update-alternatives --log "$LOGFILE" --set awk /usr/local/bin/gawk
 
+  elif [[ "$PGM" == 'vim' ]]; then
+    # Vim can be invoked with any of these commands.
+    # We need to tell the system that, from now on, they're all provided by `/usr/local/bin/vim`.
+    typeset -a names=(editor eview evim ex gview gvim gvimdiff rgview rgvim rview rvim vi view vim vimdiff)
+    for name in "${names[@]}"; do
+      # add our compiled Vim to each group of alternatives
+      sudo update-alternatives --log "$LOGFILE" \
+        --install /usr/bin/"${name}" "$name" /usr/local/bin/vim 60
+      # set our compiled Vim to be the master link
+      sudo update-alternatives --log "$LOGFILE" --set "$name" /usr/local/bin/vim
+    done
   fi
 }
+
 xdg_mime_default() { #{{{2
-  if [[ "${PGM}" == 'vim' ]]; then
-      # What's this `gvim.desktop`?{{{
-      #
-      # A file installed by the Vim package.
-      # It describes which files Vim can open in the line ‘MimeType=’.
-      #}}}
-      # What does this command do?{{{
-      #
-      # It parses the default `gvim.desktop` to build and run a command such as:
-      #
-      #     $ xdg-mime default gvim.desktop text/english text/plain text/x-makefile ...
-      #
-      # In effect, it makes gVim the default program to open various types of text files.
-      # This matters when using `xdg-open(1)`  or double-clicking on the icon of
-      # a file in a GUI file manager.
-      #}}}
-      # Is it needed?{{{
-      #
-      # Once  the `gvim.desktop`  file is  installed, it  doesn't make  gVim the
-      # default program for text files.
-      # It just informs the system that gVim *can* open some of them.
-      #
-      # ---
-      #
-      # Btw, the default `nvim.desktop` file lists the same types of files.
-      # For the moment, I prefer gVim to be the default.
-      # In the  future, you may  choose Nvim instead;  in that case,  parse this
-      # file instead (found with `$ locate nvim.desktop`):
-      #
-      #     /usr/local/share/applications/nvim.desktop
-      #}}}
-      grep -i 'mimetype' /usr/local/share/applications/gvim.desktop \
-        | sed 's/mimetype=//i; s/;/ /g' \
-        | xargs xdg-mime default gvim.desktop
+  if [[ "$PGM" != 'vim' ]]; then
+    return
   fi
+
+  print_msg 'xdg-mime default'
+  # What's this `gvim.desktop`?{{{
+  #
+  # A file installed by the Vim package.
+  # It describes which files Vim can open in the line ‘MimeType=’.
+  #}}}
+  # What does this command do?{{{
+  #
+  # It parses the default `gvim.desktop` to build and run a command such as:
+  #
+  #     $ xdg-mime default gvim.desktop text/english text/plain text/x-makefile ...
+  #
+  # In effect, it makes gVim the default program to open various types of text files.
+  # This matters  when using `xdg-open(1)` or  double-clicking on the icon  of a
+  # file in a GUI file manager.
+  #}}}
+  # Is it needed?{{{
+  #
+  # Once the `gvim.desktop` file is installed,  it doesn't make gVim the default
+  # program for text files.
+  # It just informs the system that gVim *can* open some of them.
+  #
+  # ---
+  #
+  # Btw, the default `nvim.desktop` file lists the same types of files.
+  # For the moment, I prefer gVim to be the default.
+  # In the future,  you may choose Nvim  instead; in that case,  parse this file
+  # instead (found with `$ locate nvim.desktop`):
+  #
+  #     /usr/local/share/applications/nvim.desktop
+  #}}}
+  grep -i 'mimetype' /usr/local/share/applications/gvim.desktop \
+    | sed 's/mimetype=//i; s/;/ /g' \
+    | xargs xdg-mime default gvim.desktop
 }
 # }}}1
 # Execution {{{1
+
+# ask for password immediately,
+# so we don't have to wait for the script to ask it – possibly – much later
+sudo printf ''
 
 if [[ ! -w "$LOGFILE" ]]; then
   sudo chown "$USER:$USER" "$LOGFILE"

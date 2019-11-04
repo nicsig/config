@@ -230,9 +230,8 @@ let g:UltiSnipsEnableSnipMate = 0
 " Tab is NOT a printable character, but UltiSnips seems to unmap it as if it was one.
 "}}}
 let g:UltiSnipsMappingsToIgnore = ['mycompletion#snippet_or_complete']
-" More info on this here:    :h UltiSnips-warning-smapping
-" Edit:
-" It doesn't seem necessary anymore, but I'll keep it anyway, just in case ...
+" For more info: `:h UltiSnips-warning-smapping`
+" Edit: It doesn't seem necessary anymore, but I'll keep it anyway, just in case...
 
 " The  autotrigger feature  of UltiSnips  has a  *very* negative  impact on  the
 " latency/jitter in Nvim.
@@ -240,7 +239,15 @@ let g:UltiSnipsMappingsToIgnore = ['mycompletion#snippet_or_complete']
 if has('nvim')
     augroup ultisnips_no_autotrigger
         au!
-        au VimEnter * exe 'au! UltiSnips_AutoTrigger' | aug! UltiSnips_AutoTrigger
+        " Why the guard?{{{
+        "
+        " To avoid an error if we run  the python tool `nvr` from a Vim terminal
+        " (which probably doesn't make sense, but I don't like errors).
+        "}}}
+        au VimEnter * if exists('#UltiSnips_AutoTrigger')
+        \ |     exe 'au! UltiSnips_AutoTrigger'
+        \ |     aug! UltiSnips_AutoTrigger
+        \ | endif
     augroup END
 endif
 

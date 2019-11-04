@@ -945,7 +945,7 @@ chown2me() { #{{{2
   # Purpose:{{{
   #
   # Running this function  may be necessary before manually  compiling a program
-  # which was installed via checkinstall (think vim or tmux).
+  # which was installed via checkinstall.
   # }}}
   # Why don't you use a zsh snippet? {{{
   #
@@ -3330,7 +3330,6 @@ alias zsh_sourcetrace='zsh -o sourcetrace'
 # zsh_startup {{{3
 
 alias zsh_startup='repeat 10 time zsh -i -c exit'
-
 # }}}2
 # suffix {{{2
 
@@ -4757,6 +4756,8 @@ abbrev=(
   'bl'    '; tput bel'
   # printf FieLd
   'fl'   "| awk '{ print $"
+  # Cd after Cloning repo
+  'cc' '&& cd !#2:t'
   # No Errors
   'ne'   '2>/dev/null'
   'pf'    "printf -- '"
@@ -4771,6 +4772,15 @@ abbrev=(
   #     $ tmux bind -T ...
   'tl'    '| tail -20'
 )
+
+# If you don't like the `cc` abbreviation, have a look at:{{{
+#
+#     man zshcontrib /Manipulating Hook Functions
+#     man zshmisc /SPECIAL FUNCTIONS
+#
+# https://unix.stackexchange.com/a/276472/289772
+# https://unix.stackexchange.com/questions/97920/how-to-cd-automatically-after-git-clone/276472#comment972969_276472
+#}}}
 
 __abbrev_expand() {
   emulate -L zsh
@@ -5119,66 +5129,4 @@ fi
 # Find a better way of organizing this file.
 # Or write at the top of the  file that some sections must be sourced before/after
 # others.
-
-# TODO:
-# When we clone a git repo, it would be useful to automatically cd into it.
-# Install a hook to do that.
-# Read `man zshcontrib /Manipulating Hook Functions`.
-# Also `man zshmisc /SPECIAL FUNCTIONS`.
-#
-# ---
-#
-# Update: Let's try this:
-# https://unix.stackexchange.com/a/276472/289772
-#
-# Try to fix this issue:
-# https://unix.stackexchange.com/questions/97920/how-to-cd-automatically-after-git-clone/276472#comment972969_276472
-#
-# Or use a different solution:
-# https://unix.stackexchange.com/a/97958/289772
-#
-# Document the code:
-clone_check() {
-  emulate -L zsh
-  (($? != 0)) && return
-  local cmd=$history[$((HISTCMD-1))]
-  cmd=("${(@Q)${(z)cmd}}")
-  if [[ $cmd = "git clone "* ]]; then
-    local dir
-    if (($#cmd == 3)); then
-      dir=${cmd[3]:t}
-      dir=${dir%.git}
-      dir=${dir#*:}
-    elif (($#cmd > 3)); then
-      dir=$cmd[-1]
-    else
-      return
-    fi
-    print -r CDing into $dir > /dev/tty
-    cd -- $dir
-  fi
-}
-# How could I make zsh ring the bell after any command has finished running?{{{
-#
-# Add the name `ring_the_bell` in the array `precmd_functions`, and write
-# this function:
-#
-#     ring_the_bell() {
-#       tput bel
-#     }
-#
-# https://stackoverflow.com/a/39397414/9780968
-#}}}
-#   Why don't you do it?{{{
-#
-# Too much noise.
-# Besides,  we already  have the  global alias  `B`, and  we use  `tput bel`  in
-# various places:
-#
-#     ~/.config/zsh-snippets/main.txt
-#     ~/bin/up
-#     ~/bin/up-yt
-#     ~/bin/upp
-#}}}
-precmd_functions+=(clone_check)
 

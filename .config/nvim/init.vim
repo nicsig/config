@@ -64,5 +64,9 @@ let g:python3_host_prog = '/usr/bin/python3'
 "     let g:loaded_python3_provider = 0
 "}}}
 
+" disable Ruby and Node.js support (we don't need the less code, the less issues)
+let g:loaded_ruby_provider = 0
+let g:loaded_node_provider = 0
+
 source $HOME/.vim/vimrc
 

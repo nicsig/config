@@ -894,6 +894,30 @@ set cpoptions+=>
 
 " diffopt {{{2
 
+" Do *not* ignore whitespace, with `iwhiteall`.{{{
+"
+" It would ignore significant differences.
+" For example, in a shell script, this is wrong:
+"
+"     if [ $? -gt 0]; then
+"                  ^
+"                  there should be a space
+"
+" If we have 2 files, one with the error, the other without, we want to see this
+" difference.
+"
+" ---
+"
+" Do not  ignore trailing whitespace with  `iwhite` either; if they  can somehow
+" alter the behavior  of a program, and  we're comparing 2 versions  of the same
+" program, one with trailing whitespace on some line, the other without trailing
+" whitespace, we need to see this difference to understand what's happening.
+"
+" ---
+"
+" If you need to temporarily ignore whitespace differences, use our `co SPC` mapping.
+"}}}
+
 " only 3 lines of context above/below a changed line (instead of 6)
 set diffopt+=context:3
 
@@ -902,9 +926,6 @@ set diffopt+=foldcolumn:1
 
 " turn off diff mode automatically for a buffer which becomes hidden
 set diffopt+=hiddenoff
-
-" ignore all white space changes
-set diffopt+=iwhiteall
 
 " start diff mode with vertical splits (unless explicitly specified otherwise)
 set diffopt+=vertical
@@ -4349,7 +4370,7 @@ fu s:fix_display() abort
     " update folds
     norm! zx
     " update fold titles
-    do BufWinEnter
+    do <nomodeline> BufWinEnter
 
     " Re-install HGs which may have been cleared after changing the color scheme.{{{
     "
@@ -4816,35 +4837,38 @@ ono <silent> i- :<c-u>norm vi-<cr>
 ono <silent> a- :<c-u>norm va-<cr>
 
 fu s:horizontal_rules_textobject(adverb) abort
+    " select "inside" by default (we'll update the selection to get "around" later if necessary)
     if &ft is# 'markdown'
-        if a:adverb is# 'inside'
-            let start = '^\%(---\|#\+.*\)\n\zs'
-            let end = '\ze\n\%(---\|#\+.*\|.*\%$\)$'
-        elseif a:adverb is# 'around'
-            " Why the `\zs` in `start`{{{
-            "
-            " To be sure that the cursor is *after* the start of the line.
-            " Otherwise, Vim would find the same  match for the `end` pattern as
-            " it did for the `start` pattern.
-            "}}}
-            let start = '^\%(---\|#\+.*\)\n\zs'
-            let end = '^\%(---\|#\+.*\)\zs\n'
-        endif
+        let start = '^\%(---\|#.*\)\n\zs\|\%^'
+        let end = '\n\ze\%(---\|#.*\)$\|\%$'
     else
         let cml = matchstr(get(split(&l:cms, '%s', 1), 0, ''), '\S*')
         let comment = '\V'..escape(cml, '\')..'\m'
         let fmr = '\%('..join(split(&l:fmr, ','), '\|')..'\)\d*'
-        if a:adverb is# 'inside'
-            let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\n\zs'
-            let end = '\ze\n\s*'..comment..'\s*\%(---\|.*'..fmr..'\|.*\%$\)$'
-        elseif a:adverb is# 'around'
-            let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\zs$'
-            let end = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\zs\n'
-        endif
+        let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\n\zs'
+              \ ..'\|^\%(\s*'..comment..'\)\@!.*\n\zs\s*'..comment
+              \ ..'\|\%^'
+        let end = '\ze\n\s*'..comment..'\s*\%(---\|.*'..fmr..'\)$'
+              \ ..'\|^\s*'..comment..'.*\n\%(\s*'..comment..'\)\@!'
     endif
     call search(start, 'bcW')
     norm! V
     call search(end, 'W')
+    if a:adverb is# 'around'
+        if &ft is# 'markdown'
+            if getline(line('.')+1) is# '---'
+                norm! j
+            elseif getline(line('v')-1) is# '---'
+                norm! oko
+            endif
+        else
+            if getline(line('.')+1) =~# '^\s*'..comment..'\s*---$'
+                norm! j
+            elseif getline(line('v')-1) =~# '^\s*'..comment..'\s*---$'
+                norm! oko
+            endif
+        endif
+    endif
 endfu
 
 " iE {{{3
@@ -9266,6 +9290,12 @@ endfu
 "     " press `q`
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
+"
+" 138 -
+"
+" Review all custom text-objects: make sure  they all position the cursor on the
+" end of  the selection, to  be consistent  with what Vim  seems to do  with its
+" builtin text-objects (e.g. try `vi{` in a shell function).
 
 
 

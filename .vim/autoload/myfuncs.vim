@@ -31,7 +31,7 @@ fu myfuncs#after_tmux_capture_pane() abort "{{{1
     "}}}
     norm! zR
     TW
-    exe '$' | call search('^\S')
+    exe '$' | call search('^\S', 'bW')
     sil! keepj keepp .,$g/^\s*$/d_
 
     " We need the buffer to be saved into a file, for `:lvim /pat/ %` to work.

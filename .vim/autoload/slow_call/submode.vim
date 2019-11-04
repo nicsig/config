@@ -32,6 +32,10 @@ endif
 "     fu J() abort
 "         return get(s:, 'in_submode', 0) ? "\<c-x>\<c-e>" : 'j'
 "     endfu
+"
+" You could also install a mapping on `Esc Esc` to reset the variable before the
+" callback  is invoked  (and stop  the  timer since  it would  not be  necessary
+" anymore).
 "}}}
 
 " TODO:

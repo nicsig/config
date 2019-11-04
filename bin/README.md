@@ -20,23 +20,6 @@ So, we install here a more recent version:
 
 <https://github.com/learnbyexample/command_help>
 
-##
-## `checkinstall` binary?
-
-<https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz>
-
-The link was found at the bottom of: <https://github.com/koalaman/shellcheck#installing>
-All the stable releases are listed here: <https://github.com/koalaman/shellcheck/releases>
-
-### Why don't you use the binary from your distro's official repositories?
-
-The version is too old.
-A more recent  version of shellcheck may  found issues in your code  that an old
-version doesn't.
-Maybe because shellcheck is improved, and  maybe because bash syntax evolves and
-needs a more recent version of a linter.
-
-##
 ## `fzfimg` script?
 
 <https://github.com/seebye/ueberzug/blob/master/examples/fzfimg.sh>
