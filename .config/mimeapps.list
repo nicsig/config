@@ -17,3 +17,5 @@ text/x-tex=gvim.desktop
 application/x-shellscript=gvim.desktop
 text/x-c=gvim.desktop
 text/x-c++=gvim.desktop
+application/epub+zip=zathura-pdf-mupdf.desktop
+application/pdf=zathura-pdf-mupdf.desktop

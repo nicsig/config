@@ -7058,6 +7058,8 @@ augroup trailing_whitespace
         \ ..' call s:trailing_whitespace(0)'
     " we still have an undesired match when we run `:RepeatableMotions -vv`
     au WinEnter * if &ft is# '' | call s:trailing_whitespace(0) | endif
+    " and when we run `:VimPatches 8.1` twice
+    au BufWinEnter * if &ft is# 'text' | call s:trailing_whitespace(0) | endif
 augroup END
 
 fu s:trailing_whitespace(create_match, ...) abort
@@ -9401,21 +9403,6 @@ endfu
 " Use `:Vim`, and tweak it so that it runs this command before `:vim`:
 "
 "     syn off | filetype plugin indent off
-"
-" 142 -
-"
-"     $ nvim
-"     :VimPatches 8.1
-"     " press G
-"     " press our custom `$` (or the built-in `g_`)
-"
-" Notice how the cursor jumps way beyond the end of the line (for a few seconds).
-"
-" Update:
-" I can also reproduce in Vim, using our current `/tmp/.vimrc` (undo seq 31),
-" our current `/tmp/vimrc` (undo seq 11), and our current `/tmp/file` (undo seq 2):
-"
-"     $ vim -Nu /tmp/.vimrc -S /tmp/vimrc /tmp/file
 
 
 
