@@ -4,11 +4,12 @@
 " It will disable the `matchparen` plugin.
 " But we also source it in a mapping to toggle the plugin.
 "
-"         ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:441
+"     ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:441
 "}}}
 " Warning: DO NOT rename this file to `matchparen.vim`!{{{
 "
 " If you do, when you'll press `cop`, you'll execute:
+"
 "     runtime! plugin/matchparen.vim
 "
 " This will source the current script (✔), then `$VIMRUNTIME/plugin/matchparen.vim` (✘).
@@ -19,8 +20,24 @@ if exists(':DoMatchParen') != 2 || exists('g:no_after_plugin')
     finish
 endif
 
-if exists('g:loaded_matchparen')
-    " command defined in `$VIMRUNTIME/plugin/matchparen.vim`
+if exists('#matchup_matchparen#CursorMoved')
+    " Where is `:NoMatchParen` defined?{{{
+    "
+    " By default, in `$VIMRUNTIME/plugin/matchparen.vim`
+    " But we use `vim-matchup` which redefines this command as well as `:DoMatchParen`
+    " in `~/.vim/plugged/vim-matchup/plugin/matchup.vim`.
+    "}}}
+    " Do I need to preserve {{{
+    "}}}
+    "   the current/previous window?{{{
+    "
+    " Not if you use `vim-matchup`.
+    " But you would probably need to preserve them, if you used the default matchparen plugin.
+    "}}}
+    "   the height of the windows, if some of them are squashed?{{{
+    "
+    " Same answer as previously.
+    "}}}
     NoMatchParen
     " We need to always have at least one autocmd listening to `CursorMoved`.{{{
     "
@@ -98,13 +115,13 @@ if exists('g:loaded_matchparen')
             " An empty commented  line does nothing, so will  have a minimal
             " impact  on Vim's  performance, but  is enough  to register  an
             " autocmd listening to a given event.
-            exe 'au! ' . event . ' * "'
+            exe 'au! '..event..' * "'
         augroup END
     endfor
 else
     " Why `silent!`?{{{
     "
-    " If an error is raised, `abort` would make the function stop.
+    " If an error is raised, `abort` would make the function sourcing this file stop.
     " We want the function to process all the code.
     "}}}
     sil! au! my_default_autocmds

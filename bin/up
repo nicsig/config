@@ -81,8 +81,7 @@ aptitude
 
 EOF
 
-  sudo aptitude update
-  sudo aptitude safe-upgrade
+  sudo aptitude update && sudo aptitude safe-upgrade
 
   # What does it do?{{{
   #
@@ -224,7 +223,7 @@ EOF
   git -C "${path}" stash
   git -C "${path}" clean -d -f .
   if git -C "${path}" show-ref --verify --quiet refs/heads/master; then
-    git -C "${path}" -f checkout master
+    git -C "${path}" checkout -f master
   fi
   git -C "${path}" pull
 }
@@ -405,6 +404,10 @@ if [[ $# -ne 0 ]]; then
   printf -- '%s\n' "$(basename $0): no arguments allowed"
   exit 64
 fi
+
+# ask for password immediately,
+# so we don't have to wait for the script to ask it – possibly – much later
+sudo printf '' || exit
 main
 tput bel
 

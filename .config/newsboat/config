@@ -80,7 +80,7 @@ bind-key X toggle-article-read
 bind-key SPACE toggle-article-read
 
 bind-key s sort
-bind-key S revsort
+bind-key S rev-sort
 bind-key ^S save
 
 # Options {{{1

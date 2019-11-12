@@ -150,7 +150,7 @@ install_dependencies() { #{{{2
     python3 -m pip install --user --upgrade neovim-remote
   elif [[ "$PGM" == 'tmux' ]]; then
     # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
-    sudo aptitude install
+    sudo aptitude install \
       autotools-dev \
       bison \
       build-essential \
@@ -431,7 +431,10 @@ install() { #{{{2
   elif [[ $PGM == 'zsh' ]] && ! grep -qx '/usr/local/bin/zsh' /etc/shells; then
     # https://unix.stackexchange.com/a/111367/289772
     echo '/usr/local/bin/zsh' | sudo tee -a /etc/shells
-    chsh
+    # change login shell for the current user
+    sudo chsh -s '/usr/local/bin/zsh' "$USER"
+    # and for the root user (necessary for `$ sudo -i` to work as expected)
+    sudo chsh -s '/usr/local/bin/zsh' 'root'
   fi
 }
 
@@ -514,14 +517,13 @@ xdg_mime_default() { #{{{2
 # }}}1
 # Execution {{{1
 
-# ask for password immediately,
-# so we don't have to wait for the script to ask it – possibly – much later
-sudo printf ''
-
 if [[ ! -w "$LOGFILE" ]]; then
   sudo chown "$USER:$USER" "$LOGFILE"
 fi
 
+# ask for password immediately,
+# so we don't have to wait for the script to ask it – possibly – much later
+sudo printf '' || exit
 main "$1" 2>&1 | tee -a "$LOGFILE"
 tput bel
 

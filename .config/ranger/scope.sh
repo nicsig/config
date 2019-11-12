@@ -40,21 +40,41 @@ HIGHLIGHT_STYLE='pablo'
 PYGMENTIZE_STYLE='autumn'
 
 
+# Do *not* enable the preview for archive files.{{{
+#
+# When you select a big archive containing a  lot of files, there is a risk that
+# the preview fails; and if that happens:
+#
+#   - ranger may consume a lot of cpu (e.g. 100% of one cpu core)
+#   - a decompressing utility (`atool`, `unrar`, `7z`) may consume a lot of memory (e.g. 200 Megs)
+#   - you may have to execute `:q!` to quit, instead of pressing `q`, which is jarring:
+#
+#         Not quitting: Tasks in progress: Use `quit!` to force quit
+#
+# ---
+#
+# Disabling  the preview  just for  archives doesn't  make us  lose any  feature
+# compared to a GUI file manager (which doesn't preview archives either).
+#
+# ---
+#
+# Relevant issue: <https://github.com/ranger/ranger/issues/488>
+#}}}
 handle_extension() {
     case "${FILE_EXTENSION_LOWER}" in
         # Archive
         a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
         rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z|zip)
-            atool --list -- "${FILE_PATH}" && exit 5
-            bsdtar --list --file "${FILE_PATH}" && exit 5
+            #     atool --list -- "${FILE_PATH}" && exit 5
+            #     bsdtar --list --file "${FILE_PATH}" && exit 5
             exit 1;;
         rar)
             # Avoid password prompt by providing empty password
-            unrar lt -p- -- "${FILE_PATH}" && exit 5
+            #     unrar lt -p- -- "${FILE_PATH}" && exit 5
             exit 1;;
         7z)
             # Avoid password prompt by providing empty password
-            7z l -p -- "${FILE_PATH}" && exit 5
+            #     7z l -p -- "${FILE_PATH}" && exit 5
             exit 1;;
 
         # PDF

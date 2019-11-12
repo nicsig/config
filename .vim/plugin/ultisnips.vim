@@ -266,8 +266,11 @@ endif
 " enter your first snippet, and refer to it in your snippets.
 "}}}
 augroup ulti_save_info
-    autocmd!
-    autocmd User UltiSnipsEnterFirstSnippet call s:save_info()
+    au!
+    au User UltiSnipsEnterFirstSnippet call s:save_info()
+    " useful to prevent the highlighting of trailing whitespace during a snippet expansion
+    au User UltiSnipsEnterFirstSnippet let g:expanding_snippet = 1
+    au User UltiSnipsExitLastSnippet   unlet! g:expanding_snippet
 augroup END
 
 fu s:save_info() abort

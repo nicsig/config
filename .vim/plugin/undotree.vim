@@ -19,7 +19,6 @@ fu g:Undotree_CustomMap() abort
     nno <buffer><nowait><silent> J <nop>
     nno <buffer><nowait><silent> K <nop>
 
-    nno <buffer><nowait><silent> <c-l> :<c-u>call lg#window#focus_previous_if_on_right()<cr>
     " Purpose: Override the builtin help which doesn't take into account our custom mappings.
     nno <buffer><nowait><silent> ? :<c-u>call <sid>show_help()<cr>
 

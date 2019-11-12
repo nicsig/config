@@ -65,6 +65,9 @@ set guioptions=M
 " https://salsa.debian.org/printing-team/cups/raw/debian/master/cups/utf8demo.txt
 "
 " It will open the `utf8demo.txt` file in a new split.
+"
+" Same thing with this file:
+" ftp://ftp.vim.org/pub/vim/patches/8.1/README
 "}}}
 
 " I don't  want to  see `GLVS`  nor `GetLatestVimScripts`  when I  press Tab/C-d
@@ -220,7 +223,7 @@ if !has('nvim')
     Plug 'lacygoill/vim-man'
 endif
 Plug 'lacygoill/vim-markdown'
-Plug 'lacygoill/vim-matchit'
+Plug 'andymass/vim-matchup'
 Plug 'kana/vim-operator-user', {'frozen': 1}
 Plug 'lacygoill/potion'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
@@ -283,7 +286,7 @@ Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
 
 " Read Doc:
-Plug 'justinmk/vim-dirvish', {'frozen': 1}
+Plug 'justinmk/vim-dirvish'
 Plug 'mattn/emmet-vim'
 Plug 'machakann/vim-sandwich'
 Plug 'SirVer/ultisnips'
@@ -423,6 +426,13 @@ set termencoding=utf-8
 "     call s:styled_comments()
 "}}}
 fu s:styled_comments() abort
+    " Why do you include `help`?{{{
+    "
+    " We sometimes  lose the  conceal in a  help window, when  the help  file is
+    " already displayed in another window.
+    " Including `help` in this list fixes the issue, because `'cole'` is applied
+    " from an autocmd listening to `BufWinEnter`.
+    "}}}
     let s:styled_comments_filetypes =<< trim END
         awk
         c
@@ -432,6 +442,7 @@ fu s:styled_comments() abort
         desktop
         dircolors
         gitconfig
+        help
         html
         lua
         nroff
@@ -1124,15 +1135,15 @@ let g:ft_ignore_pat = '\.\%(Z\|gz\|bz2\|zip\|tgz\|log\)$'
 
 " Define rg as the program to call when using the Ex commands: `:[l]grep[add]`.
 
-" What's `-i`?{{{
-"
-" `--ignore-case`
-" }}}
-"     `-L`?{{{
+" What's `-L`?{{{
 "
 " `--follow`
 "
 " Follow symbolic links.
+" }}}
+"     `-S`?{{{
+"
+" `--smart-case`
 "}}}
 "     `--vimgrep`?{{{
 "
@@ -1141,7 +1152,7 @@ let g:ft_ignore_pat = '\.\%(Z\|gz\|bz2\|zip\|tgz\|log\)$'
 " It  shows every  match on  its  own line,  including line  numbers and  column
 " numbers.
 "}}}
-set grepprg=rg\ -i\ -L\ --vimgrep\ 2>/dev/null
+set grepprg=rg\ -LS\ --vimgrep\ 2>/dev/null
 
 " Define how the output of rg must be parsed:
 "
@@ -1666,6 +1677,16 @@ set shortmess+=W
 " To achieve this, we install an autocmd which inspects a buffer-local variable;
 " the latter is used  to memorize the last value we've given to  the option in a
 " buffer (manually or via the `cob` mapping).
+
+" TODO: Since 8.1.2281, the option is global-local:{{{
+"
+" https://github.com/vim/vim/releases/tag/v8.1.2281
+"
+" Wait for the patch  to be ported to Nvim, and get rid  of this autocmd as well
+" as `b:showbreak` everywhere:
+"
+"     vim /b:showbreak/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
+"}}}
 augroup my_showbreak
     au!
     au BufEnter,WinEnter * let &showbreak = get(b:, 'showbreak', 1) ? '↪' : ''
@@ -2377,6 +2398,7 @@ endif
 "
 " Update: It was fixed in Vim (but not in Nvim):
 " https://github.com/vim/vim/releases/tag/v8.1.0251
+" https://github.com/neovim/neovim/pull/11269
 "}}}
 set nobackup
 " Future Workaround:{{{
@@ -3322,7 +3344,8 @@ nmap ga <plug>(EasyAlign)
 
 augroup vimrc_mappings
     au!
-    au BufReadPost $MYVIMRC  call s:install_vimrc_mappings()
+    " do *not* use `$MYVIMRC`; it would not work as expected in Nvim
+    au BufReadPost ~/.vim/vimrc call s:install_vimrc_mappings()
 augroup END
 
 fu s:install_vimrc_mappings() abort
@@ -3926,6 +3949,10 @@ endfu
 nno <silent> -r :<c-u>call <sid>edit_readme()<cr>
 
 fu s:edit_readme() abort
+    if expand('%:p:h') is# $HOME
+        sp ~/.README.md | exe '1'
+        return
+    endif
     let files = glob(expand('%:p:h')..'/*', 0, 1)
     let kwd = '\%(readme\|contents\)'
     let pat = '\c/'..kwd..'\%(\..\{-}\)\=$'
@@ -3936,8 +3963,7 @@ fu s:edit_readme() abort
         " Why `:exe`?{{{
         "
         " If later  you add  a bar  after the  command, `1`  will be  interpreted as
-        " `:1p[rint]`.
-        " We don't want that side-effect.
+        " `:1p[rint]`; we don't want that side-effect.
         "
         " MWE:
         "     " ✘ the 123th line is printed on the command-line
@@ -4747,87 +4773,6 @@ xno <silent> myM :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
                  \ <bar> call myfuncs#op_yank_matches('vis')<cr>
 " }}}2
 " Objects {{{2
-" i% {{{3
-
-" Old Code:{{{
-"
-"     xno <silent> i% <esc>%:exe 'norm vi'.matchstr(getline('.'), '\%'.col('.').'c.')<cr>
-"                     ├────┘          │    │
-"                     │               │    └ surrounding symbol
-"                     │               │      We could also use:
-"                     │               │
-"                     │               │              getline('.')[col('.')-1]<cr>
-"                     │               │
-"                     │               │      ... but it would not work for multi-byte characters.
-"                     │               │
-"                     │               └ do NOT add a bang:
-"                     │                 it would break the mapping for custom text-object like `i“`
-"                     │
-"                     └ move cursor to next surrounding symbols
-"}}}
-" Why don't we use the old code anymore?{{{
-"
-" The new  one takes  into consideration  all pairs  stored in  the buffer-local
-" value of `'mps'`. Including `“”` and `‘’`.
-"}}}
-" Could the new code be improved?{{{
-"
-" Yes, currently it doesn't always work  on a multiline text-object, because the
-" initial `%` finds  an opening symbol –  reliably – only when it's  on the last
-" line of the text-object.
-"
-" MWE:
-"
-"     (foo
-"     b|ar
-"     baz)
-"
-"     “foo
-"     bar
-"     b|az”
-"
-" Press `vi%`, while the cursor is on the bar.
-"}}}
-" Why no `v_a%`?{{{
-"
-" It would shadow `v_a%` from the `matchit` plugin:
-"
-"     xno <silent> a% <Esc>%v%
-"     ono <silent> a% :norm va%<cr>
-"}}}
-xno <silent> i% <esc>:call <sid>select_percent_object()<cr>
-ono <silent> i% :<c-u>norm vi%<cr>
-
-fu s:select_percent_object() abort
-    let pos = getcurpos()
-    " search for a closing/opening symbol
-    norm! %
-    if getcurpos() == pos
-        return
-    endif
-    " save closing/opening symbol
-    let sym = matchstr(getline('.'), '\%'..col('.')..'c.')
-    " Maybe we could speed the process by storing the next 2 values in buffer-local
-    " variables every time `FileType *` is fired. Not sure it's worth it.
-    let opening_syms = map(split(&l:mps, ','), {_,v -> matchstr(v, '.')})
-    let closing_syms = map(split(&l:mps, ','), {_,v -> matchstr(v, '.$')} )
-    " check it is indeed in 'mps'
-    if index(opening_syms, sym) < 0 && index(closing_syms, sym) < 0
-        return
-    endif
-    " check we're on a closing symbol
-    if index(opening_syms, sym) >= 0
-        norm! %
-    endif
-    " select object and quit to set the marks
-    exe "norm! v%\e"
-    " check there's at least one character inside the object
-    if getline("'<") is# getline("'>") && virtcol("'>") == virtcol("'<") + 1
-        return
-    endif
-    norm! gvloh
-endfu
-
 " i- {{{3
 
 xno <silent> i- :<c-u>call <sid>horizontal_rules_textobject('inside')<cr>
@@ -5346,6 +5291,52 @@ xno <expr> P '"_d"'..v:register..'P'
 " Those should be defined in a filetype plugin with the `-buffer` attribute.
 " }}}2
 
+" Cfg {{{2
+
+com -bar -complete=custom,s:cfg_complete -nargs=1 Cfg call s:cfg(<q-args>)
+
+fu s:cfg_complete(_a, _l, _p) abort
+    return join(sort(keys(s:PGM2CFGFILES)), "\n")
+endfu
+
+fu s:cfg(pgm) abort
+    let files = s:PGM2CFGFILES[a:pgm]
+    call filter(files, {_,v -> filereadable(expand(v))})
+    if empty(files) | echo 'no readable file' | endif
+    for file in files
+        exe 'sp '..file
+    endfor
+endfu
+
+let s:PGM2CFGFILES = {
+\ 'autostart':     ['~/bin/autostartrc'],
+\ 'bash':          ['~/.bashrc', '~/.bashenv', '~/.bash_profile'],
+\ 'conky':         ['~/.config/conky/system.lua', '~/.config/conky/system_rings.lua', '~/.config/conky/time.lua'],
+\ 'fasd':          ['~/.fasdrc'],
+\ 'fd':            ['~/.fdignore'],
+\ 'firefox':       glob('~/.mozilla/firefox/*.default/chrome/userContent.css', 0, 1),
+\ 'git':           ['~/.config/git/config', '~/.cvsignore'],
+\ 'htop':          ['~/.config/htop/htoprc'],
+\ 'intersubs':     ['~/.config/mpv/scripts/interSubs.lua', '~/.config/mpv/scripts/interSubs.py', '~/.config/mpv/scripts/interSubs_config.py'],
+\ 'keyboard':      glob('~/.config/keyboard/*', 0, 1),
+\ 'kitty':         ['~/.config/kitty/kitty.conf'],
+\ 'latexmk':       ['~/.config/latexmk/latexmkrc'],
+\ 'mpv':           ['~/.config/mpv/input.conf', '~/.config/mpv/mpv.conf'],
+\ 'newsboat':      ['~/.config/newsboat/config', '~/.config/newsboat/urls'],
+\ 'ranger':        ['~/.config/ranger/rc.conf'],
+\ 'readline':      ['~/.inputrc'],
+\ 'surfraw':       ['~/.config/surfraw/bookmarks', '~/.config/surfraw/conf'],
+\ 'tmux':          ['~/.tmux.conf'],
+\ 'vim':           ['~/.vim/vimrc'],
+\ 'w3m':           ['~/.w3m/config'],
+\ 'weechat':       ['~/.config/weechat/script/rc.conf'],
+\ 'xbindkeys':     ['~/.config/keyboard/xbindkeys.conf'],
+\ 'xfce_terminal': ['~/.config/xfce4/terminal/terminalrc'],
+\ 'zathura':       ['~/.config/zathura/zathurarc'],
+\ 'zsh':           ['~/.zshrc', '~/.zshenv'],
+\ 'zsh_snippets':  glob('~/.config/zsh-snippets/*.txt', 0, 1),
+\ }
+
 " CGrep / LGrep {{{2
 
 " Grep for a pattern below the cwd.
@@ -5469,11 +5460,11 @@ com -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 " Feed them to `grep(1)` via `xargs(1)`, and in turn feed the result to `vim(1)` via `-q`:
 "
-"     $ vim -q <(xargs rg --vimgrep -i -L pattern </tmp/listing) +cw
+"     $ vim -q <(xargs rg -LS --vimgrep pattern </tmp/listing) +cw
 "
 " In one single command:
 "
-"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs rg -i -L --vimgrep pattern) +cw
+"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs rg -LS --vimgrep pattern) +cw
 "
 " We need `sed(1)`,  because the paths output by `$ git  ls-tree` are relative to
 " the root of the repo, which here is our home.
@@ -5657,13 +5648,13 @@ com -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " Indeed, before jumping to the first line to process, `:g` adds an entry in the
 " jumplist, whose mark is `''`. So:
 "
-"             we're on the 1st line of the 1st block
-"         and ''    is a line specifier for the latter
-"         and a block has 5 lines
+"         we're on the 1st line of the 1st block
+"     and ''    is a line specifier for the latter
+"     and a block has 5 lines
 "
-"         ⇒
+"     ⇒
 "
-"         ''+5    is a line specifier for the 1st line of the second block
+"     ''+5    is a line specifier for the 1st line of the second block
 "
 " This shows that the range passed to `:g` is entirely processed BEFORE
 " the command (here `:m`) it executes.
@@ -5671,7 +5662,7 @@ com -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " `.` doesn't stand for the same line inside a range passed to `:g`, and inside
 " a range passed to a command executed by the same `:g`.
 " Also, if `:Ex`  is a command executed by `:g`  (`:g/pat/Ex`), inside `:Ex` you
-" can use `''` to refer to the initial line when `:g` was started.
+" can use `''` to refer to the initial line from which `:g` was started.
 
 
 " `:g` will cycle through the lines of the 1st block, and always move + join
@@ -5747,12 +5738,7 @@ endfu
 
 " PluginGlobalVariables {{{2
 
-" Usage:
-"
-"     :PluginGlobalVariables ulti
-"     display all global variables containing the keyword `ulti`~
-
-com -bar -nargs=1 PluginGlobalVariables call myfuncs#plugin_global_variables(<q-args>)
+com -bar -nargs=? PluginGlobalVariables call myfuncs#plugin_global_variables(<q-args>)
 
 " PA    PQ    populate arglist / qfl with shell command {{{2
 
@@ -6762,8 +6748,8 @@ augroup source_files
     "
     " See `xrdb -query` to get a list of all existing resources.
     "}}}
-    au BufWritePost  ~/.Xresources  sil call system('xrdb ~/.Xresources')
-    au BufWritePost  ~/.vim/autoload/myfuncs.vim  exe 'source '..expand('<afile>:p')
+    au BufWritePost ~/.Xresources sil call system('xrdb ~/.Xresources')
+    au BufWritePost ~/.vim/autoload/myfuncs.vim exe 'source '..expand('<afile>:p')
 
     " Why shouldn't I write any autocmd listening to `BufWritePost` after this one?{{{
     "
@@ -6775,9 +6761,9 @@ augroup source_files
     " When you write `myfuncs.vim`, this augroup is not cleared.
     " Still, don't do it.
     "}}}
-    au BufWritePost  $MYVIMRC  exe 'source '..expand('<afile>:p')
+    au BufWritePost $MYVIMRC exe 'source '..expand('<afile>:p')
     if has('nvim')
-        au BufWritePost  ~/.vim/vimrc  exe 'source '..expand('<afile>:p')
+        au BufWritePost ~/.vim/vimrc exe 'source '..expand('<afile>:p')
     endif
 augroup END
 
@@ -6962,19 +6948,38 @@ endfu
 
 " Trailing Whitespace {{{2
 
-" Trailing whitespace in red but not in  insert mode, and not if the filetype is
-" blacklisted:
+" Trailing whitespace in red but not if the filetype is blacklisted:
 let s:NO_TRAILING_WHITESPACE_FT =<< trim END
 
     fzf
     git
     help
     qf
+    text
 END
 
 augroup trailing_whitespace
     au!
     au VimEnter,WinEnter,InsertLeave * call s:trailing_whitespace(1)
+    " Why `force`?{{{
+    "
+    " When we exit a snippet, `g:expanding_snippet` may still exist (it probably
+    " depends on the order of our custom autocmds).
+    " In that case, the match won't be re-installed; we *want* it to be re-installed.
+    "
+    " ---
+    "
+    " The  name of  the argument is  inspired from the  `force` argument  of the
+    " `extend()` function.
+    "
+    " ---
+    "
+    " One day, `<aevent>` may be implemented (or `v:event` may support all events).
+    " When that happens, you could get rid of this ugly `force` argument.
+    "}}}
+    au User UltiSnipsExitLastSnippet call s:trailing_whitespace(1, 'force')
+
+    au InsertEnter * call s:trailing_whitespace(0)
     " We don't want a match in a preview window.{{{
     "
     " The match is useful to let us  know that we should probably remove useless
@@ -6983,7 +6988,6 @@ augroup trailing_whitespace
     " In this context, the match is just noise.
     "}}}
     au WinLeave * if &l:pvw | call s:trailing_whitespace(0) | endif
-    au InsertEnter * call s:trailing_whitespace(0)
     " We don't want a match in a terminal buffer when we quit terminal-job mode.{{{
     "
     " In  Vim,  the match  is  installed  when  we  open a  terminal  window
@@ -7009,6 +7013,7 @@ augroup trailing_whitespace
     if !has('nvim')
         au TerminalOpen * call s:trailing_whitespace(0)
     endif
+
     " An undesirable match will be installed in a help buffer, even with `help` in `s:NO_TRAILING_WHITESPACE_FT`.{{{
     "
     " Try `:h :as`, and you'll see it.
@@ -7038,11 +7043,33 @@ augroup trailing_whitespace
     " the file again, which triggers `BufReadPre`, `FileType` and `BufReadPost`.
     "}}}
     au BufWinEnter {$VIMRUNTIME,$HOME/.vim,$HOME/.vim/*}/doc/*.txt call s:trailing_whitespace(0)
+    " Same issue when we split a window to read a text file:{{{
+    "
+    "     :e /tmp/vim.vim
+    "     :sp /tmp/txt.txt
+    "     " when `WinEnter` is fired, the filetype is still 'vim', not 'text'
+    "
+    " In particular, we don't want a match after running `:VimPatches 8.1`; it's
+    " noise. More generally,  trailing whitespace  in a  text file  is harmless,
+    " because it's not code; so we don't care about its presence.
+    "}}}
+    exe 'au FileType '
+        \ ..join(filter(s:NO_TRAILING_WHITESPACE_FT, {_,v -> v isnot# ''}), ',')
+        \ ..' call s:trailing_whitespace(0)'
+    " we still have an undesired match when we run `:RepeatableMotions -vv`
+    au WinEnter * if &ft is# '' | call s:trailing_whitespace(0) | endif
 augroup END
 
-fu s:trailing_whitespace(create_match) abort
+fu s:trailing_whitespace(create_match, ...) abort
+    if exists('g:expanding_snippet') && ! a:0 | return |endif
     if !a:create_match && exists('w:my_trailing_whitespace')
-        call matchdelete(w:my_trailing_whitespace)
+        " Why `sil!`?{{{
+        "
+        " Because the match may not exist anymore.
+        " For example, in `~/.vim/plugged/vim-qf/after/ftplugin/qf.vim:182`,
+        " we invoke `clearmatches()`.
+        "}}}
+        sil! call matchdelete(w:my_trailing_whitespace)
         unlet w:my_trailing_whitespace
     elseif a:create_match
        \ && !exists('w:my_trailing_whitespace')
@@ -7934,7 +7961,7 @@ endfu
 "    - `DirChanged` event
 "    - `ExitPre` event
 "    - `SourcePost` event
-"    - getcompletion('*', 'arglist')   +   com -complete=arglist ...
+"    - getcompletion('', 'arglist')   +   com -complete=arglist ...
 "    - `gettagstack()`, `settagstack()`
 "    - `mode()` (new output `n_ov`, `n_oV`, `n_oC-v`)
 "    - prompt-buffer
@@ -7960,6 +7987,7 @@ endfu
 "        `function Something(a = 10, b = 20, c = 30)`
 "
 "      https://github.com/vim/vim/releases/tag/v8.1.1310
+"      https://github.com/neovim/neovim/pull/10905
 "
 "    - `:h literal-Dict`
 "
@@ -9212,6 +9240,20 @@ endfu
 "
 " With the contents of `~/.vim/vimrc`.
 "
+" Update:
+" I think you should change the code of `:DebugVimrc`.
+" Forget about the tmux pane.
+" Just dump the vimrc code in a Vim split, and manually run `$ vim -Nu /tmp/vimrc`
+" from another tmux pane.
+" However, make the command ask you whether you intend to debug Nvim:
+"
+"     call confirm("Debug Nvim?", "&Yes\n&No\n&Cancel")
+"
+" Depending on  the answer,  either you  just dump  the vimrc,  or you  dump the
+" init.vim after replacing this line with the vimrc:
+"
+"     source $HOME/.vim/vimrc
+"
 " 132 -
 "
 " Replace a long `b:undo_ftplugin` with a simple function call:
@@ -9296,6 +9338,84 @@ endfu
 " Review all custom text-objects: make sure  they all position the cursor on the
 " end of  the selection, to  be consistent  with what Vim  seems to do  with its
 " builtin text-objects (e.g. try `vi{` in a shell function).
+"
+" ---
+"
+" Also,  make sure  that they  correctly  handle a  `v`, `V`,  `C-v` prefix,  by
+" inspecting the output of `mode(1)`:
+" https://github.com/vim/vim/releases/tag/v8.1.0648
+"
+" I guess  that it  means that  all our text-objects  should be  implemented via
+" `<expr>` mappings... Otherwise, the output of `mode(1)` is unreliable.
+"
+" 139 -
+"
+" Every time you've used sth like `norm! %` in the past, it was probably wrong.
+" You should have used sth like:
+"
+"     call searchpair('(', '', ')', 'W', 'synIDattr(synID(line("."),col("."),1),"name") =~? "comment\\|string"')
+"
+" This is what the matchit plugin does, and it's more reliable.
+" For example, position your cursor on the first open parenthesis on the following line:
+"
+"     if match(s:FUNCTION_NAMES, '^\V'..funcname..'\m\%((\|()\)') == -1
+"             ^
+"
+" And run `:norm! %`: the cursor doesn't jump on the closing parenthesis.
+" Now run `:call searchpair('(', ...)`: the cursor does jump on the closing parenthesis.
+" Wrap this in a `lg#` function, and use it whenever you used `norm[!] %` in the past.
+"
+" Update:
+" Actually, this is only an issue when you're dealing with code, not prose.
+" In code, you may have an unbalanced closing brace inside a regex for example;
+" it should be ignored, but `:norm! %` won't ignore it.
+" Right  now, the  only places  where  that is  a  real issue  are in  `vim-vim`
+" (`:RefHeredoc`, `:RefLambda`, `:RefMethod`).
+"
+" ---
+"
+" More generally, we often have issues with text-objects/motions related to braces.
+" And we often have to perform refactorings in `vim-matchit`, which is a broken plugin.
+" Enough is enough; we've removed `vim-matchit`, and installed `vim-matchup`.
+" Read the documentation of the latter.
+"
+" 140 -
+"
+" Search `$MYVIMRC` everywhere. Check whether the code works as intended in Nvim.
+"
+" 141 -
+"
+" `:vimgrep` is slow in Nvim.
+"
+"     $ nvim -Nu NONE
+"     :vim /badd/gj ~/.vim/**/*.vim | echo 'finished'
+"     " ≈ 4s
+"
+"     $ nvim -Nu <(echo '')
+"     :vim /badd/gj ~/.vim/**/*.vim | echo 'finished'
+"     " ≈ 20s
+"
+" Is it a regression? A missing Vim patch?
+"
+" Temporary solution:
+" Use `:Vim`, and tweak it so that it runs this command before `:vim`:
+"
+"     syn off | filetype plugin indent off
+"
+" 142 -
+"
+"     $ nvim
+"     :VimPatches 8.1
+"     " press G
+"     " press our custom `$` (or the built-in `g_`)
+"
+" Notice how the cursor jumps way beyond the end of the line (for a few seconds).
+"
+" Update:
+" I can also reproduce in Vim, using our current `/tmp/.vimrc` (undo seq 31),
+" our current `/tmp/vimrc` (undo seq 11), and our current `/tmp/file` (undo seq 2):
+"
+"     $ vim -Nu /tmp/.vimrc -S /tmp/vimrc /tmp/file
 
 
 
@@ -9485,12 +9605,12 @@ fu s:restore_last_qfl() abort
     " If there's already a qfl on the stack, or if there's no qfl to restore, don't try to restore anything.
     " How could there already be a qfl on the stack?{{{
     "
-    "     $ rg --vimgrep -i -L network /etc
+    "     $ rg -LS --vimgrep network /etc
     "     $ vim -q <(!!)
     "
-    "     $ rg --vimgrep -i -L network /etc | vim -q /dev/stdin
+    "     $ rg -LS --vimgrep network /etc | vim -q /dev/stdin
     "
-    "     $ rg --vimgrep -i -L network /etc >/tmp/log
+    "     $ rg -LS --vimgrep network /etc >/tmp/log
     "     $ vim -q /tmp/log
     "
     "     $ vim +'vimgrep /pat/ %' file

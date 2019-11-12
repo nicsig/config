@@ -7,7 +7,7 @@ J:$HOME/Dropbox/others_vimrc/justinmk.vim
 L:$HOME/wiki/l2l.md
 M:$HOME/.vim/plugged/vim-search/plugin/search.vim
 N:$HOME/.vim/doc/misc/notes
-P:$HOME/.vim/pythonx/snippet_helpers.py
+P:$HOME/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py
 S:$HOME/wiki/shell/shell.md
 T:$HOME/wiki/tmux/tmux.md
 U:$HOME/wiki/urxvt.md

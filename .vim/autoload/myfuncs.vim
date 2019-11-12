@@ -830,7 +830,7 @@ fu myfuncs#op_grep(type, ...) abort "{{{2
             norm! gvy
         endif
 
-        let cmd = 'rg 2>/dev/null --vimgrep -i -L '..(a:0 ? a:1 : @")
+        let cmd = 'rg 2>/dev/null -FLS --vimgrep '..shellescape((a:0 ? a:1 : @"))
         let use_loclist = a:0 ? a:2 : 0
         if a:type is# 'Ex' && use_loclist
             " Why `:lgetexpr` instead of `:lgrep!`?{{{
@@ -1187,18 +1187,22 @@ fu myfuncs#plugin_install(url) abort "{{{1
 endfu
 
 fu myfuncs#plugin_global_variables(keyword) abort "{{{1
-    let condition = 'v:key =~ ''\C\V''.escape('''..a:keyword..''', ''\'') && v:key !~ ''\(loaded\|did_plugin_\)'''
-    let options   = items(filter(deepcopy(g:), condition))
+    if a:keyword is# ''
+        let usage =<< trim END
+        usage:
 
-    let msg = ''
-    for option in options
-        let msg ..=  option[0]
-                 \ ..' = '
-                 \ ..string(option[1])
-                 \ ..(index(options, option) != len(options) - 1 ? "\n\n" : '')
-    endfor
-
-    echo msg
+            :PluginGlobalVariables ulti
+            display all global variables containing the keyword `ulti`
+        END
+        echo join(usage, "\n")
+        return
+    endif
+    let variables = items(filter(deepcopy(g:),
+        \ {k -> k =~# '\C\V'..escape(a:keyword, '\') && k !~# '\%(loaded\|did_plugin_\)'}))
+    call map(variables, {_,v -> v[0]..' = '..string(v[1])})
+    new
+    setl bt=nofile nobl noswf nowrap
+    call setline(1, variables)
 endfu
 
 fu myfuncs#populate_list(list, cmd) abort "{{{1
@@ -1356,7 +1360,7 @@ fu myfuncs#tab_toc() abort "{{{1
     let toc = []
     for lnum in range(1, line('$'))
         let col = match(getline(lnum), patterns[&ft])
-        if col != -1 && synIDattr(synID(lnum, col, 0), 'name') =~? syntaxes[&ft]
+        if col != -1 && synIDattr(synID(lnum, col, 1), 'name') =~? syntaxes[&ft]
             let text = substitute(getline(lnum), '\s\+', ' ', 'g')
             call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
         endif

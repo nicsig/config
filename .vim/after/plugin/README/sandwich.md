@@ -204,7 +204,7 @@ could test whether the plugin has been sourced:
 Or use a `try` conditional before trying to use its value in an assignment.
 
 ##
-# TODO
+# Todo
 ## ?
 
 Press `vis"` while the cursor is where the bar is:

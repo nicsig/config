@@ -990,9 +990,7 @@ EOF
 #                                                        │
 cfg_autostart() { "${=EDITOR}" "${HOME}/bin/autostartrc" ;}
 cfg_bash() { "${=EDITOR}" -o "${HOME}/.bashrc" "${HOME}/.bashenv" "${HOME}/.bash_profile" ;}
-cfg_conky_rings() { "${=EDITOR}" "${HOME}/.conky/system_rings.lua" ;}
-cfg_conky_system() { "${=EDITOR}" "${HOME}/.conky/system.lua" ;}
-cfg_conky_time() { "${=EDITOR}" "${HOME}/.conky/time.lua" ;}
+cfg_conky() { "${=EDITOR}" "${HOME}/.config/conky/system.lua" "${HOME}/.config/conky/system_rings.lua" "${HOME}/.config/conky/time.lua" ;}
 cfg_fasd() { "${=EDITOR}" "${HOME}/.fasdrc" ;}
 cfg_fd() { "${=EDITOR}" "${HOME}/.fdignore" ;}
 cfg_firefox() { "${=EDITOR}" ${HOME}/.mozilla/firefox/*.default/chrome/userContent.css ;}
@@ -1000,8 +998,8 @@ cfg_git() { "${=EDITOR}" -o "${HOME}/.config/git/config" "${HOME}/.cvsignore" ;}
 cfg_htop() { "${=EDITOR}" "${HOME}/.config/htop/htoprc" ;}
 cfg_intersubs() { "${=EDITOR}" -o "${HOME}/.config/mpv/scripts/interSubs.lua" "${HOME}/.config/mpv/scripts/interSubs.py" "${HOME}/.config/mpv/scripts/interSubs_config.py" ;}
 cfg_keyboard() { "${=EDITOR}" -o ${HOME}/.config/keyboard/* ;}
-cfg_kitty() { "${=EDITOR}" "${HOME}/.config/kitty.conf" ;}
-cfg_latexmk() { "${=EDITOR}" "${HOME}/.config/latexmk/latexmkrcl" ;}
+cfg_kitty() { "${=EDITOR}" "${HOME}/.config/kitty/kitty.conf" ;}
+cfg_latexmk() { "${=EDITOR}" "${HOME}/.config/latexmk/latexmkrc" ;}
 cfg_mpv() { "${=EDITOR}" -o "${HOME}/.config/mpv/input.conf" "${HOME}/.config/mpv/mpv.conf" ;}
 cfg_newsboat() { "${=EDITOR}" -o "${HOME}/.config/newsboat/config" "${HOME}/.config/newsboat/urls" ;}
 cfg_ranger() { "${=EDITOR}" "${HOME}/.config/ranger/rc.conf" ;}
@@ -1012,8 +1010,7 @@ cfg_vim() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
 cfg_w3m() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
 cfg_weechat() { "${=EDITOR}" "${HOME}/.config/weechat/script/rc.conf" ;}
 cfg_xbindkeys() { "${=EDITOR}" "${HOME}/.config/keyboard/xbindkeys.conf" ;}
-cfg_xfce_terminal() { "${=EDITOR}" "${HOME}/.config/xfce4/terminal/terminal.rc" ;}
-cfg_xmodmap() { "${=EDITOR}" "${HOME}/.Xmodmap" ;}
+cfg_xfce_terminal() { "${=EDITOR}" "${HOME}/.config/xfce4/terminal/terminalrc" ;}
 cfg_zathura() { "${=EDITOR}" "${HOME}/.config/zathura/zathurarc" ;}
 cfg_zsh() { "${=EDITOR}" -o "${HOME}/.zshrc" "${HOME}/.zshenv" ;}
 cfg_zsh_snippets() { "${=EDITOR}" -o ${HOME}/.config/zsh-snippets/*.txt ;}
@@ -1031,8 +1028,7 @@ cfg_zsh_snippets() { "${=EDITOR}" -o ${HOME}/.config/zsh-snippets/*.txt ;}
 # Fortunately, we can force zsh to do field splitting using the `=` flag.
 # For more info:
 #
-#     man zshexpn
-#     /${=spec}
+#     man zshexpn /${=spec}
 #}}}
 
 checkinstall_what_have_i_installed() { #{{{2
@@ -1972,13 +1968,14 @@ nv() { #{{{2
 
       # send the filenames to the server
       vim --remote "$@"
-      # For each buffer in the arglist:
+      # For each buffer in the arglist:{{{
       #
-      #         enable the 'binary' option.
-      #         Among other things, il will prevent Vim from doing any kind of
-      #         conversion, which could damage the files.
+      #    - enable the 'binary' option.
+      #      Among other things, il will prevent Vim from doing any kind of
+      #      conversion, which could damage the files.
       #
-      #         set the filetype to `xxd` (to have syntax highlighting)
+      #    - set the filetype to `xxd` (to have syntax highlighting)
+      #}}}
       vim --remote-send ":argdo setl binary ft=xxd<cr>"
       # filter the contents of the binary buffer through `xxd`
       vim --remote-send ":argdo %!xxd<cr><cr>"
@@ -2002,6 +1999,7 @@ nv() { #{{{2
       shift 1
       local IFS=' '
 
+      vim --remote-send ":split<cr>"
       vim --remote "$@"
       vim --remote-send ":argdo split<cr>:q<cr><cr>"
       #                                  ├────┘
@@ -2012,6 +2010,7 @@ nv() { #{{{2
     elif [[ $1 == -O ]]; then
       shift 1
       local IFS=' '
+      vim --remote-send ":vsplit<cr>"
       vim --remote "$@"
       vim --remote-send ":argdo vsplit<cr>:q<cr><cr>"
 
@@ -2019,11 +2018,13 @@ nv() { #{{{2
     elif [[ $1 == -p ]]; then
       shift 1
       local IFS=' '
+      vim --remote-send ":tabnew<cr>"
       vim --remote "$@"
       vim --remote-send ":argdo tabedit<cr>:q<cr>"
 
-    # If the 1st argument is `-q`, we want to populate the qfl with the output
-    # of a shell command. The syntax should be:
+    # If the 1st argument is `-q`, we want to populate the qfl with the output of a shell command.{{{
+    #
+    # The syntax should be:
     #
     #               ┌ Use single quotes to prevent the current shell from expanding a glob.
     #               │ The glob is for the Vim function `system()`, which will send it back
@@ -2038,19 +2039,19 @@ nv() { #{{{2
     # With Vim, you should type:
     #
     #         vim -q =(grep -Rn foo *)    ✔
-
+    #}}}
     elif [[ $1 == -q ]]; then
-
       shift 1
       local IFS=' '
 
-      #                                 ┌ Why not $@?
-      #                                 │ $@ would be expanded into:
-      #                                 │
-      #                                 │     '$1' '$2' ...
-      #                                 │
-      #                                 │ ... but `system()` expects a single string.
-      #                                 │
+      # Why not `$@`?{{{
+      #
+      # $@ would be expanded into:
+      #
+      #     '$1' '$2' ...
+      #
+      # ... but `system()` expects a single string.
+      #}}}
       vim --remote-send ":cexpr system('$*')<cr>"
 
     # If no option was used, `-[bdoOpq]`, we just want to send files to the server.
@@ -3089,7 +3090,7 @@ alias fm='[[ -n "${TMUX}" ]] && [[ $(\tmux display -p "#W") == "zsh" ]] && \tmux
 
 # rg {{{3
 
-alias rg='\rg 2>/dev/null --vimgrep -i -L'
+alias rg='\rg -LS --vimgrep'
 
 # sh {{{3
 
@@ -3393,7 +3394,8 @@ ignore_these_cmds() {
   #
   # It splits the result of the expansion into words.
   #
-  # Watch:
+  # Example:
+  #
   #     $ sentence='Hello jane, how are you!'
   #
   #     $ printf -- '%s\n' ${sentence}
@@ -4730,7 +4732,7 @@ typeset -Ag abbrev
 abbrev=(
   # Grep (and ignore the `grep(1)` process if we grep the output of `ps(1)`)
   'G' '| grep -v grep | grep'
-  'L'    '2>&1 | less'
+  'L' '2>&1 | less'
   # Warning: If `cmd V` opens an empty buffer,{{{
   # then later opens the right buffer  (the one containing the output of `cmd`),
   # try to delete `~/.fasd-init-zsh`, and restart the shell.
@@ -4746,31 +4748,45 @@ abbrev=(
   # Maybe  the issue  came  from  having installed  fasd  from  the official  repo
   # (instead of github)...
   #}}}
-  'V'     '2>&1 | vipe >/dev/null'
-  #                     │
-  #                     └ don't write on the terminal, the Vim buffer is enough
+  'V' '2>&1 | vipe >/dev/null'
+  #                │
+  #                └ don't write on the terminal, the Vim buffer is enough
 
   # Align Columns
-  'ac'    '| column -t'
+  'ac' '| column -t'
   # ring the BelL
-  'bl'    '; tput bel'
+  'bl' '; tput bel'
   # printf FieLd
-  'fl'   "| awk '{ print $"
-  # Cd after Cloning repo
-  'cc' '&& cd !#2:t'
+  'fl' "| awk '{ print $"
+
+  # Cd into most reCent directory (useful after cloning a repo)
+  'cc' '&& cd *(/oc[1])'
+  #           │ │├┘├─┘{{{
+  #           │ ││ └ first directory in the list
+  #           │ │└ sort by the time of the last inode change
+  #           │ └ only the directories
+  #           └ all files/directories in the current directory
+  #
+  # For more info:
+  #
+  #     man zshexpn /FILENAME GENERATION/;/Glob Qualifiers/;/^\s*\Coc\s
+  #     https://unix.stackexchange.com/a/550640/289772
+  #}}}
+
   # No Errors
-  'ne'   '2>/dev/null'
-  'pf'    "printf -- '"
+  'ne' '2>/dev/null'
+  'pf' "printf -- '"
 
   # silence!
-  #        ┌ redirect output to /dev/null
-  #        │          ┌ same thing for errors
-  #        ├────────┐ ├──┐
-  'sl'    '>/dev/null 2>&1'
+  'sl' '>/dev/null 2>&1'
+  #     ├────────┘ ├──┘{{{
+  #     │          └ same thing for errors
+  #     └ redirect output to /dev/null
+  #}}}
 
   # Do *not* use `T`; it would be expanded when you try to (un)bind a tmux key binding:
   #     $ tmux bind -T ...
-  'tl'    '| tail -20'
+  'tl' '| tail -20'
 )
 
 # If you don't like the `cc` abbreviation, have a look at:{{{
@@ -4788,9 +4804,8 @@ __abbrev_expand() {
   # pattern for filename generation.
   setopt EXTENDED_GLOB
 
-  # make the `MATCH` parameter local to this function, otherwise,
-  # it would pollute the shell environment with the last word before hitting
-  # the last space
+  # make the `MATCH` parameter local to this function; otherwise, it would pollute
+  # the shell environment with the last word before hitting the last space
   local MATCH
 
   LBUFFER=${LBUFFER%%(#m)[a-zA-Z]#}
@@ -4820,8 +4835,20 @@ __abbrev_expand() {
   # > this indicates the ${name:-word} form of substitution.
   # > Instead,  a  space  may  be inserted before the -.
   #}}}
-    LBUFFER+=${abbrev[$MATCH]:-$MATCH}
-    #        │{{{
+    LBUFFER+=${(e)abbrev[$MATCH]:-$MATCH}
+    #        │  │{{{
+    #        │  └ allows us to use an abbreviation whose rhs contains parameter expansion flags
+    #        │    for example, thanks to `(e)`, you could use this abbreviation:
+    #        │
+    #        │        'cc' '&& cd ${${${${(z)BUFFER}[3]}##*/}%%.*}'
+    #        │
+    #        │    Warning: because of this, you may need to quote special characters in your abbreviations
+    #        │
+    #        │    For more info:
+    #        │
+    #        │        `man zshexpn /PARAMETER EXPANSION/;/Parameter Expansion Flags/;/^\s*\Ce\s`
+    #        │        https://unix.stackexchange.com/a/550640/289772
+    #        │
     #        └ expands into `abbrev[$MATCH]` if the latter is set, `$MATCH` otherwise
     #          See: `man zshexpn /${name:-word}`
     #}}}
@@ -4884,7 +4911,7 @@ bindkey -M isearch ' ' self-insert
 #
 #     bindkey -M isearch " " self-insert
 #
-# ... as soon  as we would type a  space in a search, we would  leave the latter
+# ... as soon as you would type a  space in a search, you would leave the latter
 # and go back to the regular command line.
 
 # Options {{{1

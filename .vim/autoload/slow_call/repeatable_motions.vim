@@ -366,8 +366,37 @@ call lg#motion#repeatable#make#all({
 \                     {'bwd': '[m',  'fwd': ']m'},
 \                     {'bwd': '[s',  'fwd': ']s'},
 \                     {'bwd': '[{',  'fwd': ']}'},
-\                     {'bwd': 'g%',  'fwd': '%' },
 \                     {'bwd': 'g,',  'fwd': 'g;'},
+\                   ],
+\ })
+
+" Why `nxo` for the mode? Why not simply an empty string?{{{
+"
+" You can use `''` when the original motion is built-in or defined via `:[nore]map`.
+" In that  case, `maparg(motion,  '', 0,  1).mode` is a  space, which  our `lg#`
+" function recognizes as `nvo`.
+"
+" But  here,   `%`  is  not  built-in;   it's  a  custom  motion   installed  by
+" `vim-matchup`.  And the  latter does not use `:[nore]map`; it  uses 3 separate
+" mappings; one for `n`, one for `x`, and one for `o`:
+"
+"     ~/.vim/plugged/vim-matchup/autoload/matchup.vim:179
+"
+" If  you  pass the  mode  `''`  to  our `lg#`  function,  it  will pass  it  to
+" `maparg()`, which won't return a space for the mode, but `o`:
+"
+"                       vv
+"     :echo maparg('%', '', 0, 1).mode
+"     o~
+"
+" As a result, `%` and `g%` would be broken in normal and visual mode.
+"}}}
+call lg#motion#repeatable#make#all({
+\        'mode':   'nxo',
+\        'buffer': 0,
+\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'motions': [
+\                     {'bwd': 'g%',  'fwd': '%'},
 \                   ],
 \ })
 

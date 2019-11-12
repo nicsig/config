@@ -69,4 +69,3 @@ let g:loaded_ruby_provider = 0
 let g:loaded_node_provider = 0
 
 source $HOME/.vim/vimrc
-

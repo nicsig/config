@@ -193,11 +193,6 @@ export LC_ALL=en_US.UTF-8
 # Normally lines  after end of  file are displayed as  a single tilde  (~). This
 # option causes lines after end of file to be displayed as blank lines.
 #}}}
-#   `F`?{{{
-#
-# Causes less to automatically  exit if the entire file can  be displayed on the
-# first screen.
-#}}}
 #   `M`?{{{
 #
 # It's a Less option which makes the prompt more verbose.
@@ -227,7 +222,19 @@ export LC_ALL=en_US.UTF-8
 #
 # It's a `less(1)` option which prevents long lines from being wrapped.
 #}}}
-export LESS=i~FMRS
+export LESS=i~MRS
+# Do *not* set the `F` option.{{{
+#
+# `F` makes less automatically  exit if the entire file can  be displayed on the
+# first screen.
+#
+# This can cause an issue if less is invoked by another program.
+# In particular,  if less  is invoked by  ranger when you  open an  archive file
+# (e.g. `.tar.gz`), and if the archive contains only a few files, less will quit
+# immediately and you won't be able to  read its contents (unless you enable the
+# preview feature for  archive files, but this can cause  another issue specific
+# to ranger).
+#}}}
 # How to make the cursor jump at the bottom of the screen, on startup?{{{
 #
 # Use the option `+G`.
@@ -411,6 +418,9 @@ export PAGER=less
 
 # PATH {{{1
 
+# https://github.com/golang/go/wiki/SettingGOPATH#zsh
+export GOPATH=$HOME/go
+
 # Why don't you set `CDPATH`?{{{
 #
 # In the past, we assigned it this value:
@@ -493,7 +503,7 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/Vcs/dasht/man:${M
 #
 #     /etc/skel/.profile
 #}}}
-export PATH=${HOME}/bin:${HOME}/.local/bin:${HOME}/texlive/2018/bin/x86_64-linux:${PATH}:${HOME}/Vcs/dasht/bin
+export PATH=${HOME}/bin:${HOME}/.local/bin:${PATH}:/usr/local/go/bin:${HOME}/Vcs/dasht/bin:${HOME}/texlive/2018/bin/x86_64-linux
 
 # What is the purpose of this block? {{{
 #
@@ -679,7 +689,7 @@ export XDG_RUNTIME_DIR=/run/user/$UID
 #                        not sure about the others
 #}}}
 
-# remove duplicates in PATH &others {{{1
+# remove duplicates in PATH & similar variables {{{1
 
 # Purpose:{{{
 #
@@ -785,7 +795,7 @@ export XDG_RUNTIME_DIR=/run/user/$UID
       #             baz    (nothing was removed, because nothing matched `*:`)
       #             ...    (never ending loop)
       #
-      # As a result, the while loop will never ends.
+      # As a result, the while loop will never end.
       # OTOH, if we add an extra colon at the end:
       #
       #     foo:bar:baz:
