@@ -88,7 +88,6 @@ main() { #{{{2
 
   install_dependencies
   download
-  uninstall
   clean
   configure
   build
@@ -98,6 +97,7 @@ main() { #{{{2
   if [[ -n "$COMMIT_HASH" ]]; then
     return
   fi
+  uninstall
   install
   update_alternatives
   xdg_mime_default

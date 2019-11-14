@@ -159,11 +159,6 @@ start_recording() { #{{{2
     screenkey
   fi
 
-  # When we start a Vim session opening a file, the 1st line is briefly hidden,
-  # then appears. It looks as if the screen was “jumping“.
-  # Sleeping half a second prevent that. Anything below doesn't work.
-  sleep .5
-
   # start the command whose activity we want to record
   "$@"
 }

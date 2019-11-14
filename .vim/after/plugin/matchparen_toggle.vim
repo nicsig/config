@@ -16,7 +16,16 @@
 " The default script would undo our toggling.
 "}}}
 
-if exists(':DoMatchParen') != 2 || exists('g:no_after_plugin')
+" TODO: Should we keep or remove `has('vim_starting')`.
+" Remember that we can set `g:matchup_matchparen_enabled` to 0.
+" Have a look also at `g:matchup_delim_start_plaintext`.
+"
+" ---
+"
+" Idea: to  toggle the plugin locally  (just for the current  buffer), you could
+" set  `b:matchup_matchparen_enabled`  to `0`  in  all  the buffers  except  the
+" current one.
+if exists(':DoMatchParen') != 2 || exists('g:no_after_plugin') || has('vim_starting')
     finish
 endif
 

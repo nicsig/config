@@ -223,7 +223,8 @@ if !has('nvim')
     Plug 'lacygoill/vim-man'
 endif
 Plug 'lacygoill/vim-markdown'
-Plug 'andymass/vim-matchup'
+" https://github.com/andymass/vim-matchup/issues/81
+Plug 'andymass/vim-matchup', {'frozen': 1}
 Plug 'kana/vim-operator-user', {'frozen': 1}
 Plug 'lacygoill/potion'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
@@ -8017,6 +8018,7 @@ endfu
 "         text
 "
 "    - v:echospace
+"    - `:h api-extended-marks` (Nvim only)
 "
 " 59 -
 " Prevent vim-session from checking swap files.
@@ -9015,6 +9017,17 @@ endfu
 " Update: Actually, I think you should only remove `g:no_plugin` and `g:no_after_plugin`.
 " Keep the rest.
 "
+" ---
+"
+" Should we add the guard `if $MYVIMRC is# '' | finish | endif` in all the files
+" under `~/.vim/{after/}plugin`?
+"
+" ---
+"
+" Should we add the guard `if  !exists('b:did_ftplugin')` in all the files under
+" `*/after/ftplugin/{&ft}.vim`?
+" https://github.com/andymass/vim-matchup/commit/0b780e9ae12ba913742356f4b7cedc52d3a15220
+"
 " 124 -
 "
 " Document a few things about debugging with breakpoints.
@@ -9403,6 +9416,7 @@ endfu
 " Use `:Vim`, and tweak it so that it runs this command before `:vim`:
 "
 "     syn off | filetype plugin indent off
+
 
 
 
