@@ -1,7 +1,3 @@
-if exists('g:no_after_plugin')
-    finish
-endif
-
 " Purpose:{{{
 "
 " Use this  file to remove a  command which you  never use and pollute  your tab
@@ -12,8 +8,8 @@ endif
 " Find a way to remove the built-in command `:Print`.
 " From `:h :Print`:
 "
-"         Just as ":print".  Was apparently added to Vi for
-"         people that keep the shift key pressed too long...
+" > Just as ":print".  Was apparently added to Vi for people that keep the shift
+" > key pressed too long...
 "}}}
 
 " LogiPat {{{1

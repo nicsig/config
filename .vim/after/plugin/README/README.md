@@ -30,25 +30,16 @@ You can use it to:
 
 ##
 # Guard
-## Should I put a guard in those scripts?  Why?
-
-If you can, yes.
+## Why should I put a guard in those scripts?
 
 A script  shouldn't be  sourced if  the plugin it  configures has  been disabled
-while we debug some issue (`$ vim -Nu /tmp/vimrc`).
-Otherwise, you may be able to reproduce a bug, that no one else will.
+while we debug some issue.
 
-Note that for the scripts which  are not associated with any third-party plugin:
+Note that there is  no possible guard for scripts which  are not associated with
+any third-party plugin, like:
 
    - nop.vim
-   - matchparen_toggle.vim
    - tidy_tab_completion.vim
-
-The only possible guard, is an ad-hoc one:
-
-    if exists('g:no_after_plugin')
-        finish
-    endif
 
 ## Which template should I follow?
 
@@ -56,17 +47,17 @@ The only possible guard, is an ad-hoc one:
        │ (i.e. the plugin it configures has been loaded)
        │
        ├───────────────────┐
-    if !exists(g:loaded_...) || exists('g:no_after_plugin')
+    if !exists(g:loaded_...)
         finish
     endif
 
 Or:
 
-    if stridx(&rtp, 'vim-...') == -1 || exists('g:no_after_plugin')
+    if stridx(&rtp, 'vim-...') == -1
         finish
     endif
 
-Note that the  name of the plugin  does not necessarily begin  with 'vim-', it's
+Note that the  name of the plugin  does not necessarily begin  with `vim-`, it's
 just a widely adopted convention.
 Adapt the first template to the plugin you're working on.
 

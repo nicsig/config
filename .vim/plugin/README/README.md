@@ -61,10 +61,10 @@ See the comment at the top of `nop.vim` for an explanation.
        │
        │                         ┌ source it only if the plugin is enabled
        │                         │
-       │                         │                                ┌ don't source if I'm debugging
-       │                         │                                │ with `$ vim -Nu NORC`
-       ├────────────────────┐    ├───────────────────────────┐    ├───────────────────┐
-    if exists('g:loaded_...') || stridx(&rtp, 'vim-...') == -1 || exists('g:no_plugin')
+       │                         │
+       │                         │
+       ├────────────────────┐    ├───────────────────────────┐
+    if exists('g:loaded_...') || stridx(&rtp, 'vim-...') == -1
         finish
     endif
 

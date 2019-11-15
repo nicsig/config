@@ -16,6 +16,19 @@ If `{count}` is less than `6`, go forwards `{count}` times.
 Otherwise, go to `{count}` percentage in the file (`N%`).
 See `:h g:matchup_motion_override_Npercent`.
 
+This is useful for constructs with more than 2 words; example:
+
+    if 1
+      " do sth
+    elseif 2
+      " do sth else
+    elseif 3
+      " do sth else
+    endif
+
+Here, there  are 4 words (`if`,  `elseif`x2, `endif`); if your  cursor is before
+`if`, and you want to jump to `endif`, you can press `3%`.
+
 ### `g%`
 
 When on a recognized word, go backwards to `[count]`th previous matching word.
@@ -345,11 +358,6 @@ Note that this does not reload `'matchpairs'` or `b:match_word`.
 
 ##
 ## Options
-### `g:matchup_enabled`
-
-Set to 0 to disable the plugin entirely.
-Default: 1
-
 ### `g:matchup_*_enabled`
 
     ┌──────────────────────────────┬────────────────────────────────┐
@@ -608,9 +616,9 @@ Default: 0
 ## Module motion
 ### `g:matchup_motion_override_Npercent`
 
-In vim, `{count}%` goes to the `{count}` percentage in the file (see `:h N%`).
-match-up overrides this motion for small {count} (by default, anything less than
-7); for example, to allow `{count}%` for `{count}` up to 11:
+In vim, `{count}%` goes  to the `{count}` percentage in the  file (see `:h N%`).
+match-up overrides  this motion for  small `{count}` (by default,  anything less
+than 7); for example, to allow `{count}%` for `{count}` up to 11:
 
     let g:matchup_motion_override_Npercent = 11
 
@@ -759,7 +767,7 @@ file type.
 Adds a set of patterns to `b:match_words`, adding a comma if necessary.
 
 ##
-# FAQ
+# Issues
 ## Highlighting is not correct for construct X!
 
 match-up  uses  matchit's filetype-specific  data,  which  may not  give  enough
@@ -860,4 +868,83 @@ prefer to use one of the following:
 
    - `vim-surround`        https://github.com/tpope/vim-surround
    - `vim-sandwich`        https://github.com/machakann/vim-sandwich
+
+##
+# Todo
+## Sometimes, words are highlighted inside comments; they should not.
+
+Write this in `/tmp/vim.vim`:
+
+    " foo if bar
+    " baz end qux
+
+And position your cursor on `if`: `if` and `end` are highlighted.
+They should not.
+match-up understands `b:match_skip`, try to set it to fix this issue.
+
+See: <https://github.com/andymass/vim-matchup/issues/54>
+And read the documentation about `vim-matchit`:
+<https://github.com/chrisbra/matchit/>
+
+## In `augroup foo`, the `f` is wrongly highlighted.
+
+The   issue   seems   to   come   from   our   `b:match_words`   assignment   in
+`~/.vim/plugged/vim-vim/after/ftplugin/vim.vim`.
+
+In particular, it contains these patterns:
+
+                                  vv
+    \<aug\%[roup]\s\+\%(END\>\)\@!\S
+    \<aug\%[roup]\s\+END\>
+
+I copied them from `$VIMRUNTIME/ftplugin/vim.vim`.
+
+If you remove the assignment, the issue is fixed.
+I think that's because match-up, by default, replaces this pattern:
+
+    \<aug\%[roup]\s\+\%(END\>\)\@!\S
+
+With this one:
+
+    \<aug\%[roup]\ze\s\+\%(END\>\)\@!\S
+
+Notice the introduction of `\ze` (see `~/.vim/plugged/vim-matchup/after/ftplugin/vim_matchup.vim`).
+Our assignment probably overwrites this fix.
+So, I think we need to edit or remove this `b:match_words` assignment.
+Remember that we need to include these patterns:
+
+    {\@1<!{{\@!:}\@1<!}}\@!
+
+And we  may need to  edit the  patterns for `:function`/`:endfunction`  (see the
+comment at the top).
+
+Try   to  use   the  `..=`   operator  to   append  your   change,  and/or   use
+`matchup#util#patch_match_words()`.
+
+## Tweak `cop` so that the toggling is local to the current buffer.
+
+To do so, you could set `b:matchup_matchparen_enabled` to `0` in all the buffers
+except the current one.
+
+Also, have a look also at `g:matchup_delim_start_plaintext`.
+
+##
+## Errors in help page (submit PR)
+
+    g%                      When on a recognized word, go backwards to [count]th
+    previous matching word.  If at an open word, cycle
+    around to the corresponding **open** word.  If the cursor
+    is not on a word, seek forwards to one and then jump
+    to its match.
+
+Replace the last `open` with `close`.
+
+---
+
+    Match preferences~                                        *g:matchup_matchpref*
+
+Break down the line in two:
+
+                                                              *g:matchup_matchpref*
+    Match preferences~
 

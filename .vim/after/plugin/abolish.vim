@@ -1,4 +1,4 @@
-if exists(':Abolish') != 2 || exists('g:no_after_plugin')
+if exists(':Abolish') != 2
     finish
 endif
 

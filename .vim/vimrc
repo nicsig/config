@@ -135,6 +135,8 @@ if has('vim_starting')
 " Plugins must be declared after this line.
 " They will be downloaded inside `~/.vim/plugged/`.
 call plug#begin('~/.vim/plugged')
+" https://github.com/andymass/vim-matchup/issues/81
+Plug 'lacygoill/vim-window'
 
 " To Assimilate:
 Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
@@ -223,8 +225,7 @@ if !has('nvim')
     Plug 'lacygoill/vim-man'
 endif
 Plug 'lacygoill/vim-markdown'
-" https://github.com/andymass/vim-matchup/issues/81
-Plug 'andymass/vim-matchup', {'frozen': 1}
+Plug 'andymass/vim-matchup'
 Plug 'kana/vim-operator-user', {'frozen': 1}
 Plug 'lacygoill/potion'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
@@ -283,7 +284,6 @@ Plug 'lacygoill/vim-term'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
-Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
 
 " Read Doc:
@@ -3999,10 +3999,6 @@ fu s:unicode_table() abort
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
 endfu
 
-" -u               :UndotreeShow {{{4
-
-" `D` toggles the diff window.
-nno <silent> -u :<c-u>UndotreeShow<cr>
 " }}}3
 " plus                (prefix) {{{3
 " +>    +<      split/join listing or long data {{{4
@@ -4117,7 +4113,7 @@ nno <silent> <c-]> :call <sid>jump_to_definition()<cr>
 
 fu s:jump_to_definition() abort
     try
-        exe "norm! \<c-]>"
+        exe "norm! \<c-]>zvzz"
     catch /^Vim\%((\a\+)\)\=:E\%(426\|433\)/
         if &filetype isnot# 'help'
             norm! 1gd
@@ -8995,29 +8991,6 @@ endfu
 "    - include it in a help command (e.g. `g?`, `:MyCmd -help`)
 "
 " 123 -
-" We have  a complex mechanism to disable custom  plugins in `~/.vim/plugin` and
-" `~/.vim/after/plugin`.
-" Maybe we could get rid of it entirely.
-" Instead, we could just add `set rtp-=~/.vim` (without adding it back with
-" `set  rtp^=~/.vim`) in our  minimal vimrc  to disable `~/.vim/plugin`,  and we
-" could add `set rtp-=~/.vim/after` to disable `~/.vim/plugin/after`.
-"
-" See:
-"
-"     ~/.vim/plugin/
-"     ~/.vim/plugin/README/README.md
-"     ~/.vim/after/plugin/
-"     ~/.vim/after/plugin/README/README.md
-"     ~/.vim/autoload/slow_call/
-"     ~/.vim/autoload/slow_call/README/README.md
-"     ~/.vim/plugged/vim-snippets/autoload/snippets.vim
-"     ~/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py
-"     ~/.vim/plugged/vim-snippets/UltiSnips/vim.snippets
-"
-" Update: Actually, I think you should only remove `g:no_plugin` and `g:no_after_plugin`.
-" Keep the rest.
-"
-" ---
 "
 " Should we add the guard `if $MYVIMRC is# '' | finish | endif` in all the files
 " under `~/.vim/{after/}plugin`?

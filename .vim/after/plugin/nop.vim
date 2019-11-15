@@ -1,7 +1,3 @@
-if exists('g:no_after_plugin')
-    finish
-endif
-
 " Purpose:{{{
 "
 " Use this file to disable some keys.

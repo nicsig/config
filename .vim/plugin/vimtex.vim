@@ -4,7 +4,7 @@
 " It doesn't  have a `plugin/` directory,  and it doesn't set  a global variable
 " when Vim starts up.
 "}}}
-if stridx(&rtp, 'vimtex') == -1 || exists('g:no_plugin')
+if stridx(&rtp, 'vimtex') == -1
     finish
 endif
 
@@ -168,22 +168,7 @@ let g:vimtex_quickfix_open_on_warning = 0
 let g:tex_flavor = 'latex'
 
 " Vimtex ships with an improved version of `matchparen`.
-" I don't want it.
+" I don't want it; I prefer to  use the `matchparen` module of match-up, because
+" its matching engine is more advanced (`:h matchup-interoperability /advanced`).
 let g:vimtex_matchparen_enabled = 0
-" TODO: matchup{{{
-"
-" By default, `vimtex` highlights  matching delimiters, including LaTex specific
-" ones, which `matchparen` does not.
-" We disable this for the moment, because it's noisy by default.
-" I prefer to enable such a feature temporarily on-demand.
-" Anyway, there's a better alternative which integrates with `vimtex`:
-"
-"         vim-matchup
-"
-" See `:lh g:matchup_override_vimtex`
-"
-" Try   to  install   vim-matchup,  read   its  doc,   and  integrate   it  with
-" vimtex.   You  may  be  able   to  enable  matchup  temporarily  by  resetting
-" `b:matchup_matchparen_enabled` and reloading the buffer.
-"}}}
 

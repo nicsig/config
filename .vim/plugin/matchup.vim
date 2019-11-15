@@ -1,5 +1,9 @@
+if exists('g:loaded_matchup') || stridx(&rtp, 'vim-matchup') == -1
+    finish
+endif
+
 " disable the matchparen module when Vim starts up
-" let g:matchup_matchparen_enabled = 0
+let g:matchup_matchparen_enabled = 0
 
 " display an offscreen match in a popup window
 let g:matchup_matchparen_offscreen = {'method': 'popup'}
@@ -78,3 +82,7 @@ let g:matchup_transmute_enabled = 1
 "
 "     $VIMRUNTIME/ftplugin/html.vim:34
 "}}}
+
+" disable the matchparen module in insert and visual mode
+let g:matchup_matchparen_nomode = "ivV\<c-v>"
+

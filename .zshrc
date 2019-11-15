@@ -3735,6 +3735,21 @@ __previous_directory() {
 zle -N __previous_directory
 bindkey '^^' __previous_directory
 
+# C-d        delete-char-or-list {{{3
+
+# Purpose:
+# Don't  display all  possible shell  commands when  I press  `C-d` on  an empty
+# command-line which only contains whitespace; just close the shell.
+__delete-char-or-list() {
+  if [[ "$LBUFFER" =~ '^\s+$' ]]; then
+    exit
+  else
+    zle delete-char-or-list
+  fi
+}
+zle -N __delete-char-or-list
+bindkey '^D' __delete-char-or-list
+
 # C-g        (prefix) {{{3
 
 # To use `C-g` as a prefix, we need to remove the function to which it's bound by default.

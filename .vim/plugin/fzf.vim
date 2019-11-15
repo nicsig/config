@@ -1,4 +1,4 @@
-if exists('g:loaded_fzf') || stridx(&rtp, 'fzf.vim') == -1 || exists('g:no_plugin')
+if exists('g:loaded_fzf') || stridx(&rtp, 'fzf.vim') == -1
     finish
 endif
 

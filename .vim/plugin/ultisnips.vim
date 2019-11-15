@@ -1,4 +1,4 @@
-if exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1 || exists('g:no_plugin')
+if exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1
     finish
 endif
 
@@ -30,8 +30,7 @@ endif
 
 " First, because  I'm looking  for unused  keys, which will  stay unused  in the
 " future. Currently, the maximum value `xx` to create a <F-xx> {lhs} is `37`:
-"
-"         https://github.com/vim/vim/blob/8858498516108432453526f07783f14c9196e112/src/keymap.h#L194
+" https://github.com/vim/vim/blob/8858498516108432453526f07783f14c9196e112/src/keymap.h#L194
 "
 " Beyond  this value,  creating a  mapping would  shadow the  `<` key,  probably
 " because it's not interpreted as a function key anymore.
@@ -41,76 +40,72 @@ endif
 " Second, if we assigned Tab / S-Tab, it would make the code more complex.
 " Indeed, we would have to:
 "
-"     1. Capture the output of s:snr() in a global variable (g:snr_vimrc);
-"        from our vimrc file.
+"    1. Capture the output of s:snr() in a global variable (g:snr_vimrc);
+"       from our vimrc file.
 "
+"    2. Create the file ~/.vim/after/plugin/ultisnips.vim,
+"       in which we would write:
 "
-"     2. Create the file ~/.vim/after/plugin/ultisnips.vim,
-"        in which we would write:
+"         ino  <silent> <tab>     <c-r>={g:snr_vimrc}expand_cycle_jump('N')<cr>
+"         snor <silent> <tab>     <Esc>:call {g:snr_vimrc}expand_cycle_jump('N')<cr>
 "
-"                ino  <silent> <tab>     <c-r>={g:snr_vimrc}expand_cycle_jump('N')<cr>
-"                snor <silent> <tab>     <Esc>:call {g:snr_vimrc}expand_cycle_jump('N')<cr>
-
-"                ino  <silent> <s-tab>   <c-r>={g:snr_vimrc}expand_cycle_jump('P')<cr>
-"                snor <silent> <s-tab>   <Esc>:call {g:snr_vimrc}expand_cycle_jump('P')<cr>
+"         ino  <silent> <s-tab>   <c-r>={g:snr_vimrc}expand_cycle_jump('P')<cr>
+"         snor <silent> <s-tab>   <Esc>:call {g:snr_vimrc}expand_cycle_jump('P')<cr>
 "
-"        Why? Because, by default Ultisnips would install these global mappings:
+"       Why? Because, by default Ultisnips would install these global mappings:
 "
-"                i  <tab>       * <c-r>=UltiSnips#ExpandSnippetOrJump()<cr>
-"                s  <tab>       * <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>
+"         i  <tab>       * <c-r>=UltiSnips#ExpandSnippetOrJump()<cr>
+"         s  <tab>       * <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>
 "
-"        Then during, the expansion of a snippet, it would temporarily install
-"        these buffer-local mappings:
+"       Then during, the expansion of a snippet, it would temporarily install
+"       these buffer-local mappings:
 "
-"                i  <s-tab>     *@<c-r>=UltiSnips#JumpBackwards()<cr>
-"                s  <s-tab>     *@<Esc>:call UltiSnips#JumpBackwards()<cr>
+"         i  <s-tab>     *@<c-r>=UltiSnips#JumpBackwards()<cr>
+"         s  <s-tab>     *@<Esc>:call UltiSnips#JumpBackwards()<cr>
 "
-"        They are removed after the expansion (:h UltiSnips-triggers):
+"       They are removed after the expansion (:h UltiSnips-triggers):
 "
-"                UltiSnips will only map the jump triggers while a snippet is
-"                active to interfere as little as possible with other mappings.
+"         > UltiSnips will only map the jump triggers while a snippet is
+"         > active to interfere as little as possible with other mappings.
 "
-"        The first 2 mappings (Tab) call UltiSnips functions which expand a snippet
-"        or jump to the next tabstop, but they can't cycle forward inside a menu, nor
-"        can they complete text.
-"        The last 2 mappings (S-Tab) call UltiSnips functions which jump to the
-"        previous tabstop, but they can't cycle backward inside a menu.
+"       The first 2 mappings (Tab) call UltiSnips functions which expand a snippet
+"       or jump to the next tabstop, but they can't cycle forward inside a menu, nor
+"       can they complete text.
+"       The last 2 mappings (S-Tab) call UltiSnips functions which jump to the
+"       previous tabstop, but they can't cycle backward inside a menu.
 "
-"        So, we need a wrapper around ultisnips functions.
+"       So, we need a wrapper around ultisnips functions.
 "
+"    3. Add this file to the list of (2) files which one of our autocmd resources
+"       automatically when we save our vimrc.
+"       Why? Because when we save our vimrc, the 2 Tab mappings will be reset by
+"       UltiSnips (only after the 1st save it seems ...).
+"       Specifically because of this file:
 "
-"     3. Add this file to the list of (2) files which one of our autocmd resources
-"        automatically when we save our vimrc.
-"        Why? Because when we save our vimrc, the 2 Tab mappings will be reset by
-"        UltiSnips (only after the 1st save it seems ...).
-"        Specifically because of this file:
+"           ~/.vim/plugged/ultisnips/autoload/UltiSnips/map_keys.vim
 "
-"                ~/.vim/plugged/ultisnips/autoload/UltiSnips/map_keys.vim
+"    4. Install the following autocmd:
 "
+"           augroup ultisnips_custom
+"               au!
+"               au! User UltiSnipsEnterFirstSnippet
+"               au User  UltiSnipsEnterFirstSnippet iunmap <buffer> <nowait> <s-tab>
+"           augroup END
 "
-"     4. Install the following autocmd:
+"     Why? Because during the expansion of a snippet, UltiSnips temporarily
+"     installs this buffer-local mapping:
 "
-"                augroup ultisnips_custom
-"                    au!
-"                    au! User UltiSnipsEnterFirstSnippet
-"                    au User  UltiSnipsEnterFirstSnippet iunmap <buffer> <nowait> <s-tab>
-"                augroup END
+"           i  <s-tab>     *@<c-r>=UltiSnips#JumpBackwards()<cr>
 "
-"      Why? Because during the expansion of a snippet, UltiSnips temporarily
-"      installs this buffer-local mapping:
+"     This mapping overrides our own global mapping:
 "
-"                i  <s-tab>     *@<c-r>=UltiSnips#JumpBackwards()<cr>
+"           ino  <silent> <s-tab>   <c-r>={g:snr_vimrc}expand_cycle_jump('P')<cr>
 "
-"      This mapping overrides our own global mapping:
-"
-"                ino  <silent> <s-tab>   <c-r>={g:snr_vimrc}expand_cycle_jump('P')<cr>
-"
-"      Therefore, we would lose the capacity to cycle backward inside a menu.
-"      It would be probably a good idea to also unmap the buffer-local mapping
-"      for S-Tab in select mode (although I don't see an immediate pb with
-"      UltiSnips overriding our mapping in this case, because there can't be
-"      a menu in select mode, so we don't need to cycle back).
-"
+"     Therefore, we would lose the capacity to cycle backward inside a menu.
+"     It would be probably a good idea to also unmap the buffer-local mapping
+"     for S-Tab in select mode (although I don't see an immediate pb with
+"     UltiSnips overriding our mapping in this case, because there can't be
+"     a menu in select mode, so we don't need to cycle back).
 "}}}
 let g:UltiSnipsExpandTrigger       = '<S-F15>'
 let g:UltiSnipsJumpForwardTrigger  = '<S-F16>'
@@ -119,12 +114,12 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-F17>'
 
 " From :h mapmode-s :
 "
-"     Some commands work both in Visual and Select mode, some in only one.
-"     Note that quite often "Visual" is mentioned where both Visual and Select
-"     mode apply.
-"     NOTE: Mapping a printable character in Select mode may confuse the user.
-"     It's better to explicitly use :xmap, and :smap for printable characters.
-"     Or use :sunmap after defining the mapping.
+" > Some commands work both in Visual and Select mode, some in only one.
+" > Note that quite often "Visual" is mentioned where both Visual and Select
+" > mode apply.
+" > NOTE: Mapping a printable character in Select mode may confuse the user.
+" > It's better to explicitly use :xmap, and :smap for printable characters.
+" > Or use :sunmap after defining the mapping.
 "
 " It probably implies that mapping a printable character in select mode is a bad
 " idea. For example, suppose that a plugin install this mapping:
@@ -180,20 +175,7 @@ ino <silent> <c-g><s-tab> <c-r>=execute(g:_uspy . ' UltiSnips_Manager._current_s
 xno <silent> <tab> :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
 " We need a way to enable UltiSnips's autotrigger on-demand.
-nno <silent> cou :<c-u>call <sid>ultisnips_toggle_autotrigger()<cr>
-fu s:ultisnips_toggle_autotrigger() abort
-    if exists('#UltiSnips_AutoTrigger')
-        au! UltiSnips_AutoTrigger
-        aug! UltiSnips_AutoTrigger
-        echom '[UltiSnips AutoTrigger] OFF'
-    else
-        augroup UltiSnips_AutoTrigger
-            au!
-            au InsertCharPre,TextChangedI,TextChangedP * call UltiSnips#TrackChange()
-        augroup END
-        echom '[UltiSnips AutoTrigger] ON'
-    endif
-endfu
+nno <silent> cou :<c-u>call plugin#ultisnips#toggle_autotrigger()<cr>
 
 " Miscellaneous {{{1
 
@@ -267,24 +249,9 @@ endif
 "}}}
 augroup ulti_save_info
     au!
-    au User UltiSnipsEnterFirstSnippet call s:save_info()
+    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#save_info()
     " useful to prevent the highlighting of trailing whitespace during a snippet expansion
     au User UltiSnipsEnterFirstSnippet let g:expanding_snippet = 1
-    au User UltiSnipsExitLastSnippet   unlet! g:expanding_snippet
+    au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
 augroup END
-
-fu s:save_info() abort
-    if &ft isnot# 'markdown' || exists('g:my_ultisnips_info')
-        return
-    endif
-    sil let g:my_ultisnips_info = {
-        \ 'lsb_release -d': matchstr(systemlist('lsb_release -d')[0], '\s\+\zs.*'),
-        \ 'st -v': systemlist('st -v')[0],
-        \ 'tmux -V': systemlist('tmux -V')[0],
-        \ 'vim --version': system('vim --version | sed -n "1s/VIM - Vi IMproved\|(.*//gp ; 2p" | tr -d "\n"'),
-        \ 'nvim --version': systemlist('nvim --version | sed -n "1p"')[0],
-        \ 'xterm -v': systemlist('xterm -v')[0],
-        \ 'zsh --version' : systemlist('zsh --version')[0],
-        \ }
-endfu
 

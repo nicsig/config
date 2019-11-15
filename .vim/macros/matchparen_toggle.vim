@@ -4,28 +4,10 @@
 " It will disable the `matchparen` plugin.
 " But we also source it in a mapping to toggle the plugin.
 "
-"     ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:441
-"}}}
-" Warning: DO NOT rename this file to `matchparen.vim`!{{{
-"
-" If you do, when you'll press `cop`, you'll execute:
-"
-"     runtime! plugin/matchparen.vim
-"
-" This will source the current script (✔), then `$VIMRUNTIME/plugin/matchparen.vim` (✘).
-" The default script would undo our toggling.
+"     ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:703
 "}}}
 
-" TODO: Should we keep or remove `has('vim_starting')`.
-" Remember that we can set `g:matchup_matchparen_enabled` to 0.
-" Have a look also at `g:matchup_delim_start_plaintext`.
-"
-" ---
-"
-" Idea: to  toggle the plugin locally  (just for the current  buffer), you could
-" set  `b:matchup_matchparen_enabled`  to `0`  in  all  the buffers  except  the
-" current one.
-if exists(':DoMatchParen') != 2 || exists('g:no_after_plugin') || has('vim_starting')
+if exists(':DoMatchParen') != 2
     finish
 endif
 
