@@ -407,6 +407,15 @@ small start-up cost to vim.
 
 Default: 1
 
+Note that this variable has priority over `g:matchup_*_enabled`.
+So, for example, if you have:
+
+    let g:matchup_matchparen_enabled = 1
+    let g:matchup_delim_start_plaintext = 0
+
+And you open  a plain text file, matching parentheses  won't be highlighted, and
+`%` won't let you jump from a parenthesis to the other matching one.
+
 ##
 ## Variables
 
@@ -884,7 +893,8 @@ match-up understands `b:match_skip`, try to set it to fix this issue.
 
 See: <https://github.com/andymass/vim-matchup/issues/54>
 And read the documentation about `vim-matchit`:
-<https://github.com/chrisbra/matchit/>
+
+    :packadd matchit | h matchit
 
 ## In `augroup foo`, the `f` is wrongly highlighted.
 
@@ -926,7 +936,7 @@ Try   to  use   the  `..=`   operator  to   append  your   change,  and/or   use
 To do so, you could set `b:matchup_matchparen_enabled` to `0` in all the buffers
 except the current one.
 
-Also, have a look also at `g:matchup_delim_start_plaintext`.
+Update: Is it a good idea? What about just toggling a global state?
 
 ##
 ## Errors in help page (submit PR)
