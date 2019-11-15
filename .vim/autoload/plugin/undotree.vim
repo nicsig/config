@@ -24,6 +24,32 @@ fu plugin#undotree#show() abort "{{{2
     " `win_execute()`.
     "}}}
     let t:undotree_prevwinid = win_getid()
+    " A similar autocmd is already installed in `...#diff_toggle()`.  Why installing yet another one here?{{{
+    "
+    " If  you close  the undotree  window  while the  diff panel  is open,  then
+    " re-open the undotree window, the diff panel is automatically re-opened.
+    " But in  that case, `D` has  not been pressed, and  `...#diff_toggle()` has
+    " not been invoked; so the autocmd is not installed.
+    "
+    " MWE:
+    "
+    "     $ vim file
+    "     " press -u to open undotree window
+    "     " press D to open diff panel
+    "     " press q to close undotree window and diff panel
+    "     " press -u to open undotree window again
+    "}}}
+    " Ok, but why the guard?{{{
+    "
+    " Well, when you  press `-u`, there's no guarantee that  the diff panel will
+    " be automatically opened; it depends on what you did the last time (did you
+    " open the diff panel or not?).
+    " So, we need  a guard to be  sure that we customize the  right diff buffer;
+    " that is one which is associated to an undotree buffer.
+    "}}}
+    au FileType diff ++once if getwinvar(winnr('#'), '&ft') is# 'undotree'
+        \ | call s:customize_diff_panel()
+        \ | endif
     UndotreeShow
     au BufWinLeave <buffer> ++once unlet! t:undotree_prevwinid
 endfu
@@ -66,16 +92,7 @@ fu plugin#undotree#diff_toggle() abort "{{{2
     endif
     " check we are going to *open* the diff panel (and not close it)
     if ! pv_bufnr
-        " FIXME: Sometimes the preview flag is not set.{{{
-        "
-        "     $ vim file
-        "     " press -u to open undotree window
-        "     " press D to open diff panel
-        "     " press q to close undotree window and diff panel
-        "     " press -u to open undotree window again
-        "}}}
-        au FileType diff ++once setl pvw
-            \ | nno <buffer><nowait><silent> q :<c-u>call <sid>close_diff_panel()<cr>
+        au FileType diff ++once call s:customize_diff_panel()
     endif
     call t:undotree.Action('DiffToggle')
     if exists('t:undotree_prevwinid')
@@ -84,6 +101,11 @@ fu plugin#undotree#diff_toggle() abort "{{{2
 endfu
 "}}}1
 " Core {{{1
+fu s:customize_diff_panel() abort "{{{2
+    setl pvw
+    nno <buffer><nowait><silent> q :<c-u>call <sid>close_diff_panel()<cr>
+endfu
+
 fu s:close_diff_panel() abort "{{{2
     if has('nvim')
         let bufnr = get(filter(tabpagebuflist(), {_,v -> getbufvar(v, '&ft') is# 'undotree'}), 0, 0)
