@@ -3,7 +3,10 @@ if exists('g:loaded_matchup') || stridx(&rtp, 'vim-matchup') == -1
 endif
 
 " disable the matchparen module when Vim starts up
-let g:matchup_matchparen_enabled = 0
+" TODO: We can't set  this variable, otherwise the matchparen module  would be –
+" paradoxically – enabled when Vim starts up. Explain how that is possible.
+"
+"     let g:matchup_matchparen_enabled = 0
 
 " display an offscreen match in a popup window
 let g:matchup_matchparen_offscreen = {'method': 'popup'}

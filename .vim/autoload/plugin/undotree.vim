@@ -66,6 +66,14 @@ fu plugin#undotree#diff_toggle() abort "{{{2
     endif
     " check we are going to *open* the diff panel (and not close it)
     if ! pv_bufnr
+        " FIXME: Sometimes the preview flag is not set.{{{
+        "
+        "     $ vim file
+        "     " press -u to open undotree window
+        "     " press D to open diff panel
+        "     " press q to close undotree window and diff panel
+        "     " press -u to open undotree window again
+        "}}}
         au FileType diff ++once setl pvw
             \ | nno <buffer><nowait><silent> q :<c-u>call <sid>close_diff_panel()<cr>
     endif

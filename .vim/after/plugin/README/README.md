@@ -38,6 +38,7 @@ while we debug some issue.
 Note that there is  no possible guard for scripts which  are not associated with
 any third-party plugin, like:
 
+   - matchparen_toggle.vim
    - nop.vim
    - tidy_tab_completion.vim
 

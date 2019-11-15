@@ -26,7 +26,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-let s:l = 936 - ((130 * winheight(0) + 15) / 30)
+let s:l = 936 - ((106 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -224,7 +224,10 @@ edit ~/.vim/autoload/plugin/undotree.vim
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 wincmd t
 set winminheight=0
@@ -232,29 +235,41 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
 argglobal
-let s:l = 29 - ((3 * winheight(0) + 0) / 0)
+let s:l = 69 - ((5 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-29
-normal! 05|
+69
+normal! 09|
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/undotree/autoload/undotree.vim") | buffer ~/.vim/plugged/undotree/autoload/undotree.vim | else | edit ~/.vim/plugged/undotree/autoload/undotree.vim | endif
-let s:l = 1 - ((0 * winheight(0) + 14) / 29)
+if bufexists("~/.vim/after/plugin/matchparen_toggle.vim") | buffer ~/.vim/after/plugin/matchparen_toggle.vim | else | edit ~/.vim/after/plugin/matchparen_toggle.vim | endif
+let s:l = 9 - ((8 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+9
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim") | buffer ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim | else | edit ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim | endif
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
-lcd ~/.vim/plugged/undotree
+lcd ~/.vim/plugged/vim-toggle-settings
 wincmd w
-2wincmd w
+3wincmd w
 exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 28 + 16) / 33)
 tabnext 7
 set stal=1
 badd +936 ~/wiki/awk/sed.md
@@ -269,8 +284,9 @@ badd +350 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
 badd +66 ~/Desktop/vim.vim
 badd +20 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
 badd +905 ~/.vim/plugin/README/matchup.md
-badd +0 ~/.vim/autoload/plugin/undotree.vim
-badd +0 ~/.vim/plugged/undotree/autoload/undotree.vim
+badd +69 ~/.vim/autoload/plugin/undotree.vim
+badd +0 ~/.vim/after/plugin/matchparen_toggle.vim
+badd +0 ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -4,7 +4,21 @@
 " It will disable the `matchparen` plugin.
 " But we also source it in a mapping to toggle the plugin.
 "
-"     ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:703
+"     ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim:441
+"}}}
+" Warning: Do *not* rename this script as `matchparen.vim`!{{{
+"
+" If you do, when you'll press `cop`, you'll execute:
+"
+"     runtime! plugin/matchparen.vim
+"
+" This will source the current script (✔), then `$VIMRUNTIME/plugin/matchparen.vim` (✘).
+" The default script would undo our toggling.
+"}}}
+" Warning: Do *not* move this script in `~/.vim/macros/`, and do *not* add the guard `has('vim_starting')`!{{{
+"
+" It  must be sourced  automatically during startup  so that the  dummy autocmds
+" (`my_default_autocmds`) are installed.
 "}}}
 
 if exists(':DoMatchParen') != 2
@@ -74,7 +88,7 @@ if exists('#matchup_matchparen#CursorMoved')
     "}}}
     "   Why also `CursorMovedI`, `WinEnter` and `TextChangedI`?{{{
     "
-    " The matchparen plugin also installs autocmds listening to these events.
+    " The default matchparen plugin also installs autocmds listening to these events.
     " If we disable  the plugin, I want  to be sure that there's  still at least
     " one autocmd listening to each of them.
     " Otherwise, we could encounter bugs which  are hard to understand, and that
