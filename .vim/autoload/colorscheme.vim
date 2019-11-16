@@ -1,3 +1,33 @@
+" Init {{{1
+
+" map greyscale colors from decimal to hexadecimal
+const s:DEC2HEX = {
+\ '232': '#080808',
+\ '233': '#121212',
+\ '234': '#1c1c1c',
+\ '235': '#262626',
+\ '236': '#303030',
+\ '237': '#3a3a3a',
+\ '238': '#444444',
+\ '239': '#4e4e4e',
+\ '240': '#585858',
+\ '241': '#626262',
+\ '242': '#6c6c6c',
+\ '243': '#767676',
+\ '244': '#808080',
+\ '245': '#8a8a8a',
+\ '246': '#949494',
+\ '247': '#9e9e9e',
+\ '248': '#a8a8a8',
+\ '249': '#b2b2b2',
+\ '250': '#bcbcbc',
+\ '251': '#c6c6c6',
+\ '252': '#d0d0d0',
+\ '253': '#dadada',
+\ '254': '#e4e4e4',
+\ '255': '#eeeeee',
+\ }
+
 " Interface {{{1
 fu colorscheme#set() abort "{{{2
     " Purpose:{{{
@@ -153,6 +183,30 @@ fu colorscheme#set() abort "{{{2
 endfu
 
 fu colorscheme#customize() abort "{{{2
+    " Why changing `CursorLine`?{{{
+    "
+    " The attributes  set by our  color scheme  make the cursorline  not visible
+    " enough.
+    "}}}
+    " Why `ctermbg=NONE` and `guibg=NONE`?{{{
+    "
+    " To make `CursorLine` transparent in case of a conflict between two HGs.
+    " It happens  when `'cursorline'` is set,  and the *background* of  the text
+    " under the cursor is highlighted by a syntax item.
+    "}}}
+    " It's not visible enough!{{{
+    "
+    " Add the bold value:
+    "
+    "     hi CursorLine term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=NONE guibg=NONE
+    "                        ^^^^                 ^^^^               ^^^^
+    "}}}
+    hi CursorLine term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
+
+    " useful when `'rnu'` is set; only available in Vim atm
+    hi! link LineNrAbove DiffDelete
+    hi! link LineNrBelow DiffAdd
+
     " the `SpecialKey` HG set by seoul256 is barely readable
     hi! link SpecialKey Special
 
@@ -163,9 +217,23 @@ fu colorscheme#customize() abort "{{{2
     " For some reason, linking VertSplit gets us the desired result.
     hi! link VertSplit Normal
 
-    " useful when `'rnu'` is set; only available in Vim atm
-    hi! link LineNrAbove DiffDelete
-    hi! link LineNrBelow DiffAdd
+    " hide the EndOfBuffer char (~) by changing its ctermfg attribute (ctermfg=bg)
+    " Why this `:if` guard?{{{
+    "
+    " Some color schemes don't set up the `Normal` HG.
+    " So, the value `bg` may not exist for all color schemes.
+    "
+    "     :colo elflord
+    "     :hi EndOfBuffer ctermfg=bg
+    "     E420: BG color unknown ~
+    "}}}
+    if execute('hi Normal') =~# 'ctermbg'
+        if $DISPLAY is# ''
+            hi EndOfBuffer ctermfg=bg
+        else
+            hi EndOfBuffer ctermfg=bg guifg=bg
+        endif
+    endif
 
     " `Underlined` is meant to be used to highlight html links.{{{
     "
@@ -175,7 +243,7 @@ fu colorscheme#customize() abort "{{{2
     " `Conditional` (because this one is blue).
     "}}}
     let cmd = 'hi Underlined term=underline cterm=underline gui=underline '
-        \ . substitute(split(execute('hi Conditional'), '\n')[0], '.*xxx\|links to.*', '', 'g')
+        \ ..substitute(split(execute('hi Conditional'), '\n')[0], '.*xxx\|links to.*', '', 'g')
         "              │{{{
         "              └ When we start Vim with `$ sudo vim`, the output of `execute('hi ...')`
         "                contains 2 lines instead of 1 (the second line contains `Last set from ...`).
@@ -206,52 +274,7 @@ fu colorscheme#customize() abort "{{{2
         \ substitute(comment_underlined_definition, '\m\C\<\%(term\|cterm\|gui\)=\S*', '', 'g')
     let comment_underlined_definition =
         \ substitute(comment_underlined_definition, '$', ' term=underline cterm=underline gui=underline', '')
-    exe 'hi ' . comment_underlined_definition
-
-    " Why changing `CursorLine`?{{{
-    "
-    " The attributes  set by our  color scheme  make the cursorline  not visible
-    " enough.
-    "}}}
-    " Why `ctermbg=NONE` and `guibg=NONE`?{{{
-    "
-    " To make `CursorLine` transparent in case of a conflict between two HGs.
-    " It happens  when `'cursorline'` is set,  and the *background* of  the text
-    " under the cursor is highlighted by a syntax item.
-    "}}}
-    " It's not visible enough!{{{
-    "
-    " Add the bold value:
-    "
-    "     hi CursorLine term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=NONE guibg=NONE
-    "                        ^^^^                 ^^^^               ^^^^
-    "}}}
-    hi CursorLine term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
-
-    " hide the EndOfBuffer char (~) by changing its ctermfg attribute (ctermfg=bg)
-    " Why this `:if` guard?{{{
-    "
-    " Some color schemes don't set up the `Normal` HG.
-    " So, the value `bg` may not exist for all color schemes.
-    "
-    "     :colo elflord
-    "     :hi EndOfBuffer ctermfg=bg
-    "     E420: BG color unknown ~
-    "}}}
-    if execute('hi Normal') =~# 'ctermbg'
-        if $DISPLAY is# ''
-            " FIXME: In Neovim and in a console, the tildes are still visible.{{{
-            "
-            " And yet, the definition of `EndOfBuffer` is the same as in Vim:
-            "
-            "     hi EndOfBuffer
-            "     EndOfBuffer    xxx ctermfg=7~
-            "}}}
-            hi EndOfBuffer ctermfg=bg
-        else
-            hi EndOfBuffer ctermfg=bg guifg=bg
-        endif
-    endif
+    exe 'hi '..comment_underlined_definition
 
     " Why the delay?{{{
     "
@@ -277,14 +300,15 @@ endfu
 fu s:customize() abort
     call s:diff()
     call s:styled_comments()
-    call s:tabline()
-    call s:title()
-    call s:user()
+    call s:StatuslineNC()
+    call s:TabLine()
+    call s:Title()
+    call s:User()
 endfu
 
 fu colorscheme#save_last_version() abort "{{{2
-    let line = 'let g:my_last_color_scheme = '.get(g:, 'seoul256_current_bg', 253)
-    call writefile([line], $HOME.'/.vim/colors/my/last_version.vim')
+    let line = 'let g:my_last_color_scheme = '..get(g:, 'seoul256_current_bg', 253)
+    call writefile([line], $HOME..'/.vim/colors/my/last_version.vim')
 endfu
 " }}}1
 " Core {{{1
@@ -369,90 +393,135 @@ fu s:styled_comments() abort "{{{2
 
     hi link markdownListItemBlockquote  markdownBlockquote
 
-    " Where did you find these color codes?{{{
-    "
-    " I chose a color from the terminal palette:
-    "
-    "     $ palette
-    "
-    " And to get the hex equivalent of the decimal code, I used `gpick(1)`.
-    "}}}
-    let guibg = &bg is# 'light' ? '#bcbcbc' : '#626262'
-    let ctermbg = &bg is# 'light' ? 250 : 241
+    let bg = s:get_attributes('TabLine', 'cterm').bg + (&bg is# 'light' ?  2 : -2)
+    if has('gui_running') || &tgc
+        let bg = get(s:DEC2HEX, bg, '#808080')
+    endif
     let comment_fg = s:get_attributes('Comment').fg
     let statement_fg = s:get_attributes('Statement').fg
     let repeat_fg = s:get_attributes('Repeat').fg
 
     " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
     if has('gui_running')
-        exe 'hi CommentCodeSpan guibg='.guibg.' guifg='.comment_fg
-        exe 'hi markdownCodeSpan guibg='.guibg
+        exe 'hi CommentCodeSpan guifg='..comment_fg..' guibg='..bg
+        exe 'hi markdownCodeSpan guibg='..bg
 
-        exe 'hi CommentBold gui=bold guifg='.comment_fg
-        exe 'hi CommentBoldItalic gui=bold,italic guifg='.comment_fg
-        exe 'hi CommentItalic gui=italic guifg='.comment_fg
+        exe 'hi CommentBold gui=bold guifg='..comment_fg
+        exe 'hi CommentBoldItalic gui=bold,italic guifg='..comment_fg
+        exe 'hi CommentItalic gui=italic guifg='..comment_fg
 
-        exe 'hi markdownListItem guifg='.repeat_fg
-        exe 'hi markdownListItemBold gui=bold guifg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic gui=bold,italic guifg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
-        exe 'hi markdownListItemItalic gui=italic guifg='.repeat_fg
+        exe 'hi markdownListItem guifg='..repeat_fg
+        exe 'hi markdownListItemBold gui=bold guifg='..repeat_fg
+        exe 'hi markdownListItemBoldItalic gui=bold,italic guifg='..repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg='..repeat_fg..' guibg='..bg
+        exe 'hi markdownListItemItalic gui=italic guifg='..repeat_fg
 
-        exe 'hi markdownBlockquote guifg='.statement_fg
-        exe 'hi markdownBlockquoteBold gui=bold guifg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan guibg='.guibg.' guifg='.statement_fg
-        exe 'hi markdownBlockquoteItalic gui=italic guifg='.statement_fg
+        exe 'hi markdownBlockquote guifg='..statement_fg
+        exe 'hi markdownBlockquoteBold gui=bold guifg='..statement_fg
+        exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg='..statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guibg='..bg..' guifg='..statement_fg
+        exe 'hi markdownBlockquoteItalic gui=italic guifg='..statement_fg
 
     " the only relevant attributes in a truecolor terminal are `guifg`, `guibg`,
     " and `cterm` (Vim) or `gui` (Neovim)
     elseif &tgc
-        exe 'hi CommentCodeSpan guifg='.comment_fg.' guibg='.guibg
-        exe 'hi markdownCodeSpan guibg='.guibg
+        exe 'hi CommentCodeSpan guifg='..comment_fg..' guibg='..bg
+        exe 'hi markdownCodeSpan guibg='..bg
 
         let attr = has('nvim') ? 'gui' : 'cterm'
-        exe 'hi CommentBold '.attr.'=bold guifg='.comment_fg
-        exe 'hi CommentBoldItalic '.attr.'=bold,italic guifg='.comment_fg
-        exe 'hi CommentItalic '.attr.'=italic guifg='.comment_fg
+        exe 'hi CommentBold '..attr..'=bold guifg='..comment_fg
+        exe 'hi CommentBoldItalic '..attr..'=bold,italic guifg='..comment_fg
+        exe 'hi CommentItalic '..attr..'=italic guifg='..comment_fg
 
-        exe 'hi markdownListItem guifg='.repeat_fg
-        exe 'hi markdownListItemBold '.attr.'=bold guifg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic '.attr.'=bold,italic guifg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='.repeat_fg.' guibg='.guibg
-        exe 'hi markdownListItemItalic '.attr.'=italic guifg='.repeat_fg
+        exe 'hi markdownListItem guifg='..repeat_fg
+        exe 'hi markdownListItemBold '..attr..'=bold guifg='..repeat_fg
+        exe 'hi markdownListItemBoldItalic '..attr..'=bold,italic guifg='..repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg='..repeat_fg..' guibg='..bg
+        exe 'hi markdownListItemItalic '..attr..'=italic guifg='..repeat_fg
 
-        exe 'hi markdownBlockquote guifg='.statement_fg
-        exe 'hi markdownBlockquoteBold '.attr.'=bold guifg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic '.attr.'=bold,italic guifg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan guifg='.statement_fg.' guibg='.guibg
-        exe 'hi markdownBlockquoteItalic '.attr.'=italic guifg='.statement_fg
+        exe 'hi markdownBlockquote guifg='..statement_fg
+        exe 'hi markdownBlockquoteBold '..attr..'=bold guifg='..statement_fg
+        exe 'hi markdownBlockquoteBoldItalic '..attr..'=bold,italic guifg='..statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guifg='..statement_fg..' guibg='..bg
+        exe 'hi markdownBlockquoteItalic '..attr..'=italic guifg='..statement_fg
 
-    " the only relevant attributes in a terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
+    " the only relevant attributes in a non-truecolor terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
-        exe 'hi CommentCodeSpan ctermfg='.comment_fg.' ctermbg='.ctermbg
-        exe 'hi markdownCodeSpan ctermbg='.ctermbg
+        exe 'hi CommentCodeSpan ctermfg='..comment_fg..' ctermbg='..bg
+        exe 'hi markdownCodeSpan ctermbg='..bg
 
-        exe 'hi CommentBold term=bold cterm=bold ctermfg='.comment_fg
-        exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg='.comment_fg
-        exe 'hi CommentItalic term=italic cterm=italic ctermfg='.comment_fg
+        exe 'hi CommentBold term=bold cterm=bold ctermfg='..comment_fg
+        exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg='..comment_fg
+        exe 'hi CommentItalic term=italic cterm=italic ctermfg='..comment_fg
 
-        exe 'hi markdownListItem ctermfg='.repeat_fg
-        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg='.repeat_fg
-        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg='.repeat_fg
-        exe 'hi markdownListItemCodeSpan ctermfg='.repeat_fg.' ctermbg='.ctermbg
-        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg='.repeat_fg
+        exe 'hi markdownListItem ctermfg='..repeat_fg
+        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg='..repeat_fg
+        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg='..repeat_fg
+        exe 'hi markdownListItemCodeSpan ctermfg='..repeat_fg..' ctermbg='..bg
+        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg='..repeat_fg
 
-        exe 'hi markdownBlockquote ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg='.statement_fg
-        exe 'hi markdownBlockquoteCodeSpan ctermfg='.statement_fg.' ctermbg='.ctermbg
-        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='.statement_fg
+        exe 'hi markdownBlockquote ctermfg='..statement_fg
+        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg='..statement_fg
+        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg='..statement_fg
+        exe 'hi markdownBlockquoteCodeSpan ctermfg='..statement_fg..' ctermbg='..bg
+        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='..statement_fg
     endif
 endfu
 
-fu s:tabline() abort "{{{2
-    " the purpose of this function is to remove the underline value from the HG
-    " TabLine
+fu s:StatuslineNC() abort "{{{2
+    " the file path in the status line of a non-focused window is too visible; let's fix that
+    " Why don't you use a hard-coded value?{{{
+    "
+    " It may not always look nice, depending on whether we use the dark or light
+    " version of seoul, and depending on the level of lightness.
+    " Instead, we compute it programmatically from another HG; `TabLine` seems a
+    " good fit.
+    "}}}
+    " Why do you pass this extra `cterm` argument?{{{
+    "
+    " If we  are in  gui or in  a true color  terminal, then  `synIDattr()` will
+    " return an hexadecimal number. We can't easily make it less/more light.
+    " We need  a decimal  number to which  we can apply  a simple  offset; later
+    " we'll convert the result back in hexadecimal via `s:DEC2HEX`.
+    "
+    " To force  `synIDattr()` to  return a  decimal number, we  can pass  it the
+    " optional `{mode}` argument, to ask for  the value the attribute would have
+    " if we were in an arbitrary mode (here `cterm`).
+    "}}}
+    let bg = s:get_attributes('TabLine', 'cterm').bg + (&bg is 'light' ? -5 : 5)
+    if has('gui_running') || &tgc
+        " The value of `bg` may not be a key in the dictionary `s:DEC2HEX`.{{{
+        "
+        " That's  because there  is  no  guarantee that  the  `bg` attribute  of
+        " `TabLine` is between 232 and 255.
+        " For example, that's not the case with these color schemes:
+        " default, delek, koehler, morning, peachpuff, shine, zellner.
+        "}}}
+        let bg = get(s:DEC2HEX, bg, '#808080')
+        exe 'hi StatuslineNC guibg='..bg
+    else
+        exe 'hi StatuslineNC ctermbg='..bg
+    endif
+    " In a non-focused window, we highlight the file path with `User1`.  That's not the colors which are applied!{{{
+    "
+    " I think that's because of `:h 'stl /User`:
+    "
+    " > The difference between User{N} and StatusLine  will be applied
+    " > to StatusLineNC for the statusline of non-current windows.
+    "
+    " Although, I  don't really understand  how that  explains how Vim  gets the
+    " colors it uses to highlight the file path in a non-focused window...
+    "}}}
+    " The foreground and background colors are reversed!{{{
+    "
+    " I  think that's  because the original  HG  is defined  with the  `reverse`
+    " attribute,  and  `:hi`  doesn't  reset  *all*  the  attributes;  only  the
+    " attributes that you pass to it as arguments.
+    "}}}
+endfu
+
+fu s:TabLine() abort "{{{2
+    " the purpose of this function is to remove the underline value from the HG `TabLine`
 
     let attributes = {
         \ 'fg'      : 0,
@@ -467,7 +536,7 @@ fu s:tabline() abort "{{{2
         let cmd = 'hi TabLine gui=none guifg=%s'
     elseif &tgc
         let attr = has('nvim') ? 'gui' : 'cterm'
-        let cmd = 'hi TabLine term=none '.attr.'=none guifg=%s'
+        let cmd = 'hi TabLine term=none '..attr..'=none guifg=%s'
     else
         let cmd = 'hi TabLine term=none cterm=none gui=none ctermfg=%s'
     endif
@@ -475,13 +544,11 @@ fu s:tabline() abort "{{{2
     " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
     " Tabline doesn't have any value in gui. In this case, executing the command
     " will fail.
-    if attributes.fg is# ''
-        return
-    endif
+    if attributes.fg is# '' | return | endif
     exe printf(cmd, attributes.fg)
 endfu
 
-fu s:title() abort "{{{2
+fu s:Title() abort "{{{2
     " Purpose: We need some HGs to get the bold, italic, bold+italic styles in a markdown header.
     let title_fg = s:get_attributes('Title').fg
     if has('gui_running')
@@ -489,26 +556,26 @@ fu s:title() abort "{{{2
         " It prevents us from using the bold style.
         " So, we remove this attribute.
         hi clear Title
-        exe 'hi Title guifg=' . title_fg
+        exe 'hi Title guifg='..title_fg
 
-        exe 'hi TitleItalic gui=italic guifg='.title_fg
-        exe 'hi TitleBold gui=bold guifg='.title_fg
-        exe 'hi TitleBoldItalic gui=bold,italic guifg='.title_fg
+        exe 'hi TitleItalic gui=italic guifg='..title_fg
+        exe 'hi TitleBold gui=bold guifg='..title_fg
+        exe 'hi TitleBoldItalic gui=bold,italic guifg='..title_fg
 
     elseif &tgc
         let attr = has('nvim') ? 'gui' : 'cterm'
-        exe 'hi TitleItalic '.attr.'=italic guifg='.title_fg
-        exe 'hi TitleBold '.attr.'=bold guifg='.title_fg
-        exe 'hi TitleBoldItalic '.attr.'=bold,italic guifg='.title_fg
+        exe 'hi TitleItalic '..attr..'=italic guifg='..title_fg
+        exe 'hi TitleBold '..attr..'=bold guifg='..title_fg
+        exe 'hi TitleBoldItalic '..attr..'=bold,italic guifg='..title_fg
 
     else
-        exe 'hi TitleItalic term=italic cterm=italic ctermfg='.title_fg
-        exe 'hi TitleBold term=bold cterm=bold ctermfg='.title_fg
-        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='.title_fg
+        exe 'hi TitleItalic term=italic cterm=italic ctermfg='..title_fg
+        exe 'hi TitleBold term=bold cterm=bold ctermfg='..title_fg
+        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='..title_fg
     endif
 endfu
 
-fu s:user() abort "{{{2
+fu s:User() abort "{{{2
     " We're going to define 2 HGs: User1 and User2.{{{
     "
     " We use them in the status line to customize the appearance of:
@@ -524,11 +591,6 @@ fu s:user() abort "{{{2
     " foreground color of `Todo`, so that the modified flag clearly stands out.
     "}}}
 
-    " `ctermfg`, `ctermbg`, `guifg`, `guibg` are not attributes of the HG
-    " `StatusLine`.
-    " They are arguments for the `:hi` command.
-    " They allow us to set the real attributes (`fg` and `bg`) for Vim in
-    " terminal or in GUI.
     let attributes = {
         \ 'fg'      : 0,
         \ 'bg'      : 0,
@@ -544,8 +606,8 @@ fu s:user() abort "{{{2
 
     elseif &tgc
         let attr = has('nvim') ? 'gui' : 'cterm'
-        let cmd1 = 'hi User1 '.attr.'=%s guifg=%s guibg=%s'
-        let cmd2 = 'hi User2 '.attr.'=%s guifg=%s guibg=%s'
+        let cmd1 = 'hi User1 '..attr..'=%s guifg=%s guibg=%s'
+        let cmd2 = 'hi User2 '..attr..'=%s guifg=%s guibg=%s'
 
     else
         let cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
@@ -569,12 +631,12 @@ fu s:user() abort "{{{2
         return
     endif
 
-    let style1 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? '' : 'reverse')
+    let style1 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? '' : 'reverse')
     if style1 is# '' | return | endif
 
     exe printf(cmd1, style1, attributes.fg, attributes.bg)
 
-    let style2 = (attributes.bold ? 'bold,' : '').(attributes.reverse ? 'reverse' : '')
+    let style2 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? 'reverse' : '')
     if style2 is# '' | return | endif
 
     let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
@@ -582,13 +644,14 @@ fu s:user() abort "{{{2
 endfu
 " }}}1
 " Utilities {{{1
-fu s:get_attributes(hg) abort "{{{2
+fu s:get_attributes(hg, ...) abort "{{{2
+    let mode = a:0 ? [a:1] : []
     let attributes = {
         \ 'fg'      : 0,
         \ 'bg'      : 0,
         \ 'bold'    : 0,
         \ 'reverse' : 0,
         \ }
-    return map(attributes, {k -> synIDattr(synIDtrans(hlID(a:hg)), k)})
+    return map(attributes, {k -> call('synIDattr', [synIDtrans(hlID(a:hg)), k] + mode)})
 endfu
 

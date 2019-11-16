@@ -135,8 +135,6 @@ if has('vim_starting')
 " Plugins must be declared after this line.
 " They will be downloaded inside `~/.vim/plugged/`.
 call plug#begin('~/.vim/plugged')
-" https://github.com/andymass/vim-matchup/issues/81
-Plug 'lacygoill/vim-window'
 
 " To Assimilate:
 Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
@@ -284,6 +282,7 @@ Plug 'lacygoill/vim-term'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-vim'
+Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
 
 " Read Doc:
@@ -664,14 +663,28 @@ set backspace=indent,eol,start
 "     > tick "Run a custom command instead of my shell"
 "     > inside the "Custom command" field, write "/usr/bin/env TERM=gnome-256color /usr/bin/zsh"
 "}}}
-if index(map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'xterm'], {_,v -> v..'-256color'}), $TERM) >= 0
+" Warning: We include `tmux` as a terminal type in which `'tgc'` can be set, but that's wrong.{{{
+"
+" We could be running tmux in a terminal which doesn't support true colors.
+" To identify the type of the outer terminal, you could inspect:
+"
+"     :echo system('tmux display -p "#{client_termname}"')
+"
+" Unfortunately, `system()` would add too much time during startup.
+"
+" Anyway, in practice, I doubt this will be an issue.
+" Most terminals support true colors; and even  if I test one which doesn't from
+" time to time, I won't be running tmux inside.
+"}}}
+if index(map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'tmux', 'xterm'], {_,v -> v..'-256color'}), $TERM) >= 0
     "\ xfce4-terminal lies about its identity
     "\ and doesn't support true color on Ubuntu 16.04
     \ && $COLORTERM isnot# 'xfce4-terminal'
     set termguicolors
     if has('vim_starting') && !has('gui_running') && !has('nvim')
-        " In Vim, if `$TERM` is not  'xterm', Vim won't automatically set 't_8f'
-        " nor 't_8b'.  We need to do it manually. See: :h xterm-true-color.
+        " In Vim,  if `$TERM`  is not  'xterm', `'t_8f'`  and `'t_8b'`  won't be
+        " automatically set; we need to do it manually.
+        " See: `:h xterm-true-color`.
         let &t_8f = "\e[38;2;%lu;%lu;%lum"
         let &t_8b = "\e[48;2;%lu;%lu;%lum"
     endif
@@ -1501,13 +1514,6 @@ set noshowmatch
 "         au BufEnter,WinEnter * let &showmatch = &ft is# 'html' ? 0 : 1
 "     augroup END
 "}}}
-
-" matchpairs {{{2
-
-augroup my_matchpairs
-    au!
-    au FileType * setl mps+=“:”,‘:’
-augroup END
 
 " modelines {{{2
 
@@ -4432,16 +4438,16 @@ fu s:fix_display() abort
     " It has not been re-installed by  our autocmd, because there was no `.conf`
     " file displayed anywhere.
     "}}}
-    "   Ok, but why `tabdo windo`?{{{
+    "   Ok, but why `tabdo ... windo`?{{{
     "
     " We (or a plugin) may  temporarily disable the syntax highlighting globally
     " with `:syn off`, then restore it with `:syn on`.
     " In that  case, we need  to reinstall our  custom syntax groups  related to
     " comments in *all* buffers currently displayed in a window.
     "}}}
-    let winid = win_getid()
-    tabdo windo do Syntax
-    call win_gotoid(winid)
+    let curwin = win_getid()
+    tabdo let winnr = winnr() | windo do Syntax | exe winnr..'wincmd w'
+    call win_gotoid(curwin)
 
     " Purpose:{{{
     "
@@ -9389,7 +9395,24 @@ endfu
 " Use `:Vim`, and tweak it so that it runs this command before `:vim`:
 "
 "     syn off | filetype plugin indent off
-
+"
+" 142 -
+"
+" Every time  we've "changed"  a buffer  in a way  that the  line count  did not
+" change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
+" `:lockmarks` modifier.
+"
+" In particular, it is useful to preserve the marks `'[` and `']`.
+" This works since 8.1.2302:
+" https://github.com/vim/vim/releases/tag/v8.1.2302
+"
+"     :vim /'\[\|'\]/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
+"           ^^^^^^^^
+"           the pattern should look for more things (`:w` command, `:up` command, ...)
+"
+" ---
+"
+" Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 
 
 

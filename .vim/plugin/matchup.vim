@@ -2,12 +2,18 @@ if exists('g:loaded_matchup') || stridx(&rtp, 'vim-matchup') == -1
     finish
 endif
 
+" Options {{{1
+" Global {{{2
+
 " disable the matchparen module when Vim starts up
 let g:matchup_matchparen_enabled = 0
 " make sure there are always autocmds listening to some events
 if ! g:matchup_matchparen_enabled
     call plugin#matchparen#install_dummy_autocmds()
 endif
+
+" disable the matchparen module in insert and visual mode
+let g:matchup_matchparen_nomode = "ivV\<c-v>"
 
 " display an offscreen match in a popup window
 let g:matchup_matchparen_offscreen = {'method': 'popup'}
@@ -41,6 +47,9 @@ let g:matchup_matchparen_offscreen = {'method': 'popup'}
 "
 "     let g:matchup_matchparen_offscreen = {}
 "}}}
+
+" Do not match words like `for` and `end` in strings and comments.
+let g:matchup_delim_noskips = 1
 
 " if I change a word, change matching words in parallel
 let g:matchup_transmute_enabled = 1
@@ -87,6 +96,68 @@ let g:matchup_transmute_enabled = 1
 "     $VIMRUNTIME/ftplugin/html.vim:34
 "}}}
 
-" disable the matchparen module in insert and visual mode
-let g:matchup_matchparen_nomode = "ivV\<c-v>"
+" Local {{{2
+
+augroup my_matchup
+    au!
+    au FileType * call s:set_buffer_local_options()
+augroup END
+
+fu s:set_buffer_local_options() abort
+    setl mps+=“:”,‘:’
+    " Rationale:{{{
+    "
+    " If `{:}` is in `'mps'`, then, if:
+    "
+    "    - the matchparen module of the `vim-matchup` plugin is enabled
+    "    - you move the cursor on an opening marker
+    "    - the closing fold marker is offscreen
+    "
+    " The closing fold marker is displayed in a popup window or in the status line.
+    " I don't want that.
+    "
+    " Solution:
+    "
+    " We remove `{:}` from `'mps'`, and include a pair of regexes in `b:match_words`,
+    " using negative lookarounds to prevent a match in a fold marker:
+    "
+    "     {\@1<!{{\@!:}\@1<!}}\@!
+    "                ^
+    "                delimiter
+    "}}}
+    setl mps-={:}
+    " We  want the  keywords to  be searched  exactly as  we've written  them in
+    " `b:match_words`, no matter the value of `&ic`.
+    let b:match_ignorecase = 0
+    " TODO: Document that it's probably a bad idea to set `b:match_words` from one of our after ftplugins.{{{
+    "
+    " At least for any of these filetypes:
+    "
+    "     :echo glob('~/.vim/plugged/vim-matchup/after/ftplugin/*.vim', 0, 1)->map({_,v -> fnamemodify(v, ':t')->matchstr('[^_]*')})
+    "
+    " Because we may override an assignment performed by match-up.
+    "
+    " ---
+    "
+    " But, from one of our after ftplugin, I think we can still:
+    "
+    "    - append a value with `..=`
+    "    - invoke one of these functions (to append a value, or substitute some pattern in a value):
+    "
+    "         matchup#util#append_match_words()
+    "         matchup#util#patch_match_words()
+    "}}}
+    if exists('b:match_words')
+        let b:match_words ..= ',{\@1<!{{\@!:}\@1<!}}\@!'
+    endif
+    " Why don't you set `b:undo_ftplugin`?{{{
+    "
+    " So, you're thinking about sth like this:
+    "
+    "     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')..'| setl mps< | unlet! b:match_ignorecase b:match_words'
+    "
+    " It would make sense  if we set them for *some* filetypes  only; but we set
+    " them for *all* filetypes, so setting `b:undo_ftplugin` is useless.
+    "}}}
+endfu
 

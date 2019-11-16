@@ -23,8 +23,7 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 30 + 16) / 33)
-arglocal
-%argdel
+argglobal
 let s:l = 2 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -33,8 +32,7 @@ normal! zt
 normal! 0
 lcd ~/wiki/c
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/wiki/c/c.md") | buffer ~/wiki/c/c.md | else | edit ~/wiki/c/c.md | endif
 let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif

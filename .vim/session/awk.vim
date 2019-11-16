@@ -16,7 +16,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -25,9 +24,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
-let s:l = 936 - ((106 * winheight(0) + 15) / 30)
+argglobal
+let s:l = 936 - ((28 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -42,8 +40,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-arglocal
-%argdel
+argglobal
 let s:l = 1 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
@@ -69,13 +66,12 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 10 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 26 + 16) / 33)
-arglocal
-%argdel
-let s:l = 484 - ((0 * winheight(0) + 0) / 1)
+exe '3resize ' . ((&lines * 17 + 16) / 33)
+exe '4resize ' . ((&lines * 0 + 16) / 33)
+argglobal
+let s:l = 484 - ((31 * winheight(0) + 5) / 10)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -83,10 +79,9 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/wiki/vim/config.md") | buffer ~/wiki/vim/config.md | else | edit ~/wiki/vim/config.md | endif
-let s:l = 1542 - ((12 * winheight(0) + 0) / 0)
+let s:l = 1542 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -94,10 +89,9 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/wiki/vim/complete.md") | buffer ~/wiki/vim/complete.md | else | edit ~/wiki/vim/complete.md | endif
-let s:l = 163 - ((150 * winheight(0) + 0) / 0)
+let s:l = 163 - ((26 * winheight(0) + 8) / 17)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -105,10 +99,9 @@ normal! zt
 normal! 0
 lcd ~/wiki/vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim") | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim | endif
-let s:l = 350 - ((306 * winheight(0) + 13) / 26)
+let s:l = 350 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -116,10 +109,10 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-lg-lib
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '1resize ' . ((&lines * 10 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 26 + 16) / 33)
+exe '3resize ' . ((&lines * 17 + 16) / 33)
+exe '4resize ' . ((&lines * 0 + 16) / 33)
 tabnext
 edit ~/Desktop/answer.md
 set splitbelow splitright
@@ -132,11 +125,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
-let s:l = 183 - ((0 * winheight(0) + 0) / 1)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+argglobal
+let s:l = 183 - ((110 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -144,10 +136,9 @@ normal! zt
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/Desktop/vim.vim") | buffer ~/Desktop/vim.vim | else | edit ~/Desktop/vim.vim | endif
-let s:l = 66 - ((13 * winheight(0) + 14) / 28)
+let s:l = 66 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -155,8 +146,8 @@ normal! zt
 normal! 021|
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
 tabnext
 edit ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
 set splitbelow splitright
@@ -169,11 +160,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
-arglocal
-%argdel
-let s:l = 39 - ((0 * winheight(0) + 0) / 1)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+argglobal
+let s:l = 39 - ((27 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -181,19 +171,18 @@ normal! zt
 normal! 0
 lcd ~/.vim/plugged/vim-vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim") | buffer ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim | else | edit ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim | endif
-let s:l = 20 - ((15 * winheight(0) + 14) / 28)
+let s:l = 20 - ((7 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 20
-normal! 011|
+normal! 0
 lcd ~/.vim/plugged/vim-vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
 tabnext
 edit ~/.vim/plugin/matchup.vim
 set splitbelow splitright
@@ -201,10 +190,7 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-3wincmd k
-wincmd w
+2wincmd k
 wincmd w
 wincmd w
 wincmd t
@@ -212,90 +198,56 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 0 + 16) / 33)
-arglocal
-%argdel
-let s:l = 8 - ((7 * winheight(0) + 13) / 27)
+argglobal
+let s:l = 135 - ((34 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-8
+135
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/.vim/plugin/README/matchup.md") | buffer ~/.vim/plugin/README/matchup.md | else | edit ~/.vim/plugin/README/matchup.md | endif
-let s:l = 897 - ((64 * winheight(0) + 0) / 0)
+let s:l = 933 - ((154 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-897
-normal! 023|
-lcd ~/.vim
-wincmd w
-arglocal
-%argdel
-if bufexists("/usr/local/share/vim/vim81/pack/dist/opt/matchit/doc/matchit.txt") | buffer /usr/local/share/vim/vim81/pack/dist/opt/matchit/doc/matchit.txt | else | edit /usr/local/share/vim/vim81/pack/dist/opt/matchit/doc/matchit.txt | endif
-let s:l = 80 - ((13 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-80
+933
 normal! 0
 lcd ~/.vim
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("/tmp/vim.vim") | buffer /tmp/vim.vim | else | edit /tmp/vim.vim | endif
-let s:l = 3 - ((2 * winheight(0) + 0) / 0)
+let s:l = 1 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
-normal! 0
+1
+normal! 07|
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 27 + 16) / 33)
+exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 exe '3resize ' . ((&lines * 0 + 16) / 33)
-exe '4resize ' . ((&lines * 0 + 16) / 33)
-tabnext
-edit ~/wiki/git/git.md
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-arglocal
-%argdel
-let s:l = 1962 - ((26 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1962
-normal! 0
-lcd ~/wiki/git
-tabnext 7
+tabnext 6
 set stal=1
 badd +936 ~/wiki/awk/sed.md
-badd +0 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
+badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 badd +484 ~/Desktop/ask.md
 badd +183 ~/Desktop/answer.md
 badd +39 ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
-badd +6 ~/.vim/plugin/matchup.vim
+badd +142 ~/.vim/plugin/matchup.vim
 badd +1542 ~/wiki/vim/config.md
 badd +163 ~/wiki/vim/complete.md
 badd +350 ~/.vim/plugged/vim-lg-lib/autoload/lg/window.vim
 badd +66 ~/Desktop/vim.vim
 badd +20 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
-badd +897 ~/.vim/plugin/README/matchup.md
-badd +3 /tmp/vim.vim
-badd +1961 ~/wiki/git/git.md
+badd +900 ~/.vim/plugin/README/matchup.md
+badd +1 /tmp/vim.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

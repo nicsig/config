@@ -777,6 +777,10 @@ Adds a set of patterns to `b:match_words`, adding a comma if necessary.
 
 ##
 # Issues
+## I can't read the documentation of the default matchit plugin!
+
+    :packadd matchit | h matchit
+
 ## Highlighting is not correct for construct X!
 
 match-up  uses  matchit's filetype-specific  data,  which  may not  give  enough
@@ -880,22 +884,6 @@ prefer to use one of the following:
 
 ##
 # Todo
-## Sometimes, words are highlighted inside comments; they should not.
-
-Write this in `/tmp/vim.vim`:
-
-    " foo if bar
-    " baz end qux
-
-And position your cursor on `if`: `if` and `end` are highlighted.
-They should not.
-match-up understands `b:match_skip`, try to set it to fix this issue.
-
-See: <https://github.com/andymass/vim-matchup/issues/54>
-And read the documentation about `vim-matchit`:
-
-    :packadd matchit | h matchit
-
 ## In `augroup foo`, the `f` is wrongly highlighted.
 
 The   issue   seems   to   come   from   our   `b:match_words`   assignment   in
@@ -937,6 +925,12 @@ To do so, you could set `b:matchup_matchparen_enabled` to `0` in all the buffers
 except the current one.
 
 Update: Is it a good idea? What about just toggling a global state?
+
+## To ignore the `augroup` keyword, why do we need to set `g:matchup_delim_noskips` to a value greater than 0?
+
+We also need to include `vimAugroupKey` in `b:match_skip`, but that's expected.
+
+## Find what is the purpose of `b:match_midmap`. (it's used in the plugin code, but not documented)
 
 ##
 ## Errors in help page (submit PR)
