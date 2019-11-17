@@ -9413,6 +9413,29 @@ endfu
 " ---
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
+"
+" 143 -
+"
+" Press `gt` in this file. Watch the status line of the previous window:
+" it wrongly displays `[LL]`.
+" The issue is due to a command similar to `do QuickFixCmdPost lopen`.
+"
+"     :vim /quickfixcmdpost/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
+"
+" Whenever you've  used `:do [<nomodeline>]  quickfixcmdpost` to open  the qf/ll
+" window, I think you have the same issue.
+" Solution: fire `WinLeave` in the previous window via `win_execute()`.
+" That makes 2 non-trivial lines, for sth trivial (opening a qf/ll window):
+"
+"     :do <nomodeline> QuickFixCmdPost lopen
+"     call lg#win_execute(lg#win_getid('#'), 'do WinLeave')
+"
+" Wrap them in  a simple `lg#copen()` function, which expects  one argument: the
+" command to run to open the qf/ll window (`:[c|l]open`, `:[cl]window`).
+"
+" Question:
+" Why do we use `:do QuickFixCmdPost` to open a qf window?
+" It it really worth the trouble?
 
 
 

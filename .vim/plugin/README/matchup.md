@@ -1,3 +1,34 @@
+# Why should I avoid assigning a value to `b:match_words` and `b:match_skip` in one of my `after/` ftplugins?
+
+Because it may override an assignment performed by match-up.
+
+Indeed, match-up already assigns a value to `b:match_{words|skip}` for these types of files:
+
+    :echo glob('~/.vim/plugged/vim-matchup/after/ftplugin/*.vim', 0, 1)
+    \ ->map({_,v -> fnamemodify(v, ':t')
+    \ ->matchstr('[^_]*')})
+
+## ?
+
+Which exceptions exist?
+
+In one of your `after/` ftplugins, you can still:
+
+   - append a value with `..=` to `b:match_{words|skip}`
+
+   - invoke one of these functions (to append a value to `b:match_words`, or substitute some pattern in a value):
+
+        matchup#util#append_match_words()
+        matchup#util#patch_match_words()
+
+---
+
+I think you can also use the hotfix feature of the plugin.
+However, does it work if we assign a value to `b:matchup_hotfix` from an `after/` ftplugin?
+I'm not sure, but I think it should only work from a ftplugin sourced earlier...
+Make some tests.
+
+##
 # Usage
 ## Default mappings
 
@@ -383,20 +414,6 @@ and text objects; does not apply to match highlighting.
 See `:h g:matchup_matchparen_stopline` instead.
 
 Default: 1500
-
-### `g:matchup_delim_noskips`
-
-This option controls whether matching is done within strings and comments.
-By default, it is set to 0 which means all valid matches are made within strings
-and comments.
-If set to  1, symbols like `()` will  still be matched but words  like `for` and
-`end`  will not;  if  set to  2,  nothing  will be  matched  within strings  and
-comments.
-
-    let g:matchup_delim_noskips = 1
-    let g:matchup_delim_noskips = 2
-
-Default: 0 (matching enabled within strings and comments)
 
 ### `g:matchup_delim_start_plaintext`
 
@@ -926,13 +943,24 @@ except the current one.
 
 Update: Is it a good idea? What about just toggling a global state?
 
+##
+## Find what is the purpose of (used in the plugin code, but not documented):
+### `b:match_midmap`
+
+### `b:matchup_regexpengine`
+
+### `b:matchup_delim_nomatchpairs`
+
+###
+### `matchup#util#check_match_words()`
+
+### `matchup#util#matchpref()`
+
+##
 ## To ignore the `augroup` keyword, why do we need to set `g:matchup_delim_noskips` to a value greater than 0?
 
 We also need to include `vimAugroupKey` in `b:match_skip`, but that's expected.
 
-## Find what is the purpose of `b:match_midmap`. (it's used in the plugin code, but not documented)
-
-##
 ## Errors in help page (submit PR)
 
     g%                      When on a recognized word, go backwards to [count]th
@@ -951,4 +979,32 @@ Break down the line in two:
 
                                                               *g:matchup_matchpref*
     Match preferences~
+
+
+---
+
+The whole section about `:MatchupWhereAmI` is weird.
+
+First, it doesn't document the command without an appended question mark.
+But the command does work without an appended question mark.
+
+Second,  it says  that running  `:MatchupWhereAmI?` twice  in the  same position
+gives a more verbose output:
+
+> Running this command twice in the same position will give
+> more verbose output.
+
+That doesn't seem to be the case.
+Try it in a c file from the Vim project, in a deeply nested block.
+
+Third, it says that `:MatchupWhereAmI?` outputs sth like:
+
+    1310 do_pending_operator( … { ⯈ if ((finish_op || VIsual_active) && oap- … {
+
+But in practice, that's not the output we observe: we also get context lines.
+A single line is obtained without the appended question mark.
+
+Finally, it says  that `:MatchupWhereAmI??` is more verbose  because it displays
+context lines; but you don't need 2 appended question marks to get this context;
+one is enough.
 

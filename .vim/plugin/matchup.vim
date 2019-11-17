@@ -3,7 +3,7 @@ if exists('g:loaded_matchup') || stridx(&rtp, 'vim-matchup') == -1
 endif
 
 " Options {{{1
-" Global {{{2
+" Global 
 
 " disable the matchparen module when Vim starts up
 let g:matchup_matchparen_enabled = 0
@@ -48,7 +48,8 @@ let g:matchup_matchparen_offscreen = {'method': 'popup'}
 "     let g:matchup_matchparen_offscreen = {}
 "}}}
 
-" Do not match words like `for` and `end` in strings and comments.
+" do not match words like `for` and `end` in strings and comments,
+" but *do* match symbols like `()` (set it to 2 for nothing to be matched)
 let g:matchup_delim_noskips = 1
 
 " if I change a word, change matching words in parallel
@@ -129,24 +130,6 @@ fu s:set_buffer_local_options() abort
     " We  want the  keywords to  be searched  exactly as  we've written  them in
     " `b:match_words`, no matter the value of `&ic`.
     let b:match_ignorecase = 0
-    " TODO: Document that it's probably a bad idea to set `b:match_words` from one of our after ftplugins.{{{
-    "
-    " At least for any of these filetypes:
-    "
-    "     :echo glob('~/.vim/plugged/vim-matchup/after/ftplugin/*.vim', 0, 1)->map({_,v -> fnamemodify(v, ':t')->matchstr('[^_]*')})
-    "
-    " Because we may override an assignment performed by match-up.
-    "
-    " ---
-    "
-    " But, from one of our after ftplugin, I think we can still:
-    "
-    "    - append a value with `..=`
-    "    - invoke one of these functions (to append a value, or substitute some pattern in a value):
-    "
-    "         matchup#util#append_match_words()
-    "         matchup#util#patch_match_words()
-    "}}}
     if exists('b:match_words')
         let b:match_words ..= ',{\@1<!{{\@!:}\@1<!}}\@!'
     endif
