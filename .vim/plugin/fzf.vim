@@ -78,3 +78,13 @@ exe 'com -bang -nargs=? -complete=dir '.g:fzf_command_prefix.'Files call fzf#vim
 "}}}
 exe 'com -bar -bang '.g:fzf_command_prefix.'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
 
+augroup fzf_open_folds
+    au!
+    " press `zv` the next time Vim has nothing to do, *after* a buffer has been displayed in a window
+    if !has('nvim')
+        au FileType fzf au BufWinEnter * ++once au SafeState * ++once norm! zv
+    else
+        au FileType fzf au BufWinEnter * ++once call timer_start(0, {-> execute('norm! zv')})
+    endif
+augroup END
+

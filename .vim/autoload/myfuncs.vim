@@ -331,7 +331,7 @@ endfu
 "
 " The peculiarity here, is the variable number of cells per line (2 on the first
 " one, 3 on the second one, 4 on the last ones).
-fu myfuncs#box_create(type, ...) abort
+fu myfuncs#box_create(_) abort
     try
         " draw `|` on the left of the paragraph
         exe "norm! _vip\<c-v>^I|"
@@ -752,9 +752,9 @@ fu myfuncs#long_data_join(type, ...) abort "{{{1
     "}}}
     try
         if a:type is# 'char' || a:type is# 'line' || a:type is# 'block'
-            let range = line("'[").','.line("']")
+            let range = line("'[")..','..line("']")
         elseif a:type is# 'vis'
-            let range = line("'<").','.line("'>")
+            let range = line("'<")..','..line("'>")
         else
             return
         endif
@@ -776,7 +776,7 @@ fu myfuncs#long_data_join(type, ...) abort "{{{1
     endtry
 endfu
 
-fu myfuncs#long_data_split(type, ...) abort "{{{1
+fu myfuncs#long_data_split(_) abort "{{{1
     let line = getline('.')
 
     let is_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
@@ -1133,6 +1133,11 @@ fu myfuncs#plugin_install(url) abort "{{{1
 
     let win_orig = win_getid()
     vnew | e $MYVIMRC
+    if &l:ro
+        echom 'cannot install plugin (vimrc is readonly)'
+        return
+    endif
+
     let win_vimrc = win_getid()
 
     call cursor(1, 1)
@@ -1301,9 +1306,7 @@ fu myfuncs#search_todo(where) abort "{{{1
     " Because we've prefixed `:lvim` with `:noa`, our autocmd which opens a qf window
     " hasn't kicked in. We must manually open it.
     do <nomodeline> QuickFixCmdPost lwindow
-    if &bt isnot# 'quickfix'
-        return
-    endif
+    if &bt isnot# 'quickfix' | return | endif
 
     "                                             ┌ Tweak the text of each entry when there's a line
     "                                             │ with just `todo` or `fixme`;
@@ -1384,7 +1387,6 @@ fu myfuncs#tab_toc() abort "{{{1
     " code more readable. Indeed, since we only set the title of the window,
     " and nothing in the list changes, it's as if we were adding/appending an
     " empty list.
-    "
     "}}}
     call setloclist(0, toc)
     call setloclist(0, [], 'a', {'title': 'TOC'})
@@ -1396,9 +1398,7 @@ fu myfuncs#tab_toc() abort "{{{1
     setl nowrap
 
     do <nomodeline> QuickFixCmdPost lwindow
-    if &bt isnot# 'quickfix'
-        return
-    endif
+    if &bt isnot# 'quickfix' | return | endif
 
     if is_help_file
         call qf#set_matches('myfuncs:tab_toc', 'Conceal', '\*')

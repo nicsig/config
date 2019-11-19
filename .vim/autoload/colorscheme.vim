@@ -484,11 +484,11 @@ fu s:StatuslineNC() abort "{{{2
     " We need  a decimal  number to which  we can apply  a simple  offset; later
     " we'll convert the result back in hexadecimal via `s:DEC2HEX`.
     "
-    " To force  `synIDattr()` to  return a  decimal number, we  can pass  it the
+    " To force `synIDattr()` to return a decimal  number, we nedd to pass it the
     " optional `{mode}` argument, to ask for  the value the attribute would have
     " if we were in an arbitrary mode (here `cterm`).
     "}}}
-    let bg = s:get_attributes('TabLine', 'cterm').bg + (&bg is 'light' ? -5 : 5)
+    let bg = s:get_attributes('TabLine', 'cterm').bg + (&bg is 'light' ? -6 : 6)
     if has('gui_running') || &tgc
         " The value of `bg` may not be a key in the dictionary `s:DEC2HEX`.{{{
         "

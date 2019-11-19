@@ -3,7 +3,7 @@ if exists('g:loaded_matchup') || stridx(&rtp, 'vim-matchup') == -1
 endif
 
 " Options {{{1
-" Global 
+" Global {{{2
 
 " disable the matchparen module when Vim starts up
 let g:matchup_matchparen_enabled = 0

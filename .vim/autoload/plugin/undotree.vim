@@ -99,14 +99,8 @@ fu plugin#undotree#diff_toggle() abort "{{{2
         call lg#win_execute(t:undotree_prevwinid, 'do WinEnter')
     endif
 endfu
-"}}}1
-" Core {{{1
-fu s:customize_diff_panel() abort "{{{2
-    setl pvw
-    nno <buffer><nowait><silent> q :<c-u>call <sid>close_diff_panel()<cr>
-endfu
-
-fu s:close_diff_panel() abort "{{{2
+fu plugin#undotree#close_diff_panel() abort "{{{2
+    " This function is public because we need to be able to call it when we press `SPC q`.
     if has('nvim')
         let bufnr = get(filter(tabpagebuflist(), {_,v -> getbufvar(v, '&ft') is# 'undotree'}), 0, 0)
     else
@@ -116,20 +110,23 @@ fu s:close_diff_panel() abort "{{{2
     endif
     if bufnr
         let winnr = bufwinnr(bufnr)
-        " Why don't you close with `:q` or `:close`?{{{
-        "
-        " A sign could be left in the sign column of the regular window.
-        " To properly close the undotree diff panel, you must press `D` from the
-        " undotree buffer.
-        "}}}
         exe winnr..'wincmd w'
         if &ft is# 'undotree'
             call t:undotree.Action('DiffToggle')
         else
-            echo 'press "D" from the undotree buffer'
+            echo 'press "D" from the undotree buffer for signs to be removed'
         endif
     else
-        echo 'press "D" from the undotree buffer'
+        echo 'press "D" from the undotree buffer for signs to be removed'
     endif
+endfu
+
+"}}}1
+" Core {{{1
+fu s:customize_diff_panel() abort "{{{2
+    setl pvw
+    " let's use our own status line
+    set stl<
+    nno <buffer><nowait><silent> q :<c-u>call plugin#undotree#close_diff_panel()<cr>
 endfu
 
