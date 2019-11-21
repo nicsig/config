@@ -37,7 +37,7 @@ fu colorscheme#set() abort "{{{2
     " That  way, the  colors  of the  terminal and  GUI  versions are  uniformly
     " colored on Linux.
     "
-    "         https://github.com/junegunn/seoul256.vim#alternate-256-xterm---srgb-mapping
+    " https://github.com/junegunn/seoul256.vim#alternate-256-xterm---srgb-mapping
     "}}}
     let g:seoul256_srgb = 1
 

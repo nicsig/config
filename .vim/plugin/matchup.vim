@@ -12,6 +12,18 @@ if ! g:matchup_matchparen_enabled
     call plugin#matchparen#install_dummy_autocmds()
 endif
 
+" Improves performance when moving with `hjkl`.{{{
+"
+" Deferred highlighting improves cursor  movement performance (for example, when
+" using `hjkl`) by delaying highlighting for a  short time and waiting to see if
+" the cursor continues moving.
+"
+" Without,  when you  move over  a match  (e.g. `return`  inside a  function) by
+" keeping `h`  or `l` pressed,  the cursor  temporarily disappears, and  I think
+" that the cpu consumption goes up.
+"}}}
+let g:matchup_matchparen_deferred = 1
+
 " disable the matchparen module in insert and visual mode
 let g:matchup_matchparen_nomode = "ivV\<c-v>"
 

@@ -3470,15 +3470,54 @@ fu s:try_fugitive_cmd(cmd) abort
         "
         " ---
         "
-        " By default, we end up in the bottom window, which may not be the one we were
-        " focusing before executing `:Gstatus`; IOW, we may lose our focused window.
-        " Note  that when  closing  another  window, the  height  of our  window
-        " may  get wrong;  we  need to  fix  it by  firing  `WinEnter`, so  that
-        " `vim-window` resets its height.
+        " Besides, by default, we end up in  the bottom window, which may not be
+        " the one we were focusing before executing `:Gstatus`; IOW, we may lose
+        " our focused window.
         "}}}
-        nno <buffer><nowait><silent> q :<c-u>wincmd p<bar>exe winnr('#')..'close'<bar>do <nomodeline> WinEnter<cr>
+        nno <buffer><nowait><silent> q :<c-u>call <sid>close_fugitive_window()<cr>
         sil! keepj keepp 1;/^# \%(Changes\|Untracked files\)/
     endif
+endfu
+
+fu s:close_fugitive_window() abort
+    " Do *not* try to be smart and focus the previous window immediately, then close the fugitive window.{{{
+    "
+    "     wincmd p
+    "     exe winnr('#')..'close'
+    "
+    " The height of the remaining windows would be wrong.
+    " When you close  a non-focused window with `:123close`, no  event is fired,
+    " so `vim-window` does not reset the height of the remaining windows:
+    "
+    "     $ vim +'sp|sp'
+    "     :1close
+    "
+    " You would need additional statements:
+    "
+    "     if &ft is# 'qf'
+    "         wincmd _
+    "     endif
+    "     do <nomodeline> WinEnter
+    "
+    " The reason  why `wincmd _` is  necessary is because the  original previous
+    " window may be a qf window; in that case you're now in a qf window, and
+    " `do WinEnter` will make `vim-window` set  the height of *only* the latter;
+    " it won't squash the other regular windows.
+    "
+    "     $ vim +'sp|sp|helpg foobar' +'copen'
+    "     :1close
+    "     :do WinEnter
+    "
+    " You could also replace `wincmd _ | do  WinEnter` with `wincmd p | wincmd p`,
+    " but  it  would  fire  many  events  (`BufLeave`,  `WinLeave`,  `WinEnter`,
+    " `BufEnter`,  `BufLeave`); the  fewer events,  the less  chance you  get an
+    " unexpected result.
+    "
+    " As you can see, there are a few pitfalls; so don't try to be smart, be simple.
+    "}}}
+    let winid = lg#win_getid('#')
+    close
+    call win_gotoid(winid)
 endfu
 
 " z                   (prefix) {{{3
@@ -7947,6 +7986,7 @@ endfu
 "    see also `:h hl-NormalNC` and `:h hl-NormalFloat`)
 "
 "    - `expandcmd()`: https://github.com/vim/vim/releases/tag/v8.1.1510
+"    - `strptime()`: https://github.com/vim/vim/releases/tag/v8.1.2326
 "
 "    - `win_execute()`: https://github.com/vim/vim/releases/tag/v8.1.1418
 "    - `win_splitmove()`: https://github.com/vim/vim/releases/tag/v8.1.2020
@@ -9447,6 +9487,25 @@ endfu
 " When we are  on a commented line, `>cp` pastes  the unnamed register, comments
 " it and increases the indentation of the text to make it a codeblock.
 " The same should happen when we press `>cp` on an UNcommented line.
+"
+" 143 -
+"
+" Open a new xterm, then run:
+"
+"     $ vim +'set lines=16 | pedit /tmp/file'
+"     " press `q:` (to open command-line window)
+"     " press `q` (to close it)
+"
+" The *focused* window is squashed to 0 lines, which is unexpected.
+" Is it a Vim bug?
+"
+" In practice, we encounter this issue when we run Vim in a tmux split.
+"
+" 144 -
+"
+" When using the `gc` operator to comment  a line starting with a backslash in a
+" Vimscript file, maybe we  should not add a space between  `"` and `\`, because
+" we sometimes want to temporarily comment a continuation line.
 
 
 

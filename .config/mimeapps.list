@@ -1,4 +1,3 @@
-
 [Default Applications]
 application/x-colpkg=anki.desktop
 application/x-apkg=anki.desktop
@@ -19,3 +18,6 @@ text/x-c=gvim.desktop
 text/x-c++=gvim.desktop
 application/epub+zip=zathura-pdf-mupdf.desktop
 application/pdf=zathura-pdf-mupdf.desktop
+
+[Added Associations]
+video/mp4=mpv.desktop;

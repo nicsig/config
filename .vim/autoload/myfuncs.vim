@@ -1698,7 +1698,6 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     exe 'lefta '..(&columns/3)..'vnew '..tempfile
     setl bh=delete bt=nofile nobl noswf wfw nowrap pvw
 
-    " for item in items(freq)
     for item in flags.weighted ? weighted_freq : items(freq)
         call append('$', join(item))
     endfor

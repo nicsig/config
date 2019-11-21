@@ -541,14 +541,6 @@ Defaults: `g:matchparen_timeout`, `g:matchparen_insert_timeout`
 `b:matchup_matchparen_timeout`  and   `b:matchup_matchparen_insert_timeout`  are
 buffer local versions of the above.
 
-### `g:matchup_matchparen_deferred`
-
-Deferred highlighting  improves cursor  movement performance (for  example, when
-using `hjkl`) by  delaying highlighting for a  short time and waiting  to see if
-the cursor continues moving.
-
-Default: 0 (disabled)
-
 ### `g:matchup_matchparen_deferred_show_delay`
 
 Delay, in milliseconds, between when the cursor moves and when we start checking
