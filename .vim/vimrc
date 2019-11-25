@@ -814,7 +814,7 @@ if has('vim_starting')
         "
         "      au VimEnter * ++nested call s:set_colorscheme()
         "                  │
-        "                  └ the autocmds need to nest, so that when we set the colorscheme,
+        "                  └ the autocmds need to nest, so that when we set the color scheme,
         "                    `ColorScheme` is fired, and our customizations are sourced
         "
         " Also, you'll need to use a variable name in uppercase.
@@ -822,7 +822,7 @@ if has('vim_starting')
         " Why don't you use the alternative?{{{
         "
         " The  alternative requires  that we  delay  the sourcing  of the  color
-        " scheme until  VimEnter. Besides, the colorscheme executes  `:hi clear`
+        " scheme until VimEnter. Besides, the  color scheme executes `:hi clear`
         " which removes any custom HG we may have defined.
         "
         " So, if we delay the color scheme, we must redefine all our custom HGs.
@@ -4123,7 +4123,7 @@ nno <c-g><c-g> <c-g>
 " C-np                move across tab pages {{{4
 
 nno <silent> <c-p> :<c-u>tabprevious<cr>
-nno <silent> <c-n> :<c-u>tabnext<cr>
+nno <silent> <c-n> :<c-u>exe (v:count > 1 ? v:count : '')..'tabnext'<cr>
 
 " C-w N               join tab page {{{4
 
@@ -7985,8 +7985,10 @@ endfu
 "    (I think the equivalent in Nvim is `'winhighlight'`;
 "    see also `:h hl-NormalNC` and `:h hl-NormalFloat`)
 "
+"    - `rand()` + `srand()`: https://github.com/vim/vim/releases/tag/v8.1.2342
 "    - `expandcmd()`: https://github.com/vim/vim/releases/tag/v8.1.1510
 "    - `strptime()`: https://github.com/vim/vim/releases/tag/v8.1.2326
+"    - `interrupt()`: https://github.com/vim/vim/releases/tag/v8.1.2341
 "
 "    - `win_execute()`: https://github.com/vim/vim/releases/tag/v8.1.1418
 "    - `win_splitmove()`: https://github.com/vim/vim/releases/tag/v8.1.2020
@@ -8022,11 +8024,6 @@ endfu
 "    - listener_add()
 "    - listener_remove()
 "
-"    - argc() + argv()
-"      in Vim, they can now access the global arglist and the local arglist of another window
-"
-"        https://github.com/vim/vim/releases/tag/v8.1.0493
-"
 "    - `DiffUpdated` event
 "    - api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
 "    - `CmdlineChanged` event
@@ -8034,7 +8031,6 @@ endfu
 "    - `DirChanged` event
 "    - `ExitPre` event
 "    - `SourcePost` event
-"    - getcompletion('', 'arglist')   +   com -complete=arglist ...
 "    - `gettagstack()`, `settagstack()`
 "    - `mode()` (new output `n_ov`, `n_oV`, `n_oC-v`)
 "    - prompt-buffer
@@ -8267,11 +8263,10 @@ endfu
 "
 "     $ shell_cmd | vim +'setf dirvish' -
 "
-" If I press `x` several times on a  file in a dirvish buffer, the file is added
-" several times in the arglist: it should not.
-" Also, `q` doesn't work and there's no conceal.
+" `q` doesn't work and there's no conceal.
 "
 " Solution:
+"
 "     $ shell_cmd | vim +'call dirvish#open("")' -
 "
 "
@@ -9490,22 +9485,10 @@ endfu
 "
 " 143 -
 "
-" Open a new xterm, then run:
-"
-"     $ vim +'set lines=16 | pedit /tmp/file'
-"     " press `q:` (to open command-line window)
-"     " press `q` (to close it)
-"
-" The *focused* window is squashed to 0 lines, which is unexpected.
-" Is it a Vim bug?
-"
-" In practice, we encounter this issue when we run Vim in a tmux split.
-"
-" 144 -
-"
 " When using the `gc` operator to comment  a line starting with a backslash in a
 " Vimscript file, maybe we  should not add a space between  `"` and `\`, because
 " we sometimes want to temporarily comment a continuation line.
+
 
 
 

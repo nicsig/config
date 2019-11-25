@@ -40,8 +40,19 @@ fu colorscheme#set() abort "{{{2
     " https://github.com/junegunn/seoul256.vim#alternate-256-xterm---srgb-mapping
     "}}}
     let g:seoul256_srgb = 1
+    " Purpose:{{{
+    "
+    " In  various locations  (this  function  + a  function  invoked by  `coC`),
+    " we  need  to  choose  a  default  value for  the  level  of  lightness  of
+    " seoul256-light.
+    "
+    " To be consistent, we need a *unique* variable to which we can refer anywhere.
+    " Note that this variable is custom; it's only intended for our own purpose;
+    " all the other `g:seoul256_` variables are set/used by seoul.
+    "}}}
+    let g:seoul256_default_lightness = 253
 
-    let seoul_bg = get(g:, 'my_last_color_scheme', 253)
+    let seoul_bg = get(g:, 'last_color_scheme', g:seoul256_default_lightness)
     if seoul_bg >= 233 && seoul_bg <= 239
         " What's this `g:seoul256_background`?{{{
         "
@@ -183,6 +194,154 @@ fu colorscheme#set() abort "{{{2
 endfu
 
 fu colorscheme#customize() abort "{{{2
+    " Why?{{{
+    "
+    " Without, we wouldn't  be able to switch to the  dark color scheme, neither
+    " via `coC`, nor via `:colo seoul256`.
+    "
+    " ---
+    "
+    " When we  try to switch from  the light color  scheme to the dark  one, the
+    " value of `g:seoul256_background`  is interpreted as the desire  to set the
+    " light color scheme:
+    "
+    "     " ~/.vim/plugged/seoul256.vim/colors/seoul256.vim
+    "     elseif s:seoul256_background >= 252 && s:seoul256_background <= 256
+    "       let s:style = 'light'
+    "
+    " This is not what we want; we want the dark one.
+    " We must make sure  the variable is deleted, so that if  we later decide to
+    " switch to the dark color scheme, we *can*.
+    "}}}
+    unlet! g:seoul256_background
+
+    " If some function calls raise errors when starting gVim, try to delay them until `VimEnter`.{{{
+    "
+    " In the past, we had some errors when starting gVim:
+    "
+    "     E417: missing argument: guifg=~
+    "     E254: Cannot allocate color 95~
+    "     E254: Cannot allocate color 187~
+    "
+    " The issue was triggered  when we were trying to set up  some of our custom
+    " HGs too early. It  was due to some default HGs  whose attributes we needed
+    " to inspect (`StatusLine`, `TabLine`, ...),  but which were not (correctly)
+    " defined yet.
+    "}}}
+    " override some default HGs
+    call s:CursorLine()
+    call s:DiffChange()
+    call s:EndOfBuffer()
+    call s:LineNrAboveBelow()
+    call s:SpecialKey()
+    call s:StatuslineNC()
+    call s:TabLine()
+    call s:Title()
+    call s:Underlined() | call s:CommentUnderlined()
+    call s:User()
+    call s:VertSplit()
+
+    " define some custom HGs
+    call s:styled_comments()
+
+    call colorscheme#cursorline(&bg is# 'dark') " (re)set `'cul'`
+
+    " set cursor color if it's needed to be visible
+    if has('vim_starting')
+        " If we start Vim with a dark color scheme, the cursor must be visible.{{{
+        "
+        " We use  a light color scheme  in our terminal, and  we have configured
+        " our terminal so that the cursor is visible on a light background.
+        " However, if we use a dark color scheme, the cursor color must be reset
+        " so that we can see it on a dark background.
+        "}}}
+        if &bg is# 'dark'
+            " Why the timer?{{{
+            "
+            " `s:cursor()` needs to know the name of the terminal.
+            " It does so by calling `lg#termname()` which in turn calls `system()`.
+            " `system()` is slow: we don't want to increase the startup time.
+            "
+            " ---
+            "
+            " A  small delay  is acceptable,  because we  only need  to set  the
+            " cursor color right from the start for the dark color scheme, which
+            " we don't use  often, and never right  from the start of  a new Vim
+            " session.
+            "
+            " ---
+            "
+            " In the future, if you stop using  the st terminal, or if you patch
+            " it  to support  hexcode values  or rgb  specifications, you  could
+            " probably eliminate the timer.
+            " Indeed, as long  as all your terminals  support hexcodes/rgb spec,
+            " you don't need the terminal name anymore.
+            "}}}
+            call timer_start(1000, {-> s:cursor()})
+        endif
+    else
+        call s:cursor()
+    endif
+endfu
+
+fu colorscheme#cursorline(enable) abort "{{{2
+    " Why is this function public?{{{
+    "
+    " We  need to  be able  to  call it  from `autoload/toggle_settings.vim`  to
+    " implement the `]oL` and `[oL` mappings which toggle `'cul'`.
+    "}}}
+
+    " Warning: Enabling  `'cul'` can  be extremely  cpu-consuming when  you move
+    " horizontally (j, k, w, b, e, ...) and `'showcmd'` is enabled.
+
+    " If we're in goyo mode, we only want to toggle `'cul'` in the current window.{{{
+    "
+    " Otherwise, when  leaving the  mode, the  state of  `'cul'` in  the current
+    " window and in the other ones can be unexpected.
+    "}}}
+    if get(g:, 'in_goyo_mode', 0) | setl cul! | return | endif
+    " `'cul'` only in the active window and not in insert mode.
+    if a:enable
+        setl cul
+        " What does this do?{{{
+        "
+        " When the cursor is on a long soft-wrapped line, and we enable `'cul'`,
+        " we want  only the  current *screen*  line to  be highlighted,  not the
+        " whole *text* line.
+        "}}}
+        if !has('nvim')
+            let s:culopt_save = &l:culopt
+            let &l:culopt = 'screenline'
+        endif
+        augroup my_cursorline
+            au!
+            " Why `BufWinEnter` and `BufWinLeave`?{{{
+            "
+            " If you load  another buffer in the current  window, `WinLeave` and
+            " `WinEnter` are not fired.
+            " It may happen, for example, when  you move in the quickfix list by
+            " pressing `]q`.
+            "}}}
+            au VimEnter,BufWinEnter,WinEnter * setl cul   | if !has('nvim') | let &l:culopt = 'screenline' | endif
+            au BufWinLeave,WinLeave          * setl nocul | if !has('nvim') | let &l:culopt = s:culopt_save | endif
+            au InsertEnter                   * setl nocul | if !has('nvim') | let &l:culopt = s:culopt_save | endif
+            au InsertLeave                   * setl cul   | if !has('nvim') | let &l:culopt = 'screenline' | endif
+        augroup END
+    else
+        sil! au! my_cursorline
+        sil! aug! my_cursorline
+        setl nocul
+    endif
+endfu
+
+fu colorscheme#save_last_version() abort "{{{2
+    let line = 'let g:last_color_scheme = '..get(g:, 'seoul256_current_bg', 253)
+    call writefile([line], $HOME..'/.vim/colors/my/last_version.vim')
+endfu
+" }}}1
+" Core {{{1
+" override default HGs {{{2
+fu s:CursorLine() abort "{{{3
     " Why changing `CursorLine`?{{{
     "
     " The attributes  set by our  color scheme  make the cursorline  not visible
@@ -202,22 +361,22 @@ fu colorscheme#customize() abort "{{{2
     "                        ^^^^                 ^^^^               ^^^^
     "}}}
     hi CursorLine term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
+endfu
 
-    " useful when `'rnu'` is set; only available in Vim atm
-    hi! link LineNrAbove DiffDelete
-    hi! link LineNrBelow DiffAdd
+fu s:DiffChange() abort "{{{3
+    " Why do you clear `DiffChange`?{{{
+    "
+    " When  you compare  two  windows  in diff  mode,  `DiffChange`  is used  to
+    " highlight the text which has *not* changed on a line which *has* changed.
+    " I don't care about the text which didn't change.
+    " It adds visual clutter.
+    "}}}
+    hi! link DiffChange NONE
+    hi! clear DiffChange
+endfu
 
-    " the `SpecialKey` HG set by seoul256 is barely readable
-    hi! link SpecialKey Special
-
-    " The `VertSplit` HG set by seoul256 is black by default.
-    " When you split a window vertically, Vim  uses it to draw 2 vertical lines,
-    " and in the middle it puts a white vertical line.
-    " That's too much. I only need one black vertical line.
-    " For some reason, linking VertSplit gets us the desired result.
-    hi! link VertSplit Normal
-
-    " hide the EndOfBuffer char (~) by changing its ctermfg attribute (ctermfg=bg)
+fu s:EndOfBuffer() abort "{{{3
+    " hide the `EndOfBuffer` char (`~`) by changing its ctermfg attribute (`ctermfg=bg`)
     " Why this `:if` guard?{{{
     "
     " Some color schemes don't set up the `Normal` HG.
@@ -234,14 +393,135 @@ fu colorscheme#customize() abort "{{{2
             hi EndOfBuffer ctermfg=bg guifg=bg
         endif
     endif
+endfu
 
-    " `Underlined` is meant to be used to highlight html links.{{{
+fu s:LineNrAboveBelow() abort "{{{3
+    " useful when `'rnu'` is set (only available in Vim atm)
+    hi! link LineNrAbove DiffDelete
+    hi! link LineNrBelow DiffAdd
+endfu
+
+fu s:SpecialKey() abort "{{{3
+    " the `SpecialKey` HG set by seoul is barely readable
+    hi! link SpecialKey Special
+endfu
+
+fu s:StatuslineNC() abort "{{{3
+    " the file path in the status line of a non-focused window is too visible; let's fix that
+    " Why don't you use a hard-coded value?{{{
+    "
+    " It may not always look nice, depending on whether we use the dark or light
+    " version of seoul, and depending on the level of lightness.
+    " Instead, we compute it programmatically from another HG; `TabLine` seems a
+    " good fit.
+    "}}}
+    " Why do you pass this extra `cterm` argument?{{{
+    "
+    " If we  are in  gui or in  a true color  terminal, then  `synIDattr()` will
+    " return an hexadecimal number. We can't easily make it less/more light.
+    " We need  a decimal  number to which  we can apply  a simple  offset; later
+    " we'll convert the result back in hexadecimal via `s:DEC2HEX`.
+    "
+    " To force `synIDattr()` to return a decimal  number, we nedd to pass it the
+    " optional `{mode}` argument, to ask for  the value the attribute would have
+    " if we were in an arbitrary mode (here `cterm`).
+    "}}}
+    let bg = s:get_attributes('TabLine', 'cterm').bg + (&bg is 'light' ? -6 : 6)
+    if has('gui_running') || &tgc
+        " The value of `bg` may not be a key in the dictionary `s:DEC2HEX`.{{{
+        "
+        " That's  because there  is  no  guarantee that  the  `bg` attribute  of
+        " `TabLine` is between 232 and 255.
+        " For example, that's not the case with these color schemes:
+        " default, delek, koehler, morning, peachpuff, shine, zellner.
+        "}}}
+        let bg = get(s:DEC2HEX, bg, '#808080')
+        exe 'hi StatuslineNC guibg='..bg
+    else
+        exe 'hi StatuslineNC ctermbg='..bg
+    endif
+    " In a non-focused window, we highlight the file path with `User1`.  That's not the colors which are applied!{{{
+    "
+    " I think that's because of `:h 'stl /User`:
+    "
+    " > The difference between User{N} and StatusLine  will be applied
+    " > to StatusLineNC for the statusline of non-current windows.
+    "
+    " Although, I  don't really understand  how that  explains how Vim  gets the
+    " colors it uses to highlight the file path in a non-focused window...
+    "}}}
+    " The foreground and background colors are reversed!{{{
+    "
+    " I  think that's  because the original  HG  is defined  with the  `reverse`
+    " attribute,  and  `:hi`  doesn't  reset  *all*  the  attributes;  only  the
+    " attributes that you pass to it as arguments.
+    "}}}
+endfu
+
+fu s:TabLine() abort "{{{3
+    " the purpose of this function is to remove the underline value from the HG `TabLine`
+
+    let attributes = {
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
+
+    call map(attributes, {k -> synIDattr(synIDtrans(hlID('Tabline')), k)})
+
+    if has('gui_running')
+        let cmd = 'hi TabLine gui=none guifg=%s'
+    elseif &tgc
+        let attr = has('nvim') ? 'gui' : 'cterm'
+        let cmd = 'hi TabLine term=none '..attr..'=none guifg=%s'
+    else
+        let cmd = 'hi TabLine term=none cterm=none gui=none ctermfg=%s'
+    endif
+
+    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
+    " Tabline doesn't have any value in gui. In this case, executing the command
+    " will fail.
+    if attributes.fg is# '' | return | endif
+    exe printf(cmd, attributes.fg)
+endfu
+
+fu s:Title() abort "{{{3
+    " Purpose: We need some HGs to get the bold, italic, bold+italic styles in a markdown header.
+    let title_fg = s:get_attributes('Title').fg
+    if has('gui_running')
+        " In gVim, `seoul256` makes a markdown Title bold by default.
+        " It prevents us from using the bold style.
+        " So, we remove this attribute.
+        hi clear Title
+        exe 'hi Title guifg='..title_fg
+
+        exe 'hi TitleItalic gui=italic guifg='..title_fg
+        exe 'hi TitleBold gui=bold guifg='..title_fg
+        exe 'hi TitleBoldItalic gui=bold,italic guifg='..title_fg
+
+    elseif &tgc
+        let attr = has('nvim') ? 'gui' : 'cterm'
+        exe 'hi TitleItalic '..attr..'=italic guifg='..title_fg
+        exe 'hi TitleBold '..attr..'=bold guifg='..title_fg
+        exe 'hi TitleBoldItalic '..attr..'=bold,italic guifg='..title_fg
+
+    else
+        exe 'hi TitleItalic term=italic cterm=italic ctermfg='..title_fg
+        exe 'hi TitleBold term=bold cterm=bold ctermfg='..title_fg
+        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='..title_fg
+    endif
+endfu
+
+fu s:Underlined() abort "{{{3
+    " Useful to highlight html links.{{{
     "
     " In a webbrowser, usually those are blue.
     " But in `seoul256`, `Underlined` is pink.
     " So, we reset the  HG with the `underline` style, and the  colors of the HG
     " `Conditional` (because this one is blue).
     "}}}
+
     let cmd = 'hi Underlined term=underline cterm=underline gui=underline '
         \ ..substitute(split(execute('hi Conditional'), '\n')[0], '.*xxx\|links to.*', '', 'g')
         "              │{{{
@@ -260,70 +540,103 @@ fu colorscheme#customize() abort "{{{2
     "     hi Underlined term=underline cterm=underline gui=underline line 15: hi Conditional
     "                                                                ^^^^^^^^^^^^^^^^^^^^^^^
     "}}}
-    let cmd = substitute(cmd, 'line\s\+\d\+:.*', '', '')
-    exe cmd
+    exe substitute(cmd, 'line\s\+\d\+:.*', '', '')
+endfu
 
+fu s:CommentUnderlined() abort "{{{3
     " define the `CommentUnderlined` HG (useful for urls in comments)
+
     " Why the `:\s\+hi\s\+` and the `line\s*\d\+`?{{{
     "
     " When we start with `-V15/tmp/log`, the output of `hi Comment` contains more noise.
     "}}}
-    let comment_definition = substitute(execute('hi Comment'), '\n\|xxx\|:\s\+hi\s\+\|line\s*\d\+\|Last set from.*', '', 'g')
-    let comment_underlined_definition = substitute(comment_definition, 'Comment', 'CommentUnderlined', '')
-    let comment_underlined_definition =
-        \ substitute(comment_underlined_definition, '\m\C\<\%(term\|cterm\|gui\)=\S*', '', 'g')
-    let comment_underlined_definition =
-        \ substitute(comment_underlined_definition, '$', ' term=underline cterm=underline gui=underline', '')
-    exe 'hi '..comment_underlined_definition
+    let Comment = substitute(execute('hi Comment'),
+        \ '\n\|xxx\|:\s\+hi\s\+\|line\s*\d\+\|Last set from.*', '', 'g')
+    let CommentUnderlined = substitute(Comment, 'Comment', 'CommentUnderlined', '')
+    let CommentUnderlined =
+        \ substitute(CommentUnderlined, '\m\C\<\%(term\|cterm\|gui\)=\S*', '', 'g')
+    let CommentUnderlined =
+        \ substitute(CommentUnderlined, '$', ' term=underline cterm=underline gui=underline', '')
 
-    " Why the delay?{{{
+    exe 'hi '..CommentUnderlined
+endfu
+
+fu s:User() abort "{{{3
+    " We're going to define 2 HGs: User1 and User2.{{{
     "
-    " gVim encounters some errors when trying to set up too early some of our custom HGs:
+    " We use them in the status line to customize the appearance of:
     "
-    "     E417: missing argument: guifg=~
-    "     E254: Cannot allocate color 95~
-    "     E254: Cannot allocate color 187~
+    "    - the filename
+    "    - the modified flag
     "
-    " The issue  seems to be  that the HGs whose  attributes we need  to inspect
-    " ('StatusLine', 'TabLine', ...), are not (correctly) defined yet.
+    " We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
+    " except for one: `reverse` (boolean flag).
+    "
+    " `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
+    " Also, we set the color of the background of `User2` as the same as the
+    " foreground color of `Todo`, so that the modified flag clearly stands out.
     "}}}
-    if has('gui_running') && has('vim_starting')
-        augroup delay_color_scheme_when_gvim_starts
-            au!
-            au VimEnter * call s:customize()
-        augroup END
+
+    let attributes = {
+        \ 'fg'      : 0,
+        \ 'bg'      : 0,
+        \ 'bold'    : 0,
+        \ 'reverse' : 0,
+        \ }
+
+    call map(attributes, {k -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
+
+    if has('gui_running')
+        let cmd1 = 'hi User1 gui=%s guifg=%s guibg=%s'
+        let cmd2 = 'hi User2 gui=%s guifg=%s guibg=%s'
+
+    elseif &tgc
+        let attr = has('nvim') ? 'gui' : 'cterm'
+        let cmd1 = 'hi User1 '..attr..'=%s guifg=%s guibg=%s'
+        let cmd2 = 'hi User2 '..attr..'=%s guifg=%s guibg=%s'
+
     else
-        call s:customize()
+        let cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
+        let cmd2 = 'hi User2 cterm=%s ctermfg=%s ctermbg=%s'
+        "                                      │
+        "                                      └ yes, you could use `%d`
+        "                                        but you couldn't use `%d` for `guifg`
+        "                                        nor `%x`
+        "                                        nor `%X`
+        "                                        only `%s`
+        "                                        so, we use `%s` everywhere
     endif
-endfu
 
-fu s:customize() abort
-    call s:diff()
-    call s:styled_comments()
-    call s:StatuslineNC()
-    call s:TabLine()
-    call s:Title()
-    call s:User()
-endfu
-
-fu colorscheme#save_last_version() abort "{{{2
-    let line = 'let g:my_last_color_scheme = '..get(g:, 'seoul256_current_bg', 253)
-    call writefile([line], $HOME..'/.vim/colors/my/last_version.vim')
-endfu
-" }}}1
-" Core {{{1
-fu s:diff() abort "{{{2
-    " Why do you clear `DiffChange`?{{{
+    " For some color  schemes (default, darkblue, ...), some values  used in the
+    " command which is going to be executed may be empty.
+    " If that happens, the command will fail:
     "
-    " When  you compare  two  windows  in diff  mode,  `DiffChange`  is used  to
-    " highlight the text which has *not* changed on a line which *has* changed.
-    " I don't care about the text which didn't change.
-    " It adds visual clutter.
-    "}}}
-    hi! link DiffChange NONE
-    hi! clear DiffChange
-endfu
+    "     Error detected while processing function <SNR>18_set_user_hg:~
+    "     E421: Color name or number not recognized: ctermfg= ctermbg=~
+    if attributes.fg is# '' || attributes.bg is# ''
+        return
+    endif
 
+    let style1 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? '' : 'reverse')
+    if style1 is# '' | return | endif
+
+    exe printf(cmd1, style1, attributes.fg, attributes.bg)
+
+    let style2 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? 'reverse' : '')
+    if style2 is# '' | return | endif
+
+    let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
+    exe printf(cmd2, style2, todo_fg, attributes.bg)
+endfu
+fu s:VertSplit() abort "{{{3
+    " When  you split  a  window  vertically, Vim  uses  `VertSplit`  to draw  2
+    " vertical lines, and in the middle it puts a white vertical line.
+    " That's too much. I only need one black vertical line.
+    "
+    " For some reason, linking `VertSplit` to `Normal` gets us the desired result.
+    hi! link VertSplit ErrorMsg
+endfu
+"}}}2
 fu s:styled_comments() abort "{{{2
     " Need this to be able to make a distinction between comments and code highlighted by `PreProc`.{{{
     "
@@ -468,179 +781,203 @@ fu s:styled_comments() abort "{{{2
     endif
 endfu
 
-fu s:StatuslineNC() abort "{{{2
-    " the file path in the status line of a non-focused window is too visible; let's fix that
-    " Why don't you use a hard-coded value?{{{
+fu s:cursor() abort "{{{2
+    " How can I change the color of the cursor in Vim?{{{
     "
-    " It may not always look nice, depending on whether we use the dark or light
-    " version of seoul, and depending on the level of lightness.
-    " Instead, we compute it programmatically from another HG; `TabLine` seems a
-    " good fit.
+    " There is no builtin way to do it:
+    " https://unix.stackexchange.com/a/72800/289772
+    "
+    " So, you have to do it at the terminal level, using an `OSC 12` sequence:
+    "
+    "     " open xterm
+    "     $ printf '\033]12;#9a7372\007'
+    "
+    " See: `OSC Ps ; Pt BEL/;/Ps = 1 2`
+    "
+    " To send this sequence to the terminal, you can:
+    "
+    "    - execute `:!printf 'seq'`
+    "    - invoke `writefile([seq], '/dev/tty', 'b')` (only in the terminal, not in gVim)
+    "    - append it to `&t_ti` (or `&t_SI`, but the effect would be delayed until you quit insert mode)
     "}}}
-    " Why do you pass this extra `cterm` argument?{{{
+
+    " `lg#termname()` is a bit slow (it invokes `system()`); let's save its output
+    if !exists('g:termname')
+        " never write a global constant in uppercase; it could raise `E741` because we include `!` in `'vi'`
+        const g:termname = lg#termname()
+    endif
+
+    " What's the use of this dictionary?{{{
     "
-    " If we  are in  gui or in  a true color  terminal, then  `synIDattr()` will
-    " return an hexadecimal number. We can't easily make it less/more light.
-    " We need  a decimal  number to which  we can apply  a simple  offset; later
-    " we'll convert the result back in hexadecimal via `s:DEC2HEX`.
-    "
-    " To force `synIDattr()` to return a decimal  number, we nedd to pass it the
-    " optional `{mode}` argument, to ask for  the value the attribute would have
-    " if we were in an arbitrary mode (here `cterm`).
+    " Use it whenever you need to change the color of the cursor in Vim.
+    " We want consistent colors, no matter from which function/script we set it;
+    " so we need a *unique* variable to which we can refer anywhere.
     "}}}
-    let bg = s:get_attributes('TabLine', 'cterm').bg + (&bg is 'light' ? -6 : 6)
-    if has('gui_running') || &tgc
-        " The value of `bg` may not be a key in the dictionary `s:DEC2HEX`.{{{
+    " Why decimal values for st?{{{
+    "
+    " st doesn't  support hexcodes;  even after patching  it to  support the
+    " OSC12 sequence; it *does* support a decimal code though.
+    "}}}
+    " Which kinds of values does xterm support?{{{
+    "
+    " Our current xterm doesn't support  decimal codes, only hexcodes or rgb
+    " specifications (e.g. `rgb:12/34/56`).
+    " I prefer  a `rgb` specification  because it doesn't contain  `#` which
+    " needs to be escaped in a `:!` command.
+    "}}}
+    " Why `rgb:37/3b/41`?{{{
+    "
+    " That's the value we use in xterm:
+    "
+    "     :sp ~/.Xresources
+    "     /cursorColor
+    "}}}
+    if !exists('g:cursor_color')
+        const g:cursor_color = {
+            \ 'light': {'st': '0', 'other': 'rgb:37/3b/41'},
+            \ 'dark': {'st': '13', 'other': 'rgb:9a/73/72'},
+            \ }
+    endif
+    " TODO: Make sure that `0` in st is equivalent to `rgb:37/3b/41` in xterm.{{{
+    "
+    " And that `13` in st is equivalent to `rgb:9a/73/72` in xterm.
+    "
+    " ---
+    "
+    " Make  sure that  the current  values for  the light  colors match  the
+    " default color of the cursor in the terminal.
+    "
+    " ---
+    "
+    " Find a way to get the ligth colors programmatically.
+    " Query the terminal, parse `~/.Xresources`, ...
+    "}}}
+
+    " FIXME: In st (but not in xterm), the cursor color is changed for all tmux panes.{{{
+    "
+    " It should only affect the current tmux pane.
+    "}}}
+    " TODO: In Nvim, we should set `'gcr'` instead of sending an OSC 12 sequence manually.{{{
+    "
+    " https://github.com/neovim/neovim/wiki/FAQ#how-to-change-cursor-color-in-the-terminal
+    "
+    " Unfortunately, right now, it only works in xterm, not in st.
+    " And it doesn't work inside tmux, unless you temporarily reset `$TERM`:
+    "
+    "     " start xterm
+    "     $ tmux -Lx
+    "     $ TERM=xterm-256color nvim
+    "       ^^^^^^^^^^^^^^^^^^^
+    "
+    "     :hi Cursor guifg=red guibg=red
+    "     :set gcr=n-v-c:block-Cursor
+    "
+    " Also, note that the wiki says that `'gcr'` works only if `'tgc'` is set.
+    "
+    " ---
+    "
+    " I suspect that there are two issues.
+    "
+    " First, Nvim probably does not send the sequence to change the cursor color
+    " when it doesn't recognize the name of the terminal.
+    " This would explain why it fails inside tmux, where `$TERM` is `tmux-256color`.
+    "
+    " Second, Nvim probably uses hexcodes or rgb spec, instead of decimal codes,
+    " which  would explain  why it  fails in  st, even  if we  temporarily reset
+    " `$TERM` to `xterm-256color`.
+    "
+    " I *think* the first issue is a Nvim bug.
+    " Because we've already configured tmux so that it relays an OSC 12 sequence
+    " to the outer terminal.
+    "
+    "     ~/.tmux/terminal-overrides.conf
+    "     /\\E]12
+    "
+    " The setting has been correctly applied, as confirmed by:
+    "
+    "     $ tmux info | grep Cs
+    "     11: Cs: (string) \033]12;%p1%s\a~
+    "
+    " So, if  the outer terminal  doesn't change  the cursor color,  it probably
+    " means that Nvim didn't send the sequence.
+    " I guess  that Nvim  only sends it  for some known  values of  `$TERM`, and
+    " `tmux-256color` is not one of them.
+    "
+    " Besides, our terminfo  db is up-to-date, and we can  see that the relevant
+    " capability has the  exact same value for the  entries `xterm-256color` and
+    " `tmux-256color`:
+    "
+    "     $ infocmp -1x xterm-256color | grep ']12'
+    "             Cs=\E]12;%p1%s\007,~
+    "
+    "     $ infocmp -1x tmux-256color | grep ']12'
+    "             Cs=\E]12;%p1%s\007,~
+    "
+    " As for the second issue, there is nothing you can do, except modifying the
+    " patch which adds  support for OSC 12  sequences in st, so  that the latter
+    " accepts hexcodes and rgb specifications.
+    "
+    " ---
+    "
+    " If you find  a way to make  it work in xterm/st  inside/outside tmux, make
+    " the guard before `call s:cursor()` more restrictive:
+    "
+    "     if &bg is# 'dark'
+    "     →
+    "     if &bg is# 'dark' && !has('nvim')
+    "
+    " Same thing in the next autocmd listening to `VimLeavePre`:
+    "
+    "     au VimLeavePre * ++once if &bg is# 'dark' | call s:restore_cursor_color() | endif
+    "     →
+    "     au VimLeavePre * ++once if &bg is# 'dark' && !has('nvim') | call s:restore_cursor_color() | endif
+    "                                               ^^^^^^^^^^^^^^^
+    "}}}
+    let color = g:cursor_color[&bg][g:termname is# 'st-256color' ? 'st' : 'other']
+    " Why?{{{
+    "
+    " We may execute a `printf` command, via `:!`.
+    " And it may contain a `#` character (prefix in hex code).
+    " On Vim's  command-line, this  character is  automatically expanded  in the
+    " name of the alternate file; we don't want that.
+    "}}}
+    let color = escape(color, '#')
+
+    " When do I need double quotes?{{{
+    "
+    " You don't need them if you send the sequence to the terminal via `:!printf`.
+    " You *do* need them, if you send the sequence via `writefile()`:
+    "
+    "     call writefile([seq], '/dev/tty', 'b')
+    "}}}
+    let seq = "\033]12;"..color.."\007"
+
+    if has('gui_running')
+        " You can't write to the tty in gVim:{{{
         "
-        " That's  because there  is  no  guarantee that  the  `bg` attribute  of
-        " `TabLine` is between 232 and 255.
-        " For example, that's not the case with these color schemes:
-        " default, delek, koehler, morning, peachpuff, shine, zellner.
+        "     $ gvim
+        "     :call writefile(["\033]12;3\007"], '/dev/tty', 'b')
+        "     E482: Can't create file /dev/tty~
         "}}}
-        let bg = get(s:DEC2HEX, bg, '#808080')
-        exe 'hi StatuslineNC guibg='..bg
+        exe 'sil !printf '..string(seq)
     else
-        exe 'hi StatuslineNC ctermbg='..bg
+        call writefile([seq], '/dev/tty', 'b')
     endif
-    " In a non-focused window, we highlight the file path with `User1`.  That's not the colors which are applied!{{{
-    "
-    " I think that's because of `:h 'stl /User`:
-    "
-    " > The difference between User{N} and StatusLine  will be applied
-    " > to StatusLineNC for the statusline of non-current windows.
-    "
-    " Although, I  don't really understand  how that  explains how Vim  gets the
-    " colors it uses to highlight the file path in a non-focused window...
-    "}}}
-    " The foreground and background colors are reversed!{{{
-    "
-    " I  think that's  because the original  HG  is defined  with the  `reverse`
-    " attribute,  and  `:hi`  doesn't  reset  *all*  the  attributes;  only  the
-    " attributes that you pass to it as arguments.
-    "}}}
+
+    " When we  quit Vim, we  want to restore the  cursor color so  that it's
+    " visible on a light background, because  we use a light color scheme in
+    " the terminal.
+    au VimLeavePre * ++once if &bg is# 'dark' | call s:restore_cursor_color() | endif
 endfu
 
-fu s:TabLine() abort "{{{2
-    " the purpose of this function is to remove the underline value from the HG `TabLine`
-
-    let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
-        \ }
-
-    call map(attributes, {k -> synIDattr(synIDtrans(hlID('Tabline')), k)})
-
-    if has('gui_running')
-        let cmd = 'hi TabLine gui=none guifg=%s'
-    elseif &tgc
-        let attr = has('nvim') ? 'gui' : 'cterm'
-        let cmd = 'hi TabLine term=none '..attr..'=none guifg=%s'
+fu s:restore_cursor_color() abort "{{{2
+    let seq = get(g:cursor_color.light, get(g:, 'termname', '') is# 'st-256color' ? 'st' : 'other')
+    let seq = "\e]12;"..seq.."\x07"
+    if !has('nvim')
+        let &t_te ..= seq
     else
-        let cmd = 'hi TabLine term=none cterm=none gui=none ctermfg=%s'
+        call writefile([seq], '/dev/tty', 'b')
     endif
-
-    " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
-    " Tabline doesn't have any value in gui. In this case, executing the command
-    " will fail.
-    if attributes.fg is# '' | return | endif
-    exe printf(cmd, attributes.fg)
-endfu
-
-fu s:Title() abort "{{{2
-    " Purpose: We need some HGs to get the bold, italic, bold+italic styles in a markdown header.
-    let title_fg = s:get_attributes('Title').fg
-    if has('gui_running')
-        " In gVim, `seoul256` makes a markdown Title bold by default.
-        " It prevents us from using the bold style.
-        " So, we remove this attribute.
-        hi clear Title
-        exe 'hi Title guifg='..title_fg
-
-        exe 'hi TitleItalic gui=italic guifg='..title_fg
-        exe 'hi TitleBold gui=bold guifg='..title_fg
-        exe 'hi TitleBoldItalic gui=bold,italic guifg='..title_fg
-
-    elseif &tgc
-        let attr = has('nvim') ? 'gui' : 'cterm'
-        exe 'hi TitleItalic '..attr..'=italic guifg='..title_fg
-        exe 'hi TitleBold '..attr..'=bold guifg='..title_fg
-        exe 'hi TitleBoldItalic '..attr..'=bold,italic guifg='..title_fg
-
-    else
-        exe 'hi TitleItalic term=italic cterm=italic ctermfg='..title_fg
-        exe 'hi TitleBold term=bold cterm=bold ctermfg='..title_fg
-        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='..title_fg
-    endif
-endfu
-
-fu s:User() abort "{{{2
-    " We're going to define 2 HGs: User1 and User2.{{{
-    "
-    " We use them in the status line to customize the appearance of:
-    "
-    "    - the filename
-    "    - the modified flag
-    "
-    " We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
-    " except for one: `reverse` (boolean flag).
-    "
-    " `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
-    " Also, we set the color of the background of `User2` as the same as the
-    " foreground color of `Todo`, so that the modified flag clearly stands out.
-    "}}}
-
-    let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
-        \ }
-
-    call map(attributes, {k -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
-
-    if has('gui_running')
-        let cmd1 = 'hi User1 gui=%s guifg=%s guibg=%s'
-        let cmd2 = 'hi User2 gui=%s guifg=%s guibg=%s'
-
-    elseif &tgc
-        let attr = has('nvim') ? 'gui' : 'cterm'
-        let cmd1 = 'hi User1 '..attr..'=%s guifg=%s guibg=%s'
-        let cmd2 = 'hi User2 '..attr..'=%s guifg=%s guibg=%s'
-
-    else
-        let cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
-        let cmd2 = 'hi User2 cterm=%s ctermfg=%s ctermbg=%s'
-        "                                      │
-        "                                      └ yes, you could use `%d`
-        "                                        but you couldn't use `%d` for `guifg`
-        "                                        nor `%x`
-        "                                        nor `%X`
-        "                                        only `%s`
-        "                                        so, we use `%s` everywhere
-    endif
-
-    " For some color  schemes (default, darkblue, ...), some values  used in the
-    " command which is going to be executed may be empty.
-    " If that happens, the command will fail:
-    "
-    "     Error detected while processing function <SNR>18_set_user_hg:~
-    "     E421: Color name or number not recognized: ctermfg= ctermbg=~
-    if attributes.fg is# '' || attributes.bg is# ''
-        return
-    endif
-
-    let style1 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? '' : 'reverse')
-    if style1 is# '' | return | endif
-
-    exe printf(cmd1, style1, attributes.fg, attributes.bg)
-
-    let style2 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? 'reverse' : '')
-    if style2 is# '' | return | endif
-
-    let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
-    exe printf(cmd2, style2, todo_fg, attributes.bg)
 endfu
 " }}}1
 " Utilities {{{1

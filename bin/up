@@ -322,6 +322,7 @@ update_ranger() { #{{{1
 }
 
 update_shellcheck() { #{{{1
+  cd /tmp || return
   # https://github.com/koalaman/shellcheck#installing-a-pre-compiled-binary
   scversion='stable'
   wget -qO- "https://storage.googleapis.com/shellcheck/shellcheck-${scversion?}.linux.x86_64.tar.xz" | tar -xJv >/dev/null

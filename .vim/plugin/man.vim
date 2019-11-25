@@ -1,10 +1,15 @@
 if has('nvim')
-    " Why ?{{{
+    " Why?{{{
+    "
+    " In the past it was needed:
     "
     "     $ man man
     "     :Man man
     "
-    " The lines are too long and `'showbreak'` is on.
+    " The lines were too long and `'showbreak'` was on.
+    "
+    " Now, I  think it's not needed  anymore, provided you set  `$MANWIDTH` to a
+    " low value (e.g. `80`) in a shell init file; but I keep it just in case.
     "}}}
     let g:man_hardwrap = 1
     augroup my_man

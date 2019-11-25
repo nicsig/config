@@ -2,8 +2,10 @@ if exists('g:loaded_undotree') || stridx(&rtp, 'undotree') == -1
     finish
 endif
 
-au User MyFlags call statusline#hoist('buffer', '', 0, {'ft': 'undotree'})
-au User MyFlags call statusline#hoist('window', '%l/%L ', 0, {'ft': 'undotree'})
+augroup my_undotree_stl
+    au!
+    au FileType undotree call lg#set_stl('undotree', '%=%l/%L ')
+augroup END
 
 " Give automatically the focus to the `undotree` window.
 let g:undotree_SetFocusWhenToggle = 1

@@ -1215,8 +1215,11 @@ fu myfuncs#populate_list(list, cmd) abort "{{{1
         " The output of the shell command passed to `:PQ` must be recognized by Vim.
         " And it must match a value in `'efm'`.
         " Examples:
-        "         :PQ find /etc -name '*.conf'                    ✘
-        "         :PQ grep -IRn foobar ~/.vim | grep -v backup    ✔
+        "
+        "     ✘
+        "     :PQ find /etc -name '*.conf'
+        "     ✔
+        "     :PQ grep -IRn foobar ~/.vim | grep -v backup
 
         " Why `:cgetfile` and not `:cexpr`?{{{
         "
@@ -1234,8 +1237,6 @@ fu myfuncs#populate_list(list, cmd) abort "{{{1
         sil exe 'tab args '..join(map(filter(systemlist(a:cmd),
             \     {_,v -> filereadable(v)}),
             \ {_,v -> fnameescape(v)}))
-        " enable item indicator in the statusline
-        let g:my_stl_list_position = 2
     endif
     return ''
 endfu
