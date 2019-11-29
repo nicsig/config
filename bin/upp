@@ -106,11 +106,13 @@ main() { #{{{2
 print_msg() { #{{{2
   width=${#1}
   dashes="$(printf -- '-%.0s' $(seq 1 "${width}"))"
+  equals="$(printf -- '=%.0s' $(seq 1 "${width}"))"
   cat <<EOF
 
 $dashes
-$1
 $dashes
+$1
+$equals
 
 EOF
 }
@@ -230,34 +232,20 @@ download() { #{{{2
   git pull
 }
 
-uninstall() { #{{{2
-  print_msg 'uninstall'
-  if [[ "$PGM" == 'nvim' ]]; then
-    # https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
-    sudo rm /usr/local/bin/nvim
-    sudo rm -r /usr/local/share/nvim/
-  elif [[ "$PGM" == 'mpv' ]]; then
-    # https://github.com/mpv-player/mpv-build/blob/master/uninstall
-    sudo ./uninstall
-  else
-    sudo make uninstall
-  fi
-}
-
 clean() { #{{{2
   print_msg 'clean'
   if [[ "$PGM" == 'weechat' ]]; then
     # Clean last `cmake(1)` command:
     # https://stackoverflow.com/a/9680493/9780968
     if [[ -d 'build' ]]; then
-      rm -rf build
+      sudo rm -rf build
     fi
     mkdir build
     cd build || exit
 
   else
-    make clean
-    make distclean
+    sudo make clean
+    sudo make distclean
   fi
 }
 
@@ -411,6 +399,20 @@ build() { #{{{2
   # https://github.com/snwh/paper-icon-theme/issues/340
   #}}}
   # TODO: If a test fails, maybe we should make the script fail too.
+}
+
+uninstall() { #{{{2
+  print_msg 'uninstall'
+  if [[ "$PGM" == 'nvim' ]]; then
+    # https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
+    sudo rm /usr/local/bin/nvim
+    sudo rm -r /usr/local/share/nvim/
+  elif [[ "$PGM" == 'mpv' ]]; then
+    # https://github.com/mpv-player/mpv-build/blob/master/uninstall
+    sudo ./uninstall
+  else
+    sudo make uninstall
+  fi
 }
 
 install() { #{{{2

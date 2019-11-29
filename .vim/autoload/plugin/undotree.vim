@@ -24,6 +24,7 @@ fu plugin#undotree#show() abort "{{{2
     " `win_execute()`.
     "}}}
     let t:undotree_prevwinid = win_getid()
+
     " A similar autocmd is already installed in `...#diff_toggle()`.  Why installing yet another one here?{{{
     "
     " If  you close  the undotree  window  while the  diff panel  is open,  then
@@ -50,6 +51,7 @@ fu plugin#undotree#show() abort "{{{2
     au FileType diff ++once if getwinvar(winnr('#'), '&ft') is# 'undotree'
         \ | call s:customize_diff_panel()
         \ | endif
+
     UndotreeShow
     au BufWinLeave <buffer> ++once unlet! t:undotree_prevwinid
 endfu
@@ -99,6 +101,7 @@ fu plugin#undotree#diff_toggle() abort "{{{2
         call lg#win_execute(t:undotree_prevwinid, 'do WinEnter')
     endif
 endfu
+
 fu plugin#undotree#close_diff_panel() abort "{{{2
     " This function is public because we need to be able to call it when we press `SPC q`.
     if has('nvim')
@@ -120,13 +123,15 @@ fu plugin#undotree#close_diff_panel() abort "{{{2
         echo 'press "D" from the undotree buffer for signs to be removed'
     endif
 endfu
-
 "}}}1
 " Core {{{1
 fu s:customize_diff_panel() abort "{{{2
     setl pvw
-    " let's use our own status line
-    set stl<
+    " In the diff panel, the undotree plugin sets a status line, which I don't find useful.
+    " Let's use our own.
+    call lg#set_stl(
+        \ '%=%{&l:pvw ? "[pvw]" : ""} %l,%c  %p%% ',
+        \ '%=%{&l:pvw ? "[pvw]" : ""} %p%% ')
     nno <buffer><nowait><silent> q :<c-u>call plugin#undotree#close_diff_panel()<cr>
 endfu
 

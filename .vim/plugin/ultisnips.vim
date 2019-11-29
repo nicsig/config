@@ -1,3 +1,48 @@
+" TODO: Document that UltiSnips doesn't support python2 anymore.
+" https://github.com/SirVer/ultisnips/pull/1129
+
+" TODO: In `vim-snippets`, check whether we still refer to python2.
+
+" TODO: Re-implement `C-s`  in qf window  (and `C-v`? and `C-t`?);  it works
+" too well  across all  types of  buffers (contrary to  `C-w CR`  which only
+" works well in buffers where we are  in normal mode by default; e.g. that's
+" not the case in fzf).
+"
+" Do sth similar for `vim-fex`.
+" In a fex buffer, `l` should not open the file under the cursor (too easy to hit by accident).
+" `C-s` should.
+
+" TODO: What  happens when  there  is a  conflict between  a  global cwd,  a
+" tab-local cwd and a window-local cwd? Who wins?
+"
+" ---
+"
+" Which effect does the (winning) cwd have?
+" Which command's behavior is altered by it?
+"
+" ---
+"
+" Is there an inheritance mechanism?
+" If I create a new window/tab page what does it inherit? (window-local cwd, tab-local cwd, ...)
+"
+" ---
+"
+" In `vim-cwd`, I don't think we set any tab-local cwd.
+" Do we want to set one from time to time?
+
+" TODO: Tweak our `=  SPC` mapping so that it comments  the added lines when
+" we are on a commented line.
+
+" TODO: Tweak our `ic` text-object so that it stops at an empty line.
+
+" TODO: I'm fed up with codespans being broken when formatting with `gq`.
+"
+" Find a way to prevent `par(1)` from breaking a codespan on multiple lines.
+"
+" Idea: If you can't,  then maybe you could temporarily replace  all spaces in a
+" codespan with  C-b; this should prevent  `par(1)` from breaking a  codespan on
+" multiple lines. Then after the formatting, you would replace C-b with spaces.
+
 if exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1
     finish
 endif
@@ -145,14 +190,11 @@ let g:UltiSnipsRemoveSelectModeMappings = 1
 " Where did you find the code for the rhs of the mapping?{{{
 "
 " https://github.com/SirVer/ultisnips/issues/1017#issuecomment-452154595
-"}}}
-ino <silent> <c-g><s-tab> <c-r>=execute(g:_uspy . ' UltiSnips_Manager._current_snippet_is_done()', 'silent!')[-1]<cr>
-" TODO: Find a way to end the expansion of a snippet when we leave insert mode.{{{
 "
-" Hint: If you install a one-shot autocmd listening to InsertLeave,
-" it will work, but you won't be able to jump to the 2nd tabstop of a snippet.
-" It may be because our custom Tab mapping manually invokes `UltiSnips#ExpandSnippet()`.
+" Note that  we can't  use `g:_uspy` anymore;  probably since  UltiSnips dropped
+" python2 support: https://github.com/SirVer/ultisnips/pull/1129
 "}}}
+ino <silent> <c-g><s-tab> <c-r>=execute('py3 UltiSnips_Manager._current_snippet_is_done()', 'silent!')[-1]<cr>
 
 " Purpose:{{{
 " We want  to be  able to press  Tab in  visual mode to  use the  {VISUAL} token
@@ -177,6 +219,89 @@ xno <silent> <tab> :call UltiSnips#SaveLastVisualSelection()<cr>gvs
 " We need a way to enable UltiSnips's autotrigger on-demand.
 nno <silent> cou :<c-u>call plugin#ultisnips#toggle_autotrigger()<cr>
 
+" Autocmds {{{1
+
+augroup my_ultisnips
+    au!
+
+    " useful during a snippet expansion to prevent the highlighting of trailing whitespace,
+    " and to get a flag in the status line
+    au User UltiSnipsEnterFirstSnippet let g:expanding_snippet = 1
+    au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
+
+    " let us know when a snippet is being expanded
+    au User MyFlags call statusline#hoist('buffer', '%#Visual#%{plugin#ultisnips#status()}', 55)
+
+    " Inserting the output of a shell command in a snippet can cause visual artifacts.{{{
+    "
+    " MWE:
+    "
+    "     snippet foo "" bm
+    "     ${1:a}`!v system('lsb_release -d')`
+    "     endsnippet
+    "
+    " Besides, if the output of the shell command is always the same (e.g. `$ st -v`),
+    " it's inefficient to call a shell every time we expand a snippet.
+    "
+    " Solution: Save all the info you need  in a global Vim dictionary, when you
+    " enter your first snippet, and refer to it in your snippets.
+    "}}}
+    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#save_info()
+
+    " Importing a long file with `:r` while a snippet is being expanded may cause a memory leak.{{{
+    "
+    " There may be other Ex commands which trigger the issue.
+    " To be  safe, let's  make UltiSnips  automatically end  the expansion  of a
+    " snippet when we enter the command-line.
+    "
+    " ---
+    "
+    " Atm, I can reproduce the issue when  I expand the snippet `vimrc` in a new
+    " file, then move the cursor at the end of the file, and execute `:r $MYVIMRC`.
+    "
+    " I'm not sure but this may be due to this issue:
+    "
+    " https://github.com/SirVer/ultisnips/issues/155#issuecomment-244889469
+    "
+    " ---
+    "
+    " When we expand a  snippet in a new file, it seems we  can't exit it simply
+    " by moving outside.
+    " I  suspect that's  because,  initially,  there are  no  lines outside  the
+    " snippet, since there are no lines at all in a new file.
+    "}}}
+    au User UltiSnipsEnterFirstSnippet nno <buffer><nowait> :
+        \ :<c-u>exe 'nunmap <buffer> :'
+        \ <bar>exe 'py3 UltiSnips_Manager._current_snippet_is_done()'
+        \ <bar>redraws<cr>:
+    " TODO: Once Nvim supports `state()`, try to use this autocmd instead:{{{
+    "
+    "     au User UltiSnipsEnterFirstSnippet au CmdlineEnter : ++once
+    "         \ if state('m') is# '' | exe 'py3 UltiSnips_Manager._current_snippet_is_done()'
+    "         \ | redraws
+    "         \ | endif
+    "
+    " Without the `state()` guard, you may exit a snippet prematurely.
+    " That's  what happens  atm with the  `if` snippet, when  you jump  from the
+    " `else` tabstop.
+    "}}}
+
+    " The  autotrigger feature  of UltiSnips  has a  *very* negative  impact on  the
+    " latency/jitter in Nvim.
+    " To make some tests, use typometer: https://github.com/pavelfatin/typometer
+    if has('nvim')
+        " Why the guard?{{{
+        "
+        " To avoid an error if we run  the python tool `nvr` from a Vim terminal
+        " (which probably doesn't make sense, but I don't like errors).
+        "}}}
+        au VimEnter * if exists('#UltiSnips_AutoTrigger')
+        \ |     exe 'au! UltiSnips_AutoTrigger'
+        \ |     aug! UltiSnips_AutoTrigger
+        \ | endif
+    endif
+augroup END
+
 " Miscellaneous {{{1
 
 " When we execute `:UltiSnipsEditSplit`, we want to open the snippet file in
@@ -195,7 +320,7 @@ let g:UltiSnipsEditSplit = 'horizontal'
 " This has also the benefit of increasing the performance, because UltiSnips
 " won't search the rtp.
 "}}}
-let g:UltiSnipsSnippetDirectories = [$HOME.'/.vim/plugged/vim-snippets/UltiSnips']
+let g:UltiSnipsSnippetDirectories = [$HOME..'/.vim/plugged/vim-snippets/UltiSnips']
 
 " Prevent UltiSnips from looking for SnipMate snippets.{{{
 "
@@ -214,44 +339,4 @@ let g:UltiSnipsEnableSnipMate = 0
 let g:UltiSnipsMappingsToIgnore = ['mycompletion#snippet_or_complete']
 " For more info: `:h UltiSnips-warning-smapping`
 " Edit: It doesn't seem necessary anymore, but I'll keep it anyway, just in case...
-
-" The  autotrigger feature  of UltiSnips  has a  *very* negative  impact on  the
-" latency/jitter in Nvim.
-" To make some tests, use typometer: https://github.com/pavelfatin/typometer
-if has('nvim')
-    augroup ultisnips_no_autotrigger
-        au!
-        " Why the guard?{{{
-        "
-        " To avoid an error if we run  the python tool `nvr` from a Vim terminal
-        " (which probably doesn't make sense, but I don't like errors).
-        "}}}
-        au VimEnter * if exists('#UltiSnips_AutoTrigger')
-        \ |     exe 'au! UltiSnips_AutoTrigger'
-        \ |     aug! UltiSnips_AutoTrigger
-        \ | endif
-    augroup END
-endif
-
-" Inserting the output of a shell command in a snippet can cause visual artifacts.{{{
-"
-" MWE:
-"
-"     snippet foo "" bm
-"     ${1:a}`!v system('lsb_release -d')`
-"     endsnippet
-"
-" Besides, if the output of the shell command is always the same (e.g. `$ st -v`),
-" it's inefficient to call a shell every time we expand a snippet.
-"
-" Solution: Save all  the info  you need  in a global  Vim dictionary,  when you
-" enter your first snippet, and refer to it in your snippets.
-"}}}
-augroup ulti_save_info
-    au!
-    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#save_info()
-    " useful to prevent the highlighting of trailing whitespace during a snippet expansion
-    au User UltiSnipsEnterFirstSnippet let g:expanding_snippet = 1
-    au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
-augroup END
 

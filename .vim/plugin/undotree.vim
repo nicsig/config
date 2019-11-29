@@ -4,7 +4,7 @@ endif
 
 augroup my_undotree_stl
     au!
-    au FileType undotree call lg#set_stl('undotree', '%=%l/%L ')
+    au FileType undotree call lg#set_stl('%=%l/%L ')
 augroup END
 
 " Give automatically the focus to the `undotree` window.

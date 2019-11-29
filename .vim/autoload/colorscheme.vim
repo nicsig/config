@@ -246,40 +246,36 @@ fu colorscheme#customize() abort "{{{2
 
     call colorscheme#cursorline(&bg is# 'dark') " (re)set `'cul'`
 
-    " set cursor color if it's needed to be visible
-    if has('vim_starting')
-        " If we start Vim with a dark color scheme, the cursor must be visible.{{{
+    " If we start Vim with a dark color scheme, the cursor must be visible.{{{
+    "
+    " We use a  light color scheme in  our terminal, and we  have configured our
+    " terminal so that the cursor is visible on a light background.
+    " However, if we use a dark color  scheme, the cursor color must be reset so
+    " that we can see it on a dark background.
+    "}}}
+    if has('vim_starting') && &bg is# 'dark'
+        " Why the timer?{{{
         "
-        " We use  a light color scheme  in our terminal, and  we have configured
-        " our terminal so that the cursor is visible on a light background.
-        " However, if we use a dark color scheme, the cursor color must be reset
-        " so that we can see it on a dark background.
+        " `s:cursor()` needs to know the name of the terminal.
+        " It does so by calling  `lg#termname()` which in turn calls `system()`.
+        " `system()` is slow: we don't want to increase the startup time.
+        "
+        " ---
+        "
+        " A small  delay is acceptable, because  we only need to  set the cursor
+        " color right from  the start for the dark color  scheme, which we don't
+        " use often, and never right from the start of a new Vim session.
+        "
+        " ---
+        "
+        " In the future, if  you stop using the st terminal, or  if you patch it
+        " to support  hexcode values or  rgb specifications, you  could probably
+        " eliminate the timer.
+        " Indeed, as long  as all your terminals support  hexcodes/rgb spec, you
+        " don't need the terminal name anymore.
         "}}}
-        if &bg is# 'dark'
-            " Why the timer?{{{
-            "
-            " `s:cursor()` needs to know the name of the terminal.
-            " It does so by calling `lg#termname()` which in turn calls `system()`.
-            " `system()` is slow: we don't want to increase the startup time.
-            "
-            " ---
-            "
-            " A  small delay  is acceptable,  because we  only need  to set  the
-            " cursor color right from the start for the dark color scheme, which
-            " we don't use  often, and never right  from the start of  a new Vim
-            " session.
-            "
-            " ---
-            "
-            " In the future, if you stop using  the st terminal, or if you patch
-            " it  to support  hexcode values  or rgb  specifications, you  could
-            " probably eliminate the timer.
-            " Indeed, as long  as all your terminals  support hexcodes/rgb spec,
-            " you don't need the terminal name anymore.
-            "}}}
-            call timer_start(1000, {-> s:cursor()})
-        endif
-    else
+        call timer_start(1000, {-> s:cursor()})
+    elseif !has('vim_starting')
         call s:cursor()
     endif
 endfu
@@ -634,7 +630,7 @@ fu s:VertSplit() abort "{{{3
     " That's too much. I only need one black vertical line.
     "
     " For some reason, linking `VertSplit` to `Normal` gets us the desired result.
-    hi! link VertSplit ErrorMsg
+    hi! link VertSplit Normal
 endfu
 "}}}2
 fu s:styled_comments() abort "{{{2
@@ -803,8 +799,13 @@ fu s:cursor() abort "{{{2
 
     " `lg#termname()` is a bit slow (it invokes `system()`); let's save its output
     if !exists('g:termname')
-        " never write a global constant in uppercase; it could raise `E741` because we include `!` in `'vi'`
-        const g:termname = lg#termname()
+        " in case `vim-lg` is not enabled
+        try
+            " never write a global constant in uppercase; it could raise `E741` because we include `!` in `'vi'`
+            const g:termname = lg#termname()
+        catch
+            const g:termname = 'st'
+        endtry
     endif
 
     " What's the use of this dictionary?{{{

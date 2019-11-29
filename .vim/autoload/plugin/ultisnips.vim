@@ -27,3 +27,7 @@ fu plugin#ultisnips#save_info() abort "{{{1
         \ }
 endfu
 
+fu plugin#ultisnips#status() abort "{{{1
+    return exists('g:expanding_snippet') ? '[Ulti]' : ''
+endfu
+
