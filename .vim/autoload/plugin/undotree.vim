@@ -130,7 +130,7 @@ fu s:customize_diff_panel() abort "{{{2
     " In the diff panel, the undotree plugin sets a status line, which I don't find useful.
     " Let's use our own.
     call lg#set_stl(
-        \ '%=%{&l:pvw ? "[pvw]" : ""} %l,%c  %p%% ',
+        \ ' %l,%c%=%{&l:pvw ? "[pvw]" : ""} %p%% ',
         \ '%=%{&l:pvw ? "[pvw]" : ""} %p%% ')
     nno <buffer><nowait><silent> q :<c-u>call plugin#undotree#close_diff_panel()<cr>
 endfu

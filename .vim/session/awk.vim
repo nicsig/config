@@ -16,7 +16,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -211,7 +210,10 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-2wincmd k
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd t
@@ -219,9 +221,7 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
+wincmd =
 argglobal
 let s:l = 127 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
@@ -233,38 +233,38 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/.vim/plugin/ultisnips.vim") | buffer ~/.vim/plugin/ultisnips.vim | else | edit ~/.vim/plugin/ultisnips.vim | endif
-let s:l = 273 - ((38 * winheight(0) + 0) / 0)
+let s:l = 288 - ((39 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-273
+288
 normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/.vim/plugged/vim-statusline/plugin/statusline.vim") | buffer ~/.vim/plugged/vim-statusline/plugin/statusline.vim | else | edit ~/.vim/plugged/vim-statusline/plugin/statusline.vim | endif
-let s:l = 358 - ((357 * winheight(0) + 14) / 28)
+let s:l = 29 - ((11 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-358
-normal! 01|
+29
+normal! 022|
 lcd ~/.vim/plugged/vim-statusline
 wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-tabnext 8
+argglobal
+if bufexists("~/.vim/plugin/undotree.vim") | buffer ~/.vim/plugin/undotree.vim | else | edit ~/.vim/plugin/undotree.vim | endif
+let s:l = 1 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 044|
+lcd ~/.vim
+wincmd w
+4wincmd w
+wincmd =
+tabnext 7
 badd +936 ~/wiki/awk/sed.md
-badd +1 ~/.vim/plugged/vim-statusline/plugin/statusline.vim
-badd +0 ~/.vim/plugin/ultisnips.vim
 badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 badd +222 ~/Desktop/ask.md
 badd +183 ~/Desktop/answer.md
@@ -276,6 +276,9 @@ badd +163 ~/wiki/vim/complete.md
 badd +66 ~/Desktop/vim.vim
 badd +20 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
 badd +939 ~/.vim/plugin/README/matchup.md
+badd +288 ~/.vim/plugin/ultisnips.vim
+badd +26 ~/.vim/plugged/vim-statusline/plugin/statusline.vim
+badd +1 ~/.vim/plugin/undotree.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -287,6 +290,7 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

@@ -20,6 +20,8 @@ setl nowrap
 
 setl cul
 
+call lg#set_stl('%y%=%-'..winwidth(0)/8..'l', '%y')
+
 let b:url = 'https://www.startpage.com/do/search?cat=&language=english&cmd=process_search&query='
 
 nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'

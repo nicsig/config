@@ -2,11 +2,6 @@ if exists('g:loaded_undotree') || stridx(&rtp, 'undotree') == -1
     finish
 endif
 
-augroup my_undotree_stl
-    au!
-    au FileType undotree call lg#set_stl('%=%l/%L ')
-augroup END
-
 " Give automatically the focus to the `undotree` window.
 let g:undotree_SetFocusWhenToggle = 1
 
@@ -62,5 +57,8 @@ fu g:Undotree_CustomMap() abort "{{{1
     " an undotree buffer either.
     "}}}
     let b:showbreak = 0
+
+    " dummy item to get an empty status line
+    call lg#set_stl('%h')
 endfu
 

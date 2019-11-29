@@ -10,6 +10,8 @@ setl nowrap
 
 setl cul
 
+call lg#set_stl('%y%=%-'..winwidth(0)/8..'l', '%y')
+
 nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 " Why `command-prompt`?  Why not running the command directly (`system('tmux ' . getline('.'))`)?{{{
 "
