@@ -98,7 +98,7 @@ fu plugin#undotree#diff_toggle() abort "{{{2
     endif
     call t:undotree.Action('DiffToggle')
     if exists('t:undotree_prevwinid')
-        call lg#win_execute(t:undotree_prevwinid, 'do WinEnter')
+        call lg#win_execute(t:undotree_prevwinid, 'do <nomodeline> WinEnter')
     endif
 endfu
 
@@ -130,8 +130,8 @@ fu s:customize_diff_panel() abort "{{{2
     " In the diff panel, the undotree plugin sets a status line, which I don't find useful.
     " Let's use our own.
     call lg#set_stl(
-        \ ' %l,%c%=%{&l:pvw ? "[pvw]" : ""} %p%% ',
-        \ '%=%{&l:pvw ? "[pvw]" : ""} %p%% ')
+        \ ' %l,%c%=%{&l:pvw ? "[pvw]" : ""}%p%% ',
+        \ '%=%{&l:pvw ? "[pvw]" : ""}%p%% ')
     nno <buffer><nowait><silent> q :<c-u>call plugin#undotree#close_diff_panel()<cr>
 endfu
 

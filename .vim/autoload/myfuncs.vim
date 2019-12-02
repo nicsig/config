@@ -658,7 +658,7 @@ fu myfuncs#gtfo_open_term(dir) abort
         return
     endif
     if s:IS_TMUX
-        sil call system('tmux splitw -h -c '..string(a:dir))
+        sil call system('tmux splitw -h -c '..shellescape(a:dir))
     elseif s:IS_X_RUNNING
         sil call system(s:LAUNCH_TERM..' '..shellescape(a:dir)..' &')
         redraw!
@@ -677,6 +677,8 @@ fu myfuncs#in_A_not_in_B(...) abort "{{{1
     if len(getbufline(fileA, 1, '$')) < len(getbufline(fileB, 1, '$'))
         let [fileA, fileB] = [fileB, fileA]
     endif
+
+    let [fileA, fileB] = [shellescape(fileA), shellescape(fileB)]
 
     " http://unix.stackexchange.com/a/28159
     " Why `wc -l < file` instead of simply `wc -l file`?{{{
@@ -725,10 +727,10 @@ fu myfuncs#join_blocks(first_reverse) abort "{{{1
             sil exe end_first_block..'put'
         endif
 
-        sil exe mods..range_second_block.."s/^/\<c-a>/e"
+        sil exe mods..range_second_block.."s/^/\x01/e"
         sil exe mods..range_first_block..'g/^/'..(end_first_block + 1)..'m.|-j'
 
-        sil exe "*!column -s '\<c-a>' -t"
+        sil *!column -s $'\x01' -t
 
     catch
         return lg#catch_error()
@@ -843,69 +845,6 @@ fu myfuncs#op_grep(type, ...) abort "{{{2
             sil lgetexpr system(cmd)
             call setloclist(0, [], 'a', {'title': cmd})
         else
-            " Old Interesting Alternative:{{{
-            "
-            "     sil! exe 'grep! '.shellescape(@").' .'
-            "
-            " Even though `:grep` is a Vim command, we really need to use `shellescape()`
-            " and NOT `fnameescape()`. Check this:
-            "
-            "     let @" = 'foo;ls'
-            "     let @" = "that's"
-            "     let @" = 'foo%bar'
-            "
-            "                         ; is special             % is special
-            "                         on shell's               on Vim's
-            "                         command-line             command-line
-            "    ┌───────────────────┬──────────┬─────────────┬────────────┐
-            "    │         @"        │  foo;ls  │  that's     │  foo%bar   │
-            "    ├───────────────────┼──────────┼─────────────┼────────────┤
-            "    │ fnameescape(@")   │  foo;ls  │  that\'s    │  foo\%bar  │
-            "    ├───────────────────┼──────────┼─────────────┼────────────┤
-            "    │ shellescape(@")   │ 'foo;ls' │ 'that'\''s' │ 'foo%bar'  │
-            "    ├───────────────────┼──────────┼─────────────┼────────────┤
-            "    │ shellescape(@",1) │ 'foo;ls' │ 'that'\''s' │ 'foo\%bar' │
-            "    └───────────────────┴──────────┴─────────────┴────────────┘
-            "
-            " `fnameescape()` would not protect `;`.
-            " The  shell  would  interpret  the  semicolon as  the  end  of  the
-            " `grep(1)` command, and would execute the rest as another command.
-            " This can be dangerous:
-            "
-            "     foo;rm -rf
-            "
-            " Conclusion:
-            " When you have a command whose arguments can contain special characters,
-            " and you want to protect them from:
-            "
-            "    - Vim       use `fnameescape(...)`
-            "    - the shell use `shellescape(...)`
-            "    - both      use `shellescape(..., 1)`
-            "                                     │
-            "                                     └ only needed after a `:!` command; not in `system(...)`
-            "                                       `:!` is the only command to remove the backslashes
-            "                                       added by the 2nd non-nul argument
-            "
-            "                             MWE:
-            "                             :sp /tmp/foo\%bar
-            "                             :sil call system('echo '.shellescape(expand('%')).' >>/tmp/log')
-            "                             :sil call system('echo '.shellescape(expand('%'),1).' >>/tmp/log')
-            "
-            "                                       $ cat /tmp/log
-            "                                           /tmp/foo%bar
-            "                                           /tmp/foo\%bar
-            "                                                   ^
-            "
-            " ---
-            "
-            " Update:
-            " If the argument  which can contain special characters  is the name
-            " of  the current  file,  you  can use  the  filename modifier  `:S`
-            " instead of `shellescape(..., 1)`.
-            " It's less verbose.
-            " `:S` must be the last modifier, and it can work with other special
-            " characters such as `#` or `<cfile>`.
-            "}}}
             sil cgetexpr system(cmd)
             call setqflist([], 'a', {'title': cmd})
         endif
@@ -1132,7 +1071,7 @@ fu myfuncs#plugin_install(url) abort "{{{1
     let to_install  = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
 
     let win_orig = win_getid()
-    vnew | e $MYVIMRC
+    vnew | e ~/.vim/vimrc
     if &l:ro
         echom 'cannot install plugin (vimrc is readonly)'
         return
@@ -1235,7 +1174,7 @@ fu myfuncs#populate_list(list, cmd) abort "{{{1
 
     elseif a:list is# 'arglist'
         sil exe 'tab args '..join(map(filter(systemlist(a:cmd),
-            \     {_,v -> filereadable(v)}),
+            \ {_,v -> filereadable(v)}),
             \ {_,v -> fnameescape(v)}))
     endif
     return ''
@@ -1406,46 +1345,6 @@ fu myfuncs#tab_toc() abort "{{{1
         call qf#create_matches()
     endif
 endfu
-
-" tmux-navigator {{{1
-
-" OLD CODE:
-" I don't like this code anymore. I frequently press `c-j` to go the next
-" horizontal viewport, and this code made me go to a tmux pane instead.
-" I don't know what was the idea/intention behind this code.
-" Everything related to tmux is a mess anyway.
-"
-" TODO: Review these tmux-navigator functions.
-
-"     echo system('tmux -S /tmp/tmux-1000/default display -p "#{pane_current_command}"')
-
-"     fu myfuncs#navigate(dir) abort
-"         if !empty($TMUX)
-"             call s:tmux_navigate(a:dir)
-"         else
-"             call s:vim_navigate(a:dir)
-"         endif
-"     endfu
-
-"     fu s:tmux_navigate(dir) abort
-"         let x = winnr()
-"         call s:vim_navigate(a:dir)
-"         if winnr() == x
-"                                  ┌ path to tmux socket
-"                                  ├──────────────────┐
-"             let cmd = 'tmux -S '.split($TMUX, ',')[0].' '.
-"                         \ 'select-pane -' . tr(a:dir, 'hjkl', 'LDUR')
-"             sil! call system(cmd)
-"         endif
-"     endfu
-
-"     fu s:vim_navigate(dir) abort
-"         try
-"             exe 'wincmd '.a:dir
-"         catch
-"             return lg#catch_error()
-"         endtry
-"     endfu
 
 " trans {{{1
 

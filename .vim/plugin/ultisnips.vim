@@ -1,48 +1,3 @@
-" TODO: Document that UltiSnips doesn't support python2 anymore.
-" https://github.com/SirVer/ultisnips/pull/1129
-
-" TODO: In `vim-snippets`, check whether we still refer to python2.
-
-" TODO: Re-implement `C-s`  in qf window  (and `C-v`? and `C-t`?);  it works
-" too well  across all  types of  buffers (contrary to  `C-w CR`  which only
-" works well in buffers where we are  in normal mode by default; e.g. that's
-" not the case in fzf).
-"
-" Do sth similar for `vim-fex`.
-" In a fex buffer, `l` should not open the file under the cursor (too easy to hit by accident).
-" `C-s` should.
-
-" TODO: What  happens when  there  is a  conflict between  a  global cwd,  a
-" tab-local cwd and a window-local cwd? Who wins?
-"
-" ---
-"
-" Which effect does the (winning) cwd have?
-" Which command's behavior is altered by it?
-"
-" ---
-"
-" Is there an inheritance mechanism?
-" If I create a new window/tab page what does it inherit? (window-local cwd, tab-local cwd, ...)
-"
-" ---
-"
-" In `vim-cwd`, I don't think we set any tab-local cwd.
-" Do we want to set one from time to time?
-
-" TODO: Tweak our `=  SPC` mapping so that it comments  the added lines when
-" we are on a commented line.
-
-" TODO: Tweak our `ic` text-object so that it stops at an empty line.
-
-" TODO: I'm fed up with codespans being broken when formatting with `gq`.
-"
-" Find a way to prevent `par(1)` from breaking a codespan on multiple lines.
-"
-" Idea: If you can't,  then maybe you could temporarily replace  all spaces in a
-" codespan with  C-b; this should prevent  `par(1)` from breaking a  codespan on
-" multiple lines. Then after the formatting, you would replace C-b with spaces.
-
 if exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1
     finish
 endif
@@ -230,7 +185,7 @@ augroup my_ultisnips
     au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
 
     " let us know when a snippet is being expanded
-    au User MyFlags call statusline#hoist('buffer', '%#Visual#%{plugin#ultisnips#status()}', 55)
+    au User MyFlags call statusline#hoist('buffer', '%#Visual#%{plugin#ultisnips#status()}', 52)
 
     " Inserting the output of a shell command in a snippet can cause visual artifacts.{{{
     "
@@ -257,7 +212,7 @@ augroup my_ultisnips
     " ---
     "
     " Atm, I can reproduce the issue when  I expand the snippet `vimrc` in a new
-    " file, then move the cursor at the end of the file, and execute `:r $MYVIMRC`.
+    " file, then move the cursor at the end of the file, and execute `:r ~/.vim/vimrc`.
     "
     " I'm not sure but this may be due to this issue:
     "
@@ -274,6 +229,7 @@ augroup my_ultisnips
         \ :<c-u>exe 'nunmap <buffer> :'
         \ <bar>exe 'py3 UltiSnips_Manager._current_snippet_is_done()'
         \ <bar>redraws<cr>:
+    au User UltiSnipsExitLastSnippet nunmap <buffer> :
     " TODO: Once Nvim supports `state()`, try to use this autocmd instead:{{{
     "
     "     au User UltiSnipsEnterFirstSnippet au CmdlineEnter : ++once
@@ -286,9 +242,18 @@ augroup my_ultisnips
     " `else` tabstop.
     "}}}
 
-    " The  autotrigger feature  of UltiSnips  has a  *very* negative  impact on  the
-    " latency/jitter in Nvim.
+    " The autotrigger feature of UltiSnips has a *very* negative impact on the latency/jitter in Nvim.{{{
+    "
+    " MWE:
+    "
+    "     500i some text
+    "     " takes around 6 seconds when the UltiSnips autocmd is installed
+    "     " instantaneous when it's uninstalled
+    "
+    " ---
+    "
     " To make some tests, use typometer: https://github.com/pavelfatin/typometer
+    "}}}
     if has('nvim')
         " Why the guard?{{{
         "

@@ -16,6 +16,8 @@ tabnew
 tabnew
 tabnew
 tabnew
+tabnew
+tabnew
 tabrewind
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -77,21 +79,21 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/wiki/vim/config.md") | buffer ~/wiki/vim/config.md | else | edit ~/wiki/vim/config.md | endif
-let s:l = 1542 - ((0 * winheight(0) + 0) / 0)
+let s:l = 1589 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1542
+1589
 normal! 0
 lcd ~/wiki/vim
 wincmd w
 argglobal
 if bufexists("~/wiki/vim/complete.md") | buffer ~/wiki/vim/complete.md | else | edit ~/wiki/vim/complete.md | endif
-let s:l = 163 - ((0 * winheight(0) + 0) / 0)
+let s:l = 161 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-163
+161
 normal! 0
 lcd ~/wiki/vim
 wincmd w
@@ -148,7 +150,7 @@ set winwidth=1
 exe '1resize ' . ((&lines * 29 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 argglobal
-let s:l = 39 - ((38 * winheight(0) + 14) / 29)
+let s:l = 39 - ((27 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -183,11 +185,11 @@ set winwidth=1
 exe '1resize ' . ((&lines * 29 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 argglobal
-let s:l = 26 - ((21 * winheight(0) + 14) / 29)
+let s:l = 28 - ((23 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-26
+28
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -204,17 +206,96 @@ wincmd w
 exe '1resize ' . ((&lines * 29 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
 tabnext
-edit ~/Desktop/cwd.md
+edit ~/.vim/plugged/vim-fex/ftplugin/fex.vim
+set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+argglobal
+let s:l = 12 - ((7 * winheight(0) + 14) / 29)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+12
+normal! 053|
+lcd ~/.vim/plugged/vim-fex
+wincmd w
+argglobal
+if bufexists("~/Desktop/cwd.md") | buffer ~/Desktop/cwd.md | else | edit ~/Desktop/cwd.md | endif
+let s:l = 5 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+5
+normal! 0
+lcd ~/.vim
+wincmd w
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+tabnext
+edit ~/wiki/vim/shell.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
+2wincmd k
+wincmd w
+wincmd w
+wincmd t
+set winminheight=0
+set winheight=1
+set winminwidth=0
+set winwidth=1
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+argglobal
+let s:l = 93 - ((3 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+93
+normal! 014|
+lcd ~/wiki/vim
+wincmd w
+argglobal
+if bufexists("~/Desktop/bug.md") | buffer ~/Desktop/bug.md | else | edit ~/Desktop/bug.md | endif
+let s:l = 18 - ((17 * winheight(0) + 14) / 28)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+18
+normal! 0
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-tmuxify/autoload/tmuxify.vim") | buffer ~/.vim/plugged/vim-tmuxify/autoload/tmuxify.vim | else | edit ~/.vim/plugged/vim-tmuxify/autoload/tmuxify.vim | endif
+let s:l = 42 - ((3 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+42
+normal! 0
+lcd ~/.vim/plugged/vim-tmuxify
+wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+tabnext
+edit ~/.vim/plugged/vim-fex/.git/index
+set splitbelow splitright
 wincmd _ | wincmd |
 split
-3wincmd k
-wincmd w
-wincmd w
+1wincmd k
 wincmd w
 wincmd t
 set winminheight=0
@@ -223,62 +304,45 @@ set winminwidth=0
 set winwidth=1
 wincmd =
 argglobal
-let s:l = 127 - ((0 * winheight(0) + 0) / 0)
+let s:l = 5 - ((4 * winheight(0) + 3) / 7)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-127
+5
 normal! 0
-lcd ~/.vim
+lcd ~/.vim/plugged/vim-fex
 wincmd w
 argglobal
-if bufexists("~/.vim/plugin/ultisnips.vim") | buffer ~/.vim/plugin/ultisnips.vim | else | edit ~/.vim/plugin/ultisnips.vim | endif
-let s:l = 288 - ((39 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-288
-normal! 0
-lcd ~/.vim
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-statusline/plugin/statusline.vim") | buffer ~/.vim/plugged/vim-statusline/plugin/statusline.vim | else | edit ~/.vim/plugged/vim-statusline/plugin/statusline.vim | endif
-let s:l = 29 - ((11 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-29
-normal! 022|
-lcd ~/.vim/plugged/vim-statusline
-wincmd w
-argglobal
-if bufexists("~/.vim/plugin/undotree.vim") | buffer ~/.vim/plugin/undotree.vim | else | edit ~/.vim/plugin/undotree.vim | endif
-let s:l = 1 - ((0 * winheight(0) + 0) / 0)
+if bufexists("~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG | endif
+let s:l = 1 - ((0 * winheight(0) + 5) / 10)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
-normal! 044|
-lcd ~/.vim
+normal! 0
+lcd ~/.vim/plugged/vim-fex/.git
 wincmd w
-4wincmd w
+2wincmd w
 wincmd =
-tabnext 7
-badd +936 ~/wiki/awk/sed.md
+tabnext 9
+badd +1 ~/wiki/awk/sed.md
 badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
-badd +222 ~/Desktop/ask.md
-badd +183 ~/Desktop/answer.md
-badd +39 ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
-badd +26 ~/.vim/plugin/matchup.vim
-badd +127 ~/Desktop/cwd.md
-badd +1542 ~/wiki/vim/config.md
-badd +163 ~/wiki/vim/complete.md
+badd +1 ~/Desktop/ask.md
+badd +190 ~/Desktop/answer.md
+badd +1 ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
+badd +1 ~/.vim/plugin/matchup.vim
+badd +36 ~/.vim/plugged/vim-fex/ftplugin/fex.vim
+badd +40 ~/wiki/vim/shell.md
+badd +1589 ~/wiki/vim/config.md
+badd +161 ~/wiki/vim/complete.md
 badd +66 ~/Desktop/vim.vim
 badd +20 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
 badd +939 ~/.vim/plugin/README/matchup.md
-badd +288 ~/.vim/plugin/ultisnips.vim
-badd +26 ~/.vim/plugged/vim-statusline/plugin/statusline.vim
-badd +1 ~/.vim/plugin/undotree.vim
+badd +2 ~/Desktop/cwd.md
+badd +1 ~/Desktop/bug.md
+badd +1 ~/.vim/plugged/vim-tmuxify/autoload/tmuxify.vim
+badd +0 ~/.vim/plugged/vim-fex/.git/index
+badd +0 ~/.vim/plugged/vim-fex/.git/COMMIT_EDITMSG
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -290,7 +354,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

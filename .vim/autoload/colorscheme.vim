@@ -210,10 +210,29 @@ fu colorscheme#customize() abort "{{{2
     "       let s:style = 'light'
     "
     " This is not what we want; we want the dark one.
-    " We must make sure  the variable is deleted, so that if  we later decide to
-    " switch to the dark color scheme, we *can*.
+    " We must  make sure  that –  if we're using  the light  color scheme  – the
+    " variable is  set to a  value inside the range  `[233,239]`; so that  if we
+    " later decide to switch to the dark color scheme, we *can*.
+    " We pick `237` because it's right in the middle, and is the default value.
+    "
+    " ---
+    "
+    " Do *not* delete `g:seoul256_background`.
+    "
+    " It could raise an error when you execute `:colo seoul256`.
+    " Atm, I  can reproduce this  issue by starting  Vim with the  light scheme,
+    " pressing `coC` to switch to the  dark one, then pressing `]ol` to increase
+    " the lightness.
+    "
+    " The error comes from:
+    "
+    "     " ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
+    "     " /fu s:lightness(
+    "     let level = g:seoul256_background - 233 + 1
+    "                 ^^^^^^^^^^^^^^^^^^^^^
+    "                 must exist, otherwise an error is raised
     "}}}
-    unlet! g:seoul256_background
+    if &bg is# 'light' | let g:seoul256_background = 237 | endif
 
     " If some function calls raise errors when starting gVim, try to delay them until `VimEnter`.{{{
     "
@@ -290,12 +309,6 @@ fu colorscheme#cursorline(enable) abort "{{{2
     " Warning: Enabling  `'cul'` can  be extremely  cpu-consuming when  you move
     " horizontally (j, k, w, b, e, ...) and `'showcmd'` is enabled.
 
-    " If we're in goyo mode, we only want to toggle `'cul'` in the current window.{{{
-    "
-    " Otherwise, when  leaving the  mode, the  state of  `'cul'` in  the current
-    " window and in the other ones can be unexpected.
-    "}}}
-    if get(g:, 'in_goyo_mode', 0) | setl cul! | return | endif
     " `'cul'` only in the active window and not in insert mode.
     if a:enable
         setl cul
@@ -960,7 +973,7 @@ fu s:cursor() abort "{{{2
         "     :call writefile(["\033]12;3\007"], '/dev/tty', 'b')
         "     E482: Can't create file /dev/tty~
         "}}}
-        exe 'sil !printf '..string(seq)
+        exe 'sil !printf '..shellescape(seq)
     else
         call writefile([seq], '/dev/tty', 'b')
     endif

@@ -250,6 +250,8 @@ pip
 
 EOF
 
+  # TODO: python2 is deprecated. Could we stop upgrading python2 packages?
+  # Do we use some scripts/programs which rely on python2 packages?
   run_until_it_succeeds python  -m pip install --upgrade --user pip
   run_until_it_succeeds python3 -m pip install --upgrade --user pip
 

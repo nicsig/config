@@ -48,7 +48,7 @@ let g:user_emmet_settings = {
 
 augroup my_emmet
     au!
-    au FileType css,html  call plugin#emmet#install_mappings()
+    au FileType css,html call plugin#emmet#install_mappings()
     " enable emmet mappings in our notes about web-related technologies (html, css, emmet, ...){{{
     "
     " TODO:
@@ -57,6 +57,6 @@ augroup my_emmet
     "     au FileType css,html,markdown  call s:install_mappings()
     "                          ^^^^^^^^
     "}}}
-    au BufReadPost,BufNewFile  */wiki/web/*.md  call plugin#emmet#install_mappings()
+    au BufReadPost,BufNewFile */wiki/web/*.md call plugin#emmet#install_mappings()
 augroup END
 

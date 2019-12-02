@@ -10,10 +10,10 @@ setl nowrap
 
 setl cul
 
-call lg#set_stl('%y%=%-'..winwidth(0)/8..'l', '%y')
+call lg#set_stl('%y%=%l ', '%y')
 
 nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
-" Why `command-prompt`?  Why not running the command directly (`system('tmux ' . getline('.'))`)?{{{
+" Why `command-prompt`?  Why not running the command directly (`system('tmux '..getline('.'))`)?{{{
 "
 " First, it allows you to review the command before it's run.
 " So you  can check that tmux  will indeed run  what you've written in  your Vim
@@ -94,7 +94,7 @@ nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!
 "           ✘
 "}}}
 nno <buffer><nowait><silent> <cr>
-    \ :<c-u>sil call system('tmux command-prompt -I ' . shellescape(substitute(getline('.'), '#', '##', 'g')))<cr>
+    \ :<c-u>sil call system('tmux command-prompt -I '..shellescape(substitute(getline('.'), '#', '##', 'g')))<cr>
 
 nmap <buffer><nowait><silent> ZZ <cr>
 

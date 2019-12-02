@@ -110,7 +110,6 @@ print_msg() { #{{{2
   cat <<EOF
 
 $dashes
-$dashes
 $1
 $equals
 
@@ -140,15 +139,12 @@ install_dependencies() { #{{{2
     sudo aptitude install \
       libncurses5-dev \
       luajit libluajit-5.1-dev \
-      python-dev \
       python3-dev
   elif [[ "$PGM" == 'nvim' ]]; then
     sudo aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
     # `:h python-provider`
-    python -m pip install --user --upgrade pynvim
     python3 -m pip install --user --upgrade pynvim
     # `:h vimtex-faq-neovim`
-    python -m pip install --user --upgrade neovim-remote
     python3 -m pip install --user --upgrade neovim-remote
   elif [[ "$PGM" == 'tmux' ]]; then
     # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
@@ -278,13 +274,11 @@ configure() { #{{{2
       --enable-luainterp=dynamic     \
       --enable-multibyte             \
       --enable-python3interp=dynamic \
-      --enable-pythoninterp=dynamic  \
       --enable-terminal              \
       --prefix=/usr/local            \
       --with-compiledby=user         \
       --with-features=huge           \
       --with-luajit                  \
-      --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
       --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
 
   # If you want the online documentation, add this option:{{{

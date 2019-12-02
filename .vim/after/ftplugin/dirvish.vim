@@ -1,7 +1,7 @@
 " Options {{{1
 
 call lg#set_stl(
-    \ '%y %F%<%=%-'..winwidth(0)/8..'(%l/%L%) ',
+    \ '%y %F%<%=%l/%L ',
     \ '%y %F')
 " in a squashed dirvish window, display the line/column position is useless (noise)
 
