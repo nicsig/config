@@ -1000,3 +1000,8 @@ Finally, it says  that `:MatchupWhereAmI??` is more verbose  because it displays
 context lines; but you don't need 2 appended question marks to get this context;
 one is enough.
 
+##
+## Report issues with floating window in Nvim
+
+<https://github.com/andymass/vim-matchup/issues/80>
+

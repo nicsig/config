@@ -1503,12 +1503,12 @@ set mouse=a
 
 " nrformats {{{2
 
-" when using the `c-a` and `c-x` commands, don't treat the numbers as octla
+" when using the `C-a` and `C-x` commands, don't treat the numbers as octal
 " E.g.:
-"         `c-a` on 007
-"         010  ✘~
-"         `c-a` on 007
-"         008  ✔~
+"     `C-a` on 007
+"     010  ✘~
+"     `C-a` on 007
+"     008  ✔~
 set nrformats-=octal
 
 " path {{{2
@@ -3204,28 +3204,6 @@ nno <silent> [k :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opf
 nno <silent> [j :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<bar>norm! g@l<cr>
 nno <silent> ]k :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
 nno <silent> ]j :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
-" }}}3
-" \                   (prefix) {{{3
-" \b            select current box {{{4
-
-" select the current box, so that we can move it quickly with `vim-schlepp`
-nno <silent> \b :<c-u>call myfuncs#block_select_box()<cr>
-
-" \f            find digraph {{{4
-
-" We've mapped `f` to a function of `vim-sneak`.
-" But it doesn't work with a digraph, contrary to the default `f` command.
-" Use `\f` when you need to look for a complex character (ex: →).
-
-nno \f f
-
-" \p            select paragraph in a block {{{4
-
-" Select a box around the current paragraph.
-" Useful to write some text FIRST, then  press `\p` and `mb` (draw-it plugin) to
-" draw a box around it.
-
-nno <expr><silent> \p  myfuncs#block_select_paragraph()
 " }}}3
 " g                   (prefix) {{{3
 " g^ g$       first/last tabpage {{{4
@@ -7038,10 +7016,18 @@ augroup trailing_whitespace
     " exist (it probably depends on the order of our custom autocmds).
     " In that case, the match won't be re-installed; we want it to be re-installed.
     "}}}
+    " Why the `mode()` guard?{{{
+    "
+    "    1. Expand the `vimrc` snippet.
+    "    2. Press Tab repeatedly to traverse all the tabstops.
+    "    3. Insert `fu`.
+    "
+    " The `fu` snippet is automatically expanded (✔); the trailing whitespace is highlighted (✘).
+    "}}}
     au User UltiSnipsExitLastSnippet if ! has('nvim')
-        \ | exe 'au SafeState * ++once call s:trailing_whitespace(1)'
+        \ | exe 'au SafeState * ++once if mode() is# "n" | call s:trailing_whitespace(1) | endif'
         \ | else
-        \ | call timer_start(0, {-> s:trailing_whitespace(1)})
+        \ | call timer_start(0, {-> mode() is# 'n' ? s:trailing_whitespace(1) : ''})
         \ | endif
 
     au InsertEnter * call s:trailing_whitespace(0)
@@ -7079,6 +7065,35 @@ augroup trailing_whitespace
         au TerminalOpen * call s:trailing_whitespace(0)
     endif
 
+    " An undesirable match will be installed in a help buffer, even with `help` in `s:NO_TRAILING_WHITESPACE_FT`.{{{
+    "
+    " Execute `:h :as` twice, and you'll see it.
+    " This is because when `WinEnter` is fired, `&filetype` has not been correctly set yet.
+    "
+    " So, we must make sure to remove this match with an additional autocmd.
+    "
+    " ---
+    "
+    " You may wonder why we don't listen to `Filetype help`:
+    "
+    "     au FileType help call s:trailing_whitespace(0)
+    "
+    " It's not always fired.
+    "
+    " MWE:
+    "
+    "     $ vim +'LogEvents filetype'
+    "     :h :as
+    "     :q
+    "     :h :as
+    "
+    " Note that if you reset `'hidden'`, `FileType` is always fired.
+    " This is because when  you close the help window, the  help buffer can't be
+    " hidden (`BufHidden`), and Vim has to unload it (`BufUnload`).
+    " As a result, the next time you ask to see the same help file, Vim has to read
+    " the file again, which triggers `BufReadPre`, `FileType` and `BufReadPost`.
+    "}}}
+    au BufWinEnter {$VIMRUNTIME,$HOME/.vim,$HOME/.vim/*}/doc/*.txt call s:trailing_whitespace(0)
     " Same issue when we split a window to read a text file:{{{
     "
     "     :e /tmp/vim.vim
@@ -7092,6 +7107,8 @@ augroup trailing_whitespace
     exe 'au FileType '
         \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_,v -> v isnot# ''}), ',')
         \ ..' call s:trailing_whitespace(0)'
+    " we still have an undesired match when we run `:VimPatches 8.1` *twice*
+    au BufWinEnter * if &ft is# 'text' | call s:trailing_whitespace(0) | endif
 augroup END
 
 fu s:trailing_whitespace(create_match) abort
@@ -8120,14 +8137,14 @@ endfu
 " If neovim is unable to suggest suggestions to fix spelling errors,
 " start it like this:
 "
-"     $ nvim -nu NORC
+"     $ nvim -Nu NORC
 "
 " Write a word with a spelling error:
 "
 "     helzo
 "
 " Then execute `:set spell`.
-" It should make neovim download some missing files (i don't know where).
+" It should make neovim download some missing files (I don't know where).
 " For more info:
 "
 " https://github.com/neovim/neovim/issues/7694
@@ -8468,7 +8485,7 @@ endfu
 " where the visual selection begins/ends.
 " You can use `getpos('v')`, and `line('.')`:
 "
-"         xno  <silent><expr>  <c-a>  Func()
+"         xno <silent><expr> <c-a> Func()
 "         fu Func() abort
 "             let lnums = [getpos('v')[1], line('.')]
 "             echom 'the visual selection starts at line '.min(lnums).' and ends at line '.max(lnums)
@@ -8527,6 +8544,13 @@ endfu
 "
 " Do you need to save and restore `v:register` every time?
 " Do you need to save and restore `v:count` every time?
+"
+" ---
+"
+" If the  operator yanks the text  on which we  operate, should it be  done with
+" `:noa` to minimize unexpected side-effects?
+" E.g., I  think  it would  prevent  our  visual  ring  from saving  a  possible
+" selection.
 "
 " ---
 "
@@ -9091,12 +9115,8 @@ endfu
 " ---
 "
 " Update: It's because we include `longest` in `'cot'`, in `vim-completion`.
-" As a result, for some completion  commands (which ones), `'ic'` is used (which
-" we set to on by default).
 "
-" Maybe you could try to temporarily  reset `'ic'` when a completion occurs, via
-" an autocmd (or via a custom mapping)...
-" No, `'ic'` is not the issue; the issue is really `longest`:
+" MWE:
 "
 "     $ cat <<'EOF' >/tmp/dict
 "     fooxxa
@@ -9130,7 +9150,7 @@ endfu
 " Or for an option to do so.
 " Or for a function to give the original text.
 " I guess that the `inserted` item from `:h complete_info(` could help.
-" But not entirely (what if the case of the text has changed too).
+" But not entirely (what if the case of the text has changed too?).
 " Also, whatever fix you implement, it would probably break the dot command.
 "
 " 117 -
@@ -9456,6 +9476,7 @@ endfu
 " 137 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
+
 
 
 

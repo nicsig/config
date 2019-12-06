@@ -1,3 +1,251 @@
+" OPERATORS {{{1
+fu myfuncs#op_grep(type, ...) abort "{{{2
+    let cb_save  = &cb
+    let sel_save = &selection
+    let reg_save = ['"', getreg('"'), getregtype('"')]
+
+    try
+        set cb-=unnamed cb-=unnamedplus
+        set selection=inclusive
+
+        if a:type is# 'char'
+            norm! `[v`]y
+        elseif a:type is# 'line'
+            norm! '[V']y
+        elseif a:type is# 'block'
+            sil exe "norm! `[\<c-v>`]y"
+        elseif a:type is# 'vis'
+            norm! gvy
+        endif
+
+        let cmd = 'rg 2>/dev/null -FLS --vimgrep '..shellescape((a:0 ? a:1 : @"))
+        let use_loclist = a:0 ? a:2 : 0
+        if a:type is# 'Ex' && use_loclist
+            " Why `:lgetexpr` instead of `:lgrep!`?{{{
+            "
+            " The latter shows us the output of the shell command (`$ ag ...`).
+            " This makes the screen flicker, which is distracting.
+            "
+            " `:lgetexpr` executes the shell command silently.
+            "}}}
+            sil lgetexpr system(cmd)
+            call setloclist(0, [], 'a', {'title': cmd})
+        else
+            sil cgetexpr system(cmd)
+            call setqflist([], 'a', {'title': cmd})
+        endif
+
+    catch
+        return lg#catch_error()
+    finally
+        let &cb  = cb_save
+        let &sel = sel_save
+        call call('setreg', reg_save)
+    endtry
+endfu
+
+" op_replace_without_yank {{{2
+
+" This function is called directly from our `dr` and `drr` mappings.
+fu myfuncs#set_reg(reg_name) abort
+    " We save the name of the register which was called just before `dr` inside
+    " a script-local variable, for the dot command to know which register we
+    " used the first time.
+    "
+    " By default, it will be `"`.
+    " Or `+` if we have prepended the value 'unnamedplus' in the 'clipboard'
+    " option's value.
+
+    let s:replace_reg_name = a:reg_name
+endfu
+
+fu myfuncs#op_replace_without_yank(type) abort
+    let cb_save  = &cb
+    let sel_save = &selection
+    try
+        set selection=inclusive
+
+        " save registers and types to restore later.
+        " FIXME:
+        " We save and restore the register which can be prefixed before the `dr` operator.
+        " Is it necessary?
+        " If so, have we done the same for the other operators which can be prefixed
+        " by a register?
+        call lg#reg#save(['"', s:replace_reg_name])
+
+        " Why do you save the visual marks?{{{
+        "
+        " Suppose you select some lines.
+        " Then you search some word inside (`/\%Vword`).
+        " You replace it (`ciwreplacement`).
+        " You press `n` to go to the next occurrence of the word, and repeat the
+        " edit.
+        " It won't work, because the visual selection has been altered.
+        "}}}
+        let visual_marks_save = [getpos("'<"), getpos("'>")]
+
+        " TODO:
+        " Should  we use  `getreg(..., 1)`  to properly  restore the  expression
+        " register.
+        let replace_reg_contents = getreg(s:replace_reg_name)
+        let replace_reg_type     = getregtype(s:replace_reg_name)
+
+        " build condition to check if we're replacing the current line
+
+        let replace_current_line =     line("'[") == line("']")
+        \                          &&  col("'[") == 1
+        \                          && (col("']") == col('$')-1 || col('$') == 1)
+
+        " If we copy a line containing leading whitespace, and try to replace
+        " another line like this: `0dr$`
+        " The leading whitespace (indentation) will be removed.
+        " Why?
+        "
+        " Because the text on which we operate doesn't include the ending newline.
+        " So, `g@` will pass the type `char`.
+        " So, our function will trim the leading / ending whitespace.
+        " We don't want that for a single line.
+        " For multiple lines, yes. A single one, no.
+        " We use the `replace_current_line` condition to be informed when this
+        " case happens. We treat it as linewise motion/text-object, to keep the
+        " indentation.
+
+        if a:type is# 'line' || replace_current_line
+            exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
+            norm! gv=
+
+        elseif a:type is# 'block'
+            exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
+
+        elseif a:type is# 'char'
+            " If  pasting linewise  contents in  a *characterwise*  motion, trim
+            " surrounding whitespace from the content to be pasted.
+            "
+            " *Not* the trailing whitespace on each line.
+            " *Just* the  leading whitespace of  the first line, and  the ending
+            " whitespace of the last.
+            if replace_reg_type is# 'V'
+                call setreg(s:replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
+            endif
+
+            exe 'keepj norm! `[v`]"'.s:replace_reg_name.'p'
+        endif
+
+    catch
+        return lg#catch_error()
+    finally
+        let &cb  = cb_save
+        let &sel = sel_save
+        call lg#reg#restore(['"', s:replace_reg_name])
+        call setpos("'<", visual_marks_save[0])
+        call setpos("'>", visual_marks_save[1])
+    endtry
+endfu
+
+" TRIM WhiteSpace Multi-Line
+fu s:trimws_ml(s) abort
+    return substitute(a:s, '^\_s*\(.\{-}\)\_s*$', '\1', '')
+endfu
+
+" op_toggle_alignment {{{2
+
+fu s:is_right_aligned(line1, line2) abort
+    let first_non_empty_line = search('\S', 'cnW', a:line2)
+    let length               = strlen(getline(first_non_empty_line))
+    for line in getline(a:line1, a:line2)
+        if strlen(line) != length && line !~# '^\s*$'
+            return 0
+        endif
+    endfor
+    return 1
+endfu
+
+fu myfuncs#op_toggle_alignment(type) abort
+    if a:type is# 'vis'
+        let [mark1, mark2] = ["'<", "'>"]
+    else
+        let [mark1, mark2] = ["'[", "']"]
+    endif
+    if s:is_right_aligned(line(mark1), line(mark2))
+        exe mark1..','..mark2..'left'
+        exe 'norm! '..mark1..'='..mark2
+    else
+        exe mark1..','..mark2..'right'
+    endif
+endfu
+fu myfuncs#op_trim_ws(type) abort "{{{2
+    if &l:binary || &ft is# 'diff'
+        return
+    endif
+
+    if a:type is# 'vis'
+        sil! exe line("'<").','.line("'>")..'TW'
+    else
+        sil! exe line("'[").','.line("']")..'TW'
+    endif
+endfu
+
+" op_yank_matches {{{2
+
+" `s:yank_where_match` is a boolean flag:
+"
+"     1 → yank the lines where a match is found
+"     0 → yank the other lines
+"
+" `s:yank_comments` is another boolean flag:
+"
+"     1 → the pattern describes commented lines
+"     0 → the pattern is simply @/
+
+fu myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
+    let s:yank_matches_view = winsaveview()
+    let s:yank_where_match = a:yank_where_match
+    let s:yank_comments    = a:yank_comments
+endfu
+
+fu myfuncs#op_yank_matches(type) abort
+    let reg_save = ['z', getreg('z'), getregtype('z')]
+    try
+        let @z = ''
+
+        let mods  = 'keepj keepp'
+        let range = (a:type is# 'char' || a:type is# 'line')
+                \ ?     line("'[").','.line("']")
+                \ :     line("'<").','.line("'>")
+
+        let cmd = s:yank_where_match ? 'g' : 'v'
+        let pat = s:yank_comments
+              \ ?     '^\s*\C\V'..escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
+              \ :     @/
+
+        exe mods..' '..range..cmd..'/'..pat..'/y Z'
+
+        " Remove empty lines.
+        " We can't use the pattern `\_^\s*\n` to describe an empty line, because
+        " we aren't in a buffer:    `@z` is just a big string
+        if !s:yank_where_match
+            let @z = substitute(@z, '\n\%(\s*\n\)\+', '\n', 'g')
+        endif
+
+        " the first time we've appended a match to `@z`, it created a newline
+        " we don't want this one; remove it
+        let @z = substitute(@z, "^\n", '', '')
+
+        call setreg('"', @z, 'l')
+        if exists('s:yank_matches_view')
+            call winrestview(s:yank_matches_view)
+            unlet! s:yank_matches_view
+        endif
+
+    catch
+        return lg#catch_error()
+
+    finally
+        call call('setreg', reg_save)
+    endtry
+endfu
+" }}}1
+
 fu myfuncs#after_tmux_capture_pane() abort "{{{1
     " Purpose:{{{
     "
@@ -183,128 +431,6 @@ endfu
 
 fu myfuncs#align_with_end_save_dir(dir) abort
     let s:align_with_end_dir = a:dir
-endfu
-
-fu myfuncs#block_select_box() abort "{{{1
-" this function selects an ascii box that we drew with our `draw-it` plugin
-    let view = winsaveview()
-    let guard = 0
-
-    " find the upper-left corner of the box
-    while guard < 99
-        " search an underscore, to try to position the cursor on the first
-        " line of the box
-        call search('_', 'bW')
-        " if we're on the first line of the box:
-        "         __________
-        "                  ^
-        " ... then `bhj` should position us on the first `|` character of the box
-        "         __________
-        "       >|
-        norm! bhj
-        " if that's the case, we've found the upper-left corner of the box
-        " stop the loop
-        if getline('.')[col('.') - 1] is# '|'
-            norm! k
-            break
-        else
-            " otherwise position the cursor back where it was:
-            "         __________
-            "        ^
-            norm! k
-            " and continue searching
-        endif
-        let guard += 1
-    endwhile
-
-    if guard == 99
-        call winrestview(view)
-        return
-    endif
-
-    " switch to visual block mode
-    exe "norm! \<c-v>"
-    let guard = 0
-    " select the left border of the box
-    while guard < 30
-        norm! j
-        if getline('.')[col('.') - 1] isnot# '|'
-            norm! k
-            break
-        endif
-        let guard += 1
-    endwhile
-
-    if guard = 30
-        call winrestview(view)
-        return
-    endif
-
-    " we've selected the left border of the box, now we have to select the
-    " whole box: `el` should position the cursor on the lower-right corner
-    norm! el
-
-    " if the box we've selected doesn't contain the line where we were
-    " originally, revert everything
-    "
-    "            ┌ original line is before the box
-    "            │
-    if view.lnum < line("'<") || view.lnum > line("'>")
-    "                                      │
-    "                                      └ original line is after the box
-        exe "norm! \e"
-        call winrestview(view)
-    endif
-endfu
-
-" block_select_paragraph {{{1
-
-" This function should try to select a box containing the current paragraph.
-"
-" It won't work as expected if we want to select a box around a block of text:
-"
-"     hello world    ✔
-"     bye all
-"
-"     hello world    foo bar    ✘
-"     bye all        baz qux
-"
-" It  will give  the value  `all`  to 'virtualedit',  but it  won't restore  its
-" original value, because it would alter the selection.
-
-fu myfuncs#block_select_paragraph() abort
-    let ve_save = &ve
-    try
-        set ve=all
-
-        " search the beginning of the text in the current paragraph
-        call search('\n\s*\n', 'bW')
-        let [firstline, firstcol] = searchpos('\S', 'W')
-        " search the end of the text in the current paragraph
-        let lastline = search('\n\s*\n', 'nW')
-        let lastcol = searchpos('.*\zs\S\s*' ,'nW')[1]
-
-        " search the longest line in the paragraph;
-        " iterate over the lines in the latter
-        for line in range(firstline, lastline)
-            +
-            " if a line in the paragraph is longer than the previous value of
-            " `lastcol`, update the latter
-            let lastcol = searchpos('.*\zs\S\s*' ,'nW')[1] > lastcol
-                      \ ?     searchpos('.*\zs\S\s*' ,'nW')[1]
-                      \ :     lastcol
-        endfor
-
-        " execute the command which will select a block containing the paragraph
-        return (firstline - 2)..'G'..(firstcol - 2)..'|'
-             \ .."\<c-v>"
-             \ ..(lastcol + 2)..'|'..(lastline + 1)..'G'
-
-    catch
-        return lg#catch_error()
-    finally
-        let &ve = ve_save
-    endtry
 endfu
 
 " box_create / destroy {{{1
@@ -812,254 +938,6 @@ fu myfuncs#only_selection(lnum1,lnum2) abort "{{{1
     call setline(1, lines)
 endfu
 
-" OPERATORS {{{1
-fu myfuncs#op_grep(type, ...) abort "{{{2
-    let cb_save  = &cb
-    let sel_save = &selection
-    let reg_save = ['"', getreg('"'), getregtype('"')]
-
-    try
-        set cb-=unnamed cb-=unnamedplus
-        set selection=inclusive
-
-        if a:type is# 'char'
-            norm! `[v`]y
-        elseif a:type is# 'line'
-            norm! '[V']y
-        elseif a:type is# 'block'
-            sil exe "norm! `[\<c-v>`]y"
-        elseif a:type is# 'vis'
-            norm! gvy
-        endif
-
-        let cmd = 'rg 2>/dev/null -FLS --vimgrep '..shellescape((a:0 ? a:1 : @"))
-        let use_loclist = a:0 ? a:2 : 0
-        if a:type is# 'Ex' && use_loclist
-            " Why `:lgetexpr` instead of `:lgrep!`?{{{
-            "
-            " The latter shows us the output of the shell command (`$ ag ...`).
-            " This makes the screen flicker, which is distracting.
-            "
-            " `:lgetexpr` executes the shell command silently.
-            "}}}
-            sil lgetexpr system(cmd)
-            call setloclist(0, [], 'a', {'title': cmd})
-        else
-            sil cgetexpr system(cmd)
-            call setqflist([], 'a', {'title': cmd})
-        endif
-
-    catch
-        return lg#catch_error()
-    finally
-        let &cb  = cb_save
-        let &sel = sel_save
-        call call('setreg', reg_save)
-    endtry
-endfu
-
-" op_replace_without_yank {{{2
-
-" This function is called directly from our `dr` and `drr` mappings.
-fu myfuncs#set_reg(reg_name) abort
-    " We save the name of the register which was called just before `dr` inside
-    " a script-local variable, for the dot command to know which register we
-    " used the first time.
-    "
-    " By default, it will be `"`.
-    " Or `+` if we have prepended the value 'unnamedplus' in the 'clipboard'
-    " option's value.
-
-    let s:replace_reg_name = a:reg_name
-endfu
-
-fu myfuncs#op_replace_without_yank(type) abort
-    let cb_save  = &cb
-    let sel_save = &selection
-    try
-        set selection=inclusive
-
-        " save registers and types to restore later.
-        " FIXME:
-        " We save and restore the register which can be prefixed before the `dr` operator.
-        " Is it necessary?
-        " If so, have we done the same for the other operators which can be prefixed
-        " by a register?
-        call lg#reg#save(['"', s:replace_reg_name])
-
-        " Why do you save the visual marks?{{{
-        "
-        " Suppose you select some lines.
-        " Then you search some word inside (`/\%Vword`).
-        " You replace it (`ciwreplacement`).
-        " You press `n` to go to the next occurrence of the word, and repeat the
-        " edit.
-        " It won't work, because the visual selection has been altered.
-        "}}}
-        let visual_marks_save = [getpos("'<"), getpos("'>")]
-
-        " TODO:
-        " Should  we use  `getreg(..., 1)`  to properly  restore the  expression
-        " register.
-        let replace_reg_contents = getreg(s:replace_reg_name)
-        let replace_reg_type     = getregtype(s:replace_reg_name)
-
-        " build condition to check if we're replacing the current line
-
-        let replace_current_line =     line("'[") == line("']")
-        \                          &&  col("'[") == 1
-        \                          && (col("']") == col('$')-1 || col('$') == 1)
-
-        " If we copy a line containing leading whitespace, and try to replace
-        " another line like this: `0dr$`
-        " The leading whitespace (indentation) will be removed.
-        " Why?
-        "
-        " Because the text on which we operate doesn't include the ending newline.
-        " So, `g@` will pass the type `char`.
-        " So, our function will trim the leading / ending whitespace.
-        " We don't want that for a single line.
-        " For multiple lines, yes. A single one, no.
-        " We use the `replace_current_line` condition to be informed when this
-        " case happens. We treat it as linewise motion/text-object, to keep the
-        " indentation.
-
-        if a:type is# 'line' || replace_current_line
-            exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
-            norm! gv=
-
-        elseif a:type is# 'block'
-            exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
-
-        elseif a:type is# 'char'
-            " If  pasting linewise  contents in  a *characterwise*  motion, trim
-            " surrounding whitespace from the content to be pasted.
-            "
-            " *Not* the trailing whitespace on each line.
-            " *Just* the  leading whitespace of  the first line, and  the ending
-            " whitespace of the last.
-            if replace_reg_type is# 'V'
-                call setreg(s:replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
-            endif
-
-            exe 'keepj norm! `[v`]"'.s:replace_reg_name.'p'
-        endif
-
-    catch
-        return lg#catch_error()
-    finally
-        let &cb  = cb_save
-        let &sel = sel_save
-        call lg#reg#restore(['"', s:replace_reg_name])
-        call setpos("'<", visual_marks_save[0])
-        call setpos("'>", visual_marks_save[1])
-    endtry
-endfu
-
-" TRIM WhiteSpace Multi-Line
-fu s:trimws_ml(s) abort
-    return substitute(a:s, '^\_s*\(.\{-}\)\_s*$', '\1', '')
-endfu
-
-" op_toggle_alignment {{{2
-
-fu s:is_right_aligned(line1, line2) abort
-    let first_non_empty_line = search('\S', 'cnW', a:line2)
-    let length               = strlen(getline(first_non_empty_line))
-    for line in getline(a:line1, a:line2)
-        if strlen(line) != length && line !~# '^\s*$'
-            return 0
-        endif
-    endfor
-    return 1
-endfu
-
-fu myfuncs#op_toggle_alignment(type) abort
-    if a:type is# 'vis'
-        let [mark1, mark2] = ["'<", "'>"]
-    else
-        let [mark1, mark2] = ["'[", "']"]
-    endif
-    if s:is_right_aligned(line(mark1), line(mark2))
-        exe mark1..','..mark2..'left'
-        exe 'norm! '..mark1..'='..mark2
-    else
-        exe mark1..','..mark2..'right'
-    endif
-endfu
-fu myfuncs#op_trim_ws(type) abort "{{{2
-    if &l:binary || &ft is# 'diff'
-        return
-    endif
-
-    if a:type is# 'vis'
-        sil! exe line("'<").','.line("'>")..'TW'
-    else
-        sil! exe line("'[").','.line("']")..'TW'
-    endif
-endfu
-
-" op_yank_matches {{{2
-
-" `s:yank_where_match` is a boolean flag:
-"
-"     1 → yank the lines where a match is found
-"     0 → yank the other lines
-"
-" `s:yank_comments` is another boolean flag:
-"
-"     1 → the pattern describes commented lines
-"     0 → the pattern is simply @/
-
-fu myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
-    let s:yank_matches_view = winsaveview()
-    let s:yank_where_match = a:yank_where_match
-    let s:yank_comments    = a:yank_comments
-endfu
-
-fu myfuncs#op_yank_matches(type) abort
-    let reg_save = ['z', getreg('z'), getregtype('z')]
-    try
-        let @z = ''
-
-        let mods  = 'keepj keepp'
-        let range = (a:type is# 'char' || a:type is# 'line')
-                \ ?     line("'[").','.line("']")
-                \ :     line("'<").','.line("'>")
-
-        let cmd = s:yank_where_match ? 'g' : 'v'
-        let pat = s:yank_comments
-              \ ?     '^\s*\C\V'..escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
-              \ :     @/
-
-        exe mods..' '..range..cmd..'/'..pat..'/y Z'
-
-        " Remove empty lines.
-        " We can't use the pattern `\_^\s*\n` to describe an empty line, because
-        " we aren't in a buffer:    `@z` is just a big string
-        if !s:yank_where_match
-            let @z = substitute(@z, '\n\%(\s*\n\)\+', '\n', 'g')
-        endif
-
-        " the first time we've appended a match to `@z`, it created a newline
-        " we don't want this one; remove it
-        let @z = substitute(@z, "^\n", '', '')
-
-        call setreg('"', @z, 'l')
-        if exists('s:yank_matches_view')
-            call winrestview(s:yank_matches_view)
-            unlet! s:yank_matches_view
-        endif
-
-    catch
-        return lg#catch_error()
-
-    finally
-        call call('setreg', reg_save)
-    endtry
-endfu
-
-" }}}1
 fu myfuncs#plugin_install(url) abort "{{{1
     let pat = 'https\=://github.com/\(.\{-}\)/\(.*\)/\='
     if a:url !~# pat
