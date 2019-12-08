@@ -4,6 +4,7 @@ endif
 
 " Options {{{1
 " Global {{{2
+" matchparen module {{{3
 
 " disable the matchparen module when Vim starts up
 let g:matchup_matchparen_enabled = 0
@@ -60,6 +61,8 @@ let g:matchup_matchparen_offscreen = {'method': 'popup'}
 "     let g:matchup_matchparen_offscreen = {}
 "}}}
 
+" misc. {{{3
+
 " do not match words like `for` and `end` in strings and comments,
 " but *do* match symbols like `()` (set it to 2 for nothing to be matched)
 let g:matchup_delim_noskips = 1
@@ -108,7 +111,7 @@ let g:matchup_transmute_enabled = 1
 "
 "     $VIMRUNTIME/ftplugin/html.vim:34
 "}}}
-
+"}}}1
 " Local {{{2
 
 augroup my_matchup

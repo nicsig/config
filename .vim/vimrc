@@ -49,7 +49,7 @@ set guioptions=M
 "
 " Although, you could disable `netrw` and still use `:Gbrowse`:
 "
-"     com -bar -nargs=* Browse sil call system('xdg-open '.shellescape(<q-args>))
+"     com -bar -nargs=* Browse sil call system('xdg-open '..shellescape(<q-args>))
 "
 " `:Browse` is an undocumented feature of `vim-fugitive`.
 " See: https://github.com/tpope/vim-fugitive/blob/2564c37d0a2ade327d6381fef42d84d9fad1d057/autoload/fugitive.vim#L3446-L3447
@@ -2227,7 +2227,7 @@ augroup tags_vimrc
     "
     " This would work:
     "
-    "     au! BufWritePost .zshrc sil call system('source '.expand('%:p:S'))
+    "     au! BufWritePost .zshrc sil call system('source '..expand('%:p:S'))
     "
     " But I'm concerned that after editing the zshrc and doing some experiments,
     " we end up in a shell  whose state is really weird, producing hard-to-debug
@@ -3743,14 +3743,6 @@ xno <silent> <bar>t :<c-u>call myfuncs#trans(1, 1)<cr>
 
 " cycle through several types of translations
 nno <silent> coT :<c-u>call myfuncs#trans_cycle()<cr>
-
-
-" OLD CODE:
-"
-"     nno <silent>  <bar>w  :<c-u> sil! call system('xdg-open http://www.wordreference.com/enfr/'
-"                           \   .  expand('<cword>'))
-"                           \<bar> redraw!<cr>
-
 " }}}3
 " hyphen              (prefix) {{{3
 " -a  -8           ascii / bytes info {{{4
@@ -6215,7 +6207,7 @@ fu s:make_missing_dir(file, buf) abort
                 let pass = inputsecret('[sudo] password for '..$USER..': ')
                 sil call system('sudo -S mkdir '..dir, pass.."\n")
                 "                      │{{{
-                "                      └ ... read the password from the standard input
+                "                      └ read the password from the standard input
                 "                        instead of using the terminal device.
                 "                        The password must be followed by a newline character.
                 "}}}
@@ -6662,7 +6654,7 @@ fu s:make_clipboard_persist_after_quitting_vim() abort
     "
     " Or, you could use a pipe:
     "
-    "     call system('printf -- ' . shellescape(@+) . ' | xclip -selection clipboard')
+    "     call system('printf -- '..shellescape(@+)..' | xclip -selection clipboard')
     "
     " But note that we already have 3 pitfalls to avoid.
     " We  don't want  a trailing  newline  to be  appended,  so we  have to  use
@@ -7541,17 +7533,17 @@ endfu
 "
 "     fu s:open_current_file_in_github() abort
 "       let file_dir = expand('%:h')
-"       sil let git_root = system('cd ' . file_dir . '; git rev-parse --show-toplevel | tr -d "\n"')
-"       let file_path = substitute(expand('%:p'), git_root . '/', '', '')
+"       sil let git_root = system('cd '..file_dir..'; git rev-parse --show-toplevel | tr -d "\n"')
+"       let file_path = substitute(expand('%:p'), git_root..'/', '', '')
 "       sil let branch = system('git symbolic-ref --short -q HEAD | tr -d "\n"')
-"       sil let git_remote = system('cd ' . file_dir . '; git remote get-url origin')
+"       sil let git_remote = system('cd '..file_dir..'; git remote get-url origin')
 "       let repo_path = matchstr(matchlist(git_remote, ':\(.*\)\.')[1], 'github\.com/\zs.*')
-"       let url = 'https://github.com/' . repo_path . '/blob/' . branch . '/' . file_path
+"       let url = 'https://github.com/'..repo_path..'/blob/'..branch..'/'..file_path
 "       let first_line = getpos("'<")[1]
-"       let url ..= '#L' . first_line
+"       let url ..= '#L'..first_line
 "       let last_line = getpos("'>")[1]
-"       if last_line != first_line | let url ..= '-L' . last_line | endif
-"       sil call system('xdg-open ' . url)
+"       if last_line != first_line | let url ..= '-L'..last_line | endif
+"       sil call system('xdg-open '..url)
 "     endfu
 "
 " Source:
@@ -9476,6 +9468,7 @@ endfu
 " 137 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
+
 
 
 

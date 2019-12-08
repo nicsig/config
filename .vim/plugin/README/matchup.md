@@ -802,9 +802,6 @@ match-up aims to be as fast as  possible, but highlighting matching words can be
 intensive and may be slow on less powerful machines.
 There are a few things you can try to improve performance:
 
-  - Update to a recent version of vim.  Newer versions are faster, more
-    extensively tested, and better supported by match-up.
-
   - Try deferred highlighting, which delays highlighting until the cursor is
     stationary to improve cursor movement performance.
     `g:matchup_matchparen_deferred`
@@ -813,8 +810,8 @@ There are a few things you can try to improve performance:
     timeout, highlighting will not be attempted again until the cursor moves.
     `g:matchup_matchparen_timeout`, `g:matchup_matchparen_insert_timeout`
 
-If are having any  other performance issues, please open a  new issue and report
-the output of `:MatchupShowTimes`.
+If you  are having  any other performance  issues, please open  a new  issue and
+report the output of `:MatchupShowTimes`.
 
 ## Matching does not work when lines are too far apart!
 
@@ -893,6 +890,14 @@ prefer to use one of the following:
 
 ##
 # Todo
+## Read the README
+
+    :e ~/.vim/plugged/vim-matchup/README.md
+
+It contains information which are not documented at `:h matchup`.
+
+Btw, should we include them in PR?
+
 ## In `augroup foo`, the `f` is wrongly highlighted.
 
 The   issue   seems   to   come   from   our   `b:match_words`   assignment   in
@@ -987,7 +992,7 @@ gives a more verbose output:
 > more verbose output.
 
 That doesn't seem to be the case.
-Try it in a c file from the Vim project, in a deeply nested block.
+Try it in a C file from the Vim project, in a deeply nested block.
 
 Third, it says that `:MatchupWhereAmI?` outputs sth like:
 
@@ -999,6 +1004,87 @@ A single line is obtained without the appended question mark.
 Finally, it says  that `:MatchupWhereAmI??` is more verbose  because it displays
 context lines; but you don't need 2 appended question marks to get this context;
 one is enough.
+
+---
+
+> If are having any other performance issues, please open a new issue and
+> report the output of `:MatchupShowTimes`.
+
+It should start with:
+
+> If **you** are having ...
+
+##
+
+## Should we set `g:matchup_surround_enabled` to 1?
+
+It would give us the mappings `ds%` and `cs%`.
+However, I don't like those lhs (they are inspired from `vim-surround`); I would
+prefer `sd%` and `sr%` (`sd` being inspired from `vim-sandwich`).
+
+We could ask for an option letting the user choose their own keys.
+
+---
+
+`vim-sandwich` already gives us `sdb` and `srb`, but I think they are less powerful.
+`sd%` and `sc%` should work with any pair of words as defined by `b:match_words`...
+
+---
+
+> {count}cs%
+
+> Change {count}th surrounding matching words.
+> This only works  for open and close words.
+> If  vim-surround is  installed, you  can type  replacements according  to that
+> plugin's rules.
+> Otherwise, match-up will give you the  opportunity to type a single character.
+> Some simple replacement pairs are supported.
+> Requires |g:matchup_surround_enabled| = 1.
+
+What does this sentence mean?:
+> If  vim-surround is  installed, you  can type  replacements according  to that
+> plugin's rules.
+
+Temporarily install `vim-surround` and make some tests to understand.
+
+Does `vim-sandwich` integrate in the same manner?
+
+---
+
+Here are some characters that you can type after `cs%` if matchup and surround are installed:
+
+    ┌────────────┬───────────────────────────────────────────────────────────────────────────────┐
+    │ input char │ result                                                                        │
+    ├────────────┼───────────────────────────────────────────────────────────────────────────────┤
+    │ a          │ <...>                                                                         │
+    ├────────────┼───────────────────────────────────────────────────────────────────────────────┤
+    │ f          │ InputFunc(...)                                                                │
+    ├────────────┼───────────────────────────────────────────────────────────────────────────────┤
+    │ l          │ \begin{input}...\end{input}                                                   │
+    ├────────────┼───────────────────────────────────────────────────────────────────────────────┤
+    │ r          │ [...]                                                                         │
+    ├────────────┼───────────────────────────────────────────────────────────────────────────────┤
+    │ t          │ <input>...</input>                                                            │
+    ├────────────┼───────────────────────────────────────────────────────────────────────────────┤
+    │ -          │ <?php ... ?>                                                                  │
+    │            │                                                                               │
+    │            │ This works only if `{g|b}:surround_{char2nr('-')}` is set to `"<?php \r ?>"`. │
+    │            │ The double quotes are important (single quotes would not work).               │
+    └────────────┴───────────────────────────────────────────────────────────────────────────────┘
+
+There may be others.
+
+---
+
+I think  that `vim-sandwich` is  not as  well integrated as  `vim-surround`, and
+andymass knows it. From the README:
+
+> An  alternative plugin  is vim-sandwich,  which allows  more complex  surround
+> replacement rules but is not currently supported.
+
+We need  to better understand  `vim-sandwich` to  determine whether it  would be
+worth it  to ask for  a better integration; maybe  it can already  do everything
+that `[count]cs%` does.
 
 ##
 ## Report issues with floating window in Nvim

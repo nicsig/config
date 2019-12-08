@@ -184,7 +184,7 @@ fu colorscheme#set() abort "{{{2
     " To avoid duplicating the hex color codes.
     "}}}
     if has('nvim')
-        for i in range(0, 15)
+        for i in range(16)
             " See `:h terminal-configuration` for more info about these
             " `g:terminal_color_` variables.
             let g:terminal_color_{i} = g:terminal_ansi_colors[i]

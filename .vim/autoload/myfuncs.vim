@@ -23,10 +23,8 @@ fu myfuncs#op_grep(type, ...) abort "{{{2
         if a:type is# 'Ex' && use_loclist
             " Why `:lgetexpr` instead of `:lgrep!`?{{{
             "
-            " The latter shows us the output of the shell command (`$ ag ...`).
+            " The latter shows us the output of the shell command (`$ rg ...`).
             " This makes the screen flicker, which is distracting.
-            "
-            " `:lgetexpr` executes the shell command silently.
             "}}}
             sil lgetexpr system(cmd)
             call setloclist(0, [], 'a', {'title': cmd})
@@ -1038,16 +1036,7 @@ fu myfuncs#populate_list(list, cmd) abort "{{{1
         "     ✔
         "     :PQ grep -IRn foobar ~/.vim | grep -v backup
 
-        " Why `:cgetfile` and not `:cexpr`?{{{
-        "
-        " It suffers from an issue regarding a possible pipe in the shell command.
-        " You  have to  escape  it, which  is  inconsistent with  how  a bar  is
-        " interpreted by Vim in other contexts.
-        "
-        " I don't want to remember this quirk.
-        "}}}
-        sil call system(a:cmd..' >/tmp/my_cfile')
-        cgetfile /tmp/my_cfile
+        sil cgetexpr system(a:cmd)
         call setqflist([], 'a', {'title': a:cmd})
 
     elseif a:list is# 'arglist'
