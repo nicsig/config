@@ -91,6 +91,15 @@ call s:cancel_prefix(['+', '-', '<space>', '<bar>', 'U', 's', 'S'])
 " will make sure nothing happens.
 "}}}
 
+" [[  ]] {{{1
+
+" We disable  `[[` and  `]]` for  now, because I  think we  press those  keys by
+" accident too  often; when that  happens, we jump  far away, and  lose context;
+" this is too distracting.
+
+nno [[ <nop>
+nno ]] <nop>
+
 " i_C-n {{{1
 
 " Why do you disable keyword completion?{{{
@@ -214,4 +223,19 @@ endif
 "}}}
 sil! ounmap z
 sil! ounmap Z
+
+" no_vim_maps {{{2
+
+" Don't let the default Vim ftplugin install mappings.{{{
+"
+"     $VIMRUNTIME/ftplugin/vim.vim
+"
+" ... defines the buffer-local mappings `["`, `]"`. I don't want them, because I
+" use other global  mappings (same keys), which are more  powerful (support more
+" filetypes).
+"
+" We could also set `no_plugin_maps`, but it would affect all default ftplugins.
+" For the moment, I only want to disable mappings installed from the Vim ftplugin.
+"}}}
+let g:no_vim_maps = 1
 

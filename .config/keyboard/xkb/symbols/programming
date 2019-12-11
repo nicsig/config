@@ -1,9 +1,6 @@
-// Are the keysyms case-sensitive?{{{
-//
-// Yes.
-// So, don't write `return`, but `Return`.
-// }}}
-// How to get the names of the physical keys (such as AE02)? {{{
+// How to get the names of{{{
+//}}}
+//   the physical keys (such as AE02)?{{{
 //
 //     $ zathura <(xkbprint -label name $DISPLAY - | ps2pdf -)
 //                 │         ├────────┘ │        │
@@ -14,36 +11,112 @@
 //                 │           (legal types are: none, name,code,symbols)
 //                 │
 //                 └ print an XKB keyboard description
+//}}}
+//   the keysyms (such as `eacute`)?{{{
 //
+//     $ locate keysymdef.h
+//     /usr/include/X11/keysymdef.h~
+//}}}
+
+// Where can I find the default layout?{{{
 //
+// Right now, I think we're mainly using `fr(latin9)` which is defined here:
+//
+//     /usr/share/X11/xkb/symbols/fr
+//     /Historic Linux French keyboard layout (fr-latin9)
+//}}}
+// Which pitfall should I be aware of when writing the name of a keysym?{{{
+//
+// It's case-sensitive.
+// So, don't write `return`, but `Return`.
 // }}}
+
 partial alphanumeric_keys
     xkb_symbols "special_chars" {
+    // Purpose:{{{
+    //
     // I often  press `Shift+oe` ('oe'  is produced by  the key at  the top-left
     // corner of the keyboard) by accident, instead of `Shift+&`, when I want to
     // insert a `1`; fix this by making `Shift+oe` produce `1`.
+    //}}}
     key <TLDE> { [ oe, 1, oe, OE ] };
+
     key <AE02> { [ eacute, 2, less, Eacute ] };
     key <AE03> { [ quotedbl, 3, greater ] };
     key <AD01> { [ a, A, bar ] };
     key <AD02> { [ z, Z, parenleft ] };
     key <AD03> { [ e, E, parenright, EuroSign ] };
     key <AD05> { [ t, T, grave ] };
-    key <AD08> { [ i, I ] };
+
+    // Purpose:{{{
+    //
+    // We change the keysym produced by `AltGr  + i` to avoid an issue, which is
+    // due to:
+    //
+    //    - `AltGr + i` producing `î` by default
+    //    - Vim being unable to distinguish `î` from `M-n`
+    //
+    // Indeed, in Vim, we bind sth to  `M-n`, and we could want to bind sth else
+    // to `AltGr + i` in the future.
+    //
+    // We make `AltGr + i` produce `¹` to avoid any confusion in Vim.
+    //
+    // ---
+    //
+    // Same thing for `AltGr + o`; by default it produces `ô`, but Vim is unable
+    // to distinguish `ô` from `M-t`.
+    //}}}
+    key <AD08> { [ i, I, onesuperior ] };
+    key <AD09> { [ o, O, twosuperior ] };
+
     key <AC01> { [ q, Q, equal ] };
     key <AC02> { [ s, S, bracketleft ] };
     key <AC03> { [ d, D, bracketright ] };
     key <AC04> { [ f, F, minus ] };
     key <AC05> { [ g, G, plus ] };
-    key <AC06> { [ h, H, eth ] };
+
+    // Purpose:{{{
+    //
+    // By default, `AltGr + h` produces `ð`, and Vim is unable to distinguish the latter from `M-p`.
+    // Let's make sure we can bind different commands to `AltGr + h` and `M-p` inside Vim.
+    //}}}
+    key <AC06> { [ h, H, eth, threesuperior ] };
+
     key <AC07> { [ j, J, asterisk ] };
     key <AC08> { [ k, K, numbersign ] };
     key <AC09> { [ l, L ] };
+
+    // Purpose:{{{
+    //
+    // We've customized the keyboard layout so that `AltGr + i` produces `¹`.
+    // But by default, `AltGr + m` already  produces `¹`.
+    //
+    // I don't like 2 chords producing the  same keysym; if we press `AltGr + m`
+    // by accident, and  `¹` is bound to sth  (it is in tmux), I  don't want any
+    // unexpected behavior.
+    //
+    // So we make `AltGr + m` produce `³`.
+    //
+    // ---
+    //
+    // Same issue with  `AltGr + ù` which  by default produces `²`  (`AltGr + o`
+    // already produces `²`).
+    //
+    // ---
+    //
+    // Same issue with  `AltGr + *` which  by default produces `³`  (`AltGr + m`
+    // already produces `³`).
+    //}}}
+    key <AC10> { [ m, M, foursuperior ] };
+    key <AC11> { [ ugrave, percent, fivesuperior ] };
+    key <BKSL> { [ asterisk, mu, sixsuperior ] };
+
     key <AB02> { [ x, X, braceleft, z ] };
     key <AB03> { [ c, C, braceright, copyright ] };
     key <AB04> { [ v, V, v ] };
     key <AB05> { [ b, B, asciitilde ] };
     key <SPCE> { [ space, space, underscore, NoSymbol ] };
+
     // Necessary for xcape to translate `Control_R` into `Return`.{{{
     //
     // `xcape` can  *not* translate a keysym  k1 into another one k2,  if no key

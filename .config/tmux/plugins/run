@@ -1,5 +1,5 @@
 # 876 sloc (`$ cloc --exclude-ext=md .`)
-source "$HOME/.tmux/plugins_config/fingers" ; run "$HOME/.tmux/plugins/tmux-fingers/tmux-fingers.tmux"
+source "$HOME/.config/tmux/plugins_config/fingers" ; run "$HOME/.config/tmux/plugins/tmux-fingers/tmux-fingers.tmux"
 
 # 174 sloc
 # We disable the logging plugin for now, because it overwrites our `P` key binding.
@@ -9,5 +9,5 @@ source "$HOME/.tmux/plugins_config/fingers" ; run "$HOME/.tmux/plugins/tmux-fing
 #     source "$HOME/.tmux/plugins_config/logging" ; run "$HOME/.tmux/plugins/tmux-logging/logging.tmux"
 
 # 260 sloc
-run "$HOME/.tmux/plugins/tmux-yank/yank.tmux"
+run "$HOME/.config/tmux/plugins/tmux-yank/yank.tmux"
 

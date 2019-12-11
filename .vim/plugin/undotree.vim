@@ -46,18 +46,6 @@ fu g:Undotree_CustomMap() abort "{{{1
     "}}}
     nno <buffer><nowait><silent> D :<c-u>call plugin#undotree#diff_toggle()<cr>
 
-    " Purpose:{{{
-    "
-    " If you  press `C-h` and `C-l`  to alternate the focus  between an undotree
-    " buffer  and  a  markdown  buffer,  inside  the  latter,  the  `&showbreak`
-    " character is displayed on and off (because of our `my_showbreak` autocmd);
-    " it's distracting.
-    "
-    " Besides, we don't  want the `&showbreak` character to  be displayed inside
-    " an undotree buffer either.
-    "}}}
-    let b:showbreak = 0
-
     " dummy item to get an empty status line
     call lg#set_stl('%h')
 endfu

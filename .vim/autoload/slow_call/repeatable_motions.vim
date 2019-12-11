@@ -359,7 +359,6 @@ call lg#motion#repeatable#make#all({
 \                     {'bwd': '[@',  'fwd': ']@'},
 \                     {'bwd': '[M',  'fwd': ']M'},
 \                     {'bwd': '[S',  'fwd': ']S'},
-\                     {'bwd': '[[',  'fwd': ']]'},
 \                     {'bwd': '[]',  'fwd': ']['},
 \                     {'bwd': '[`',  'fwd': ']`'},
 \                     {'bwd': '[c',  'fwd': ']c'},

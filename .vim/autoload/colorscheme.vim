@@ -310,7 +310,7 @@ fu colorscheme#cursorline(enable) abort "{{{2
     " horizontally (j, k, w, b, e, ...) and `'showcmd'` is enabled.
 
     " `'cul'` only in the active window and not in insert mode.
-    if a:enable
+    if a:enable && ! &l:cul
         setl cul
         " What does this do?{{{
         "
@@ -336,10 +336,12 @@ fu colorscheme#cursorline(enable) abort "{{{2
             au InsertEnter                   * setl nocul | if !has('nvim') | let &l:culopt = s:culopt_save | endif
             au InsertLeave                   * setl cul   | if !has('nvim') | let &l:culopt = 'screenline' | endif
         augroup END
-    else
+    elseif ! a:enable && &l:cul
         sil! au! my_cursorline
         sil! aug! my_cursorline
         setl nocul
+        let &l:culopt = get(s:, 'culopt_save', &l:culopt)
+        unlet! s:culopt_save
     endif
 endfu
 

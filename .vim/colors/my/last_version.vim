@@ -1,1 +1,1 @@
-let g:last_color_scheme = 253
+let g:last_color_scheme = 252

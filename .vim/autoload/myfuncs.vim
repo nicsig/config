@@ -350,6 +350,8 @@ fu s:format_shell_buffer() abort
     " conceal the location
     call qf#set_matches('after_tmux_capture_pane:format_shell_buffer', 'Conceal', 'location')
     call qf#create_matches()
+    lclose
+    norm! gg
 endfu
 
 fu s:format_xdcc_buffer(pat_cmd) abort
