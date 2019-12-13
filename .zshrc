@@ -2842,14 +2842,16 @@ alias config_push='config add -u && config commit -m "update" && config push'
 
 alias ga='git add'
 
+alias gcl='git clone'
 # Do not add `rlwrap` before `git commit`.{{{
 # Why?
-#     1. It's not needed here.
-#     2. It causes an issue.
+#
+#    1. It's not needed here.
+#    2. It causes an issue.
 #
 # How to reproduce the issue?
 #
-#   1. write at the beginning of vimrc:
+#    1. write at the beginning of vimrc:
 #
 #         nno <silent> cd :sil w<cr>
 #         set rtp+=~/.vim/plugged/vim-gutentags/
@@ -2860,7 +2862,7 @@ alias ga='git add'
 #   4. write something on the 1st line and stay on the 1st line
 #   5. while the buffer is still modified, hit `cd`
 #
-# → the line disappears
+# The line disappears.
 #
 # It has nothing to do with the conceal feature.
 # It's reproducible without syntax highglighting.
@@ -2872,7 +2874,7 @@ alias ga='git add'
 #    - commit without `rlwrap`
 #
 # We have several mechanisms to save a buffer (including an autocmd).
-# It's easier (and more future-proof) to just NOT use `rlwrap`.
+# It's easier (and more future-proof) to just *not* use `rlwrap`.
 #
 # TODO:
 # I can't reproduce this issue anymore.
@@ -4771,8 +4773,6 @@ abbrev=(
   'ac' '| column -t'
   # ring the BelL
   'bl' '; tput bel'
-  # printf FieLd
-  'fl' "| awk '{ print $"
 
   # Cd into most reCent directory (useful after cloning a repo)
   'cc' '&& cd *(/oc[1])'
@@ -4787,6 +4787,9 @@ abbrev=(
   #     man zshexpn /FILENAME GENERATION/;/Glob Qualifiers/;/^\s*\Coc\s
   #     https://unix.stackexchange.com/a/550640/289772
   #}}}
+
+  # printf FieLd
+  'fl' "| awk '{ print $"
 
   # No Errors
   'ne' '2>/dev/null'

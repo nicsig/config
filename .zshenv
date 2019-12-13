@@ -431,8 +431,10 @@ export GOPATH=$HOME/go
 # Besides, the `j` alias (provided by the fasd plugin) serves a similar purpose,
 # but does it in a much more powerful way.
 #}}}
+
 # https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-310003.4.1
 export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
+
 # add man pages for `texlive` and `dasht`
 # What's the default value of `$MANPATH`?{{{
 #
@@ -450,6 +452,7 @@ export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 # in `/usr/share/man`).
 #}}}
 export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/Vcs/dasht/man:${MANPATH}:
+
 # add the `texlive` and `dasht` binaries to our path
 # Aren't `~/bin` and `~/.local/bin` already in `$PATH` by default?{{{
 #

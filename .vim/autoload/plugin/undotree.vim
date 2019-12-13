@@ -1,5 +1,10 @@
 " Interface {{{1
 fu plugin#undotree#show() abort "{{{2
+    if &bt isnot# ''
+        echo printf('no undotree for a special buffer (&bt == %s)', &bt)
+        return
+    endif
+
     " Purpose:{{{
     "
     " If you had several windows in your  tab page prior to opening the undotree

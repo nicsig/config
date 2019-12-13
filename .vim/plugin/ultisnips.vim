@@ -225,20 +225,15 @@ augroup my_ultisnips
     " I  suspect that's  because,  initially,  there are  no  lines outside  the
     " snippet, since there are no lines at all in a new file.
     "}}}
-    au User UltiSnipsEnterFirstSnippet nno <buffer><nowait> :
-        \ :<c-u>exe 'nunmap <buffer> :'
-        \ <bar>exe 'py3 UltiSnips_Manager._current_snippet_is_done()'
-        \ <bar>redraws<cr>:
+    au User UltiSnipsEnterFirstSnippet nno <buffer><expr><nowait> : plugin#ultisnips#cancel_expansion()..':'
     au User UltiSnipsExitLastSnippet nunmap <buffer> :
-    " TODO: Once Nvim supports `state()`, try to use this autocmd instead:{{{
+    " TODO: Once Nvim supports `state()`, replace the previous 2 autocmds with this single one:{{{
     "
     "     au User UltiSnipsEnterFirstSnippet au CmdlineEnter : ++once
-    "         \ if state('m') is# '' | exe 'py3 UltiSnips_Manager._current_snippet_is_done()'
-    "         \ | redraws
-    "         \ | endif
+    "         \ if state('m') is# '' | call plugin#ultisnips#cancel_expansion() | endif
     "
     " Without the `state()` guard, you may exit a snippet prematurely.
-    " That's  what happens  atm with the  `if` snippet, when  you jump  from the
+    " That's what  happens atm  with the  `if` snippet, when  you jump  from the
     " `else` tabstop.
     "}}}
 

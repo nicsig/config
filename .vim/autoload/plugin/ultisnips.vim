@@ -1,3 +1,9 @@
+fu plugin#ultisnips#cancel_expansion() abort "{{{1
+    py3 UltiSnips_Manager._current_snippet_is_done()
+    redraws
+    return ''
+endfu
+
 fu plugin#ultisnips#toggle_autotrigger() abort "{{{1
     if exists('#UltiSnips_AutoTrigger')
         au! UltiSnips_AutoTrigger

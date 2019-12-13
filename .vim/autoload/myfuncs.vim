@@ -1027,28 +1027,6 @@ fu myfuncs#plugin_global_variables(keyword) abort "{{{1
     call setline(1, variables)
 endfu
 
-fu myfuncs#populate_list(list, cmd) abort "{{{1
-    if a:list is# 'quickfix'
-        " The output of the shell command passed to `:PQ` must be recognized by Vim.
-        " And it must match a value in `'efm'`.
-        " Examples:
-        "
-        "     ✘
-        "     :PQ find /etc -name '*.conf'
-        "     ✔
-        "     :PQ grep -IRn foobar ~/.vim | grep -v backup
-
-        sil cgetexpr system(a:cmd)
-        call setqflist([], 'a', {'title': a:cmd})
-
-    elseif a:list is# 'arglist'
-        sil exe 'tab args '..join(map(filter(systemlist(a:cmd),
-            \ {_,v -> filereadable(v)}),
-            \ {_,v -> fnameescape(v)}))
-    endif
-    return ''
-endfu
-
 fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     let mods = 'sil keepj keepp'

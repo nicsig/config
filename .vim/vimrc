@@ -282,6 +282,7 @@ Plug 'lacygoill/vim-statusline'
 Plug 'lacygoill/vim-term'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
+Plug 'machakann/vim-Verdin'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
@@ -2123,14 +2124,13 @@ set tagcase=smart
 "    │ tags   │ file in the WORKING DIRECTORY             and whose name is tags │
 "    └────────┴──────────────────────────────────────────────────────────────────┘
 "}}}
-" What's the effect of this new value?{{{
+" What's the effect of our new value `./tags;`?{{{
 "
-" We define a new value by adding a semicolon after `./tags`.
-" `;` tells Vim to look UP recursively.
-" It's the opposite of `**` which looks DOWN recursively.
+" `;` tells Vim to look *up* recursively.
+" It's the opposite of `**` which looks *down* recursively.
 " You could also include the value `tags;`:
 "
-"         set tags=./tags;,tags;
+"     set tags=./tags;,tags;
 "
 " Explanation:
 "
@@ -2143,12 +2143,19 @@ set tagcase=smart
 "    │         │ then in the parent of the parent and so on, recursively      │
 "    └─────────┴──────────────────────────────────────────────────────────────┘
 "
-" The value of 'tags' influence commands such as `:tj` and `:ltag`.
-" But also, tag completion in insert mode.
-" The completion  function invoked  by `i_^x^]`  looks for  matches in  the tags
-" files whose path are stored in the value of 'tags'.
+" The value of `'tags'` influences commands such as `:tj` and `:ltag`.
+" It also influences tag completion (`:h i^x^]`), which looks for matches in the
+" tags files whose paths are stored in the value of `'tags'`.
 "}}}
-set tags=./tags;
+" Why the guard?{{{
+"
+" We use a specific value for the vimrc file (`$HOME/.vim/autoload/tags`).
+" When we write  our vimrc, we don't the autocmd  which sources it automatically
+" to reset this value.
+"}}}
+if has('vim_starting')
+    set tags=./tags;
+endif
 " Why could a command such as `:tj` or `:ltag` include some irrelevant tags? {{{
 "
 " It's probably due to the combination of two factors:
@@ -2161,33 +2168,34 @@ set tags=./tags;
 "      For example,  you may have  executed `$ ctags  -R` by accident  in a
 "      wrong directory, such as `~/.vim` or `~/.vim/plugged`.
 "
-"      Or maybe it  was executed by `vim-gutentags`  because you accidently
+"      Or maybe it  was executed by `vim-gutentags`  because you accidentally
 "      created  a git  repo (via  something like  `git {add|commit|push}`),
 "      where you shouldn't have.
 "
-" `vim-gutentags` appends the global value  of 'tags' to the buffer-local value,
-" for buffers inside a git repo.
+" `vim-gutentags`  appends the  global  value of  `'tags'`  to the  buffer-local
+" value, for buffers inside a git repo.
 "
-" So, if `./tags;` and/or `tags;` is  inside the global value of 'tags', because
-" of `vim-gutentags`, it will also be in the local value.
-"
+" So, if  `./tags;` and/or `tags;`  is inside the  global value of  `'tags'`, it
+" will also end up in the local value.
 " And thus, when  you'll be working on a project,  like the `vim-session` plugin
-" for example, here's the kind of local value that 'tags' will contain:
+" for example, here's the kind of local value that `'tags'` will contain:
 "
-"         tags=~/.vim/plugged/vim-session/tags,./tags;,tags;
-"                                                    ^     ^
-"  Because  of  the semicolons,  Vim  may  include a  wrong  tags  file such  as
+"     tags=~/.vim/plugged/vim-session/tags,./tags;,tags;
+"                                                ^     ^
+" Because  of  the  semicolons, Vim  may  include  a  wrong  tags file  such  as
 " `~/.vim/tags`. If that happens, you'll end up with way too many tags.
 "}}}
 " What to do if that happens? {{{
 "
-" 1. Try  to configure  `vim-gutentags` and  prevent it  from including  the
-"    global value of 'tags' inside the local one.
+" -  Try  to configure  `vim-gutentags` and  prevent it  from including  the
+"    global value of `'tags'` inside the local one.
 "
-" 2. Remove wrong tags files (`rm(1)`), and make sure there's no `.git/`
+" -  Remove wrong tags files (`rm(1)`), and make sure there's no `.git/`
 "    directory outside a valid  repository.
 "    Otherwise, `vim-gutentags` may recreate a tags file.
 "}}}
+" TODO: Find a  way to configure gutentags  so that it never  appends the global
+" value of `'tags'` to the local value.
 
 " In our vimrc file, we want the ability to jump from the call of a function
 " defined in `myfuncs.vim`, to its definition, with `C-]`.
@@ -2196,7 +2204,7 @@ augroup tags_vimrc
     au BufReadPost $HOME/.vim/vimrc setl tags=$HOME/.vim/autoload/tags
     " update the tags file whenever we write `myfuncs.vim`
     exe 'au BufWritePost '..resolve($HOME..'/.vim/autoload/myfuncs.vim')
-    \ ..' sil! !ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim'
+    \ ..' call system("ctags -f $HOME/.vim/autoload/tags $HOME/.vim/autoload/myfuncs.vim")'
 
     " Don't source the zshrc automatically.{{{
     "
@@ -3170,13 +3178,10 @@ nmap <space>S saiW
 nno <silent> <space>t :<c-u>exe (v:count ? v:count..'tabnew' : 'tabnew')<cr>
 "}}}3
 " [    ]              (prefix) {{{3
-" ]kj                           various alignments {{{4
+" ]k ]j                           various alignments {{{4
 
-"  [k [j align the beginning of the current line with the one of the
-"  previous/next line
-"
-"  ]k ]j align the end of the current line with the one of the
-"  previous/next line
+" `[k`, `[j` align the beginning of the current line with the one of the previous/next line
+" `]k`, `]j` align the end of the current line with the one of the previous/next line
 
 nno <silent> [k :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<bar>norm! g@l<cr>
 nno <silent> [j :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<bar>norm! g@l<cr>
@@ -3690,12 +3695,13 @@ endfu
 nno <silent> <bar>g :<c-u>set operatorfunc=myfuncs#op_grep<cr>g@
 
 " same thing for visual selection
+" Do not use `!g` for the `{lhs}`.{{{
+"
+" It  would introduce  some "lag"  whenever  we hit  `!` to  filter some  visual
+" selection. We would need  to wait, or hit the second  character of our command
+" to see the bang on the command-line.
+"}}}
 xno <silent> <bar>g :<c-u>call myfuncs#op_grep('vis')<cr>
-
-" Why not `!g` for the `{lhs}` ?
-" Because it would introduce some "lag" whenever we hit `!` to filter some
-" visual selection. We would need to wait, or hit the second character of our
-" command to see the bang on the command-line.
 
 " |t         translate {{{4
 
@@ -4554,8 +4560,8 @@ nmap crgg <plug>(MakeDigraph)_
 
 " dg/  dv/            delete all lines containing/excluding search register {{{3
 
-nno <silent> dg/ :<c-u>g//d_<cr>:sil update<cr>gg
-nno <silent> dv/ :<c-u>v//d_<cr>:sil update<cr>gg
+nno <silent> dg/ :<c-u>g//d_<cr>:sil update<cr>
+nno <silent> dv/ :<c-u>v//d_<cr>:sil update<cr>
 
 xno <silent> mg/ :g//d_<cr>:sil update<cr>
 xno <silent> mv/ :v//d_<cr>:sil update<cr>
@@ -5698,34 +5704,6 @@ endfu
 
 com -bar -nargs=? PluginGlobalVariables call myfuncs#plugin_global_variables(<q-args>)
 
-" PA    PQ    populate arglist / qfl with shell command {{{2
-
-" Usage:
-"         :PA find /etc -name '*.conf'
-"         :PQ grep -IRn foobar ~/.vim | grep -v backup
-
-" We already have `:CGrep`, so why `:PQ`?{{{
-"
-" `:CGrep` (and `|g`) relies on `rg(1)` and `'efm'` (because we use `:cgetexpr`).
-" `:PQ` gives us more control on the grep program.
-" For example, it allows us to pass the argument `-w` to `rg(1)`:
-"
-"    ┌─────────────────────────┬──────────────────────────────────────────────────────┐
-"    │ :CGrep              pat │ search any `pat` using   `$ ripgrep --vimgrep -i -L` │
-"    ├─────────────────────────┼──────────────────────────────────────────────────────┤
-"    │ :PQ ag    --vimgrep pat │ search any `pat` using   `$ ag --vimgrep`            │
-"    ├─────────────────────────┼──────────────────────────────────────────────────────┤
-"    │ :PQ ag -w --vimgrep pat │ search a whole word `pat` using `$ ag -w --vimgrep`  │
-"    └─────────────────────────┴──────────────────────────────────────────────────────┘
-"             -w --word-regexp
-"             Only match whole words.
-"}}}
-com -bar -nargs=1 PA exe myfuncs#populate_list('arglist',  <q-args>)
-com      -nargs=1 PQ exe myfuncs#populate_list('quickfix', <q-args>)
-" TODO: Maybe we should remove `:PQ` and use our `g` cycle instead (C-g g).
-" It seems they do the same thing, but `:PQ` “hides” the real command, while our
-" cycle populates the command-line with it.
-
 " PC    Plugin Clean {{{2
 
 com -bar PC call s:plug_clean()
@@ -6028,10 +6006,10 @@ com -bar
 \           call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
 " }}}1
 " Autocmds {{{1
-" Warning: If you need to write an autocmd listening to `BufWritePost`, put it BEFORE the one reloading our vimrc.{{{
+" Warning: If you need to write an autocmd listening to `BufWritePost`, put it BEFORE the one sourcing our vimrc.{{{
 "
 " Otherwise, if the pattern is `$MYVIMRC`,  it won't work, probably because when
-" the vimrc is reloaded, the augroup it cleared.
+" the vimrc is re-sourced, the augroup it cleared.
 " Yes, the autocmd is re-installed, but it's  a new one, which won't take effect
 " immediately for the current `BufWritePost` event.
 " It will be executed only for the next `BufWritePost`.
@@ -6042,8 +6020,8 @@ com -bar
 "     $ cat /tmp/vim.vim
 "         augroup test_sth
 "             au!
-"             au  BufWritePost  /tmp/vim.vim  so %
-"             au  BufWritePost  *             let g:d_ebug = get(g:, 'd_ebug', 0) + 1
+"             au BufWritePost /tmp/vim.vim so %
+"             au BufWritePost *            let g:d_ebug = get(g:, 'd_ebug', 0) + 1
 "         augroup END
 "
 "     $ vim -Nu /tmp/vim.vim /tmp/vim.vim
@@ -6389,7 +6367,8 @@ augroup no_syntax_in_diff_mode
     "     $ vimdiff file1 file2
     "
     " This is because the previous autocmd is not fired in that case.
-    " Probably because the option is set before the autocmd is installed.
+    " Maybe because the option is set  before the autocmd is installed, or maybe
+    " because `OptionSet` is not fired at startup.
     "}}}
     au VimEnter * call s:if_diff_syn_clear()
     fu s:if_diff_syn_clear() abort
@@ -6718,24 +6697,31 @@ augroup END
 " Spell files {{{2
 
 " It's not technically an autocmd, but it's the only section where it fits.
-" It generates binary files on certain conditions, so it could be assimilated
-" as an autocmd.
+" It generates binary files on certain  conditions, so it could be considered as
+" an autocmd.
 "
-" When spell checking is enabled, and we mark a word as good or bad,
-" we make an addition into `~/.vim/spell/fr.utf-8.`.
-" But, for Vim to take this addition into account, it has to perform
-" a successful check on the corresponding binary file `fr.utf-8.add.spl`.
+" When spell checking is enabled, and we mark  a word as good or bad, we make an
+" addition into `~/.vim/spell/fr.utf-8.`.
+" But,  for  Vim to  take  this  addition into  account,  it  has to  perform  a
+" successful check on the corresponding binary file `fr.utf-8.add.spl`.
 "
-" Versioning those binary files with git could cause pb (conflicts between
+" Versioning  those binary  files with  git  could cause  pb (conflicts  between
 " different versions).
 
-" When we switch to another machine, we should regenerates them with the
+" When  we switch  to  another  machine, we  should  regenerates  them with  the
 " `:mkspell!` command.
 " The bang asks to overwrite an old binary if there's already one.
-" So we do it here, for every spell binary file, but only if
-" the binary (.add.spl) is older than the original addition file (.add).
+" So  we do  it  here, for  every  spell binary  file, but  only  if the  binary
+" (.add.spl) is older than the original addition file (.add).
 
 fu s:mkspell() abort
+    " Why the for loop?{{{
+    "
+    " Because there can  be several spell files (one per  language), in which we
+    " made additions.
+    "
+    " http://vi.stackexchange.com/a/5052/6960
+    "}}}
     for spell_file in glob('~/.vim/spell/*.add', 1, 1)
         if filereadable(spell_file) && !filereadable(spell_file..'.spl')
       \ || (getftime(spell_file) > getftime(spell_file..'.spl'))
@@ -6744,12 +6730,6 @@ fu s:mkspell() abort
     endfor
 endfu
 call s:mkspell()
-
-" Why the for loop?
-" Because there can be several spell files (one per language), in which we
-" made additions.
-"
-" http://vi.stackexchange.com/a/5052/6960
 
 " Swap file handling "{{{2
 
@@ -6864,11 +6844,11 @@ augroup my_terminal
 augroup END
 
 fu s:setup_vim_terminal() abort
-    " Neovim automatically disables 'wrap' in a terminal buffer.
+    " Neovim automatically disables `'wrap'` in a terminal buffer.
     " Not Vim. We do it in this function.
     setl nowrap
     call s:setup_neovim_terminal()
-    " Here, 'termwinkey' seems to behave a little like `C-r` in insert mode.
+    " Here, `'termwinkey'` seems to behave a little like `C-r` in insert mode.
     " With one difference though: when specifying the register, you need to prefix it with `"`.
     exe 'nno <buffer><nowait><silent> p i<c-e>'..&l:termwinkey..'""'
 endfu
@@ -8118,7 +8098,7 @@ endfu
 "
 " We could try sth like this:
 "
-"     ono <silent> ie :<c-u>exe 'norm vie'.(v:operator is# '!' ? '<space>' : '')<cr>
+"     ono <silent> ie :<c-u>exe 'norm vie'..(v:operator is# '!' ? '<space>' : '')<cr>
 "
 " But, why does the issue occur with `![m`, but not with `![z`?
 "
@@ -8809,7 +8789,7 @@ endfu
 "
 " Watch this:
 "
-"     :ono ii :<c-u>exe 'normal! T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())<cr>
+"     :ono ii :<c-u>exe 'normal! T'..nr2char(getchar())..v:operator..'t'..nr2char(getchar())<cr>
 "
 " Move your cursor on `bar`, then press `ciixy`:
 "
@@ -8821,7 +8801,7 @@ endfu
 " Now try this mapping:
 "
 "             vvvvv
-"     :ono ii <esc>:<c-u>exe 'normal! T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())<cr>
+"     :ono ii <esc>:<c-u>exe 'normal! T'..nr2char(getchar())..v:operator..'t'..nr2char(getchar())<cr>
 "     foo x_bar_y baz
 "     foo xy baz~
 "
@@ -9422,6 +9402,8 @@ endfu
 "     match in file /usr/share/dict/words~
 "     ...~
 "
+" Same issue with the `C-n` (and `C-p`) completion.
+"
 " 135 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
@@ -9465,7 +9447,6 @@ endfu
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
-
 
 
 
