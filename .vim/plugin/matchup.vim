@@ -111,7 +111,7 @@ let g:matchup_transmute_enabled = 1
 "
 "     $VIMRUNTIME/ftplugin/html.vim:34
 "}}}
-"}}}1
+"}}}2
 " Local {{{2
 
 augroup my_matchup

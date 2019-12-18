@@ -940,6 +940,20 @@ except the current one.
 
 Update: Is it a good idea? What about just toggling a global state?
 
+## Document the fact that `'synmaxcol'` can have an influence on whether `%` succeeds.
+
+For example:
+
+    {
+    \ 'a': ['xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'],
+    \ }
+
+If your cursor is  on the first `[`, `%` will fail to  jump to the matching `]`,
+unless `'synmaxcol'` is greater than about 320.
+
+Maybe it should be documented in the plugin's help...
+Note that this limitation does not apply to the default `%`.
+
 ##
 ## Find what is the purpose of (used in the plugin code, but not documented):
 ### `b:match_midmap`

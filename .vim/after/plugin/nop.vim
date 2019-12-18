@@ -194,11 +194,17 @@ endif
 
 " o_z  o_Z {{{2
 
-" Why?{{{
+" Rationale:{{{
 "
 " The  default mappings  installed by  `vim-sneak`  are too  inconsistent to  be
 " memorized. They also conflict with `vim-sandwich`.
 "}}}
+if maparg('z', 'o') =~? 'sneak'
+    ounmap z
+endif
+if maparg('Z', 'o') =~? 'sneak'
+    ounmap Z
+endif
 " How to find the mappings installed by `vim-sneak` in{{{
 " }}}
 "   normal mode?{{{
@@ -221,8 +227,6 @@ endif
 "
 "     put =filter(split(execute('ono'), '\n'), {_,v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)'})
 "}}}
-sil! ounmap z
-sil! ounmap Z
 
 " no_vim_maps {{{2
 

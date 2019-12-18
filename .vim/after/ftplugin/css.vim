@@ -10,14 +10,14 @@ setl sw=2
 
 " Variables {{{1
 
-const b:mc_chain =<< trim END
+let b:mc_chain =<< trim END
     file
     omni
     keyn
-    dict
     ulti
     abbr
     c-n
+    dict
 END
 
 " Teardown {{{1

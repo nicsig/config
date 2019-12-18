@@ -31,6 +31,8 @@ set rtp+=~/.vim/after
 "}}}
 let &packpath = &rtp
 
+" disable Python 2 support (it's deprecated anyway)
+let g:loaded_python_provider = 0
 " Purpose:{{{
 "
 " On Ubuntu 16.04, we've installed the deb package `usrmerge`.
@@ -56,10 +58,6 @@ let &packpath = &rtp
 "    - in case of an issue `:CheckHealth` will give better advice
 "}}}
 let g:python3_host_prog = '/usr/bin/python3'
-" How to disable Python 3 support?{{{
-"
-"     let g:loaded_python3_provider = 0
-"}}}
 
 " disable Ruby and Node.js support (we don't need them, and the less code, the fewer issues)
 let g:loaded_ruby_provider = 0

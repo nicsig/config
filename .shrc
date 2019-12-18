@@ -27,7 +27,7 @@
 
 
 
-# Recovered Aliases:
+#  Recovered  Aliases:
 
 alias checki='sudo rlwrap checkinstall -y'
 alias fzo='sh -c "$(fc -ln -1)|fzf"'

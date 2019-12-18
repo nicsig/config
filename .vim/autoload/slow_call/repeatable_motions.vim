@@ -234,7 +234,7 @@ fu s:fts(cmd) abort
     " `feedkeys('zv', 'int')` would IMMEDIATELY press `zv` (✘).
     " The autocmd also presses `zv`, but only after a motion has occurred (✔).
     "}}}
-    au CursorMoved * ++once sil! norm! zv
+    au CursorMoved * ++once norm! zv
 
     " What's the purpose of this `if` conditional?{{{
     "

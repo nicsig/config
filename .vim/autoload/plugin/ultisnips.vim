@@ -1,4 +1,5 @@
 fu plugin#ultisnips#cancel_expansion() abort "{{{1
+    if ! get(g:, 'expanding_snippet', 0) | return | endif
     py3 UltiSnips_Manager._current_snippet_is_done()
     redraws
     return ''

@@ -9,13 +9,14 @@
 #}}}
 bindkey -e
 
-# Why 8192?{{{
+# Why 16384?{{{
 #
-# Last time I needed a core file for an issue with Vim, the latter didn't dump a
-# core below `4856`; and I like powers of 2s; the next power of 2 is 8192.
+# I want a power of 2.
+# In the past, I used 8192, but last time I needed a core file for an issue with
+# Vim, the core was truncated, the next power of 2 is 16384.
 #
-# Note that this is weird, because the size  of the core file was only 2.4M, and
-# 4856 should grant much more space than that (around 19 mebibytes).
+# Note that this is weird, because the size  of the core file was only 4.4M, and
+# 8192 should grant much more space than that (around 32 mebibytes).
 #}}}
 #   How much space does that stand for?{{{
 #
@@ -31,9 +32,9 @@ bindkey -e
 #     $ sudo blockdev --getbsz /dev/sda1
 #     4096~
 #
-# So, 8192 should allow a core file up to 32 mebybytes (2^25 bytes).
+# So, 16384 should allow a core file up to 64 mebybytes (2^26 bytes).
 #}}}
-ulimit -c 8192
+ulimit -c 16384
 
 # disable XON/XOFF flow control
 # Why?{{{
@@ -1005,7 +1006,7 @@ cfg_newsboat() { "${=EDITOR}" -o "${HOME}/.config/newsboat/config" "${HOME}/.con
 cfg_ranger() { "${=EDITOR}" "${HOME}/.config/ranger/rc.conf" ;}
 cfg_readline() { "${=EDITOR}" "${HOME}/.inputrc" ;}
 cfg_surfraw() { "${=EDITOR}" -o "${HOME}/.config/surfraw/bookmarks" "${HOME}/.config/surfraw/conf" ;}
-cfg_tmux() { "${=EDITOR}" "${HOME}/.tmux.conf" ;}
+cfg_tmux() { "${=EDITOR}" "${HOME}/.config/tmux/tmux.conf" ;}
 cfg_vim() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
 cfg_w3m() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
 cfg_weechat() { "${=EDITOR}" "${HOME}/.config/weechat/script/rc.conf" ;}

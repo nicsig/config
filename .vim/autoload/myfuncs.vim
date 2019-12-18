@@ -1,4 +1,4 @@
-" OPERATORS {{{1
+" Operators {{{1
 fu myfuncs#op_grep(type, ...) abort "{{{2
     let cb_save  = &cb
     let sel_save = &selection
@@ -21,16 +21,15 @@ fu myfuncs#op_grep(type, ...) abort "{{{2
         let cmd = 'rg 2>/dev/null -FLS --vimgrep '..shellescape((a:0 ? a:1 : @"))
         let use_loclist = a:0 ? a:2 : 0
         if a:type is# 'Ex' && use_loclist
-            " Why `:lgetexpr` instead of `:lgrep!`?{{{
-            "
-            " The latter shows us the output of the shell command (`$ rg ...`).
-            " This makes the screen flicker, which is distracting.
-            "}}}
-            sil lgetexpr system(cmd)
+            sil let loclist = getloclist(0, {'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
+            call setloclist(0, loclist)
             call setloclist(0, [], 'a', {'title': cmd})
+            do <nomodeline> QuickFixCmdPost lwindow
         else
-            sil cgetexpr system(cmd)
+            sil let qfl = getqflist({'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
+            call setqflist(qfl)
             call setqflist([], 'a', {'title': cmd})
+            do <nomodeline> QuickFixCmdPost cwindow
         endif
 
     catch
@@ -175,12 +174,12 @@ fu myfuncs#op_trim_ws(type) abort "{{{2
     if &l:binary || &ft is# 'diff'
         return
     endif
-
     if a:type is# 'vis'
-        sil! exe line("'<").','.line("'>")..'TW'
+        let range = line("'<")..','..line("'>")
     else
-        sil! exe line("'[").','.line("']")..'TW'
+        let range = line("'[")..','..line("']")
     endif
+    exe range..'TW'
 endfu
 
 " op_yank_matches {{{2
@@ -278,7 +277,7 @@ fu myfuncs#after_tmux_capture_pane() abort "{{{1
     norm! zR
     TW
     exe '$' | call search('^\S', 'bW')
-    sil! keepj keepp .,$g/^\s*$/d_
+    sil keepj keepp .,$g/^\s*$/d_
 
     " We need the buffer to be saved into a file, for `:lvim /pat/ %` to work.
     let tempfile = tempname()
@@ -341,7 +340,10 @@ fu s:format_shell_buffer() abort
     " this match.
     "}}}
     call matchadd('Title', pat, 0)
-    sil exe 'lvim /'..pat..'/j %'
+    if search(pat, 'n')
+        sil exe 'lvim /'..pat..'/j %'
+    endif
+
     let loclist = getloclist(0)
     call map(loclist, {_,v -> extend(v, {'text': substitute(v.text, '٪\zs\s\{2,}', '  ', '')})})
     call setloclist(0, loclist)
@@ -358,6 +360,27 @@ fu s:format_xdcc_buffer(pat_cmd) abort
     " remove noise
     exe 'sil keepj keepp v@'..a:pat_cmd..'@d_'
     sil keepj keepp %s/^.\{-}\d\+)\s*//e
+
+    " align the first 3 fields{{{
+    "
+    " Don't align beyond the third field; a bot name may contain a bar.
+    " As a result, if  you align beyond the third field, you  may break the xdcc
+    " command we're going to copy.
+    "}}}
+    if executable('sed') && executable('column')
+        " prepend the first three occurrences of a bar with a literal C-a
+        sil %!sed 's/|/\x01|/1; s/|/\x01|/3'
+        " sort the text using the C-a's as delimiters
+        sil %!column -s $'\x01' -t
+    endif
+    " `:EasyAlign` alternative:{{{
+    "
+    "     sil %EasyAlign | {'align': 'lll'}
+    "
+    " For more info about the syntax of this `:EasyAlign` command,
+    " see `:h easy-align-6-7`.
+    "}}}
+
     sil update
 
     " highlight filenames
@@ -539,7 +562,7 @@ fu s:box_create_separations() abort
     "
     " ... useful to make our table more readable.
     norm! '{++yyp
-    keepj keepp sil! s/[^│┼]/ /g
+    sil keepj keepp s/[^│┼]/ /ge
 
     " Delete it in the `s` (s for space) register, so that it's stored inside
     " default register and we can paste it wherever we want.
@@ -579,9 +602,9 @@ fu myfuncs#box_destroy(type) abort
     sil exe range..'s/.*\zs|//e'
 
     " trim whitespace
-    sil! exe range..'TW'
+    sil exe range..'TW'
     " remove empty lines
-    sil! exe range..'-g/^\s*$/d_'
+    sil exe range..'-g/^\s*$/d_'
 
     call append(lnum1-1, [''])
 
@@ -610,9 +633,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
         unlet w:xl_match
     endif
 
-    if a:bang
-        return
-    endif
+    if a:bang | return | endif
 
     " If `a:lnum1 == a:lnum2`, it means `:XorLines` was called without a range.
     if a:lnum1 == a:lnum2
@@ -625,7 +646,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
     let min_chars = min([len(chars1), len(chars2)])
 
     " Build a pattern matching the characters which are different
-    let pattern = ''
+    let pat = ''
     for i in range(min_chars)
         if chars1[i] isnot# chars2[i]
 
@@ -649,32 +670,31 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
             " It seems each time a `%{digit}v` anchor matches the beginning of a group
             " of consecutive characters, it adds 2 duplicate entries instead of one.
 
-            let pattern ..= (empty(pattern) ? '' : '\|')..'\%'..lnum1..'l'..'\%'..(i+1)..'v.'
-            let pattern ..= (empty(pattern) ? '' : '\|')..'\%'..lnum2..'l'..'\%'..(i+1)..'v.'
+            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum1..'l'..'\%'..(i+1)..'v.'
+            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum2..'l'..'\%'..(i+1)..'v.'
         endif
     endfor
 
-    " If one of the lines is longer than the other, we have to add its end in
-    " the pattern.
+    " If one of the lines is longer than the other, we have to add its end in the pattern.
     if len(chars1) > len(chars2)
 
         " Suppose that the shortest line has 50 characters:
         " it's better to write `\%>50v.` than `\%50v.*`.
         "
         " `\%>50v.` = any character after the 50th character:
-        "             this will add one entry in the loclist for EVERY character
+        " This will add one entry in the loclist for *every* character.
         "
-        " `\%50v.*` = the WHOLE set of characters after the 50th:
-        "             this will add only ONE entry in the loclist
+        " `\%50v.*` = the *whole* set of characters after the 50th:
+        " This will add only *one* entry in the loclist.
 
-        let pattern ..= (!empty(pattern) ? '\|' : '')..'\%'..lnum1..'l'..'\%>'..len(chars2)..'v.'
+        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum1..'l'..'\%>'..len(chars2)..'v.'
 
     elseif len(chars1) < len(chars2)
-        let pattern ..= (!empty(pattern) ? '\|' : '')..'\%'..lnum2..'l'..'\%>'..len(chars1)..'v.'
+        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum2..'l'..'\%>'..len(chars1)..'v.'
     endif
 
     " Give the result
-    if !empty(pattern)
+    if !empty(pat)
         " Why silent?{{{
         "
         " If the  lines are long, `:lvim`  will print a long  message which will
@@ -682,10 +702,8 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
         "
         "     (1 of 123): ...
         "}}}
-        sil noa exe 'lvim /'..pattern..'/g %'
-        " d_opts = [{'on_stderr': function('<SNR>129_system_handler')}, {'stderr': '', 'on_exit': function('<SNR>129_system_handler'), 'on_stdout': function('<SNR>129_system_handler'), 'exit_code': 0, 'stdout': '', 'on_stderr': function('<SNR>129_system_handler')}]
-        " d_opts = [{'on_stderr': function('<SNR>129_system_handler')}]
-        let w:xl_match = matchadd('SpellBad', pattern, -1)
+        sil noa exe 'lvim /'..pat..'/g %'
+        let w:xl_match = matchadd('SpellBad', pat, -1)
     else
         echohl WarningMsg
         echom 'Lines are identical'
@@ -1369,6 +1387,10 @@ fu s:vim_parent() abort "{{{1
 endfu
 
 fu myfuncs#webpage_read(url) abort "{{{1
+    if ! executable('w3m')
+        echo 'w3m is not installed'
+        return
+    endif
     let tempfile = tempname()..'/webpage'
     exe 'tabe '..tempfile
     " Alternative shell command:{{{
@@ -1378,7 +1400,7 @@ fu myfuncs#webpage_read(url) abort "{{{1
     "                         └ high nr to be sure that
     "                           `lynx` won't break long lines of code
     "}}}
-    sil! exe 'r !w3m -cols 100 '..shellescape(a:url, 1)
+    sil exe 'r !w3m -cols 100 '..shellescape(a:url, 1)
     setl bt=nofile nobl noswf nowrap
 endfu
 
@@ -1450,10 +1472,12 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     endfor
 
     " format output into aligned columns
-    " We don't need to delete the first empty line, `column` doesn't return it.
-    " Probably because there's nothing to align in it.
-    sil! %!column -t
-    sil! %!sort -rn -k2
+    if executable('column') && executable('sort')
+        sil %!column -t
+        sil %!sort -rn -k2
+        " We don't need to delete the first empty line, `column` doesn't return it.
+        " Probably because there's nothing to align in it.
+    endif
 
     exe 'vert res '..(max(map(getline(1, '$'), {_,v -> strchars(v, 1)}))+4)
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'

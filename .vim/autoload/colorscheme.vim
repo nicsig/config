@@ -194,6 +194,26 @@ fu colorscheme#set() abort "{{{2
 endfu
 
 fu colorscheme#customize() abort "{{{2
+    " We delay until `VimEnter` to avoid errors when starting gVim.{{{
+    "
+    "     E417: missing argument: guifg=~
+    "     E254: Cannot allocate color 95~
+    "     E254: Cannot allocate color 187~
+    "
+    " I think it depends on the Vim version you're using.
+    " At one point in the past, we needed the delay, then not, then again...
+    "
+    " When the issue is  triggered it's because we are trying to  set up some of
+    " our custom HGs too early.
+    " Specifically,  we   need  to  inspect  some   default  HGs  (`StatusLine`,
+    " `TabLine`, ...), but their attributes are not (correctly) defined yet.
+    "}}}
+    if has('vim_starting') && has('gui_running')
+        au VimEnter * call s:override() | call s:styled_comments()
+    else
+        call s:override() | call s:styled_comments()
+    endif
+
     " Why?{{{
     "
     " Without, we wouldn't  be able to switch to the  dark color scheme, neither
@@ -234,35 +254,6 @@ fu colorscheme#customize() abort "{{{2
     "}}}
     if &bg is# 'light' | let g:seoul256_background = 237 | endif
 
-    " If some function calls raise errors when starting gVim, try to delay them until `VimEnter`.{{{
-    "
-    " In the past, we had some errors when starting gVim:
-    "
-    "     E417: missing argument: guifg=~
-    "     E254: Cannot allocate color 95~
-    "     E254: Cannot allocate color 187~
-    "
-    " The issue was triggered  when we were trying to set up  some of our custom
-    " HGs too early. It  was due to some default HGs  whose attributes we needed
-    " to inspect (`StatusLine`, `TabLine`, ...),  but which were not (correctly)
-    " defined yet.
-    "}}}
-    " override some default HGs
-    call s:CursorLine()
-    call s:DiffChange()
-    call s:EndOfBuffer()
-    call s:LineNrAboveBelow()
-    call s:SpecialKey()
-    call s:StatuslineNC()
-    call s:TabLine()
-    call s:Title()
-    call s:Underlined() | call s:CommentUnderlined()
-    call s:User()
-    call s:VertSplit()
-
-    " define some custom HGs
-    call s:styled_comments()
-
     call colorscheme#cursorline(&bg is# 'dark') " (re)set `'cul'`
 
     " If we start Vim with a dark color scheme, the cursor must be visible.{{{
@@ -297,6 +288,20 @@ fu colorscheme#customize() abort "{{{2
     elseif !has('vim_starting')
         call s:cursor()
     endif
+endfu
+
+fu s:override() abort "{{{2
+    call s:CursorLine()
+    call s:DiffChange()
+    call s:EndOfBuffer()
+    call s:LineNrAboveBelow()
+    call s:SpecialKey()
+    call s:StatuslineNC()
+    call s:TabLine()
+    call s:Title()
+    call s:Underlined() | call s:CommentUnderlined()
+    call s:User()
+    call s:VertSplit()
 endfu
 
 fu colorscheme#cursorline(enable) abort "{{{2
@@ -337,8 +342,15 @@ fu colorscheme#cursorline(enable) abort "{{{2
             au InsertLeave                   * setl cul   | if !has('nvim') | let &l:culopt = 'screenline' | endif
         augroup END
     elseif ! a:enable && &l:cul
-        sil! au! my_cursorline
-        sil! aug! my_cursorline
+        " When is this guard necessary?{{{
+        "
+        "     :setl cul
+        "     " press `]oL`
+        "}}}
+        if exists('#my_cursorline')
+            au! my_cursorline
+            aug! my_cursorline
+        endif
         setl nocul
         let &l:culopt = get(s:, 'culopt_save', &l:culopt)
         unlet! s:culopt_save

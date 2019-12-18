@@ -22,3 +22,4 @@ application/pdf=zathura-pdf-mupdf.desktop
 [Added Associations]
 video/mp4=mpv.desktop;
 image/gif=ristretto.desktop;
+text/x-log=gvim.desktop;
