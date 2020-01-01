@@ -90,7 +90,7 @@ lcd ~/wiki/vim
 wincmd w
 argglobal
 if bufexists("~/wiki/vim/complete.md") | buffer ~/wiki/vim/complete.md | else | edit ~/wiki/vim/complete.md | endif
-let s:l = 162 - ((27 * winheight(0) + 13) / 27)
+let s:l = 162 - ((35 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -142,7 +142,7 @@ lcd ~/.vim/plugged/vim-vim
 wincmd w
 argglobal
 if bufexists("~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim") | buffer ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim | else | edit ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim | endif
-let s:l = 37 - ((32 * winheight(0) + 14) / 28)
+let s:l = 37 - ((33 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -394,9 +394,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
-let s:l = 3 - ((0 * winheight(0) + 0) / 0)
+let s:l = 3 - ((2 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -406,21 +407,20 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/.vim/indent/matlab.vim") | buffer ~/.vim/indent/matlab.vim | else | edit ~/.vim/indent/matlab.vim | endif
-let s:l = 90 - ((15 * winheight(0) + 0) / 0)
+let s:l = 7 - ((6 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-90
-normal! 05|
+7
+normal! 0
 lcd ~/.vim
 wincmd w
 2wincmd w
-wincmd =
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 10
 badd +936 ~/wiki/awk/sed.md
-badd +422 ~/wiki/vim/complete.md
-badd +1360 ~/.vim/vimrc
-badd +1034 ~/.vim/plugged/vim-completion/autoload/completion.vim
+badd +3 ~/Desktop/m.m
 badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 badd +228 ~/Desktop/ask.md
 badd +69 ~/Desktop/vim.vim
@@ -429,13 +429,15 @@ badd +88 ~/.vim/plugin/matchup.vim
 badd +4 ~/.vim/plugged/vim-fex/ftplugin/fex.vim
 badd +55 ~/.vim/plugged/vim-unix/autoload/unix.vim
 badd +95 ~/.vim/plugged/vim-completion/plugin/completion.vim
-badd +3 ~/Desktop/m.m
 badd +1644 ~/wiki/vim/config.md
+badd +422 ~/wiki/vim/complete.md
 badd +37 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
 badd +947 ~/.vim/plugin/README/matchup.md
 badd +8 ~/Desktop/cwd.md
 badd +23 ~/wiki/vim/shell.md
+badd +1360 ~/.vim/vimrc
 badd +19 ~/.vim/autoload/myfuncs.vim
+badd +1034 ~/.vim/plugged/vim-completion/autoload/completion.vim
 badd +38 ~/.vim/plugged/vim-completion/autoload/completion/util.vim
 badd +13 ~/Desktop/qfl.txt
 badd +0 ~/.vim/indent/matlab.vim
