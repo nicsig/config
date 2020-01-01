@@ -1,4 +1,3 @@
-let $VIMRUNTIME = '/usr/local/share/nvim/runtime'
 " https://neovim.io/doc/user/nvim.html#nvim-from-vim
 
 set rtp^=~/.vim

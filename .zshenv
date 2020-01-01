@@ -333,7 +333,52 @@ fi
 #
 #     $ MANPAGER="vim -Nu NORC --cmd 'filetype on | let g:no_after_plugin = 1' -M +MANPAGER -" man man
 #}}}
-export MANPAGER='nvim +Man!'
+# Why do you reset `$VIMRUNTIME` and include it inside the rtp?{{{
+#
+# If you don't, and you execute `:!man cmd` from Vim, `E492` will be raised:
+#
+#     Error detected while processing command line:~
+#     E492: Not an editor command: Man!~
+#
+# I think that's because a Nvim process started from Vim inherits `$VIMRUNTIME`.
+#
+# From `:h $VIMRUNTIME`:
+#
+# > 1. If the environment variable $VIMRUNTIME is set, it is used.  You can use
+# >    this when the runtime files are in an unusual location.
+#
+# And if `$VIMRUNTIME` is wrong, you may experience other issues, like:
+#
+#    - you can't access the system clipboard:
+#
+#         :echo @+
+#         clipboard: No provider. Try ":checkhealth" or ":h clipboard".
+#
+#    - `:checkhealth` is broken (`E5009: Invalid 'runtimepath'`)
+#
+#    - the python interface is not enabled (`:echo has('python3')` outputs 0),
+#      which breaks plugins relying on it (like UltiSnips)
+#
+# ---
+#
+# The issue  happens when you  press `K`  on a shell  command in a  shell script
+# while `'kp'` has its default value, i.e. `man`.
+#
+# ---
+#
+# Similarly, a Nvim process started from Vim inherits `$VIM` and `$MYVIMRC`.
+#}}}
+() {
+  emulate -L zsh
+  local -a cmd=( \
+  'set rtp-=$VIMRUNTIME' \
+  '| let $VIMRUNTIME = \"/usr/local/share/nvim/runtime\"' \
+  '| set rtp^=$VIMRUNTIME' \
+  '| let $VIM = \"/usr/local/share/nvim\"' \
+  '| let $MYVIMRC = \"$HOME/.config/nvim/init.vim\"' \
+  )
+  export MANPAGER="nvim --cmd \"${cmd}\" +Man!"
+}
 
 # Purpose:{{{
 #

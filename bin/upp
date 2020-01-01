@@ -89,6 +89,18 @@ main() { #{{{2
   install_dependencies
   download
   clean
+  # Don't remove any installed binary if we compile against a specific commit hash:{{{
+  #
+  # in that  case, we probably don't  want to install the  newly compiled binary
+  # (we're probably just bisecting some bug).
+  #}}}
+  if [[ -z "$COMMIT_HASH" ]]; then
+    # Do *not* move `uninstall` after `configure` and `build`.{{{
+    #
+    # It would break the installation of the awk binary.
+    #}}}
+    uninstall
+  fi
   configure
   build
 
@@ -97,7 +109,6 @@ main() { #{{{2
   if [[ -n "$COMMIT_HASH" ]]; then
     return
   fi
-  uninstall
   install
   update_alternatives
   xdg_mime_default
@@ -450,7 +461,7 @@ update_alternatives(){ #{{{2
   #}}}
   sudo update-alternatives --log "$LOGFILE" \
     --install /usr/bin/awk awk /usr/local/bin/gawk 60 \
-    --slave /usr/share/man/man1/awk.1.gz awk.1.gz /usr/local/share/man/man1/gawk.1.gz
+    --slave /usr/share/man/man1/awk.1 awk.1 /usr/local/share/man/man1/gawk.1
   # Note the order of the arguments `--log` and `--install`/`--set`.
   # `--log` should  come first because  it's an option, while  `--install` and
   # `--set` are subcommands.

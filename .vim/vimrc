@@ -264,7 +264,6 @@ Plug 'lacygoill/vim-lg-lib'
 Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
 Plug 'lacygoill/vim-par'
-Plug 'lacygoill/vim-python'
 Plug 'lacygoill/vim-qf'
 Plug 'lacygoill/vim-readline'
 Plug 'lacygoill/vim-reorder'
@@ -1357,58 +1356,6 @@ let g:is_bash = 1
 
 " Don't insert two spaces after a '.', '?' and '!' with a join command.
 set nojoinspaces
-
-" keywordprg {{{2
-
-" The default value of `'kp'` is `man -s`. It can cause an issue.{{{
-"
-" Write `ls` in `/tmp/file`, and press `K` on it:
-"
-"     Error detected while processing command line:~
-"     E492: Not an editor command: Man!~
-"     Error detected while processing VimEnter Autocommands for "*":~
-"     E216: No such group or event: UltiSnips_AutoTrigger~
-"
-" I think  that the issue is  due to the  environment of the Vim  process, which
-" wrongly interferes with the environment of the Nvim process.
-"
-" Indeed, from Nvim (started by Vim's `K` command), run these commands:
-"
-"     :echo $VIM
-"     /usr/local/share/vim~
-"     " it should be `/usr/local/share/nvim`
-"
-"     :echo $VIMRUNTIME
-"     /usr/local/share/vim/vim81~
-"     " it should be `/usr/local/share/nvim/runtime`
-"
-"     :checkhealth
-"     E5009: Invalid 'runtimepath'~
-"     " the runtimepath is wrong (the issue persists even if you manually reset $VIMRUNTIME)
-"
-"     :echo has('python3')
-"     0~
-"     " the python interface is not available
-"     " which explains why UltiSnips didn't install its `UltiSnips_AutoTrigger` autocmd
-"
-"     :echo @+
-"     clipboard: No provider. Try ":checkhealth" or ":h clipboard".~
-"     " no access to the system clipboard
-"
-" `:h $VIMRUNTIME` explains how `$VIMRUNTIME` is set.
-"
-" ---
-"
-" Anyway, it doesn't make sense to keep the default value of `'kp'`.
-"
-" First, as  the previous MWE  showed you, this can  lead to Vim  invoking Nvim,
-" which is awkward, and can create a "frankenstein" environment.
-"
-" Second, there's no reason to invoke `man(1)`.
-" We are in Vim, and we can read manpages via `:Man`; why bother invoking a shell?
-" Let's use `:Man`.
-"}}}
-set kp=:Man
 
 " lazyredraw {{{2
 " What does it do?{{{
@@ -2800,7 +2747,7 @@ cno <expr> <c-r><c-h> getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHisto
 
 cno <c-r><c-l> <c-r><c-r>=<sid>insert_current_line()<cr>
 fu s:insert_current_line() abort
-    let cml = matchstr(get(split(&l:cms, '%s'), 0, ''), '\S*')
+    let cml = matchstr(&l:cms, '\S*\ze\s*%s')
     let cml = '\%(\V'..escape(cml, '\')..'\m\)\='
     return substitute(getline('.'), '^\s*'..cml..'\s*:\=', '', '')
 endfu
@@ -2840,10 +2787,8 @@ endfu
 ino <silent> <c-g><c-h> <c-r>=<sid>compact_whitespace()<cr>
 
 fu s:compact_whitespace() abort
-    if empty(&l:cms)
-        return ''
-    endif
-    let cml = '\V'..matchstr(split(&l:cms, '%s')[0], '\S*')..'\m'
+    if empty(&l:cms) | return '' | endif
+    let cml = '\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')..'\m'
 
     if getline('.') =~# cml..'\s\s' && &filetype isnot# 'markdown'
         let pat = '\s*'..cml..'\zs\s\+'
@@ -2853,8 +2798,7 @@ fu s:compact_whitespace() abort
         let rep = ''
     endif
 
-    call setline('.',
-    \            substitute(getline('.'), pat, rep, ''))
+    call setline('.', substitute(getline('.'), pat, rep, ''))
     return ''
 endfu
 
@@ -2902,9 +2846,8 @@ fu s:c_m() abort
         return seq
     endif
 
-    " If we  press Enter  on a  commented line with  nothing in  it, we  want to
-    " delete everything.
-    let cml = get(split(&l:cms, '%s'), 0, '')
+    " If we press Enter on a commented line with nothing in it, we want to delete everything.
+    let cml = matchstr(&l:cms, '\S*\ze\s*%s')
 
     if empty(cml) | return "\<c-g>u\<cr>" | endif
 
@@ -3564,9 +3507,9 @@ fu s:z_equal(_) abort
         " give it the number of the entry we want to select in advance.
         " From `:h norm`:
         "
-        "     {commands} should be a complete command.  If
-        "     {commands} does not finish a command, the last one
-        "     will be aborted as if <Esc> or <C-C> was typed.
+        " > {commands} should be a complete command.  If
+        " > {commands} does not finish a command, the last one
+        " > will be aborted as if <Esc> or <C-C> was typed.
         "}}}
         " TODO: I don't know why, but `t` can't be used here. Find the reason why.{{{
         "
@@ -4710,10 +4653,10 @@ nno M zMzvzz
 " I think that's  because when you replay  a macro with `@@`, the  last macro is
 " redefined by `@=`.
 "}}}
-nno <expr> J "m'" . v:count1 . 'J``'
+nno <expr> J "m'"..v:count1..'J``'
 
 " gJ doesn't insert or remove any spaces
-nno <expr> gJ "m'" . v:count1 . 'gJ``'
+nno <expr> gJ "m'"..v:count1..'gJ``'
 
 " Q        q {{{3
 
@@ -4784,7 +4727,7 @@ fu s:horizontal_rules_textobject(adverb) abort
         let start = '^\%(---\|#.*\)\n\zs\|\%^'
         let end = '\n\ze\%(---\|#.*\)$\|\%$'
     else
-        let cml = matchstr(get(split(&l:cms, '%s', 1), 0, ''), '\S*')
+        let cml = matchstr(&l:cms, '\S*\ze\s*%s')
         let comment = '\V'..escape(cml, '\')..'\m'
         let fmr = '\%('..join(split(&l:fmr, ','), '\|')..'\)\d*'
         let start = '^\s*'..comment..'\s*\%(---\|.*'..fmr..'\)\n\zs'
@@ -5235,13 +5178,6 @@ xno <expr> l mode() is# '<c-v>' && virtcol('.') == &columns - 2 ? '' : 'l'
 " (you can cycle through the last 2 visual selections with `gv`)
 
 nno <expr><silent> vip getline('.') =~# '^\s*$' ? '' : 'vip'
-
-" gJ  g C-j   join lines {{{3
-
-" We use J to move the selection down. The J command needs to be restored.
-xno gJ J
-" Now `gJ` needs to be restored.
-xno g<c-j> gJ
 
 " mJ  m C-j   join blocks {{{3
 
@@ -8162,12 +8098,10 @@ endfu
 "
 " Also, make some cleaning in our mappings:
 "
-"    - x_gJ      join lines
-"    - x_g C-j   join lines without inserting/removing spaces
 "    - x_mJ      join two blocks
 "    - x_m C-j   join two blocks in reverse order
 "
-" Are they consistent?
+" Are they consistent with other similar default commands (like `v_J` and `v_gJ`)?
 " Could we make them easier to remember?
 "
 " 61 -
@@ -9347,7 +9281,36 @@ endfu
 "
 " 130 -
 "
-" Read: https://vimways.org/2019/indentation-without-dents/
+" Read:
+" https://vimways.org/2019/indentation-without-dents/
+" https://vimways.org/2019/a-test-to-attest-to/
+"
+" 131 -
+"
+" Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
+" (to improve performance...)
+"
+" 132 -
+"
+" Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
+" Example:
+"
+"     if !empty(readdir(expand('%:p:h'), {n -> n =~# 'some_name'})) | do sth | endif
+"
+" Note that `readdir()` has not been ported to Nvim yet.
+"
+" 133 -
+"
+" Try to use `matchlist()` more often.
+" In particular, whenever you've  used `matchstr()` several times consecutively,
+" it may be an indication that `matchlist()` was better:
+"
+"     let text = 'hello world some text'
+"     let foo = matchstr(text, '^\S\+')
+"     let bar = matchstr(text, '^\S\+\s\+\zs\S\+')
+"     ⇔
+"     let text = 'hello world some text'
+"     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 
 
 
@@ -9648,21 +9611,5 @@ endfu
 "         else
 "             return (n != 0 ? g:nums[n] : '')
 "         endif
-"     endfu
-
-
-
-
-"     ino <c-g>d <c-r>=<sid>diagram_complete()<cr>
-"
-"     fu s:diagram_complete() abort
-"         let previous_line = getline(line('.')-1)
-"         let new_line      = substitute(previous_line, '\%(└|┌\).*', '', '')
-"         if stridx(previous_line, '┌') != -1
-"             let new_line ..= '│'
-"         endif
-"         let new_line = substitute(new_line, '[^└┌│'.split(&l:cms, '%s')[0].']', ' ', 'g')
-"         call setline('.', new_line)
-"         return repeat("\<Right>", col('$') - col('.'))
 "     endfu
 

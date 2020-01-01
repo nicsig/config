@@ -41,10 +41,10 @@ endif
 " TODO:
 " Create a submode to move half a screen with `d`, `u`:
 "
-"    call submode#enter_with('half-screen', 'n', '', '<c-d>', '<c-d>' )
-"    call submode#enter_with('half-screen', 'n', '', '<c-u>', '<c-u>' )
-"    call submode#map('half-screen', 'n', '', 'd', '<c-d>')
-"    call submode#map('half-screen', 'n', '', 'u', '<c-u>')
+"     call submode#enter_with('half-screen', 'n', '', '<c-d>', '<c-d>' )
+"     call submode#enter_with('half-screen', 'n', '', '<c-u>', '<c-u>' )
+"     call submode#map('half-screen', 'n', '', 'd', '<c-d>')
+"     call submode#map('half-screen', 'n', '', 'u', '<c-u>')
 
 " Issue:
 " Entering the submode with `C-d` and `C-u`  is dangerous, we could press `d` or
@@ -74,7 +74,7 @@ endif
 " you want to be sure where you are (inside/outside the submode).
 
 
-" TODO: Do the same work for C-n, C-p, and C-h, j, k, l
+" TODO: Do the same work for `C-[np]` and `C-[hjkl]`.
 
 
 " C-w g[hjkl] (tradewinds) {{{1
@@ -181,16 +181,17 @@ call submode#map(       'tradewinds', 'n', 'r',       'l', '<plug>(tradewinds-l)
 
 " schlepp {{{1
 
-"                                        ┌ recursive (remap {rhs})
-"                                        │
-call submode#enter_with('schlepp', 'x', 'r', 'H', '<plug>(schlepp_left)' )
-call submode#enter_with('schlepp', 'x', 'r', 'J', '<plug>(schlepp_down)' )
-call submode#enter_with('schlepp', 'x', 'r', 'K', '<plug>(schlepp_up)'   )
-call submode#enter_with('schlepp', 'x', 'r', 'L', '<plug>(schlepp_right)')
-call submode#map(       'schlepp', 'x', 'r', 'j', '<plug>(schlepp_down)' )
-call submode#map(       'schlepp', 'x', 'r', 'k', '<plug>(schlepp_up)'   )
-call submode#map(       'schlepp', 'x', 'r', 'h', '<plug>(schlepp_left)' )
-call submode#map(       'schlepp', 'x', 'r', 'l', '<plug>(schlepp_right)')
+" Commented because we use `M-[hjkl]` now; we don't need schlepp anymore.
+" Using `x_J` would shadow a default Vim command (join lines in selection).
+"
+"     call submode#enter_with('schlepp', 'x', 'r', 'H', '<plug>(schlepp_left)' )
+"     call submode#enter_with('schlepp', 'x', 'r', 'J', '<plug>(schlepp_down)' )
+"     call submode#enter_with('schlepp', 'x', 'r', 'K', '<plug>(schlepp_up)'   )
+"     call submode#enter_with('schlepp', 'x', 'r', 'L', '<plug>(schlepp_right)')
+"     call submode#map(       'schlepp', 'x', 'r', 'j', '<plug>(schlepp_down)' )
+"     call submode#map(       'schlepp', 'x', 'r', 'k', '<plug>(schlepp_up)'   )
+"     call submode#map(       'schlepp', 'x', 'r', 'h', '<plug>(schlepp_left)' )
+"     call submode#map(       'schlepp', 'x', 'r', 'l', '<plug>(schlepp_right)')
 
 " FIXME: which arguments to pass to `submode#leave_with()` to quit the submode +
 " to quit visual mode? Would be useful to quit to normal mode and undo with UU.
@@ -260,6 +261,8 @@ call submode#map(       'change-indent', 'i', '',      '<', '<c-d>')
 "                      it's a little confusing
 "}}}
 
+"                                        ┌ recursive (remap {rhs})
+"                                        │
 call submode#enter_with('char-around', 'i', 'r', '<c-x>j', '<plug>(duplicate-char-below)' )
 call submode#map(       'char-around', 'i', 'r',      'j', '<plug>(duplicate-char-below)')
 ino <expr> <plug>(duplicate-char-below) <sid>duplicate_char_around(0)

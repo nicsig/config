@@ -212,7 +212,7 @@ fu myfuncs#op_yank_matches(type) abort
 
         let cmd = s:yank_where_match ? 'g' : 'v'
         let pat = s:yank_comments
-              \ ?     '^\s*\C\V'..escape(get(split(&l:cms, '\s*%s\s*'), 0, ''), '\')
+              \ ?     '^\s*\C\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')
               \ :     @/
 
         exe mods..' '..range..cmd..'/'..pat..'/y Z'
@@ -963,8 +963,8 @@ fu myfuncs#plugin_install(url) abort "{{{1
         return
     endif
     let rep = 'Plug ''\1/\2'''
-    let plug_line   = substitute(a:url, pat, rep, '')
-    let to_install  = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
+    let plug_line  = substitute(a:url, pat, rep, '')
+    let to_install = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
 
     let win_orig = win_getid()
     vnew | e ~/.vim/vimrc
@@ -1217,8 +1217,7 @@ endfu
 " Have a look at this plugin:
 " https://github.com/echuraev/translate-shell.vim
 
-" TODO:
-" add `| C-t` mapping, to replay last text
+" TODO: add `| C-t` mapping, to replay last text
 
 "                ┌ the function is called for the 1st time;
 "                │ if the text is too long for `trans`, it will be
@@ -1239,11 +1238,11 @@ fu myfuncs#trans(first_time, ...) abort
     endif
 
     " remove characters which cause issue during the translation
-    let garbage = '["`*]'.(!empty(&l:cms) ? '\|'.split(&l:cms, '%s')[0] : '')
-    let chunk   = substitute(s:trans_chunks[0], garbage, '', 'g')
+    let garbage = '["`*]'..(!empty(&l:cms) ? '\|'..matchstr(&l:cms, '\S*\ze\s*%s') : '')
+    let chunk = substitute(s:trans_chunks[0], garbage, '', 'g')
 
     " reduce excessive whitespace
-    let chunk   = substitute(chunk, '\s\+', ' ', 'g')
+    let chunk = substitute(chunk, '\s\+', ' ', 'g')
 
     " `exit_io` invokes a callback when the jobs finishes
     " if you want to invoke a callback every time the job sends a message, use

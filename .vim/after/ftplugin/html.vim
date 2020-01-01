@@ -14,14 +14,11 @@
 
 setl fp=js-beautify\ --html
 
-" when pressing `K`, search documentation for the word under the cursor in a search engine
-setl kp=:Doc
-
 " google style guide
 setl sw=2
 
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'| setl sw< | set fp< kp<'
+    \ ..'| setl sw< | set fp<'
 

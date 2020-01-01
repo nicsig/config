@@ -240,8 +240,8 @@ Or maybe you need to subscribe to a pro account:
 
 Or it may be related to one of these issues:
 
-<https://github.com/m9dfukc/deepl-alfred-workflow/issues/14#issuecomment-402965296>
-<https://github.com/vsetka/deepl-translator/issues/9>
+- <https://github.com/m9dfukc/deepl-alfred-workflow/issues/14#issuecomment-402965296>
+- <https://github.com/vsetka/deepl-translator/issues/9>
 
 Don't open an issue: <https://github.com/oltodosel/interSubs/issues/19>
 
