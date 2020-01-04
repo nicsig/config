@@ -98,7 +98,7 @@ fu plugin#undotree#diff_toggle() abort "{{{2
         return
     endif
     " check we are going to *open* the diff panel (and not close it)
-    if ! pv_bufnr
+    if !pv_bufnr
         au FileType diff ++once call s:customize_diff_panel()
     endif
     call t:undotree.Action('DiffToggle')

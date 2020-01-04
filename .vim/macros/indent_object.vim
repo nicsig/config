@@ -24,7 +24,7 @@ fu s:in_indentation() abort "{{{1
 
     " pattern matching anything except empty lines and lines with recorded
     " indentation level
-    let pat = '^\%(\s*\%'.vCol.'v\|^$\)\@!'
+    let pat = '^\%(\s*\%'..vCol..'v\|^$\)\@!'
 
     " find first match (backwards & don't wrap or move cursor)
     let start = search(pat, 'bWn') + 1
@@ -38,13 +38,13 @@ fu s:in_indentation() abort "{{{1
     endif
 
     " go to start (this includes empty lines) and--importantly--column 0
-    exe 'norm! '.start.'G0'
+    exe 'norm! '..start..'G0'
 
     " skip empty lines (unless already on one .. need to be in column 0)
     call search('^[^\n\r]', 'Wc')
 
     " go to end (this includes empty lines)
-    exe 'norm! Vo'.end.'G'
+    exe 'norm! Vo'..end..'G'
 
     " skip backwards to last selected non-empty line
     call search('^[^\n\r]', 'bWc')
@@ -76,7 +76,7 @@ fu s:around_indentation() abort "{{{1
 
     " pattern matching anything except empty lines and lines with recorded
     " indentation level
-    let pat = '^\%(\s*\%'.vCol.'v\|^$\)\@!'
+    let pat = '^\%(\s*\%'..vCol..'v\|^$\)\@!'
 
     " find first match (backwards & don't wrap or move cursor)
     let start = search(pat, 'Wbn') + 1
@@ -121,7 +121,7 @@ fu s:around_indentation() abort "{{{1
     endif
 
     " finally, select from start to end
-    exe 'norm! ' . start . 'G0V' . end . 'G$o'
+    exe 'norm! '..start..'G0V'..end..'G$o'
 endfu
 " }}}1
 

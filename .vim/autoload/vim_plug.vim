@@ -12,7 +12,7 @@ fu vim_plug#move_between_commits(is_fwd) abort "{{{1
     "                                   │
     "                                   └ necessary!
     "
-    " Without  `x` Vim  will  type  `o` AFTER  having  finished processing  this
+    " Without  `x` Vim  will type  `o` *after*  having finished  processing this
     " function. Because of this, `wincmd P`  will be executed before the preview
     " window is opened,  which will raise an error, and  prevent the function to
     " finish its work.

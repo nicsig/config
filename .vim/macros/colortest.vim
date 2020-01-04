@@ -68,9 +68,9 @@ fu s:main() abort
         let fname = fnameescape(s:fname)
         unlet s:fname
         if &mod || line('$') != 1 || getline(1) isnot# ''
-            exe 'new ' . fname
+            exe 'new '..fname
         else
-            exe 'edit ' . fname
+            exe 'edit '..fname
         endif
     endif
 
@@ -88,8 +88,8 @@ fu s:main() abort
             \ col1, col2, col1, col2)
     endwhile
 
-    let range = lnum1 . ',' . lnum2
-    exe range . 'g/^" \a/call s:highlight()'
+    let range = lnum1..','..lnum2
+    exe range..'g/^" \a/call s:highlight()'
 
     nohlsearch
 endfu

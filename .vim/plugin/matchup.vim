@@ -9,7 +9,7 @@ endif
 " disable the matchparen module when Vim starts up
 let g:matchup_matchparen_enabled = 0
 " make sure there are always autocmds listening to some events
-if ! g:matchup_matchparen_enabled
+if !g:matchup_matchparen_enabled
     call plugin#matchparen#install_dummy_autocmds()
 endif
 

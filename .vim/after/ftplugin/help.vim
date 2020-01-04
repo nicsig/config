@@ -3,11 +3,12 @@
 fu s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
+let s:snr = get(s:, 'snr', s:snr())
 
 if expand('%:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
     setl fdm=expr
-    let &l:fdt = s:snr()..'fold_text()'
-    let &l:fde = s:snr()..'fold_expr()'
+    let &l:fdt = s:snr..'fold_text()'
+    let &l:fde = s:snr..'fold_expr()'
 endif
 
 fu s:fold_expr() abort "{{{1

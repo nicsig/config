@@ -34,8 +34,7 @@ noremap <expr><silent><unique> gj <sid>vertical_jump_rhs(1)
 fu s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
 endfu
-
-let s:snr = s:snr()
+let s:snr = get(s:, 'snr', s:snr())
 
 fu s:vertical_jump_rhs(is_fwd) abort
     let mode = mode(1)
@@ -44,7 +43,7 @@ fu s:vertical_jump_rhs(is_fwd) abort
         let mode = "\<c-v>\<c-v>"
     endif
 
-    return printf(":\<c-u>call ".s:snr()."vertical_jump_go(%d,%s)\<cr>",
+    return printf(":\<c-u>call "..s:snr.."vertical_jump_go(%d,%s)\<cr>",
     \             a:is_fwd, string(mode))
 endfu
 
@@ -64,7 +63,7 @@ fu s:vertical_jump_go(is_fwd, mode) abort
     let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
     let &l:fen = 0
     try
-        exe 'norm! '.(a:is_fwd ? n.'j' : n.'k')
+        exe 'norm! '..(a:is_fwd ? n..'j' : n..'k')
     finally
         " restore folds
         if winbufnr(winid) == bufnr
@@ -80,16 +79,16 @@ fu s:vertical_jump_go(is_fwd, mode) abort
 endfu
 
 fu s:get_jump_height(is_fwd) abort
-    let vcol  = '\%'.virtcol('.').'v'
+    let vcol = '\%'..virtcol('.')..'v'
     let flags = a:is_fwd ? 'nW' : 'bnW'
 
     " a line where there IS a character in the same column,
     " then one where there is NOT
-    let lnum1 = search(vcol.'.*\n\%(.*'.vcol.'.\)\@!', flags)
+    let lnum1 = search(vcol..'.*\n\%(.*'..vcol..'.\)\@!', flags)
 
     " a line where there is NOT a character in the same column,
     " then one where there IS
-    let lnum2 = search('^\%(.*'.vcol.'.\)\@!.*\n.*\zs'.vcol, flags)
+    let lnum2 = search('^\%(.*'..vcol..'.\)\@!.*\n.*\zs'..vcol, flags)
 
     let lnums = filter([lnum1, lnum2], {_,v -> v > 0})
 
@@ -150,7 +149,7 @@ nno <silent> >t :<c-u>call <sid>move_tabpage('+1')<cr>
 
 fu s:move_tabpage(where) abort
     try
-        exe 'tabmove '.a:where
+        exe 'tabmove '..a:where
     catch /^Vim\%((\a\+)\)\?:E474:/
     catch
         return lg#catch_error()
@@ -284,7 +283,7 @@ fu s:fts(cmd) abort
         "}}}
         call feedkeys(move_fwd ? "\<plug>Sneak_;" : "\<plug>Sneak_,", 'i')
     else
-        call feedkeys("\<plug>Sneak_".a:cmd, 'i')
+        call feedkeys("\<plug>Sneak_"..a:cmd, 'i')
     endif
     return ''
 endfu
@@ -292,7 +291,7 @@ endfu
 call lg#motion#repeatable#make#all({
 \        'mode':   '',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': 'F' ,  'fwd': 'f' },
 \                     {'bwd': 'SS',  'fwd': 'ss'},
@@ -326,7 +325,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':    'n',
 \        'buffer':  0,
-\        'from':    expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':    expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '!e',  'fwd': '!e'},
 \                   ]
@@ -336,7 +335,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '<f'    ,  'fwd': '>f'},
 \                     {'bwd': '<t'    ,  'fwd': '>t'},
@@ -348,7 +347,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   '',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': "['",  'fwd': "]'"},
 \                     {'bwd': '["',  'fwd': ']"'},
@@ -393,7 +392,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'nxo',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': 'g%',  'fwd': '%'},
 \                   ],
@@ -403,7 +402,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
 \                     {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
@@ -420,7 +419,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '<l'    ,  'fwd': '>l'},
 \                     {'bwd': '<q'    ,  'fwd': '>q'},
@@ -430,7 +429,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   '',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[Z',  'fwd': ']Z'},
 \                     {'bwd': '[h',  'fwd': ']h'},
@@ -445,7 +444,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[e', 'fwd': ']e'},
 \                   ]
@@ -455,7 +454,7 @@ call lg#motion#repeatable#make#all({
 call lg#motion#repeatable#make#all({
 \        'mode':   'n',
 \        'buffer': 0,
-\        'from':   expand('<sfile>:p').':'.expand('<slnum>'),
+\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
 \        'motions': [
 \                     {'bwd': '[oB',  'fwd': ']oB'},
 \                     {'bwd': '[oC',  'fwd': ']oC'},

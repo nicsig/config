@@ -21,14 +21,12 @@ fu myfuncs#op_grep(type, ...) abort "{{{2
         let cmd = 'rg 2>/dev/null -FLS --vimgrep '..shellescape((a:0 ? a:1 : @"))
         let use_loclist = a:0 ? a:2 : 0
         if a:type is# 'Ex' && use_loclist
-            sil let loclist = getloclist(0, {'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
-            call setloclist(0, loclist)
-            call setloclist(0, [], 'a', {'title': cmd})
+            sil let items = getloclist(0, {'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
+            call setloclist(0, [], ' ', {'items': items, 'title': cmd})
             do <nomodeline> QuickFixCmdPost lwindow
         else
-            sil let qfl = getqflist({'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
-            call setqflist(qfl)
-            call setqflist([], 'a', {'title': cmd})
+            sil let items = getqflist({'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
+            call setqflist([], ' ', {'items': items, 'title': cmd})
             do <nomodeline> QuickFixCmdPost cwindow
         endif
 
@@ -148,7 +146,7 @@ endfu
 
 fu s:is_right_aligned(line1, line2) abort
     let first_non_empty_line = search('\S', 'cnW', a:line2)
-    let length               = strlen(getline(first_non_empty_line))
+    let length = strlen(getline(first_non_empty_line))
     for line in getline(a:line1, a:line2)
         if strlen(line) != length && line !~# '^\s*$'
             return 0
@@ -344,10 +342,9 @@ fu s:format_shell_buffer() abort
         sil exe 'lvim /'..pat..'/j %'
     endif
 
-    let loclist = getloclist(0)
-    call map(loclist, {_,v -> extend(v, {'text': substitute(v.text, '٪\zs\s\{2,}', '  ', '')})})
-    call setloclist(0, loclist)
-    call setloclist(0, [], 'a', {'title': 'last shell commands'})
+    let items = getloclist(0)
+    call map(items, {_,v -> extend(v, {'text': substitute(v.text, '٪\zs\s\{2,}', '  ', '')})})
+    call setloclist(0, [], ' ', {'items': items, 'title': 'last shell commands'})
     " the location list window is automatically opened by one of our autocmds;
     " conceal the location
     call qf#set_matches('after_tmux_capture_pane:format_shell_buffer', 'Conceal', 'location')
@@ -840,8 +837,7 @@ fu myfuncs#in_A_not_in_B(...) abort "{{{1
     sil let output = systemlist('diff -U $(wc -l < '..fileA..') '..fileA..' '..fileB.." | grep '^-' | sed 's/^-//g'")
 
     call map(output, {_,v -> {'text': v}})
-    call setloclist(0, output)
-    call setloclist(0, [], 'a', {'title': 'in  '..fileA..'  but not in  '..fileB})
+    call setloclist(0, [], ' ', {'items': output, 'title': 'in  '..fileA..'  but not in  '..fileB})
 
     do <nomodeline> QuickFixCmdPost lopen
     call qf#set_matches('myfuncs#in_A_not_in_B', 'Conceal', 'double_bar')
@@ -1100,7 +1096,6 @@ endfu
 fu myfuncs#search_todo(where) abort "{{{1
     try
         sil noa exe 'lvim /\CFIX'..'ME\|TO'..'DO/j '..(a:where is# 'buffer' ? '%' : './**/*')
-        sil! call lg#motion#repeatable#make#set_last_used(']l')
     catch /^Vim\%((\a\+)\)\?:E480:/
         echom 'no TO'..'DO or FIX'..'ME'
         return
@@ -1113,12 +1108,12 @@ fu myfuncs#search_todo(where) abort "{{{1
     do <nomodeline> QuickFixCmdPost lwindow
     if &bt isnot# 'quickfix' | return | endif
 
-    "                                             ┌ Tweak the text of each entry when there's a line
-    "                                             │ with just `todo` or `fixme`;
-    "                                             │ replace it with the text of the next non empty line instead
-    "                                             │
-    call setloclist(0, map(getloclist(0), {_,v -> s:search_todo_text(v)}), 'r')
-    call setloclist(0, [], 'a', {'title': 'FIX'..'ME & TO'..'DO'})
+    "                                        ┌ Tweak the text of each entry when there's a line
+    "                                        │ with just `todo` or `fixme`;
+    "                                        │ replace it with the text of the next non empty line instead
+    "                                        │
+    let items = map(getloclist(0), {_,v -> s:search_todo_text(v)})
+    call setloclist(0, [], 'r', {'items': items, 'title': 'FIX'..'ME & TO'..'DO'})
 
     if &bt isnot# 'quickfix'
         return
@@ -1174,27 +1169,7 @@ fu myfuncs#tab_toc() abort "{{{1
         endif
    endfor
 
-    " Why do we call `setloclist()` 2 times? {{{
-
-    " To set the title of the location window, we must pass the dictionary
-    " `{'title': 'TOC'}` as a fourth argument to `setloclist()`.
-    " But when we pass a fourth argument, the list passed as a 2nd argument is
-    " ignored. No item in this list will populate the location list.
-    "
-    " So, the purpose of the first call to `setloclist()` is to populate the
-    " location list.
-    " The purpose of the second call is to set the title of the location
-    " window.
-    "
-    " In the 2nd call, the empty list and the `a` flag are not important.
-    " We could replace them with resp. any list and the `r` flag, for example.
-    " But we choose the empty list `[]` and the `a` flag, because it makes the
-    " code more readable. Indeed, since we only set the title of the window,
-    " and nothing in the list changes, it's as if we were adding/appending an
-    " empty list.
-    "}}}
-    call setloclist(0, toc)
-    call setloclist(0, [], 'a', {'title': 'TOC'})
+    call setloclist(0, [], ' ', {'items': toc, 'title': 'TOC'})
 
     let is_help_file = &bt is# 'help'
 
@@ -1386,7 +1361,7 @@ fu s:vim_parent() abort "{{{1
 endfu
 
 fu myfuncs#webpage_read(url) abort "{{{1
-    if ! executable('w3m')
+    if !executable('w3m')
         echo 'w3m is not installed'
         return
     endif

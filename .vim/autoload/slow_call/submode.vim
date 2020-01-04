@@ -279,8 +279,8 @@ fu s:duplicate_char_around(above) abort
     " We use this function to reimplement `c-y` (and `c-e`) in a more powerful way.
 
     let vcol = virtcol('.')
-    let line = search('\%'.vcol.'v.*\S', (a:above ? 'b' : '').'nW')
-    let char = matchstr(getline(line), '\%'.vcol.'v.')
+    let line = search('\%'..vcol..'v.*\S', (a:above ? 'b' : '')..'nW')
+    let char = matchstr(getline(line), '\%'..vcol..'v.')
     return char
 endfu
 
