@@ -1,59 +1,59 @@
 #!/bin/sh
 # Usage:{{{
 #
-#     $ yank
-#     $ cmd | yank
-#     $ yank FILE ...
+#     $ cmd | sendtoclipboard
+#     $ sendtoclipboard FILE ...
+#     $ sendtoclipboard
 #
-# In the first command, write your text, then press Enter followed by C-d:
+# In the last command, write your text, and end by pressing `C-d`:
 #
-#     $ yank
+#     $ sendtoclipboard
 #     hello
-#     Enter
 #     C-d
+#
+# You can press `Enter`  whenever you need a newline in your  text; it won't end
+# the input.
 #}}}
 
 # What does this script do?{{{
 #
-# It writes arbitrary text in the clipboard selection.
+# It  writes  arbitrary  text  in  the clipboard  selection  via  `xsel(1x)`  or
+# `xclip(1)` (only if `$DISPLAY` is set) and via OSC 52.
 #
 # The source of the text can be:
 #
-#    - the terminal (what you type interactively)
 #    - a pipe
 #    - some file(s)
+#    - the terminal (what you type interactively)
 #
 # ---
 #
 # If the script is run from a shell managed by tmux, it will also write the text
 # in a tmux buffer (in addition to the clipboard selection).
-#
-# And if the  script is run from a  shell where `$DISPLAY` is set,  it will also
-# try to write the text in the clipboard selection via `xclip(1)` or `xsel(1x)`.
 #}}}
 #   Where did you find it?{{{
 #
 # https://github.com/sunaku/home/blob/master/bin/yank
 # https://sunaku.github.io/tmux-yank-osc52.html
 #}}}
-#   Why does it write in the clipboard selection via `xsel(1x)` *and* via OSC 52?{{{
+#   Why does it write in the clipboard selection via `xsel(1x)`/`xclip(1)` *and* via OSC 52?{{{
 #
 # Most of the time, this is indeed redundant.
 # That is, when you're  copying some short text from a local  shell, only one of
 # these tools is necessary.
 #
-# However, there're 2 special cases where only one of them will work.
+# However, there are 2 special cases where only one of them will work.
 #
 # - If the script is run locally, OSC 52 may truncate the text if it's too long (>75k).
 #   In that case, `xsel(1x)` is useful as a more reliable fallback.
 #
-# - If the script is run on a remote server, there's probably no display server (Xorg).
+# - If the script is run on a remote server, there is probably no display server (Xorg).
 #   In that case, `xsel(1x)` will fail.
 #   And even if there  is a display server, you probably want to  copy the text in
 #   the *local* clipboard selection, not the remote one.
 #   Only OSC 52 can do that.
 #}}}
-#   What's its benefit over using tmux with `set-clipboard` set to 'on' or 'external'?{{{
+#   What is its benefit over using tmux with `set-clipboard` set to 'on' or 'external'?{{{
 #
 # In  that  case,   the  script  is  useless  when  you   copy  some  text  with
 # `copy-selection`  or `copy-pipe`  (because tmux  automatically sends  OSC 52).
@@ -107,16 +107,17 @@ buf=$(rlwrap cat "$@")
 #}}}
 [ -n "$TMUX" ] && tmux set-buffer "${buf}" ||:
 
-# copy to clipboard selection via `xsel(1x)` {{{1
+# copy to clipboard selection via:{{{1
+# `xsel(1x)` or `xclip(1)`{{{2
 
-[ -n "$DISPLAY" ] && printf -- '%s' "${buf}" | { xsel -i -b || xclip -selection clipboard ;} ||:
-#                                                      │  │{{{
-#                                                      │  │
-#                                                      │  └ operate on the CLIPBOARD selection.
+[ -n "$DISPLAY" ] && printf -- '%s' "${buf}" | { xsel -ib || xclip -selection clipboard ;} ||:
+#                                                      ││{{{
+#                                                      ││
+#                                                      │└ operate on the CLIPBOARD selection.
 #                                                      └ read standard input into the selection.
 #}}}
 
-# copy to clipboard selection via OSC 52 {{{1
+# OSC 52 {{{2
 
 # Don't try to set the clipboard via OSC 52 if we're in gVim.{{{
 #
@@ -140,8 +141,8 @@ fi
 len=$(printf -- '%s' "${buf}" | wc -c)
 # Where does that number come from?{{{
 #
-# Tmux doesn't  send to  the outer  terminal any sequence  of more  than 100_000
-# bytes: <https://www.mail-archive.com/tmux-users%40lists.sourceforge.net/msg05950.html>
+# Tmux doesn't send to the outer terminal any sequence of more than 10^5 bytes:
+# <https://www.mail-archive.com/tmux-users%40lists.sourceforge.net/msg05950.html>
 #
 # Besides, there's an overhead of 8  bytes for the header (`\033]52;c;`) and the
 # footer (`\007`); so, only 99_992 bytes can be used for the text.
@@ -175,7 +176,7 @@ put() {
   # Why do you wrap the OSC 52 sequence inside a DCS sequence?{{{
   #
   # Without,  the script  would fail  on a  remote machine  (or on  a local  one
-  # without X or xsel / xclip) if `set-clipboard` is set to 'external'.
+  # without X or `xsel(1x)` / `xclip(1)`) if `set-clipboard` is set to 'external'.
   #
   # This looks like a bug:
   #

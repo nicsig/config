@@ -3,6 +3,7 @@
 # TODO: make sure rg is re-installed (ripgrep)
 
 # TODO: install terminal descriptions in our home
+#
 #             ┌ (--location) if the page has moved to a different location,
 #             │              redo the request on the new place
 #             │
@@ -50,8 +51,8 @@
 # Assign it the value `Adwaita`, or any installed light gtk3 theme name.
 # For more info, see:
 #
-#     https://askubuntu.com/a/1037112/867754
-#     https://bugzilla.mozilla.org/show_bug.cgi?id=1283086
+# https://askubuntu.com/a/1037112/867754
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1283086
 #
 # Find a way to automate this setting from a shell command.
 
@@ -258,15 +259,15 @@ cp ~/.config/home/user/.mozilla/firefox/xxx.default/chrome/userContent.css ~/.mo
 
 printf -- "\nCreating symlinks pointing to config files in the Dropbox directory.\n"
 
-cd "${HOME}" || exit
+cd "$HOME" || exit
 dpath="${HOME}/Dropbox/conf"
 
 ln -sfn "${dpath}/bin" bin
 # l'option -f force la création du lien symbolique même si un élément de même nom existe déjà
-# -n : dans le cas où la cible est un dossier, si un élément de même nom que le lien existe déjà,
-#on se retrouve avec un lien symbolique à l'intérieur du dossier
-#-n = --no-dereference   empêche ce comportement
-# malheureusement ne semble pas fonctionner... Pk ?
+# `-n` : dans le cas où la cible est un dossier, si un élément de même nom que le lien existe déjà,
+# on se retrouve avec un lien symbolique à l'intérieur du dossier
+# `-n` = --no-dereference   empêche ce comportement
+# malheureusement ne semble pas fonctionner... Pk?
 
 ln -sfn "${dpath}/bash_aliases" .bash_aliases
 ln -sfn "${dpath}/cheat" .cheat
@@ -288,7 +289,7 @@ ln -sfn "${dpath}/mpv" .mpv
 ln -sfn "${dpath}/ranger" .config/ranger
 ln -sfn "${dpath}/shrc" .shrc
 ln -sfn "${dpath}/tmux/" .tmux
-ln -sfn "${dpath}/tmux.conf" .tmux.conf
+ln -sfn "${dpath}/tmux.conf" .config/tmux/tmux.conf
 ln -sfn "${dpath}/Trolltech.conf" .config/Trolltech.conf
 ln -sfn "${dpath}/vim" .vim
 ln -sfn "${dpath}/vimperator" .vimperator

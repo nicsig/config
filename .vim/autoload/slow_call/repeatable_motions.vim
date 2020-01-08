@@ -50,7 +50,7 @@ endfu
 fu s:vertical_jump_go(is_fwd, mode) abort
     if a:mode is# 'n'
         norm! m'
-    elseif index(['v', 'V', "\<c-v>"], a:mode) >= 0
+    elseif a:mode =~# "[vV\<c-v>]"
         norm! gv
     endif
 
@@ -73,7 +73,7 @@ fu s:vertical_jump_go(is_fwd, mode) abort
     endtry
 
     " open just enough folds to see where we are
-    if a:mode is# 'n' || index(['v', 'V', "\<c-v>"], a:mode) >= 0
+    if a:mode =~# "[nvV\<c-v>]"
         norm! zv
     endif
 endfu

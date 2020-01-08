@@ -11,7 +11,7 @@ set shortmess=aoO
 " badd +1 ~/.bashrc
 " badd +61 ~/.shrc
 " badd +1812 ~/.zshrc
-" badd +1 ~/.tmux.conf
+" badd +1 ~/.config/tmux/tmux.conf
 " badd +53 ~/Desktop/ask.md
 " badd +1 /tmp/vimrc
 " badd +0 ~/Desktop/winlayout.md
@@ -116,7 +116,7 @@ normal! 02|
 wincmd w
 arglocal
 silent! argdel *
-if bufexists('~/.tmux.conf') | buffer ~/.tmux.conf | else | edit ~/.tmux.conf | endif
+if bufexists('~/.config/tmux/tmux.conf') | buffer ~/.config/tmux/tmux.conf | else | edit ~/.config/tmux/tmux.conf | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}

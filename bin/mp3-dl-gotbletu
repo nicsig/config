@@ -14,7 +14,7 @@
 # a script to copy link and download youtube videos to mp3
 # just create a shortcut launcher on the panel and click on it while on the youtube page to want download the mp3 from
 
-# requires: wmctrl youtube-dl xclip
+# requires: `wmctrl(1)` `youtube-dl(1)` `xsel(1x)`
 
 # set browser string to look for
 wmctrl -a Chromium
@@ -32,7 +32,7 @@ cd ~/Desktop || exit
 notify-send -i ~/Downloads/youtube_green.png 'Starting Download' -t 5000
 
 # download (prevents downloading all playlist)
-youtube-dl -c --restrict-filenames --extract-audio --audio-format mp3 -o "%(title)s.%(ext)s" "$(xclip -selection clipboard -o | cut -d\& -f1)"
+youtube-dl -c --restrict-filenames --extract-audio --audio-format mp3 -o "%(title)s.%(ext)s" "$(xsel -ob | cut -d\& -f1)"
 
 # OSD display finish
 notify-send -i ~/Downloads/youtube_red.png 'Finish Download' -t 5000

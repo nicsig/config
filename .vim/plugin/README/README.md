@@ -205,7 +205,7 @@ In xterm:
 In xterm + tmux:
 
    - Vim uses color 227
-   - Nvim uses color 7 (255 if you don't set the `Tc` terminfo extension in tmux.conf)
+   - Nvim uses color 7 (255 if you don't set the `Tc` terminfo extension in `tmux.conf`)
 
 Now, let's consider the `> Hist` prompt.
 

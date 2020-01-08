@@ -1506,7 +1506,8 @@ fzf_clipboard() { #{{{2
   # the clipboard history, start apps, launch websearches for various engines...
 
   # fuzzy find clipboard history
-  #     xclip -selection clipboard <<<"$(greenclip print | fzf)"
+  #
+  #     xsel -ib <<<"$(greenclip print | fzf)"
 }
 
 fzf_fasd() { #{{{2
@@ -5109,8 +5110,8 @@ setopt RM_STAR_SILENT
 # We must *not* reset `$TERM` when the  terminal is connecting to a running tmux
 # server.
 # Because the latter will already have set `$TERM` to 'tmux-256color' (thanks to
-# the  option 'default-terminal'  in `~/.tmux.conf`),  which is  one of  the few
-# valid value ({screen|tmux}[-256color]).
+# the option 'default-terminal'  in `tmux.conf`), which is one of  the few valid
+# value ({screen|tmux}[-256color]).
 #
 # One way to be sure that we're not connected to Tmux , is to check that `$TERM`
 # is set to 'xterm'.
@@ -5156,7 +5157,7 @@ fi
 # }}}1
 
 # TODO: Try to customize the theme for the linux console (then remove `[[ -n "$DISPLAY" ]]`).
-if [[ -z "${NO_SYNTAX_HIGHLIGHTING}" ]] && [[ -n "$DISPLAY" ]]; then
+if [[ -z "$NO_SYNTAX_HIGHLIGHTING" ]] && [[ -n "$DISPLAY" ]]; then
   . "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
   . "${HOME}/.zsh/syntax_highlighting.zsh"
 fi

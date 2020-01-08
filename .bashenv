@@ -17,13 +17,11 @@ fi
 # started from  an interactive shell  and still rely  on `$PATH` to  be properly
 # set. Maybe some which are started by the display manager?
 #
-#     https://unix.stackexchange.com/a/88266/232487
+# https://unix.stackexchange.com/a/88266/232487
 #
-# Quote:
-#
-#     Many distributions,  display managers and desktop  environments arrange to
-#     run ~/.profile, either by explicitly  sourcing it from the startup scripts
-#     or by running a login shell.
+# > Many distributions,  display managers and desktop  environments arrange to
+# > run ~/.profile, either by explicitly  sourcing it from the startup scripts
+# > or by running a login shell.
 #}}}
 # Does `$PATH` get its value only from here? #{{{
 #
@@ -34,8 +32,7 @@ fi
 # including `$HOME/bin` and `$HOME/.local/bin`.
 #
 # See `man login` for more info, or:
-#
-#     http://unix.stackexchange.com/a/228167
+# http://unix.stackexchange.com/a/228167
 #}}}
 # What do you put in `$PATH` and why?{{{
 #
@@ -48,19 +45,16 @@ fi
 # It can happen when we start bash  from zsh (the latter will already have added
 # those paths).
 #
-# Source:
-#     https://unix.stackexchange.com/a/40973/289772
+# Source: https://unix.stackexchange.com/a/40973/289772
 #}}}
 # Why don't you use `export` for `$PATH`?{{{
 #
-#      You don't  need export  if the  variable is  already in  the environment:
-#      any  change   of  the  value  of   the  variable  is  reflected   in  the
-#      environment.¹ PATH is  pretty much  always in  the environment;  all unix
-#      systems  set it  very early  on (usually  in the  very first  process, in
-#      fact).
+# > You don't  need export if  the variable is  already in the  environment: any
+# > change of the  value of the variable is reflected  in the environment.¹ PATH
+# > is pretty much always in the environment; all unix systems set it very early
+# > on (usually in the very first process, in fact).
 #
-# Source:
-#     https://unix.stackexchange.com/a/26059/289772
+# Source: https://unix.stackexchange.com/a/26059/289772
 #}}}
 for p in "${HOME}/bin" "${HOME}/.local/bin"; do
   case ":$PATH:" in

@@ -8,14 +8,14 @@ bind -T prefix F command-prompt "find-window -Z -- '%%'"
 # For such a useful feature, I would prefer a key binding in the root table.
 
 # If I press the hint in lowercase, don't just copy the text, paste it immediately.
-# https://github.com/Morantron/tmux-fingers#fingers-copy-command
-set -g @fingers-copy-command ': ; tmux pasteb -p'
-#                             │
-#                             └ make tmux-fingers pipe the text to a command which will do nothing with its stdin
+# https://github.com/Morantron/tmux-fingers#fingers-main-action
+set -g @fingers-main-action ': ; tmux pasteb -p'
+#                            │
+#                            └ make tmux-fingers pipe the text to a command which will do nothing with its stdin
 
 # If I press the hint in uppercase, only copy the text; don't paste it.
-# https://github.com/Morantron/tmux-fingers#fingers-copy-command-uppercase
-set -g @fingers-copy-command-uppercase 'echo >/dev/null'
+# https://github.com/Morantron/tmux-fingers#fingers-shift-action
+set -g @fingers-shift-action 'echo >/dev/null'
 
 # set the style of the hints
 # https://github.com/Morantron/tmux-fingers#fingers-hint-format
@@ -27,6 +27,10 @@ set -g @fingers-hint-format-nocompact '#[fg=blue,bold][%s]'
 # https://github.com/Morantron/tmux-fingers#fingers-highlight-format-nocompact
 set -g @fingers-highlight-format '#[fg=red,bold,dim]%s'
 set -g @fingers-highlight-format-nocompact '#[fg=red,bold,dim]%s'
+
+# When generating hints, take into account the keyboard layout to optimize
+# finger movement: https://github.com/Morantron/tmux-fingers#fingers-keyboard-layout
+set -g @fingers-keyboard-layout 'azerty'
 
 # If you need fingers to recognize more patterns, see:
 # https://github.com/Morantron/tmux-fingers#fingers-patterns-n

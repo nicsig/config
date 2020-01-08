@@ -235,6 +235,7 @@ Plug 'justinmk/vim-sneak'
 Plug 'lacygoill/vim-submode', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmux', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
+" Alternative: https://github.com/vim/vim/pull/3220#issuecomment-538651011
 Plug 'andymass/vim-tradewinds'
 Plug 'lacygoill/vim-unix'
 
@@ -342,7 +343,8 @@ endif
 " startup, isn't 'termencoding', but 'encoding'.
 "}}}
 
-" Sets the character encoding used inside Vim.
+" Sets the character encoding used inside Vim.{{{
+"
 " It applies  to text in  the buffers,  registers, Strings in  expressions, text
 " stored in the viminfo file, etc.
 " It sets the kind of characters which Vim can work with.
@@ -350,9 +352,8 @@ endif
 " 'fileencodings':
 "
 " https://vi.stackexchange.com/a/17326/17449
-set encoding=utf-8
-
-" To avoid errors, we could also write:
+"}}}
+" To avoid errors, we could also write:{{{
 "
 "     scriptencoding utf-8
 "
@@ -360,10 +361,14 @@ set encoding=utf-8
 " But setting `encoding` seems to have a broader scope, and hence be better,
 " as I want every file sourced after `vimrc` to be read using the `utf-8`
 " encoding (ex: filetype plugins).
+"}}}
+set encoding=utf-8
 
 " Encoding used for the terminal.  This specifies what character
 " encoding the keyboard produces and the display will understand.
-set termencoding=utf-8
+if !has('nvim')
+    set termencoding=utf-8
+endif
 
 " Ftplugins + Syntax {{{2
 
@@ -530,7 +535,7 @@ call setenv('MANSECT', $MYMANSECT)
 call setenv('MY_WIKI', $HOME..'/wiki')
 
 if !isdirectory($XDG_RUNTIME_DIR..'/vim')
-    call mkdir($XDG_RUNTIME_DIR..'/vim', 'p', '0700')
+    call mkdir($XDG_RUNTIME_DIR..'/vim', 'p', 0700)
 endif
 call setenv('XDG_RUNTIME_VIM', $XDG_RUNTIME_DIR..'/vim')
 " For more info about `$XDG_RUNTIME_DIR` and `/run`:
@@ -2261,7 +2266,7 @@ augroup END
 " But make sure to remove the `.` at the front of `'directory'`.
 "}}}
 if !isdirectory($HOME..'/.vim')
-    call mkdir($HOME..'/.vim', '', 0770)
+    call mkdir($HOME..'/.vim', '', 0700)
 endif
 
 " Put all swap files in `~/.vim/tmp/swap/`.{{{
@@ -2966,8 +2971,8 @@ fu s:repeat_last_edit_on_last_text() abort
     " put the last changed text inside the search register, so that we can refer
     " to it with the text-object `gn`
 
-    "                                      ┌ last changed text
-    "                                      │
+    "                                       ┌ last changed text
+    "                                       │
     let last_text = '\V'..substitute(escape(@", '\'), '\n', '\\n', 'g')
     " The last changed text may contain newlines, but if it ENDs with one, we
     " usually don't want it.
@@ -3126,7 +3131,7 @@ fu s:run_current_line(type) abort
     let file = dir..'/'..a:type
     let max_history = 100
     if !isdirectory(dir)
-        call mkdir(dir, 'p', '0700')
+        call mkdir(dir, 'p', 0700)
     endif
     " make sure the history doesn't exceed `max_history` entries
     if filereadable(file)
@@ -4475,6 +4480,7 @@ nno <expr> "" <sid>easy_and_custom_paste()
 xno "" "+
 
 fu s:easy_and_custom_paste() abort
+    let [contents, type] = [getreg('+'), getregtype('+')]
     " We manipulate the `+` register in case we're going to paste it.
     " But what if we're going to yank some text into it?{{{
     "
@@ -4483,13 +4489,14 @@ fu s:easy_and_custom_paste() abort
     " register.
     "}}}
     if &ft is# 'markdown'
-        let @+ = substitute(@+, '’', "'", 'g')
-        let @+ = substitute(@+, '\w\zs \ze, \w', '', 'g')
-        if @+ =~# '\m\C^\s*http' && getline('.') =~# '^\S\|^$'
+        let contents = substitute(contents, '’', "'", 'g')
+        let contents = substitute(contents, '\w\zs \ze, \w', '', 'g')
+        if contents =~# '\m\C^\s*http' && getline('.') =~# '^\S\|^$'
             au TextChanged <buffer> ++once s/^\s*\zshttp.*/<&>/e
         endif
     endif
-    let @+ = substitute(@+, '٪', '$', 'g')
+    let contents = substitute(contents, '٪', '$', 'g')
+    call setreg('+', contents, type)
     return '"+'
 endfu
 
@@ -5176,10 +5183,10 @@ xno <expr> < <sid>niceblock('<')
 
 " With this  mapping, we can  always access the last  text we deleted  in visual
 " mode, from the `v` register.
-xno <expr><silent> d 'd'..timer_start(0, {_ -> execute('let @v=@"')})[-1]
+xno <expr><silent> d 'd'..timer_start(0, {_ -> setreg('v', getreg('"'), getregtype('"'))})[-1]
 
 " same thing when we yank
-xno <expr><silent> y 'y'..timer_start(0, {_ -> execute('let @v=@"')})[-1]
+xno <expr><silent> y 'y'..timer_start(0, {_ -> setreg('v', getreg('"'), getregtype('"'))})[-1]
 
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
@@ -5758,7 +5765,7 @@ fu s:plugins_update() abort
     endif
 
     if !isdirectory($HOME..'/.vim/tmp/snapshot')
-        call mkdir($HOME..'/.vim/tmp/snapshot', 'p')
+        call mkdir($HOME..'/.vim/tmp/snapshot', 'p', 0700)
     endif
     "                                                                          ┌ put the month before the day
     "                                                                          │ so that, in the output of `ls(1)`,
@@ -6409,18 +6416,18 @@ augroup END
 "}}}
 "     How do you fix it?{{{
 "
-" Before quitting Vim, we call xclip.
-" We pass it the contents of Vim's clipboard, and we make xclip its new owner.
-" You can check this by running:
+" Before quitting Vim, we call `xsel(1x)`.
+" We pass  it the contents  of Vim's clipboard, and  we make `xsel(1x)`  its new
+" owner. You can check this by yanking some text in the clipboard, quitting Vim,
+" then running:
 "
-"     $ ps aux | grep xclip
-"     user 123  ... xclip -selection clipboard /tmp/vXIc2YS/71~
+"     $ ps aux | grep xsel
+"     user 1234 ... xsel -ib~
 "
-" With the autocmd,  if you yank some  text in the clipboard then  quit Vim, you
-" will find this running process.
-" It will persist for as long as you don't yank some other text in the clipboard.
+" The `xsel(1x)` process will  persist for as long as you  don't yank some other
+" text in the clipboard.
 " For example, if  you copy sth from Firefox, then  re-run the previous `ps(1)`,
-" you won't find `xclip(1)` anymore.
+" you won't find `xsel(1x)` anymore.
 "}}}
 
 "     Why doesn't it affect urxvt?{{{
@@ -6466,13 +6473,17 @@ augroup END
 "
 " Before pasting the clipboard:
 "
-"     $ ps aux | grep xclip
+"     $ ps aux | grep 'xclip\|xsel'
 "     user 1234 ... xclip -quiet -i -selection clipboard~
 "
 " After pasting the clipboard once:
 "
 "     $ ps aux | grep xclip
 "     ''~
+"
+" Note that  by default, if `xclip(1)`  and `xsel(1x)` are both  installed, Nvim
+" uses  `xclip(1)`,  unless  you've  configured  `g:clipboard`  to  use  another
+" clipboard manager. See `:h g:clipboard`.
 "}}}
 "     Does it affect all applications?{{{
 "
@@ -6481,6 +6492,11 @@ augroup END
 " another program before quitting...
 "
 " OTOH, the issue does affect libreoffice.
+"}}}
+
+" Warning: If you change the name of the augroup, do the same in `tmux#capture_pane#main()`:{{{
+"
+"     ~/.vim/plugged/vim-tmux/autoload/tmux/capture_pane.vim
 "}}}
 augroup make_clipboard_persist_after_quitting_vim
     au!
@@ -6494,9 +6510,9 @@ fu s:make_clipboard_persist_after_quitting_vim() abort
     " If you find the current limit too low, you may increase it, after doing some tests:
     "
     "     :let @+ = repeat('a', 999999)
-    "     :10Time call system('xclip -selection clipboard', @+)
+    "     :10Time call system('xsel -ib', @+)
     "}}}
-    if !executable('xclip') || strlen(@+) == 0 || strlen(@+) > 9999
+    if !executable('xsel') || strlen(@+) == 0 || strlen(@+) > 9999
         return
     endif
     " Why do you pass the text via the second argument of `system()`?{{{
@@ -6507,18 +6523,18 @@ fu s:make_clipboard_persist_after_quitting_vim() abort
     "
     "     let tempfile = tempname()
     "     call writefile(split(@+, '\n'), tempfile, 'b')
-    "     call system('xclip -selection clipboard ' . tempfile)
+    "     call system('xsel -ib '..tempfile)
     "
     " But it would be cumbersome, and maybe brittle.
-    " What if for some  reason the file is removed before xclip  has a chance to
-    " read it,  or it does not  have the right permissions  (`writefile()` can't
-    " write into it, `xclip(1)` can't read it)?
+    " What if for some reason the file is removed before `xsel(1x)` has a chance
+    " to read it, or it does not have the right permissions (`writefile()` can't
+    " write into it, `xsel(1x)` can't read it)?
     "
     " ---
     "
     " Or, you could use a pipe:
     "
-    "     call system('printf -- '..shellescape(@+)..' | xclip -selection clipboard')
+    "     call system('printf -- '..shellescape(@+)..' | xsel -ib')
     "
     " But note that we already have 3 pitfalls to avoid.
     " We  don't want  a trailing  newline  to be  appended,  so we  have to  use
@@ -6541,7 +6557,7 @@ fu s:make_clipboard_persist_after_quitting_vim() abort
     "              ^
     "              ✘ where is `%n`?
     "}}}
-    sil call system('xclip -selection clipboard', @+)
+    sil call system('xsel -ib', @+)
 endfu
 
 " Read special files {{{2
@@ -7182,31 +7198,31 @@ endfu
 "
 " Try this:
 "
-"         % api cpanminus
-"         % sudo cpanm graph::easy
+"     % api cpanminus
+"     % sudo cpanm graph::easy
 "
-"         to uninstall later
-"         % sudo cpanm --uninstall graph::easy
+"     to uninstall later
+"     % sudo cpanm --uninstall graph::easy
 "
 " Write this in a file:
 "
-"         digraph {
-"             start -> adsuck;
-"             adsuck -> block;
-"             block -> noop[label="yes"];
-"             block -> unbound[label="no"];
-"             noop -> serve_noop[label="yes"];
-"             noop -> serve_empty[label="no"];
-"         }
+"     digraph {
+"         start -> adsuck;
+"         adsuck -> block;
+"         block -> noop[label="yes"];
+"         block -> unbound[label="no"];
+"         noop -> serve_noop[label="yes"];
+"         noop -> serve_empty[label="no"];
+"     }
 "
 " Visually select it, and type:
 "
-"         :'<,'>!graph-easy --as ascii
-"                                      ^
-"                                      don't add `%`
-"                                      it would work, but if you have several digraph codes
-"                                      in the current file, they will all be expanded, even
-"                                      if you only select one in particular
+"     :'<,'>!graph-easy --as ascii
+"                                  ^
+"                                  don't add `%`
+"                                  it would work, but if you have several digraph codes
+"                                  in the current file, they will all be expanded, even
+"                                  if you only select one in particular
 "
 " Interesting links:
 " https://vi.stackexchange.com/a/541/13370
@@ -7255,7 +7271,7 @@ endfu
 " Protect all temporary change of option with `try|catch|endtry`.
 " Look for the pattern:
 "
-"         _save\|save_\|old_\|_old
+"     _save\|save_\|old_\|_old
 "
 " Do it in vimrc, myfuncs, plugins.
 "
@@ -7287,8 +7303,8 @@ endfu
 "     :cfilter! -other_plugins
 "
 " Also:
-"         catch
-"             return lg#catch_error()
+"     catch
+"         return lg#catch_error()
 "
 " Also:
 " what happens if you do:
@@ -7691,12 +7707,12 @@ endfu
 "
 " 43 -
 "
-" Use syntax hl in `vim-qf` instead of complex mechanism using matches
-" also, in `vim-qf`, fix the fixme in the autocmd `my_qf`
+" Use syntax hl in `vim-qf` instead of complex mechanism using matches.
+" Also, in `vim-qf`, fix the fixme in the autocmd `my_qf`.
 "
 " 44 -
 "
-" Add syntax hl in toc menu, and make content more relevant in help toc
+" Add syntax hl in toc menu, and make content more relevant in help toc.
 "
 " 45 -
 "
@@ -7869,14 +7885,13 @@ endfu
 "    - :h matchadd(), new `window` key in optional dictionary;
 "       see also new window ID argument to matchdelete(), clearmatches(), getmatches() and setmatches()
 "
-"    - line() (since 8.1.1967, supports 2nd optional winid argument)
-"    - appendbufline()
-"    - deletebufline()
+"    - `line()` (since 8.1.1967, supports 2nd optional winid argument)
+"    - `appendbufline()`
+"    - `deletebufline()`
 "
-"    - listener_add()
-"    - listener_remove()
+"    - `listener_add()`
+"    - `listener_remove()`
 "
-"    - `DiffUpdated` event
 "    - api: buffer updates; https://github.com/neovim/neovim/commit/f85cbea725b4d21412dc0ddfd07239307b3b63a4
 "    - `CmdlineChanged` event
 "    - `DiffUpdated` event
@@ -7887,20 +7902,20 @@ endfu
 "    - `mode()` (new output `n_ov`, `n_oV`, `n_oC-v`)
 "    - prompt-buffer
 "
-"    - sign_define()
-"    - sign_getdefined()
-"    - sign_getplaced()
-"    - sign_place()
-"    - sign_undefined()
-"    - sign_unplace()
+"    - `sign_define()`
+"    - `sign_getdefined()`
+"    - `sign_getplaced()`
+"    - `sign_place()`
+"    - `sign_undefined()`
+"    - `sign_unplace()`
 "
-"    - str2list() and list2str()
-"    - term_setansicolors(), term_getansicolors(), g:term_ansi_colors
-"    - term_setsize()
-"    - winlayout()
-"    - winnr(): new argument `{N}[hjkl]`
+"    - `str2list()`, and `list2str()`
+"    - `term_setansicolors()`, `term_getansicolors()`, `g:term_ansi_colors`
+"    - `term_setsize()`
+"    - `winlayout()`
+"    - `winnr()`: new argument `{N}[hjkl]`
 "
-"    - environ(), getenv(), setenv()
+"    - `environ()`, `getenv()`, `setenv()`
 "
 "    - ability to set a default value to an argument passed to a function (`:h optional-function-argument`):
 "
@@ -7923,7 +7938,7 @@ endfu
 "
 "    - `:h literal-Dict`
 "
-"    - bufadd(), bufload()
+"    - `bufadd()`, `bufload()`
 "      useful to edit a file which is not currently loaded, with `deletebufline()`, `setbufline()`, ...
 "      and *without* side-effects (e.g. no window opened/closed which could alter the layout)
 "
@@ -7949,6 +7964,7 @@ endfu
 "    - `:h v:echospace`
 "    - `:h api-extended-marks` (Nvim only)
 "    - `linecount` entry in dictionary output by `getbufinfo()` (8.2.0019)
+"    - `:h :cq` (`:{N}cq[uit][!]`, Quit Vim with error code {N}.)
 "
 " 52 -
 "
@@ -8058,7 +8074,7 @@ endfu
 " We need it in all modes except in operator-pending mode.
 " Alternatively, we could include at the end of `lg#motion#regex#go()`:
 "
-"     exe 'norm! '.line('.').'g'
+"     exe 'norm! '..line('.')..'g'
 "
 " It would not make the cursor move, but it would make the command-line redrawn.
 " MWE:
@@ -8351,12 +8367,12 @@ endfu
 " where the visual selection begins/ends.
 " You can use `getpos('v')`, and `line('.')`:
 "
-"         xno <silent><expr> <c-a> Func()
-"         fu Func() abort
-"             let lnums = [getpos('v')[1], line('.')]
-"             echom 'the visual selection starts at line '.min(lnums).' and ends at line '.max(lnums)
-"             return ''
-"         endfu
+"     xno <silent><expr> <c-a> Func()
+"     fu Func() abort
+"         let lnums = [getpos('v')[1], line('.')]
+"         echom 'the visual selection starts at line '.min(lnums).' and ends at line '.max(lnums)
+"         return ''
+"     endfu
 "
 " Try to use this technique in your plugin(s) instead of escaping.
 " Unless they really need to update the visual marks.
@@ -8373,7 +8389,7 @@ endfu
 "
 " 75 -
 "
-" Search for `[ spc`, `spc ]`, `{ spc`, `spc }`, `^\s*\\` everywhere.
+" Search for `[ SPC`, `SPc ]`, `{ SPC`, `SPC }`, `^\s*\\` everywhere.
 " Refactor the style.
 "     noa vim /\[ \| \]\|{ \| }\|^\s*\\/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/vimrc | cw
 "
@@ -8655,7 +8671,7 @@ endfu
 "
 " Study this (Neovim):
 "
-"     :help nvim_buf_set_virtual_text()
+"     :h nvim_buf_set_virtual_text()
 "
 " Usage example:
 "
@@ -8707,10 +8723,6 @@ endfu
 "
 " 95 -
 "
-" Assimilate the `Yank()` function, and the `~/bin/yank` script.
-"
-" 96 -
-"
 " Document the fact that  you need to put `<esc>` at the start  of the rhs of an
 " `:ono` mapping if it presses `v:operator`.
 "
@@ -8748,7 +8760,7 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 97 -
+" 96 -
 "
 " We have too many comments in this file about the bracketed paste mode.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
@@ -8758,7 +8770,7 @@ endfu
 "
 " https://github.com/neovim/neovim/pull/4448
 "
-" 98 -
+" 97 -
 "
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
@@ -8768,7 +8780,7 @@ endfu
 " Also, `:verbose syn list ...` doesn't print the script location from which the
 " syntax group was installed. Maybe ask for an improvement of `:verb`.
 "
-" 99 -
+" 98 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -8784,7 +8796,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 100 -
+" 99 -
 "
 " We really need a library function to get a comment leader.
 "
@@ -8833,7 +8845,7 @@ endfu
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 "
-" 101 -
+" 100 -
 "
 " We often make this error:
 "
@@ -8849,20 +8861,20 @@ endfu
 " Other Idea: Make `M-b` inspect the 2 previous characters.
 " If they are a pair of brackets, make it move the cursor as if `C-b` had been pressed.
 "
-" 102 -
+" 101 -
 "
 " In a markdown file, `gc` should behave slightly differently.
 " It  should  make sure  there  are  4 spaces  between  `>`  and the  first  non
 " whitespace on each line; and reformat the quote with `par(1)`.
 " Because that's what we do all the time; so better automate it.
 "
-" 103 -
+" 102 -
 "
 " In a fugitive buffer, when we need to  stage many files, I would like to press
 " `-` very fast. We can't because – for  some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
 "
-" 104 -
+" 103 -
 "
 " We've just had an issue in `vim-search` because we used `==` instead of `==#`.
 " Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
@@ -8870,7 +8882,7 @@ endfu
 "
 "     vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
 "
-" 105 -
+" 104 -
 "
 " The  interface of  your plugins  and custom  config should  be simplified  and
 " exposed; review every custom mapping/command.
@@ -8890,7 +8902,7 @@ endfu
 "        If the help of a command gets too big, you could spread it across
 "        several pages, using a `-help {keyword}` argument.
 "
-" 106 -
+" 105 -
 "
 " Should we add the guard `if $MYVIMRC is# '' | finish | endif` in all the files
 " under `~/.vim/{after/}plugin`?
@@ -8901,7 +8913,7 @@ endfu
 " `*/after/ftplugin/{&ft}.vim`?
 " https://github.com/andymass/vim-matchup/commit/0b780e9ae12ba913742356f4b7cedc52d3a15220
 "
-" 107 -
+" 106 -
 "
 " Document a few things about debugging with breakpoints.
 "
@@ -8971,7 +8983,7 @@ endfu
 " the sourcing of the autoloaded directory).
 " Now you can run `:breakadd func <snr>123_function_name`.
 "
-" 108 -
+" 107 -
 "
 " In xterm, we may now be able to use the alt modifier in mappings without nasty
 " side-effects:
@@ -8979,7 +8991,7 @@ endfu
 " `:h modifyOtherKeys`
 " https://github.com/vim/vim/issues/4974#issuecomment-541431801
 "
-" 109 -
+" 108 -
 "
 " Vim saves anything typed on the  command-line, regardless of how we've left it
 " (including when we've pressed `C-c` or `Esc`).
@@ -8998,7 +9010,7 @@ endfu
 "     /the
 "     " press Escape: the cursor jumps to the next occurrence of `the`
 "
-" 110 -
+" 109 -
 "
 " Press `é`: it capitalizes the next word.
 " Also, I don't know how, but we often capitalize a word by accident (in a different way).
@@ -9006,7 +9018,7 @@ endfu
 " Or use xterm, which now supports  meta sequences OOTB, and doesn't suffer from
 " these kind of issues.
 "
-" 111 -
+" 110 -
 "
 " Document somewhere that to debug Nvim, you should not do this *from Vim*:
 "
@@ -9049,7 +9061,7 @@ endfu
 "
 "     source $HOME/.vim/vimrc
 "
-" 112 -
+" 111 -
 "
 " Replace a long `b:undo_ftplugin` with a simple function call:
 "
@@ -9065,7 +9077,7 @@ endfu
 "    - settings are properly reset when we change the filetype
 "    - function implementing the undo is in the right file
 "
-" 113 -
+" 112 -
 "
 " Look for `:windo` and `:wincmd` everywhere.
 "
@@ -9075,7 +9087,7 @@ endfu
 " Once Nvim  supports `win_execute()`, remove  the `lg#` prefix in  the function
 " calls.
 "
-" 114 -
+" 113 -
 "
 " `C-l` works in the  pattern field of a `:s` and  `:g` command (provided `'is'`
 " is set), but not in the one of a `:vim` command or `:helpg`/`:lh` (`:h /^l`).
@@ -9107,7 +9119,7 @@ endfu
 " Temporarily replace `:vim` by `:%s` (the  percent is important if the text you
 " want to copy is not on the current line).
 "
-" 115 -
+" 114 -
 "
 " Review all the custom motions you've installed.
 " For each  of them, make  sure you can  jump back with  `C-o` (set mark  `'` on
@@ -9116,12 +9128,12 @@ endfu
 " Actually, maybe not for all of them.
 " Think about which motions should add an entry in the jumplist.
 "
-" 116 -
+" 115 -
 "
 " Install a `=rm`  mapping in Vim files to refactor  nested function calls using
 " the method call operator (`->`).
 "
-" 117 -
+" 116 -
 "
 "     $ cd ; vim
 "     :echo getcwd() → /home/user
@@ -9131,7 +9143,7 @@ endfu
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
 "
-" 118 -
+" 117 -
 "
 " Review all custom text-objects: make sure  they all position the cursor on the
 " end of  the selection, to  be consistent  with what Vim  seems to do  with its
@@ -9146,7 +9158,7 @@ endfu
 " I guess  that it  means that  all our text-objects  should be  implemented via
 " `<expr>` mappings... Otherwise, the output of `mode(1)` is unreliable.
 "
-" 119 -
+" 118 -
 "
 " Every time you've used sth like `norm! %` in the past, it was probably wrong.
 " You should have used sth like:
@@ -9177,7 +9189,7 @@ endfu
 " Enough is enough; we've removed `vim-matchit`, and installed `vim-matchup`.
 " Read the documentation of the latter.
 "
-" 120 -
+" 119 -
 "
 " Search `$MYVIMRC` everywhere; check whether the code works as intended in Nvim.
 " Search `.vim/vimrc` everywhere; check whether we should have used `$MYVIMRC`.
@@ -9185,7 +9197,7 @@ endfu
 " What should  we do  in Nvim? Use `~/.vim/vimrc`,  `~/.config/nvim/init.vim` or
 " both (if so how)?
 "
-" 121 -
+" 120 -
 "
 " `:vimgrep` is slow in Nvim.
 "
@@ -9204,7 +9216,7 @@ endfu
 "
 "     syn off | filetype plugin indent off
 "
-" 122 -
+" 121 -
 "
 " Every time  we've "changed"  a buffer  in a way  that the  line count  did not
 " change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
@@ -9222,13 +9234,13 @@ endfu
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 "
-" 123 -
+" 122 -
 "
 " When using the `gc` operator to comment  a line starting with a backslash in a
 " Vimscript file, maybe we  should not add a space between  `"` and `\`, because
 " we sometimes want to temporarily comment a continuation line.
 "
-" 124 -
+" 123 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
 " commented line.
@@ -9250,7 +9262,7 @@ endfu
 "
 "     " ~/.vim/plugged/vim-brackets/autoload/brackets.vim
 "
-" 125 -
+" 124 -
 "
 " I'm fed up with codespans being broken when formatting with `gq`.
 "
@@ -9263,27 +9275,27 @@ endfu
 " Also: Same issue with italics / bold style.
 " Tweak syntax regexes?
 "
-" 126 -
+" 125 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
 "
-" 127 -
+" 126 -
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
 "
-" 128 -
+" 127 -
 "
 " Read:
 " https://vimways.org/2019/indentation-without-dents/ (see `~/.vim/indent/[my]matlab.vim`, `~/Desktop/m.m`)
 " https://vimways.org/2019/a-test-to-attest-to/
 "
-" 129 -
+" 128 -
 "
 " Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
 " (to improve performance...)
 "
-" 130 -
+" 129 -
 "
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
@@ -9292,7 +9304,7 @@ endfu
 "
 " Note that `readdir()` has not been ported to Nvim yet.
 "
-" 131 -
+" 130 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -9309,29 +9321,29 @@ endfu
 
 
 
-fu s:yank(text) abort
-    " What's this `yank` ?{{{
+" TODO: Assimilate the `s:sendtoclipboard()` function, and the `~/bin/sendtoclipboard` script.
+fu s:sendtoclipboard(text) abort
+    " What's this `sendtoclipboard` ?{{{
     "
-    " A custom script: `~/bin/yank`.
+    " A custom script: `~/bin/sendtoclipboard`.
     " It writes the text in:
     "
     "    - a tmux buffer
-    "    - the clipboard via xsel or xclip
-    "    - the clipboard via xsel or xclip
+    "    - the clipboard via `xsel(1x)` or `xclip(1)`
+    "    - the clipboard via OSC 52
     "}}}
-    sil let seq = system('yank', a:text)
+    sil let seq = system('sendtoclipboard', a:text)
     " Why this guard?{{{
     "
     " gVim doesn't seem to support OSC 52.
     "}}}
     "   Why don't you move it at the top?{{{
     "
-    " In addition to producing an OSC 52 sequence, `yank` copies the text in the
-    " clipboard via `xsel(1x)`; this last feature may still be useful in gVim.
+    " In addition to producing an  OSC 52 sequence, `sendtoclipboard` copies the
+    " text  in the  clipboard via  `xsel(1x)`; this  last feature  may still  be
+    " useful in gVim.
     "}}}
-    if has('gui_running')
-        return
-    endif
+    if has('gui_running') | return | endif
     if v:shell_error
         return lg#catch_error()
     else
@@ -9339,8 +9351,8 @@ fu s:yank(text) abort
         "
         " Hint: It's only needed when you're working on a remote machine.
         "
-        " If you're  not convinced, comment  the line,  and in the  yank script,
-        " comment the line invoking xsel and xclip.
+        " If   you're   not   convinced,   comment  the   line,   and   in   the
+        " `sendtoclipboard` script, comment the line invoking `xsel(1x)`.
         " Then, try to use this function: it will fail.
         " It should work  thanks to the OSC 52 sequence,  but it doesn't without
         " this `writefile()` line.
@@ -9350,7 +9362,7 @@ fu s:yank(text) abort
         call writefile([seq], '/dev/tty', 'b')
     endif
 endfu
-nno <silent> <space>y y:<c-u>call <sid>yank(@0)<cr>
+nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
 
 
 
@@ -9381,143 +9393,4 @@ nno <silent> <space>y y:<c-u>call <sid>yank(@0)<cr>
 "    22. package
 "
 " Once finished, get back to studying the terminal and latex.
-
-
-
-
-" TODO:
-" It would be  convenient to have a  command which saves a  particular qfl in
-" a dedicated file under `~/.vim/after/qfl/`, and which could restore it when needed.
-augroup save_and_restore_last_qfl
-    au!
-    "     au VimLeavePre * call s:save_last_qfl()
-    "     au VimEnter    * call s:restore_last_qfl()
-augroup END
-fu s:save_last_qfl() abort
-    let curqfnr = getqflist({'nr': 0}).nr
-    let qfls = filter(map(range(1, getqflist({'nr': '$'}).nr),
-        \ {_,v -> getqflist({'id': 0, 'nr': v, 'size': 0, 'title': 0})}),
-        \ {_,v -> v.size != 0
-        \      && v.size < 9999
-        \      && v.title !~# '^\s*:hub\s\+push\s*$'
-        \      && v.nr >= curqfnr})
-    if empty(qfls) | unlet! g:MY_LAST_QFL | return | endif
-    let items = getqflist({'nr': qfls[0].nr, 'items': 0}).items
-    call map(items, {_,v -> extend(v, {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
-    let g:MY_LAST_QFL = {'items': items, 'title': getqflist({'title': 0}).title}
-endfu
-fu s:restore_last_qfl() abort
-    " If there's already a qfl on the stack, or if there's no qfl to restore, don't try to restore anything.
-    " How could there already be a qfl on the stack?{{{
-    "
-    "     $ rg -LS --vimgrep network /etc
-    "     $ vim -q <(!!)
-    "
-    "     $ rg -LS --vimgrep network /etc | vim -q /dev/stdin
-    "
-    "     $ rg -LS --vimgrep network /etc >/tmp/log
-    "     $ vim -q /tmp/log
-    "
-    "     $ vim +'vimgrep /pat/ %' file
-    "
-    "     $ vim -S /tmp/efm.vim
-    "}}}
-    " Why not restoring the qfl if there's already one on the stack?{{{
-    "
-    " Too confusing.
-    " You would expect a certain a qfl, but get a different one.
-    " You may  lose a lot of  time/energy before remembering you  have this code
-    " which restores an old qfl.
-    " This is  especially true if the  two qfl which  end on the stack  are very
-    " similar, which happens when you're refining an 'efm'.
-    "}}}
-    " Why not restoring the qfl if `v:servername` is empty?{{{
-    "
-    " I prefer to restore the last qfl in our main Vim instance; the one where a
-    " sessions is tracked.
-    " For all the other  ones, I think it's unexpected to  get the qfl restored;
-    " in particular,  it's surprising to  get a big  list of buffers  even after
-    " running a simple `$ vim`.
-    "}}}
-    if getqflist({'size':0}).size
-    \ || empty(get(get(g:, 'MY_LAST_QFL', {}), 'items', []))
-    \ || v:servername is# ''
-        return
-    endif
-    call setqflist([], ' ', {'items': g:MY_LAST_QFL.items, 'title': g:MY_LAST_QFL.title})
-endfu
-
-
-com -bar -complete=custom,s:csave_complete -nargs=1 CSave call s:csave(<q-args>)
-com -bar -complete=custom,s:csave_complete -nargs=1 CRestore call s:crestore(<q-args>)
-fu s:csave_complete(_a, _l, _p) abort
-    if !isdirectory($HOME..'/.vim/qfl') | return '' | endif
-    return join(map(glob($HOME..'/.vim/qfl/*.vim', 0, 1), {_,v -> fnamemodify(v, ':t:r')}), "\n")
-endfu
-
-fu s:csave(fname) abort
-    let qfl_dir = $HOME..'/.vim/qfl/'
-    if !isdirectory(qfl_dir)
-        call mkdir(qfl_dir)
-    endif
-    let curqfnr = getqflist({'nr': 0}).nr
-    let qfls = filter(map(range(1, getqflist({'nr': '$'}).nr),
-        \ {_,v -> getqflist({'id': 0, 'nr': v, 'size': 0, 'title': 0})}),
-        \ {_,v -> v.size != 0
-        \      && v.size < 9999
-        \      && v.title !~# '^\s*:hub\s\+push\s*$'
-        \      && v.nr >= curqfnr})
-    if empty(qfls) | unlet! g:MY_LAST_QFL | return | endif
-    let items = getqflist({'nr': qfls[0].nr, 'items': 0}).items
-    " Explanation:{{{
-    "
-    " `remove(v, 'bufnr')` does 2 things:
-    "
-    "    - it removes the `bufnr` key from every entry in the qfl
-    "    - it evaluates to the value which was bound to that key (i.e. the buffer number of the qfl entry)
-    "
-    " `bufname(...)` converts the buffer number into a buffer name.
-    " `fnamemodify(...)` makes sure that the  name is absolute, and not relative
-    " to the current working directory.
-    "}}}
-    call map(items, {_,v -> extend(v, {'filename': fnamemodify(bufname(remove(v, 'bufnr')), ':p')})})
-    let qfl = {'items': items, 'title': getqflist({'title': 0}).title}
-    let lines =<< trim END
-        let s:qfl = %s
-        let s:items = s:qfl.items
-        let s:title = s:qfl.title
-        call setqflist([], ' ', {'items': s:items, 'title': s:title})
-        unlet! s:qfl s:items s:title
-    END
-    let lines[0] = substitute(lines[0], '%s', string(qfl), '')
-    let fname = qfl_dir..a:fname..'.vim'
-    call writefile(lines, fname)
-    " TODO: Don't use `~/.viminfo` to save the qfl. Use a dedicated file.{{{
-    "
-    " Benefits:
-    "
-    " `~/.viminfo` is not altered, and doesn't get too big.
-    " The bigger `~/.viminfo` is, the slower Vim starts.
-    " It may not  be an issue when  you start your first main  Vim instance, but
-    " there's no reason for other Vim instances to start slowly because of a qfl
-    " they don't care about.
-    "
-    " Can save and restore multiple qfl, using different files.
-    "
-    " ---
-    "
-    " Also, consider  the possibility  of not  restoring the  qfl automatically,
-    " even for the first main Vim instance.
-    " It may make a restart slower.
-    " If manually restoring a qfl is easy, that should not be an issue.
-    "}}}
-    "     let g:MY_LAST_QFL = {'items': items, 'title': getqflist({'title': 0}).title}
-endfu
-
-fu s:crestore(fname) abort
-    let qfl_dir = $HOME..'/.vim/qfl/'
-    let fname = qfl_dir..a:fname..'.vim'
-    exe 'so '..fname
-    cw
-endfu
 
