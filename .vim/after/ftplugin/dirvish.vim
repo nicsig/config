@@ -1,6 +1,6 @@
 " Options {{{1
 
-call lg#set_stl(
+sil! call lg#set_stl(
     \ '%y %F%<%=%l/%L ',
     \ '%y %F')
 " in a squashed dirvish window, display the line/column position is useless (noise)

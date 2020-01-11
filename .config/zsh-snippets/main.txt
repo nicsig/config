@@ -8,6 +8,7 @@ gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 groff -man -Tascii {{program}}.man § check formatting of a manual page
 
 git bisect visualize --oneline
+git log -L {{line1}},{{line2}}:{{file}} § trace evolution of range of lines
 
 cd ~/Vcs/tmux/ && { git stash; make clean; make distclean; \sh autogen.sh && ./configure && make ; tput bel ;} § compile tmux (useful when git-bisecting)
 cd ~/Vcs/vim/ && { git stash; make clean; make distclean; sed -i 's/#ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ ; s/#CFLAGS = -g -DSINIXN/CFLAGS = -g -DSINIXN/ ; s@#STRIP = /bin/true@STRIP = /bin/true@' src/Makefile ; ./configure --enable-fail-if-missing --with-features=huge; make ; tput bel ;} § compile vim

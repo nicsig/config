@@ -12,7 +12,7 @@ if expand('%:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
 endif
 
 fu s:fold_expr() abort "{{{1
-    return getline(v:lnum) =~# '^=\+$' ? '>1' : '='
+    return getline(v:lnum) =~# '^=\+$' ? '>1' : 1
 endfu
 
 fu s:fold_text() abort "{{{1

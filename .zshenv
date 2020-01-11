@@ -329,9 +329,9 @@ fi
 #
 #     ~/.vim/after/plugin/tidy_tab_completion.vim
 #
-# But you can try it if you set `g:no_after_plugin`:
+# But you can try it if you remove `~/.vim/after/` from the rtp:
 #
-#     $ MANPAGER="vim -Nu NORC --cmd 'filetype on | let g:no_after_plugin = 1' -M +MANPAGER -" man man
+#     $ MANPAGER="vim -Nu NORC --cmd 'filetype on | set rtp-=~/.vim/after' -M +MANPAGER -" man man
 #}}}
 # Why do you reset `$VIMRUNTIME` and include it inside the rtp?{{{
 #

@@ -304,7 +304,7 @@ fu myfuncs#box_create(_) abort
         " Capture all the column positions in the current line matching a `|`
         " character:
         let col_pos = []
-        let i       = 0
+        let i = 0
         for char in split(getline('.'), '\zs')
             let i += 1
             if char is# '|'
@@ -344,7 +344,7 @@ fu s:box_create_border(where, col_pos) abort
         " duplicate first line in the box
         norm! '{+yyP
         " replace all characters with `─`
-        exe 'norm! v$r─'
+        norm! v$r─
         " draw corners
         exe 'norm! '..col_pos[0]..'|r┌'..col_pos[-1]..'|r┐'
     else
@@ -371,7 +371,7 @@ fu s:box_create_separations() abort
 
     " Delete it in the `s` (s for space) register, so that it's stored inside
     " default register and we can paste it wherever we want.
-    delete s
+    d s
 
     " Create a separation line, such as:
     "

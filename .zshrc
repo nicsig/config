@@ -240,24 +240,8 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
 #    1. create the named directory `~xdcc`
 #    2. refer to it in a(ny) command
 #}}}
-# Could we use another command instead of `:`?{{{
-#
-# Yes, any command would do.
-# }}}
-# What does `:` do in general?{{{
-#
-# From `man zshbuiltins`:
-#
-# > : [ arg ... ]
-#
-# >      This  command  does  nothing,  although  normal  argument  expansions  is
-# >      performed which may have effects on shell parameters.
-#}}}
-xdcc=~/Downloads/XDCC/
-: ~xdcc
-
-tmp=/run/user/$UID/tmp
-: ~tmp
+hash -d xdcc=~/Downloads/XDCC/
+hash -d tmp=/run/user/$UID/tmp
 
 # What's `fpath`?{{{
 #

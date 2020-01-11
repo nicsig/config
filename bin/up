@@ -3,12 +3,15 @@
 # TODO: make the script remove old kernels.{{{
 #
 # You could try this command:
+#
 #     $ sudo apt autoremove
 #
 # You would need to add sth like this in `/etc/sudoers.d/my_modifications`:
+#
 #     user ubuntu=(root)NOPASSWD:/usr/bin/apt autoremove
 #
 # To do so, execute this:
+#
 #     $ sudo visudo -f /etc/sudoers.d/my_modifications
 #
 # For more info, read this:
@@ -18,7 +21,7 @@
 #
 # Here's what `apt` prints when we invoke it in a script:
 #
-#     WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+#     WARNING: apt does not have a stable CLI interface. Use with caution in scripts.~
 #
 # I need to think of a reliable way to remove old kernels.
 #
@@ -345,8 +348,7 @@ update_terminfo() { #{{{1
 
 update_texlive() { #{{{1
   # For more info:{{{
-  #
-  #     https://tex.stackexchange.com/a/55459/169646
+  # https://tex.stackexchange.com/a/55459/169646
   #}}}
   cat <<EOF
 

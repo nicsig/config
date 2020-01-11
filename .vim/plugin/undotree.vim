@@ -47,6 +47,6 @@ fu g:Undotree_CustomMap() abort "{{{1
     nno <buffer><nowait><silent> D :<c-u>call plugin#undotree#diff_toggle()<cr>
 
     " dummy item to get an empty status line
-    call lg#set_stl('%h')
+    sil! call lg#set_stl('%h')
 endfu
 

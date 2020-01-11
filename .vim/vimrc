@@ -253,8 +253,7 @@ Plug 'lacygoill/vim-doc'
 Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-fold'
 Plug 'lacygoill/vim-freekeys'
-Plug 'lacygoill/vim-gitcommit'
-Plug 'lacygoill/vim-gitconfig'
+Plug 'lacygoill/vim-git'
 Plug 'lacygoill/vim-gx'
 Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
@@ -322,7 +321,41 @@ augroup delay_slow_call
     " the lazy-loaded  interface has  been installed, maybe  try to  add another
     " event to the autocmd.
     "}}}
-    au CursorHold,CursorMoved,InsertEnter * call s:delay_slow_call()
+    " Before adding an event to the list, make sure it doesn't increase Vim's startup time.{{{
+    "
+    " In particular, avoid `SafeState`, `VimEnter`, `BufEnter`.
+    "
+    " ---
+    "
+    " When you check with `--startuptime`, don't make Vim execute `:q` automatically:
+    "
+    "                                                ✘
+    "                                                vv
+    "     $ rm /tmp/log ; vim --startuptime /tmp/log +q && vim /tmp/log
+    "
+    " It could give numbers which are much lower than what you'll experience.
+    " It  depends on  the events  you  listen to;  e.g.  if you  only listen  to
+    " `CursorMoved`,  the  numbers  are  much  lower  when  you  make  Vim  quit
+    " automatically, compared to when you quit manually.
+    "
+    " So, make sure to quit manually:
+    "
+    "     $ rm /tmp/log ; vim --startuptime /tmp/log
+    "     :q
+    "     $ vim /tmp/log
+    "}}}
+    let s:events =<< trim END
+        CursorHold
+        InsertEnter
+        WinEnter
+        BufNewFile
+        BufReadPost
+        BufWritePost
+        QuickFixCmdPost
+        TextYankPost
+        TextChanged
+    END
+    exe 'au '..join(s:events, ',')..' * call s:delay_slow_call()' | unlet! s:events
     " Do *not* call the function when we enter debug mode.
     " It could raise spurious errors when we debug Vim (`$ vim -D`).
     au CmdlineEnter :,/,\?,@ call s:delay_slow_call()
@@ -2444,8 +2477,12 @@ set updatetime=2000
 
 " viminfo {{{2
 
-" Useful to save `g:MY_LAST_QFL`.
-set viminfo+=!
+" Useful to save variables such as `g:MY_VAR`.
+if has('nvim')
+    set shada+=!
+else
+    set viminfo+=!
+endif
 
 " virtualedit {{{2
 
@@ -4262,7 +4299,7 @@ endfu
 "     try
 "         set nosr
 "         let operator = get(s:, 'indentation_direction', '') is# 'decrease' ? '<' : '>'
-"         exe 'norm! '.line("'[").'G'.operator.line("']").'G'
+"         exe 'norm! '..line("'[")..'G'..operator..line("']")..'G'
 "     catch
 "         return lg#catch_error()
 "     finally
@@ -6202,79 +6239,6 @@ fu s:wipe_noname() abort
     endif
 endfu
 
-" Fast Fold {{{2
-
-augroup folding_toggle_in_insert_mode
-    au!
-    " Purpose:{{{
-    "
-    " Editing text in insert mode in a markdown buffer is sometimes very slow.
-    "
-    " MWE:
-    "
-    "     $ vim +"put='text' | norm! yy200pG200Ax" /tmp/md.md
-    "
-    " Vim takes several seconds to start.
-    " This is because of our `'fdm'` and `'fde'` options, and because of `200Ax`.
-    " Repeating  the insertion  of some  text  can take  a long  time; the  more
-    " repetitions, and the more lines above, the longer it takes.
-    "
-    " Now, enter insert mode  at the start of the `xxx...`  line, and press `C-k C-k`
-    " to delete the rest of the line.
-    " Again, it takes several seconds.
-    "
-    " It  seems  the  issue  is `fold#md#fde#heading_depth()`  which,  for  some
-    " reason, is called more than 80000 times.
-    "
-    " I think that every time a character is inserted or removed while in insert
-    " mode, Vim has to recompute the folding level of each line above.
-    " That would explain why  the issue gets worse as the  number of lines above
-    " increases,  and  why it  gets  worse  as  the number  of  inserted/removed
-    " characters increases.
-    "}}}
-    " TODO: We should also listen to `WinLeave`.{{{
-    "
-    " In case we focus another window while in insert mode (maybe with the mouse).
-    " But then in `s:toggle_folding()`, we would  need to make sure we're insert
-    " mode before resetting `fdm` to 'manual':
-    "
-    "     if a:action is# 'disable' && mode() is# 'i'
-    "                                  ^^^^^^^^^^^^^^
-    " This would not work, probably because the function is called from command-line mode.
-    "
-    " ---
-    "
-    " More  generally, I  don't  trust  this code;  there  are probably  several
-    " special cases that it doesn't properly handle.
-    "
-    " Study the fastfold plugin: https://github.com/Konfekt/FastFold/blob/master/plugin/fastfold.vim
-    " Improve the code.
-    "}}}
-    au InsertEnter * call s:toggle_folding('disable')
-    au InsertLeave,WinLeave * call s:toggle_folding('restore')
-augroup END
-
-fu s:toggle_folding(action) abort
-    if a:action is# 'disable' && !exists('w:fdm_save')
-        let w:fdm_save = &l:fdm
-        setl fdm=manual
-    elseif a:action is# 'restore' && exists('w:fdm_save')
-        let &l:fdm = w:fdm_save
-        " Why?{{{
-        "
-        " In a markdown file, where `'fdl'` has the value `0`, enter insert mode
-        " to write the  first line of a  new fold (starting with  one or several
-        " `#`); as soon as you leave insert mode, the new fold is closed.
-        "
-        " This is annoying, because I expect to  be able to write sth inside the
-        " new fold immediately; instead, I have to first open it back.
-        " Let's open it automatically.
-        "}}}
-        norm! zv
-        unlet! w:fdm_save
-    endif
-endfu
-
 " Filetype Linter {{{2
 
 " TODO:
@@ -6898,9 +6862,9 @@ augroup trailing_whitespace
     " The `fu` snippet is automatically expanded (✔); the trailing whitespace is highlighted (✘).
     "}}}
     au User UltiSnipsExitLastSnippet if !has('nvim')
-        \ | exe 'au SafeState * ++once if mode() is# "n" | call s:trailing_whitespace(1) | endif'
+        \ |     exe 'au SafeState * ++once if mode() is# "n" | call s:trailing_whitespace(1) | endif'
         \ | else
-        \ | call timer_start(0, {-> mode() is# 'n' ? s:trailing_whitespace(1) : ''})
+        \ |     call timer_start(0, {-> mode() is# 'n' ? s:trailing_whitespace(1) : ''})
         \ | endif
 
     au InsertEnter * call s:trailing_whitespace(0)
@@ -7710,6 +7674,8 @@ endfu
 " Use syntax hl in `vim-qf` instead of complex mechanism using matches.
 " Also, in `vim-qf`, fix the fixme in the autocmd `my_qf`.
 "
+" Once done, try to use this mechanism for the issue we have in `s:ltag()`.
+"
 " 44 -
 "
 " Add syntax hl in toc menu, and make content more relevant in help toc.
@@ -8082,7 +8048,7 @@ endfu
 "     map <silent> ]g :call search('pat')<cr>
 "         !]g → command-line not redrawn
 "
-"     map <silent> ]g :call search('pat') <bar> exe 'norm! '.line('.').'g'<cr>
+"     map <silent> ]g :call search('pat') <bar> exe 'norm! '..line('.')..'g'<cr>
 "         !]g → command-line redrawn
 "
 " It seems `vim-textobj-user` doesn't suffer from this issue:
@@ -9316,6 +9282,47 @@ endfu
 "     ⇔
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
+"
+" 131 -
+"
+" Once Nvim supports `SafeState`, try to replace as many timers as possible:
+"
+"     call timer_start(0, {-> ...})
+"     →
+"     au SafeState * ++once ...
+"
+" Should we though?
+"
+" I mean, sometimes it helps:
+" https://vi.stackexchange.com/a/22414/17449
+" *prevents flickering*
+"
+" and sometimes, it doesn't work and you really need a timer:
+" https://github.com/vim/vim/issues/5243#issuecomment-555250613
+"
+" In general, it seems that `SafeState` executes a command earlier compared to a
+" timer (that would explain the behaviors observed in the previous 2 links).
+"
+" Do we want a delayed command to be executed earlier?
+" Naively, I would say yes. The longer a  command is delayed, the longer we stay
+" in an undesirable state...
+"
+" 132 -
+"
+" We refer to dirvish in several locations in `vim-fex`.
+" I don't like that.
+" dirvish and fex are two different plugins.
+"
+" 133 -
+"
+" When we execute `:noa windo "`, the inactive windows are unsquashed.
+" But not when we execute `:windo "`.
+" Does this mean that to fix the issue of "Zomg, my unfocused windows are unsquashed",
+" we don't have to use `win_execute()`, we can simply remove `:noa` somewhere?
+"
+" Update: Even if that's the case, I still prefer `win_execute()`.
+" Most of  the time, I  don't want `WinEnter`/`WinLeave`  to be fired  for every
+" window, just to fix the windows' height.
 
 
 

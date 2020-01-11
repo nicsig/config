@@ -208,7 +208,7 @@ endfu
 "     lg#motion#repeatable#make#is_repeating()
 "}}}
 
-" These mappings must be installed BEFORE `lg#motion#repeatable#make#all()`
+" These mappings must be installed *before* `lg#motion#repeatable#make#all()`
 " is invoked to make the motions repeatable.
 noremap <expr><unique> t  <sid>fts('t')
 noremap <expr><unique> T  <sid>fts('T')
@@ -288,16 +288,16 @@ fu s:fts(cmd) abort
     return ''
 endfu
 
-call lg#motion#repeatable#make#all({
-\        'mode':   '',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': 'F' ,  'fwd': 'f' },
-\                     {'bwd': 'SS',  'fwd': 'ss'},
-\                     {'bwd': 'T' ,  'fwd': 't' },
-\                   ],
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   '',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': 'F' ,  'fwd': 'f' },
+    \              {'bwd': 'SS',  'fwd': 'ss'},
+    \              {'bwd': 'T' ,  'fwd': 't' },
+    \            ],
+    \ })
 
 " Make other motions repeatable {{{1
 
@@ -322,51 +322,51 @@ call lg#motion#repeatable#make#all({
 " cycle through help topics relevant for last errors
 " we don't have a pair of motions to move in 2 directions,
 " so I just repeat the same keys for 'bwd' and 'fwd'
-call lg#motion#repeatable#make#all({
-\        'mode':    'n',
-\        'buffer':  0,
-\        'from':    expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': '!e',  'fwd': '!e'},
-\                   ]
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':    'n',
+    \ 'buffer':  0,
+    \ 'from':    expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': '!e',  'fwd': '!e'},
+    \            ]
+    \ })
 
 " fold more|less / move tabpage / rotate window
-call lg#motion#repeatable#make#all({
-\        'mode':   'n',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': '<f'    ,  'fwd': '>f'},
-\                     {'bwd': '<t'    ,  'fwd': '>t'},
-\                     {'bwd': '<c-w>R',  'fwd': '<c-w>r'},
-\                   ]
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   'n',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': '<f'    ,  'fwd': '>f'},
+    \              {'bwd': '<t'    ,  'fwd': '>t'},
+    \              {'bwd': '<c-w>R',  'fwd': '<c-w>r'},
+    \            ]
+    \ })
 
 " built-in motions
-call lg#motion#repeatable#make#all({
-\        'mode':   '',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': "['",  'fwd': "]'"},
-\                     {'bwd': '["',  'fwd': ']"'},
-\                     {'bwd': '[#',  'fwd': ']#'},
-\                     {'bwd': '[(',  'fwd': '])'},
-\                     {'bwd': '[*',  'fwd': ']*'},
-\                     {'bwd': '[/',  'fwd': ']/'},
-\                     {'bwd': '[@',  'fwd': ']@'},
-\                     {'bwd': '[M',  'fwd': ']M'},
-\                     {'bwd': '[S',  'fwd': ']S'},
-\                     {'bwd': '[]',  'fwd': ']['},
-\                     {'bwd': '[`',  'fwd': ']`'},
-\                     {'bwd': '[c',  'fwd': ']c'},
-\                     {'bwd': '[m',  'fwd': ']m'},
-\                     {'bwd': '[s',  'fwd': ']s'},
-\                     {'bwd': '[{',  'fwd': ']}'},
-\                     {'bwd': 'g,',  'fwd': 'g;'},
-\                   ],
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   '',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': "['",  'fwd': "]'"},
+    \              {'bwd': '["',  'fwd': ']"'},
+    \              {'bwd': '[#',  'fwd': ']#'},
+    \              {'bwd': '[(',  'fwd': '])'},
+    \              {'bwd': '[*',  'fwd': ']*'},
+    \              {'bwd': '[/',  'fwd': ']/'},
+    \              {'bwd': '[@',  'fwd': ']@'},
+    \              {'bwd': '[M',  'fwd': ']M'},
+    \              {'bwd': '[S',  'fwd': ']S'},
+    \              {'bwd': '[]',  'fwd': ']['},
+    \              {'bwd': '[`',  'fwd': ']`'},
+    \              {'bwd': '[c',  'fwd': ']c'},
+    \              {'bwd': '[m',  'fwd': ']m'},
+    \              {'bwd': '[s',  'fwd': ']s'},
+    \              {'bwd': '[{',  'fwd': ']}'},
+    \              {'bwd': 'g,',  'fwd': 'g;'},
+    \            ],
+    \ })
 
 " Why `nxo` for the mode? Why not simply an empty string?{{{
 "
@@ -389,99 +389,99 @@ call lg#motion#repeatable#make#all({
 "
 " As a result, `%` and `g%` would be broken in normal and visual mode.
 "}}}
-call lg#motion#repeatable#make#all({
-\        'mode':   'nxo',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': 'g%',  'fwd': '%'},
-\                   ],
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   'nxo',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': 'g%',  'fwd': '%'},
+    \            ],
+    \ })
 
 " custom motions
-call lg#motion#repeatable#make#all({
-\        'mode':   'n',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
-\                     {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
-\                     {'bwd': '[-'    ,  'fwd': ']-'},
-\                     {'bwd': '[a'    ,  'fwd': ']a'},
-\                     {'bwd': '[b'    ,  'fwd': ']b'},
-\                     {'bwd': '[f'    ,  'fwd': ']f'},
-\                     {'bwd': '[l'    ,  'fwd': ']l'},
-\                     {'bwd': '[q'    ,  'fwd': ']q'},
-\                     {'bwd': '[t'    ,  'fwd': ']t'},
-\                   ]
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   'n',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
+    \              {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
+    \              {'bwd': '[-'    ,  'fwd': ']-'},
+    \              {'bwd': '[a'    ,  'fwd': ']a'},
+    \              {'bwd': '[b'    ,  'fwd': ']b'},
+    \              {'bwd': '[f'    ,  'fwd': ']f'},
+    \              {'bwd': '[l'    ,  'fwd': ']l'},
+    \              {'bwd': '[q'    ,  'fwd': ']q'},
+    \              {'bwd': '[t'    ,  'fwd': ']t'},
+    \            ]
+    \ })
 
-call lg#motion#repeatable#make#all({
-\        'mode':   'n',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': '<l'    ,  'fwd': '>l'},
-\                     {'bwd': '<q'    ,  'fwd': '>q'},
-\                   ]
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   'n',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': '<l'    ,  'fwd': '>l'},
+    \              {'bwd': '<q'    ,  'fwd': '>q'},
+    \            ]
+    \ })
 
-call lg#motion#repeatable#make#all({
-\        'mode':   '',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': '[Z',  'fwd': ']Z'},
-\                     {'bwd': '[h',  'fwd': ']h'},
-\                     {'bwd': '[r',  'fwd': ']r'},
-\                     {'bwd': '[u',  'fwd': ']u'},
-\                     {'bwd': '[U',  'fwd': ']U'},
-\                     {'bwd': '[z',  'fwd': ']z'},
-\                     {'bwd': 'gk',  'fwd': 'gj'},
-\                   ]
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   '',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': '[Z',  'fwd': ']Z'},
+    \              {'bwd': '[h',  'fwd': ']h'},
+    \              {'bwd': '[r',  'fwd': ']r'},
+    \              {'bwd': '[u',  'fwd': ']u'},
+    \              {'bwd': '[U',  'fwd': ']U'},
+    \              {'bwd': '[z',  'fwd': ']z'},
+    \              {'bwd': 'gk',  'fwd': 'gj'},
+    \            ]
+    \ })
 
-call lg#motion#repeatable#make#all({
-\        'mode':   'n',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': '[e', 'fwd': ']e'},
-\                   ]
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   'n',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': '[e', 'fwd': ']e'},
+    \            ]
+    \ })
 
 " toggle settings
-call lg#motion#repeatable#make#all({
-\        'mode':   'n',
-\        'buffer': 0,
-\        'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
-\        'motions': [
-\                     {'bwd': '[oB',  'fwd': ']oB'},
-\                     {'bwd': '[oC',  'fwd': ']oC'},
-\                     {'bwd': '[oD',  'fwd': ']oD'},
-\                     {'bwd': '[oH',  'fwd': ']oH'},
-\                     {'bwd': '[oI',  'fwd': ']oI'},
-\                     {'bwd': '[oL',  'fwd': ']oL'},
-\                     {'bwd': '[oN',  'fwd': ']oN'},
-\                     {'bwd': '[oS',  'fwd': ']oS'},
-\                     {'bwd': '[oW',  'fwd': ']oW'},
-\                     {'bwd': '[oc',  'fwd': ']oc'},
-\                     {'bwd': '[od',  'fwd': ']od'},
-\                     {'bwd': '[of',  'fwd': ']of'},
-\                     {'bwd': '[og',  'fwd': ']og'},
-\                     {'bwd': '[oh',  'fwd': ']oh'},
-\                     {'bwd': '[oi',  'fwd': ']oi'},
-\                     {'bwd': '[ol',  'fwd': ']ol'},
-\                     {'bwd': '[on',  'fwd': ']on'},
-\                     {'bwd': '[oo',  'fwd': ']oo'},
-\                     {'bwd': '[op',  'fwd': ']op'},
-\                     {'bwd': '[oq',  'fwd': ']oq'},
-\                     {'bwd': '[os',  'fwd': ']os'},
-\                     {'bwd': '[ot',  'fwd': ']ot'},
-\                     {'bwd': '[ov',  'fwd': ']ov'},
-\                     {'bwd': '[ow',  'fwd': ']ow'},
-\                     {'bwd': '[oy',  'fwd': ']oy'},
-\                     {'bwd': '[oz',  'fwd': ']oz'},
-\                   ]
-\ })
+sil! call lg#motion#repeatable#make#all({
+    \ 'mode':   'n',
+    \ 'buffer': 0,
+    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'motions': [
+    \              {'bwd': '[oB',  'fwd': ']oB'},
+    \              {'bwd': '[oC',  'fwd': ']oC'},
+    \              {'bwd': '[oD',  'fwd': ']oD'},
+    \              {'bwd': '[oH',  'fwd': ']oH'},
+    \              {'bwd': '[oI',  'fwd': ']oI'},
+    \              {'bwd': '[oL',  'fwd': ']oL'},
+    \              {'bwd': '[oN',  'fwd': ']oN'},
+    \              {'bwd': '[oS',  'fwd': ']oS'},
+    \              {'bwd': '[oW',  'fwd': ']oW'},
+    \              {'bwd': '[oc',  'fwd': ']oc'},
+    \              {'bwd': '[od',  'fwd': ']od'},
+    \              {'bwd': '[of',  'fwd': ']of'},
+    \              {'bwd': '[og',  'fwd': ']og'},
+    \              {'bwd': '[oh',  'fwd': ']oh'},
+    \              {'bwd': '[oi',  'fwd': ']oi'},
+    \              {'bwd': '[ol',  'fwd': ']ol'},
+    \              {'bwd': '[on',  'fwd': ']on'},
+    \              {'bwd': '[oo',  'fwd': ']oo'},
+    \              {'bwd': '[op',  'fwd': ']op'},
+    \              {'bwd': '[oq',  'fwd': ']oq'},
+    \              {'bwd': '[os',  'fwd': ']os'},
+    \              {'bwd': '[ot',  'fwd': ']ot'},
+    \              {'bwd': '[ov',  'fwd': ']ov'},
+    \              {'bwd': '[ow',  'fwd': ']ow'},
+    \              {'bwd': '[oy',  'fwd': ']oy'},
+    \              {'bwd': '[oz',  'fwd': ']oz'},
+    \            ]
+    \ })
 

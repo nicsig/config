@@ -20,7 +20,7 @@ setl nowrap
 
 setl cul
 
-call lg#set_stl('%y%=%l ', '%y')
+sil! call lg#set_stl('%y%=%l ', '%y')
 
 let b:url = 'https://www.startpage.com/do/search?cat=&language=english&cmd=process_search&query='
 
