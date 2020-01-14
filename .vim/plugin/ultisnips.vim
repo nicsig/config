@@ -185,7 +185,8 @@ augroup my_ultisnips
     au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
 
     " let us know when a snippet is being expanded
-    au User MyFlags call statusline#hoist('buffer', '%#Visual#%{plugin#ultisnips#status()}', 52)
+    au User MyFlags call statusline#hoist('buffer', '%#Visual#%{plugin#ultisnips#status()}',
+        \ 55, expand('<sfile>')..':'..expand('<sflnum>'))
 
     " Inserting the output of a shell command in a snippet can cause visual artifacts.{{{
     "
@@ -256,9 +257,9 @@ augroup my_ultisnips
         " (which probably doesn't make sense, but I don't like errors).
         "}}}
         au VimEnter * if exists('#UltiSnips_AutoTrigger')
-        \ |     exe 'au! UltiSnips_AutoTrigger'
-        \ |     aug! UltiSnips_AutoTrigger
-        \ | endif
+            \ |     exe 'au! UltiSnips_AutoTrigger'
+            \ |     aug! UltiSnips_AutoTrigger
+            \ | endif
     endif
 augroup END
 

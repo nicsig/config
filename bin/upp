@@ -291,6 +291,8 @@ configure() { #{{{2
       --with-features=huge           \
       --with-luajit                  \
       --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
+    # TODO: Is `--with-python3-config-dir` still necessary?
+    # According to `./configure --help`, it's deprecated...
 
   # If you want the online documentation, add this option:{{{
   #

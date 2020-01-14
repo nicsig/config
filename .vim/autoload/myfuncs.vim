@@ -882,9 +882,9 @@ fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     " possible syntax groups (e.g. `shHereDoc03`).
     "}}}
     let l:Rep = {->
-    \ match(map(synstack(line('.'), col('.')), {_,v -> synIDattr(v, 'name')}), 'heredoc') != -1
-    \ ? submatch(0)
-    \ : submatch(1)..repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))}
+        \ match(map(synstack(line('.'), col('.')), {_,v -> synIDattr(v, 'name')}), 'heredoc') != -1
+        \ ? submatch(0)
+        \ : submatch(1)..repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))}
     " We need the loop because there may be several tabs consecutively.{{{
     "
     " If that happens, a single substitution would fail to replace all of them, for

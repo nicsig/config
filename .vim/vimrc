@@ -348,6 +348,7 @@ augroup delay_slow_call
         CursorHold
         InsertEnter
         WinEnter
+        CmdWinEnter
         BufNewFile
         BufReadPost
         BufWritePost
@@ -1394,7 +1395,13 @@ let g:is_bash = 1
 " join {{{2
 
 " Don't insert two spaces after a '.', '?' and '!' with a join command.
-set nojoinspaces
+
+" Update: Actually, I like how  in the user manual 2 spaces  are added between a
+" final dot and the next non-whitespace.  It  makes it easier to find when a new
+" sentence starts.
+" In fact, I think it's a widely adopted convention.  See `man man` and `man par`.
+
+"     set nojoinspaces
 
 " lazyredraw {{{2
 " What does it do?{{{
@@ -2492,7 +2499,10 @@ endif
 "    - beyond the last char on a line
 "
 " Useful to select a rectangle out of irregular (different lengths) lines.
-set virtualedit=block
+if has('vim_starting')
+    set ve=block
+    const g:orig_virtualedit = &ve
+endif
 
 " wildignore(case) {{{2
 
@@ -4443,13 +4453,13 @@ fu s:fix_display() abort
     "
     " We could also be more radical, and execute:
     "
-    "     :syntax sync fromstart
+    "     :syn sync fromstart
     "
     " But after we execute  it in our `vimrc`, every time  we source the latter,
     " we experience lag.
     "}}}
-    syntax sync minlines=200
-    syntax sync maxlines=400
+    syn sync minlines=200
+    syn sync maxlines=400
 
     call winrestview(view)
 endfu
@@ -4499,8 +4509,8 @@ fu s:fix_macro() abort
         \ | unlet! s:fix_macro_c
     augroup END
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
-    nmap <buffer><nowait><silent>  <cr>  q
-    nmap <buffer><nowait><silent>  ZZ    q
+    nmap <buffer><nowait><silent> <cr> q
+    nmap <buffer><nowait><silent> ZZ q
     let line = substitute(getreg(c), "\<c-m>\<c-j>$", "\<c-m>", '')
     call setline(1, line)
     norm! 1|0f'
@@ -9323,6 +9333,57 @@ endfu
 " Update: Even if that's the case, I still prefer `win_execute()`.
 " Most of  the time, I  don't want `WinEnter`/`WinLeave`  to be fired  for every
 " window, just to fix the windows' height.
+"
+" 134 -
+"
+"     $ vim
+"     :h
+"     C-k
+"     qq
+"     ll
+"     C-j
+"     ll
+"     q
+"     :reg q
+"     c  "q   ll^@llq~
+"                   ^
+"                   ✘
+"
+" I think the issue is due to the existence of a custom mapping on `q`.
+" When you press `q`, Vim probably detects that it's not the default `q` command
+" which terminates a recording; so it records the keypress.
+" It turns out that the mapping will – in the end – press the default `q` command.
+"
+" Solution:
+"
+" In `lg#window#quit()`, replace this line:
+"
+"     if reg_recording() isnot# '' | return feedkeys('q', 'in')[-1] | endif
+"
+" with this block:
+"
+"     let regname = reg_recording()
+"     if regname isnot# ''
+"         call feedkeys('q', 'in')[-1]
+"         call timer_start(0, {-> setreg(regname, substitute(getreg(regname), 'q$', '', ''), 'c')})
+"         return ''
+"     endif
+"
+" Should we wrap that in a `lg#` function and use it wherever we've used a local `q` mapping?
+" Note that I don't think that a trailing  `q` has any effect in a recording; at
+" least, it doesn't start a new recording.
+" I  think  that the  special  meaning  of `q`  is  disabled  while replaying  a
+" recording; maybe  because it would  cause an infinite recursion  when pressing
+" `q` during a recording.
+"
+" 135 -
+"
+" Remove all invocations of `setenv()` and `getenv()`.
+" Use global variables  instead; don't write them in uppercase  though; we don't
+" want them to be saved/restored via viminfo.
+"
+" Document somewhere how `[gs]etenv()` can be used.
+
 
 
 
