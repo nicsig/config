@@ -4533,6 +4533,22 @@ __expand_aliases() {
 zle -N __expand_aliases
 bindkey '\ee' __expand_aliases
 
+# FIXME:
+#
+#     $ alias foo='virtualbox &!'
+#     # insert 'foo'
+#     # press `M-e`
+#     $ virtualbox &|~
+#                   ^
+#                   ✘
+#                             v
+#     $ alias foo='virtualbox \&!'
+#     # insert 'foo'
+#     # press `M-e`
+#     $ virtualbox \&!~
+#                  ^ ^
+#                  ? ✔
+
 # M-m           normalize_command_line {{{3
 
 # TODO:

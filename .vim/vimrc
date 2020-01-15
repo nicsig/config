@@ -4808,19 +4808,18 @@ fu s:horizontal_rules_textobject(adverb) abort
     call search(start, 'bcW')
     norm! V
     call search(end, 'W')
-    if a:adverb is# 'around'
-        if &ft is# 'markdown'
-            if getline(line('.')+1) is# '---'
-                norm! j
-            elseif getline(line('v')-1) is# '---'
-                norm! oko
-            endif
-        else
-            if getline(line('.')+1) =~# '^\s*'..comment..'\s*---$'
-                norm! j
-            elseif getline(line('v')-1) =~# '^\s*'..comment..'\s*---$'
-                norm! oko
-            endif
+    if a:adverb isnot# 'around' | return | endif
+    if &ft is# 'markdown'
+        if getline(line('.')+1) is# '---'
+            norm! j
+        elseif getline(line('v')-1) is# '---'
+            norm! oko
+        endif
+    else
+        if getline(line('.')+1) =~# '^\s*'..comment..'\s*---$'
+            norm! j
+        elseif getline(line('v')-1) =~# '^\s*'..comment..'\s*---$'
+            norm! oko
         endif
     endif
 endfu
@@ -9383,7 +9382,6 @@ endfu
 " want them to be saved/restored via viminfo.
 "
 " Document somewhere how `[gs]etenv()` can be used.
-
 
 
 
