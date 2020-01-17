@@ -349,7 +349,6 @@ augroup delay_slow_call
         InsertEnter
         WinEnter
         CmdWinEnter
-        BufNewFile
         BufReadPost
         BufWritePost
         QuickFixCmdPost
@@ -1256,7 +1255,7 @@ fu s:inex() abort
     "     ${HOME}/bin/README.md
     "     ^
     "}}}
-    let pat = '\m\C${\f\+}'..'\V'..v:fname..'\|${'..v:fname..'}\f\+\|\%'..col('.')..'c${\f\+}\f\+'
+    let pat = '\m\C${\f\+}'..'\V'..v:fname..'\m\|${'..v:fname..'}\f\+\|\%'..col('.')..'c${\f\+}\f\+'
     "                          │
     "                          └ `v:fname` could contain a tilde
     let cursor_after = '\m\%(.*\%'..col('.')..'c\)\@='
@@ -3213,8 +3212,8 @@ nno <silent> ]j :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myf
 " g                   (prefix) {{{3
 " g^ g$       first/last tabpage {{{4
 
-nno <silent> g^  :<c-u>1tabnext<cr>
-nno <silent> g$  :<c-u>$tabnext<cr>
+nno <silent> g^ :<c-u>1tabnext<cr>
+nno <silent> g$ :<c-u>$tabnext<cr>
 
 " gV  g C-v   select last changed text {{{4
 
@@ -4604,13 +4603,23 @@ nno cg# g#``/<up><cr>``cgN
 nmap crg  <plug>(MakeDigraph)
 nmap crgg <plug>(MakeDigraph)_
 
-" dg/  dv/            delete all lines containing/excluding search register {{{3
+" d[gv]...            delete all lines containing/excluding some pattern {{{3
 
-nno <silent> dg/ :<c-u>g//d_<cr>:sil update<cr>
-nno <silent> dv/ :<c-u>v//d_<cr>:sil update<cr>
+nno <silent> dg<space> :<c-u>call myfuncs#delete_matching_lines('empty')<cr>
+xno <silent> mg<space> :<c-u>call myfuncs#delete_matching_lines('empty', 'vis')<cr>
 
-xno <silent> mg/ :g//d_<cr>:sil update<cr>
-xno <silent> mv/ :v//d_<cr>:sil update<cr>
+nno <silent> dgz :<c-u>call myfuncs#delete_matching_lines('folds')<cr>
+xno <silent> mgz :<c-u>call myfuncs#delete_matching_lines('folds', 'vis')<cr>
+
+nno <silent> dg" :<c-u>call myfuncs#delete_matching_lines('comments')<cr>
+nno <silent> dv" :<c-u>call myfuncs#delete_matching_lines('comments', 'reverse')<cr>
+xno <silent> mg" :<c-u>call myfuncs#delete_matching_lines('comments', 'vis')<cr>
+xno <silent> mv" :<c-u>call myfuncs#delete_matching_lines('comments', 'vis+reverse')<cr>
+
+nno <silent> dg/ :<c-u>call myfuncs#delete_matching_lines('@/')<cr>
+nno <silent> dv/ :<c-u>call myfuncs#delete_matching_lines('@/', 'reverse')<cr>
+xno <silent> mg/ :<c-u>call myfuncs#delete_matching_lines('@/', 'vis')<cr>
+xno <silent> mv/ :<c-u>call myfuncs#delete_matching_lines('@/', 'vis+reverse')<cr>
 
 " dr                  replace without yank {{{3
 
@@ -4847,9 +4856,9 @@ ono <silent> af :<c-u>norm Vaf<cr>
 
 fu s:textobj_func(inside) abort
     if search('^\s*fu\%[nction]', 'bcW')
-        k<
+        norm! m<
         call search('^\s*endf\%[unction]\s*$', 'eW')
-        k>
+        norm! m>
         exe 'norm! gv$'..(a:inside ? 'koj' : '')
         " we want a linewise selection no matter the original visual mode
         exe (mode() isnot# 'V' ? 'norm! V' : '')
@@ -8601,29 +8610,6 @@ endfu
 "
 " 87 -
 "
-" Could  we use  Vim packages  to eliminate  the separation  of plugins'  config
-" between `~/.vim/plugin` and `~/.vim/after/plugin/`?
-"
-" > What  I like  about packadd  is  that **you  can actually  put the  before**
-" > **and  after  config**  and  the  loading of  the  plugin  **in  a  single**
-" > **file**.  That's because packadd loads the plugin right when it's called as
-" > apposed to most plugin managers that collect the list of all plugins to load
-" > before loading  them.  (For  that to  work plugins need  to be  installed in
-" > a  pack/**/opt  directory  i.e.  when  using  the  minpac  package  manager:
-" > minpac#add(url, {'type': 'opt'}))
-"
-" > Oh that's  a neat idea. I  think at  the moment though  I prefer to  see all
-" > external plugins that will be loaded  in the one place. I use :packadd! (the
-" > ! version) which adds the plugins to  the runtime path but doesn't load them
-" > immediately. Also, that  way the plugins are  loaded when they expect  to be
-" > loaded (ie. in the usual place in the startup order).
-"
-" Source:
-" https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/eboufag/
-" https://www.reddit.com/r/vim/comments/a5ngap/debugging_your_vim_config_vimways_1224/ebow7d5/
-"
-" 88 -
-"
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
@@ -8632,7 +8618,7 @@ endfu
 " I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
 " instead `H` and `L`.
 "
-" 89 -
+" 88 -
 "
 " We don't version control our pdfs in `~/wiki`.
 " Suppose one of our  notes has a link to a local pdf,  and we restore our notes
@@ -8642,7 +8628,7 @@ endfu
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
 "
-" 90 -
+" 89 -
 "
 " Study this (Neovim):
 "
@@ -8654,12 +8640,12 @@ endfu
 "
 " Source: https://vi.stackexchange.com/a/18729/17449
 "
-" 91 -
+" 90 -
 "
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
 "
-" 92 -
+" 91 -
 "
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
@@ -8667,13 +8653,13 @@ endfu
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 93 -
+" 92 -
 "
 " Watch these videos about using Vim as a diff tool, and as a merge tool:
 " https://www.youtube.com/watch?v=zEah_HDpHzc
 " https://www.youtube.com/watch?v=VxpCgQyUXlI
 "
-" 94 -
+" 93 -
 "
 " Refactor your `]q` &friends mapping, so that they call `:[cl]above` and `:[cl]below`.
 "
@@ -8696,7 +8682,7 @@ endfu
 " arbitrary qfl in the stack, via a count.
 " Once the patch has been ported to Nvim, use this command and get rid of `:CC`, `:LL`.
 "
-" 95 -
+" 94 -
 "
 " Document the fact that  you need to put `<esc>` at the start  of the rhs of an
 " `:ono` mapping if it presses `v:operator`.
@@ -8735,7 +8721,7 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 96 -
+" 95 -
 "
 " We have too many comments in this file about the bracketed paste mode.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
@@ -8745,7 +8731,7 @@ endfu
 "
 " https://github.com/neovim/neovim/pull/4448
 "
-" 97 -
+" 96 -
 "
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
@@ -8755,7 +8741,7 @@ endfu
 " Also, `:verbose syn list ...` doesn't print the script location from which the
 " syntax group was installed. Maybe ask for an improvement of `:verb`.
 "
-" 98 -
+" 97 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -8771,7 +8757,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 99 -
+" 98 -
 "
 " We really need a library function to get a comment leader.
 "
@@ -8820,7 +8806,7 @@ endfu
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 "
-" 100 -
+" 99 -
 "
 " We often make this error:
 "
@@ -8836,20 +8822,20 @@ endfu
 " Other Idea: Make `M-b` inspect the 2 previous characters.
 " If they are a pair of brackets, make it move the cursor as if `C-b` had been pressed.
 "
-" 101 -
+" 100 -
 "
 " In a markdown file, `gc` should behave slightly differently.
 " It  should  make sure  there  are  4 spaces  between  `>`  and the  first  non
 " whitespace on each line; and reformat the quote with `par(1)`.
 " Because that's what we do all the time; so better automate it.
 "
-" 102 -
+" 101 -
 "
 " In a fugitive buffer, when we need to  stage many files, I would like to press
 " `-` very fast. We can't because – for  some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
 "
-" 103 -
+" 102 -
 "
 " We've just had an issue in `vim-search` because we used `==` instead of `==#`.
 " Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
@@ -8857,7 +8843,7 @@ endfu
 "
 "     vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
 "
-" 104 -
+" 103 -
 "
 " The  interface of  your plugins  and custom  config should  be simplified  and
 " exposed; review every custom mapping/command.
@@ -8877,7 +8863,7 @@ endfu
 "        If the help of a command gets too big, you could spread it across
 "        several pages, using a `-help {keyword}` argument.
 "
-" 105 -
+" 104 -
 "
 " Should we add the guard `if $MYVIMRC is# '' | finish | endif` in all the files
 " under `~/.vim/{after/}plugin`?
@@ -8888,7 +8874,7 @@ endfu
 " `*/after/ftplugin/{&ft}.vim`?
 " https://github.com/andymass/vim-matchup/commit/0b780e9ae12ba913742356f4b7cedc52d3a15220
 "
-" 106 -
+" 105 -
 "
 " Document a few things about debugging with breakpoints.
 "
@@ -8958,7 +8944,7 @@ endfu
 " the sourcing of the autoloaded directory).
 " Now you can run `:breakadd func <snr>123_function_name`.
 "
-" 107 -
+" 106 -
 "
 " In xterm, we may now be able to use the alt modifier in mappings without nasty
 " side-effects:
@@ -8966,7 +8952,7 @@ endfu
 " `:h modifyOtherKeys`
 " https://github.com/vim/vim/issues/4974#issuecomment-541431801
 "
-" 108 -
+" 107 -
 "
 " Vim saves anything typed on the  command-line, regardless of how we've left it
 " (including when we've pressed `C-c` or `Esc`).
@@ -8985,7 +8971,7 @@ endfu
 "     /the
 "     " press Escape: the cursor jumps to the next occurrence of `the`
 "
-" 109 -
+" 108 -
 "
 " Press `é`: it capitalizes the next word.
 " Also, I don't know how, but we often capitalize a word by accident (in a different way).
@@ -8993,7 +8979,7 @@ endfu
 " Or use xterm, which now supports  meta sequences OOTB, and doesn't suffer from
 " these kind of issues.
 "
-" 110 -
+" 109 -
 "
 " Document somewhere that to debug Nvim, you should not do this *from Vim*:
 "
@@ -9036,7 +9022,7 @@ endfu
 "
 "     source $HOME/.vim/vimrc
 "
-" 111 -
+" 110 -
 "
 " Replace a long `b:undo_ftplugin` with a simple function call:
 "
@@ -9052,7 +9038,7 @@ endfu
 "    - settings are properly reset when we change the filetype
 "    - function implementing the undo is in the right file
 "
-" 112 -
+" 111 -
 "
 " Look for `:windo` and `:wincmd` everywhere.
 "
@@ -9062,7 +9048,7 @@ endfu
 " Once Nvim  supports `win_execute()`, remove  the `lg#` prefix in  the function
 " calls.
 "
-" 113 -
+" 112 -
 "
 " `C-l` works in the  pattern field of a `:s` and  `:g` command (provided `'is'`
 " is set), but not in the one of a `:vim` command or `:helpg`/`:lh` (`:h /^l`).
@@ -9094,7 +9080,7 @@ endfu
 " Temporarily replace `:vim` by `:%s` (the  percent is important if the text you
 " want to copy is not on the current line).
 "
-" 114 -
+" 113 -
 "
 " Review all the custom motions you've installed.
 " For each  of them, make  sure you can  jump back with  `C-o` (set mark  `'` on
@@ -9103,12 +9089,12 @@ endfu
 " Actually, maybe not for all of them.
 " Think about which motions should add an entry in the jumplist.
 "
-" 115 -
+" 114 -
 "
 " Install a `=rm`  mapping in Vim files to refactor  nested function calls using
 " the method call operator (`->`).
 "
-" 116 -
+" 115 -
 "
 "     $ cd ; vim
 "     :echo getcwd() → /home/user
@@ -9118,7 +9104,7 @@ endfu
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
 "
-" 117 -
+" 116 -
 "
 " Review all custom text-objects: make sure  they all position the cursor on the
 " end of  the selection, to  be consistent  with what Vim  seems to do  with its
@@ -9133,7 +9119,7 @@ endfu
 " I guess  that it  means that  all our text-objects  should be  implemented via
 " `<expr>` mappings... Otherwise, the output of `mode(1)` is unreliable.
 "
-" 118 -
+" 117 -
 "
 " Every time you've used sth like `norm! %` in the past, it was probably wrong.
 " You should have used sth like:
@@ -9164,7 +9150,7 @@ endfu
 " Enough is enough; we've removed `vim-matchit`, and installed `vim-matchup`.
 " Read the documentation of the latter.
 "
-" 119 -
+" 118 -
 "
 " Search `$MYVIMRC` everywhere; check whether the code works as intended in Nvim.
 " Search `.vim/vimrc` everywhere; check whether we should have used `$MYVIMRC`.
@@ -9172,7 +9158,7 @@ endfu
 " What should  we do  in Nvim? Use `~/.vim/vimrc`,  `~/.config/nvim/init.vim` or
 " both (if so how)?
 "
-" 120 -
+" 119 -
 "
 " `:vimgrep` is slow in Nvim.
 "
@@ -9191,7 +9177,7 @@ endfu
 "
 "     syn off | filetype plugin indent off
 "
-" 121 -
+" 120 -
 "
 " Every time  we've "changed"  a buffer  in a way  that the  line count  did not
 " change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
@@ -9209,13 +9195,13 @@ endfu
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 "
-" 122 -
+" 121 -
 "
 " When using the `gc` operator to comment  a line starting with a backslash in a
 " Vimscript file, maybe we  should not add a space between  `"` and `\`, because
 " we sometimes want to temporarily comment a continuation line.
 "
-" 123 -
+" 122 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
 " commented line.
@@ -9237,7 +9223,7 @@ endfu
 "
 "     " ~/.vim/plugged/vim-brackets/autoload/brackets.vim
 "
-" 124 -
+" 123 -
 "
 " I'm fed up with codespans being broken when formatting with `gq`.
 "
@@ -9250,27 +9236,27 @@ endfu
 " Also: Same issue with italics / bold style.
 " Tweak syntax regexes?
 "
-" 125 -
+" 124 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
 "
-" 126 -
+" 125 -
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
 "
-" 127 -
+" 126 -
 "
 " Read:
 " https://vimways.org/2019/indentation-without-dents/ (see `~/.vim/indent/[my]matlab.vim`, `~/Desktop/m.m`)
 " https://vimways.org/2019/a-test-to-attest-to/
 "
-" 128 -
+" 127 -
 "
 " Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
 " (to improve performance...)
 "
-" 129 -
+" 128 -
 "
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
@@ -9279,7 +9265,7 @@ endfu
 "
 " Note that `readdir()` has not been ported to Nvim yet.
 "
-" 130 -
+" 129 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -9292,7 +9278,7 @@ endfu
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 "
-" 131 -
+" 130 -
 "
 " Once Nvim supports `SafeState`, try to replace as many timers as possible:
 "
@@ -9316,13 +9302,13 @@ endfu
 " Naively, I would say yes. The longer a  command is delayed, the longer we stay
 " in an undesirable state...
 "
-" 132 -
+" 131 -
 "
 " We refer to dirvish in several locations in `vim-fex`.
 " I don't like that.
 " dirvish and fex are two different plugins.
 "
-" 133 -
+" 132 -
 "
 " When we execute `:noa windo "`, the inactive windows are unsquashed.
 " But not when we execute `:windo "`.
@@ -9333,7 +9319,7 @@ endfu
 " Most of  the time, I  don't want `WinEnter`/`WinLeave`  to be fired  for every
 " window, just to fix the windows' height.
 "
-" 134 -
+" 133 -
 "
 "     $ vim
 "     :h
@@ -9375,7 +9361,7 @@ endfu
 " recording; maybe  because it would  cause an infinite recursion  when pressing
 " `q` during a recording.
 "
-" 135 -
+" 134 -
 "
 " Remove all invocations of `setenv()` and `getenv()`.
 " Use global variables  instead; don't write them in uppercase  though; we don't

@@ -394,7 +394,6 @@ sil! call lg#motion#repeatable#make#all({
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': 'g%',  'fwd': '%'},
     \              {'bwd': '[-',  'fwd': ']-'},
     \            ],
     \ })

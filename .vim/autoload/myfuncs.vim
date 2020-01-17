@@ -77,6 +77,7 @@ fu myfuncs#op_replace_without_yank(type) abort
         " edit.
         " It won't work, because the visual selection has been altered.
         "}}}
+        " TODO: review the previous comment; I don't understand how it's relevant to the current function.
         let visual_marks_save = [getpos("'<"), getpos("'>")]
 
         " TODO:
@@ -132,6 +133,12 @@ fu myfuncs#op_replace_without_yank(type) abort
         let &cb  = cb_save
         let &sel = sel_save
         call lg#reg#restore(['"', s:replace_reg_name])
+        " TODO: Is  it  possible  that  the   previous  paste  has  removed  the
+        " characters where the visual marks were originally?
+        " Could the positions of the saved marks be invalid?
+        " If so, would it raise an error?
+        " Should  we check  the validity  of  these positions  before trying  to
+        " restore the marks?
         call setpos("'<", visual_marks_save[0])
         call setpos("'>", visual_marks_save[1])
     endtry
@@ -417,6 +424,52 @@ fu myfuncs#box_destroy(type) abort
     exe 'norm! '..lnum1..'Gj_'
 endfu
 
+fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
+    let view = winsaveview() | let fen_save = &l:fen | setl nofen
+
+    " Purpose:{{{
+    "
+    " The deletions will leave the cursor on  the line below the last line where
+    " a match was found.   This line may be far away  from our current position.
+    " This  is distracting;  let's try  to stay  as close  as possible  from our
+    " current position.
+    "
+    " To achieve this goal, we need to find the nearest character which won't be
+    " deleted, and set a mark on it.
+    "}}}
+    let pos = getcurpos()
+    let global = a:0 && a:1 =~# '\<reverse\>' ? 'v' : 'g'
+    let cml = '\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')..'\m'
+    let to_search = {
+        \ 'empty': ['^\s*$', '^'],
+        \ 'folds': ['{{\%x7b\d*\s*$', '^'],
+        \ 'comments': ['^\s*'..cml, '^\%(\s*'..cml..'\)\@!'],
+        \ '@/': [@/, '^\%(.*'..@/..'\m\)\@!'],
+        \ }
+    let wont_be_deleted = to_search[a:to_delete][global is# 'g']
+    " necessary if the pattern matches on the current line, but the match starts
+    " before our current position
+    exe 'norm! '..(pos[1] == 1 ? '1|' : 'k$')
+    call search(wont_be_deleted, pos[1] == 1 ? 'c' : '')
+    " if the match is on our original line, restore the column position
+    if line('.') == pos[1] | call setpos('.', pos) | endif
+    norm! m'
+    call setpos('.', pos)
+
+    let mods = 'keepj keepp '
+    let range = a:0 && a:1 =~# '\<vis\>' ? '*' : '%'
+    let pat = to_search[a:to_delete][0]
+    let cmd = a:to_delete is# 'folds' ? 'norm! zd' : 'd_'
+    exe mods..range..global..'/'..pat..'/'..cmd
+    if a:to_delete is# 'folds' | sil exe mods..range..'s/\s\+$//' | endif
+
+    sil update
+    let &l:fen = fen_save | call winrestview(view)
+    " `sil!` because if the pattern was so broad that all the lines were removed,
+    " the original line doesn't exist anymore, and the `'` mark is invalid
+    sil! norm! `'zv
+endfu
+
 fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
     if a:option is# '-h' || a:option is# '--help'
         let usage =<< trim END
@@ -552,10 +605,10 @@ fu myfuncs#dump_wiki(url) abort "{{{1
         call map(files, {_,v -> substitute(v, '^\C\V'..tempdir..'/', '', '')})
         call filter(files, {_,v -> v !~# '\c_\=footer\%(\.md\)\=$'})
 
-        mark x
+        norm! mx
         call append('.', files+[''])
         exe 'norm! '..(len(files)+1)..'j'
-        mark y
+        norm! my
 
         sil keepj keepp 'x+,'y-s/^/# /
         sil keepj keepp 'x+,'y-g/^./exe 'keepalt r '..tempdir..'/'..getline('.')[2:]
