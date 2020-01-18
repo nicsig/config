@@ -442,7 +442,6 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     let cml = '\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')..'\m'
     let to_search = {
         \ 'empty': ['^\s*$', '^'],
-        \ 'folds': ['{{\%x7b\d*\s*$', '^'],
         \ 'comments': ['^\s*'..cml, '^\%(\s*'..cml..'\)\@!'],
         \ '@/': [@/, '^\%(.*'..@/..'\m\)\@!'],
         \ }
@@ -459,8 +458,7 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     let mods = 'keepj keepp '
     let range = a:0 && a:1 =~# '\<vis\>' ? '*' : '%'
     let pat = to_search[a:to_delete][0]
-    let cmd = a:to_delete is# 'folds' ? 'norm! zd' : 'd_'
-    exe mods..range..global..'/'..pat..'/'..cmd
+    exe mods..range..global..'/'..pat..'/d_'
     if a:to_delete is# 'folds' | sil exe mods..range..'s/\s\+$//' | endif
 
     sil update

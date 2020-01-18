@@ -1144,7 +1144,7 @@ augroup END
 " of 'foldlevel' in any window.
 set foldlevelstart=0
 
-" do NOT open folds when jumping with "(", "{", "[[", "[{", etc.
+" do *not* open folds when jumping with "(", "{", "[[", "[{", etc.
 set foldopen-=block
 
 " Close a fold even if it doesn't contain any line.
@@ -2902,9 +2902,9 @@ fu s:c_m() abort
         let seq = "\<c-y>"
         let menu = get(get(get(complete_info(['items']), 'items', []), 0, {}), 'menu', '')
         if menu is# '[f]'
-            let seq .= "\<c-r>=completion#file#complete()\<cr>"
+            let seq ..= "\<c-r>=completion#file#complete()\<cr>"
         elseif menu[:5] is# '[snip]'
-            let seq .= "\<c-r>=UltiSnips#ExpandSnippet()\<cr>"
+            let seq ..= "\<c-r>=UltiSnips#ExpandSnippet()\<cr>"
         endif
         return seq
     endif
@@ -4605,11 +4605,11 @@ nmap crgg <plug>(MakeDigraph)_
 
 " d[gv]...            delete all lines containing/excluding some pattern {{{3
 
+" If you need to delete folds, use `zd`, `zD`, or `zE`.
+" They also work in visual mode (except `zE`).
+
 nno <silent> dg<space> :<c-u>call myfuncs#delete_matching_lines('empty')<cr>
 xno <silent> mg<space> :<c-u>call myfuncs#delete_matching_lines('empty', 'vis')<cr>
-
-nno <silent> dgz :<c-u>call myfuncs#delete_matching_lines('folds')<cr>
-xno <silent> mgz :<c-u>call myfuncs#delete_matching_lines('folds', 'vis')<cr>
 
 nno <silent> dg" :<c-u>call myfuncs#delete_matching_lines('comments')<cr>
 nno <silent> dv" :<c-u>call myfuncs#delete_matching_lines('comments', 'reverse')<cr>
@@ -8391,6 +8391,8 @@ endfu
 " OTOH, if  you omit `:keepj` for  *any* edition performed by  your opfunc, then
 " *one* entry is added in the changelist.
 "
+" tommy uses it here: https://vi.stackexchange.com/a/8748/17449
+"
 " ---
 "
 " Dirvish uses `keepj` for `tabnext` and `wincmd w`:
@@ -9368,6 +9370,7 @@ endfu
 " want them to be saved/restored via viminfo.
 "
 " Document somewhere how `[gs]etenv()` can be used.
+
 
 
 
