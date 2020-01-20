@@ -1,6 +1,42 @@
 fu plugin#ultisnips#cancel_expansion() abort "{{{1
     if !get(g:, 'expanding_snippet', 0) | return | endif
-    py3 UltiSnips_Manager._current_snippet_is_done()
+    try
+        py3 UltiSnips_Manager._current_snippet_is_done()
+    " Vim(py3):IndexError: pop from empty list
+    catch
+        " This fixes the following issue:{{{
+        "
+        " Install this snippet:
+        "
+        "     snippet cc "color property" bm
+        "     color: $1`!p snip.rv = complete(t[1], ['red', 'green', 'blue'])`
+        "     $0
+        "     endsnippet
+        "
+        " If the snippet file imports python code, make sure to comment the relevant block:
+        "
+        "     global !p
+        "     from snippet_helpers import *
+        "     endglobal
+        "
+        " Now,  try to  expand the  tab  trigger `cc`);  it fails,  and a  stack
+        " trace is  displayed in  a new  split.  This  is expected,  because the
+        " `complete()` function is not defined.
+        "
+        " But the  `[Ulti]` flag  remains displayed in  the status  line because
+        " `g:expanding_snippet` is still set.
+        " Because  of that,  when  you  insert a  trailing  space, it's  wrongly
+        " highlighted even while you're insert mode.
+        " Besides, if  you get back  to the file where  you tried to  expand the
+        " snippet, and press `:` to enter the command-line, you get this error:
+        "
+        "     Error detected while processing function plugin#ultisnips#cancel_expansion:
+        "     line    2:
+        "     Traceback (most recent call last):
+        "}}}
+        unlet! g:expanding_snippet
+        sil! nunmap <buffer> :
+    endtry
     redraws
     return ''
 endfu
