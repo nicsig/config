@@ -544,44 +544,18 @@ fu s:Underlined() abort "{{{3
     " So, we reset the  HG with the `underline` style, and the  colors of the HG
     " `Conditional` (because this one is blue).
     "}}}
-
-    let cmd = 'hi Underlined term=underline cterm=underline gui=underline '
-        \ ..substitute(split(execute('hi Conditional'), '\n')[0], '.*xxx\|links to.*', '', 'g')
-        "              │{{{
-        "              └ When we start Vim with `$ sudo vim`, the output of `execute('hi ...')`
-        "                contains 2 lines instead of 1 (the second line contains `Last set from ...`).
-        "}}}
-
-    " Why this second substitution?{{{
-    "
-    " When starting Vim in debug mode `$ vim -D ...`, this error is raised:
-    "
-    "     E416: missing equal sign: line 123: hi Conditional~
-    "
-    " This is because, in this particular case, the value of `cmd` contains noise at the end:
-    "
-    "     hi Underlined term=underline cterm=underline gui=underline line 15: hi Conditional
-    "                                                                ^^^^^^^^^^^^^^^^^^^^^^^
-    "}}}
-    exe substitute(cmd, 'line\s\+\d\+:.*', '', '')
+    let Conditional = filter(split(execute('hi Conditional'), '\n'), {_,v -> v =~# '^Conditional' })[0]
+    exe 'hi '..substitute(Conditional, '^Conditional\|xxx\|\<\%(term\|cterm\|gui\)=\S*',
+        \ {m -> m[0] is# 'Conditional' ? 'Underlined' : ''}, 'g')
+        \ ..' term=underline cterm=underline gui=underline'
 endfu
 
 fu s:CommentUnderlined() abort "{{{3
     " define the `CommentUnderlined` HG (useful for urls in comments)
-
-    " Why the `:\s\+hi\s\+` and the `line\s*\d\+`?{{{
-    "
-    " When we start with `-V15/tmp/log`, the output of `hi Comment` contains more noise.
-    "}}}
-    let Comment = substitute(execute('hi Comment'),
-        \ '\n\|xxx\|:\s\+hi\s\+\|line\s*\d\+\|Last set from.*', '', 'g')
-    let CommentUnderlined = substitute(Comment, 'Comment', 'CommentUnderlined', '')
-    let CommentUnderlined =
-        \ substitute(CommentUnderlined, '\m\C\<\%(term\|cterm\|gui\)=\S*', '', 'g')
-    let CommentUnderlined =
-        \ substitute(CommentUnderlined, '$', ' term=underline cterm=underline gui=underline', '')
-
-    exe 'hi '..CommentUnderlined
+    let Comment = filter(split(execute('hi Comment'), '\n'), {_,v -> v =~# '^Comment' })[0]
+    exe 'hi '..substitute(Comment, '^Comment\|xxx\|\<\%(term\|cterm\|gui\)=\S*',
+        \ {m -> m[0] is# 'Comment' ? 'CommentUnderlined' : ''}, 'g')
+        \ ..' term=underline cterm=underline gui=underline'
 endfu
 
 fu s:User() abort "{{{3

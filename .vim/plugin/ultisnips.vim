@@ -185,7 +185,12 @@ augroup my_ultisnips
     au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
 
     " let us know when a snippet is being expanded
-    au User MyFlags call statusline#hoist('buffer', '%#Visual#%{plugin#ultisnips#status()}',
+    let s:Visual = filter(split(execute('hi Visual'), '\n'), {_,v -> v =~# '^Visual' })[0]
+    exe 'hi '..substitute(s:Visual, '^Visual\|xxx\|\<\%(term\|cterm\|gui\)=\S*',
+        \ {m -> m[0] is# 'Visual' ? 'Ulti' : ''}, 'g')
+        \ ..' term=bold cterm=bold gui=bold'
+    unlet s:Visual
+    au User MyFlags call statusline#hoist('buffer', '%#Ulti#%{plugin#ultisnips#status()}',
         \ 55, expand('<sfile>')..':'..expand('<sflnum>'))
 
     " Inserting the output of a shell command in a snippet can cause visual artifacts.{{{

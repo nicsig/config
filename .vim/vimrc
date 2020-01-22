@@ -2951,11 +2951,11 @@ ino <silent> <c-s> <esc>:sil update<cr>
 
 " M-a  M-e {{{3
 
-ino <silent> <m-a> <c-r>=<sid>move_by_sentence(0)<cr>
-ino <silent> <m-e> <c-r>=<sid>move_by_sentence(1)<cr>
+ino <silent> <m-a> <c-r>=<sid>move_by_sentence(1)<cr>
+ino <silent> <m-e> <c-r>=<sid>move_by_sentence(0)<cr>
 
-fu s:move_by_sentence(is_fwd) abort
-    if a:is_fwd
+fu s:move_by_sentence(fwd) abort
+    if a:fwd
         norm! (
     else
         norm! )
@@ -3000,11 +3000,6 @@ endfu
 " }}}2
 " Normal {{{2
 " SPC                 (prefix) {{{3
-" SPC                           za {{{4
-
-nno <space><space> za
-xno <space><space> za
-
 " . {{{4
 
 " `.` repeats the last edit.
@@ -3060,104 +3055,6 @@ nno <silent> <space>al :<c-u>arglocal<cr>
 " This causes the buffer to be reloaded.
 " Add a bang to `:arglocal` to discard unsaved changes in the current buffer.
 nno <silent> <space>an :<c-u>arglocal %<cr>
-
-" f                             fuzzy search {{{4
-
-" Mnemonic:
-" SPC fl  = l for :ls (listing)
-" SPC fr  = most Recently used (files and buffers)
-" SPC fgc = Git Changed files
-
-" `:FzSnippets` only returns snippets whose tab trigger contains the text
-" before the cursor.
-
-fu s:fuzzy_mappings() abort
-    let fuzzy_mappings = {
-                         \ 'bt': 'BTags',
-                         \ 'f' : 'Files',
-                         \ 'gf': 'GFiles',
-                         \ 'gc': 'GFiles?',
-                         \ 'h' : 'Helptags',
-                         \ 'l' : 'Buffers',
-                         \ 'm' : 'Maps',
-                         \ 'M' : 'Marks',
-                         \ 'r' : 'History',
-                         \ 'R' : 'Rg',
-                         \ 's' : 'Snippets',
-                         \ 't' : 'Tags',
-                         \ 'w' : 'Windows',
-                         \ }
-
-    for [char, cmd] in items(fuzzy_mappings)
-        exe 'nno  <space>f'..char..'  :<c-u>Fz'..cmd..'<cr>'
-    endfor
-
-    nno <silent> <space>fF :<c-u>FZF $HOME<cr>
-
-    augroup remove_gvfs_from_oldfiles
-        au!
-        " Rationale:{{{
-        "
-        " If you've opened ftp files with Vim:
-        "
-        "     $ gvim ftp://ftp.vim.org/pub/vim/patches/8.0/README
-        "
-        " `v:oldfiles` will contain filepaths such as:
-        "
-        "     /run/user/1000/gvfs/ftp:host=ftp.vim.org/pub/vim/patches/8.0/README
-        "
-        " Those kind of paths make `:FzHistory` slow to start.
-        " This is because the command  calls `filereadable()`, and the latter is
-        " slow on such a path:
-        "
-        "     :Time echo filereadable('~/.bashrc')
-        "     :Time echo filereadable('/run/user/1000/gvfs/ftp:host=ftp.vim.org/pub/vim/patches/8.0/README')
-        "
-        " The first command is instantaneous.
-        " The second command takes more than a tenth of a second.
-        "
-        " And the  effect is cumulative: the  more paths like the  previous one,
-        " the slower `:FzHistory` opens its fzf window.
-        "
-        " The value of `v:oldfiles` is built from the viminfo file.
-        " The latter is read after our vimrc, so we can't clean `v:oldfiles` right now.
-        " We need to wait for Vim to have fully started up.
-        "}}}
-        au VimEnter * call filter(v:oldfiles, {_,v -> v !~# '/gvfs/'})
-    augroup END
-endfu
-
-call s:fuzzy_mappings()
-
-" To use `:FzBCommits` and `:FzCommits`, we first need to be in the working
-" tree of the repo:
-"
-"    - on which the current file belong
-"
-"    - in which we are interested;
-"      let's say, again, the one where the current file belong
-
-nno <silent> <space>fbc :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzBCommits<cr>
-nno <silent> <space>fc  :<c-u>lcd <c-r>=expand('%:p:h')<cr> <bar> FzCommits<cr>
-
-" Fuzzy search mappings from insert / visual / operator-pending mode.
-
-" C-g is often used as a prefix to create mappings in insert mode.
-" So, to maintain some consistency, we use it to create a fuzzy search mapping
-" in insert mode.
-"
-" We can safely do it without overriding / shadowing and existing mapping,
-" because it's not present in:
-"
-"     :h i_^g C-d
-"     :echo map(taglist('^i_CTRL-G'), {_,v -> v.name})
-"
-" There is no default equivalent for visual mode, but we often use `m` for
-" visual mode mappings. So, here again, we'll use `m` as a prefix.
-
-imap <c-g>m <plug>(fzf-maps-i)
-xmap mm     <plug>(fzf-maps-x)
-omap m      <plug>(fzf-maps-o)
 
 " i x                           ixquick, tmux prompt {{{4
 
@@ -4399,9 +4296,9 @@ fu s:fix_display() abort
     "}}}
     call s:styled_comments()
 
-    " update folds
-    norm! zx
-    " update fold titles
+    " recompute folds
+    exe winnr()..'windo "'
+    " and their titles
     do <nomodeline> BufWinEnter
 
     " Re-install HGs which may have been cleared after changing the color scheme.{{{
@@ -4713,12 +4610,6 @@ xno <silent> j gj
 xno <silent> k gk
 xno <silent> ^ g^
 xno <silent> 0 g0
-
-" H  L  M             collapse/expand folds {{{3
-
-nno <expr> H v:count ? 'H' : 'zMzz'
-nno <expr> L v:count ? 'L' : 'zRzz'
-nno M zMzvzz
 
 " J        gJ         join without moving {{{3
 
@@ -5895,13 +5786,7 @@ com -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
 
 " RemoveSwapFiles {{{2
 
-com -bar RemoveSwapFiles call s:remove_swapfiles()
-
-fu s:remove_swapfiles() abort
-    for swapfile in glob($HOME..'/.vim/tmp/swap/*', 1, 1)
-        call delete(swapfile)
-    endfor
-endfu
+com -bar RemoveSwapFiles call map(glob($HOME..'/.vim/tmp/swap/*', 1, 1), {_,v -> delete(v)})
 
 " RemoveTabs {{{2
 
@@ -6714,10 +6599,6 @@ augroup END
 
 " Spell files {{{2
 
-" It's not technically an autocmd, but it's the only section where it fits.
-" It generates binary files on certain  conditions, so it could be considered as
-" an autocmd.
-"
 " When spell checking is enabled, and we mark  a word as good or bad, we make an
 " addition into `~/.vim/spell/fr.utf-8.`.
 " But,  for  Vim to  take  this  addition into  account,  it  has to  perform  a
@@ -6732,22 +6613,19 @@ augroup END
 " So  we do  it  here, for  every  spell binary  file, but  only  if the  binary
 " (.add.spl) is older than the original addition file (.add).
 
-fu s:mkspell() abort
-    " Why the for loop?{{{
+augroup my_mkspell
+    au!
+    " Why `map()`?{{{
     "
     " Because there can  be several spell files (one per  language), in which we
     " made additions.
     "
     " http://vi.stackexchange.com/a/5052/6960
     "}}}
-    for spell_file in glob('~/.vim/spell/*.add', 1, 1)
-        if filereadable(spell_file) && !filereadable(spell_file..'.spl')
-      \ || (getftime(spell_file) > getftime(spell_file..'.spl'))
-            exe 'mkspell! '..fnameescape(spell_file)
-        endif
-    endfor
-endfu
-call s:mkspell()
+    au VimEnter * call map(glob('~/.vim/spell/*.add', 1, 1),
+        \ {_,v -> filereadable(v) && !filereadable(v..'.spl') || (getftime(v) > getftime(v..'.spl'))
+        \         && execute('mkspell! '..fnameescape(v))})
+augroup END
 
 " Swap file handling "{{{2
 
@@ -9249,6 +9127,7 @@ endfu
 " want them to be saved/restored via viminfo.
 "
 " Document somewhere how `[gs]etenv()` can be used.
+
 
 
 
