@@ -23,7 +23,7 @@ endif
 "     ino j      <c-r>=J()<cr>
 "     fu C_g_j()
 "         let s:in_submode = 1
-"         let s:timer_id = timer_start(3000, {_ -> execute('let s:in_submode = 0')})
+"         let s:timer_id = timer_start(3000, {-> execute('let s:in_submode = 0')})
 "         if exists('s:timer_id')
 "             call timer_stop(s:timer_id)
 "         endif

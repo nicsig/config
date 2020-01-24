@@ -308,7 +308,7 @@ augroup delay_slow_call
     au!
     " Do *not* use a simple timer:{{{
     "
-    "     au VimEnter * call timer_start(1000, {_ ->
+    "     au VimEnter * call timer_start(1000, {->
     "         \       execute('runtime  autoload/toggle_settings.vim
     "         \ |              runtime! autoload/slow_call/*.vim', '')
     "         \ })
@@ -1793,7 +1793,7 @@ set synmaxcol=250
 " Nvim doesn't have terminal options.
 " It correctly and automatically sets its internal terminfo db.
 "
-"     $ nvim -V3/tmp/log +'call timer_start(0, {_ -> execute("q")})'
+"     $ nvim -V3/tmp/log +'call timer_start(0, {-> execute("q")})'
 "     $ nvim -es +'exe "1,/{{\\%x7b$/g/^/d_" | /}}\\%x7d$/,$g/^/d_' +'%p | qa!' /tmp/log | nvim -
 "     /paste
 "     ext.enable_bpaste         = <Esc>[?2004h~
@@ -2925,7 +2925,7 @@ fu s:c_m() abort
 
     if getline('.') =~ '^\s*\V'..escape(cml, '\')..'\m\s*$'
         " We can't invoke `setline()` immediately, because of `<expr>`.
-        call timer_start(0, {_ -> setline('.', '')})
+        call timer_start(0, {-> setline('.', '')})
         " Why don't you simply press `BS`?{{{
         "
         "     return "0\<c-d>"..repeat("\<BS>", strchars(cml) + 1)
@@ -3487,7 +3487,7 @@ fu s:z_equal(_) abort
     catch
         return lg#catch_error()
     finally
-        call timer_start(0, {_ -> winbufnr(winid) == bufnr
+        call timer_start(0, {-> winbufnr(winid) == bufnr
             \ && call('settabwinvar', win_id2tabwin(winid) + ['&spell', spell_save])})
     endtry
 endfu
@@ -4297,7 +4297,7 @@ fu s:fix_display() abort
     call s:styled_comments()
 
     " recompute folds
-    exe winnr()..'windo "'
+    let _ = foldlevel(1)
     " and their titles
     do <nomodeline> BufWinEnter
 
@@ -5138,10 +5138,10 @@ xno <expr> < <sid>niceblock('<')
 
 " With this  mapping, we can  always access the last  text we deleted  in visual
 " mode, from the `v` register.
-xno <expr><silent> d 'd'..timer_start(0, {_ -> setreg('v', getreg('"'), getregtype('"'))})[-1]
+xno <expr><silent> d 'd'..timer_start(0, {-> setreg('v', getreg('"'), getregtype('"'))})[-1]
 
 " same thing when we yank
-xno <expr><silent> y 'y'..timer_start(0, {_ -> setreg('v', getreg('"'), getregtype('"'))})[-1]
+xno <expr><silent> y 'y'..timer_start(0, {-> setreg('v', getreg('"'), getregtype('"'))})[-1]
 
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
@@ -6006,7 +6006,7 @@ augroup my_cmdline_window
     " But, it doesn't erases the command-line window.
     " Our `C-c` mapping takes care of that.
     "}}}
-    au CmdWinEnter * nno <buffer><expr><nowait> <c-c> '<c-c>'..timer_start(0, {_ -> execute('redraw')})[-1]
+    au CmdWinEnter * nno <buffer><expr><nowait> <c-c> '<c-c>'..timer_start(0, {-> execute('redraw')})[-1]
 augroup END
 
 " Create Missing Directory {{{2
@@ -6123,7 +6123,7 @@ augroup wipe_noname_buffers
     " At that moment, we  could be sure the last hidden  noname buffer is really
     " hidden. And the autocmd would just have to call `s:wipe_noname()`.
     "}}}
-    au BufHidden * call timer_start(0, {_ -> s:wipe_noname()})
+    au BufHidden * call timer_start(0, {-> s:wipe_noname()})
 augroup END
 
 fu s:wipe_noname() abort
@@ -7237,7 +7237,7 @@ endfu
                   "}}}
                   " Still, syntax highlighting would work better.
                   " Less hack, no timer.
-                  au CmdlineLeave : call timer_start(5, {_ -> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
+                  au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
                   au FileType qf ++once call s:ltag(2)
               augroup END
               return ':ltag / | lw'..repeat("\<left>", 5)
@@ -8292,11 +8292,11 @@ endfu
 "
 " This mapping works in Vim, but not in Neovim:
 "
-"     cno <expr> <c-d> timer_start(0, {_ -> feedkeys("\<lt>del>", 'in')})[-1]
-"                                                     ├───┘
-"                                                     └ yeah, you really need that
-"                                                      (to prevent "<del>" from deleting the next quote
-"                                                       when the mapping is parsed?)
+"     cno <expr> <c-d> timer_start(0, {-> feedkeys("\<lt>del>", 'in')})[-1]
+"                                                   ├───┘
+"                                                   └ yeah, you really need that
+"                                                    (to prevent "<del>" from deleting the next quote
+"                                                     when the mapping is parsed?)
 "
 " Because of this `c_^d` didn't work in Neovim.
 " It works now, because I've refactored the mapping to avoid `<expr>`.
