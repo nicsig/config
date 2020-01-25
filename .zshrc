@@ -2828,7 +2828,9 @@ alias config_push='config add -u && config commit -m "update" && config push'
 
 alias ga='git add'
 
+alias gch='git checkout'
 alias gcl='git clone'
+alias gcm='git checkout master'
 # Do not add `rlwrap` before `git commit`.{{{
 # Why?
 #
@@ -2866,16 +2868,9 @@ alias gcl='git clone'
 # I can't reproduce this issue anymore.
 # Is this comment still relevant?
 #}}}
-alias gcm='git commit'
-alias gco='git checkout'
-
-# Mnemonics: Git Find
-alias gf='git log --all --source -p -S'
+alias gco='git commit'
 
 alias gp='rlwrap -H /dev/null git push'
-
-# Git Restore Last Commit
-alias grlc='git reset --hard "$(git rev-parse HEAD)"'
 
 # this shadows the `/usr/bin/gs` (ghostscript) utility, but I don't care
 alias gs='git status -s'
@@ -3078,7 +3073,7 @@ alias fm='[[ -n "${TMUX}" ]] && [[ $(\tmux display -p "#W") == "zsh" ]] && \tmux
 
 # rg {{{3
 
-alias rg='\rg -LS --vimgrep'
+alias rg='\rg -LS --vimgrep --color=auto'
 
 # sh {{{3
 

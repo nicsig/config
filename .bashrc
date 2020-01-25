@@ -237,4 +237,3 @@ shopt -s histreedit
 # Instead,  write the expanded command into the readline editing  buffer for
 # further modification.
 shopt -s histverify
-

@@ -1263,7 +1263,7 @@ fu s:inex() abort
     "     ${HOME}/bin/README.md
     "     ^
     "}}}
-    let pat = '\m\C${\f\+}'..'\V'..v:fname..'\m\|${'..v:fname..'}\f\+\|\%'..col('.')..'c${\f\+}\f\+'
+    let pat = '\m\C${\f\+}'..'\V'..v:fname..'\m\|${\V'..v:fname..'}\f\+\|\%'..col('.')..'c${\f\+}\f\+'
     "                          │
     "                          └ `v:fname` could contain a tilde
     let cursor_after = '\m\%(.*\%'..col('.')..'c\)\@='
@@ -5214,7 +5214,14 @@ fu s:cfg_complete(_a, _l, _p) abort
 endfu
 
 fu s:cfg(pgm) abort
-    let files = s:PGM2CFGFILES[a:pgm]
+    if has_key(s:PGM2CFGFILES, a:pgm)
+        let files = s:PGM2CFGFILES[a:pgm]
+    else
+        echohl ErrorMsg
+        echo a:pgm..' is not supported'
+        echohl NONE
+        return
+    endif
     call filter(files, {_,v -> filereadable(expand(v))})
     if empty(files) | echo 'no readable file' | endif
     for file in files
