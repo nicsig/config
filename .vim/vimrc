@@ -7800,8 +7800,9 @@ endfu
 "
 " How to filter  a custom text-object without the command-line not being redrawn?
 " MWE:
-"     !ie spc
-"     ![m spc
+"
+"     !iE SPC
+"     ![m SPC
 "     ...
 "
 " We could try sth like this:
@@ -8379,10 +8380,6 @@ endfu
 " closed fold.
 " Maybe do the same with `J` and `K` in visual mode.
 "
-" Btw:
-" I think we shouldn't use the keys  `]f` and `[f` to promote/demote a fold, but
-" instead `H` and `L`.
-"
 " 87 -
 "
 " We don't version control our pdfs in `~/wiki`.
@@ -8815,38 +8812,6 @@ endfu
 "
 " 111 -
 "
-" `C-l` works in the  pattern field of a `:s` and  `:g` command (provided `'is'`
-" is set), but not in the one of a `:vim` command or `:helpg`/`:lh` (`:h /^l`).
-"
-" You could try this:
-"
-"     cno <c-l> <c-r>=<sid>c_l()<cr>
-"     fu s:c_l() abort
-"         if getcmdline() =~# '^\m\C\s*\d*l\=vim\%[grepadd]\>'
-"             let [line, col] = [getline('.'), col('.')]
-"             return matchstr(line, '\%'..col..'c.')
-"         else
-"             call feedkeys("\<c-l>", 'in')
-"             return ''
-"         endif
-"     endfu
-"
-" But it fails if there is something after the pattern:
-"
-"     :vim /foo/ files
-"              ^
-"              assuming you have the word `foobar` on the screen,
-"              pressing `C-l` should insert `b`, but that's not what happens
-"              because of `/ files`
-"
-" And it doesn't work at all with `:helpg`/`:lh`.
-"
-" Trick:
-" Temporarily replace `:vim` by `:%s` (the  percent is important if the text you
-" want to copy is not on the current line).
-"
-" 112 -
-"
 " Review all the custom motions you've installed.
 " For each  of them, make  sure you can  jump back with  `C-o` (set mark  `'` on
 " original position).
@@ -8854,12 +8819,12 @@ endfu
 " Actually, maybe not for all of them.
 " Think about which motions should add an entry in the jumplist.
 "
-" 113 -
+" 112 -
 "
 " Install a `=rm`  mapping in Vim files to refactor  nested function calls using
 " the method call operator (`->`).
 "
-" 114 -
+" 113 -
 "
 "     $ cd ; vim
 "     :echo getcwd() → /home/user
@@ -8869,7 +8834,7 @@ endfu
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
 "
-" 115 -
+" 114 -
 "
 " Review all custom text-objects: make sure  they all position the cursor on the
 " end of  the selection, to  be consistent  with what Vim  seems to do  with its
@@ -8884,7 +8849,7 @@ endfu
 " I guess  that it  means that  all our text-objects  should be  implemented via
 " `<expr>` mappings... Otherwise, the output of `mode(1)` is unreliable.
 "
-" 116 -
+" 115 -
 "
 " Every time you've used sth like `norm! %` in the past, it was probably wrong.
 " You should have used sth like:
@@ -8915,7 +8880,7 @@ endfu
 " Enough is enough; we've removed `vim-matchit`, and installed `vim-matchup`.
 " Read the documentation of the latter.
 "
-" 117 -
+" 116 -
 "
 " Search `$MYVIMRC` everywhere; check whether the code works as intended in Nvim.
 " Search `.vim/vimrc` everywhere; check whether we should have used `$MYVIMRC`.
@@ -8923,7 +8888,7 @@ endfu
 " What should  we do  in Nvim? Use `~/.vim/vimrc`,  `~/.config/nvim/init.vim` or
 " both (if so how)?
 "
-" 118 -
+" 117 -
 "
 " `:vimgrep` is slow in Nvim.
 "
@@ -8943,7 +8908,7 @@ endfu
 "
 "     syn off | filetype plugin indent off
 "
-" 119 -
+" 118 -
 "
 " Every time  we've "changed"  a buffer  in a way  that the  line count  did not
 " change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
@@ -8961,13 +8926,13 @@ endfu
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 "
-" 120 -
+" 119 -
 "
 " When using the `gc` operator to comment  a line starting with a backslash in a
 " Vimscript file, maybe we  should not add a space between  `"` and `\`, because
 " we sometimes want to temporarily comment a continuation line.
 "
-" 121 -
+" 120 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
 " commented line.
@@ -8989,7 +8954,7 @@ endfu
 "
 "     " ~/.vim/plugged/vim-brackets/autoload/brackets.vim
 "
-" 122 -
+" 121 -
 "
 " I'm fed up with codespans being broken when formatting with `gq`.
 "
@@ -9002,27 +8967,27 @@ endfu
 " Also: Same issue with italics / bold style.
 " Tweak syntax regexes?
 "
-" 123 -
+" 122 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
 "
-" 124 -
+" 123 -
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
 "
-" 125 -
+" 124 -
 "
 " Read:
 " https://vimways.org/2019/indentation-without-dents/ (see `~/.vim/indent/[my]matlab.vim`, `~/Desktop/m.m`)
 " https://vimways.org/2019/a-test-to-attest-to/
 "
-" 126 -
+" 125 -
 "
 " Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
 " (to improve performance...)
 "
-" 127 -
+" 126 -
 "
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
@@ -9031,7 +8996,7 @@ endfu
 "
 " Note that `readdir()` has not been ported to Nvim yet.
 "
-" 128 -
+" 127 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -9044,7 +9009,7 @@ endfu
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 "
-" 129 -
+" 128 -
 "
 " Once Nvim supports `SafeState`, try to replace as many timers as possible:
 "
@@ -9068,24 +9033,13 @@ endfu
 " Naively, I would say yes. The longer a  command is delayed, the longer we stay
 " in an undesirable state...
 "
-" 130 -
+" 129 -
 "
 " We refer to dirvish in several locations in `vim-fex`.
 " I don't like that.
 " dirvish and fex are two different plugins.
 "
-" 131 -
-"
-" When we execute `:noa windo "`, the inactive windows are unsquashed.
-" But not when we execute `:windo "`.
-" Does this mean that to fix the issue of "Zomg, my unfocused windows are unsquashed",
-" we don't have to use `win_execute()`, we can simply remove `:noa` somewhere?
-"
-" Update: Even if that's the case, I still prefer `win_execute()`.
-" Most of  the time, I  don't want `WinEnter`/`WinLeave`  to be fired  for every
-" window, just to fix the windows' height.
-"
-" 132 -
+" 130 -
 "
 "     $ vim
 "     :h
@@ -9127,7 +9081,7 @@ endfu
 " recording; maybe  because it would  cause an infinite recursion  when pressing
 " `q` during a recording.
 "
-" 133 -
+" 131 -
 "
 " Remove all invocations of `setenv()` and `getenv()`.
 " Use global variables  instead; don't write them in uppercase  though; we don't
