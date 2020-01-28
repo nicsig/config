@@ -37,7 +37,7 @@
 
 # Where can I download `bat(1)`?{{{
 #
-#     https://github.com/sharkdp/bat/releases
+# https://github.com/sharkdp/bat/releases
 #}}}
 # What does `BAT_STYLE` control?{{{
 #

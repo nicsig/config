@@ -4253,6 +4253,14 @@ fu s:fix_display() abort
 
     redraw! | redraws! | redrawt
 
+    if !has('nvim')
+        call popup_clear()
+    else
+        call map(filter(nvim_list_wins(),
+            \ {_,v -> has_key(nvim_win_get_config(v), 'anchor')}),
+            \ {_,v -> nvim_win_close(v, 1)})
+    endif
+
     if &l:diff
         " update differences between windows in diff mode
         diffupdate!
@@ -5242,6 +5250,7 @@ let s:PGM2CFGFILES = {
 \ 'keyboard':      glob('~/.config/keyboard/*', 0, 1),
 \ 'kitty':         ['~/.config/kitty/kitty.conf'],
 \ 'latexmk':       ['~/.config/latexmk/latexmkrc'],
+\ 'less':          ['~/.config/lesskey'],
 \ 'mpv':           ['~/.config/mpv/input.conf', '~/.config/mpv/mpv.conf'],
 \ 'newsboat':      ['~/.config/newsboat/config', '~/.config/newsboat/urls'],
 \ 'ranger':        ['~/.config/ranger/rc.conf'],
@@ -7736,7 +7745,9 @@ endfu
 "
 " Read:
 "
-"     :h syntax.txt     (not that big once you remove part 4: :h syn-file-remarks
+"     :h vim9-script
+"     :h syntax.txt
+"                        (not that big once you remove part 4: :h syn-file-remarks
 "                        you're not supposed to read entirely anyway, only the ones
 "                        matching the types of files you use frequently;
 "                        to get a list:    :h ft-*-syn c-d)

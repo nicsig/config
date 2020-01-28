@@ -985,6 +985,7 @@ cfg_intersubs() { "${=EDITOR}" -o "${HOME}/.config/mpv/scripts/interSubs.lua" "$
 cfg_keyboard() { "${=EDITOR}" -o ${HOME}/.config/keyboard/* ;}
 cfg_kitty() { "${=EDITOR}" "${HOME}/.config/kitty/kitty.conf" ;}
 cfg_latexmk() { "${=EDITOR}" "${HOME}/.config/latexmk/latexmkrc" ;}
+cfg_less() { "${=EDITOR}" "${HOME}/.config/lesskey" ;}
 cfg_mpv() { "${=EDITOR}" -o "${HOME}/.config/mpv/input.conf" "${HOME}/.config/mpv/mpv.conf" ;}
 cfg_newsboat() { "${=EDITOR}" -o "${HOME}/.config/newsboat/config" "${HOME}/.config/newsboat/urls" ;}
 cfg_ranger() { "${=EDITOR}" "${HOME}/.config/ranger/rc.conf" ;}

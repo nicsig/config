@@ -58,7 +58,8 @@ let g:loaded_python_provider = 0
 "}}}
 let g:python3_host_prog = '/usr/bin/python3'
 
-" disable Ruby and Node.js support (we don't need them, and the less code, the fewer issues)
+" disable Perl, Ruby, and Node.js support (we don't need them, and the less code, the fewer issues)
+let g:loaded_perl_provider = 0
 let g:loaded_ruby_provider = 0
 let g:loaded_node_provider = 0
 

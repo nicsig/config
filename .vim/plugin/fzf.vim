@@ -6,7 +6,11 @@ endif
 
 " Variables{{{1
 
-" Make fzf use the builtin terminal.
+fu s:snr() abort
+    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
+endfu
+let s:snr = get(s:, 'snr', s:snr())
+
 " Do *not* use `{'window': 'split'}`!{{{
 "
 " Otherwise, in  Neovim, when you  invoke an fzf  Ex command (like  `:FZF`), you
@@ -16,7 +20,85 @@ endif
 "
 " See this: https://github.com/junegunn/fzf/issues/1055
 "}}}
-let g:fzf_layout = {'window': '10new'}
+let g:fzf_layout = {'window': 'call '..s:snr..'create_centered_floating_window()'}
+if has('nvim')
+    " Source: https://github.com/neovim/neovim/issues/9718#issuecomment-559573308
+    fu s:create_centered_floating_window() abort
+        " set the width to `&columns - 20`, and make sure it's at least 80 and at most `&columns - 4`
+        let width = min([&columns - 4, max([80, &columns - 20])])
+        " set the height to `&lines - 10`, and make sure it's at least 20 and at most `&lines - 4`
+        let height = min([&lines - 4, max([20, &lines - 10])])
+        let top = '┌'..repeat('─', width - 2)..'┐'
+        let mid = '│'..repeat(' ', width - 2)..'│'
+        let bot = '└'..repeat('─', width - 2)..'┘'
+        let lines = [top] + repeat([mid], height - 2) + [bot]
+        let config = {
+            "\ sets the window layout to "floating",
+            "\ place at (row,col) coordinates relative to the global editor grid
+            \ 'relative': 'editor',
+            \ 'row': ((&lines - height) / 2) - 1,
+            \ 'col': (&columns - width) / 2,
+            \ 'width': width,
+            \ 'height': height,
+            "\ display the window with many UI options disabled
+            "\ (e.g. 'number', 'cursorline', 'foldcolumn', ...)
+            \ 'style': 'minimal',
+            \ }
+        let box_bufnr = nvim_create_buf(v:false, v:true)
+        "                             │        │{{{
+        "                             │        └ scratch buffer
+        "                             │
+        "                             └ not listed ('buflisted' off)
+        "}}}
+        call nvim_buf_set_lines(box_bufnr, 0, -1, v:true, lines)
+        "                                  │   │    │{{{
+        "                                  │   │    └ out-of-bounds indices should be an error
+        "                                  │   │
+        "                                  │   └ up to the last line
+        "                                  │
+        "                                  │     actually `-1` stands for the index *after* the last line,
+        "                                  │     but since this argument is exclusive, here,
+        "                                  │     `-1` matches the last line
+        "                                  │
+        "                                  └ start replacing from the first line
+        "}}}
+        " open 1st float to get a surrounding box
+        let winid = nvim_open_win(box_bufnr, v:false, config)
+        call setwinvar(winid, '&winhl', 'Normal:Floating')
+
+        " open 2nd float for fzf to display its info
+        let config.row += 1
+        let config.height -= 2
+        let config.col += 2
+        let config.width -= 4
+        let winid = nvim_open_win(nvim_create_buf(v:false, v:true), v:true, config)
+        "                                                             │
+        "                                                             └ enter the window
+        "                                                             (to make it the current window)
+        call setwinvar(winid, '&winhl', 'Normal:Floating')
+
+        " when the fzf buffer is wiped out, wipe out the surrounding box buffer
+        exe 'au BufWipeout <buffer> ++once bw '..box_bufnr
+    endfu
+else
+    fu s:create_centered_floating_window() abort
+        " TODO: Implement sth equivalent for Vim.{{{
+        "
+        " Not possible right now:
+        " https://github.com/vim/vim/issues/4063#issuecomment-565808502
+        "
+        " But it could be in the future.
+        "
+        " From `:h todo`:
+        "
+        " >     Popup windows:
+        " >     - Make it possible to put a terminal window in a popup.  Would always grab key
+        " >       input?  Sort-of possible by creating a hidden terminal and opening a popup
+        " >       with that buffer: #4063.
+        "}}}
+        10new
+    endfu
+endif
 
 let g:fzf_action = {
     \ 'ctrl-t': 'tab split',
@@ -91,13 +173,21 @@ augroup fzf_open_folds
     if !has('nvim')
         au FileType fzf au BufWinEnter * ++once au SafeState * ++once norm! zv
     else
-        au FileType fzf au BufWinEnter * ++once call timer_start(0, {-> execute('norm! zv')})
+        " Why the `mode()` guard?{{{
+        "
+        " To avoid this issue when we execute an fzf command twice:
+        "
+        "     Error detected while processing function <lambda>443:
+        "     line    1:
+        "     Can't re-enter normal mode from terminal mode
+        "}}}
+        au FileType fzf au BufWinEnter * ++once call timer_start(0, {-> mode() is# 'n' && execute('norm! zv')})
     endif
 augroup END
 
 " Mappings{{{1
 
-exe 'nno <space>fmn :<c-u>'..g:fzf_command_prefix..'Maps<cr>'
+exe 'nno <silent> <space>fmn :<c-u>'..g:fzf_command_prefix..'Maps<cr>'
 nmap <space>fmi i<plug>(fzf-maps-i)
 nmap <space>fmx v<plug>(fzf-maps-x)
 nmap <space>fmo y<plug>(fzf-maps-o)
@@ -127,7 +217,7 @@ fu s:fuzzy_mappings() abort
         \ }
 
     for [char, cmd] in items(key2cmd)
-        exe 'nno <space>f'..char..' :<c-u>'..g:fzf_command_prefix..cmd..'<cr>'
+        exe 'nno <silent> <space>f'..char..' :<c-u>'..g:fzf_command_prefix..cmd..'<cr>'
     endfor
 
     augroup remove_gvfs_from_oldfiles

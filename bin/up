@@ -17,7 +17,7 @@
 # For more info, read this:
 # https://askubuntu.com/a/100953/867754
 #}}}
-# Why don't you do it atm?{{{
+#   Why don't you do it atm?{{{
 #
 # Here's what `apt` prints when we invoke it in a script:
 #
@@ -30,6 +30,13 @@
 # We would use it less often, and would  be more careful when using it (read all
 # the  messages, don't  answer yes  automatically without  making sure  it's not
 # going to remove sth important).
+#}}}
+
+# TODO: Find a way to update bat automatically.{{{
+#
+# Rationale: Recently, we  had an issue in  fzf.vim; the latter passed  some new
+# arguments to `bat(1)` to get files preview.
+# Since we were using an old `bat(1)`, the arguments were not recognized.
 #}}}
 
 main() { #{{{1
