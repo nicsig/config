@@ -1177,48 +1177,6 @@ fu myfuncs#trans_stop() abort
     call job_stop(s:trans_job)
 endfu
 
-" unicode_toggle {{{1
-
-fu myfuncs#unicode_toggle(line1, line2) abort
-    let view  = winsaveview()
-    let range = a:line1..','..a:line2
-    let mods  = 'keepj keepp '
-
-    call cursor(a:line1, 1)
-    " replace  '\u0041'  with  'A'
-    " or       '...'     with  '\u2026'
-    "
-    " `char2nr(submatch(0))` =
-    "         decimal  code point of a character who  is not in the extended ascii table.
-    "
-    " `printf('\u%x')` =
-    "         string '\u1234'
-    "         where `1234` is the conversion of the decimal code point into hexa
-    let [pat, l:Rep] = search('\\u\x\+', 'nW', a:line2)
-        \ ? ['\\u\x\+', {-> eval('"'.submatch(0).'"')}]
-        \
-        \ : ['[^\x00-\xff]',
-        \       {-> printf(
-        \               char2nr(submatch(0)) <= 65535
-        \               ?    '\u%x'
-        \               :    '\U%x',
-        \               char2nr(submatch(0))
-        \ )}]
-    sil exe mods..range..'s/'..pat..'/\=l:Rep()/ge'
-    call winrestview(view)
-endfu
-
-fu s:vim_parent() abort "{{{1
-    "    ┌────────────────────────────┬─────────────────────────────────────┐
-    "    │ :echo getpid()             │ print the PID of Vim                │
-    "    ├────────────────────────────┼─────────────────────────────────────┤
-    "    │ $ ps -p <Vim PID> -o ppid= │ print the PID of the parent of Vim  │
-    "    ├────────────────────────────┼─────────────────────────────────────┤
-    "    │ $ ps -p $(..^..) -o comm=  │ print the name of the parent of Vim │
-    "    └────────────────────────────┴─────────────────────────────────────┘
-    return expand('`ps -p $(ps -p '..getpid()..' -o ppid=) -o comm=`')
-endfu
-
 fu myfuncs#webpage_read(url) abort "{{{1
     if !executable('w3m')
         echo 'w3m is not installed'

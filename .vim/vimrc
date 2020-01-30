@@ -279,6 +279,7 @@ Plug 'lacygoill/vim-statusline'
 Plug 'lacygoill/vim-term'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
+Plug 'lacygoill/vim-unichar'
 Plug 'machakann/vim-Verdin'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-window'
@@ -2111,6 +2112,15 @@ endif
 "}}}
 set t_RV=
 
+" Ts, Te {{{3
+
+" necessary when `$TERM` is not 'xterm' to be able to apply the strikethrough attribute to text:{{{
+"
+"     $ vim -Nu NONE +'hi MyStrikeThrough cterm=strikethrough'
+"     :hi MyStrikeThrough
+"}}}
+let [&t_Ts, &t_Te] = ["\e[9m", "\e[29m"]
+
 " ut {{{3
 
 " We don't really need this atm.
@@ -2832,7 +2842,7 @@ endfu
 
 " C-g             (prefix) {{{3
 " C-h {{{4
-"
+
 " Sometimes, we want to do this:{{{
 "
 " ┌ exceeding amount of whitespace
@@ -5937,18 +5947,6 @@ fu s:trim_whitespace(line1,line2) abort
     call winrestview(view)
 endfu
 
-" UnicodeToggle {{{2
-
-" This command  looks for  special characters  \u or \U  + code  points (\u1234)
-" inside the range of lines it received.
-" If it  finds one,  it tries  to translate  all similar  ones into  the literal
-" characters they stand for.
-" If it doesn't find any \u...., it tries to do the reverse.
-" Translate all characters whose code point  is above 255 (anything which is not
-" in the extended ascii table) into special characters + code points.
-
-com -bar -range=% UnicodeToggle call myfuncs#unicode_toggle(<line1>,<line2>)
-
 " WebPageRead {{{2
 
 " this command opens a new tab page, loads a temporary buffer, and dumps
@@ -7911,20 +7909,26 @@ endfu
 " 60 -
 "
 " Try to remove as many `virtcol()` as possible everywhere.
-" Same thing for `\%v`.
-" They don't mean what we thought.
-" If `virtcol('.')` evaluates to `123`, it doesn't mean:
+" Same thing for `\%v`; they don't mean what we thought.
 "
-" >   the next character is the 123th on the line
-"
-" but:
-"
-" >   the next character occupies the 123th column on the line
-"
-" `virtcol()` and `\%v` are influenced by some options ('wrap', 'linebreak', ...).
+" `virtcol('.')` and `\%v` take into account cells between the last character on
+" a screen line of a long wrapped text line, and the first character of the next
+" screen line (this includes 1 cell for the "virtual" newline).
+" And so,  `virtcol()` and  `\%v` are  influenced by  `'wrap'` (and  all options
+" related to the latter like `'linebreak'` and `'showbreak'`)
 "
 " Although, I  guess it's ok  to use  them when you're  sure your lines  are not
 " wrapped.
+"
+" ---
+"
+" We had an issue because of this in `vim#util#put()`:
+"
+"     ~/.vim/plugged/vim-vim/autoload/vim/util.vim
+"
+" The solution was to temporarily disable 'wrap'.
+" Try to find other locations where we  have made a similar mistake; if you find
+" anything, fix it.
 "
 " 61 -
 "
@@ -8412,6 +8416,8 @@ endfu
 "     :call nvim_buf_set_virtual_text(bufnr('%'), 0, line('w0')-1, [[repeat(' ',max([4,80-strdisplaywidth(getline(line('w0')))])).'Fancy Status', 'Error']],{})
 "
 " Source: https://vi.stackexchange.com/a/18729/17449
+"
+" More generally, try to study everything related to virtual text.
 "
 " 89 -
 "
@@ -8903,14 +8909,14 @@ endfu
 "
 " `:vimgrep` is slow in Nvim.
 "
-"     for i in {1..10}; do vim -es -Nu NORC -i NONE +"let time = reltime() | vim /badd/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
-"     average 0.6 seconds~
+"     for i in {1..10}; do vim -es -Nu NORC -i NONE +"let time = reltime() | vim /pattern/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
+"     average 0.4 seconds~
 "
-"     for i in {1..10}; do nvim -es -Nu NORC -i NONE +"syn off | let time = reltime() | vim /badd/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
-"     average 2.6 seconds~
+"     for i in {1..10}; do nvim -es -Nu NORC -i NONE +"syn off | let time = reltime() | vim /pattern/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
+"     average 2.3 seconds~
 "
-"     for i in {1..10}; do nvim -es -Nu NORC -i NONE +"let time = reltime() | vim /badd/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
-"     average 11.4 seconds~
+"     for i in {1..10}; do nvim -es -Nu NORC -i NONE +"let time = reltime() | vim /pattern/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
+"     average 10.8 seconds~
 "
 " Is it a regression? A missing Vim patch?
 "
@@ -9099,6 +9105,8 @@ endfu
 " want them to be saved/restored via viminfo.
 "
 " Document somewhere how `[gs]etenv()` can be used.
+
+
 
 
 
