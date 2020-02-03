@@ -461,7 +461,9 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     exe mods..range..global..'/'..pat..'/d_'
     if a:to_delete is# 'folds' | sil exe mods..range..'s/\s\+$//' | endif
 
-    sil update
+    sil! update
+    "  │
+    "  └ `:h E32`
     let &l:fen = fen_save | call winrestview(view)
     " `sil!` because if the pattern was so broad that all the lines were removed,
     " the original line doesn't exist anymore, and the `'` mark is invalid

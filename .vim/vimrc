@@ -2520,6 +2520,13 @@ endif
 if has('vim_starting')
     set ve=block
     const g:orig_virtualedit = &ve
+    augroup hoist_ve
+        au!
+        au User MyFlags call statusline#hoist('global',
+            \ '%{&ve isnot# "'..&ve..'" && mode(1) is# "n" ? "[ve="..&ve.."]" : ""}', 8,
+            \ expand('<sfile>')..':'..expand('<sflnum>'))
+        au OptionSet virtualedit call timer_start(0, {-> execute('redrawt')})
+    augroup END
 endif
 
 " wildignore(case) {{{2
@@ -5808,7 +5815,27 @@ endfu
 
 " RemoveDuplicateLines {{{2
 
+" Explanation:{{{
+"
+" Each  time awk  iterates over  a  new line,  it creates  an associative  array
+" element with the entire line as the index and with the default value 0.
+" The `!` operator negates 0, and the  final value is 1 (i.e. true); without any
+" action, awk performs `{ print $0 }`, and the entire line gets printed.
+"
+" Then, the `++` operator is processed and  1 is added to the array value, which
+" now becomes 1; this way, the next time the same line is encountered, the value
+" returned by the array will be 1, which will  then be negated to 0 by `!`; as a
+" result, the  default action won't be  executed (i.e. the duplicate  line won't
+" get printed).
+"
+" See also: https://www.gnu.org/software/gawk/manual/html_node/History-Sorting.html#History-Sorting
+"}}}
 com -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
+"                                                               │{{{
+"                                                               └ `:h :!`:
+" `!` is replaced with the previous external command
+" But not when there is a backslash before the '!', then that backslash is removed.
+"}}}
 
 " RemoveSwapFiles {{{2
 
@@ -6545,19 +6572,19 @@ fu s:filter_special_file() abort
         "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | fmt -w78'
         "
         " The formatting was awful (too much random spacing everywhere).
-        " `par` gives a more readable text:
+        " `par(1)` gives a more readable text:
         "
         "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | par -w80rjeq'
         "
         " However, there are still errors.
-        " Look at the bottom  of a `pdf` file, filtered by  `par`, to find error
+        " Look at the bottom of a `pdf` file filtered by `par(1)`, to find error
         " messages. It's often  due to  a too long  “word” (more  precisely what
-        " `par` considers a word). Because of this, a pdf is often truncated.
+        " `par(1)` considers a word). Because of this, a pdf is often truncated.
         " So, I don't use it atm.
         "
-        " Try to  fix these errors  by learning  how to better  configure `par`,
+        " Try to fix these errors by  learning how to better configure `par(1)`,
         " through  command-line  options,  and/or through  `$PARINIT`. Then  use
-        " `par` to format a pdf.
+        " `par(1)` to format a pdf.
         "}}}
         sil exe ext2cmd[ext]
         let b:did_filter_special_file = 1
@@ -7612,7 +7639,7 @@ endfu
 "
 " Read:
 " https://github.com/luchermitte/lh-vim-lib/blob/master/doc/oo.md
-" (oop in viml):
+" (oop in viml)
 "
 " 43 -
 "
@@ -7756,7 +7783,16 @@ endfu
 "     :h indent.txt
 "
 "     :h popup.txt
+"
 "     :h textprop.txt
+"         in Nvim see `:h nvim_buf_add_highlight()`
+"         for a real usage example, see:
+"             https://github.com/dstein64/vim-startuptime/commit/9299a46dd156064683b1e7e4e7d60fc1268cd7f7
+"             https://github.com/dstein64/vim-startuptime/commit/be56323c1e4fecdd5045d6c8a08c39266a1b0839
+"
+"         maybe we should replace any ad-hoc syntax plugin which is used for static buffers
+"         (i.e. buffers which we read but don't edit)
+"
 "     :h diff.txt
 "     :h recover.txt
 "     :h tips.txt
@@ -8149,6 +8185,16 @@ endfu
 "
 "     :vim /\m\C\\e/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
 "     :Cfilter! -other_plugins
+"
+" Note that the start of the  selection does not necessarily match the character
+" which will be marked with `'<`; if you're controlling `'<`, then `getpos('v')`
+" gives  the position  of  `'>`, and  vice versa;  if  you're controlling  `'>`,
+" `getpos('v')` gives the position of `'<`.
+"
+" If  you want  an expression  which tells  you whether  you're controlling  the
+" bottom of the selection:
+"
+"     line('.') >= getpos('v')[1]
 "
 " 74 -
 "
@@ -8907,26 +8953,6 @@ endfu
 "
 " 117 -
 "
-" `:vimgrep` is slow in Nvim.
-"
-"     for i in {1..10}; do vim -es -Nu NORC -i NONE +"let time = reltime() | vim /pattern/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
-"     average 0.4 seconds~
-"
-"     for i in {1..10}; do nvim -es -Nu NORC -i NONE +"syn off | let time = reltime() | vim /pattern/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
-"     average 2.3 seconds~
-"
-"     for i in {1..10}; do nvim -es -Nu NORC -i NONE +"let time = reltime() | vim /pattern/gj /usr/local/share/nvim/runtime/**/*.vim | pu=matchstr(reltimestr(reltime(time)), '.*\..\{,3}').' seconds to run :vimgrep'" +'%p|qa!'; done
-"     average 10.8 seconds~
-"
-" Is it a regression? A missing Vim patch?
-"
-" Temporary solution:
-" Use `:Vim`, and tweak it so that it runs this command before `:vim`:
-"
-"     syn off | filetype plugin indent off
-"
-" 118 -
-"
 " Every time  we've "changed"  a buffer  in a way  that the  line count  did not
 " change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
 " `:lockmarks` modifier.
@@ -8943,13 +8969,13 @@ endfu
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 "
-" 119 -
+" 118 -
 "
 " When using the `gc` operator to comment  a line starting with a backslash in a
 " Vimscript file, maybe we  should not add a space between  `"` and `\`, because
 " we sometimes want to temporarily comment a continuation line.
 "
-" 120 -
+" 119 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
 " commented line.
@@ -8971,7 +8997,7 @@ endfu
 "
 "     " ~/.vim/plugged/vim-brackets/autoload/brackets.vim
 "
-" 121 -
+" 120 -
 "
 " I'm fed up with codespans being broken when formatting with `gq`.
 "
@@ -8984,27 +9010,27 @@ endfu
 " Also: Same issue with italics / bold style.
 " Tweak syntax regexes?
 "
-" 122 -
+" 121 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
 "
-" 123 -
+" 122 -
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
 "
-" 124 -
+" 123 -
 "
 " Read:
 " https://vimways.org/2019/indentation-without-dents/ (see `~/.vim/indent/[my]matlab.vim`, `~/Desktop/m.m`)
 " https://vimways.org/2019/a-test-to-attest-to/
 "
-" 125 -
+" 124 -
 "
 " Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
 " (to improve performance...)
 "
-" 126 -
+" 125 -
 "
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
@@ -9013,7 +9039,7 @@ endfu
 "
 " Note that `readdir()` has not been ported to Nvim yet.
 "
-" 127 -
+" 126 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -9026,7 +9052,7 @@ endfu
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 "
-" 128 -
+" 127 -
 "
 " Once Nvim supports `SafeState`, try to replace as many timers as possible:
 "
@@ -9050,13 +9076,13 @@ endfu
 " Naively, I would say yes. The longer a  command is delayed, the longer we stay
 " in an undesirable state...
 "
-" 129 -
+" 128 -
 "
 " We refer to dirvish in several locations in `vim-fex`.
 " I don't like that.
 " dirvish and fex are two different plugins.
 "
-" 130 -
+" 129 -
 "
 "     $ vim
 "     :h
@@ -9098,7 +9124,7 @@ endfu
 " recording; maybe  because it would  cause an infinite recursion  when pressing
 " `q` during a recording.
 "
-" 131 -
+" 130 -
 "
 " Remove all invocations of `setenv()` and `getenv()`.
 " Use global variables  instead; don't write them in uppercase  though; we don't

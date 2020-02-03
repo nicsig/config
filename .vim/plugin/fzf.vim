@@ -20,83 +20,118 @@ let s:snr = get(s:, 'snr', s:snr())
 "
 " See this: https://github.com/junegunn/fzf/issues/1055
 "}}}
-let g:fzf_layout = {'window': 'call '..s:snr..'create_centered_floating_window()'}
+let g:fzf_layout = {'window': 'call '..s:snr..'fzf_window(0.9, 0.6, "Comment")'}
+" Source: https://github.com/junegunn/fzf/blob/master/README-VIM.md#starting-fzf-in-neovim-floating-window
+fu s:fzf_window(width, height, border_highlight) abort
+    " Size and position
+    let width = float2nr(&columns * a:width)
+    let height = float2nr(&lines * a:height)
+    let row = float2nr((&lines - height) / 2)
+    let col = float2nr((&columns - width) / 2)
+
+    " Border
+    let top = '╭' . repeat('─', width - 2) . '╮'
+    let mid = '│' . repeat(' ', width - 2) . '│'
+    let bot = '╰' . repeat('─', width - 2) . '╯'
+    let border = [top] + repeat([mid], height - 2) + [bot]
+
+    let args1 = [a:border_highlight, {'row': row, 'col': col, 'width': width, 'height': height}]
+    let args2 = ['Normal', {'row': row + 1, 'col': col + 2, 'width': width - 4, 'height': height - 2}]
+    if has('nvim')
+        " Draw frame
+        let frame = call('s:create_float', args1)
+        call nvim_buf_set_lines(frame, 0, -1, v:true, border)
+        "                              │   │  │{{{
+        "                              │   │  └ out-of-bounds indices should be an error
+        "                              │   │
+        "                              │   └ up to the last line
+        "                              │
+        "                              │     actually `-1` stands for the index *after* the last line,
+        "                              │     but since this argument is exclusive, here,
+        "                              │     `-1` matches the last line
+        "                              │
+        "                              └ start replacing from the first line
+        " }}}
+        " Draw viewport
+        call call('s:create_float', args2)
+    else
+        let frame = call('s:create_popup_window', args1)
+        call setbufline(frame, 0, border)
+        call call('s:create_popup_window', args2)
+    endif
+
+    " Wipe frame buffer when viewport is quit
+    exe 'au BufWipeout <buffer> bw!'..frame
+endfu
+
 if has('nvim')
-    " Source: https://github.com/neovim/neovim/issues/9718#issuecomment-559573308
-    fu s:create_centered_floating_window() abort
-        " set the width to `&columns - 20`, and make sure it's at least 80 and at most `&columns - 4`
-        let width = min([&columns - 4, max([80, &columns - 20])])
-        " set the height to `&lines - 10`, and make sure it's at least 20 and at most `&lines - 4`
-        let height = min([&lines - 4, max([20, &lines - 10])])
-        let top = '┌'..repeat('─', width - 2)..'┐'
-        let mid = '│'..repeat(' ', width - 2)..'│'
-        let bot = '└'..repeat('─', width - 2)..'┘'
-        let lines = [top] + repeat([mid], height - 2) + [bot]
-        let config = {
-            "\ sets the window layout to "floating",
-            "\ place at (row,col) coordinates relative to the global editor grid
-            \ 'relative': 'editor',
-            \ 'row': ((&lines - height) / 2) - 1,
-            \ 'col': (&columns - width) / 2,
-            \ 'width': width,
-            \ 'height': height,
-            "\ display the window with many UI options disabled
-            "\ (e.g. 'number', 'cursorline', 'foldcolumn', ...)
-            \ 'style': 'minimal',
-            \ }
-        let box_bufnr = nvim_create_buf(v:false, v:true)
-        "                             │        │{{{
-        "                             │        └ scratch buffer
-        "                             │
-        "                             └ not listed ('buflisted' off)
+    fu s:create_float(hl, opts) abort
+        "                         ┌ not listed ('buflisted' off){{{
+        "                         │        ┌ scratch buffer
+        "                         │        │}}}
+        let buf = nvim_create_buf(v:false, v:true)
+        " What's the effect of `relative: editor`?{{{
+        "
+        " It sets the window layout to "floating", placed at (row,col) coordinates
+        " relative to the global editor grid.
         "}}}
-        call nvim_buf_set_lines(box_bufnr, 0, -1, v:true, lines)
-        "                                  │   │    │{{{
-        "                                  │   │    └ out-of-bounds indices should be an error
-        "                                  │   │
-        "                                  │   └ up to the last line
-        "                                  │
-        "                                  │     actually `-1` stands for the index *after* the last line,
-        "                                  │     but since this argument is exclusive, here,
-        "                                  │     `-1` matches the last line
-        "                                  │
-        "                                  └ start replacing from the first line
+        "   What about `style: minimal`?{{{
+        "
+        " It displays  the window  with many UI  options disabled  (e.g. 'number',
+        " 'cursorline', 'foldcolumn', ...).
         "}}}
-        " open 1st float to get a surrounding box
-        let winid = nvim_open_win(box_bufnr, v:false, config)
-        call setwinvar(winid, '&winhl', 'Normal:Floating')
-
-        " open 2nd float for fzf to display its info
-        let config.row += 1
-        let config.height -= 2
-        let config.col += 2
-        let config.width -= 4
-        let winid = nvim_open_win(nvim_create_buf(v:false, v:true), v:true, config)
-        "                                                             │
-        "                                                             └ enter the window
-        "                                                             (to make it the current window)
-        call setwinvar(winid, '&winhl', 'Normal:Floating')
-
-        " when the fzf buffer is wiped out, wipe out the surrounding box buffer
-        exe 'au BufWipeout <buffer> ++once bw '..box_bufnr
+        let opts = extend({'relative': 'editor', 'style': 'minimal'}, a:opts)
+        let win = nvim_open_win(buf, v:true, opts)
+        "                            │{{{
+        "                            └ enter the window (to make it the current window)
+        "}}}
+        call setwinvar(win, '&winhighlight', 'NormalFloat:'..a:hl)
+        call setwinvar(win, '&colorcolumn', '')
+        return buf
     endfu
 else
-    fu s:create_centered_floating_window() abort
+    fu s:create_popup_window(hl, opts) abort
         " TODO: Implement sth equivalent for Vim.{{{
         "
         " Not possible right now:
         " https://github.com/vim/vim/issues/4063#issuecomment-565808502
         "
-        " But it could be in the future.
-        "
-        " From `:h todo`:
-        "
-        " >     Popup windows:
-        " >     - Make it possible to put a terminal window in a popup.  Would always grab key
-        " >       input?  Sort-of possible by creating a hidden terminal and opening a popup
-        " >       with that buffer: #4063.
+        " Update: It should be possible starting from 8.2.0191.
+        " However, I don't know how to make fzf use the popup window.
+        " It seems fzf uses whatever window has the focus when it's invoked, and
+        " a Vim popup window never has the focus.
         "}}}
-        10new
+        " FIXME: report crash.{{{
+        "
+        " Start Vim.
+        " Press `SPC fr`.
+        " Press `Esc`.
+        " Press `C-\ C-n`.
+        " Press `!w`.
+        "}}}
+
+        "     let top = '┌'..repeat('─', width - 2)..'┐'
+        "     let mid = '│'..repeat(' ', width - 2)..'│'
+        "     let bot = '└'..repeat('─', width - 2)..'┘'
+        "     let border = [top] + repeat([mid], height - 2) + [bot]
+        "     let line = ((&lines - height) / 2) - 1
+        "     let col = (&columns - width) / 2
+        "     call popup_create(border, #{
+        "         \ line: line,
+        "         \ col: col,
+        "         \ minwidth: width,
+        "         \ minheight: height,
+        "         \ mask: [[col-8, col+width-11, line-2, line+height-5]]})
+
+        let buf = term_start(&shell, #{hidden: 1})
+        call popup_create(buf, #{
+            \ line: a:opts.row,
+            \ col: a:opts.col,
+            \ minwidth: a:opts.width,
+            \ minheight: a:opts.height,
+            \ })
+        return buf
+        exe 'au BufWipeout * ++once bw!'..buf
     endfu
 endif
 

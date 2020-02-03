@@ -50,7 +50,7 @@ endfu
 fu s:vertical_jump_go(is_fwd, mode) abort
     if a:mode is# 'n'
         norm! m'
-    elseif a:mode =~# "[vV\<c-v>]"
+    elseif a:mode =~# "^[vV\<c-v>]$"
         norm! gv
     endif
 
@@ -430,7 +430,6 @@ sil! call lg#motion#repeatable#make#all({
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '[Z',  'fwd': ']Z'},
     \              {'bwd': '[h',  'fwd': ']h'},
     \              {'bwd': '[r',  'fwd': ']r'},
     \              {'bwd': '[u',  'fwd': ']u'},

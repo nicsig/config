@@ -352,8 +352,10 @@ fu colorscheme#cursorline(enable) abort "{{{2
             aug! my_cursorline
         endif
         setl nocul
-        let &l:culopt = get(s:, 'culopt_save', &l:culopt)
-        unlet! s:culopt_save
+        if !has('nvim')
+            let &l:culopt = get(s:, 'culopt_save', &l:culopt)
+            unlet! s:culopt_save
+        endif
     endif
 endfu
 
