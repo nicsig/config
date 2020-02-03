@@ -1676,16 +1676,9 @@ set signcolumn=yes
 if !has('nvim')
     augroup disable_signcolumn_in_terminal_buffer
         au!
-        au TerminalOpen * setl scl=no
+        au TerminalOpen * if &bt is# 'terminal' | setl scl=no | endif
     augroup END
 endif
-
-" Old Way:
-" sign define dummy
-" augroup dummy_sign
-"     au!
-"     au BufReadPost * exe 'sign place 9999 line=1 name=dummy buffer=' . bufnr('%')
-" augroup END
 
 " startofline {{{2
 
@@ -4973,7 +4966,7 @@ snor <c-d> <esc>i<del>
 augroup install_escape_mapping_in_terminal
     au!
     if !has('nvim')
-        " Do *not* install this mapping:  `tno  <buffer>  <esc>:  <c-\><c-n>:`{{{
+        " Do *not* install this mapping:  `tno <buffer> <esc>: <c-\><c-n>:`{{{
         "
         " Watch:
         "
@@ -4984,9 +4977,9 @@ augroup install_escape_mapping_in_terminal
         "
         " The meta keysyms are disabled.
                 " }}}
-        au TerminalOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
+        au TerminalOpen * if &bt is# 'terminal' | exe 'tno <buffer> <esc><esc> <c-\><c-n>' | endif
     else
-        au TermOpen * tno  <buffer>  <esc><esc>  <c-\><c-n>
+        au TermOpen * tno <buffer> <esc><esc> <c-\><c-n>
     endif
 augroup END
 
@@ -6776,7 +6769,7 @@ augroup my_terminal
     if has('nvim')
         au TermOpen * call s:setup_neovim_terminal() | startinsert
     else
-        au TerminalOpen * call s:setup_vim_terminal()
+        au TerminalOpen * if &bt is# 'terminal' | call s:setup_vim_terminal() | endif
     endif
 augroup END
 
@@ -6871,7 +6864,7 @@ augroup trailing_whitespace
     " been correctly set.
     "}}}
     if !has('nvim')
-        au TerminalOpen * call s:trailing_whitespace(0)
+        au TerminalOpen * if &bt is# 'terminal' | call s:trailing_whitespace(0) | endif
     endif
 
     " An undesirable match will be installed in a help buffer, even with `help` in `s:NO_TRAILING_WHITESPACE_FT`.{{{

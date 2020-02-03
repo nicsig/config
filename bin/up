@@ -230,8 +230,8 @@ EOF
 
   local path="${2}${plugin_name}"
   [[ -d "${path}" ]] || git -C "$2" clone "$1"
-  git -C "${path}" stash
-  git -C "${path}" clean -d -f .
+  # https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning
+  git -C "${path}" stash --all
   if git -C "${path}" show-ref --verify --quiet refs/heads/master; then
     git -C "${path}" checkout -f master
   fi

@@ -215,20 +215,9 @@ download() { #{{{2
   fi
 
   cd "$PGM" || exit
-  # We may have edited some file (`configure`, `Makefile`, ...).
-  # Stash those edits.
-  git stash
-  # To prevent this kind of error when running `$ git pull`:{{{
-  #
-  #     error: The following untracked working tree files would be overwritten by merge:~
-  #       path/to/file~
-  #       ...~
-  #     Please move or remove them before you merge.~
-  #     Aborting~
-  #
-  # Source: https://stackoverflow.com/a/8362346/9780968
-  #}}}
-  git clean -d -f .
+  # We may have edited some file (`configure`, `Makefile`, ...).  Stash those edits.
+  # https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning
+  git stash --all
   if [[ -n "$COMMIT_HASH" ]]; then
     git checkout -f "$COMMIT_HASH"
   # check a master branch exists (trans has no master branch)
