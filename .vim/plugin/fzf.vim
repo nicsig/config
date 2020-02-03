@@ -171,21 +171,8 @@ fu s:fuzzy_mappings() abort
 endfu
 call s:fuzzy_mappings()
 
-nno <silent> <space>fgc :<c-u>call <sid>fuzzy_commits('')<cr>
-nno <silent> <space>fgbc :<c-u>call <sid>fuzzy_commits('B')<cr>
-fu s:fuzzy_commits(char) abort
-    let cwd = getcwd()
-    " To use `:FzBCommits` and `:FzCommits`, we first need to be in the working tree of the repo:{{{
-    "
-    "    - in which the current file belongs
-    "
-    "    - in which we are interested;
-    "      let's say, again, the one where the current file belong
-    "}}}
-    noa exe 'lcd '..fnameescape(expand('%:p:h'))
-    exe g:fzf_command_prefix..a:char..'Commits'
-    noa exe 'lcd '..cwd
-endfu
+nno <silent> <space>fgc :<c-u>call plugin#fzf#commits('')<cr>
+nno <silent> <space>fgbc :<c-u>call plugin#fzf#commits('B')<cr>
 
 " Why not `C-r C-r`?{{{
 "

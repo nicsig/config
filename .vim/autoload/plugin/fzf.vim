@@ -1,18 +1,20 @@
-if has('nvim')
+" Interface {{{1
+fu plugin#fzf#window(width, height, border_highlight) abort "{{{2
     " Source: https://github.com/junegunn/fzf/blob/master/README-VIM.md#starting-fzf-in-neovim-floating-window
-    fu plugin#fzf#window(width, height, border_highlight) abort
-        " Size and position
-        let width = float2nr(&columns * a:width)
-        let height = float2nr(&lines * a:height)
-        let row = float2nr((&lines - height) / 2)
-        let col = float2nr((&columns - width) / 2)
 
-        " Border
-        let top = '┌' . repeat('─', width - 2) . '┐'
-        let mid = '│' . repeat(' ', width - 2) . '│'
-        let bot = '└' . repeat('─', width - 2) . '┘'
-        let border = [top] + repeat([mid], height - 2) + [bot]
+    " Size and position
+    let width = float2nr(&columns * a:width)
+    let height = float2nr(&lines * a:height)
+    let row = float2nr((&lines - height) / 2)
+    let col = float2nr((&columns - width) / 2)
 
+    " Border
+    let top = '┌' . repeat('─', width - 2) . '┐'
+    let mid = '│' . repeat(' ', width - 2) . '│'
+    let bot = '└' . repeat('─', width - 2) . '┘'
+    let border = [top] + repeat([mid], height - 2) + [bot]
+
+    if has('nvim')
         " Draw frame
         let frame = s:create_float(a:border_highlight, {
             \ 'row': row,
@@ -42,45 +44,9 @@ if has('nvim')
             \ })
         " Wipe frame buffer when viewport is quit
         exe 'au BufWipeout <buffer> bw '..frame
-    endfu
-
-    fu s:create_float(hl, opts) abort
-        "                         ┌ not listed ('buflisted' off){{{
-        "                         │        ┌ scratch buffer
-        "                         │        │}}}
-        let buf = nvim_create_buf(v:false, v:true)
-        " What's the effect of `relative: editor`?{{{
-        "
-        " It sets the window layout to "floating", placed at (row,col) coordinates
-        " relative to the global editor grid.
-        "}}}
-        "   What about `style: minimal`?{{{
-        "
-        " It displays  the window  with many UI  options disabled  (e.g. 'number',
-        " 'cursorline', 'foldcolumn', ...).
-        "}}}
-        let opts = extend({'relative': 'editor', 'style': 'minimal'}, a:opts)
-        let win = nvim_open_win(buf, v:true, opts)
-        "                            │{{{
-        "                            └ enter the window (to make it the current window)
-        "}}}
-        call setwinvar(win, '&winhighlight', 'NormalFloat:'..a:hl)
-        return buf
-    endfu
-else
-    fu plugin#fzf#window(width, height, border_highlight) abort
-        let width = float2nr(&columns * a:width)
-        let height = float2nr(&lines * a:height)
-        let line = ((&lines - height) / 2) -1 + 1
-        let col = (&columns - width) / 2 + 2
-
-        let top = '┌' . repeat('─', width - 2) . '┐'
-        let mid = '│' . repeat(' ', width - 2) . '│'
-        let bot = '└' . repeat('─', width - 2) . '┘'
-        let border = [top] + repeat([mid], height - 2) + [bot]
-
+    else
         let frame = s:create_popup_window(a:border_highlight, {
-            \ 'line': line,
+            \ 'line': row,
             \ 'col': col,
             \ 'width': width,
             \ 'height': height,
@@ -89,36 +55,75 @@ else
         call setbufline(frame, 1, border)
 
         call s:create_popup_window('Normal', {
-            \ 'line': line + 1,
+            \ 'line': row + 1,
             \ 'col': col + 2,
             \ 'width': width - 4,
             \ 'height': height - 2,
             \ })
-    endfu
+    endif
+endfu
 
-    fu s:create_popup_window(hl, opts) abort
-        if has_key(a:opts, 'is_frame')
-            let id = popup_create('', #{
-                \ line: a:opts.line,
-                \ col: a:opts.col,
-                \ minwidth: a:opts.width,
-                \ minheight: a:opts.height,
-                \ zindex: 50,
-                \ })
-            call setwinvar(id, '&wincolor', a:hl)
-            exe 'au BufWipeout * ++once call popup_close('..id..')'
-            return winbufnr(id)
-        else
-            let buf = term_start(&shell, #{hidden: 1})
-            call popup_create(buf, #{
-                \ line: a:opts.line,
-                \ col: a:opts.col,
-                \ minwidth: a:opts.width,
-                \ minheight: a:opts.height,
-                \ zindex: 51,
-                \ })
-            exe 'au BufWipeout * ++once bw! '..buf
-        endif
-    endfu
-endif
+fu plugin#fzf#commits(char) abort "{{{2
+    let cwd = getcwd()
+    " To use `:FzBCommits` and `:FzCommits`, we first need to be in the working tree of the repo:{{{
+    "
+    "    - in which the current file belongs
+    "
+    "    - in which we are interested;
+    "      let's say, again, the one where the current file belong
+    "}}}
+    noa exe 'lcd '..fnameescape(expand('%:p:h'))
+    exe g:fzf_command_prefix..a:char..'Commits'
+    noa exe 'lcd '..cwd
+endfu
+" }}}1
+" Core {{{1
+fu s:create_float(hl, opts) abort "{{{2
+    "                         ┌ not listed ('buflisted' off){{{
+    "                         │        ┌ scratch buffer
+    "                         │        │}}}
+    let buf = nvim_create_buf(v:false, v:true)
+    " What's the effect of `relative: editor`?{{{
+    "
+    " It sets the  window layout to "floating", placed  at (row,col) coordinates
+    " relative to the global editor grid.
+    "}}}
+    "   What about `style: minimal`?{{{
+    "
+    " It  displays the  window with  many  UI options  disabled (e.g.  'number',
+    " 'cursorline', 'foldcolumn', ...).
+    "}}}
+    let opts = extend({'relative': 'editor', 'style': 'minimal'}, a:opts)
+    let win = nvim_open_win(buf, v:true, opts)
+    "                            │{{{
+    "                            └ enter the window (to make it the current window)
+    "}}}
+    call setwinvar(win, '&winhighlight', 'NormalFloat:'..a:hl)
+    return buf
+endfu
+
+fu s:create_popup_window(hl, opts) abort "{{{2
+    if has_key(a:opts, 'is_frame')
+        let id = popup_create('', #{
+            \ line: a:opts.line,
+            \ col: a:opts.col,
+            \ minwidth: a:opts.width,
+            \ minheight: a:opts.height,
+            \ zindex: 50,
+            \ })
+        call setwinvar(id, '&wincolor', a:hl)
+        exe 'au BufWipeout * ++once call popup_close('..id..')'
+        return winbufnr(id)
+    else
+        let buf = term_start(&shell, #{hidden: 1})
+        call popup_create(buf, #{
+            \ line: a:opts.line,
+            \ col: a:opts.col,
+            \ minwidth: a:opts.width,
+            \ minheight: a:opts.height,
+            \ zindex: 51,
+            \ })
+        exe 'au BufWipeout * ++once bw! '..buf
+    endif
+endfu
 
