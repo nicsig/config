@@ -6,12 +6,12 @@ setl noswf
 " to avoid polluting the buffer list
 " Why the value 'wipe', and not 'delete'?{{{
 "
-" If we press `SPC q` to quit the window, `lg#window#quit()` will run `:close`.
+" If we press `SPC q` to quit the window, `window#quit#main()` will run `:close`.
 " If we have unsaved changes, this will raise `E37`:
 "
 "     Vim(close):E37: No write since last change (add ! to override)
 "
-" However, if the  value of 'bh' is 'wipe', then  `lg#window#quit()` adds a bang
+" However, if the value of 'bh' is 'wipe', then `window#quit#main()` adds a bang
 " (`:close!`), which avoids the error.
 "}}}
 setl bh=wipe nobl

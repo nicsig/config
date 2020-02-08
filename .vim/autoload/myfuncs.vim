@@ -300,8 +300,7 @@ fu myfuncs#box_create(_) abort
         norm! gv$A|
 
         " align all (*) the pipe characters (`|`) inside the current paragraph
-        let range = line("'[").','.line("']")
-        sil exe range..'EasyAlign *|'
+        sil '[,']EasyAlign *|
 
         " If we wanted to center the text inside each cell, we would have to add
         " hit `CR CR` after `gaip`:
@@ -425,7 +424,8 @@ fu myfuncs#box_destroy(type) abort
 endfu
 
 fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
-    let view = winsaveview() | let fen_save = &l:fen | setl nofen
+    let view = winsaveview()
+    let fen_save = &l:fen | setl nofen
 
     " Purpose:{{{
     "
@@ -464,7 +464,8 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     sil! update
     "  │
     "  └ `:h E32`
-    let &l:fen = fen_save | call winrestview(view)
+    let &l:fen = fen_save
+    call winrestview(view)
     " `sil!` because if the pattern was so broad that all the lines were removed,
     " the original line doesn't exist anymore, and the `'` mark is invalid
     sil! norm! `'zv

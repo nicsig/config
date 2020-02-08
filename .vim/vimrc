@@ -1664,7 +1664,13 @@ set shortmess+=W
 " signcolumn {{{2
 
 " We want a margin between the left of the screen and the text.
-set signcolumn=yes
+if has('nvim')
+    " https://www.reddit.com/r/neovim/comments/f04fao/my_biggest_vimneovim_wish_single_width_sign_column/fgrz3vm/
+    set signcolumn=yes:1
+else
+    set signcolumn=yes
+endif
+
 
 " We don't want `'signcolumn'` to be enabled in a Vim terminal buffer.{{{
 "
@@ -1676,7 +1682,7 @@ set signcolumn=yes
 if !has('nvim')
     augroup disable_signcolumn_in_terminal_buffer
         au!
-        au TerminalOpen * if &bt is# 'terminal' | setl scl=no | endif
+        au TerminalWinOpen * setl scl=no
     augroup END
 endif
 
@@ -4099,8 +4105,7 @@ fu s:join_tab_page(cnt) abort
     " If the mapping received  a count, move the current window  to the tab page
     " whose number matches this count.
     let bufnr = bufnr('%')
-    " not `:q`/`:close` because we want to be able to undo
-    call lg#window#quit()
+    q
     if cnt < curtab
         exe 'tabnext '..min([cnt, tabpagenr('$')])
     else
@@ -4977,7 +4982,7 @@ augroup install_escape_mapping_in_terminal
         "
         " The meta keysyms are disabled.
                 " }}}
-        au TerminalOpen * if &bt is# 'terminal' | exe 'tno <buffer> <esc><esc> <c-\><c-n>' | endif
+        au TerminalWinOpen * tno <buffer> <esc><esc> <c-\><c-n>
     else
         au TermOpen * tno <buffer> <esc><esc> <c-\><c-n>
     endif
@@ -5312,6 +5317,75 @@ if has('nvim')
     com -bar CheckHealth checkhealth
 endif
 
+" CombineParamValues {{{2
+
+" Purpose:{{{
+"
+" Here is a situation which we frequently encounter:
+"
+" We find some issue which can be influenced by several parameters.
+" To  get a  better  understanding, we  want  to  make a  test  in all  possible
+" environments (i.e. for all combinations of parameters values).
+"
+" Getting all those combinations can be time-consuming, and tedious.
+" We need a command to automate the task.
+"}}}
+" Usage:{{{
+"
+" Write all the possible values of each parameter on a dedicated line, separated
+" by whitespace.  Then run the command against this range of lines.
+"
+" As an example, executing the command on these lines:
+"
+"     a
+"     b c
+"
+" will replace them with:
+"
+"     a b
+"     a c
+"
+" And these lines:
+"
+"     a
+"     b c
+"     d e f
+"
+" would be replaced with:
+"
+"     a b d
+"     a b e
+"     a b f
+"     a c d
+"     a c e
+"     a c f
+"}}}
+com -bar -range=% CombineParamValues call s:combine_param_values(<line1>, <line2>)
+
+fu s:combine_param_values(lnum1, lnum2) abort
+    let param_values = map(filter(getline(a:lnum1, a:lnum2), {_,v -> v != ''}), {_,v -> split(v)})
+    if len(param_values) < 2 | return | endif
+    let reg_save = [getreg('"'), getregtype('"')]
+    let @" = join(s:combine(param_values), "\n")
+    exe 'norm! '..a:lnum1..'GV'..a:lnum2..'G""p'
+    call setreg('"', reg_save[0], reg_save[1])
+    sil exe '''<,''>EasyAlign *\ '
+endfu
+
+fu s:combine(param_values) abort
+    if len(a:param_values) == 2
+        let res = []
+        for i in a:param_values[0]
+            for j in a:param_values[1]
+                let res += [i..' '..j]
+            endfor
+        endfor
+    else
+        let res = s:combine([s:combine(a:param_values[:-2]), a:param_values[-1]])
+    endif
+    return res
+endfu
+
 " DiffLines {{{2
 
 com -bar -bang -range -nargs=? DiffLines call myfuncs#diff_lines(<bang>0, <line1>, <line2>, <q-args>)
@@ -5629,9 +5703,9 @@ com -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " purpose.
 
 com -bar -bang -nargs=1 JoinBlocks
-\ |                                 let &l:fen = 0
-\ |                                 exe "keepp .,.+<args>-1g/^/''+<args>m.|-j<bang>"
-\ |                                 let &l:fen = 1
+    \ | let &l:fen = 0
+    \ | exe "keepp .,.+<args>-1g/^/''+<args>m.|-j<bang>"
+    \ | let &l:fen = 1
 
 " OnlySelection {{{2
 
@@ -6769,21 +6843,39 @@ augroup my_terminal
     if has('nvim')
         au TermOpen * call s:setup_neovim_terminal() | startinsert
     else
-        au TerminalOpen * if &bt is# 'terminal' | call s:setup_vim_terminal() | endif
+        au TerminalWinOpen * call s:setup_vim_terminal()
     endif
 augroup END
 
 fu s:setup_vim_terminal() abort
     " Neovim automatically disables `'wrap'` in a terminal buffer.
     " Not Vim. We do it in this function.
-    setl nowrap
+    setlocal nowrap
+    " 'scrolloff' might
     call s:setup_neovim_terminal()
     " Here, `'termwinkey'` seems to behave a little like `C-r` in insert mode.
     " With one difference though: when specifying the register, you need to prefix it with `"`.
-    exe 'nno <buffer><nowait><silent> p i<c-e>'..&l:termwinkey..'""'
+    execute 'nnoremap <buffer><nowait><silent> p i<c-e>'..&l:termwinkey..'""'
 endfu
 
 fu s:setup_neovim_terminal() abort
+    " `'scrolloff'` causes an issue with our zsh snippets:{{{
+    "
+    "     $ nvim -Nu NONE +'set so=3 | 10sp | term' +'startinsert'
+    "     # press C-g C-g Esc
+    "     # insert some random characters
+    "     # the terminal window flickers
+    "
+    " Imo, it's a bug:
+    " https://github.com/neovim/neovim/issues/11072#issuecomment-533828802
+    " But the devs closed the issue.
+    "
+    " There may be other similar issues:
+    " https://github.com/neovim/neovim/search?q=terminal+scrolloff&type=Issues
+    "
+    " Anyway, let's reset the option in a terminal window to avoid any issue.
+    "}}}
+    setlocal scrolloff=0
     nno <buffer><nowait><silent> I  I<c-a>
     nno <buffer><nowait><silent> A  A<c-e>
     nno <buffer><nowait><silent> C  i<c-k>
@@ -6864,7 +6956,7 @@ augroup trailing_whitespace
     " been correctly set.
     "}}}
     if !has('nvim')
-        au TerminalOpen * if &bt is# 'terminal' | call s:trailing_whitespace(0) | endif
+        au TerminalWinOpen * call s:trailing_whitespace(0)
     endif
 
     " An undesirable match will be installed in a help buffer, even with `help` in `s:NO_TRAILING_WHITESPACE_FT`.{{{
@@ -7271,7 +7363,7 @@ endfu
                   "}}}
                   " Still, syntax highlighting would work better.
                   " Less hack, no timer.
-                  au CmdlineLeave : call timer_start(5, {-> execute("exe 'au! my_ltag' | aug! my_ltag", 'silent!')})
+                  au CmdlineLeave : call timer_start(5, {-> execute(['au! my_ltag', 'aug! my_ltag'], 'silent!')})
                   au FileType qf ++once call s:ltag(2)
               augroup END
               return ':ltag / | lw'..repeat("\<left>", 5)
@@ -7795,6 +7887,7 @@ endfu
 "
 "     :h vim-differences (Neovim only)
 "     and all the links from this page, in particular `:h API`
+"     as well as: https://www.2n.pl/blog/how-to-write-neovim-plugins-in-lua
 "
 " 54 -
 "
@@ -8184,10 +8277,10 @@ endfu
 " gives  the position  of  `'>`, and  vice versa;  if  you're controlling  `'>`,
 " `getpos('v')` gives the position of `'<`.
 "
-" If  you want  an expression  which tells  you whether  you're controlling  the
-" bottom of the selection:
+" If you want  an expression which tells you whether  you're controlling the end
+" of the selection:
 "
-"     line('.') >= getpos('v')[1]
+"     line('.') > getpos('v')[1] || line('.') == getpos('v')[1] && col('.') >= getpos('v')[2]
 "
 " 74 -
 "
@@ -9097,7 +9190,7 @@ endfu
 "
 " Solution:
 "
-" In `lg#window#quit()`, replace this line:
+" In `window#quit#main()`, replace this line:
 "
 "     if reg_recording() isnot# '' | return feedkeys('q', 'in')[-1] | endif
 "
@@ -9124,8 +9217,6 @@ endfu
 " want them to be saved/restored via viminfo.
 "
 " Document somewhere how `[gs]etenv()` can be used.
-
-
 
 
 
