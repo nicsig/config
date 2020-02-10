@@ -5,10 +5,10 @@ endif
 " Define some motions {{{1
 "       Why define them here? Why not in vimrc?{{{
 "
-" In vimrc, we would need a guard:
+" In the vimrc, we would need a guard:
 "
 "     if has('vim_starting')
-"         …
+"         ...
 "     endif
 "
 " Without it, as  soon as we would  resource the vimrc, the  wrappers which make

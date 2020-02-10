@@ -55,11 +55,11 @@ endif
 " We should see the  submode in the command-line.
 " Tweak `submode#enter_with()` so that we can ask for the submode to be shown
 " on a per-submode basis (i.e. for some of them nothing shown, for other yes).
-" Currently, we don't see in which submode we are because we've disabled 'showmode'
-" in vimrc.
+" Currently,  we don't  see  in  which submode  we  are  because we've  disabled
+" 'showmode' in the vimrc.
 "
 " Note:
-" Even if you enable 'showmode' in vimrc, you won't always see the submode.
+" Even if you enable 'showmode' in the vimrc, you won't always see the submode.
 " If the submode is a submode of insert mode, `INSERT` would shadow the message.
 " Is this issue present in the original plugin?
 " Anyway, the solution would be to remove `s:smd_save` everywhere, and to reset

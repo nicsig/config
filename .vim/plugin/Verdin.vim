@@ -38,6 +38,6 @@ let g:Verdin#fuzzymatch = 0
 "}}}
 augroup no_Verdin_in_vimrc
     au!
-    au BufReadPost /home/jean/.vim/vimrc setl ofu=syntaxcomplete#Complete
+    au BufReadPost $MYVIMRC setl ofu=syntaxcomplete#Complete
 augroup END
 

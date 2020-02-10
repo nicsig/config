@@ -825,7 +825,7 @@ fu myfuncs#plugin_install(url) abort "{{{1
     let to_install = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
 
     let win_orig = win_getid()
-    vnew | e ~/.vim/vimrc
+    vnew | e $MYVIMRC
     if &l:ro
         echom 'cannot install plugin (vimrc is readonly)'
         return
@@ -860,7 +860,7 @@ fu myfuncs#plugin_install(url) abort "{{{1
     update
     " Why?{{{
     "
-    " Saving  `vimrc`, and  triggering  its  resourcing, is  not  enough to  let
+    " Saving the  vimrc, and  triggering its  resourcing, is  not enough  to let
     " `vim-plug` know that it must manage a new plugin.
     " Indeed we've guarded all `:Plug` commands with `if has('vim_starting')`.
     " So, to avoid having to restart  Vim, we manually tell `vim-plug` about our

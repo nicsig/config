@@ -218,7 +218,7 @@ augroup my_ultisnips
     " ---
     "
     " Atm, I can reproduce the issue when  I expand the snippet `vimrc` in a new
-    " file, then move the cursor at the end of the file, and execute `:r ~/.vim/vimrc`.
+    " file, then move the cursor at the end of the file, and execute `:r $MYVIMRC`.
     "
     " I'm not sure but this may be due to this issue:
     "

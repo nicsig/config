@@ -3,7 +3,7 @@
 " Use this file to disable some keys.
 " Use it to remove some undesirable mappings installed by other plugins.
 "}}}
-" Why should I disable keys in `~/.vim/after/plugin`, instead of `vimrc`?{{{
+" Why should I disable keys in `~/.vim/after/plugin`, instead of the vimrc?{{{
 "
 " Plugin authors often use `mapcheck()` to decide whether they can remap a key.
 " And,  atm, `mapcheck()`  returns an  empty string  whether there's  no mapping
@@ -14,9 +14,7 @@
 " mapping, even if it tries to avoid it by invoking `mapcheck()`.
 "
 " This is what happens if you disable `s` (recommended by `vim-sandwich`).
-" `vim-sneak` will still remap `s`:
-"
-"         https://github.com/vim/vim/issues/2940
+" `vim-sneak` will still remap `s`: https://github.com/vim/vim/issues/2940
 "
 " In fact, it depends on the order of installation of the mappings:
 "
@@ -48,8 +46,8 @@ fu s:cancel_prefix(prefixes) abort
         " In this case, the key should have no effect.
         " This is probably the reason why `:h sandwich-keymappings`, recommends this:{{{
         "
-        " NOTE: To prevent unintended operation, the following setting is strongly
-        "       recommended to add to your vimrc.
+        " > NOTE: To prevent unintended operation, the following setting is strongly
+        " >       recommended to add to your vimrc.
         "
         "         nmap s <Nop>
         "         xmap s <Nop>
