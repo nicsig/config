@@ -21,7 +21,7 @@ let g:fzf_layout = {
     \     'height': 0.6,
     \     'xoffset': 0.5,
     \     'yoffset': 0.5,
-    \     'highlight': 'Comment',
+    \     'highlight': 'Normal',
     \     'border': 'sharp',
     \ }}
 

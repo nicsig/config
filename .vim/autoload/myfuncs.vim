@@ -220,7 +220,7 @@ fu myfuncs#op_yank_matches(type) abort
               \ ?     '^\s*\C\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')
               \ :     @/
 
-        exe mods..' '..range..cmd..'/'..pat..'/y Z'
+        exe mods..' '..range..cmd..'/'..escape(pat, '/')..'/y Z'
 
         " Remove empty lines.
         " We can't use the pattern `\_^\s*\n` to describe an empty line, because
@@ -373,7 +373,7 @@ fu s:box_create_separations() abort
     "
     " ... useful to make our table more readable.
     norm! '{++yyp
-    sil keepj keepp s/[^│┼]/ /ge
+    call setline('.', substitute(getline('.'), '[^│┼]', ' ', 'g'))
 
     " Delete it in the `s` (s for space) register, so that it's stored inside
     " default register and we can paste it wherever we want.
@@ -458,7 +458,7 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     let mods = 'keepj keepp '
     let range = a:0 && a:1 =~# '\<vis\>' ? '*' : '%'
     let pat = to_search[a:to_delete][0]
-    exe mods..range..global..'/'..pat..'/d_'
+    exe mods..range..global..'/'..escape(pat, '/')..'/d_'
     if a:to_delete is# 'folds' | sil exe mods..range..'s/\s\+$//' | endif
 
     sil! update
@@ -613,8 +613,8 @@ fu myfuncs#dump_wiki(url) abort "{{{1
 
         sil keepj keepp 'x+,'y-s/^/# /
         sil keepj keepp 'x+,'y-g/^./exe 'keepalt r '..tempdir..'/'..getline('.')[2:]
-        sil keepj keepp 'x+,'y-g/^=\+\s*$/d_ | -s/^/## /
-        sil keepj keepp 'x+,'y-g/^-\+\s*$/d_ | -s/^/### /
+        sil keepj keepp 'x+,'y-g/^=\+\s*$/d_ | call setline(line('.')-1, substitute(getline(line('.')-1), '^', '## ', ''))
+        sil keepj keepp 'x+,'y-g/^-\+\s*$/d_ | call setline(line('.')-1, substitute(getline(line('.')-1), '^', '### ', ''))
         sil keepj keepp 'x+,'y-s/^#.\{-}\n\zs\s*\n\ze##//
 
         sil keepj keepp 'x+,'y-g/^#\%(#\)\@!/call append(line('.')-1, '#')

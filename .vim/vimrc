@@ -8572,29 +8572,6 @@ endfu
 "
 " 92 -
 "
-" Refactor your `]q` &friends mapping, so that they call `:[cl]above` and `:[cl]below`.
-"
-" Update: No wait, those commands move relatively to the current *entry* in the qfl.
-" Maybe you would prefer commands which move relatively to the current *cursor position*.
-" If so, try the `:[cl]before` and the `:[cl]after` commands.
-"
-" Update:
-" I'm not sure to understand what those commands are supposed to do.
-" I've run `:helpg foo`,  then I've pressed Enter on the  first entry, and tried
-" to run every of those commands; they all raise an error...
-"
-" Oh...
-" I think `:cbelow` fails when there is no other match in the current file.
-" It works  in a file where  there are still  other matches in the  current file
-" after the current entry.
-" IOW, I think all those commands are limited to the current file.
-"
-" Also: Vim  patch 8.1.1281  has extended  `:[cl]history` to  make it  select an
-" arbitrary qfl in the stack, via a count.
-" Once the patch has been ported to Nvim, use this command and get rid of `:CC`, `:LL`.
-"
-" 93 -
-"
 " Document the fact that  you need to put `<esc>` at the start  of the rhs of an
 " `:ono` mapping if it presses `v:operator`.
 "
@@ -8632,7 +8609,7 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 94 -
+" 93 -
 "
 " We have too many comments in this file about the bracketed paste mode.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
@@ -8642,7 +8619,7 @@ endfu
 "
 " https://github.com/neovim/neovim/pull/4448
 "
-" 95 -
+" 94 -
 "
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
@@ -8652,7 +8629,7 @@ endfu
 " Also, `:verbose syn list ...` doesn't print the script location from which the
 " syntax group was installed. Maybe ask for an improvement of `:verb`.
 "
-" 96 -
+" 95 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -8668,7 +8645,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 97 -
+" 96 -
 "
 " We really need a library function to get a comment leader.
 "
@@ -8717,7 +8694,7 @@ endfu
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 "
-" 98 -
+" 97 -
 "
 " We often make this error:
 "
@@ -8733,20 +8710,20 @@ endfu
 " Other Idea: Make `M-b` inspect the 2 previous characters.
 " If they are a pair of brackets, make it move the cursor as if `C-b` had been pressed.
 "
-" 99 -
+" 98 -
 "
 " In a markdown file, `gc` should behave slightly differently.
 " It  should  make sure  there  are  4 spaces  between  `>`  and the  first  non
 " whitespace on each line; and reformat the quote with `par(1)`.
 " Because that's what we do all the time; so better automate it.
 "
-" 100 -
+" 99 -
 "
 " In a fugitive buffer, when we need to  stage many files, I would like to press
 " `-` very fast. We can't because – for  some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
 "
-" 101 -
+" 100 -
 "
 " We've just had an issue in `vim-search` because we used `==` instead of `==#`.
 " Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
@@ -8754,7 +8731,7 @@ endfu
 "
 "     vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** ~/.vim/vimrc
 "
-" 102 -
+" 101 -
 "
 " The  interface of  your plugins  and custom  config should  be simplified  and
 " exposed; review every custom mapping/command.
@@ -8774,7 +8751,7 @@ endfu
 "        If the help of a command gets too big, you could spread it across
 "        several pages, using a `-help {keyword}` argument.
 "
-" 103 -
+" 102 -
 "
 " Should we add the guard `if $MYVIMRC is# '' | finish | endif` in all the files
 " under `~/.vim/{after/}plugin`?
@@ -8785,7 +8762,7 @@ endfu
 " `*/after/ftplugin/{&ft}.vim`?
 " https://github.com/andymass/vim-matchup/commit/0b780e9ae12ba913742356f4b7cedc52d3a15220
 "
-" 104 -
+" 103 -
 "
 " Document a few things about debugging with breakpoints.
 "
@@ -8855,7 +8832,7 @@ endfu
 " the sourcing of the autoloaded directory).
 " Now you can run `:breakadd func <snr>123_function_name`.
 "
-" 105 -
+" 104 -
 "
 " In xterm, we may now be able to use the alt modifier in mappings without nasty
 " side-effects:
@@ -8863,7 +8840,7 @@ endfu
 " `:h modifyOtherKeys`
 " https://github.com/vim/vim/issues/4974#issuecomment-541431801
 "
-" 106 -
+" 105 -
 "
 " Vim saves anything typed on the  command-line, regardless of how we've left it
 " (including when we've pressed `C-c` or `Esc`).
@@ -8882,7 +8859,7 @@ endfu
 "     /the
 "     " press Escape: the cursor jumps to the next occurrence of `the`
 "
-" 107 -
+" 106 -
 "
 " Press `é`: it capitalizes the next word.
 " Also, I don't know how, but we often capitalize a word by accident (in a different way).
@@ -8890,7 +8867,7 @@ endfu
 " Or use xterm, which now supports  meta sequences OOTB, and doesn't suffer from
 " these kind of issues.
 "
-" 108 -
+" 107 -
 "
 " Document somewhere that to debug Nvim, you should not do this *from Vim*:
 "
@@ -8933,7 +8910,7 @@ endfu
 "
 "     source $HOME/.vim/vimrc
 "
-" 109 -
+" 108 -
 "
 " Replace a long `b:undo_ftplugin` with a simple function call:
 "
@@ -8949,7 +8926,7 @@ endfu
 "    - settings are properly reset when we change the filetype
 "    - function implementing the undo is in the right file
 "
-" 110 -
+" 109 -
 "
 " Look for `:windo` and `:wincmd` everywhere.
 "
@@ -8959,7 +8936,7 @@ endfu
 " Once Nvim  supports `win_execute()`, remove  the `lg#` prefix in  the function
 " calls.
 "
-" 111 -
+" 110 -
 "
 " Review all the custom motions you've installed.
 " For each  of them, make  sure you can  jump back with  `C-o` (set mark  `'` on
@@ -8968,12 +8945,12 @@ endfu
 " Actually, maybe not for all of them.
 " Think about which motions should add an entry in the jumplist.
 "
-" 112 -
+" 111 -
 "
 " Install a `=rm`  mapping in Vim files to refactor  nested function calls using
 " the method call operator (`->`).
 "
-" 113 -
+" 112 -
 "
 "     $ cd ; vim
 "     :echo getcwd() → /home/user
@@ -8983,7 +8960,7 @@ endfu
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
 "
-" 114 -
+" 113 -
 "
 " Review all custom text-objects: make sure  they all position the cursor on the
 " end of  the selection, to  be consistent  with what Vim  seems to do  with its
@@ -8998,7 +8975,7 @@ endfu
 " I guess  that it  means that  all our text-objects  should be  implemented via
 " `<expr>` mappings... Otherwise, the output of `mode(1)` is unreliable.
 "
-" 115 -
+" 114 -
 "
 " Every time you've used sth like `norm! %` in the past, it was probably wrong.
 " You should have used sth like:
@@ -9029,7 +9006,7 @@ endfu
 " Enough is enough; we've removed `vim-matchit`, and installed `vim-matchup`.
 " Read the documentation of the latter.
 "
-" 116 -
+" 115 -
 "
 " Search `$MYVIMRC` everywhere; check whether the code works as intended in Nvim.
 " Search `.vim/vimrc` everywhere; check whether we should have used `$MYVIMRC`.
@@ -9037,7 +9014,7 @@ endfu
 " What should  we do  in Nvim? Use `~/.vim/vimrc`,  `~/.config/nvim/init.vim` or
 " both (if so how)?
 "
-" 117 -
+" 116 -
 "
 " Every time  we've "changed"  a buffer  in a way  that the  line count  did not
 " change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
@@ -9055,13 +9032,13 @@ endfu
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 "
-" 118 -
+" 117 -
 "
 " When using the `gc` operator to comment  a line starting with a backslash in a
 " Vimscript file, maybe we  should not add a space between  `"` and `\`, because
 " we sometimes want to temporarily comment a continuation line.
 "
-" 119 -
+" 118 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
 " commented line.
@@ -9083,7 +9060,7 @@ endfu
 "
 "     " ~/.vim/plugged/vim-brackets/autoload/brackets.vim
 "
-" 120 -
+" 119 -
 "
 " I'm fed up with codespans being broken when formatting with `gq`.
 "
@@ -9096,27 +9073,27 @@ endfu
 " Also: Same issue with italics / bold style.
 " Tweak syntax regexes?
 "
-" 121 -
+" 120 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
 "
-" 122 -
+" 121 -
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
 "
-" 123 -
+" 122 -
 "
 " Read:
 " https://vimways.org/2019/indentation-without-dents/ (see `~/.vim/indent/[my]matlab.vim`, `~/Desktop/m.m`)
 " https://vimways.org/2019/a-test-to-attest-to/
 "
-" 124 -
+" 123 -
 "
 " Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
 " (to improve performance...)
 "
-" 125 -
+" 124 -
 "
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
@@ -9125,7 +9102,7 @@ endfu
 "
 " Note that `readdir()` has not been ported to Nvim yet.
 "
-" 126 -
+" 125 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -9138,7 +9115,7 @@ endfu
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 "
-" 127 -
+" 126 -
 "
 " Once Nvim supports `SafeState`, try to replace as many timers as possible:
 "
@@ -9162,13 +9139,13 @@ endfu
 " Naively, I would say yes. The longer a  command is delayed, the longer we stay
 " in an undesirable state...
 "
-" 128 -
+" 127 -
 "
 " We refer to dirvish in several locations in `vim-fex`.
 " I don't like that.
 " dirvish and fex are two different plugins.
 "
-" 129 -
+" 128 -
 "
 "     $ vim
 "     :h
@@ -9210,14 +9187,13 @@ endfu
 " recording; maybe  because it would  cause an infinite recursion  when pressing
 " `q` during a recording.
 "
-" 130 -
+" 129 -
 "
 " Remove all invocations of `setenv()` and `getenv()`.
 " Use global variables  instead; don't write them in uppercase  though; we don't
 " want them to be saved/restored via viminfo.
 "
 " Document somewhere how `[gs]etenv()` can be used.
-
 
 
 

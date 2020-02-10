@@ -698,9 +698,9 @@ export TLDR_QUOTE='italic'
 
 # Make WeeChat use less CPU.{{{
 #
-# > 8.3. How can I tweak WeeChat to use less CPU?
-# > ...
-# > Set the TZ variable (for example: export TZ="Europe/Paris"), to prevent frequent access to file /etc/localtime.
+# >   8.3. How can I tweak WeeChat to use less CPU?
+# >   ...
+# >   Set the TZ variable (for example: export TZ="Europe/Paris"), to prevent frequent access to file /etc/localtime.
 #
 # https://weechat.org/files/doc/devel/weechat_faq.en.html#cpu_usage
 #}}}
