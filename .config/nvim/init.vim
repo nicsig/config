@@ -2,11 +2,11 @@
 
 " Do *not* use two config files; one for Nvim (init.vim), and one for Vim (vimrc).{{{
 "
-" We did that in the past; and we included a `so ~/.vim/vimrc` at the end of the init.vim.
-" But this lead to many issues.
+" We did that  in the past; and we  included a `:so ~/.vim/vimrc` at  the end of
+" the init.vim.  But this lead to many issues.
 "
-" Just use one  file (Vim location or  Nvim location), and create  a symlink for
-" the other editor.  KISS.
+" Just use one file (at the Vim or  Nvim location), and create a symlink for the
+" other editor.  KISS.
 "}}}
 
 if has('nvim')
@@ -307,6 +307,7 @@ Plug 'tpope/vim-rhubarb'
 Plug 'lacygoill/vim-schlepp'
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
+Plug 'dstein64/vim-startuptime'
 Plug 'lacygoill/vim-submode', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmux', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
@@ -2794,7 +2795,7 @@ set whichwrap=h,l
 
 fu s:remember_new_mappings(some_lhs) abort
     for lhs in a:some_lhs
-        exe 'nno  <silent>  '..lhs[0]..'  :<c-u>call <sid>reminder_new_mapping('..string(lhs[1])..')<cr>'
+        exe 'nno <silent> '..lhs[0]..' :<c-u>call <sid>reminder_new_mapping('..string(lhs[1])..')<cr>'
     endfor
 endfu
 
@@ -3940,7 +3941,7 @@ fu s:edit_readme() abort
         " Why `:exe`?{{{
         "
         " If later  you add  a bar  after the  command, `1`  will be  interpreted as
-        " `:1p[rint]`; we don't want that side-effect.
+        " `:1p[rint]`; we don't want that side effect.
         "
         " MWE:
         "     " ✘ the 123th line is printed on the command-line
@@ -5303,7 +5304,7 @@ xno <expr> P '"_d"'..v:register..'P'
 
 " Cfg {{{2
 
-com -bar -complete=custom,s:cfg_complete -nargs=1 Cfg call s:cfg(<q-args>)
+com! -bar -complete=custom,s:cfg_complete -nargs=1 Cfg call s:cfg(<q-args>)
 
 fu s:cfg_complete(_a, _l, _p) abort
     return join(sort(keys(s:PGM2CFGFILES)), "\n")
@@ -5381,13 +5382,13 @@ let s:PGM2CFGFILES = {
 "
 "     :CGrep 'a'\''b"c'
 "}}}
-com -nargs=1 CGrep call myfuncs#op_grep('Ex', <q-args>, 0)
-com -nargs=1 LGrep call myfuncs#op_grep('Ex', <q-args>, 1)
+com! -nargs=1 CGrep call myfuncs#op_grep('Ex', <q-args>, 0)
+com! -nargs=1 LGrep call myfuncs#op_grep('Ex', <q-args>, 1)
 
 " CheckHealth {{{2
 
 if has('nvim')
-    com -bar CheckHealth checkhealth
+    com! -bar CheckHealth checkhealth
 endif
 
 " CombineParamValues {{{2
@@ -5433,7 +5434,7 @@ endif
 "     a c e
 "     a c f
 "}}}
-com -bar -range=% CombineParamValues call s:combine_param_values(<line1>, <line2>)
+com! -bar -range=% CombineParamValues call s:combine_param_values(<line1>, <line2>)
 
 fu s:combine_param_values(lnum1, lnum2) abort
     let param_values = map(filter(getline(a:lnum1, a:lnum2), {_,v -> v != ''}), {_,v -> split(v)})
@@ -5461,12 +5462,12 @@ endfu
 
 " DiffLines {{{2
 
-com -bar -bang -range -nargs=? DiffLines call myfuncs#diff_lines(<bang>0, <line1>, <line2>, <q-args>)
+com! -bar -bang -range -nargs=? DiffLines call myfuncs#diff_lines(<bang>0, <line1>, <line2>, <q-args>)
 
 " DiffOrig {{{2
 
 " See differences between current buffer and original file.
-com -bar DiffOrig echo s:diff_orig()
+com! -bar DiffOrig echo s:diff_orig()
 
 fu s:diff_orig() abort
     call save#toggle_auto(0)
@@ -5508,11 +5509,11 @@ endfu
 " Usage:
 "     :DumpWiki https://github.com/oniony/TMSU/
 
-com -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
+com! -bar -nargs=1 DumpWiki call myfuncs#dump_wiki(<q-args>)
 
 " FormatManpage {{{2
 
-com -bar -range=%  FormatManpage  call s:format_manpage(<line1>, <line2>)
+com! -bar -range=%  FormatManpage  call s:format_manpage(<line1>, <line2>)
 
 fu s:format_manpage(line1, line2) abort
     let range = a:line1..','..a:line2
@@ -5526,17 +5527,17 @@ endfu
 
 " GotoChar {{{2
 
-com -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
+com! -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 
 " GrepCfg {{{2
 
 " Description:{{{
 "
-" Search for a pattern inside all our configuration files, in our config repo.
+" Search for a pattern inside all our configuration files.
 "
 " ---
 "
-" The basic idea is to get the list of files in our config repo with:
+" The basic idea is to get the list of all files in our config repo with:
 "
 "     # https://stackoverflow.com/a/8533413/9780968
 "     $ config ls-tree --full-tree --name-only HEAD -r >/tmp/listing
@@ -5545,67 +5546,48 @@ com -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 "     $ sed -i "s:^:$HOME/:" /tmp/listing
 "
-" Feed them to `grep(1)` via `xargs(1)`, and in turn feed the result to `vim(1)` via `-q`:
+" Then feed them to `:vimgrep`.
 "
-"     $ vim -q <(xargs rg -LS --vimgrep pattern </tmp/listing) +cw
-"
-" In one single command:
-"
-"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs rg -LS --vimgrep pattern) +cw
+" ---
 "
 " We need `sed(1)`,  because the paths output by `$ git  ls-tree` are relative to
 " the root of the repo, which here is our home.
 " But if we're not  in our home, the relative paths  will be interpreted wrongly
 " by `$ vim -q`.
+"
+" ---
+"
+" You could also feed the file names to `grep(1)` via `xargs(1)`:
+"
+"     $ vim -q <(config ls-tree --full-tree -r --name-only HEAD | sed "s:^:$HOME/:" | xargs grep -HIins pattern) +cw
+"
+" But grep's regex engine is not as powerful as Vim.
+"
+" And it can't give you the column position.
+" You can get the byte-offset from the  start of the file with `-ob`, but that's
+" not the byte-offset from the start of the line.
 "}}}
 " Usage:{{{
 "
-"     :GrepCfg '\<sed\>'
-"
-" Note the usage of quotes around the pattern.
-" We could get rid of them if  we defined the command with `<q-args>`, but doing
-" so would introduce an inconsistency between `:GrepCfg` and `grep(1)`.
-" We use quotes around  a pattern after `grep(1)`, so we should  do the same for
-" `:GrepCfg`.
+"     :GrepCfg \<sed\>
 "}}}
-" Do *not* use `-bar`!{{{
-"
-" It  would force  you  to  double a  backslash  in front  of  a  bar, which  is
-" inconsistent with `grep(1)`:
-"
-"     " with `-bar`
-"     :GrepCfg 'hello\\|world'
-"                    ^
-"                    ✘
-"
-"     " without `-bar`
-"     :GrepCfg 'hello\|world'
-"                    ^
-"                    ✔
-"}}}
-com -nargs=1 GrepCfg call s:grep_cfg(<args>)
+com! -nargs=1 GrepCfg call s:grep_cfg(<q-args>)
+
 fu s:grep_cfg(pat) abort
-    let pat = shellescape(a:pat)
-    let cmd =<< trim END
+    let files =<< trim END
         git
-        --git-dir="${HOME}/.cfg/"
-        --work-tree="${HOME}"
+            --git-dir="${HOME}/.cfg/"
+            --work-tree="${HOME}"
         ls-tree
-        --full-tree
-        --name-only HEAD
+            --full-tree
+            --name-only HEAD
         -r
         | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
-        | xargs grep -HIins
     END
-    let cmd += [pat]
-    " TODO: How to get the column position?{{{
-    "
-    " We could pass the `-b` option to  `grep(1)`, but it would give us the byte
-    " offset from the start of the file.
-    " We need the character offset from the start of the line.
-    "}}}
-    sil cgetexpr system(join(cmd)) | cw
-    call setqflist([], 'a', {'title': ':GrepCfg '..pat})
+    let files = systemlist(join(files))
+    call filter(files, 'filereadable(v:val)')
+    exe 'vim /'..escape(a:pat, '/')..'/gj '..join(files)
+    call setqflist([], 'a', {'title': ':GrepCfg '..a:pat})
 endfu
 
 " H {{{2
@@ -5674,7 +5656,7 @@ endfu
 "                      ^^^^^^^^^^^^^^^^^^^^^
 "                      ✘ we would need `/tmp/file`, but the latter has not yet been loaded~
 "}}}
-com -bar -range=%  HlWeirdWhitespace  call s:hl_weird_whitespace()
+com! -bar -range=% HlWeirdWhitespace call s:hl_weird_whitespace()
 
 fu s:hl_weird_whitespace() abort
     if !exists('w:strange_whitespace')
@@ -5697,11 +5679,11 @@ endfu
 "
 " A filename can contain whitespace.
 "}}}
-com -bar -nargs=+ -complete=buffer InAButNotInB call myfuncs#in_A_not_in_B(<f-args>)
+com! -bar -nargs=+ -complete=buffer InAButNotInB call myfuncs#in_A_not_in_B(<f-args>)
 
 " IsPrime {{{2
 
-com -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
+com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 
 " JoinBlocks {{{2
 
@@ -5775,7 +5757,7 @@ com -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 " This command isn't really needed (we have `v_mj`), but I keep it for educational
 " purpose.
 
-com -bar -bang -nargs=1 JoinBlocks
+com! -bar -bang -nargs=1 JoinBlocks
     \ | let &l:fen = 0
     \ | exe "keepp .,.+<args>-1g/^/''+<args>m.|-j<bang>"
     \ | let &l:fen = 1
@@ -5790,11 +5772,11 @@ com -bar -bang -nargs=1 JoinBlocks
 "     :'<,'>OnlySelection
 "     :12,34OnlySelection
 
-com -bar -range=% OnlySelection call myfuncs#only_selection(<line1>,<line2>)
+com! -bar -range=% OnlySelection call myfuncs#only_selection(<line1>,<line2>)
 
 " PluginsToCommit {{{2
 
-com -bar -nargs=0 PluginsToCommit  call s:plugins_to_commit()
+com! -bar -nargs=0 PluginsToCommit  call s:plugins_to_commit()
 
 fu s:plugins_to_commit() abort
     let script = 'commit-these-vim-plugins'
@@ -5824,11 +5806,11 @@ endfu
 
 " PluginGlobalVariables {{{2
 
-com -bar -nargs=? PluginGlobalVariables call myfuncs#plugin_global_variables(<q-args>)
+com! -bar -nargs=? PluginGlobalVariables call myfuncs#plugin_global_variables(<q-args>)
 
 " PC    Plugin Clean {{{2
 
-com -bar PC call s:plug_clean()
+com! -bar PC call s:plug_clean()
 
 fu s:plug_clean() abort
     sil! PlugClean
@@ -5876,19 +5858,19 @@ endfu
 
 " PI    Plugin Install {{{2
 
-com -bar -nargs=1 PI call myfuncs#plugin_install(<q-args>)
+com! -bar -nargs=1 PI call myfuncs#plugin_install(<q-args>)
 
 " PUP    update (N)Vim plugins {{{2
 
 " Don't name the command `:PU`; it could shadow the default `:pu[t]`.
-com -bar PUP call s:plugins_update()
+com! -bar PUP call s:plugins_update()
 
 fu s:plugins_update() abort
     " :h spellfile-cleanup
     runtime spell/cleanadd.vim
 
     " Install `wfrench` package. Useful for dictionary completion.
-    if expand('`aptitude show wfrench | grep "^State"`') =~? 'state:\s*not\s\+installed'
+    if system('aptitude show wfrench | grep "^State"')[:-2] =~? 'state:\s*not\s\+installed'
         echom 'Need to install the wfrench package for the french dictionary.'
         let password = inputsecret('Enter sudo password:').."\n"
         sil let out = system('sudo -S aptitude install wfrench', password)
@@ -5969,16 +5951,16 @@ endfu
 "
 " See also: https://www.gnu.org/software/gawk/manual/html_node/History-Sorting.html#History-Sorting
 "}}}
-com -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
-"                                                               │{{{
-"                                                               └ `:h :!`:
+com! -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
+"                                                                │{{{
+"                                                                └ `:h :!`:
 " `!` is replaced with the previous external command
 " But not when there is a backslash before the '!', then that backslash is removed.
 "}}}
 
 " RemoveSwapFiles {{{2
 
-com -bar RemoveSwapFiles call map(glob($HOME..'/.vim/tmp/swap/*', 1, 1), {_,v -> delete(v)})
+com! -bar RemoveSwapFiles call map(glob($HOME..'/.vim/tmp/swap/*', 1, 1), {_,v -> delete(v)})
 
 " RemoveTabs {{{2
 
@@ -5986,7 +5968,7 @@ com -bar RemoveSwapFiles call map(glob($HOME..'/.vim/tmp/swap/*', 1, 1), {_,v ->
 " with a nr of spaces which will occupy the same nr of cells.
 "
 " Before using it, set 'ts' (2,4,8) so that the text is aligned.
-com -bar -range=% RemoveTabs call myfuncs#remove_tabs(<line1>,<line2>)
+com! -bar -range=% RemoveTabs call myfuncs#remove_tabs(<line1>,<line2>)
 
 " Retab {{{2
 
@@ -6003,7 +5985,7 @@ com -bar -range=% RemoveTabs call myfuncs#remove_tabs(<line1>,<line2>)
 " Mnemonic: we use spaces as the default way to indent, so it makes sense to
 " to use a bang only for the less useful conversion: spaces → tabs
 
-com -bar -bang -range=% Retab call s:retab(<line1>,<line2>, <bang>0)
+com! -bar -bang -range=% Retab call s:retab(<line1>,<line2>, <bang>0)
 
 fu s:retab(line1, line2, bang) abort
     let view = winsaveview()
@@ -6018,7 +6000,7 @@ endfu
 
 " ReverseEveryNLines {{{2
 
-com -bar -range=% -nargs=1 ReverseEveryNLines call s:reverse_every_n_lines(<args>, <line1>, <line2>)
+com! -bar -range=% -nargs=1 ReverseEveryNLines call s:reverse_every_n_lines(<args>, <line1>, <line2>)
 
 fu s:reverse_every_n_lines(n, line1, line2) abort
     let mods = 'keepj keepp'
@@ -6032,7 +6014,7 @@ endfu
 " This command highlights in red the character after a given column.
 " Repeat the command toggles the highlighting.
 
-com -bar -nargs=? ShowLongLines echo s:shll(<args>)
+com! -bar -nargs=? ShowLongLines echo s:shll(<args>)
 
 fu s:shll(...) abort
     if !exists('w:shll')
@@ -6077,11 +6059,11 @@ endfu
 
 " SumColumn {{{2
 
-com -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | exe '.!bc' | -j
+com! -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | exe '.!bc' | -j
 
 " Tldr {{{2
 
-com -bar -complete=custom,s:tldr_completion -nargs=1 Tldr call s:tldr(<q-args>)
+com! -bar -complete=custom,s:tldr_completion -nargs=1 Tldr call s:tldr(<q-args>)
 fu s:tldr_completion(_a, _l, _p) abort
     sil return system('tldr --list 2>/dev/null | tr -s "[ \t]" "\n"')
 endfu
@@ -6106,7 +6088,7 @@ endfu
 
 " TW {{{2
 
-com -bar -range=% TW call s:trim_whitespace(<line1>,<line2>)
+com! -bar -range=% TW call s:trim_whitespace(<line1>,<line2>)
 fu s:trim_whitespace(line1,line2) abort
     let view = winsaveview()
     sil exe 'keepj keepp '..a:line1..','..a:line2..'s/\s\+$//e'
@@ -6117,18 +6099,15 @@ endfu
 
 " this command opens a new tab page, loads a temporary buffer, and dumps
 " the contents of a webpage inside the latter
-com -bar -nargs=1 WebPageRead call myfuncs#webpage_read(<q-args>)
+com! -bar -nargs=1 WebPageRead call myfuncs#webpage_read(<q-args>)
 
 " WordFrequency {{{2
 
 " Display words in the current buffer sorted by frequency
 
-com -bar
-\   -nargs=?
-\   -range=%
-\   -complete=custom,myfuncs#wf_complete
-\           WordFrequency
-\           call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
+com! -bar -nargs=? -range=% -complete=custom,myfuncs#wf_complete
+    \ WordFrequency
+    \ call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
 " }}}1
 " Autocmds {{{1
 " Warning: If you need to write an autocmd listening to `BufWritePost`, put it *before* the one sourcing our vimrc.{{{
@@ -6400,6 +6379,38 @@ fu s:fire_leave_events() abort
     endif
 endfu
 
+" Highlight ansi codes {{{2
+
+augroup highlight_ansi
+    au!
+    " useful when we run sth like `$ trans word | vipe`
+    au VimEnter * if $_ =~# '\C/vipe$' | call s:ansi_highlight() | endif
+    au StdinReadPost * call s:ansi_highlight()
+
+    fu s:ansi_highlight() abort
+        " TODO: Remove the ansi codes, and use text properties instead of regex-based syntax rules.
+        " This way, if we yank some line, we won't copy the ansi codes.
+        hi ansiBold term=bold cterm=bold gui=bold
+        hi ansiBoldUnderlined term=bold,underline cterm=bold,underline gui=bold,underline
+        " Do not remove `oneline`.{{{
+        "
+        " It would sometimes highlight text while it shouldn't.
+        " E.g.:
+        "
+        "     $ env | vipe
+        "
+        " In this example, the issue comes from some environment variables which
+        " contain escape sequences (`FINGERS_...`).
+        "
+        " Besides, I think  that most of the time, programs  which output escape
+        " sequences do it only for a short text on a single line...
+        "}}}
+        syn region ansiBold matchgroup=Normal start=/\e\[1m/ end=/\e\[22m/ concealends oneline
+        syn region ansiBoldUnderlined matchgroup=Normal start=/\e\[4m\e\[1m/ end=/\e\[22m\e\[24m/ concealends oneline
+        setl cole=3 cocu=nc
+    endfu
+augroup END
+
 " Include shell cwd in 'path' {{{2
 
 augroup include_shell_cwd_in_path
@@ -6409,17 +6420,18 @@ augroup include_shell_cwd_in_path
     " We want to be able to press `ZF` to  open a file path in a Vim split, when
     " the buffer has been populated with a shell command such as:
     "
-    "     $ find -name '*.rs' | vim -
     "     $ find -name '*.rs' | vipe
-    "
-    " In the first case, Vim opens the filename `-`; in the second one, it opens
-    " sth like:
-    "
-    "     /tmp/xCpuUhBIJi
+    "     $ find -name '*.rs' | vim -
     "}}}
-    au VimEnter,StdinReadPost * if expand('<amatch>') =~# '^-$\|^/tmp/\w\{10}$'
-        \ | let &path ..= ','..$PWD
-        \ | endif
+    "   Wait.  Doesn't Vim look in the cwd by default?{{{
+    "
+    " Yes it does, regardless of the value of `'path'` (even if you empty it).
+    " But we have an autocmd in `vim-cwd` which may change the cwd (to `~/.vim`).
+    " So, to be sure `ZF` works all the time, we need to tell Vim – explicitly –
+    " to look into the cwd of the parent shell.
+    "}}}
+    au VimEnter * if $_ =~# '\C/vipe$' | set path+=$PWD | endif
+    au StdinReadPost * set path+=$PWD
 augroup END
 
 " No syntax in diff mode {{{2
@@ -7096,22 +7108,7 @@ endfu
 
 "     *s/^\%V"\s\=\zs\d\+\ze\s*-/\=submatch(0)-1/c
 "
-" 1 - Solve the following pbs:
-"
-"    - join
-"    - delete
-"    - sort
-"
-" ... every N lines.
-" Write a command implementing each solution.
-" Group the interface of the commands, with `:ReverseEveryNLines`.
-" Try to infer some general principles underlying the solutions of this family
-" of problems. For example:
-"
-"     when you perform an operation which changes the addresses of the lines
-"     below, do it in reverse order
-"
-" 2 - Move the cursor some lines down (cd) or up (cu).
+" 1 - Move the cursor some lines down (cd) or up (cu).
 " The motion bypasses all the lines which have an indentation level greater or
 " equal than our current cursor position.
 " Useful to move by logical blocks of code of the same level.
@@ -7120,7 +7117,7 @@ endfu
 "        nno cd /\%<c-r>=virtcol('.')<cr>v\S<cr>
 "        nno cu ?\%<c-r>=virtcol('.')<cr>v\S<cr>
 "
-" 3 - Vimcast, Episode 50, An introduction to vspec
+" 2 - Vimcast, Episode 50, An introduction to vspec
 "
 " https://github.com/junegunn/vader.vim (927 sloc)
 "
@@ -7129,7 +7126,7 @@ endfu
 " https://github.com/kana/vim-flavor
 " http://www.relishapp.com/kana/vim-flavor/docs
 "
-" 4 - Implement the concept of "narrowing region".
+" 3 - Implement the concept of "narrowing region".
 "
 " A mapping, or command which would copy a range of lines in a temporary buffer.
 " We could edit this temp buffer, and after writing it, the original selection
@@ -7141,9 +7138,9 @@ endfu
 " ... but the source code is too long (1500 sloc).
 " Take inspiration from it.
 "
-" 5 - Implement ]n, ]s, ]u, ]x, ]y from unimpaired.vim
+" 4 - Implement ]n, ]s, ]u, ]x, ]y from unimpaired.vim
 "
-" 6 - Tmux navigation
+" 5 - Tmux navigation
 " La navigation entre les panes de Tmux et les viewports de Vim n'est pas
 " cohérente.
 " Pour aller dans un pane Tmux depuis Vim, on peut taper C-{hjkl}.
@@ -7176,7 +7173,7 @@ endfu
 " https://sunaku.github.io/tmux-select-pane.html
 " https://github.com/urbainvaes/vim-tmux-pilot
 "
-" 7 -
+" 6 -
 "
 " https://github.com/hunspell/mythes
 " https://hunspell.github.io/
@@ -7213,7 +7210,7 @@ endfu
 "
 " Créer une méthode mucomplete qui s'en sert.
 "
-" 8 -
+" 7 -
 "
 " Why `:FzRg!` + `foobar` (in interactive mode) gives much more results than
 " `:FzRg! foobar`?
@@ -7225,11 +7222,11 @@ endfu
 " a standard search (not fuzzy).
 " OTOH, `:FzRg!` + `pattern` performs a live fuzzy search.
 "
-" 9 -
+" 8 -
 "
 " Extract big chunks of code from `myfuncs.vim` into separate plugins.
 "
-" 10 -
+" 9 -
 "
 " Read and integrate `:h slow-start` in our notes.
 "
@@ -7237,14 +7234,14 @@ endfu
 " If so,  maybe it  would make Vim  start faster;  it would not  have to  load a
 " possibly big dictionary saved in a global variable.
 "
-" 11 -
+" 10 -
 "
 " Integrate `~/wiki/diff.md` into `~/wiki/vim/vim.md`.
 " Or into `~/wiki/admin.md`.
 " Yeah... maybe everything which is related to diff or vimdiff, put it inside
 " admin.
 "
-" 12 -
+" 11 -
 "
 " In a temporary directory, execute these shell commands:
 "
@@ -7328,12 +7325,12 @@ endfu
 " Also, remember we've  created the `:BoxPrettify` command. useful  to convert a
 " raw ascii diagram, in a more polished one.
 "
-" 13 -
+" 12 -
 "
 " Look  for mappings  which would  benefit from  being made  dot/semicolon/comma
 " repeatable.
 "
-" 14 -
+" 13 -
 "
 " `:!` and `system()` are not interactive / show ansi codes (besides try
 " `!cat`, `!restore-trash`)
@@ -7346,7 +7343,7 @@ endfu
 "
 " https://github.com/neovim/neovim/issues/1496
 "
-" 15 -
+" 14 -
 "
 " Document the fact that the tmux buffers are especially useful when you work in
 " a vim which wasn't compiled with the clipboard support (no `+` register).
@@ -7356,7 +7353,7 @@ endfu
 " https://github.com/sirver/ultisnips/blob/master/contributing.md#running-using-docker
 " https://github.com/sirver/ultisnips/blob/master/contributing.md#reproducing-bugs
 "
-" 16 -
+" 15 -
 "
 " Protect all temporary change of option with `try|catch|endtry`.
 " Look for the pattern:
@@ -7378,7 +7375,7 @@ endfu
 "         mandatory conclusion (like restoring options)
 "     endtry
 "
-" 17 -
+" 16 -
 "
 " Re-read our snippet `op`, and refactor this section in our notes:
 "
@@ -7389,7 +7386,7 @@ endfu
 " refactor all operators so that they remove  'unnamed' and 'unnamedplus'
 " from 'cb', and set 'inclusive'
 "
-"     vim /g@/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets $MYVIMRC
+"     vim /g@/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "     :cfilter! -other_plugins
 "
 " Also:
@@ -7413,7 +7410,7 @@ endfu
 " Should we yank with noautocmd to prevent our visual ring from saving
 " a possible selection?
 "
-" 18 -
+" 17 -
 "
 " Create a mapping to populate command-line with `:ltag /`, then open the
 " location window. Ex:
@@ -7457,7 +7454,7 @@ endfu
 "
 " It seems that `<space>ft` (fzf.vim) is identical to `:tj /`.
 "
-" 19 -
+" 18 -
 "
 " Shell function to grep a pattern and populate the qfl.
 " This one doesn't send the results to a vim server, and allows to pass
@@ -7467,12 +7464,12 @@ endfu
 "
 " Difference compared to our `nv()` shell function?
 "
-" 20 -
+" 19 -
 "
 " Read `:h cscope` (useful to list tags in qfl?)
 " https://www.reddit.com/r/vim/comments/6p6uch/how_to_refactor_by_tags/dkn30bd/
 "
-" 21 -
+" 20 -
 "
 " If we search a too complex pattern, `n` takes a long time to compute the nr
 " of matches (total & current).
@@ -7504,11 +7501,11 @@ endfu
 " PS: i've tried this solution but the message gets erased.
 " To continue...
 "
-" 22 -
+" 21 -
 "
 " Use `:[c|l]bottom` in your jobs plugins (if they populate a qfl asynchronously)
 "
-" 23 -
+" 22 -
 "
 " Re-implement these mappings to open the file you're editing on github.
 " It could be handy when you want to see a commit you've just pushed.
@@ -7537,14 +7534,14 @@ endfu
 " Update:
 " `:Gbrowse` does sth similar.
 "
-" 24 -
+" 23 -
 "
 " Refactor all our functions which populate the qfl to offload work to a single
 " function in `vim-qf`?
 "
-"     vim /set\%(qf\|loc\)list/gj ~/.vim/**/*.vim $MYVIMRC
+"     vim /set\%(qf\|loc\)list/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
-" 25 -
+" 24 -
 "
 " Look for  functions containing  the keyword  `maybe` or  `later` (or  look for
 " `aug\%[roup]!`).
@@ -7567,7 +7564,7 @@ endfu
 "       ...
 "     endfu
 "
-" 26 -
+" 25 -
 "
 " https://github.com/chrisbra/vim_faq
 " We've  stopped  reading  at  `faq-4.2`,  because we  need  time  to  integrate
@@ -7584,15 +7581,15 @@ endfu
 "    - `:stjump`
 "    - `:ptjump`
 "
-" 27 -
+" 26 -
 "
 " No need to check `if &bt  is# 'quickfix'` before applying conceal abort and/or
 " try conditional are enough.
 " Sure?
 "
-"     vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets $MYVIMRC
+"     vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
-" 28 -
+" 27 -
 "
 " https://github.com/justinmk/vim-dirvish/issues/62
 " https://github.com/bounceme/remote-viewer/
@@ -7602,7 +7599,7 @@ endfu
 " other "middleware"),  so that  any dumb local  navigator (like  dirvish) works
 " without adding special-case support for scp, ftp, webdav, ..., netrw does.
 "
-" 29 -
+" 28 -
 "
 " Do we really need a timer to display a message?
 "
@@ -7622,7 +7619,7 @@ endfu
 "
 " Once you're done:
 "
-"     :noa vim /timer_start(/gj ~/.vim/**/*.vim ~/.vim/**/vim.snippets $MYVIMRC | cw
+"     :noa vim /timer_start(/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** | cw
 "
 " Look for all  the instances where we've  used a timer and where  we could have
 " used a simple `:redraw`. Replace the timer if it makes sense.
@@ -7637,7 +7634,7 @@ endfu
 "
 " See `:h :echo-redraw`.
 "
-" 30 -
+" 29 -
 "
 " Create mapping to send current line to terminal, and execute it
 " Use `g>` for the lhs?
@@ -7646,7 +7643,7 @@ endfu
 "     g> on visual selection
 "     g>> for line
 "
-" 31 -
+" 30 -
 "
 " Finish reviewing vim-math
 " What insight can we gain from it?
@@ -7657,11 +7654,11 @@ endfu
 "
 " Is there any functionality we could steal?
 "
-" 32 -
+" 31 -
 "
 " Finish reviewing `~/Dropbox/vim_plugins/pair_complete.vim`.
 "
-" 33 -
+" 32 -
 "
 " We use `cml`, `cms`, in vimrc, myfuncs and in some of our plugins:
 "
@@ -7681,14 +7678,14 @@ endfu
 "
 "     synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')  isnot#  'comment'
 "
-" 34 -
+" 33 -
 "
 " Check whether some Ex commands would be better suited as mappings.
 "
 " And check whether some mappings would be better suited as Ex commands.
 " Hint: if you keep forgetting the lhs of a mapping, turn it into an Ex command.
 "
-" 35 -
+" 34 -
 "
 " Install autocmd listening to `BufReadPost */after/ftplugin/*.vim`
 " which would install a buffer-local autocmd listening to `bufwritepost`
@@ -7697,12 +7694,12 @@ endfu
 "
 " or when we undo a non-existing ...
 "
-" 36 -
+" 35 -
 "
 " Normalize underscore/hyphen in plug mappings, and function names in shell init
 " files.
 "
-" 37 -
+" 36 -
 "
 " Update the position of the mark in `vim-readline`
 "
@@ -7739,11 +7736,11 @@ endfu
 "
 " Look for other mappings to implement, add them to a todo.
 "
-" 38 -
+" 37 -
 "
 " Should we add `:noa` every time we use `:wincmd`?
 "
-"     :vim /wincmd p\|call win_gotoid/gj ~/.vim/**/*.vim $MYVIMRC
+"     :vim /wincmd p\|call win_gotoid/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "     :cfilter! -not_my_plugins
 "     :cfilter! -not_relevant
 "     :cfilter! \<noa\>
@@ -7764,7 +7761,7 @@ endfu
 " Also, it  preserves the previous window (`winnr('#')` and  `wincmd p` have the
 " same result).
 "
-" 39 -
+" 38 -
 "
 " Check that whenever we use `wincmd p` we get to the right window.
 " Maybe we should use this instead:
@@ -7773,7 +7770,7 @@ endfu
 "     ...
 "     call win_gotoid(id)
 "
-" 40 -
+" 39 -
 "
 " Read:
 " https://github.com/neovim/neovim/wiki/FAQ
@@ -7782,31 +7779,31 @@ endfu
 " `:h vim-differences` (in neovim) ... in particular to improve our options
 " https://neovim.io/news/archive/
 "
-" 41 -
+" 40 -
 "
 " Read:
 " https://dev.to/idanarye/omnipytent-5g5l
 " https://www.reddit.com/r/vim/comments/7kwlxc/omnipytent_plugin_explained/
 " https://github.com/idanarye/vim-omnipytent
 "
-" 42 -
+" 41 -
 "
 " Read:
 " https://github.com/luchermitte/lh-vim-lib/blob/master/doc/oo.md
 " (oop in viml)
 "
-" 43 -
+" 42 -
 "
 " Use syntax hl in `vim-qf` instead of complex mechanism using matches.
 " Also, in `vim-qf`, fix the fixme in the autocmd `my_qf`.
 "
 " Once done, try to use this mechanism for the issue we have in `s:ltag()`.
 "
-" 44 -
+" 43 -
 "
 " Add syntax hl in toc menu, and make content more relevant in help toc.
 "
-" 45 -
+" 44 -
 "
 " The toc  window may currently  be a little  too wide (see:  vim-qf, autoload/,
 " `qf#open()`). We could  compute the longest line:
@@ -7815,7 +7812,7 @@ endfu
 "
 " and set the width of the toc window dynamically.
 "
-" 46 -
+" 45 -
 "
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
@@ -7831,13 +7828,13 @@ endfu
 " They must not call  functions from one of our other  plugins.
 " If they do, move the latter inside `vim-lg-lib` too.
 "
-" 47 -
+" 46 -
 "
 " Implement a search ring, and install mappings to cycle through it
 " useful to search for an old pattern without having to do `/ up ...`
 " (; and ,  would be more comfy)
 "
-" 48 -
+" 47 -
 "
 " When you create a loclist, replace the  old one if its title is `breakdown` or
 " `fix_me & to_do`.
@@ -7851,7 +7848,7 @@ endfu
 " it parsed, or any information sufficient to know that there's no need to
 " recreate a qfl.
 "
-" 49 -
+" 48 -
 "
 " Create a submode to insert numbers more easily.
 "
@@ -7893,7 +7890,7 @@ endfu
 "         return ''
 "     endfu
 "
-" 50 -
+" 49 -
 "
 "     :h quickref
 "     :h index
@@ -7901,7 +7898,7 @@ endfu
 " Document these help tags somewhere in your notes.
 " Explain when it's useful to refer to them.
 "
-" 51 -
+" 50 -
 "
 " Prevent vim-session from checking swap files.
 " Annoying when a session crashed, and we can't restore a session.
@@ -7912,7 +7909,7 @@ endfu
 " Update:
 " I don't think you should disable swap files.
 "
-" 52 -
+" 51 -
 "
 " In  neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
 " current neovim instance. But what about vim?
@@ -7920,7 +7917,7 @@ endfu
 " https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 " https://gist.github.com/andymass/bcd0a4956ed1a873d41f7265be6c6979
 "
-" 53 -
+" 52 -
 "
 " Read:
 "
@@ -7958,7 +7955,7 @@ endfu
 "     and all the links from this page, in particular `:h API`
 "     as well as: https://www.2n.pl/blog/how-to-write-neovim-plugins-in-lua
 "
-" 54 -
+" 53 -
 "
 " In `~/wiki/vim/funcref.md`, look for the pattern `funcref(`.
 " There are 2 codes side-by-side.
@@ -7975,7 +7972,7 @@ endfu
 " `┊`. This would allow us to use `"` instead of repeating a whole command.
 "
 "
-" 55 -
+" 54 -
 "
 " To document.
 " If neovim is unable to suggest suggestions to fix spelling errors,
@@ -7996,7 +7993,7 @@ endfu
 "
 " Also, for debugging purpose, try `:spellinfo`.
 "
-" 56 -
+" 55 -
 "
 " How to filter  a custom text-object without the command-line not being redrawn?
 " MWE:
@@ -8048,7 +8045,7 @@ endfu
 " `vim-textobj-user`, and  fix it every  time you defined  a text object  in the
 " past.
 "
-" 57 -
+" 56 -
 "
 " Document `paste(1)` as a filter:
 " https://vi.stackexchange.com/a/16096/17270
@@ -8061,13 +8058,13 @@ endfu
 " Are they consistent with other similar default commands (like `v_J` and `v_gJ`)?
 " Could we make them easier to remember?
 "
-" 58 -
+" 57 -
 "
 " Implement a mapping/command to extract the lines which are present in a block,
 " but not in the other.
 " `:InAButNotInB` is too cumbersome.
 "
-" 59 -
+" 58 -
 "
 "     $ shell_cmd | vim +'setf dirvish' -
 "
@@ -8097,7 +8094,7 @@ endfu
 "    you can only inspect `get(b:, 'current_syntax', '')` and compare it to 'dirvish'
 "    but the autocmd will still be global.
 "
-" 60 -
+" 59 -
 "
 " Try to remove as many `virtcol()` as possible everywhere.
 " Same thing for `\%v`; they don't mean what we thought.
@@ -8111,17 +8108,37 @@ endfu
 " Although, I  guess it's ok  to use  them when you're  sure your lines  are not
 " wrapped.
 "
+" Update: Actually, I think it depends on how you use the info.
+" If you use it with `:norm! 123|`, it should be ok.
+"
 " ---
 "
-" We had an issue because of this in `vim#util#put()`:
+" The same is true for `:norm! 123|`.
+" We had an issue because of this in `readline#undo()`:
 "
-"     ~/.vim/plugged/vim-vim/autoload/vim/util.vim
+"     ~/.vim/plugged/vim-readline/autoload/readline.vim
 "
-" The solution was to temporarily disable 'wrap'.
+" Even if  `123` is  correct (not  obtained by `virtcol('.')`,  but by  sth like
+" `strchars(matchstr(line, pat))`), `:norm! 123|` may  still position the cursor
+" unexpectedly on a long wrapped line.
+"
+" Solution: temporarily disable 'wrap'.
+"
 " Try to find other locations where we  have made a similar mistake; if you find
 " anything, fix it.
 "
-" 61 -
+" ---
+"
+" I think you can reliably save the cursor position with `virtcol()` and restore
+" it with `:norm`, because both take into consideration virtual characters which
+" are added when a long line gets wrapped;  they agree on what the position of a
+" character is on a long wrapped line.
+"
+" See our comment in `vim#util#put()`:
+"
+"     ~/.vim/plugged/vim-vim/autoload/vim/util.vim
+"
+" 60 -
 "
 " Every time we populate a qfl from a script, we should save the command we used
 " with the 'context' qf property.
@@ -8130,7 +8147,7 @@ endfu
 " The mapping would re-execute the command and  replace the old qfl with the new
 " one.
 "
-" 62 -
+" 61 -
 "
 " gf, c-w f, c-w gf should also be able to parse a column number.
 " It would be useful in the qf window.
@@ -8152,7 +8169,7 @@ endfu
 "     ...
 "     [123]: link
 "
-" 63 -
+" 62 -
 "
 " Finish implementing `!t` (timer info)
 "
@@ -8185,7 +8202,7 @@ endfu
 "  - `!ic` = channel
 "  - ...
 "
-" 64 -
+" 63 -
 "
 " Check which mappings could be supercharged using `v:count`:
 "
@@ -8199,7 +8216,7 @@ endfu
 " Basically,  any  mapping which  calls  an  ex  command accepting  a  numerical
 " argument, or a bang, could be passed the latter via `v:count`.
 "
-" 65 -
+" 64 -
 "
 " Currently, `:FreeKeys` ignores free sequences beginning with `m`, `'` and `@`.
 " This is because it thinks it would introduce a timeout with some of our custom
@@ -8217,7 +8234,7 @@ endfu
 " Either  tweak the  code  of `vim-freekeys`,  or take  the  habit of  executing
 " `:freekeys -nomapcheck` (we've added a `-k` mapping for that).
 "
-" 66 -
+" 65 -
 "
 " https://github.com/ardagnir/athame
 " https://github.com/ardagnir/athame/issues/52
@@ -8226,7 +8243,7 @@ endfu
 "
 " Could be used to expand ultisnips snippets in the shell.
 "
-" 67 -
+" 66 -
 "
 " Extract the code dedicated to templates from `vim-unix`.
 " Make it able to evaluate viml (i.e. dynamic templates).
@@ -8234,13 +8251,13 @@ endfu
 " See here for inspiration:
 " https://github.com/aperezdc/vim-template
 "
-" 68 -
+" 67 -
 "
 " Rethink the `gt`/`gT` mappings.
 " They could be better  used to move the current tabpage, instead  of `>t`, `<t`.
 " But what would we use to populate the location list with to_do's and fix_me's?
 "
-" 69 -
+" 68 -
 "
 " In python files, we  can use multi-line comments with a  pair of triple double
 " quotes.
@@ -8269,7 +8286,7 @@ endfu
 "
 "     $ pylint --generate-rcfile >>~/.pylintrc
 "
-" 70 -
+" 69 -
 "
 " We should use more abbreviations.
 " Review the triggers:
@@ -8291,12 +8308,12 @@ endfu
 " Implement  a   `-A`  mapping   showing  the   available  abbreviations   in  a
 " sidebar/cheatsheet. Show only the less well known at any given time.
 "
-" 71 -
+" 70 -
 "
 " Try to make some existing mappings  smarter by reacting differently when we're
 " at the more prompt (see `:h mode()`, `rm` mode).
 "
-" 72 -
+" 71 -
 "
 " Should we  remap '@' so that  when we replay a  macro, the `esc` key  is never
 " interpreted as a part of a function-like (f1, arrow, ...) key?
@@ -8315,7 +8332,7 @@ endfu
 " Also,  it would prevent  to use function-like keys  during the recording  of a
 " macro.
 "
-" 73 -
+" 72 -
 "
 " I think there's  no need to escape (so that the visual  marks are set) to know
 " where the visual selection begins/ends.
@@ -8338,7 +8355,7 @@ endfu
 " >         returns the cursor position.  Differs from |'<| in
 " >         that it's updated right away.
 "
-"     :vim /\m\C\\e/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** $MYVIMRC
+"     :vim /\m\C\\e/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "     :Cfilter! -other_plugins
 "
 " Note that the start of the  selection does not necessarily match the character
@@ -8351,13 +8368,13 @@ endfu
 "
 "     line('.') > getpos('v')[1] || line('.') == getpos('v')[1] && col('.') >= getpos('v')[2]
 "
-" 74 -
+" 73 -
 "
 " Search for `[ SPC`, `SPc ]`, `{ SPC`, `SPC }`, `^\s*\\` everywhere.
 " Refactor the style.
-"     noa vim /\[ \| \]\|{ \| }\|^\s*\\/gj ~/.vim/**/*.vim ~/.vim/**/*.snippets $MYVIMRC | cw
+"     noa vim /\[ \| \]\|{ \| }\|^\s*\\/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** | cw
 "
-" 75 -
+" 74 -
 "
 " Search for `g@` everywhere.
 "
@@ -8398,7 +8415,7 @@ endfu
 " ---
 "
 " If the  operator yanks the text  on which we  operate, should it be  done with
-" `:noa` to minimize unexpected side-effects?
+" `:noa` to minimize unexpected side effects?
 " E.g., I  think  it would  prevent  our  visual  ring  from saving  a  possible
 " selection.
 "
@@ -8454,17 +8471,17 @@ endfu
 " It would contain the logic specific to the operator (i.e. not the boilerplate code).
 " The library function would use this name to call `myfunc` (with `call()`).
 "
-" 76 -
+" 75 -
 "
 " Eliminate `lg#reg#save()`, `lg#reg#restore()` whenever possible.
 " We don't need to save/restore @+ anymore.
 "
-" 77 -
+" 76 -
 "
 " Be  consistent  in  how  you  chose  the  priority  of  matches  created  with
 " `matchadd()`.
 "
-" 78 -
+" 77 -
 "
 " We have 4 plugins which use `repeat#set()`:
 "
@@ -8481,13 +8498,13 @@ endfu
 "    - submitting a bug report/PR
 "    - re-implementing the plugin
 "
-" 79 -
+" 78 -
 "
 " Every  time you open a  window, be aware that  an error may be  raised because
 " you're in the command-line window.
 " You may want to catch that error to avoid a stack trace.
 "
-" 80 -
+" 79 -
 "
 " - remove `&l:` when it's not necessary?  (or the opposite: add it everywhere?)
 " - use full name of commands and options?
@@ -8500,19 +8517,19 @@ endfu
 " But don't fuck up the alignment of our diagrams.
 " So, before using your custom refactoring command, look for all the diagrams:
 "
-"     Vim /[─│]/j ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/** $MYVIMRC
+"     Vim /[─│]/j $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
 " And manually refactor everything you can around them.
 " Then, you  should be able to  use your refactoring command  wherever you want,
 " without breaking our diagrams.
 "
-" 81 -
+" 80 -
 "
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
 "
-" 82 -
+" 81 -
 "
 " This mapping works in Vim, but not in Neovim:
 "
@@ -8528,7 +8545,7 @@ endfu
 " Btw, it looks similar to another issue we opened:
 " https://github.com/neovim/neovim/issues/9006
 "
-" 83 -
+" 82 -
 "
 "     % hash | vipe
 "
@@ -8569,13 +8586,13 @@ endfu
 " It seems to help a lot in our previous MWE.
 " Do we still have an issue? Or does the numeric prefix fix everything?
 "
-" 84 -
+" 83 -
 "
 " The  `C-n` and  `C-p`  buffer-local  mappings installed  by  fugitive in  some
 " buffers, conflict with our global mappings to cycle through tabpages.
 " We're often distracted, because we wonder why our mappings are not working.
 "
-" 85 -
+" 84 -
 "
 " Read:
 "
@@ -8590,13 +8607,12 @@ endfu
 " https://github.com/prabirshrestha/async.vim (243)
 " https://github.com/metakirby5/codi.vim (747)
 "
-" 86 -
+" 85 -
 "
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
-" closed fold.
-" Maybe do the same with `J` and `K` in visual mode.
+" closed fold.  Maybe do the same with `J` and `K` in visual mode.
 "
-" 87 -
+" 86 -
 "
 " We don't version control our pdfs in `~/wiki`.
 " Suppose one of our  notes has a link to a local pdf,  and we restore our notes
@@ -8606,7 +8622,7 @@ endfu
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
 "
-" 88 -
+" 87 -
 "
 " Study this (Neovim):
 "
@@ -8620,12 +8636,12 @@ endfu
 "
 " More generally, try to study everything related to virtual text.
 "
-" 89 -
+" 88 -
 "
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
 "
-" 90 -
+" 89 -
 "
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
@@ -8633,13 +8649,13 @@ endfu
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 91 -
+" 90 -
 "
 " Watch these videos about using Vim as a diff tool, and as a merge tool:
 " https://www.youtube.com/watch?v=zEah_HDpHzc
 " https://www.youtube.com/watch?v=VxpCgQyUXlI
 "
-" 92 -
+" 91 -
 "
 " Document the fact that  you need to put `<esc>` at the start  of the rhs of an
 " `:ono` mapping if it presses `v:operator`.
@@ -8678,7 +8694,7 @@ endfu
 "
 " https://www.reddit.com/r/vim/comments/bo2o0b/text_object_that_is_delimited_by_two_distinct/end5png/
 "
-" 93 -
+" 92 -
 "
 " We have too many comments in this file about the bracketed paste mode.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
@@ -8688,7 +8704,7 @@ endfu
 "
 " https://github.com/neovim/neovim/pull/4448
 "
-" 94 -
+" 93 -
 "
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
@@ -8698,7 +8714,7 @@ endfu
 " Also, `:verbose syn list ...` doesn't print the script location from which the
 " syntax group was installed. Maybe ask for an improvement of `:verb`.
 "
-" 95 -
+" 94 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -8714,7 +8730,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 96 -
+" 95 -
 "
 " We really need a library function to get a comment leader.
 "
@@ -8763,7 +8779,7 @@ endfu
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 "
-" 97 -
+" 96 -
 "
 " We often make this error:
 "
@@ -8779,28 +8795,28 @@ endfu
 " Other Idea: Make `M-b` inspect the 2 previous characters.
 " If they are a pair of brackets, make it move the cursor as if `C-b` had been pressed.
 "
-" 98 -
+" 97 -
 "
 " In a markdown file, `gc` should behave slightly differently.
 " It  should  make sure  there  are  4 spaces  between  `>`  and the  first  non
 " whitespace on each line; and reformat the quote with `par(1)`.
 " Because that's what we do all the time; so better automate it.
 "
-" 99 -
+" 98 -
 "
 " In a fugitive buffer, when we need to  stage many files, I would like to press
 " `-` very fast. We can't because – for  some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
 "
-" 100 -
+" 99 -
 "
 " We've just had an issue in `vim-search` because we used `==` instead of `==#`.
 " Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
 " Or maybe we should just do it for comparisons where no operand is a number:
 "
-"     vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** $MYVIMRC
+"     vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
-" 101 -
+" 100 -
 "
 " The  interface of  your plugins  and custom  config should  be simplified  and
 " exposed; review every custom mapping/command.
@@ -8820,7 +8836,7 @@ endfu
 "        If the help of a command gets too big, you could spread it across
 "        several pages, using a `-help {keyword}` argument.
 "
-" 102 -
+" 101 -
 "
 " Should we add the guard `if $MYVIMRC is# '' | finish | endif` in all the files
 " under `~/.vim/{after/}plugin`?
@@ -8831,7 +8847,7 @@ endfu
 " `*/after/ftplugin/{&ft}.vim`?
 " https://github.com/andymass/vim-matchup/commit/0b780e9ae12ba913742356f4b7cedc52d3a15220
 "
-" 103 -
+" 102 -
 "
 " Document a few things about debugging with breakpoints.
 "
@@ -8901,15 +8917,15 @@ endfu
 " the sourcing of the autoloaded directory).
 " Now you can run `:breakadd func <snr>123_function_name`.
 "
-" 104 -
+" 103 -
 "
 " In xterm, we may now be able to use the alt modifier in mappings without nasty
-" side-effects:
+" side effects:
 "
 " `:h modifyOtherKeys`
 " https://github.com/vim/vim/issues/4974#issuecomment-541431801
 "
-" 105 -
+" 104 -
 "
 " Vim saves anything typed on the  command-line, regardless of how we've left it
 " (including when we've pressed `C-c` or `Esc`).
@@ -8928,7 +8944,7 @@ endfu
 "     /the
 "     " press Escape: the cursor jumps to the next occurrence of `the`
 "
-" 106 -
+" 105 -
 "
 " Press `é`: it capitalizes the next word.
 " Also, I don't know how, but we often capitalize a word by accident (in a different way).
@@ -8936,7 +8952,7 @@ endfu
 " Or use xterm, which now supports  meta sequences OOTB, and doesn't suffer from
 " these kind of issues.
 "
-" 107 -
+" 106 -
 "
 " Replace a long `b:undo_ftplugin` with a simple function call:
 "
@@ -8952,17 +8968,17 @@ endfu
 "    - settings are properly reset when we change the filetype
 "    - function implementing the undo is in the right file
 "
-" 108 -
+" 107 -
 "
 " Look for `:windo` and `:wincmd` everywhere.
 "
-"     :vim /\m\C\<\%(windo\|wincmd\)\>/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** $MYVIMRC
+"     :vim /\m\C\<\%(windo\|wincmd\)\>/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
 " Replace these commands with `lg#win_execute()` whenever possible.
 " Once Nvim  supports `win_execute()`, remove  the `lg#` prefix in  the function
 " calls.
 "
-" 109 -
+" 108 -
 "
 " Review all the custom motions you've installed.
 " For each  of them, make  sure you can  jump back with  `C-o` (set mark  `'` on
@@ -8971,12 +8987,12 @@ endfu
 " Actually, maybe not for all of them.
 " Think about which motions should add an entry in the jumplist.
 "
-" 110 -
+" 109 -
 "
 " Install a `=rm`  mapping in Vim files to refactor  nested function calls using
 " the method call operator (`->`).
 "
-" 111 -
+" 110 -
 "
 "     $ cd ; vim
 "     :echo getcwd() → /home/user
@@ -8986,7 +9002,7 @@ endfu
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
 "
-" 112 -
+" 111 -
 "
 " Review all custom text-objects: make sure  they all position the cursor on the
 " end of  the selection, to  be consistent  with what Vim  seems to do  with its
@@ -9001,7 +9017,7 @@ endfu
 " I guess  that it  means that  all our text-objects  should be  implemented via
 " `<expr>` mappings... Otherwise, the output of `mode(1)` is unreliable.
 "
-" 113 -
+" 112 -
 "
 " Every time you've used sth like `norm! %` in the past, it was probably wrong.
 " You should have used sth like:
@@ -9032,7 +9048,7 @@ endfu
 " Enough is enough; we've removed `vim-matchit`, and installed `vim-matchup`.
 " Read the documentation of the latter.
 "
-" 114 -
+" 113 -
 "
 " Every time  we've "changed"  a buffer  in a way  that the  line count  did not
 " change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
@@ -9042,7 +9058,7 @@ endfu
 " This works since 8.1.2302:
 " https://github.com/vim/vim/releases/tag/v8.1.2302
 "
-"     :vim /'\[\|'\]/gj ~/.vim/**/*.{snippets,vim} ~/.vim/template/** $MYVIMRC
+"     :vim /'\[\|'\]/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "           ^^^^^^^^
 "           the pattern should look for more things (`:w` command, `:up` command, ...)
 "
@@ -9050,13 +9066,13 @@ endfu
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 "
-" 115 -
+" 114 -
 "
 " When using the `gc` operator to comment  a line starting with a backslash in a
 " Vimscript file, maybe we  should not add a space between  `"` and `\`, because
 " we sometimes want to temporarily comment a continuation line.
 "
-" 116 -
+" 115 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
 " commented line.
@@ -9078,7 +9094,7 @@ endfu
 "
 "     " ~/.vim/plugged/vim-brackets/autoload/brackets.vim
 "
-" 117 -
+" 116 -
 "
 " I'm fed up with codespans being broken when formatting with `gq`.
 "
@@ -9091,27 +9107,27 @@ endfu
 " Also: Same issue with italics / bold style.
 " Tweak syntax regexes?
 "
-" 118 -
+" 117 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
 "
-" 119 -
+" 118 -
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
 "
-" 120 -
+" 119 -
 "
 " Read:
 " https://vimways.org/2019/indentation-without-dents/ (see `~/.vim/indent/[my]matlab.vim`, `~/Desktop/m.m`)
 " https://vimways.org/2019/a-test-to-attest-to/
 "
-" 121 -
+" 120 -
 "
 " Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
 " (to improve performance...)
 "
-" 122 -
+" 121 -
 "
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
@@ -9120,7 +9136,7 @@ endfu
 "
 " Note that `readdir()` has not been ported to Nvim yet.
 "
-" 123 -
+" 122 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -9133,7 +9149,7 @@ endfu
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 "
-" 124 -
+" 123 -
 "
 " Once Nvim supports `SafeState`, try to replace as many timers as possible:
 "
@@ -9157,13 +9173,13 @@ endfu
 " Naively, I would say yes. The longer a  command is delayed, the longer we stay
 " in an undesirable state...
 "
-" 125 -
+" 124 -
 "
 " We refer to dirvish in several locations in `vim-fex`.
 " I don't like that.
 " dirvish and fex are two different plugins.
 "
-" 126 -
+" 125 -
 "
 "     $ vim
 "     :h
@@ -9205,59 +9221,75 @@ endfu
 " recording; maybe  because it would  cause an infinite recursion  when pressing
 " `q` during a recording.
 "
-" 127 -
+" 126 -
 "
 " Remove all invocations of `setenv()` and `getenv()`.
 " Use global variables  instead; don't write them in uppercase  though; we don't
 " want them to be saved/restored via viminfo.
 "
 " Document somewhere how `[gs]etenv()` can be used.
-
-
-
-
-" TODO: Assimilate the `s:sendtoclipboard()` function, and the `~/bin/sendtoclipboard` script.
-fu s:sendtoclipboard(text) abort
-    " What's this `sendtoclipboard` ?{{{
-    "
-    " A custom script: `~/bin/sendtoclipboard`.
-    " It writes the text in:
-    "
-    "    - a tmux buffer
-    "    - the clipboard via `xsel(1x)` or `xclip(1)`
-    "    - the clipboard via OSC 52
-    "}}}
-    sil let seq = system('sendtoclipboard', a:text)
-    " Why this guard?{{{
-    "
-    " gVim doesn't seem to support OSC 52.
-    "}}}
-    "   Why don't you move it at the top?{{{
-    "
-    " In addition to producing an  OSC 52 sequence, `sendtoclipboard` copies the
-    " text  in the  clipboard via  `xsel(1x)`; this  last feature  may still  be
-    " useful in gVim.
-    "}}}
-    if has('gui_running') | return | endif
-    if v:shell_error
-        return lg#catch_error()
-    else
-        " TODO: Document why this line is needed.{{{
+"
+" 127 -
+"
+"     $ vim -Nu NONE -S <(cat <<'EOF'
+"         com -nargs=1 Test try | call Func(<args>) | catch | endtry
+"         fu Func(_)
+"         endfu
+"         EOF
+"     )
+"     :Test foo
+"     " where are we???
+"     " press C-c
+"     Error detected while processing :~
+"     E121: Undefined variable: foo~
+"     E116: Invalid arguments for function Func~
+"     " why are the errors not caught?
+"
+" 128 -
+"
+" Assimilate the `s:sendtoclipboard()` function, and the `~/bin/sendtoclipboard` script.
+    fu s:sendtoclipboard(text) abort
+        " What's this `sendtoclipboard` ?{{{
         "
-        " Hint: It's only needed when you're working on a remote machine.
+        " A custom script: `~/bin/sendtoclipboard`.
+        " It writes the text in:
         "
-        " If   you're   not   convinced,   comment  the   line,   and   in   the
-        " `sendtoclipboard` script, comment the line invoking `xsel(1x)`.
-        " Then, try to use this function: it will fail.
-        " It should work  thanks to the OSC 52 sequence,  but it doesn't without
-        " this `writefile()` line.
-        " I think  that's because the script  is called via `system()`  and thus
-        " has no controlling terminal; so the sequence is written nowhere.
+        "    - a tmux buffer
+        "    - the clipboard via `xsel(1x)` or `xclip(1)`
+        "    - the clipboard via OSC 52
         "}}}
-        call writefile([seq], '/dev/tty', 'b')
-    endif
-endfu
-nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
+        sil let seq = system('sendtoclipboard', a:text)
+        " Why this guard?{{{
+        "
+        " gVim doesn't seem to support OSC 52.
+        "}}}
+        "   Why don't you move it at the top?{{{
+        "
+        " In addition to producing an  OSC 52 sequence, `sendtoclipboard` copies the
+        " text  in the  clipboard via  `xsel(1x)`; this  last feature  may still  be
+        " useful in gVim.
+        "}}}
+        if has('gui_running') | return | endif
+        if v:shell_error
+            return lg#catch_error()
+        else
+            " TODO: Document why this line is needed.{{{
+            "
+            " Hint: It's only needed when you're working on a remote machine.
+            "
+            " If   you're   not   convinced,   comment  the   line,   and   in   the
+            " `sendtoclipboard` script, comment the line invoking `xsel(1x)`.
+            " Then, try to use this function: it will fail.
+            " It should work  thanks to the OSC 52 sequence,  but it doesn't without
+            " this `writefile()` line.
+            " I think  that's because the script  is called via `system()`  and thus
+            " has no controlling terminal; so the sequence is written nowhere.
+            "}}}
+            call writefile([seq], '/dev/tty', 'b')
+        endif
+    endfu
+    nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
+
 
 
 

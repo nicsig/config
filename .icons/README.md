@@ -20,7 +20,11 @@ Select your theme.
 
 # It doesn't persist after a reboot!
 
-Read this: <https://forum.xfce.org/viewtopic.php?id=11997>
+Read this:
+
+- <https://forum.xfce.org/viewtopic.php?id=11997>
+- <https://bugs.launchpad.net/ubuntu/+source/xfwm4/+bug/157447>
+- <https://askubuntu.com/questions/708667/cursor-theme-changes-to-default-after-re-login>
 
 ---
 

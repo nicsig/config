@@ -189,8 +189,6 @@ interSubs will *also* call `python3`, and so should run the same interpreter.
 
 ---
 
-
-
 Even though the shebang of `interSubs.py` is:
 
     #! /usr/bin/env python
@@ -203,12 +201,49 @@ contains this line:
                            ^
 
 ##
-## I have the error message: “No module named 'PyQt5.QtCore'”!
+## I have an error message!
+### “No module named 'PyQt5.QtCore'”
 
 Install `python3-pyqt5`:
 
     $ api python3-pyqt5
 
+###
+### “Cannot find main.* for any supported scripting backend in: ...”
+
+`~/.config/mpv/scripts/` should  only contain lua scripts,  or files/directories
+with the extension `.disable`.  See `man mpv /LUA SCRIPTING/;/^\s*Script location/`.
+
+interSubs automatically creates a `__pycache__/` and an `urls/` directories.
+Those may be the cause of these warnings.
+They  don't  prevent  interSubs  from  working,  but if  you  want  to  get  rid
+of  them,  remove  `__pycache__/`  and `urls/`,  then  move  `interSubs.py`  and
+`interSubs_config.py` inside a  directory whose name ends  with `.disable`; e.g.
+in `python.disable/`.
+
+You'll also need to inform `interSubs.lua` of the new location of `interSubs.py`.
+
+    # ~/.config/mpv/scripts/interSubs.lua
+    pyname = '~/.config/mpv/scripts/python.disable/interSubs.py'
+                                    ^^^^^^^^^^^^^^^
+                                    new path component
+
+And  you'll  need to  inform  `interSubs.py`  of the  new  location  of the  new
+directory where the `interSubs_config.py` lives:
+
+    # ~/.config/mpv/scripts/python.disable/interSubs.py
+    pth = os.path.expanduser('~/.config/mpv/scripts/python.disable/')
+                                                    ^^^^^^^^^^^^^^^
+
+Note that these warnings start from this commit:
+<https://github.com/mpv-player/mpv/commit/00cdda2ae80f2f3c5b6fc4302d7edaf14755d037>
+
+#### “Can't load unknown script: ...”
+
+It's a similar issue.
+You have a file in `~/.config/mpv/scripts/`  which is not recognized as a lua script.
+
+##
 ## The subtitles get invisible when I start interSubs!
 
 Try to update `pyqt5`.
@@ -224,7 +259,7 @@ Or comment this `return` statement in `interSubs.py`:
 The purpose of `return` is to get  rid of some flickering introduced by a recent
 version of `pyqt5` (5.12).
 
-## How to translate a whole sentence?
+## I can't get a whole sentence to be translated!
 
 That's what the `f_deepl_translation` function is for.
 

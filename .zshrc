@@ -9,32 +9,23 @@
 #}}}
 bindkey -e
 
-# Why 16384?{{{
+# Why 32768?{{{
 #
 # I want a power of 2.
-# In the past, I used 8192, but last time I needed a core file for an issue with
-# Vim, the core was truncated, the next power of 2 is 16384.
-#
-# Note that this is weird, because the size  of the core file was only 4.4M, and
-# 8192 should grant much more space than that (around 32 mebibytes).
+# In the past, I used 16384, but last time I needed a core file for a crash with
+# Nvim, the core was truncated; the next power  of 2 is 32768, so that's what we
+# use now.
 #}}}
 #   How much space does that stand for?{{{
 #
-# The limit size for a core file must be expressed as a number of blocks.
+# The limit  size for  a core  file must be  expressed as  a number  of 512-byte
+# blocks; from `man zshbuiltins /ulimit/;/-c`:
 #
-#     $ ulimit -d -c
-#     -d: data seg size (kbytes)          unlimited~
-#     -c: core file size (blocks)         4096~
-#                         ^^^^^^
+# >    -c     512-byte blocks on the size of core dumps.
 #
-# Atm, the size of a block on our filesystem is 4096 bytes:
-#
-#     $ sudo blockdev --getbsz /dev/sda1
-#     4096~
-#
-# So, 16384 should allow a core file up to 64 mebybytes (2^26 bytes).
+# So, 32768 should allow a core file up to 16 mebybytes (2^24 bytes).
 #}}}
-ulimit -c 16384
+ulimit -c 32768
 
 # disable XON/XOFF flow control
 # Why?{{{
@@ -258,15 +249,14 @@ hash -d tmp=/run/user/$UID/tmp
 # To override any possible conflicting function (a default one, or coming from a
 # third-party plugin).
 #}}}
-#                                   ┌ additional completion definitions,
-#                                   │ not available in a default installation,
-#                                   │ useful for virtualbox
-#                                   ├──────────────────────────────┐
-fpath=( ${HOME}/.zsh/my-completions ${HOME}/.zsh/zsh-completions/src $fpath )
-
-# Add completion for the `dasht` command:
-# https://github.com/sunaku/dasht
-fpath+=${HOME}/Vcs/dasht/etc/zsh/completions
+fpath=(
+  ${HOME}/.zsh/my-completions
+  # extra completion definitions, not available in a default installation, useful for virtualbox
+  ${HOME}/.zsh/zsh-completions/src
+  $fpath
+  # completion for the `dasht` command: https://github.com/sunaku/dasht
+  ${HOME}/Vcs/dasht/etc/zsh/completions
+)
 
 # Why loading this module?{{{
 #
@@ -667,7 +657,7 @@ zstyle ':completion:*' list-colors ''
 
 zstyle ':completion:*' completer _expand _complete _correct _approximate
 # show completion menu when number of options is at least 2
-# Warning: It has a side-effect:{{{
+# Warning: It has a side effect:{{{
 #
 #   % cd /u/l/m Tab a
 #               │   │

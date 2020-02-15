@@ -19,7 +19,7 @@ mpv_socket = '/tmp/mpv_socket'
 keybinding = 'F1'
 keybinding_hide = 'F2'
 
-pyname = '~/.config/mpv/scripts/interSubs.py'
+pyname = '~/.config/mpv/scripts/python.disable/interSubs.py'
 
 ------------------------------------------------------
 

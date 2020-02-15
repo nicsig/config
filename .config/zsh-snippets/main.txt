@@ -13,6 +13,7 @@ git log --all --source -p -i -S § search for string across all commits
 git log --pretty=format:'%h - %an, %ar : %s' --after='{{date1}}' --before='{{date2}}' § search commits in date range
 git log -L {{line1}},{{line2}}:{{file}} § trace evolution of range of lines
 git reset --hard "$(git rev-parse HEAD)" § restore latest checked out commit
+git remote add upstream git://github.com/{{original-dev-username}}/{{repo-you-forked-from}}.git; git fetch upstream pull/{{PR-id}}/head:{{PR-branch}}; git checkout {{PR-branch}} § test PR
 
 cd ~/Vcs/tmux/ && { git stash -a; make clean; make distclean; \sh autogen.sh && ./configure && make; tput bel ;} § compile tmux (useful when git-bisecting)
 cd ~/Vcs/vim/ && { git stash -a; make clean; make distclean; sed -i 's/#ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ ; s/#CFLAGS = -g -DSINIXN/CFLAGS = -g -DSINIXN/ ; s@#STRIP = /bin/true@STRIP = /bin/true@' src/Makefile ; ./configure --enable-fail-if-missing --with-features=huge; make ; tput bel ;} § compile vim

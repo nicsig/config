@@ -29,7 +29,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-let s:l = 936 - ((28 * winheight(0) + 15) / 30)
+let s:l = 936 - ((17 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -202,11 +202,11 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 27 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 argglobal
-let s:l = 4 - ((0 * winheight(0) + 14) / 28)
+let s:l = 4 - ((3 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -226,7 +226,7 @@ lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("/usr/local/share/vim/vim82/doc/options.txt") | buffer /usr/local/share/vim/vim82/doc/options.txt | else | edit /usr/local/share/vim/vim82/doc/options.txt | endif
-let s:l = 6733 - ((0 * winheight(0) + 0) / 0)
+let s:l = 6733 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -234,9 +234,9 @@ normal! zt
 normal! 033|
 lcd ~/.vim
 wincmd w
-exe '1resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 27 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 1 + 16) / 33)
 tabnext
 set splitbelow splitright
 wincmd t
@@ -284,11 +284,11 @@ lcd ~/wiki/vim
 wincmd w
 argglobal
 if bufexists("~/.vim/vimrc") | buffer ~/.vim/vimrc | else | edit ~/.vim/vimrc | endif
-let s:l = 5323 - ((3 * winheight(0) + 3) / 7)
+let s:l = 5324 - ((3 * winheight(0) + 3) / 7)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5323
+5324
 normal! 0
 lcd ~/.vim
 wincmd w
@@ -392,66 +392,134 @@ set winminwidth=0
 set winwidth=1
 wincmd =
 argglobal
-let s:l = 37 - ((12 * winheight(0) + 0) / 0)
+let s:l = 45 - ((4 * winheight(0) + 5) / 10)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-37
+45
 normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
 if bufexists("~/.vim/plugged/vim-vim/autoload/vim/refactor/substitute.vim") | buffer ~/.vim/plugged/vim-vim/autoload/vim/refactor/substitute.vim | else | edit ~/.vim/plugged/vim-vim/autoload/vim/refactor/substitute.vim | endif
-let s:l = 15 - ((13 * winheight(0) + 0) / 0)
+let s:l = 75 - ((8 * winheight(0) + 4) / 9)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-15
+75
 normal! 0
 lcd ~/.vim/plugged/vim-vim
 wincmd w
 argglobal
 if bufexists("~/.vim/plugged/vim-vim/test/refactor/substitute.vim") | buffer ~/.vim/plugged/vim-vim/test/refactor/substitute.vim | else | edit ~/.vim/plugged/vim-vim/test/refactor/substitute.vim | endif
-let s:l = 1 - ((0 * winheight(0) + 14) / 28)
+let s:l = 1 - ((0 * winheight(0) + 4) / 9)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
-normal! 032|
+normal! 023|
 lcd ~/.vim/plugged/vim-vim
 wincmd w
 wincmd =
 tabnext
+edit ~/.vim/vimrc
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+wincmd _ | wincmd |
+split
+4wincmd k
+wincmd w
+wincmd w
+wincmd w
+wincmd w
 wincmd t
 set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+wincmd =
+argglobal
+let s:l = 6395 - ((6 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+6395
+normal! 01|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/Desktop/text-properties.md") | buffer ~/Desktop/text-properties.md | else | edit ~/Desktop/text-properties.md | endif
+let s:l = 82 - ((1 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+82
+normal! 019|
+lcd ~/.vim
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-search/plugin/search.vim") | buffer ~/.vim/plugged/vim-search/plugin/search.vim | else | edit ~/.vim/plugged/vim-search/plugin/search.vim | endif
+let s:l = 351 - ((0 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+351
+normal! 039|
+lcd ~/.vim/plugged/vim-search
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-search/autoload/search.vim") | buffer ~/.vim/plugged/vim-search/autoload/search.vim | else | edit ~/.vim/plugged/vim-search/autoload/search.vim | endif
+let s:l = 554 - ((1 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+554
+normal! 047|
+lcd ~/.vim/plugged/vim-search
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-search/.git/index") | buffer ~/.vim/plugged/vim-search/.git/index | else | edit ~/.vim/plugged/vim-search/.git/index | endif
+let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+1
+normal! 0
+lcd ~/.vim/plugged/vim-search/.git
+wincmd w
+5wincmd w
+wincmd =
 tabnext 11
 badd +1 ~/wiki/awk/sed.md
-badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
+badd +20 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 badd +206 ~/Desktop/ask.md
-badd +1 ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
+badd +95 ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
 badd +1 ~/.vim/plugin/matchup.vim
-badd +1 ~/.vim/plugged/vim-fex/ftplugin/fex.vim
+badd +48 ~/.vim/plugged/vim-fex/ftplugin/fex.vim
 badd +1 ~/.vim/plugged/vim-unix/autoload/unix.vim
-badd +69 ~/.vim/plugged/vim-completion/plugin/completion.vim
-badd +34 ~/Desktop/refactor.md
-badd +1718 ~/wiki/vim/config.md
+badd +1 ~/.vim/plugged/vim-completion/plugin/completion.vim
+badd +1 ~/Desktop/refactor.md
+badd +398 ~/wiki/vim/config.md
 badd +437 ~/wiki/vim/complete.md
-badd +56 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
+badd +14 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
 badd +69 ~/Desktop/vim.vim
 badd +947 ~/.vim/plugin/README/matchup.md
 badd +8 ~/Desktop/cwd.md
-badd +1 /usr/local/share/vim/vim82/doc/options.txt
 badd +23 ~/wiki/vim/shell.md
-badd +14 ~/.vim/vimrc
-badd +1 ~/.vim/autoload/myfuncs.vim
+badd +311 ~/.vim/vimrc
+badd +617 ~/.vim/autoload/myfuncs.vim
 badd +1015 ~/.vim/plugged/vim-completion/autoload/completion.vim
 badd +8 ~/.vim/plugged/vim-completion/autoload/completion/util.vim
-badd +17 ~/.vim/plugged/vim-vim/autoload/vim/refactor/substitute.vim
+badd +7 ~/.vim/plugged/vim-vim/autoload/vim/refactor/substitute.vim
 badd +1 ~/.vim/plugged/vim-vim/test/refactor/substitute.vim
+badd +38 ~/Desktop/text-properties.md
+badd +351 ~/.vim/plugged/vim-search/plugin/search.vim
+badd +0 ~/.vim/plugged/vim-search/autoload/search.vim
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -463,7 +531,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

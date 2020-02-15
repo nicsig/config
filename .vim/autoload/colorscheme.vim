@@ -546,18 +546,12 @@ fu s:Underlined() abort "{{{3
     " So, we reset the  HG with the `underline` style, and the  colors of the HG
     " `Conditional` (because this one is blue).
     "}}}
-    let Conditional = filter(split(execute('hi Conditional'), '\n'), {_,v -> v =~# '^Conditional' })[0]
-    exe 'hi '..substitute(Conditional, '^Conditional\|xxx\|\<\%(term\|cterm\|gui\)=\S*',
-        \ {m -> m[0] is# 'Conditional' ? 'Underlined' : ''}, 'g')
-        \ ..' term=underline cterm=underline gui=underline'
+    sil! call lg#syntax#derive('Conditional', 'Underlined', 'term=underline cterm=underline gui=underline')
 endfu
 
 fu s:CommentUnderlined() abort "{{{3
     " define the `CommentUnderlined` HG (useful for urls in comments)
-    let Comment = filter(split(execute('hi Comment'), '\n'), {_,v -> v =~# '^Comment' })[0]
-    exe 'hi '..substitute(Comment, '^Comment\|xxx\|\<\%(term\|cterm\|gui\)=\S*',
-        \ {m -> m[0] is# 'Comment' ? 'CommentUnderlined' : ''}, 'g')
-        \ ..' term=underline cterm=underline gui=underline'
+    sil! call lg#syntax#derive('Comment', 'CommentUnderlined', 'term=underline cterm=underline gui=underline')
 endfu
 
 fu s:User() abort "{{{3

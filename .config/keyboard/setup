@@ -90,7 +90,7 @@ main 2>&1 | tee -a "${LOGFILE}"
 #    # Replace a single and brief `Control_L` with `Escape`, so that the CapsLock key
 #    # can be used as `Escape`.
 #    xcape -e 'Control_L=Escape'
-#    # Side-effect:
+#    # Side effect:
 #    # now  the left  control key,  when  pressed briefly  and released  on its  own,
 #    # generates `Escape`.
 #    # Same thing for any physical key producing `Control_L`.
@@ -107,7 +107,7 @@ main 2>&1 | tee -a "${LOGFILE}"
 #    xmodmap -e 'keycode 255 = Return'
 #    # Replace a single `Control_R` into `Return`.
 #    xcape -e 'Control_R=Return'
-#    # Side-effect: now the right control key, when pressed and released on its own, generates `Return`.
+#    # Side effect: now the right control key, when pressed and released on its own, generates `Return`.
 #
 #
 #    # # Goal: backspace as Alt when hold
@@ -121,7 +121,7 @@ main 2>&1 | tee -a "${LOGFILE}"
 #    # xmodmap -e 'keycode 253 = BackSpace'
 #    # # Replace a single `Meta_L` into a `BackSpace` (to restore the backspace).
 #    # xcape -t 100 -e 'Meta_L=BackSpace'
-#    # # Side-effect: now any key generating `Meta_L` will now generate `BackSpace` when hit alone.
+#    # # Side effect: now any key generating `Meta_L` will now generate `BackSpace` when hit alone.
 #
 #
 #    # # Goal: tab as AltGr when hold

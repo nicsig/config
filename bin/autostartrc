@@ -4,6 +4,70 @@
 
 mkdir -p /run/user/$UID/tmp
 
+# Prevent xfce4 from saving & restoring a session.{{{
+#
+# It can happen even if you untick "Automatically save session on logout" in:
+#
+#     Settings
+#     > Session and Startup
+#     > General
+#
+# Maybe that's  because we sometimes forget  to untick "Save session  for future
+# logins" in the GUI menu which pops up when we log out by pressing Alt-F4 while
+# on the desktop...
+#
+# See: https://askubuntu.com/questions/427842/how-to-permanently-disable-the-save-session-feature-in-xubuntu
+#
+# In any case, when that happens, you may experience many issues.
+#
+# E.g.,  sometimes, the  desktop manager  (`xfdesktop(1)`) or  worse the  window
+# manager (`xfwm4`)  process is not automatically  started when you boot  up the
+# machine.
+#
+# Not sure,  but it  may also affect  the persistence of  a custom  cursor theme
+# across reboots.  See `~/.icons/README.md`.
+#
+# ---
+#
+# Once,  the window  manager  was not  started, not  even  after restarting  the
+# machine.  This lead to many issues.
+#
+# The cursor in  the terminal was not a  full block, but an empty  one (only the
+# borders were drawn, not the inside).
+#
+# When starting tmux, its  status line position was too low; half  of it was not
+# visible.
+#
+# After starting the web browser, I could not enter text anywhere, except in the
+# browser whose window geometry was too small to be usable.
+# The latter issue persisted across reboots.
+# It was not  possible to administrate the  machine anymore; I had  to switch to
+# the console and start `w3m(1)` to find a solution.
+#
+# ---
+#
+# Here is another issue which seems to confirm that this feature is buggy:
+# https://bugs.launchpad.net/ubuntu/+source/xfce4-session/+bug/1215182
+#
+# I really don't want to rely on  such an unreliable feature, which can cause so
+# many different issues.
+#}}}
+# TODO: A better way to avoid this issue would be to purge the `xfce4-session` package.{{{
+#
+# If  you  purge  the package,  you'll  need  to  make  sure the  system  starts
+# automatically some processes; in particular the current script.
+# Check out:
+#
+#     Settings
+#     > Session and Startup
+#     > Application Autostart
+#
+# You  may want  to  make sure  that  some  (all?) of  the  processes which  are
+# currently automatically started on login are still automatically started after
+# purging the package.
+#}}}
+rm -rf ${HOME}/.cache/sessions/* && chmod -w "${HOME}/.cache/sessions"
+
 # Autostart programs
 
 # conky

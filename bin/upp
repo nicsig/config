@@ -85,7 +85,11 @@ fi
 
 # Functions {{{1
 main() { #{{{2
-  print_msg "$(date +%m-%d\ %H:%M)"
+  # make sure  the next information  which are going  to be logged  are visually
+  # well-separated from the previous ones, by creating an empty fold
+  printf -- '\n-----------'
+
+  print_title "$(date +%m-%d\ %H:%M)"
 
   install_dependencies
   download
@@ -96,6 +100,7 @@ main() { #{{{2
   # (we're probably just bisecting some bug).
   #}}}
   if [[ -z "$COMMIT_HASH" ]]; then
+    print_version
     # Do *not* move `uninstall` after `configure` and `build`.{{{
     #
     # It would break the installation of the awk binary.
@@ -115,7 +120,7 @@ main() { #{{{2
   xdg_mime_default
 }
 
-print_msg() { #{{{2
+print_title() { #{{{2
   width=${#1}
   dashes="$(printf -- '-%.0s' $(seq 1 "${width}"))"
   equals="$(printf -- '=%.0s' $(seq 1 "${width}"))"
@@ -129,7 +134,7 @@ EOF
 }
 
 install_dependencies() { #{{{2
-  print_msg 'install dependencies'
+  print_title 'install dependencies'
   sudo aptitude install make
 
   if [[ "$PGM" == 'vim' ]]; then
@@ -205,7 +210,7 @@ install_dependencies() { #{{{2
 }
 
 download() { #{{{2
-  print_msg 'download'
+  print_title 'download'
   [[ -d "$GIT_REPOS" ]] || mkdir -p "$GIT_REPOS"
   cd "$GIT_REPOS" || exit
 
@@ -230,7 +235,7 @@ download() { #{{{2
 }
 
 clean() { #{{{2
-  print_msg 'clean'
+  print_title 'clean'
   if [[ "$PGM" == 'weechat' ]]; then
     # Clean last `cmake(1)` command:
     # https://stackoverflow.com/a/9680493/9780968
@@ -247,7 +252,7 @@ clean() { #{{{2
 }
 
 configure() { #{{{2
-  print_msg 'configure'
+  print_title 'configure'
   if [[ "$PGM" == 'ansifilter' ]]; then
     sed -i.bak 's:^PREFIX.*:PREFIX = /usr/local:' makefile
 
@@ -338,7 +343,7 @@ configure() { #{{{2
 }
 
 build() { #{{{2
-  print_msg 'build'
+  print_title 'build'
   if [[ "$PGM" == 'mpv' ]]; then
     # Procedure to compile `mpv`:{{{
     #
@@ -398,8 +403,25 @@ build() { #{{{2
   # TODO: If a test fails, maybe we should make the script fail too.
 }
 
+print_version() { #{{{2
+  # In case  of an  issue, we may  want to get  back to  a known old  and stable
+  # version; we may also want to bisect the issue.
+  # In both cases, knowing the previous version of the program will help.
+  print_title 'current version'
+  if [[ "$PGM" == 'tmux' ]]; then
+    tmux -V
+  elif [[ "$PGM" == 'surfraw' ]]; then
+    surfraw -version
+  elif [[ "$PGM" == 'jumpapp' ]]; then
+    # no flag exists to get the version
+    :
+  else
+    "$PGM" --version
+  fi
+}
+
 uninstall() { #{{{2
-  print_msg 'uninstall'
+  print_title 'uninstall'
   if [[ "$PGM" == 'nvim' ]]; then
     # https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
     sudo rm /usr/local/bin/nvim
@@ -413,7 +435,7 @@ uninstall() { #{{{2
 }
 
 install() { #{{{2
-  print_msg 'install'
+  print_title 'install'
 
   if [[ "$PGM" == 'mpv' ]]; then
     sudo ./install
@@ -442,7 +464,7 @@ update_alternatives(){ #{{{2
     return
   fi
 
-  print_msg 'update-alternatives'
+  print_title 'update-alternatives'
   update-alternatives --get-selections >"${LOGDIR}/update-alternatives-get-selections.bak"
 
   if [[ "$PGM" == 'awk' ]]; then
@@ -478,7 +500,7 @@ xdg_mime_default() { #{{{2
     return
   fi
 
-  print_msg 'xdg-mime default'
+  print_title 'xdg-mime default'
   # What's this `gvim.desktop`?{{{
   #
   # A file installed by the Vim package.

@@ -4,7 +4,7 @@ See `:h spellfile-cleanup`.
 
 # Where did you get it?
 
-        $VIMRUNTIME/spell/cleanadd.vim
+    $VIMRUNTIME/spell/cleanadd.vim
 
 # Why did you copy it here?
 

@@ -23,7 +23,7 @@ from PyQt5.QtCore import Qt, QThread, QObject, pyqtSignal, pyqtSlot, QSize
 from PyQt5.QtWidgets import QApplication, QFrame, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QWidget
 from PyQt5.QtGui import QPalette, QPaintEvent, QPainter, QPainterPath, QFont, QFontMetrics, QColor, QPen, QBrush
 
-pth = os.path.expanduser('~/.config/mpv/scripts/')
+pth = os.path.expanduser('~/.config/mpv/scripts/python.disable/')
 os.chdir(pth)
 import interSubs_config as config
 

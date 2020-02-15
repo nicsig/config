@@ -1,5 +1,29 @@
 #!/bin/bash
 
+# I don't have any completion for `mpv(1)`!{{{
+#
+# Install a more recent version.
+#
+# >     Installation of zsh completion is now done unconditionally because it's
+# >     nothing more than copying a file.
+#
+# Source: https://github.com/mpv-player/mpv/commit/2712db8238846f7b4e24052dbe091ea87defc5ae#diff-5ed7f1b1089cec542ab721fcae5dd5d2
+#
+# The completion function should be installed in:
+#
+#     /usr/local/share/zsh/site-functions/_mpv
+#
+# And it should be used because `$fpath` contains
+# `/usr/local/share/zsh/site-functions/` by default.
+#
+# ---
+#
+# If you're stuck with an old version, try this:
+#
+#     curl -Ls 'https://raw.githubusercontent.com/mpv-player/mpv/21a5c416d5de6ef43a5e2c08ba53cb2a8cb59ae2/TOOLS/zsh.pl' \
+#     | perl - >"${HOME}/.zsh/my-completions/_mpv"
+#}}}
+
 # TODO: make the script remove old kernels.{{{
 #
 # You could try this command:
@@ -73,7 +97,6 @@ $(date +%m-%d\ %H:%M)
 EOF
 
   update_apt "$1"
-  update_mpv_completion_function
   update_pip
   update_ranger
   update_shellcheck
@@ -236,20 +259,6 @@ EOF
     git -C "${path}" checkout -f master
   fi
   git -C "${path}" pull
-}
-
-update_mpv_completion_function() { #{{{1
-  cat <<EOF
-
-mpv completion function
------------------------
-
-EOF
-
-  curl -Ls 'https://raw.githubusercontent.com/mpv-player/mpv/master/TOOLS/zsh.pl' | \
-    perl - \
-    >"${HOME}/.zsh/my-completions/_mpv"
-  [[ $? ]] && printf -- 'Done\n'
 }
 
 update_pip() { #{{{1
