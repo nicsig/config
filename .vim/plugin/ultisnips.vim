@@ -184,6 +184,64 @@ augroup my_ultisnips
     au User UltiSnipsEnterFirstSnippet let g:expanding_snippet = 1
     au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
 
+    " An expanded snippet may break the detection of the current fold.{{{
+    "
+    "     $ mkdir /tmp/snippets
+    "     $ cat <<'EOF' >/tmp/snippets/vim.snippets
+    "     snippet ab ""
+    "     x
+    "     x
+    "     endsnippet
+    "     EOF
+    "
+    "     $ cat <<'EOF' >/tmp/vimrc
+    "         let g:UltiSnipsSnippetDirectories = ['/tmp/snippets']
+    "         let g:UltiSnipsExpandTrigger = '<tab>'
+    "         set rtp-=$HOME/.vim
+    "         set rtp-=$HOME/.vim/after
+    "         set rtp^=$HOME/.vim/plugged/ultisnips
+    "         filetype on
+    "         setl fdm=marker
+    "     EOF
+    "
+    "     $ vim -Nu /tmp/vimrc +"%d|0pu=['\\\"{{'..'{', '\\\"}}'..'}']" /tmp/vim.vim
+    "     " press:
+    "     "   zo to open the fold
+    "     "   O to open new line inside the fold
+    "     "   ab to insert tab trigger
+    "     "   tab to expand snippet
+    "     "   Esc to get back to normal mode
+    "     "   zc to close the fold
+    "
+    " At the  end, you'll notice the  fold can't be closed,  because Vim doesn't
+    " detect  it  anymore.   Most  probably,  UltiSnips  interfered  with  Vim's
+    " internal info about the fold; it edited  the buffer in such a way that Vim
+    " was not able to track the changes, and its info about the fold got stale.
+    "
+    " In practice, it does not happen all the time.
+    " For  example, in  the previous  MWE, if  you remove  one `x`  line in  the
+    " snippet, the issue disappears.
+    "}}}
+    "   Why don't you listen to `UltiSnipsEnterFirstSnippet` too?{{{
+    "
+    " It wouldn't work.
+    "
+    " We would need to slightly delay the command; e.g. with a timer.
+    " I  don't like  using  a timer  here;  it  looks like  a  hack, which  will
+    " sometimes make UltiSnips behave unexpectedly (e.g. stack trace).
+    "}}}
+    "   Why only if the foldmethod is 'marker'?{{{
+    "
+    " I don't think it's needed when we use `expr`, `indent` or `syntax`.
+    " For  those methods,  our  fold-related mappings  (like  `SPC SPC`)  should
+    " recompute the folds (via `fold#lazy#compute()`).
+    "
+    " Besides, `zx`  has the side  effect of re-applying `'foldlevel'`  which in
+    " our case closes  all the other folds;  so, better use it  when it's really
+    " necessary (to preserve the other folds state).
+    "}}}
+    au User UltiSnipsExitLastSnippet if &l:fdm is# 'marker' | exe 'norm! zx' | endif
+
     " let us know when a snippet is being expanded
     sil! call lg#syntax#derive('Visual', 'Ulti', 'term=bold cterm=bold gui=bold')
     au User MyFlags call statusline#hoist('buffer', '%#Ulti#%{plugin#ultisnips#status()}',

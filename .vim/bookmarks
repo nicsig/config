@@ -5,12 +5,12 @@ F:$HOME/.vim/autoload/myfuncs.vim
 G:$HOME/wiki/git/git.md
 J:$HOME/Dropbox/others_vimrc/justinmk.vim
 L:$HOME/wiki/l2l.md
-M:$HOME/.vim/plugged/vim-fold/autoload/fold/lazy.vim
+M:$HOME/.vim/plugged/vim-quickhl/autoload/quickhl/manual.vim
 N:$HOME/.vim/doc/misc/notes
 P:$HOME/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py
 S:$HOME/wiki/shell/shell.md
 T:$HOME/wiki/tmux/tmux.md
-U:$HOME/wiki/urxvt.md
+U:/tmp/file
 V:$HOME/wiki/vim/
 W:$HOME/wiki/weechat/weechat.md
 X:$HOME/.Xresources

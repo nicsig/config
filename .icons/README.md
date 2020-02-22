@@ -20,6 +20,16 @@ Select your theme.
 
 # It doesn't persist after a reboot!
 
+Make sure sessions are not saved & restored (clear `~/.cache/sessions/` and make
+it non-writable); then apply the theme:
+
+    $ lxappearance
+    > Mouse Cursor
+    > select theme
+    > click on "Apply" button
+
+---
+
 Read this:
 
 - <https://forum.xfce.org/viewtopic.php?id=11997>

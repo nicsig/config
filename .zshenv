@@ -87,7 +87,7 @@ export BAT_THEME='GitHub'
 #}}}
 export BROWSER='firefox'
 
-# editor {{{1
+# EDITOR {{{1
 
 # What is the difference between `EDITOR` and `VISUAL`?{{{
 #
@@ -96,7 +96,40 @@ export BROWSER='firefox'
 # https://unix.stackexchange.com/a/334022/289772
 #}}}
 
-export VISUAL='vim'
+if [[ -n "$VIM_TERMINAL" ]]; then
+  export VISUAL='vim'
+  # Prevent `C-d` from terminating the shell process, because it could cause issues in a (N)Vim popup terminal.{{{
+  #
+  # By default,  pressing `C-d`  on an empty  command-line terminates  the shell
+  # process.
+  # If you do that in a (N)Vim popup terminal, when you try to toggle the window
+  # on again, `E86` will be raised.
+  #
+  # Other issues may arise, simply because our current implementation of a popup
+  # terminal assumes that once the shell process  – which runs inside – has been
+  # started, it will always stay alive.
+  #
+  # For example, in  Vim, if you press `C-d`, the  frame color still indicates
+  # that you're in a running shell (which is not the case).
+  # Then, if  you try to type a  shell command, you'll see that  you're not in
+  # Terminal-Job mode.  So, you'll probably insert `i`, which will raise `E21`.
+  #
+  # ---
+  #
+  # You  can't  prevent `C-d`  from  terminating  the  shell process  simply  by
+  # installing a `C-d` key binding.
+  # This  termination behavior  overrides any  key  binding; you  *need* to  set
+  # `IGNORE_EOF`.
+  #}}}
+  setopt IGNORE_EOF
+elif [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
+  export VISUAL='nvim'
+  setopt IGNORE_EOF
+else
+  # if you want to use Nvim instead of Vim, this is the line to edit; leave the previous two alone
+  export VISUAL='vim'
+fi
+
 export EDITOR="$VISUAL"
 
 # For some applications, it could be useful to use full paths (e.g. `/usr/local/bin/vim`):{{{
@@ -368,6 +401,12 @@ fi
 #
 # Similarly, a Nvim process started from Vim inherits `$VIM` and `$MYVIMRC`.
 #}}}
+# Why do you `expand()` the value of `$MYVIMRC`?{{{
+#
+# `$HOME` must be expanded, otherwise, it  could cause unexpected errors in some
+# of our plugins; atm, such an error  occurs from `vim-qf` when we press `gO` to
+# open the TOC.
+#}}}
 () {
   emulate -L zsh
   local -a cmd=( \
@@ -375,7 +414,7 @@ fi
   '| let $VIMRUNTIME = \"/usr/local/share/nvim/runtime\"' \
   '| set rtp^=$VIMRUNTIME' \
   '| let $VIM = \"/usr/local/share/nvim\"' \
-  '| let $MYVIMRC = \"$HOME/.config/nvim/init.vim\"' \
+  '| let $MYVIMRC = expand(\"$HOME/.config/nvim/init.vim\")' \
   )
   export MANPAGER="nvim --cmd \"${cmd}\" +Man!"
 }

@@ -1183,7 +1183,7 @@ EOF
 # tab-complete `fasd(1)`; this may help us remembering its existence.
 fasd_add() {
   emulate -L zsh
-  if [[ $# -ne 0 ]]; then
+  if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
   usage: $0 <filepath to add in fasd's database>
 EOF
@@ -1191,7 +1191,9 @@ EOF
   fi
 
   fasd -A "$1"
-  if ! fasd | grep -P "^\d*\.?\d*\s*$1$"; then
+  if fasd | grep -P "^\d*\.?\d*\s*$(realpath $1)$"; then
+    echo "added $1"
+  else
     echo "failed to add $1"
   fi
 }
@@ -1209,7 +1211,7 @@ EOF
   if ! fasd | grep -P "^\d*\.?\d*\s*$1$"; then
     echo "removed $1"
   else
-    echo "failed to remove"
+    echo "failed to remove $1"
   fi
 }
 #}}}2
@@ -3711,11 +3713,24 @@ bindkey '^^' __previous_directory
 
 # C-d        delete-char-or-list {{{3
 
-# Purpose:
+# Purpose:{{{
+#
 # Don't  display all  possible shell  commands when  I press  `C-d` on  an empty
 # command-line which only contains whitespace; just close the shell.
+#
+# Also, don't terminate the shell in a (N)Vim popup terminal.
+# It could lead to many issues; look for `IGNORE_EOF` in `~/.zshenv`.
+#}}}
 __delete-char-or-list() {
-  if [[ "$LBUFFER" =~ '^\s+$' ]]; then
+  # we're in a (N)Vim terminal
+  if [[ -n "$VIM_TERMINAL" || -n "$NVIM_LISTEN_ADDRESS" ]]; then
+    if [[ "$BUFFER" =~ '^\s*$' ]]; then
+      :
+    else
+      zle delete-char-or-list
+    fi
+  # we're in a regular terminal
+  elif [[ "$BUFFER" =~ '^\s+$' ]]; then
     exit
   else
     zle delete-char-or-list
@@ -3951,7 +3966,7 @@ bindkey '^X?' __complete_debug
 #         → parameter
 #           HOME  HOST    # this list may be erased if you repress C-d later
 #
-#     % echo $HO C-d C-x D
+#     % echo $HO C-x C-d D
 #         → parameter
 #           HOME  HOST    # this list is printed forever
 #     % echo $HO          # new prompt automatically populated with the previous command

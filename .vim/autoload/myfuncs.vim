@@ -200,9 +200,9 @@ endfu
 "     0 → the pattern is simply @/
 
 fu myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
-    let s:yank_matches_view = winsaveview()
     let s:yank_where_match = a:yank_where_match
-    let s:yank_comments    = a:yank_comments
+    let s:yank_comments = a:yank_comments
+    let s:yank_reg = v:register
 endfu
 
 fu myfuncs#op_yank_matches(type) abort
@@ -233,12 +233,7 @@ fu myfuncs#op_yank_matches(type) abort
         " we don't want this one; remove it
         let @z = substitute(@z, "^\n", '', '')
 
-        call setreg('"', @z, 'l')
-        if exists('s:yank_matches_view')
-            call winrestview(s:yank_matches_view)
-            unlet! s:yank_matches_view
-        endif
-
+        call setreg(get(s:, 'yank_reg', '"'), @z, 'l')
     catch
         return lg#catch_error()
 
