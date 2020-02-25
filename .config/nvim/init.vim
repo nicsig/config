@@ -9,8 +9,9 @@
 " other editor.  KISS.
 "}}}
 
-if has('nvim')
+if has('nvim') && has('vim_starting')
     " https://neovim.io/doc/user/nvim.html#nvim-from-vim
+    set rtp^=/tmp/charblob
     set rtp^=~/.vim
     set rtp+=~/.vim/after
     " Do *not* do this `ln -s ~/.vim/after ~/.config/nvim/after`!{{{
@@ -298,7 +299,6 @@ if !has('nvim')
 endif
 Plug 'lacygoill/vim-markdown'
 Plug 'andymass/vim-matchup'
-Plug 'lacygoill/potion'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
 Plug 'lacygoill/vim-repeat', {'branch': 'assimil'}
 Plug 'tpope/vim-rhubarb'
@@ -359,6 +359,7 @@ Plug 'machakann/vim-Verdin'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
+Plug 'lacygoill/test-lua'
 
 " Read Doc:
 Plug 'justinmk/vim-dirvish'
@@ -1343,15 +1344,16 @@ fu s:inex() abort
     "                          └ `v:fname` could contain a tilde
     let cursor_after = '\m\%(.*\%'..col('.')..'c\)\@='
     let cursor_before = '\m\%(\%'..col('.')..'c.*\)\@<='
-    let pat = cursor_after..pat..cursor_before
+    let pat1 = cursor_after..pat..cursor_before
+    let pat2 = cursor_after..'=\f\+'..cursor_before
     if line =~# pat
-        let pat = matchstr(line, pat)
-        let env = matchstr(pat, '\w\+')
-        return substitute(pat, '${'..env..'}', eval('$'..env), '')
+        let pat1 = matchstr(line, pat1)
+        let env = matchstr(pat1, '\w\+')
+        return substitute(pat1, '${'..env..'}', eval('$'..env), '')
 
     " for lines such as `set option=path`, Vim tries to open `option=path` instead of `path`
-    elseif line =~# cursor_after..'='..cursor_before
-        return substitute(v:fname, '.*=', '', '')
+    elseif line =~# pat2
+        return matchstr(line, pat2)[1:]
     " for lines such as `./relative/path/to/file`{{{
     "
     " especially useful when the buffer has been populated by sth like:
@@ -6108,43 +6110,40 @@ augroup END
 " Create Missing Directory {{{2
 
 fu s:make_missing_dir(file, buf) abort
-    " Before creating a directory, make sure that the current buffer:
+    " Before creating a directory, make sure that the current buffer:{{{
     "
-    "    - is not a special one    :h special-buffers
+    "    - is not a special one    `:h special-buffers`
     "    - is not a remote file    ftp://...
     "
-    " Found here:    http://stackoverflow.com/a/4294176
-
-    if empty(getbufvar(a:buf, '&buftype')) && a:file !~# '^\w\+:/'
-        let dir = fnamemodify(a:file, ':h')
-        if !isdirectory(dir)
-            try
-                call mkdir(dir, 'p')
-            catch /^Vim\%((\a\+)\)\=:E739:/
-                " If the directory is in a root directory, `mkdir()` will fail.
-                " We need to run `$ sudo mkdir`.
-                let pass = inputsecret('[sudo] password for '..$USER..': ')
-                sil call system('sudo -S mkdir '..dir, pass.."\n")
-                "                      │{{{
-                "                      └ read the password from the standard input
-                "                        instead of using the terminal device.
-                "                        The password must be followed by a newline character.
-                "}}}
-                " Since this function is called after `BufWritePre`, we need to write the buffer.
-                " Why do we need to do it now, but not in the previous case (`call mkdir()`)?{{{
-                "
-                " Usually, when we save, we press `C-s` which executes `:update`.
-                " This command will fail for a file owned by root.
-                "}}}
-                W
-            endtry
-        endif
+    " Found here: http://stackoverflow.com/a/4294176
+    "}}}
+    if !empty(getbufvar(a:buf, '&buftype')) || a:file =~# '^\w\+:/'
+        return
     endif
+    let dir = fnamemodify(a:file, ':h')
+    " if the directory already exists, nothing needs to be done
+    if isdirectory(dir) | return | endif
+    try
+        call mkdir(dir, 'p')
+    catch /^Vim\%((\a\+)\)\=:E739:/
+        " If the directory is in a root directory, `mkdir()` will fail.
+        " We need to run `$ sudo mkdir`.
+        let pass = inputsecret('[sudo] password for '..$USER..': ')
+        sil call system('sudo -S mkdir '..dir, pass.."\n")
+        "                      │{{{
+        "                      └ read the password from the standard input
+        "                        instead of using the terminal device.
+        "                        The password must be followed by a newline character.
+        "}}}
+        " Write the  file as root, so  that the next `:update`  (invoked when we
+        " press `C-s`) does not fail.
+        W
+    endtry
 endfu
 
 augroup make_missing_dir
     au!
-    au BufWritePre * call s:make_missing_dir(expand('<afile>:p'), expand('<abuf>'))
+    au BufWritePre * call s:make_missing_dir(expand('<afile>:p'), +expand('<abuf>'))
 augroup END
 
 " Default Extension {{{2
@@ -7359,7 +7358,7 @@ endfu
 " Tweak the function so that we can interrupt it with `C-c`.
 " Don't use `echoerr` in the catch clause. it would raise an error (again).
 " use `echo` (+ echohl if needed).
-" PS: i've tried this solution but the message gets erased.
+" PS: I've tried this solution but the message gets erased.
 " To continue...
 "
 " 21 -
@@ -9124,6 +9123,7 @@ endfu
         endif
     endfu
     nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
+
 
 
 
