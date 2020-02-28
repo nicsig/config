@@ -4,16 +4,19 @@ fu plugin#ultisnips#cancel_expansion() abort "{{{1
         py3 UltiSnips_Manager._current_snippet_is_done()
     " Vim(py3):IndexError: pop from empty list
     catch
-        " This fixes the following issue:{{{
+    finally
+        " Make sure `UltiSnipsExitLastSnippet` is fired.{{{
         "
-        " Install this snippet:
+        " If an error occurred when expanding a snippet, the event is not fired.
+        " This can lead to several issues; for example, install this snippet:
         "
         "     snippet cc "color property" bm
         "     color: $1`!p snip.rv = complete(t[1], ['red', 'green', 'blue'])`
         "     $0
         "     endsnippet
         "
-        " If the snippet file imports python code, make sure to comment the relevant block:
+        " If the  snippet file  imports python  code, make  sure to  comment the
+        " relevant block:
         "
         "     global !p
         "     from snippet_helpers import *
@@ -34,8 +37,8 @@ fu plugin#ultisnips#cancel_expansion() abort "{{{1
         "     line    2:
         "     Traceback (most recent call last):
         "}}}
-        unlet! g:expanding_snippet
-        sil! nunmap <buffer> :
+        call timer_start(0, {-> execute('do <nomodeline> User UltiSnipsExitLastSnippet')})
+        " the timer is necessary to avoid `E523` which is caused by the `<expr>` argument
     endtry
     redraws
     return ''

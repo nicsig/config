@@ -96,8 +96,8 @@ export BROWSER='firefox'
 # https://unix.stackexchange.com/a/334022/289772
 #}}}
 
-if [[ -n "$VIM_TERMINAL" ]]; then
-  export VISUAL='vim'
+# we're in (N)Vim's terminal
+if [[ -n "$VIM_TERMINAL" ]] || [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
   # Prevent `C-d` from terminating the shell process, because it could cause issues in a (N)Vim popup terminal.{{{
   #
   # By default,  pressing `C-d`  on an empty  command-line terminates  the shell
@@ -109,7 +109,7 @@ if [[ -n "$VIM_TERMINAL" ]]; then
   # terminal assumes that once the shell process  – which runs inside – has been
   # started, it will always stay alive.
   #
-  # For example, in  Vim, if you press `C-d`, the  frame color still indicates
+  # For example,  in Vim, if you  press `C-d`, the border  color still indicates
   # that you're in a running shell (which is not the case).
   # Then, if  you try to type a  shell command, you'll see that  you're not in
   # Terminal-Job mode.  So, you'll probably insert `i`, which will raise `E21`.
@@ -118,19 +118,89 @@ if [[ -n "$VIM_TERMINAL" ]]; then
   #
   # You  can't  prevent `C-d`  from  terminating  the  shell process  simply  by
   # installing a `C-d` key binding.
-  # This  termination behavior  overrides any  key  binding; you  *need* to  set
-  # `IGNORE_EOF`.
+  # This  default termination  behavior overrides  any custom  key binding;  you
+  # *need* to set `IGNORE_EOF`.
   #}}}
   setopt IGNORE_EOF
-elif [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
-  export VISUAL='nvim'
-  setopt IGNORE_EOF
+# we're in a regular terminal
 else
-  # if you want to use Nvim instead of Vim, this is the line to edit; leave the previous two alone
   export VISUAL='vim'
 fi
 
 export EDITOR="$VISUAL"
+
+# Necessary to avoid many issues when starting Nvim from Vim's terminal (or Vim from Nvim's terminal).{{{
+#
+# In the past, `E492` was raised when running `:!man cmd` from Vim.
+#
+# More generally, when Nvim was started from Vim's terminal:
+#
+#    - the clipboard didn't work:
+#
+#         :echo @+
+#         clipboard: No provider. Try ":checkhealth" or ":h clipboard".
+#
+#    - `:checkhealth` was broken (`E5009: Invalid 'runtimepath'`)
+#
+#    - the python interface was not enabled (`:echo has('python3')` output 0),
+#      which broke plugins relying on it (like UltiSnips)
+#
+# We had many other subtle issues which required a lot of fixes.
+# Like an  anonymous zsh function to  build a complex value  for `$MANPAGER`, to
+# reset `$VIMRUNTIME` & friends.
+#
+# I think  we sometimes  had an issue  when pressing  `K` on a  word in  a shell
+# script, when `'kp'` had its default value (`man`)...
+#
+# And running `$ ls | vipe` from Nvim's terminal raised:
+#
+#     E117: Unknown function: stdpath
+#
+# We tried to fix all these issues from our vimrc by checking whether we were in
+# a (N)Vim terminal  and clearing the variables.  But it  didn't work; you can't
+# clear these variables.
+#
+# We also tried to reset them from the vimrc:
+#
+#     if has('vim_starting')
+#         if $VIM_TERMINAL != '' && v:progpath =~# '\C/nvim$'
+#             let $VIMRUNTIME = '/usr/local/share/nvim/runtime'
+#             let $VIM = '/usr/local/share/nvim'
+#             let $MYVIMRC = $HOME..'/.config/nvim/init.vim'
+#         elseif $NVIM_LISTEN_ADDRESS != '' && v:progpath =~# '\C/vim$'
+#             let $VIMRUNTIME = '/usr/local/share/vim/vim82'
+#             let $VIM = '/usr/local/share/vim'
+#             let $MYVIMRC = $HOME..'/.vim/vimrc'
+#         endif
+#     endif
+#
+# But it seemed brittle (the path `.../vim82` is only valid while you use Vim 8.2).
+#
+# Anyway, the root cause of all these issues is in the shell's environment.
+# So that's where we need to intervene.
+# We just  make sure the environment  of a shell never  contains `$VIMRUNTIME` &
+# friends; it fixes everything.
+# See: https://github.com/neovim/neovim/issues/8696
+#
+# ---
+#
+# Btw, don't try to unset too many variables, like:
+#
+#    - `NVIM_LOG_FILE`
+#    - `NVIM_LISTEN_ADDRESS`
+#    - `VIM_TERMINAL`
+#    - `VIM_SERVERNAME`
+#
+# It  could break  a program  running  in (N)Vim's  terminal and  which need  to
+# communicate with the containing (N)Vim process:
+# https://github.com/neovim/neovim/issues/8696#issuecomment-403125772
+#
+# Leave them alone; they should be harmless; for example, Vim doesn't understand
+# `NVIM_LISTEN_ADDRESS`.
+# The only variables which can cause issues are the ones which are understood by
+# both Vim and Nvim.
+#}}}
+unset VIM VIMRUNTIME MYVIMRC
 
 # For some applications, it could be useful to use full paths (e.g. `/usr/local/bin/vim`):{{{
 # https://unix.stackexchange.com/questions/4859/visual-vs-editor-what-s-the-difference#comment5812_4861
@@ -366,58 +436,7 @@ fi
 #
 #     $ MANPAGER="vim -Nu NORC --cmd 'filetype on | set rtp-=~/.vim/after' -M +MANPAGER -" man man
 #}}}
-# Why do you reset `$VIMRUNTIME` and include it inside the rtp?{{{
-#
-# If you don't, and you execute `:!man cmd` from Vim, `E492` will be raised:
-#
-#     Error detected while processing command line:~
-#     E492: Not an editor command: Man!~
-#
-# I think that's because a Nvim process started from Vim inherits `$VIMRUNTIME`.
-#
-# From `:h $VIMRUNTIME`:
-#
-# > 1. If the environment variable $VIMRUNTIME is set, it is used.  You can use
-# >    this when the runtime files are in an unusual location.
-#
-# And if `$VIMRUNTIME` is wrong, you may experience other issues, like:
-#
-#    - you can't access the system clipboard:
-#
-#         :echo @+
-#         clipboard: No provider. Try ":checkhealth" or ":h clipboard".
-#
-#    - `:checkhealth` is broken (`E5009: Invalid 'runtimepath'`)
-#
-#    - the python interface is not enabled (`:echo has('python3')` outputs 0),
-#      which breaks plugins relying on it (like UltiSnips)
-#
-# ---
-#
-# The issue  happens when you  press `K`  on a shell  command in a  shell script
-# while `'kp'` has its default value, i.e. `man`.
-#
-# ---
-#
-# Similarly, a Nvim process started from Vim inherits `$VIM` and `$MYVIMRC`.
-#}}}
-# Why do you `expand()` the value of `$MYVIMRC`?{{{
-#
-# `$HOME` must be expanded, otherwise, it  could cause unexpected errors in some
-# of our plugins; atm, such an error  occurs from `vim-qf` when we press `gO` to
-# open the TOC.
-#}}}
-() {
-  emulate -L zsh
-  local -a cmd=( \
-  'set rtp-=$VIMRUNTIME' \
-  '| let $VIMRUNTIME = \"/usr/local/share/nvim/runtime\"' \
-  '| set rtp^=$VIMRUNTIME' \
-  '| let $VIM = \"/usr/local/share/nvim\"' \
-  '| let $MYVIMRC = expand(\"$HOME/.config/nvim/init.vim\")' \
-  )
-  export MANPAGER="nvim --cmd \"${cmd}\" +Man!"
-}
+export MANPAGER="nvim +Man!"
 
 # Purpose:{{{
 #

@@ -11,7 +11,6 @@
 
 if has('nvim') && has('vim_starting')
     " https://neovim.io/doc/user/nvim.html#nvim-from-vim
-    set rtp^=/tmp/charblob
     set rtp^=~/.vim
     set rtp+=~/.vim/after
     " Do *not* do this `ln -s ~/.vim/after ~/.config/nvim/after`!{{{
@@ -352,6 +351,7 @@ Plug 'lacygoill/vim-stacktrace'
 Plug 'lacygoill/vim-statusline'
 Plug 'lacygoill/vim-xterm'
 Plug 'lacygoill/vim-terminal'
+Plug 'lacygoill/vim-test-lua'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-unichar'
@@ -359,7 +359,6 @@ Plug 'machakann/vim-Verdin'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
-Plug 'lacygoill/test-lua'
 
 " Read Doc:
 Plug 'justinmk/vim-dirvish'
@@ -2597,6 +2596,13 @@ if has('vim_starting')
     const g:orig_virtualedit = &ve
     augroup hoist_ve
         au!
+        " TODO: The `[ve=onemore]` flag is visible when selecting some text and pressing `sa`.{{{
+        "
+        " It should not be visible.
+        "
+        " The  only solution  I  can see  right  now, is  to send  a  PR to  the
+        " vim-sandwich dev, which prefixes `:set` with `:noa`.
+        "}}}
         au User MyFlags call statusline#hoist('global',
             \ '%{&ve isnot# "'..&ve..'" && mode(1) is# "n" ? "[ve="..&ve.."]" : ""}', 8,
             \ expand('<sfile>')..':'..expand('<sflnum>'))
@@ -9123,12 +9129,6 @@ endfu
         endif
     endfu
     nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
-
-
-
-
-
-
 
 
 

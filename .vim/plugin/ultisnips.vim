@@ -240,7 +240,11 @@ augroup my_ultisnips
     " our case closes  all the other folds;  so, better use it  when it's really
     " necessary (to preserve the other folds state).
     "}}}
-    au User UltiSnipsExitLastSnippet if &l:fdm is# 'marker' | exe 'norm! zx' | endif
+    au User UltiSnipsExitLastSnippet if &l:fdm is# 'marker'
+        \ |     let s:view = winsaveview()
+        \ |     exe 'norm! zx'
+        \ |     call winrestview(s:view)
+        \ | endif
 
     " let us know when a snippet is being expanded
     sil! call lg#syntax#derive('Visual', 'Ulti', 'term=bold cterm=bold gui=bold')
@@ -285,9 +289,13 @@ augroup my_ultisnips
     " I  suspect that's  because,  initially,  there are  no  lines outside  the
     " snippet, since there are no lines at all in a new file.
     "}}}
-    au User UltiSnipsEnterFirstSnippet nno <buffer><expr><nowait> : plugin#ultisnips#cancel_expansion()..':'
-    au User UltiSnipsExitLastSnippet nunmap <buffer> :
-    " TODO: Once Nvim supports `state()`, replace the previous 2 autocmds with this single one:{{{
+    au User UltiSnipsEnterFirstSnippet
+        \   exe 'nno <buffer><expr><nowait> : plugin#ultisnips#cancel_expansion()..":"'
+        \ | nno <buffer><expr><nowait> p plugin#ultisnips#cancel_expansion()..'p'
+    " `sil!` to suppress errors when the event is fired twice consecutively
+    " (yeah, for some reason, it can happen)
+    au User UltiSnipsExitLastSnippet sil! exe 'nunmap <buffer> :' | sil! nunmap <buffer> p
+    " Pitfall: If you try to replace the `:` mapping with a `CmdlineEnter` autocmd, use `state()`:{{{
     "
     "     au User UltiSnipsEnterFirstSnippet au CmdlineEnter : ++once
     "         \ if state('m') is# '' | call plugin#ultisnips#cancel_expansion() | endif
