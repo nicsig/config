@@ -265,7 +265,16 @@ augroup my_ultisnips
     " Solution: Save all the info you need  in a global Vim dictionary, when you
     " enter your first snippet, and refer to it in your snippets.
     "}}}
-    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#save_info()
+    " Why don't you listen to `UltiSnipsEnterFirstSnippet` instead?{{{
+    "
+    " Yeah, I tried that in the past.
+    " It worked most of the time, but not always.
+    " Sometimes, expanding  a snippet  caused ultisnips  to crash  and open  a split
+    " window with a stack trace.
+    " I think that's because the event is not always fired...
+    " I'm tired of this issue; let's call the function from `InsertEnter`.
+    "}}}
+    au InsertEnter * call plugin#ultisnips#save_info()
 
     " Importing a long file with `:r` while a snippet is being expanded may cause a memory leak.{{{
     "

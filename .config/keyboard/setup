@@ -9,7 +9,7 @@
 # Just write the full path to the script without the tilde (expand it yourself).
 #}}}
 # TODO:
-# We shoul  install a systemd service,  so that we re-run  this script properly,
+# We should install  a systemd service, so that we  re-run this script properly,
 # without risking to pollute the environment of xbindkeys.
 # But that's tricky.
 # Read our todo in `~/wiki/admin/systemd.md`.
@@ -54,6 +54,7 @@ main() {
   # running.
   #}}}
   xset r rate 175 40
+  # FIXME: Sometimes, `xset(1)` is not executed.  Should we add a `sleep(1)`?
 }
 
 main 2>&1 | tee -a "${LOGFILE}"

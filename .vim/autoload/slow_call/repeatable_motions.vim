@@ -158,7 +158,7 @@ endfu
 " }}}1
 " Make `fx` motion, &friends, repeatable {{{1
 
-" To make `)` repeatable, we just need to invoke `lg#motion#repeatable#make#all()`.
+" To make `)` repeatable, we just need to invoke `repmap#make#all()`.
 " So, why do we  need extra mappings, and an extra  function, `s:fts()`, to make
 " `fx` (&friends) repeatable?
 " Answer:{{{
@@ -205,10 +205,10 @@ endfu
 "
 " We'll give this information to the function via:
 "
-"     lg#motion#repeatable#make#is_repeating()
+"     repmap#make#is_repeating()
 "}}}
 
-" These mappings must be installed *before* `lg#motion#repeatable#make#all()`
+" These mappings must be installed *before* `repmap#make#all()`
 " is invoked to make the motions repeatable.
 noremap <expr><unique> t  <sid>fts('t')
 noremap <expr><unique> T  <sid>fts('T')
@@ -249,7 +249,7 @@ fu s:fts(cmd) abort
     " before returning the  keys to press. In the other, it  doesn't need to ask
     " anything.
     "}}}
-    if lg#motion#repeatable#make#is_repeating()
+    if repmap#make#is_repeating()
         let move_fwd = a:cmd =~# '\C[fts]'
         "                └ When we press `;` after `fx`, how is `a:cmd` obtained?{{{
         "
@@ -288,7 +288,7 @@ fu s:fts(cmd) abort
     return ''
 endfu
 
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   '',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -303,7 +303,7 @@ sil! call lg#motion#repeatable#make#all({
 
 " Rule: For a motion to be made repeatable, it must ALREADY be defined.{{{
 "
-" Don't invoke `lg#motion#repeatable#make#all()` for a custom motion
+" Don't invoke `repmap#make#all()` for a custom motion
 " which you're not sure whether it has been defined, or will be later.
 "
 " Indeed, the function needs to save all the information relative to the
@@ -322,7 +322,7 @@ sil! call lg#motion#repeatable#make#all({
 " cycle through help topics relevant for last errors
 " we don't have a pair of motions to move in 2 directions,
 " so I just repeat the same keys for 'bwd' and 'fwd'
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':    'n',
     \ 'buffer':  0,
     \ 'from':    expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -332,7 +332,7 @@ sil! call lg#motion#repeatable#make#all({
     \ })
 
 " fold more|less / move tabpage / rotate window
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   'n',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -344,7 +344,7 @@ sil! call lg#motion#repeatable#make#all({
     \ })
 
 " built-in motions
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   '',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -389,7 +389,7 @@ sil! call lg#motion#repeatable#make#all({
 "
 " As a result, `%` and `g%` would be broken in normal and visual mode.
 "}}}
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   'nxo',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -399,7 +399,7 @@ sil! call lg#motion#repeatable#make#all({
     \ })
 
 " custom motions
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   'n',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -415,7 +415,7 @@ sil! call lg#motion#repeatable#make#all({
     \            ]
     \ })
 
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   'n',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -425,7 +425,7 @@ sil! call lg#motion#repeatable#make#all({
     \            ]
     \ })
 
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   '',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -439,7 +439,7 @@ sil! call lg#motion#repeatable#make#all({
     \            ]
     \ })
 
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   'n',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -449,7 +449,7 @@ sil! call lg#motion#repeatable#make#all({
     \ })
 
 " toggle settings
-sil! call lg#motion#repeatable#make#all({
+sil! call repmap#make#all({
     \ 'mode':   'n',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),

@@ -340,6 +340,7 @@ Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-qf'
 Plug 'lacygoill/vim-readline'
 Plug 'lacygoill/vim-reorder'
+Plug 'lacygoill/vim-repmap'
 Plug 'lacygoill/vim-save'
 Plug 'lacygoill/vim-search'
 Plug 'lacygoill/vim-selection-ring'
@@ -351,7 +352,7 @@ Plug 'lacygoill/vim-stacktrace'
 Plug 'lacygoill/vim-statusline'
 Plug 'lacygoill/vim-xterm'
 Plug 'lacygoill/vim-terminal'
-Plug 'lacygoill/vim-test-lua'
+Plug 'lacygoill/nvim-luatest'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-unichar'
@@ -4345,7 +4346,13 @@ fu s:fix_display() abort
 
     if !has('nvim')
         " `popup_clear()` doesn't close a terminal popup (`E994`)
-        sil! call popup_close(win_getid())
+        let g = 0 | while g < 99 | let g += 1
+            try
+                call popup_close(win_getid())
+            catch /^Vim\%((\a\+)\)\=:E99[34]:/
+                break
+            endtry
+        endwhile
         call popup_clear()
     else
         call map(nvim_list_wins(),
@@ -9129,6 +9136,26 @@ endfu
         endif
     endfu
     nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
+"
+" 128 -
+"
+" `]q` doesn't always work as expected in a `:WTF` qf window.
+" Idea: When  pressing `1]q`,  make  the implementation  fall  back on  `:cnext`
+" instead of `:cafter`.
+"
+" 129 -
+"
+" I  think `popup_clear()`  should close  *all* popup  windows, including  popup
+" terminals.
+"
+" The alternative is to first use `sil! popup_close()`, but there may be several
+" popup terminals.  So, I guess you need  a `while` loop and a `try` conditional
+" inside, to close all of them before invoking `popup_clear()`.
+" That's what I do in `s:fix_display()` but it's verbose.
+" To test the code, run this:
+"
+"     eval range(2)->map({-> term_start(&shell, #{hidden: 1})->popup_create({})})
+
 
 
 
