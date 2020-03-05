@@ -298,9 +298,7 @@ augroup my_ultisnips
     " I  suspect that's  because,  initially,  there are  no  lines outside  the
     " snippet, since there are no lines at all in a new file.
     "}}}
-    au User UltiSnipsEnterFirstSnippet
-        \   exe 'nno <buffer><expr><nowait> : plugin#ultisnips#cancel_expansion()..":"'
-        \ | nno <buffer><expr><nowait> p plugin#ultisnips#cancel_expansion()..'p'
+    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#prevent_memory_leak(v:true)
     " `sil!` to suppress errors when the event is fired twice consecutively
     " (yeah, for some reason, it can happen)
     au User UltiSnipsExitLastSnippet sil! exe 'nunmap <buffer> :' | sil! nunmap <buffer> p

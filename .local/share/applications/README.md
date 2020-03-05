@@ -1,7 +1,7 @@
 # Where can I find more information about the format of a .desktop file?
 
-<https://developer.gnome.org/integration-guide/stable/desktop-files.html.en>
-<https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#introduction>
+- <https://developer.gnome.org/integration-guide/stable/desktop-files.html.en>
+- <https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#introduction>
 
 # What should I do after writing a desktop file?
 

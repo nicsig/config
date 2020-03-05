@@ -62,11 +62,11 @@ Source: <https://unix.stackexchange.com/a/417143/289772>
 # Documentation
 ## Where can I get more info on how to write my own completion function?
 
-<https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org>
-<https://github.com/zsh-users/zsh/blob/master/Etc/completion-style-guide>
+- <https://github.com/zsh-users/zsh-completions/blob/master/zsh-completions-howto.org>
+- <https://github.com/zsh-users/zsh/blob/master/Etc/completion-style-guide>
 
-<https://unix.stackexchange.com/a/366565/232487>
-<https://github.com/chrisallenlane/cheat/blob/master/cheat/autocompletion/cheat.zsh>
+- <https://unix.stackexchange.com/a/366565/232487>
+- <https://github.com/chrisallenlane/cheat/blob/master/cheat/autocompletion/cheat.zsh>
 
 ##
 # Issues

@@ -131,16 +131,16 @@ endfu
 "    - a hypertext link,  or a heading, sounds  like something more important
 "}}}
 
-noremap <expr> <silent><unique> [` lg#motion#regex#rhs('codespan', 0)
-noremap <expr> <silent><unique> ]` lg#motion#regex#rhs('codespan', 1)
-noremap <expr> <silent><unique> [h lg#motion#regex#rhs('path', 0)
-noremap <expr> <silent><unique> ]h lg#motion#regex#rhs('path', 1)
-noremap <expr> <silent><unique> [r lg#motion#regex#rhs('ref', 0)
-noremap <expr> <silent><unique> ]r lg#motion#regex#rhs('ref', 1)
-noremap <expr> <silent><unique> [u lg#motion#regex#rhs('url', 0)
-noremap <expr> <silent><unique> ]u lg#motion#regex#rhs('url', 1)
-noremap <expr> <silent><unique> [U lg#motion#regex#rhs('concealed_url', 0)
-noremap <expr> <silent><unique> ]U lg#motion#regex#rhs('concealed_url', 1)
+noremap <expr> <silent><unique> [` lg#motion#rhs('codespan', 0)
+noremap <expr> <silent><unique> ]` lg#motion#rhs('codespan', 1)
+noremap <expr> <silent><unique> [h lg#motion#rhs('path', 0)
+noremap <expr> <silent><unique> ]h lg#motion#rhs('path', 1)
+noremap <expr> <silent><unique> [r lg#motion#rhs('ref', 0)
+noremap <expr> <silent><unique> ]r lg#motion#rhs('ref', 1)
+noremap <expr> <silent><unique> [u lg#motion#rhs('url', 0)
+noremap <expr> <silent><unique> ]u lg#motion#rhs('url', 1)
+noremap <expr> <silent><unique> [U lg#motion#rhs('concealed_url', 0)
+noremap <expr> <silent><unique> ]U lg#motion#rhs('concealed_url', 1)
 
 "    <t  >t         move tab pages {{{2
 

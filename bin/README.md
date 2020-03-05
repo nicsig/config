@@ -26,14 +26,14 @@ So, we install here a more recent version:
 
 ## `NetalyzrCLI.jar` archive?
 
-<https://sebsauvage.net/links/?r-awQg>
-<http://www.netalyzr.icsi.berkeley.edu/NetalyzrCLI.jar>
-<https://play.google.com/store/apps/details?id=edu.berkeley.icsi.netalyzr.android>
+- <https://sebsauvage.net/links/?r-awQg>
+- <http://www.netalyzr.icsi.berkeley.edu/NetalyzrCLI.jar>
+- <https://play.google.com/store/apps/details?id=edu.berkeley.icsi.netalyzr.android>
 
 ## `typometer.jar` archive?
 
-<https://pavelfatin.com/typometer/>
-<https://github.com/pavelfatin/typometer>
+- <https://pavelfatin.com/typometer/>
+- <https://github.com/pavelfatin/typometer>
 
 ##
 # git-jump

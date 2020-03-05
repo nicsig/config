@@ -1,5 +1,5 @@
 fu plugin#ultisnips#cancel_expansion() abort "{{{1
-    if !get(g:, 'expanding_snippet', 0) | return | endif
+    if !get(g:, 'expanding_snippet', 0) | return '' | endif
     try
         py3 UltiSnips_Manager._current_snippet_is_done()
     " Vim(py3):IndexError: pop from empty list
@@ -75,5 +75,23 @@ endfu
 
 fu plugin#ultisnips#status() abort "{{{1
     return exists('g:expanding_snippet') ? '[Ulti]' : ''
+endfu
+
+fu plugin#ultisnips#prevent_memory_leak(on_enter) abort "{{{1
+    if a:on_enter
+        nno <buffer><expr><nowait> : plugin#ultisnips#cancel_expansion()
+            \ ..':'..plugin#ultisnips#prevent_memory_leak(v:false)
+        nno <buffer><expr><nowait> p plugin#ultisnips#cancel_expansion()
+            \ ..'p'..plugin#ultisnips#prevent_memory_leak(v:false)
+    else
+        " We already unmap those on `UltiSnipsExitLastSnippet`.  Why do it again here?{{{
+        "
+        " Once, the mappings were not removed correctly.
+        " I think that sometimes the event is not fired as expected.
+        "}}}
+        sil! nunmap <buffer> :
+        sil! nunmap <buffer> p
+    endif
+    return ''
 endfu
 

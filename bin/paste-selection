@@ -32,12 +32,29 @@ seq="\e[200~${selection}\e[201~"
 # But, it would disable `allowWindowOps`.
 # From `man xterm /allowSendEvents (`:
 #
-# > Note that  allowing such  events would  create a  very large  security hole,
-# > therefore  enabling  this  resource   forcefully  disables  the  allowXXXOps
-# > resources.
+# >     Note that  allowing such  events would  create a  very large  security hole,
+# >     therefore  enabling  this  resource   forcefully  disables  the  allowXXXOps
+# >     resources.
 #
 # Because of  this, you wouldn't be  able to use  OSC sequences, like OSC  52 to
 # get/set the clipboard, and OSC 4 to get/set a color in the 256-color palette.
+#
+# ---
+#
+# Alternative:
+#
+#     XTerm*VT100.Translations: #override \
+#                      Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
+#                      Ctrl Shift <Key>C:    copy-selection(CLIPBOARD) \n\
+#                      Ctrl Shift <Key>E:    insert-selection(PRIMARY)
+#                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# It works, and is probably better, but you have to use a key different than `f`:
+#
+#                      Ctrl Shift <Key>E:    insert-selection(PRIMARY)
+#                                      ^
+#
+# That's probably because we currently bind this script to `C-S-f` via `xbindkeys(1)`.
 #}}}
 # FIXME: fails on non-ascii characters (e.g. 'éòü'){{{
 #

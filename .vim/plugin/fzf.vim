@@ -111,6 +111,7 @@ augroup fzf_open_folds
 augroup END
 
 " Mappings{{{1
+" `:map` {{{2
 
 exe 'nno <silent> <space>fmn :<c-u>'..g:fzf_command_prefix..'Maps<cr>'
 nmap <space>fmi i<plug>(fzf-maps-i)
@@ -119,7 +120,31 @@ nmap <space>fmo y<plug>(fzf-maps-o)
 " don't press `fm` (search for next `m` character) if we cancel `SPC fm`
 nno <space>fm<esc> <nop>
 
-fu s:fuzzy_mappings() abort
+" command-line history {{{2
+
+" Why not `C-r C-r`?{{{
+"
+" Already taken (`:h c^r^r`).
+"}}}
+" Why not `C-r C-r C-r`?{{{
+"
+" Would cause a timeout when we press `C-r C-r` to insert a register literally.
+"}}}
+cno <expr> <c-r><c-h>
+\    getcmdtype() =~ ':' ?  '<c-e><c-u>'..g:fzf_command_prefix..'History:<cr>'
+\  : getcmdtype() =~ '[/?]' ? '<c-e><c-u><c-c>:'..g:fzf_command_prefix..'History/<cr>' : ''
+"                                        ^^^^^
+"                                        don't use `<esc>`; an empty pattern would search for the last pattern
+"                                        and raise an error if it can't be found
+
+" commits {{{2
+
+nno <silent> <space>fgc :<c-u>call plugin#fzf#commits('')<cr>
+nno <silent> <space>fgbc :<c-u>call plugin#fzf#commits('B')<cr>
+
+" miscellaneous (`:Marks`, `:Rg`, ...) {{{2
+
+fu s:miscellaneous() abort
     nno <silent> <space>fF :<c-u>FZF $HOME<cr>
 
     let key2cmd = {
@@ -177,23 +202,10 @@ fu s:fuzzy_mappings() abort
         au VimEnter * call filter(v:oldfiles, {_,v -> v !~# '/gvfs/'})
     augroup END
 endfu
-call s:fuzzy_mappings()
+call s:miscellaneous()
 
-nno <silent> <space>fgc :<c-u>call plugin#fzf#commits('')<cr>
-nno <silent> <space>fgbc :<c-u>call plugin#fzf#commits('B')<cr>
+" registers {{{2
 
-" Why not `C-r C-r`?{{{
-"
-" Already taken (`:h c^r^r`).
-"}}}
-" Why not `C-r C-r C-r` ?{{{
-"
-" Would cause a timeout when we press `C-r C-r` to insert a register literally.
-"}}}
-cno <expr> <c-r><c-h>
-\    getcmdtype() =~ ':' ?  '<c-e><c-u>'..g:fzf_command_prefix..'History:<cr>'
-\  : getcmdtype() =~ '[/?]' ? '<c-e><c-u><c-c>:'..g:fzf_command_prefix..'History/<cr>' : ''
-"                                        ^^^^^
-"                                        don't use `<esc>`; an empty pattern would search for the last pattern
-"                                        and raise an error if it can't be found
+nno <silent> """ :<c-u>call plugin#fzf#registers('n')<cr>
+ino <silent> <c-r><c-r><c-r> <c-\><c-o>:call plugin#fzf#registers('i')<cr>
 

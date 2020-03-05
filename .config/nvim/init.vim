@@ -214,6 +214,7 @@ Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
 Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
 Plug 'lacygoill/vim-autoread', {'branch': 'assimil'}
 Plug 'lacygoill/vim-cheat', {'branch': 'assimil'}
+Plug 'lacygoill/vim-cookbook'
 Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-debug'
 Plug 'junegunn/vim-easy-align'
@@ -352,7 +353,7 @@ Plug 'lacygoill/vim-stacktrace'
 Plug 'lacygoill/vim-statusline'
 Plug 'lacygoill/vim-xterm'
 Plug 'lacygoill/vim-terminal'
-Plug 'lacygoill/nvim-luatest'
+Plug 'lacygoill/vim-cookbook'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-unichar'
@@ -673,12 +674,12 @@ set backspace=indent,eol,start
 " So, if you want to copy some text from a Vim buffer to Firefox, you'll need to
 " explicitly mention the name of the `+` register:
 "
-"         "+yy
+"     "+yy
 "
 " Same thing if you want to paste  in a Vim buffer, some text you've just copied
 " in Firefox:
 "
-"         "+p
+"     "+p
 "
 " It would be convenient to just press `yy` and `p`, and Vim would automatically
 " use the system register, instead of the unnamed one.
@@ -3093,7 +3094,7 @@ endfu
 
 " }}}2
 " Normal {{{2
-" SPC                 (prefix) {{{3
+" SPC {{{3
 " . {{{4
 
 " `.` repeats the last edit.
@@ -3198,7 +3199,7 @@ nmap <space>S saiW
 
 nno <silent> <space>t :<c-u>exe (v:count ? v:count..'tabnew' : 'tabnew')<cr>
 "}}}3
-" [    ]              (prefix) {{{3
+" [    ] {{{3
 " ]k ]j                           various alignments {{{4
 
 " `[k`, `[j` align the beginning of the current line with the one of the previous/next line
@@ -3209,7 +3210,7 @@ nno <silent> [j :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfu
 nno <silent> ]k :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
 nno <silent> ]j :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
 " }}}3
-" g                   (prefix) {{{3
+" g {{{3
 " g^ g$       first/last tabpage {{{4
 
 nno <silent> g^ :<c-u>1tabnext<cr>
@@ -3339,7 +3340,7 @@ nno <expr> gQ ":\e"..execute('ToggleEditingCommands 0', 'silent!')..'gQ'
 nno <silent> gt :<c-u>call myfuncs#search_todo('buffer')<cr>
 nno <silent> gT :<c-u>call myfuncs#search_todo('project')<cr>
 "}}}3
-" m                   (prefix) {{{3
+" m {{{3
 " m/  m?         put current location in loclist {{{4
 
 " these mappings can be used to traverse an arbitrary set of locations in the
@@ -3379,7 +3380,7 @@ endfu
 
 nno <silent> m! :<c-u>noh <bar> call <sid>where_are_my_matches()<cr>
 "}}}3
-" U                   (prefix) {{{3
+" U {{{3
 " UM                undo changes during current session {{{4
 
 let s:changenr_save = {}
@@ -3529,7 +3530,7 @@ fu s:close_fugitive_window() abort
     call win_gotoid(winid)
 endfu
 "}}}3
-" z                   (prefix) {{{3
+" z {{{3
 " z= {{{4
 
 " Will a repetition of this command open a new menu?{{{
@@ -3662,7 +3663,7 @@ fu s:repeatable_spell_commands(type) abort
     exe 'norm! '..cmd
 endfu
 " }}}3
-" |                   (prefix) {{{3
+" | {{{3
 " |c         execute the Compiler {{{4
 
 " Why `:silent`?{{{
@@ -3763,7 +3764,246 @@ xno <silent> <bar>t :<c-u>call myfuncs#trans(1, 1)<cr>
 " cycle through several types of translations
 nno <silent> coT :<c-u>call myfuncs#trans_cycle()<cr>
 " }}}3
-" hyphen              (prefix) {{{3
+" = {{{3
+" = C-p               fix indentation of pasted text {{{4
+
+" Why not `=p`?{{{
+"
+" Already used in `vim-brackets` to paste and fix right afterward.
+" Same for `=P`.
+"}}}
+nno =<c-p> m''[=']``
+
+" =A                  toggle alignment {{{4
+
+nno <silent> =A :<c-u>set opfunc=myfuncs#op_toggle_alignment<cr>g@
+xno <silent> =A :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
+
+" =d                  fix display {{{4
+
+" In normal mode, we remapped `C-l` to give the focus to the right window.
+" But by default, `C-l` redraws the screen by executing `:redraw!`.
+"
+" So, we need to bind `:redraw!` to another key, `=d` could be a good
+" candidate.
+
+nno <silent> =d :<c-u>call <sid>fix_display()<cr>
+
+fu s:fix_display() abort
+    let view = winsaveview()
+
+    redraw! | redraws! | redrawt
+
+    if !has('nvim')
+        " `popup_clear()` doesn't close a terminal popup (`E994`)
+        let g = 0 | while g < 99 | let g += 1
+            try
+                call popup_close(win_getid())
+            catch /^Vim\%((\a\+)\)\=:E99[34]:/
+                break
+            endtry
+        endwhile
+        call popup_clear()
+    else
+        call map(nvim_list_wins(),
+            \ {_,v -> nvim_win_is_valid(v) && has_key(nvim_win_get_config(v), 'anchor') && nvim_win_close(v, 1)})
+            "         ^^^^^^^^^^^^^^^^^^^^
+            "         necessary{{{
+            "
+            " Otherwise, `E5555`  is raised when  the current window is  a float
+            " displaying a terminal buffer.
+            "
+            " I think  that's because our  current implementation of  a toggling
+            " terminal creates 2 windows: one for  the terminal, and one for the
+            " border.  And  we have a  one-shot autocmd which closes  the border
+            " when the  terminal is  closed; it  probably interferes  here; i.e.
+            " when  Nvim tries  to close  the border,  the autocmd  has done  it
+            " already.
+            "}}}
+    endif
+
+    if &l:diff
+        " update differences between windows in diff mode
+        diffupdate!
+        "         │
+        "         └ check if the file was changed externally and needs to be reloaded
+        call winrestview(view)
+        return
+    endif
+
+    " reload filetype plugins (to reapply window-local options)
+    " Why don't you run `do filetypeplugin filetype`?{{{
+    "
+    " It would only reload the default filetype plugins.
+    "
+    " It would not run our custom autocmds listening to `FileType`.
+    " In particular, it would not run the autocmd in the `styled_comments` augroup.
+    " For that, you would need to run:
+    "
+    "     do styled_comments filetype
+    "
+    " Nor would it run the autocmd in `my_default_local_formatoptions`.
+    " For that, you would need to run:
+    "
+    "     do my_default_local_formatoptions filetype
+    "
+    " IOW, you would need to run an extra `:do` command for every custom augroup
+    " you have installed; that's not manageable.
+    "}}}
+    exe 'do filetype '..&ft
+
+    " Purpose:{{{
+    "
+    " We (or a plugin) may  temporarily disable the syntax highlighting globally
+    " with `:syn off`, then restore it with `:syn on`.
+    " In  that case,  the position  of the  autocmd which  installs the  default
+    " syntax  groups is  moved *after*  our  custom autocmd  which installs  the
+    " syntax groups related to comments.
+    "
+    " Because of this new order, the default autocmd undoes our custom one.
+    " We need to re-install our custom autocmd *after* the default one.
+    "}}}
+    call s:styled_comments()
+
+    " recompute folds
+    let _ = foldlevel(1)
+    " and their titles
+    do <nomodeline> BufWinEnter
+
+    " Re-install HGs which may have been cleared after changing the color scheme.{{{
+    "
+    " Remember that to change the brightness  of `seoul-256`, in effect, we *do*
+    " change the color scheme.
+    " Also, note  that `do Syntax` will  only re-install a HG  if its attributes
+    " are defined in a syntax plugin which is sourced for the current buffer.
+    "}}}
+    " We already run `:do Syntax` from an autocmd listening to `ColorScheme`.  Is it really useful here?{{{
+    "
+    " Yes.
+    "
+    " For  performance  reason,  the  autocmd only  iterates  over  the  buffers
+    " *displayed* in a window.
+    "
+    " MWE:
+    "
+    "     $ cat <<'EOF' >>~/.vim/after/syntax/conf.vim
+    "     syn match confError /some error/
+    "     hi confError ctermbg=red
+    "     EOF
+    "
+    "     $ cat <<'EOF' >>/tmp/conf.conf
+    "     # some comment
+    "     some error
+    "     EOF
+    "
+    "     $ vim ~/.bashrc /tmp/conf.conf
+    "     :bn|bp " to source conf syntax plugin
+    "     ]ol
+    "     [ol
+    "     :bn
+    "
+    " `some error` should be highlighted in red; it's not.
+    " The `confError` HG has been cleared when we pressed `]ol` and `[ol`.
+    " It has not been re-installed by  our autocmd, because there was no `.conf`
+    " file displayed anywhere.
+    "}}}
+    "   Ok, but why `tabdo ... windo`?{{{
+    "
+    " We (or a plugin) may  temporarily disable the syntax highlighting globally
+    " with `:syn off`, then restore it with `:syn on`.
+    " In that  case, we need  to reinstall our  custom syntax groups  related to
+    " comments in *all* buffers currently displayed in a window.
+    "}}}
+    let curwin = win_getid()
+    tabdo let winnr = winnr() | windo do Syntax | exe winnr..'wincmd w'
+    call win_gotoid(curwin)
+
+    " Purpose:{{{
+    "
+    " Reset the min/max number of lines above the viewport from which Vim begins
+    " parsing the buffer to apply syntax highlighting.
+    "
+    " Sometimes syntax highlighting is wrong, these commands should fix that.
+    "
+    " We could also be more radical, and execute:
+    "
+    "     :syn sync fromstart
+    "
+    " But after we execute it in our  vimrc, every time we source the latter, we
+    " experience lag.
+    "}}}
+    syn sync minlines=200
+    syn sync maxlines=400
+
+    call winrestview(view)
+endfu
+
+" =m                  fix macro {{{4
+
+" Usage:
+"     =ma  →  edit recording a
+nno <silent> =m :<c-u>call <sid>fix_macro()<cr>
+
+fu s:fix_macro() abort
+    let c = getchar()
+    if c < 97 || c > 123
+        return
+    endif
+    let c = nr2char(c)
+    " Why don't you use the command-line window?{{{
+    "
+    " When the  register contains some  special characters (like `C-u`),  and we
+    " press  Enter  to  leave  the  command-line window,  the  register  is  not
+    " populated with what we expect.
+    "}}}
+    40vnew
+    setl bh=wipe bt=nofile nobl nomod noswf wfw wrap
+    augroup fix_macro
+        au! * <buffer>
+        let s:fix_macro_c = c
+        " What does this autocmd do?{{{
+        "
+        " It makes sure that an escape character is present at the end of the recording.
+        "}}}
+        "   Why does it do that?{{{
+        "
+        " If the recording ends with a CR, for some reason, Vim adds a `C-j`:
+        "
+        "     :let @a = "/pat\r"
+        "     :reg a
+        "     "a   /pat^M^J~
+        "                ^^
+        " Because of this, your macro may end  up moving the focus to the bottom
+        " window, or do sth else if `C-j` is locally mapped to some action.
+        "
+        " By making  sure an `Escape`  is always at the  end of a  recording, we
+        " prevent Vim from interfering with our macros.
+        "
+        " ---
+        "
+        " I suspect the explanation is contained at `:h file-formats`.
+        " It's as if Vim thought the text in  the string came from a file in DOS
+        " format (because `^M^J` is the `<EOL>` on DOS).
+        " This is  weird because  setting `'fileformat'` and  `'fileformats'` to
+        " `unix` does not fix the issue:
+        "
+        "     $ vim -es -Nu NONE +'set ffs=unix ff=unix|let @q = "xy\r"' +"pu=execute('reg q')" +'%p|qa!'
+        "     Type Name Content
+        "       l  "q   xy^M^J
+        "                   ^^
+        "}}}
+        au QuitPre <buffer> call setreg(s:fix_macro_c, substitute(getline(1), "\e"..'\@1<!$', "\e", ''))
+        \ | unlet! s:fix_macro_c
+    augroup END
+    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
+    nmap <buffer><nowait><silent> <cr> q
+    nmap <buffer><nowait><silent> ZZ q
+    let line = substitute(getreg(c), "\<c-m>\<c-j>$", "\<c-m>", '')
+    call setline(1, line)
+    norm! 1|0f'
+endfu
+"}}}3
+" hyphen {{{3
 " -a  -8           ascii / bytes info {{{4
 
 " We remap `-a`  to a function of  the `unicode.vim` plugin which  gives us more
@@ -3992,7 +4232,7 @@ fu s:unicode_table() abort
 endfu
 
 " }}}3
-" plus                (prefix) {{{3
+" plus {{{3
 " +>    +<      split/join listing or long data {{{4
 
 " long data = dictionary, list, bulleted list
@@ -4025,6 +4265,7 @@ nno <silent> +t  :<c-u>set opfunc=myfuncs#op_trim_ws<cr>g@
 xno <silent> +t  :<c-u>call myfuncs#op_trim_ws('vis')<cr>
 nno <silent> +tt :<c-u>set opfunc=myfuncs#op_trim_ws<bar>exe 'norm! '..v:count1..'g@_'<cr>
 " }}}3
+
 " CR / Tab / Shift / Control / Meta {{{3
 " CR                  move cursor on 80/100 column {{{4
 
@@ -4323,235 +4564,6 @@ nno <silent> >b :<c-u>set opfunc=myfuncs#box_create<cr>g@ip
 
 " undo the box, make it come back to just bars between cells
 nno <silent> <b :<c-u>set opfunc=myfuncs#box_destroy<cr>g@ip
-
-" =A                  toggle alignment {{{3
-
-nno <silent> =A :<c-u>set opfunc=myfuncs#op_toggle_alignment<cr>g@
-xno <silent> =A :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
-
-" =d                  fix display {{{3
-
-" In normal mode, we remapped `C-l` to give the focus to the right window.
-" But by default, `C-l` redraws the screen by executing `:redraw!`.
-"
-" So, we need to bind `:redraw!` to another key, `=d` could be a good
-" candidate.
-
-nno <silent> =d :<c-u>call <sid>fix_display()<cr>
-
-fu s:fix_display() abort
-    let view = winsaveview()
-
-    redraw! | redraws! | redrawt
-
-    if !has('nvim')
-        " `popup_clear()` doesn't close a terminal popup (`E994`)
-        let g = 0 | while g < 99 | let g += 1
-            try
-                call popup_close(win_getid())
-            catch /^Vim\%((\a\+)\)\=:E99[34]:/
-                break
-            endtry
-        endwhile
-        call popup_clear()
-    else
-        call map(nvim_list_wins(),
-            \ {_,v -> nvim_win_is_valid(v) && has_key(nvim_win_get_config(v), 'anchor') && nvim_win_close(v, 1)})
-            "         ^^^^^^^^^^^^^^^^^^^^
-            "         necessary{{{
-            "
-            " Otherwise, `E5555`  is raised when  the current window is  a float
-            " displaying a terminal buffer.
-            "
-            " I think  that's because our  current implementation of  a toggling
-            " terminal creates 2 windows: one for  the terminal, and one for the
-            " border.  And  we have a  one-shot autocmd which closes  the border
-            " when the  terminal is  closed; it  probably interferes  here; i.e.
-            " when  Nvim tries  to close  the border,  the autocmd  has done  it
-            " already.
-            "}}}
-    endif
-
-    if &l:diff
-        " update differences between windows in diff mode
-        diffupdate!
-        "         │
-        "         └ check if the file was changed externally and needs to be reloaded
-        call winrestview(view)
-        return
-    endif
-
-    " reload filetype plugins (to reapply window-local options)
-    " Why don't you run `do filetypeplugin filetype`?{{{
-    "
-    " It would only reload the default filetype plugins.
-    "
-    " It would not run our custom autocmds listening to `FileType`.
-    " In particular, it would not run the autocmd in the `styled_comments` augroup.
-    " For that, you would need to run:
-    "
-    "     do styled_comments filetype
-    "
-    " Nor would it run the autocmd in `my_default_local_formatoptions`.
-    " For that, you would need to run:
-    "
-    "     do my_default_local_formatoptions filetype
-    "
-    " IOW, you would need to run an extra `:do` command for every custom augroup
-    " you have installed; that's not manageable.
-    "}}}
-    exe 'do filetype '..&ft
-
-    " Purpose:{{{
-    "
-    " We (or a plugin) may  temporarily disable the syntax highlighting globally
-    " with `:syn off`, then restore it with `:syn on`.
-    " In  that case,  the position  of the  autocmd which  installs the  default
-    " syntax  groups is  moved *after*  our  custom autocmd  which installs  the
-    " syntax groups related to comments.
-    "
-    " Because of this new order, the default autocmd undoes our custom one.
-    " We need to re-install our custom autocmd *after* the default one.
-    "}}}
-    call s:styled_comments()
-
-    " recompute folds
-    let _ = foldlevel(1)
-    " and their titles
-    do <nomodeline> BufWinEnter
-
-    " Re-install HGs which may have been cleared after changing the color scheme.{{{
-    "
-    " Remember that to change the brightness  of `seoul-256`, in effect, we *do*
-    " change the color scheme.
-    " Also, note  that `do Syntax` will  only re-install a HG  if its attributes
-    " are defined in a syntax plugin which is sourced for the current buffer.
-    "}}}
-    " We already run `:do Syntax` from an autocmd listening to `ColorScheme`.  Is it really useful here?{{{
-    "
-    " Yes.
-    "
-    " For  performance  reason,  the  autocmd only  iterates  over  the  buffers
-    " *displayed* in a window.
-    "
-    " MWE:
-    "
-    "     $ cat <<'EOF' >>~/.vim/after/syntax/conf.vim
-    "     syn match confError /some error/
-    "     hi confError ctermbg=red
-    "     EOF
-    "
-    "     $ cat <<'EOF' >>/tmp/conf.conf
-    "     # some comment
-    "     some error
-    "     EOF
-    "
-    "     $ vim ~/.bashrc /tmp/conf.conf
-    "     :bn|bp " to source conf syntax plugin
-    "     ]ol
-    "     [ol
-    "     :bn
-    "
-    " `some error` should be highlighted in red; it's not.
-    " The `confError` HG has been cleared when we pressed `]ol` and `[ol`.
-    " It has not been re-installed by  our autocmd, because there was no `.conf`
-    " file displayed anywhere.
-    "}}}
-    "   Ok, but why `tabdo ... windo`?{{{
-    "
-    " We (or a plugin) may  temporarily disable the syntax highlighting globally
-    " with `:syn off`, then restore it with `:syn on`.
-    " In that  case, we need  to reinstall our  custom syntax groups  related to
-    " comments in *all* buffers currently displayed in a window.
-    "}}}
-    let curwin = win_getid()
-    tabdo let winnr = winnr() | windo do Syntax | exe winnr..'wincmd w'
-    call win_gotoid(curwin)
-
-    " Purpose:{{{
-    "
-    " Reset the min/max number of lines above the viewport from which Vim begins
-    " parsing the buffer to apply syntax highlighting.
-    "
-    " Sometimes syntax highlighting is wrong, these commands should fix that.
-    "
-    " We could also be more radical, and execute:
-    "
-    "     :syn sync fromstart
-    "
-    " But after we execute it in our  vimrc, every time we source the latter, we
-    " experience lag.
-    "}}}
-    syn sync minlines=200
-    syn sync maxlines=400
-
-    call winrestview(view)
-endfu
-
-" =m                  fix macro {{{3
-
-" Usage:
-"     =ma  →  edit recording a
-nno <silent> =m :<c-u>call <sid>fix_macro()<cr>
-
-fu s:fix_macro() abort
-    let c = getchar()
-    if c < 97 || c > 123
-        return
-    endif
-    let c = nr2char(c)
-    " Why don't you use the command-line window?{{{
-    "
-    " When the  register contains some  special characters (like `C-u`),  and we
-    " press  Enter  to  leave  the  command-line window,  the  register  is  not
-    " populated with what we expect.
-    "}}}
-    40vnew
-    setl bh=wipe bt=nofile nobl nomod noswf wfw wrap
-    augroup fix_macro
-        au! * <buffer>
-        let s:fix_macro_c = c
-        " What does this autocmd do?{{{
-        "
-        " It makes sure that an escape character is present at the end of the recording.
-        "}}}
-        "   Why does it do that?{{{
-        "
-        " If the recording ends with a CR, for some reason, Vim adds a `C-j`:
-        "
-        "     :let @a = "/pat\r"
-        "     :reg a
-        "     "a   /pat^M^J~
-        "                ^^
-        " Because of this, your macro may end  up moving the focus to the bottom
-        " window, or do sth else if `C-j` is locally mapped to some action.
-        "
-        " By making  sure an `Escape`  is always at the  end of a  recording, we
-        " prevent Vim from interfering with our macros.
-        "
-        " ---
-        "
-        " I suspect the explanation is contained at `:h file-formats`.
-        " It's as if Vim thought the text in  the string came from a file in DOS
-        " format (because `^M^J` is the `<EOL>` on DOS).
-        " This is  weird because  setting `'fileformat'` and  `'fileformats'` to
-        " `unix` does not fix the issue:
-        "
-        "     $ vim -es -Nu NONE +'set ffs=unix ff=unix|let @q = "xy\r"' +"pu=execute('reg q')" +'%p|qa!'
-        "     Type Name Content
-        "       l  "q   xy^M^J
-        "                   ^^
-        "}}}
-        au QuitPre <buffer> call setreg(s:fix_macro_c, substitute(getline(1), "\e"..'\@1<!$', "\e", ''))
-        \ | unlet! s:fix_macro_c
-    augroup END
-    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
-    nmap <buffer><nowait><silent> <cr> q
-    nmap <buffer><nowait><silent> ZZ q
-    let line = substitute(getreg(c), "\<c-m>\<c-j>$", "\<c-m>", '')
-    call setline(1, line)
-    norm! 1|0f'
-endfu
 
 " ""                  easier access to system register (and clean paste in mardown) {{{3
 
@@ -6709,7 +6721,7 @@ augroup END
 
 augroup my_stdin
     au!
-    au StdInReadPost * if line2byte(line('$')+1)<=2 | cquit | endif
+    au StdInReadPost * if line2byte(line('$')+1) <= 2 | cquit | endif
 augroup END
 
 " Spell files {{{2
@@ -7794,37 +7806,39 @@ endfu
 "
 " Read:
 "
-"     :h vim9-script
-"     :h syntax.txt
-"                        only 2400 lines once you remove part 4, and part 5: `:h syn-file-remarks`
-"                        you're not supposed to read part 5 entirely anyway, only the tags
-"                        relevant to the types of files you use frequently;
-"                        to get a list:    :h ft-*-syn c-d
+"     :h textprop.txt
+"                        in Nvim see `:h nvim_buf_add_highlight()`
+"     :h popup.txt
+"     :h channel.txt
+"
 "     :h tagsrch.txt
 "     :h sign.txt
-"     :h channel.txt
+"
+"     :h syntax.txt
+"                      only 2400 lines once you remove part 4, and part 5: `:h syn-file-remarks`
+"                      you're not supposed to read part 5 entirely anyway, only the tags
+"                      relevant to the types of files you use frequently;
+"                      to get a list:    :h ft-*-syn c-d
+"
+"     :h recover.txt
+"     :h diff.txt
+"     :h tips.txt
+"
 "     :h pattern.txt
 "     :h indent.txt
 "
-"     :h popup.txt
+"     :h terminal.txt
+"     :h vim9-script
 "
-"     :h textprop.txt
-"         in Nvim see `:h nvim_buf_add_highlight()`
-"         for a real usage example, see:
-"             https://github.com/dstein64/vim-startuptime/commit/9299a46dd156064683b1e7e4e7d60fc1268cd7f7
-"             https://github.com/dstein64/vim-startuptime/commit/be56323c1e4fecdd5045d6c8a08c39266a1b0839
+"     :h vim-differences
+"                           (Nvim only)
+"                           and all the links from this page, in particular `:h API`
+"                           as well as: https://www.2n.pl/blog/how-to-write-neovim-plugins-in-lua
+"     :h lsp.txt
+"                   (Nvim only)
 "
-"     :h diff.txt
-"     :h recover.txt
-"     :h tips.txt
 "     :h if_lua.txt (the interface may be phased out in the future)
 "     :h if_pyth.txt (" https://groups.google.com/forum/#!topic/vim_dev/__gARXMigYE)
-"     :h terminal.txt
-"     :h lsp.txt (Nvim only)
-"
-"     :h vim-differences (Neovim only)
-"     and all the links from this page, in particular `:h API`
-"     as well as: https://www.2n.pl/blog/how-to-write-neovim-plugins-in-lua
 "
 " 53 -
 "
@@ -7882,13 +7896,13 @@ endfu
 " Update:
 " It probably has sth to do with these functions:
 "
-"    - fold#motion#go()     (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
-"    - lg#motion#regex#go() (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
+"    - fold#motion#go()    (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
+"    - lg#motion#go()      (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
 "
 " Update:
 " It has to do with the `<silent>` argument in the mapping.
 " We need it in all modes except in operator-pending mode.
-" Alternatively, we could include at the end of `lg#motion#regex#go()`:
+" Alternatively, we could include at the end of `lg#motion#go()`:
 "
 "     exe 'norm! '..line('.')..'g'
 "
@@ -9136,25 +9150,6 @@ endfu
         endif
     endfu
     nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
-"
-" 128 -
-"
-" `]q` doesn't always work as expected in a `:WTF` qf window.
-" Idea: When  pressing `1]q`,  make  the implementation  fall  back on  `:cnext`
-" instead of `:cafter`.
-"
-" 129 -
-"
-" I  think `popup_clear()`  should close  *all* popup  windows, including  popup
-" terminals.
-"
-" The alternative is to first use `sil! popup_close()`, but there may be several
-" popup terminals.  So, I guess you need  a `while` loop and a `try` conditional
-" inside, to close all of them before invoking `popup_clear()`.
-" That's what I do in `s:fix_display()` but it's verbose.
-" To test the code, run this:
-"
-"     eval range(2)->map({-> term_start(&shell, #{hidden: 1})->popup_create({})})
 
 
 
