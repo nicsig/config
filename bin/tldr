@@ -53,6 +53,12 @@ auto_update_index() {
     recent "$index" || update_index
 }
 
+bname() {
+    fn=${1##*/}
+    fn=${fn%$2}
+    printf "%s\n" "$fn"
+}
+
 style_for() {
     style=""
     # sanitize user input, only lowercase and spaces are allowed
@@ -216,7 +222,7 @@ path_for_cmd() {
     else
         # take the first one so we can show something, but warn the user
         p=$(echo "$desc" | cut -d '"' -f 8)
-        >&2 echo -e "${red}tldr page $1 not found in $platform or common, using page from platform $p instead$reset\n"
+        >&2 printf "${red}tldr page $1 not found in $platform or common, using page from platform $p instead$reset\n"
         echo "$p/$1.md"
     fi
 }
@@ -243,6 +249,14 @@ get_tldr() {
 
 fetch_tldr() {
     curl -sf "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages/{$platform,common}/$1.md"
+}
+
+list_pages() {
+    for platform in $(ls "$configdir" ); do
+        for page in $(ls 2>/dev/null "$configdir"/"$platform/") ; do
+            bname "$page" .md
+        done
+    done | sort | uniq
 }
 
 config
@@ -272,8 +286,8 @@ while [ $# -gt 0 ]
 do
     case "$1" in
         -l|--list)
-            >&2 echo -e "Known tldr pages: \n"
-            tr '{' '\n' < "$configdir/index.json" | grep '^\"name\":' | cut -d '"' -f4 | column
+            >&2 printf "Known tldr pages: \n"
+            list_pages
             exit 0
             ;;
         -n)

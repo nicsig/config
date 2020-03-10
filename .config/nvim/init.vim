@@ -3607,7 +3607,7 @@ fu s:my_zd(type) abort
     try
         norm! zd
     " `zd` only works when 'foldmethod' is "manual" or "marker".
-    catch /^Vim\%((\a\+)\)\=:E351:/
+    catch /^Vim\%((\a\+)\)\=:\%(E351\|E490\):/
         return lg#catch_error()
     endtry
 endfu
@@ -3790,7 +3790,24 @@ xno <silent> =A :<c-u>call myfuncs#op_toggle_alignment('vis')<cr>
 nno <silent> =d :<c-u>call <sid>fix_display()<cr>
 
 fu s:fix_display() abort
-    let view = winsaveview()
+    " If we're in a popup window, it will be closed; we want to preserve the view in the *previous* window.{{{
+    "
+    " Not the view in the *current* window.
+    "
+    " Unfortunately, we  can't get the  last line address  of the cursor  in the
+    " previous window; we could save it via a `WinLeave` autocmd, but it doesn't
+    " seem worth the hassle.
+    "
+    " OTOH, we can get the topline, which for the moment is good enough.
+    "}}}
+    if !has('nvim') && win_gettype() is# 'popup'
+        let wininfo = getwininfo(win_getid(winnr('#')))
+        if !empty(wininfo)
+            let topline = wininfo[0].topline
+        endif
+    else
+        let view = winsaveview()
+    endif
 
     redraw! | redraws! | redrawt
 
@@ -3803,9 +3820,35 @@ fu s:fix_display() abort
                 break
             endtry
         endwhile
-        call popup_clear()
+        try
+            call popup_clear()
+        " `E994` may still happen in some weird circumstances;
+        " example: https://github.com/vim/vim/issues/5744
+        catch /^Vim\%((\a\+)\)\=:E994:/
+            return lg#catch_error()
+        endtry
     else
-        call map(nvim_list_wins(),
+        " Why not `nvim_list_wins()`?{{{
+        "
+        " Yeah, it could replace:
+        "
+        "     map(range(1, winnr('$')), {_,v -> win_getid(v)})
+        "
+        " But it would  list *all* windows, and thus the  code would close *all*
+        " floating windows.  We don't want that; we only want to close all
+        " floating windows in the *current tab page*.
+        "
+        " We want that for 2 reasons.
+        "
+        " It's consistent with  `popup_clear()` which only closes  popups in the
+        " current tab page (and global popups).
+        "
+        " The purpose of `=d` is to fix  some issue in what is currently visible
+        " on the  screen; whatever  is displayed  on another  tab page  is *not*
+        " currently visible;  therefore, there  is no  reason to  close anything
+        " outside the current tab page.
+        "}}}
+        call map(map(range(1, winnr('$')), {_,v -> win_getid(v)}),
             \ {_,v -> nvim_win_is_valid(v) && has_key(nvim_win_get_config(v), 'anchor') && nvim_win_close(v, 1)})
             "         ^^^^^^^^^^^^^^^^^^^^
             "         necessary{{{
@@ -3935,7 +3978,16 @@ fu s:fix_display() abort
     syn sync minlines=200
     syn sync maxlines=400
 
-    call winrestview(view)
+    if exists('topline')
+        let so_save = &l:so
+        setl so=0
+        exe 'norm! '..topline..'GztM'
+        "                          ^
+        "                          middle of the window to minimize the distance from the original cursor position
+        let &l:so = so_save
+    elseif exists('view')
+        call winrestview(view)
+    endif
 endfu
 
 " =m                  fix macro {{{4
@@ -7802,6 +7854,12 @@ endfu
 " https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 " https://gist.github.com/andymass/bcd0a4956ed1a873d41f7265be6c6979
 "
+" Update:
+" You could just install `:tno` mappings which open the file under the cursor in
+" the current Vim instance.
+" If the path is relative, you could inspect the prompt to extract the cwd.
+" https://www.reddit.com/r/vim/comments/feod1s/tips_for_avoiding_nested_vim_sessions_when/
+"
 " 52 -
 "
 " Read:
@@ -9150,6 +9208,40 @@ endfu
         endif
     endfu
     nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
+"
+" 128 -
+"
+" Write a refactoring command to convert a dictionary into its literal form:
+"
+"     {'a': 1, 'b': 'string'}
+"     →
+"     #{a: 1, b: 'string'}
+"
+" Idea:
+" Inside the dictionary, iterate over all the colons which are outside a string.
+" For each  of them, look  back for a string  (only whitespace can  separate the
+" string from the colon); if you find such a string, press `sd'`.
+"
+" Warning: Read `:h literal-Dict`.
+" The `#{}` notation limit the characters which can be used in a key name.
+" Take that into consideration when writing your refactoring command.
+" That is,  if some key contains  characters which are invalid  in `#{}`, cancel
+" the whole refactoring.
+"
+" 129 -
+"
+" Create a command to cycle between different buffer states.
+" E.g.:
+"
+"    1. press some custom mapping to remember the current state (`:echo undotree().seq_cur`)
+"
+"    2. edit the buffer
+"
+"    3. press some custom mapping to get back to the original remembered state;
+"       before that, remember the new current state to be able to cycle between the 2 states
+"
+" This would  be useful when  we bisect the  code in some  file, and we  need to
+" temporarily remove a lot of code.
 
 
 
