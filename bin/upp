@@ -222,7 +222,7 @@ download() { #{{{2
   cd "$PGM" || exit
   # We may have edited some file (`configure`, `Makefile`, ...).  Stash those edits.
   # https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning
-  git stash --all
+  git stash --all; git stash clear
   if [[ -n "$COMMIT_HASH" ]]; then
     git checkout -f "$COMMIT_HASH"
   # check a master branch exists (trans has no master branch)

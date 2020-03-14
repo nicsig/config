@@ -254,7 +254,7 @@ EOF
   local path="${2}${plugin_name}"
   [[ -d "${path}" ]] || git -C "$2" clone "$1"
   # https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning
-  git -C "${path}" stash --all
+  git -C "${path}" stash --all; git -C "${path}" stash clear
   if git -C "${path}" show-ref --verify --quiet refs/heads/master; then
     git -C "${path}" checkout -f master
   fi
@@ -357,6 +357,12 @@ update_shellcheck() { #{{{1
 }
 
 update_terminfo() { #{{{1
+  cat <<EOF
+
+terminfo
+----------------
+
+EOF
   curl -L http://invisible-island.net/datafiles/current/terminfo.src.gz -o /tmp/terminfo.src.gz
   gunzip /tmp/terminfo.src.gz
   tic -sx /tmp/terminfo.src

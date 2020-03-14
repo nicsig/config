@@ -1658,6 +1658,18 @@ set path=.,**5
 "     │ └ /usr/include directory
 "     └ directory of the current buffer
 
+" Idea: You could also include the item `.git/..;`.{{{
+"
+" It  describes the  parent  directory  of `.git/`,  the  latter being  searched
+" recursively upward in the file system; IOW,  it describes the root of your git
+" project.
+"
+" We don't need it atm, because we have  something better: we set the cwd to the
+" root directory of a git project, so `**5` looks not only in the project's root
+" directory, but  recursively down into  it.  Still, it  could be useful  in the
+" future...
+"}}}
+
 " scroll {{{2
 
 " display at least 3 lines above/below the cursor
@@ -2118,11 +2130,11 @@ endif
 " MWE:
 "
 "     $ cat <<'EOF' >/tmp/vimrc
-"     cno <plug>(up) <up>
-"     nmap <expr> * Func()
-"     fu Func()
-"         return "*/\<plug>(up)\r"
-"     endfu
+"         cno <plug>(up) <up>
+"         nmap <expr> * Func()
+"         fu Func()
+"             return "*/\<plug>(up)\r"
+"         endfu
 "     EOF
 "
 "     # open xterm
@@ -4434,26 +4446,15 @@ endfu
 nno <silent> <c-p> :<c-u>tabprevious<cr>
 nno <silent> <c-n> :<c-u>exe (v:count > 1 ? v:count : '')..'tabnext'<cr>
 
-" C-w N               join tab page {{{4
+" C-w s               send to tab page {{{4
 
-" Why `C-w N`?{{{
-"
-" Symmetry with the default `C-w T`.
-"
-" Mnemonic:
-"
-" 'T' for spli*t*.
-" 'N' for joi*n*.
-"}}}
-nno <silent> <c-w>N :<c-u>call <sid>join_tab_page(v:count)<cr>
+nno <silent> <c-w>s :<c-u>call <sid>send_to_tab_page(v:count)<cr>
 
-fu s:join_tab_page(cnt) abort
+fu s:send_to_tab_page(cnt) abort
     let cnt = a:cnt
     let curtab = tabpagenr()
-    if cnt == curtab
-        echo "can't join current tab page with itself" | return
     " if we don't press a count before the lhs, we want the chance to provide it afterward
-    elseif cnt == 0
+    if cnt == 0
         " TODO: It would be nice if we could select the tab page via fzf.{{{
         "
         "     " prototype
@@ -4470,8 +4471,10 @@ fu s:join_tab_page(cnt) abort
         " We  still need  to figure out  how to  preview all the  windows opened  in the
         " selected tab page.
         "}}}
-        let cnt = input('join with tab page nr: ')
-        if cnt !~# '^[+-]\=\d*[1-9]\d*$'
+        let cnt = input('send to tab page nr: ')
+        if cnt is# '$'
+            let cnt = tabpagenr('$')
+        elseif cnt !~# '^[+-]\=\d*[1-9]\d*$'
             redraw | if cnt isnot# '' | echo 'not a valid number' | endif | return
         " parse a `+2` or `-3` number as an index relative to the current tabpage
         elseif cnt[0] =~# '+\|-'
@@ -4480,15 +4483,17 @@ fu s:join_tab_page(cnt) abort
             let cnt = matchstr(cnt, '\d\+')
         endif
     endif
-    " If the mapping received  a count, move the current window  to the tab page
-    " whose number matches this count.
-    let bufnr = bufnr('%')
-    q
-    if cnt < curtab
-        exe 'tabnext '..min([cnt, tabpagenr('$')])
-    else
-        exe 'tabnext '..min([cnt - 1, tabpagenr('$')])
+    if cnt == curtab
+        redraw | echo 'current window is already in current tab page' | return
+    elseif cnt > tabpagenr('$')
+        redraw | echo 'no tab page with number '..cnt | return
     endif
+    let bufnr = bufnr('%')
+    " close the window
+    q
+    " focus target tab page
+    exe 'tabnext '..cnt
+    " open new window displaying the buffer from the closed window in the target tab page
     exe 'sb '..bufnr
 endfu
 
@@ -7259,7 +7264,7 @@ endfu
 " You create  the skeleton of  the diagram with  graph-easy, then tweak  it with
 " vim-schlepp + vim-draw.
 "
-" Also, remember we've  created the `:BoxPrettify` command. useful  to convert a
+" Also, remember we've  created the `:BoxPrettify` command. Useful  to convert a
 " raw ascii diagram, in a more polished one.
 "
 " 12 -
@@ -8803,7 +8808,7 @@ endfu
 " Use `>s` only when necessary (i.e. only  when you need to step into a function
 " or a sourced file).
 " Right after executing `>s`, do *not* use any of your readline mappings.
-" You would step into the readline function, which would create noise.
+" You would step into a readline function, which would create noise.
 " The effect is  cumulative: for each of your custom  readline mapping you press
 " right after  executing `>s`, you'll add  a new frame onto  the stacktrace (you
 " can see it with `>bt`); you would then  need to run `>f` to quit each readline
