@@ -3256,7 +3256,7 @@ fu s:break_line(_) abort
             sil update
         endif
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -3301,7 +3301,7 @@ fu s:try_to_edit_plugin_config(cmd) abort
         try
             exe 'norm! '..a:cmd..'zv'
         catch
-            return lg#catch_error()
+            return lg#catch()
         endtry
     else
         let split = a:cmd[0] is# 'g' ? 'edit' : a:cmd[1] is# 'g' ? 'tabedit' : 'split'
@@ -3603,7 +3603,7 @@ fu s:z_equal(_) abort
         "}}}
         call feedkeys('z=', 'in')
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         call timer_start(0, {-> winbufnr(winid) == bufnr
             \ && call('settabwinvar', win_id2tabwin(winid) + ['&spell', spell_save])})
@@ -3620,7 +3620,7 @@ fu s:my_zd(type) abort
         norm! zd
     " `zd` only works when 'foldmethod' is "manual" or "marker".
     catch /^Vim\%((\a\+)\)\=:\%(E351\|E490\):/
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -3837,7 +3837,7 @@ fu s:fix_display() abort
         " `E994` may still happen in some weird circumstances;
         " example: https://github.com/vim/vim/issues/5744
         catch /^Vim\%((\a\+)\)\=:E994:/
-            return lg#catch_error()
+            return lg#catch()
         endtry
     else
         " Why not `nvim_list_wins()`?{{{
@@ -4434,10 +4434,10 @@ fu s:jump_to_definition() abort
             norm! 1gd
             norm! zvzz
         else
-            return lg#catch_error()
+            return lg#catch()
         endif
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -4546,7 +4546,7 @@ fu s:indent_without_shiftround(type) abort
         set shiftround
         exe 'norm! '..v:count1..op
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         let &shiftround = sr_save
     endtry
@@ -4605,7 +4605,7 @@ endfu
 "         let operator = get(s:, 'indentation_direction', '') is# 'decrease' ? '<' : '>'
 "         exe 'norm! '..line("'[")..'G'..operator..line("']")..'G'
 "     catch
-"         return lg#catch_error()
+"         return lg#catch()
 "     finally
 "         let &sr = sr_save
 "     endtry
@@ -5639,7 +5639,7 @@ endfu
 "                 exe 'sp | h ' . a:topic
 "             endif
 "         catch
-"             return lg#catch_error()
+"             return lg#catch()
 "         endtry
 "     endfu
 
@@ -7311,7 +7311,7 @@ endfu
 "         do sth which can fail
 "
 "     catch
-"         return lg#catch_error()
+"         return lg#catch()
 "
 "     finally
 "         mandatory conclusion (like restoring options)
@@ -7333,7 +7333,7 @@ endfu
 "
 " Also:
 "     catch
-"         return lg#catch_error()
+"         return lg#catch()
 "
 " Also:
 " what happens if you do:
@@ -7959,13 +7959,13 @@ endfu
 " Update:
 " It probably has sth to do with these functions:
 "
-"    - fold#motion#go()    (✔)   ~/.vim/plugged/vim-fold/autoload/fold.vim:33
-"    - lg#motion#go()      (✘)   ~/.vim/plugged/vim-lg-lib/autoload/lg/motion/regex.vim:1
+"    - `s:jump()`    (✔)   ~/.vim/plugged/vim-fold/autoload/fold/motion.vim:101
+"    - `s:jump()`    (✘)   ~/.vim/plugged/vim-brackets/autoload/brackets/move.vim:178
 "
 " Update:
 " It has to do with the `<silent>` argument in the mapping.
 " We need it in all modes except in operator-pending mode.
-" Alternatively, we could include at the end of `lg#motion#go()`:
+" Alternatively, we could include at the end of `s:jump()`:
 "
 "     exe 'norm! '..line('.')..'g'
 "
@@ -9195,7 +9195,7 @@ endfu
         "}}}
         if has('gui_running') | return | endif
         if v:shell_error
-            return lg#catch_error()
+            return lg#catch()
         else
             " TODO: Document why this line is needed.{{{
             "
@@ -9247,6 +9247,22 @@ endfu
 "
 " This would  be useful when  we bisect the  code in some  file, and we  need to
 " temporarily remove a lot of code.
+"
+" Update: A command would be better.
+"
+"     " add current undo seq to a dictionary (key = undo seq, value = description of the buffer state)
+"     " save the info in a file
+"     :UndoSeq -save 'some description'
+"
+"     " removes undo seq 123 from the dictionary
+"     :UndoSeq -del 123
+"
+"     " removes the file where the info contained in the dictionary is saved
+"     :UndoSeq -del
+"
+"     " load list of undo seq into location window
+"     " pressing Enter on an entry runs `:undo 123` in the associated buffer
+"     :UndoSeq
 
 
 

@@ -3,7 +3,7 @@ if stridx(&rtp, 'vim-lg-lib') == -1
 endif
 
 " Define some motions {{{1
-"       Why define them here? Why not in vimrc?{{{
+"       Why define them here? Why not in vimrc?{{{
 "
 " In the vimrc, we would need a guard:
 "
@@ -97,51 +97,6 @@ fu s:get_jump_height(is_fwd) abort
     \    :     line('.') - max(lnums)
 endfu
 
-"    ]h  ]r  ]u     move to next path/ref/url {{{2
-
-" Why not `]H`?{{{
-"
-" `]u` (next url) is lowercase. `]h` (next path) should be too.
-"}}}
-" But, doesn't it cause an inconsistency in some filetype plugins?{{{
-"
-" Yes.
-"
-" For example, in `vim-help`, we use `]e`, with a lowercase character to move to
-" the next example, while we have to use `]H` to move to the next hypertext link.
-" Same kind of inconsistency in `vim-man`.
-"}}}
-" Is it bad to use `]H`?{{{
-"
-" It's ok.
-"
-" There was already an inconsistency in those filetype plugins: because of `]O`.
-" If we  used `]o` to  move to the  next option, we would  need to wait  for the
-" timeout (because of the mappings  which toggle options values). So, instead we
-" have to use `]O`.
-"
-" I  prefer to  keep all  inconsistencies in  the filetype  plugins, instead  of
-" spreading them across more plugins.
-"
-" Besides, there are other arguments in favor of this choice:
-"
-"    - a path is a universal concept,  while an option tag is specific  to
-"      documentation; its mapping  should be  easier to type
-"
-"    - a hypertext link,  or a heading, sounds  like something more important
-"}}}
-
-noremap <expr> <silent><unique> [` lg#motion#rhs('codespan', 0)
-noremap <expr> <silent><unique> ]` lg#motion#rhs('codespan', 1)
-noremap <expr> <silent><unique> [h lg#motion#rhs('path', 0)
-noremap <expr> <silent><unique> ]h lg#motion#rhs('path', 1)
-noremap <expr> <silent><unique> [r lg#motion#rhs('ref', 0)
-noremap <expr> <silent><unique> ]r lg#motion#rhs('ref', 1)
-noremap <expr> <silent><unique> [u lg#motion#rhs('url', 0)
-noremap <expr> <silent><unique> ]u lg#motion#rhs('url', 1)
-noremap <expr> <silent><unique> [U lg#motion#rhs('concealed_url', 0)
-noremap <expr> <silent><unique> ]U lg#motion#rhs('concealed_url', 1)
-
 "    <t  >t         move tab pages {{{2
 
 nno <silent> <t :<c-u>call <sid>move_tabpage('-1')<cr>
@@ -150,9 +105,9 @@ nno <silent> >t :<c-u>call <sid>move_tabpage('+1')<cr>
 fu s:move_tabpage(where) abort
     try
         exe 'tabmove '..a:where
-    catch /^Vim\%((\a\+)\)\?:E474:/
+    catch /^Vim\%((\a\+)\)\=:E474:/
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 " }}}1
@@ -331,13 +286,12 @@ sil! call repmap#make#all({
     \            ]
     \ })
 
-" fold more|less / move tabpage / rotate window
+" move tabpage / rotate window
 sil! call repmap#make#all({
     \ 'mode':   'n',
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '<f'    ,  'fwd': '>f'},
     \              {'bwd': '<t'    ,  'fwd': '>t'},
     \              {'bwd': '<c-w>R',  'fwd': '<c-w>r'},
     \            ]
@@ -355,11 +309,9 @@ sil! call repmap#make#all({
     \              {'bwd': '[(',  'fwd': '])'},
     \              {'bwd': '[*',  'fwd': ']*'},
     \              {'bwd': '[/',  'fwd': ']/'},
-    \              {'bwd': '[@',  'fwd': ']@'},
     \              {'bwd': '[M',  'fwd': ']M'},
     \              {'bwd': '[S',  'fwd': ']S'},
     \              {'bwd': '[]',  'fwd': ']['},
-    \              {'bwd': '[`',  'fwd': ']`'},
     \              {'bwd': '[c',  'fwd': ']c'},
     \              {'bwd': '[m',  'fwd': ']m'},
     \              {'bwd': '[s',  'fwd': ']s'},
@@ -430,6 +382,7 @@ sil! call repmap#make#all({
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
+    \              {'bwd': '[`',  'fwd': ']`'},
     \              {'bwd': '[h',  'fwd': ']h'},
     \              {'bwd': '[r',  'fwd': ']r'},
     \              {'bwd': '[u',  'fwd': ']u'},
@@ -454,24 +407,17 @@ sil! call repmap#make#all({
     \ 'buffer': 0,
     \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '[oB',  'fwd': ']oB'},
     \              {'bwd': '[oC',  'fwd': ']oC'},
     \              {'bwd': '[oD',  'fwd': ']oD'},
-    \              {'bwd': '[oH',  'fwd': ']oH'},
-    \              {'bwd': '[oI',  'fwd': ']oI'},
     \              {'bwd': '[oL',  'fwd': ']oL'},
-    \              {'bwd': '[oN',  'fwd': ']oN'},
     \              {'bwd': '[oS',  'fwd': ']oS'},
-    \              {'bwd': '[oW',  'fwd': ']oW'},
     \              {'bwd': '[oc',  'fwd': ']oc'},
     \              {'bwd': '[od',  'fwd': ']od'},
     \              {'bwd': '[of',  'fwd': ']of'},
-    \              {'bwd': '[og',  'fwd': ']og'},
     \              {'bwd': '[oh',  'fwd': ']oh'},
     \              {'bwd': '[oi',  'fwd': ']oi'},
     \              {'bwd': '[ol',  'fwd': ']ol'},
     \              {'bwd': '[on',  'fwd': ']on'},
-    \              {'bwd': '[oo',  'fwd': ']oo'},
     \              {'bwd': '[op',  'fwd': ']op'},
     \              {'bwd': '[oq',  'fwd': ']oq'},
     \              {'bwd': '[os',  'fwd': ']os'},

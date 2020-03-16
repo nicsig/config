@@ -21,7 +21,7 @@ let g:fzf_layout = {
     \     'height': 0.6,
     \     'xoffset': 0.5,
     \     'yoffset': 0.5,
-    \     'highlight': 'Title',
+    \     'highlight': 'Comment',
     \     'border': 'sharp',
     \ }}
 
@@ -30,6 +30,13 @@ let g:fzf_action = {
     \ 'ctrl-s': 'split',
     \ 'ctrl-v': 'vsplit',
     \ }
+
+" Always enable preview window on the right with 50% width.{{{
+"
+" By default, the preview  window is only enabled if the width  of the screen is
+" bigger than 120 columns.
+"}}}
+let g:fzf_preview_window = 'right:50%'
 
 " When we use `:[Fz]Buffers`, and we select a buffer which is already displayed
 " in a window, give the focus to it, instead of loading it in the current one.

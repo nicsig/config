@@ -1553,7 +1553,7 @@ EOF
   #                                                      ^^^^^^^
   #                                                      hides warning message
   #
-  # There's an warning  message asking a question, but because  of `silent!`, we
+  # There's a  warning message asking a  question, but because of  `silent!`, we
   # can't see it.
   #
   # Interestingly, the issue disappears if you remove the quotes around `$()`:

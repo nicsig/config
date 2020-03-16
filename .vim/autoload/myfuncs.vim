@@ -31,7 +31,7 @@ fu myfuncs#op_grep(type, ...) abort "{{{2
         endif
 
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         let &cb  = cb_save
         let &sel = sel_save
@@ -128,7 +128,7 @@ fu myfuncs#op_replace_without_yank(type) abort
         endif
 
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         let &cb  = cb_save
         let &sel = sel_save
@@ -235,7 +235,7 @@ fu myfuncs#op_yank_matches(type) abort
 
         call setreg(get(s:, 'yank_reg', '"'), @z, 'l')
     catch
-        return lg#catch_error()
+        return lg#catch()
 
     finally
         call call('setreg', reg_save)
@@ -334,7 +334,7 @@ fu myfuncs#box_create(_) abort
 
         call s:box_create_separations()
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -616,7 +616,7 @@ fu myfuncs#dump_wiki(url) abort "{{{1
         sil update
 
     catch
-        return lg#catch_error()
+        return lg#catch()
 
     finally
         call setpos("'x", x_save)
@@ -730,7 +730,7 @@ fu myfuncs#join_blocks(first_reverse) abort "{{{1
         sil *!column -s $'\x01' -t
 
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         if winbufnr(winid) == bufnr
             let [tabnr, winnr] = win_id2tabwin(winid)
@@ -771,7 +771,7 @@ fu myfuncs#long_data_join(type, ...) abort "{{{1
             sil keepj keepp s/\m\zs\s*,\ze\s\=[\]}]//e
         endif
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -957,7 +957,7 @@ fu myfuncs#search_todo(where) abort "{{{1
         echom 'no TO'..'DO or FIX'..'ME'
         return
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 
     " Because we've prefixed `:lvim` with `:noa`, our autocmd which opens a qf window

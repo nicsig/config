@@ -1,3 +1,15 @@
+if exists('g:autoloaded_plugin#fzf')
+    finish
+endif
+let g:autoloaded_plugin#fzf = 1
+
+" Init {{{1
+
+const s:COLORS = {
+    \ 'regtype': 3,
+    \ 'regname': 30,
+    \ }
+
 fu plugin#fzf#commits(char) abort "{{{1
     let cwd = getcwd()
     " To use `:FzBCommits` and `:FzCommits`, we first need to be in the working tree of the repo:{{{
@@ -16,14 +28,13 @@ fu plugin#fzf#registers(mode) abort "{{{1
     let source = split(execute('reg'), '\n')[1:]
     " trim leading whitespace (useful to filter based on type; e.g. typing `^b` will leave only blockwise registers)
     call map(source, {_,v -> substitute(v, '^\s\+', '', '')})
-    " highlight register name
-    call map(source, {_,v -> substitute(v, '"\S', "\x1b[38;5;30m&\x1b[0m", '')})
     " highlight register type
-    call map(source, {_,v -> substitute(v, '^\s*\zsc', "\x1b[38;5;3m&\x1b[0m", '')})
-    call map(source, {_,v -> substitute(v, '^\s*\zsb', "\x1b[38;5;5m&\x1b[0m", '')})
-    call fzf#run(fzf#wrap('registers', {
+    call map(source, {_,v -> substitute(v, '^\s*\zs[bcl]', "\x1b[38;5;"..s:COLORS.regtype.."m&\x1b[0m", '')})
+    " highlight register name
+    call map(source, {_,v -> substitute(v, '"\S', "\x1b[38;5;"..s:COLORS.regname.."m&\x1b[0m", '')})
+    call fzf#run(fzf#wrap({
         \ 'source': source,
-        \ 'options': '--ansi --tiebreak=index +m',
+        \ 'options': '--ansi --nth=3.. --tiebreak=index +m',
         \ 'sink': function('s:registers_sink', [a:mode])}))
 endfu
 
