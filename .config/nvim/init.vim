@@ -1943,12 +1943,8 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 "
 " ---
 "
-" Also, the bracketed paste mode doesn't  seem to be enabled when you insert the
-" contents of a register.
-"
-" Probably because, technically, you're not *pasting*  some text (like you do by
-" pressing `C-S-v`), you're *inserting* the contents of a register.
-" So, maybe (N)Vim doesn't enable the bracketed paste mode...
+" Also, the bracketed  paste mode is ignored  when you insert the  contents of a
+" register with `C-r`.
 "
 " MWE:
 "
@@ -1969,20 +1965,8 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 "         Level 2~
 "     Level 1~
 "
-" Note that I  don't think it's a  bug in (N)Vim, because, in  the previous MWE,
-" you can avoid the issue by pasting from normal mode (`"ap`).
-"
-" You may consider the  last argument as invalid, because we  can also paste the
-" clipboard selection by pressing `"+p`, and yet if we press `C-S-v` from insert
-" mode, and the  text is wrongly indented,  we consider this as  an issue, hence
-" the creation of the `'paste'` option in the first place.
-"
-" That's true, but I think the reason why `'paste'` was created, even though one
-" can paste by pressing `"+p`, is because there's no guarantee that Vim has been
-" compiled with  `+clipboard`. So, `'paste'`  is useful  when one  cannot access
-" `"+` because they're using a limited version of Vim.
-" In contrast, one can always paste the contents of the register `a`, regardless
-" of the features of their Vim binary.
+" You can avoid the issue by pasting from normal mode (`"ap`), or inserting with
+" `C-r C-o` or `C-r C-p`.
 "}}}
 "   How many things need to be configured for it to work?{{{
 "
@@ -1996,11 +1980,11 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 " depends on its default configuration.
 " For example, zsh automatically sets the parameter `zle_bracketed_paste`:
 "
-" > This two-element array  contains the terminal escape  sequences for enabling
-" > and  disabling  the  feature. These  escape sequences  are  used  to  enable
-" > bracketed paste when ZLE is active and disable it at other times.  Unsetting
-" > the  parameter has  the  effect  of ensuring  that  bracketed paste  remains
-" > disabled.
+" >     This two-element array  contains the terminal escape  sequences for enabling
+" >     and  disabling  the  feature. These  escape sequences  are  used  to  enable
+" >     bracketed paste when ZLE is active and disable it at other times.  Unsetting
+" >     the  parameter has  the  effect  of ensuring  that  bracketed paste  remains
+" >     disabled.
 "
 " Which enables the bracketed paste mode.
 " But if you unset the parameter, you disable the mode.
@@ -2035,21 +2019,21 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 "
 " For more info, see `:h xterm-bracketed-paste`.
 "
-" > When the 't_BE' option is set then  't_BE' will be sent to the terminal when
-" > entering "raw"  mode and 't_BD'  when leaving  "raw" mode.  The  terminal is
-" > then  expected to  put 't_PS'  before pasted  text and  't_PE' after  pasted
-" > text.  This  way Vim can separate  text that is pasted  from characters that
-" > are typed.  The pasted text is handled  like when the middle mouse button is
-" > used, it is inserted literally and not interpreted as commands.
+" >     When the 't_BE' option is set then  't_BE' will be sent to the terminal when
+" >     entering "raw"  mode and 't_BD'  when leaving  "raw" mode.  The  terminal is
+" >     then  expected to  put 't_PS'  before pasted  text and  't_PE' after  pasted
+" >     text.  This  way Vim can separate  text that is pasted  from characters that
+" >     are typed.  The pasted text is handled  like when the middle mouse button is
+" >     used, it is inserted literally and not interpreted as commands.
 "}}}
 "     Now you're talking about yet another mode!  What's this raw mode?{{{
 "
 " A mode in which the terminal driver doesn't interpret the characters it receives.
 "
-" > The  terminal can  be placed  into  "raw" mode  where the  characters are  not
-" > processed by the terminal driver, but are sent straight through (it can be set
-" > that INTR and QUIT characters  are still processed). This allows programs like
-" > emacs and vi to use the entire screen more easily.
+" >     The  terminal can  be placed  into  "raw" mode  where the  characters are  not
+" >     processed by the terminal driver, but are sent straight through (it can be set
+" >     that INTR and QUIT characters  are still processed). This allows programs like
+" >     emacs and vi to use the entire screen more easily.
 "
 " Source: https://unix.stackexchange.com/a/21760/289772
 "
@@ -2546,11 +2530,6 @@ set timeoutlen=3000
 "}}}
 set ttimeoutlen=6
 
-" ttyfast {{{2
-
-" terminal connection is fast
-set ttyfast
-
 " ttymouse {{{2
 
 " This option may help when you need to interact with Vim with your mouse.{{{
@@ -2933,9 +2912,9 @@ endfu
 " }}}2
 " Insert {{{2
 
-" Most of these mappings take care of not breaking undo sequence (C-g U).
+" Most of these mappings take care of not breaking the undo sequence (`:h i^gU`).
 " It means we can repeat an edition with the dot command, even if we use them.
-" If you add another mapping, try to not break undo sequence. Thanks.
+" If you add another mapping, try to not break the undo sequence. Thanks.
 
 " C-g             (prefix) {{{3
 " C-h {{{4
@@ -3047,6 +3026,39 @@ fu s:c_m() abort
 endfu
 
 ino <silent> <expr> <c-m> <sid>c_m()
+
+" C-r             ignore `'autoindent'` when inserting register {{{3
+
+ino <silent> <c-r> <c-r><c-p>
+"                       ├───┘
+"                       └ and fix the indentation while we're at it;
+"                         use `<c-o>` if you prefer to preserve the indentation
+
+" The previous `<c-r>` mapping breaks the default `:h i^r^o`; allow us to still use it.{{{
+"
+" You may wonder why `:h i^r^o` gets broken.
+" Suppose you  press `C-r`  in insert mode;  Vim sees that  you have  2 mappings
+" starting with `C-r`:
+"
+"     i  <C-R>       * <C-R><C-P>
+"     i  <C-R><C-R><C-R> * <C-\><C-O>:call plugin#fzf#registers('i')<CR>
+"
+" It must wait another key to know which one you want to press.
+"
+" Then, suppose you  press `C-o`; Vim now  knows that you don't want  to use the
+" 2nd mapping, but the  first mapping is still ok (it would  have been no matter
+" what  you would  have pressed  – except  a 2nd  `C-r` –  because its  lhs only
+" contains 1 key), and so Vim expands `C-r` into `C-r C-p`.
+"
+" In the end, the typeahead buffer contains:
+"
+"     C-r C-p C-o
+"
+" Which is not what you wanted, i.e. `C-r C-o`.
+"}}}
+ino <silent> <c-r><c-o> <c-r><c-o>
+" the same issue could affect `:h i^r^p` if one day we use `<c-r><c-o>` in the `<c-r>` mapping
+ino <silent> <c-r><c-p> <c-r><c-p>
 
 " C-s             save {{{3
 
@@ -3812,7 +3824,7 @@ fu s:fix_display() abort
     "
     " OTOH, we can get the topline, which for the moment is good enough.
     "}}}
-    if !has('nvim') && win_gettype() is# 'popup'
+    if window#util#is_popup()
         let wininfo = getwininfo(win_getid(winnr('#')))
         if !empty(wininfo)
             let topline = wininfo[0].topline
@@ -7902,6 +7914,10 @@ endfu
 "
 "     :h if_lua.txt (the interface may be phased out in the future)
 "     :h if_pyth.txt (" https://groups.google.com/forum/#!topic/vim_dev/__gARXMigYE)
+"
+" Note that LSP is not a replacement for tags:
+" https://www.reddit.com/r/vim/comments/fj9tsz/do_lsps_make_tag_generating_tools_obsolete/fkmna6k/
+" https://www.reddit.com/r/vim/comments/fj9tsz/do_lsps_make_tag_generating_tools_obsolete/fkmvji3/
 "
 " 53 -
 "

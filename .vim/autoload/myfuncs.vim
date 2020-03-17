@@ -1050,6 +1050,9 @@ endfu
 " https://github.com/echuraev/translate-shell.vim
 
 " TODO: add `| C-t` mapping, to replay last text
+" TODO: Implement a mapping which would translate the word under the cursor in a split.
+" Apply text properties to get bold/italics attributes.
+" Apply folding to be able to read only one section (`noun`, `verb`, `Synonyms`, `Examples`).
 
 "                ┌ the function is called for the 1st time;
 "                │ if the text is too long for `trans`, it will be
