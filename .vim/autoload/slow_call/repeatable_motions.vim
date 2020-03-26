@@ -43,8 +43,8 @@ fu s:vertical_jump_rhs(is_fwd) abort
         let mode = "\<c-v>\<c-v>"
     endif
 
-    return printf(":\<c-u>call "..s:snr.."vertical_jump_go(%d,%s)\<cr>",
-    \             a:is_fwd, string(mode))
+    return printf(":\<c-u>call %svertical_jump_go(%d,%s)\<cr>",
+        \ s:snr, a:is_fwd, string(mode))
 endfu
 
 fu s:vertical_jump_go(is_fwd, mode) abort
@@ -93,8 +93,8 @@ fu s:get_jump_height(is_fwd) abort
     let lnums = filter([lnum1, lnum2], {_,v -> v > 0})
 
     return a:is_fwd
-    \    ?     min(lnums) - line('.')
-    \    :     line('.') - max(lnums)
+        \ ?     min(lnums) - line('.')
+        \ :     line('.') - max(lnums)
 endfu
 
 "    <t  >t         move tab pages {{{2

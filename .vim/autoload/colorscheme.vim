@@ -209,9 +209,9 @@ fu colorscheme#customize() abort "{{{2
     " `TabLine`, ...), but their attributes are not (correctly) defined yet.
     "}}}
     if has('vim_starting') && has('gui_running')
-        au VimEnter * call s:override() | call s:styled_comments()
+        au VimEnter * call s:override() | call s:styled_comments() | call s:misc()
     else
-        call s:override() | call s:styled_comments()
+        call s:override() | call s:styled_comments() | call s:misc()
     endif
 
     " Why?{{{
@@ -290,20 +290,6 @@ fu colorscheme#customize() abort "{{{2
     endif
 endfu
 
-fu s:override() abort "{{{2
-    call s:CursorLine()
-    call s:DiffChange()
-    call s:EndOfBuffer()
-    call s:LineNrAboveBelow()
-    call s:SpecialKey()
-    call s:StatuslineNC()
-    call s:TabLine()
-    call s:Title()
-    call s:Underlined() | call s:CommentUnderlined()
-    call s:User()
-    call s:VertSplit()
-endfu
-
 fu colorscheme#cursorline(enable) abort "{{{2
     " Why is this function public?{{{
     "
@@ -365,6 +351,20 @@ fu colorscheme#save_last_version() abort "{{{2
 endfu
 " }}}1
 " Core {{{1
+fu s:override() abort "{{{2
+    call s:CursorLine()
+    call s:DiffChange()
+    call s:EndOfBuffer()
+    call s:LineNrAboveBelow()
+    call s:SpecialKey()
+    call s:StatuslineNC()
+    call s:TabLine()
+    call s:Title()
+    call s:Underlined() | call s:CommentUnderlined()
+    call s:User()
+    call s:VertSplit()
+endfu
+
 " override default HGs {{{2
 fu s:CursorLine() abort "{{{3
     " Why changing `CursorLine`?{{{
@@ -546,12 +546,12 @@ fu s:Underlined() abort "{{{3
     " So, we reset the  HG with the `underline` style, and the  colors of the HG
     " `Conditional` (because this one is blue).
     "}}}
-    sil! call lg#syntax#derive('Conditional', 'Underlined', 'term=underline cterm=underline gui=underline')
+    sil! call lg#syntax#derive('Underlined', 'Conditional', 'term=underline cterm=underline gui=underline')
 endfu
 
 fu s:CommentUnderlined() abort "{{{3
     " define the `CommentUnderlined` HG (useful for urls in comments)
-    sil! call lg#syntax#derive('Comment', 'CommentUnderlined', 'term=underline cterm=underline gui=underline')
+    sil! call lg#syntax#derive('CommentUnderlined', 'Comment', 'term=underline cterm=underline gui=underline')
 endfu
 
 fu s:User() abort "{{{3
@@ -772,6 +772,31 @@ fu s:styled_comments() abort "{{{2
         exe 'hi markdownBlockquoteCodeSpan ctermfg='..statement_fg..' ctermbg='..bg
         exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='..statement_fg
     endif
+endfu
+
+fu s:misc() abort "{{{2
+    " We need a HG to draw signs in a popup window.{{{
+    "
+    " `WarningMsg` is a good fit for that, but there's one issue.
+    " If  we  use  `WarningMsg`  to  define  a  sign  via  `sign_define()`,  Vim
+    " highlights the  foreground of the  screen cells with `WarningMsg`  but the
+    " background with `Pmenu`, because our color scheme only sets the foreground
+    " color of `WarningMsg`.
+    "
+    " This is a bit jarring because:
+    "
+    "    - in a popup window, the sign column is highlighted by `SignColumn`
+    "    - the background of `SignColumn` is identical to `Normal`
+    "
+    " So, the background of the sign column is highlighted like `Normal`, except
+    " where there are signs; in those locations, `Pmenu` is used.
+    "
+    " To solve this, we build `PopupSign`  with the same attributes as `Normal`,
+    " except the background color which is like `Normal`.
+    "}}}
+    " create `PopupSign` from `WarningMsg`
+    " override the `guibg` or `ctermbg` attribute, using the colors of the `Normal` HG
+    call lg#syntax#derive('PopupSign', 'WarningMsg', {'bg': 'Normal'})
 endfu
 
 fu s:cursor() abort "{{{2

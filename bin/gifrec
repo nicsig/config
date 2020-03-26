@@ -54,9 +54,15 @@
 #}}}
 
 # Functions {{{1
-encode_to_gif() { #{{{2
-  gifenc /tmp/recording_desktop.mkv /tmp/gif.gif >/dev/null 2>&1
-  rm /tmp/recording_desktop.mkv 2>/dev/null
+main() { #{{{2
+  get_geometry
+  start_recording "$@"
+  stop_everything
+  maybe_close_panes
+  encode_to_gif
+
+  # show the size (some sites have a size limit for gifs)
+  du -sh /tmp/gif.gif
 }
 
 get_geometry() { #{{{2
@@ -109,26 +115,6 @@ get_geometry() { #{{{2
   fi
 }
 
-main() { #{{{2
-  get_geometry
-  start_recording "$@"
-  stop_everything
-  maybe_close_panes
-  encode_to_gif
-
-  # show the size (some sites have a size limit for gifs)
-  du -sh /tmp/gif.gif
-}
-
-maybe_close_panes() { #{{{2
-  if [[ -n "${TMUX}" ]]; then
-    # we've opened 2 panes to reduce the geometry of the recorded pane
-    # close them
-    tmux kill-pane -t "${pane_id1}"
-    tmux kill-pane -t "${pane_id2}"
-  fi
-}
-
 start_recording() { #{{{2
   # https://trac.ffmpeg.org/wiki/Capture/Desktop
   #
@@ -178,6 +164,20 @@ stop_everything() { #{{{2
 
   killall screenkey
 }
+maybe_close_panes() { #{{{2
+  if [[ -n "${TMUX}" ]]; then
+    # we've opened 2 panes to reduce the geometry of the recorded pane
+    # close them
+    tmux kill-pane -t "${pane_id1}"
+    tmux kill-pane -t "${pane_id2}"
+  fi
+}
+
+encode_to_gif() { #{{{2
+  gifenc /tmp/recording_desktop.mkv /tmp/gif.gif >/dev/null 2>&1
+  rm /tmp/recording_desktop.mkv 2>/dev/null
+}
+
 #}}}1
 # Execution {{{1
 

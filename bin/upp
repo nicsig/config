@@ -270,24 +270,70 @@ configure() { #{{{2
     # Uncomment to get more info in your backtraces.
     #     sed -i 's/-O2/-O0/' Makefile.am
     sh autogen.sh
+    # TODO: When you update your OS, try to pass `--enable-utf8proc` to `./configure`.{{{
+    #
+    # It may fix various issues in (N)Vim when editing a line containing some emojis
+    #
+    # See: https://www.youtube.com/watch?v=F91VWOelFNE&t=346s
+    #
+    # Note that it requires the `libutf8proc-dev` package.
+    #
+    # I don't do  it atm, because it seems  to cause Vim to not  draw some lines
+    # when we move in the buffer opened by `:UnicodeTable`.
+    # I  suspect that  the issue  comes from  our our  `libutf8proc-dev` package
+    # which is way too old; we have `1.3.1` while the latest release is `2.4.0`:
+    # https://juliastrings.github.io/utf8proc/releases/
+    #
+    # We could try to  compile from source then install, but  it would be tricky
+    # to make tmux use this compiled library.
+    #
+    # >     You  can then  link with  the resulting  libutf8proc library  by including
+    # >     -lutf8proc  in your  link flags  (...) and  #include <utf8proc.h>  in your
+    # >     source code (...).
+    #}}}
     ./configure
 
   elif [[ "$PGM" == 'vim' ]]; then
     ./configure  \
-      --enable-cscope                \
       --enable-fail-if-missing       \
       --enable-gui=gtk2              \
       --enable-luainterp=dynamic     \
-      --enable-multibyte             \
       --enable-python3interp=dynamic \
-      --enable-terminal              \
       --prefix=/usr/local            \
       --with-compiledby=user         \
-      --with-features=huge           \
-      --with-luajit                  \
-      --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
-    # TODO: Is `--with-python3-config-dir` still necessary?
-    # According to `./configure --help`, it's deprecated...
+      --with-luajit
+    # Those options are not necessary, because they're set by default:{{{
+    #
+    #     --enable-cscope
+    #     --enable-multibyte
+    #     --enable-terminal
+    #     --with-features=huge
+    #
+    # Check out `$ ./configure --help`.
+    #
+    # ---
+    #
+    # `enable-gui=gtk2` is also unnecessary atm, because it's also set by default;
+    # however, I prefer to be sure that gVim still uses gtk2 in the future.
+    # Last time I checked, gtk3 increased the latency.
+    #}}}
+    # Don't use `--with-python3-config-dir`;  it's deprecated.{{{
+    #
+    # Check out `./configure --help`.
+    #}}}
+    # `--with-luajit` doesn't make `--enable-luainterp` useless.{{{
+    #
+    # Without `--enable-luainterp`, the lua interface is not enabled.
+    # You can check it's working with:
+    #
+    #     :lua print(_VERSION)
+    #
+    # And that LuaJIT is available with:
+    #
+    #     :lua print(jit.version)
+    #
+    # See `:h :lua /luajit`.
+    #}}}
 
   # If you want the online documentation, add this option:{{{
   #

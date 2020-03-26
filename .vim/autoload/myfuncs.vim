@@ -1089,10 +1089,10 @@ fu myfuncs#trans(first_time, ...) abort
     " to the file after the callback has been invoked
     " use `exit_cb` instead
     let opts = {
-               \ 'out_io':    'file',
-               \ 'out_name':  s:trans_tempfile,
-               \ 'err_io':    'null',
-               \ 'exit_cb':   function('s:trans_output'),
+               \ 'out_io':   'file',
+               \ 'out_name': s:trans_tempfile,
+               \ 'err_io':   'null',
+               \ 'exit_cb':  function('s:trans_output'),
                \ }
 
     " send the first chunk in the list of chunks to `trans`

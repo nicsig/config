@@ -57,7 +57,7 @@
 #    │ numbers │ lines addresses                                   │
 #    └─────────┴───────────────────────────────────────────────────┘
 #
-# There're other values (like auto, full, plain), see `man $bat`.
+# There're other values (like auto, full, plain), see `man bat`.
 #}}}
 export BAT_STYLE=changes,grid,header
 # What are the other possible themes, and how to (pre)view them?{{{
@@ -95,38 +95,7 @@ export BROWSER='firefox'
 # editor (e.g.  `sed(1)`), and  your preferred  TUI/GUI editor  (e.g. `vim(1)`):
 # https://unix.stackexchange.com/a/334022/289772
 #}}}
-
-# we're in (N)Vim's terminal
-if [[ -n "$VIM_TERMINAL" ]] || [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
-  # Prevent `C-d` from terminating the shell process, because it could cause issues in a (N)Vim popup terminal.{{{
-  #
-  # By default,  pressing `C-d`  on an empty  command-line terminates  the shell
-  # process.
-  # If you do that in a (N)Vim popup terminal, when you try to toggle the window
-  # on again, `E86` will be raised.
-  #
-  # Other issues may arise, simply because our current implementation of a popup
-  # terminal assumes that once the shell process  – which runs inside – has been
-  # started, it will always stay alive.
-  #
-  # For example,  in Vim, if you  press `C-d`, the border  color still indicates
-  # that you're in a running shell (which is not the case).
-  # Then, if  you try to type a  shell command, you'll see that  you're not in
-  # Terminal-Job mode.  So, you'll probably insert `i`, which will raise `E21`.
-  #
-  # ---
-  #
-  # You  can't  prevent `C-d`  from  terminating  the  shell process  simply  by
-  # installing a `C-d` key binding.
-  # This  default termination  behavior overrides  any custom  key binding;  you
-  # *need* to set `IGNORE_EOF`.
-  #}}}
-  setopt IGNORE_EOF
-# we're in a regular terminal
-else
-  export VISUAL='vim'
-fi
-
+export VISUAL='vim'
 export EDITOR="$VISUAL"
 
 # Necessary to avoid many issues when starting Nvim from Vim's terminal (or Vim from Nvim's terminal).{{{
@@ -220,10 +189,13 @@ unset VIM VIMRUNTIME MYVIMRC
 # https://github.com/junegunn/fzf#environment-variables
 # https://github.com/junegunn/fzf#respecting-gitignore
 export FZF_DEFAULT_COMMAND='fd --hidden --follow --type f'
+# this command is invoked by `fzf-cd-widget`;
+# look for it in your zshrc to find out which key we've bound the latter to
 export FZF_ALT_C_COMMAND='fd --hidden --follow --type d'
+# this command is invoked by `fzf-file-widget`
 export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 
-export FZF_DEFAULT_OPTS='--exact --inline-info --bind change:top,alt-j:preview-page-down,alt-k:preview-page-up'
+export FZF_DEFAULT_OPTS='--exact --info=inline --bind change:top,alt-j:preview-page-down,alt-k:preview-page-up'
 # https://github.com/andrewferrier/fzf-z/blob/c36f93f89f7e78308bce1056e9672cad77dd8993/fzfz#L15
 export FZF_ALT_C_OPTS="${FZF_DEFAULT_OPTS} --preview='tree -C -L 2 -x --noreport --dirsfirst {} | head -\$LINES'"
 export FZF_CTRL_R_OPTS=$FZF_DEFAULT_OPTS

@@ -17,7 +17,7 @@ fu plugin#fzf#commits(char) abort "{{{1
     "    - in which the current file belongs
     "
     "    - in which we are interested;
-    "      let's say, again, the one where the current file belong
+    "      let's say, again, the one to which the current file belongs
     "}}}
     noa exe 'lcd '..fnameescape(expand('%:p:h'))
     exe g:fzf_command_prefix..a:char..'Commits'

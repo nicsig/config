@@ -9,11 +9,11 @@
 #}}}
 bindkey -e
 
-# Why 32768?{{{
+# Why 65536?{{{
 #
 # I want a power of 2.
-# In the past, I used 16384, but last time I needed a core file for a crash with
-# Nvim, the core was truncated; the next power  of 2 is 32768, so that's what we
+# In the past, I used 32768, but last time I needed a core file for a crash with
+# Nvim, the core was truncated; the next power  of 2 is 65536, so that's what we
 # use now.
 #}}}
 #   How much space does that stand for?{{{
@@ -23,9 +23,9 @@ bindkey -e
 #
 # >    -c     512-byte blocks on the size of core dumps.
 #
-# So, 32768 should allow a core file up to 16 mebybytes (2^24 bytes).
+# So, 65536 should allow a core file up to 32 mebybytes (2^25 bytes).
 #}}}
-ulimit -c 32768
+ulimit -c 65536
 
 # disable XON/XOFF flow control
 # Why?{{{
@@ -1463,6 +1463,7 @@ fix() { #{{{2
   tput rs1
   tput rs2
   tput rs3
+  tput cnorm
   clear
   printf -- '\ec'
 }
