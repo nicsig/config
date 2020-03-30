@@ -5,7 +5,7 @@ fu s:snr()
 endfu
 let s:snr = get(s:, 'snr', s:snr())
 
-if expand('%:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
+if expand('<afile>:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
     setl fdm=expr
     let &l:fdt = s:snr..'fold_text()'
     let &l:fde = s:snr..'fold_expr()'

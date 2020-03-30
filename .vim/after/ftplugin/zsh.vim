@@ -9,7 +9,7 @@
 "}}}
 runtime! ftplugin/sh.vim
 
-if expand('%:p') is# $HOME..'/.zsh_history'
+if expand('<afile>:p') is# $HOME..'/.zsh_history'
     " remove duplicate entries in `~/.zsh_history`
     com -bar -buffer -range=% ZshCleanHistory
         \ %!LC_ALL=C awk -F';' '{ i = index($0, ";"); s = substr($0, i+1); if (\!x[s]) { print $0 }; x[s]++ }'

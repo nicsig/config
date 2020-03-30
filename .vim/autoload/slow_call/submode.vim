@@ -81,8 +81,8 @@ endif
 
 call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-h)')
 call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-j)')
-call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gh', '<plug>(tradewinds-k)')
-call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gj', '<plug>(tradewinds-l)')
+call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gk', '<plug>(tradewinds-k)')
+call submode#enter_with('tradewinds', 'n', 'r', '<c-w>gl', '<plug>(tradewinds-l)')
 call submode#map(       'tradewinds', 'n', 'r',       'h', '<plug>(tradewinds-h)')
 call submode#map(       'tradewinds', 'n', 'r',       'j', '<plug>(tradewinds-j)')
 call submode#map(       'tradewinds', 'n', 'r',       'k', '<plug>(tradewinds-k)')

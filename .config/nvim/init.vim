@@ -1310,22 +1310,6 @@ set hidden
 " Remember up to 1000 past commands / search patterns.
 set history=1000
 
-" invisible characters {{{2
-
-" We define which symbol Vim must use to display certain symbols:
-"
-"    ┌────────────────────────┬───────────────────────────────┐
-"    │ tab                    │ > or <> or <-> or <--> or ... │
-"    ├────────────────────────┼───────────────────────────────┤
-"    │ end of line            │ ¬                             │
-"    ├────────────────────────┼───────────────────────────────┤
-"    │ scroll unwrapped lines │ » «                           │
-"    ├────────────────────────┼───────────────────────────────┤
-"    │ no-break space         │ ∅                             │
-"    └────────────────────────┴───────────────────────────────┘
-
-set listchars=tab:<->,eol:¬,precedes:«,extends:»,nbsp:∅
-
 " includeexpr (gf) {{{2
 
 fu s:snr()
@@ -1490,6 +1474,22 @@ let g:is_bash = 1
 " For more info, see this:
 " https://github.com/neovim/neovim/issues/5559
 " https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=848663
+
+" invisible characters {{{2
+
+" We define which symbol Vim must use to display certain symbols:
+"
+"    ┌────────────────────────┬───────────────────────────────┐
+"    │ tab                    │ > or <> or <-> or <--> or ... │
+"    ├────────────────────────┼───────────────────────────────┤
+"    │ end of line            │ ¬                             │
+"    ├────────────────────────┼───────────────────────────────┤
+"    │ scroll unwrapped lines │ » «                           │
+"    ├────────────────────────┼───────────────────────────────┤
+"    │ no-break space         │ ∅                             │
+"    └────────────────────────┴───────────────────────────────┘
+
+set listchars=tab:<->,eol:¬,precedes:«,extends:»,nbsp:∅
 
 " join {{{2
 
@@ -1770,9 +1770,29 @@ if has('nvim')
     " https://www.reddit.com/r/neovim/comments/f04fao/my_biggest_vimneovim_wish_single_width_sign_column/fgrz3vm/
     set signcolumn=yes:1
 else
+    " Why an autocmd?{{{
+    "
+    " Suppose you preview a file in a popup.
+    " In that popup, `'scl'` – like all  window-local options – will be reset to
+    " its default value, which is `auto`.
+    "
+    " Now, at the same time, you start editing the same file in a regular window.
+    " In the latter, the value will *also* be set to `auto`, which means that if
+    " your buffer doesn't contain any sign, the sign column won't be visible; we
+    " want it to be *always* visible.
+    "}}}
+    augroup set_signcolumn
+        au!
+        au BufWinEnter * if win_gettype() is# 'popup' | setl scl=yes | endif
+    augroup END
+    " Isn't the autocmd enough?{{{
+    "
+    " `BufWinEnter` is not always fired; e.g.  it's not fired when you display a
+    " dirvish buffer  in a  window.  In  such a case,  it's good  to have  set a
+    " global value which all windows should inherit.
+    "}}}
     set signcolumn=yes
 endif
-
 
 " We don't want `'signcolumn'` to be enabled in a Vim terminal buffer.{{{
 "
@@ -2322,7 +2342,7 @@ augroup tags_vimrc
     "
     " This would work:
     "
-    "     au! BufWritePost .zshrc sil call system('source '..expand('%:p:S'))
+    "     au! BufWritePost .zshrc sil call system('source '..expand('<afile>:p:S'))
     "
     " But I'm concerned that after editing the zshrc and doing some experiments,
     " we end up in a shell  whose state is really weird, producing hard-to-debug
@@ -3697,7 +3717,13 @@ fu s:repeatable_spell_commands(type) abort
     let cmd_to_repeat = cmd[:-2]..(last_char_is_uppercase
         \ ? tolower(last_char)
         \ : toupper(last_char))
-    exe 'norm! '..cmd
+    try
+        exe 'norm! '..cmd
+    catch /^Vim\%((\a\+)\)\=:E349:/
+        echohl ErrorMsg
+        echom v:exception
+        echohl NONE
+    endtry
 endfu
 " }}}3
 " | {{{3
@@ -4938,6 +4964,7 @@ let s:pat_numbers =<< trim END
     0x\x
     \d
 END
+" 12.34
 
 fu s:around_number() abort "{{{4
     " This can handle the following three formats:{{{
@@ -6090,8 +6117,8 @@ com! -bar -nargs=? -range=% -complete=custom,myfuncs#wf_complete
 "     $ cat /tmp/vim.vim
 "         augroup test_sth
 "             au!
-"             au BufWritePost /tmp/vim.vim so %
-"             au BufWritePost *            let g:d_ebug = get(g:, 'd_ebug', 0) + 1
+"             au BufWritePost /tmp/vim.vim exe 'so '..expand('<afile>:p')
+"             au BufWritePost * let g:d_ebug = get(g:, 'd_ebug', 0) + 1
 "         augroup END
 "
 "     $ vim -Nu /tmp/vim.vim /tmp/vim.vim
@@ -6613,20 +6640,20 @@ augroup filter_special_file
     " But  for some  reason,  Vim doesn't  fire `BufReadPost`  when  it reads  a
     " `.docx` or `.epub` file.
     "
-    "     au BufReadPost  *.docx  sil %!pandoc -f docx -t markdown %:p:S
+    "     au BufReadPost *.docx  sil %!pandoc -f docx -t markdown <afile>:p:S
     "        ^
     "        ✘
     "
     " We could use `FileType tar`:
     "
-    "     au FileType  tar  sil %!pandoc -f docx -t markdown %:p:S
+    "     au FileType tar sil %!pandoc -f docx -t markdown <afile>:p:S
     "
     " ... but $VIMRUNTIME/plugin/tarPlugin.vim would leave some undesired
     " messages inside the buffer; it's noise.
     " Maybe it's because the event is fired too early, and the built-in tar plugin
     " processes the buffer after the event.
     "}}}
-    au BufWinEnter  *.{doc,docx,epub,odp,odt,pdf,rtf}  call s:filter_special_file()
+    au BufWinEnter *.{doc,docx,epub,odp,odt,pdf,rtf} call s:filter_special_file()
 augroup END
 
 fu s:filter_special_file() abort
@@ -6634,8 +6661,8 @@ fu s:filter_special_file() abort
         return
     endif
 
-    let fname = expand('%:p:S')
-    let ext = expand('%:e')
+    let fname = expand('<afile>:p:S')
+    let ext = expand('<afile>:e')
     let ext2cmd = {
         \ 'doc' : '%!antiword '..fname,
         \ 'docx': '%!pandoc -f docx -t markdown '..fname,
@@ -6649,7 +6676,7 @@ fu s:filter_special_file() abort
     if has_key(ext2cmd, ext)
         let filter = matchstr(ext2cmd[ext], '%!\zs\S*')
         if !executable(filter)
-            echom 'cannot filter '..expand('%:p')..'; please install '..filter
+            echom 'cannot filter '..expand('<afile>:p')..'; please install '..filter
             return
         endif
 
@@ -6687,7 +6714,7 @@ endfu
 
 augroup regenerate_helptags
     au!
-    au BufWritePost ~/.vim/plugged/*/doc/*.txt exe 'helptags '..expand('<amatch>:p:h')
+    au BufWritePost ~/.vim/plugged/*/doc/*.txt exe 'helptags '..expand('<afile>:p:h')
 augroup END
 
 " Reload config {{{2
@@ -7656,6 +7683,15 @@ endfu
 "     let id = win_getid()
 "     ...
 "     call win_gotoid(id)
+"
+" Update: We definitely should *not* be using `wincmd p`.
+" It could raise `E366` if you've just created a popup window.
+"
+"     $ vim -Nu NONE +'set previewpopup=height:11,width:59' +'pedit ~/.shrc'
+"     :wincmd p
+"     E366: Not allowed to enter a popup window~
+"
+" The issue is that `wincmd p` seems too unpredictable...
 "
 " 39 -
 "
