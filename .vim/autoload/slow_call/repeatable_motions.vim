@@ -163,8 +163,8 @@ endfu
 "     repmap#make#is_repeating()
 "}}}
 
-" These mappings must be installed *before* `repmap#make#all()`
-" is invoked to make the motions repeatable.
+" These mappings  must be installed  *before* `repmap#make#all()` is  invoked to
+" make the motions repeatable.
 noremap <expr><unique> t  <sid>fts('t')
 noremap <expr><unique> T  <sid>fts('T')
 noremap <expr><unique> f  <sid>fts('f')
@@ -176,7 +176,7 @@ fu s:fts(cmd) abort
     " Why not `call feedkeys('zv', 'int')`?{{{
     "
     " It  would interfere  with  `vim-sneak`,  when the  latter  asks for  which
-    " character we want to move on. `zv` would be interpreted like this:
+    " character we want to move on.  `zv` would be interpreted like this:
     "
     "     zv
     "     ││
@@ -197,11 +197,11 @@ fu s:fts(cmd) abort
     "    -   directly from a  [ftFT]  mapping
     "    - indirectly from a  [;,]    mapping
     "      │
-    "      └ move_again()  →  s:move()  →  fts()
+    "      └ move_again()  →  move()  →  fts()
     "
     " It needs to distinguish from where it was called.
     " Because in  the first  case, it  needs to  ask the  user for  a character,
-    " before returning the  keys to press. In the other, it  doesn't need to ask
+    " before returning the keys to press.  In  the other, it doesn't need to ask
     " anything.
     "}}}
     if repmap#make#is_repeating()
@@ -210,31 +210,24 @@ fu s:fts(cmd) abort
         "
         " Here's what happens approximately:
         "
-        " we press ;
+        " we press `;`
         " |
-        " +-  move_again('fwd', ', ;')   is invoked
+        " +-  `move_again('fwd')` is invoked
         "     |
         "     +-  all info about the 'f' motion is saved in `motion`
         "     |
-        "     |   Why 'f' ?
-        "     |   'f' was saved in   s:last_motions[', ;']   when we pressed `fx` earlier
-        "     |   and is now retrieved with   s:get_motion_info(s:last_motions[', ;'])
+        "     |   Why 'f'?
+        "     |   'f' was saved in `s:last_motion` when we pressed `fx` earlier
+        "     |   and is now retrieved with `s:get_motion_info(s:last_motion)`
         "     |
-        "     +-  s:move('f', 0, 0, motion)   is invoked
-        "           |     │   │  │
-        "           |     │   │  └ don't update the last motion
-        "           |     │   └ not local to buffer
-        "           |     └ obtained with   motion.fwd.lhs
-        "           |
-        "           +-  'fwd' is saved in `dir_key`
-        "           |   obtained with   s:get_direction('f', motion)
-        "           |
-        "           +-  s:fts('f')  is evaluated through `eval()`
-        "               │
-        "               └ obtained with   motion['fwd'].rhs
-        "
-        "               When this evaluation occurs, `s:fts()` receives the argument 'f'.
-        "               This is how `a:cmd` is obtained.
+        "     +-  a temporary ad-hoc mapping is installed
+        "     |
+        "     |     n  <Plug>(repeat-motion-tmp) * <SNR>123_fts('f')
+        "     |                                                  |
+        "     |                                                  +- obtained with `motion.fwd.lhs`
+        "     |                                                     This is how `a:cmd` is obtained.
+        "     |
+        "     +-  the ad-hoc mapping is fed to the typeahead buffer
         "}}}
         call feedkeys(move_fwd ? "\<plug>Sneak_;" : "\<plug>Sneak_,", 'i')
     else

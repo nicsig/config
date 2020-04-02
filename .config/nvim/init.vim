@@ -2516,10 +2516,9 @@ set timeoutlen=3000
 "
 "     exe "set <m-u>=\eu"
 "
-" So, if  we press  `Esc` then `u`  in less than  &ttimeoutlen, Vim  thinks that
-" we've pressed `M-u`.
-" To avoid this kind of misunderstanding,  we need to set `'ttimeoutlen'` as low
-" as possible.
+" So, if we press `Esc` then `u` in less than `&ttimeoutlen` ms, Vim thinks that
+" we've pressed `M-u`.   To avoid this kind of misunderstanding,  we need to set
+" `'ttimeoutlen'` as low as possible.
 "}}}
 "   What other issue does this fix?{{{
 "
@@ -2530,9 +2529,9 @@ set timeoutlen=3000
 "
 " Why?
 " Because  some special  keys (e.g. F1,  F2, ...,  left, right,  ...) produce  a
-" keycode beginning with `Esc`.
+" sequence of terminal keycodes beginning with `Esc`.
 " So, Vim has to  wait `'ttimeoutlen'` ms to know whether  the `Esc` was pressed
-" manually or it was part of some keycode.
+" manually or it was part of some sequence of terminal keycodes.
 "}}}
 "   What issue(s) can this cause?{{{
 "
@@ -2540,8 +2539,9 @@ set timeoutlen=3000
 " keycode to reach the latter.
 "
 " For example,  if we press `M-u`  and our local  machine sends `Esc +  u`, more
-" than `&ttimeoutlen` could elapse between `Esc` reaching the remote machine and `u`.
-" In that case, Vim will think we pressed `Esc` then `u` instead of `M-u`.
+" than `&ttimeoutlen` ms could elapse  between `Esc` reaching the remote machine
+" and `u`.  In  that case, Vim will  think we pressed `Esc` then  `u` instead of
+" `M-u`.
 "
 " ---
 "
@@ -4785,24 +4785,6 @@ xno <silent> 0 g0
 
 " J        gJ         join without moving {{{3
 
-" Why don't you use `@=` to make our custom `J` support a count?{{{
-"
-" Yeah, in the past we installed this:
-"
-"     nno  <silent>  J  @="m'J``"<cr>
-"
-" But I raises an issue when you replay a macro with `@@` which contains `J`:
-"
-"     $ printf 'ab\ncd\nef\ngh\nij\nkl' | vim -Nu NONE +'nno J  @="J"<cr>' -
-"     qq A, Esc J q
-"     j @q
-"     j @@
-"
-" You should get `ij, kl` in the last line, but instead you'll get `ij kl`.
-"
-" I think that's  because when you replay  a macro with `@@`, the  last macro is
-" redefined by `@=`.
-"}}}
 nno <expr> J "m'"..v:count1..'J``'
 
 " gJ doesn't insert or remove any spaces
@@ -8272,7 +8254,7 @@ endfu
 " where the visual selection begins/ends.
 " You can use `getpos('v')`, and `line('.')`:
 "
-"     xno <silent><expr> <c-a> Func()
+"     xno <expr><silent> <c-a> Func()
 "     fu Func() abort
 "         let lnums = [getpos('v')[1], line('.')]
 "         echom 'the visual selection starts at line '.min(lnums).' and ends at line '.max(lnums)
@@ -9249,6 +9231,8 @@ endfu
 "     " load list of undo seq into location window
 "     " pressing Enter on an entry runs `:undo 123` in the associated buffer
 "     :UndoSeq
+
+
 
 
 
