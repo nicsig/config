@@ -3523,7 +3523,7 @@ fi
 # It temporarily turns on the “application” mode.
 #
 # See:
-# > 3.8: Why do the cursor (arrow) keys not work? (And other terminal oddities.)
+# >     3.8: Why do the cursor (arrow) keys not work? (And other terminal oddities.)
 # http://zsh.sourceforge.net/FAQ/zshfaq03.html
 #}}}
 #   What's that application mode?{{{
@@ -3572,7 +3572,7 @@ fi
 # Why do we need this for st, but not for the other terminals?{{{
 #
 # When  you press  the  delete key,  most  terminals  react as  if  you were  in
-# application  mode. That is,  they emit  the  string stored  in the  capability
+# application mode.   That is,  they emit  the string  stored in  the capability
 # `kdch1` (Keyboard Delete 1 CHaracter).
 #
 #     $ infocmp -1x | grep kdch1

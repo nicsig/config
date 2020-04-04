@@ -32,7 +32,7 @@ exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 27 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -50,7 +50,7 @@ wincmd w
 argglobal
 if bufexists("~/.config/rofi/README.md") | buffer ~/.config/rofi/README.md | else | edit ~/.config/rofi/README.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -193,7 +193,7 @@ wincmd w
 argglobal
 if bufexists("~/.config/rofi/scripts/README.md") | buffer ~/.config/rofi/scripts/README.md | else | edit ~/.config/rofi/scripts/README.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

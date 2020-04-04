@@ -17,7 +17,7 @@ endif
 " OTOH, if you  configure UltiSnips from this directory, when  UltiSnips will be
 " sourced, it will see you've chosen a key to expand a snippet:
 "
-"         let g:UltiSnipsExpandTrigger = '<S-F15>'
+"     let g:UltiSnipsExpandTrigger = '<S-F15>'
 "
 " So, it will use it to install the mappings.
 " And the key  we've chosen is purposefully NOT `Tab`,  so when `vim-completion`

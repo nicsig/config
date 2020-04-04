@@ -18,9 +18,10 @@ text/x-c=gvim.desktop
 text/x-c++=gvim.desktop
 application/epub+zip=zathura-pdf-mupdf.desktop
 application/pdf=zathura-pdf-mupdf.desktop
+video/mp4=mpv.desktop
 
 [Added Associations]
-video/mp4=mpv.desktop;
+video/mp4=mpv.desktop;parole.desktop;
 image/gif=ristretto.desktop;
 text/x-log=gvim.desktop;
 text/plain=gvim.desktop;

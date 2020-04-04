@@ -48,7 +48,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/web/html_css/emmet.md') | buffer ~/wiki/web/html_css/emmet.md | else | edit ~/wiki/web/html_css/emmet.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

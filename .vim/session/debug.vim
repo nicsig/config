@@ -87,7 +87,7 @@ set winminwidth=0
 set winwidth=1
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -119,7 +119,7 @@ exe '1resize ' . ((&lines * 28 + 16) / 33)
 exe '2resize ' . ((&lines * 1 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -137,7 +137,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/algo.md') | buffer ~/wiki/algo.md | else | edit ~/wiki/algo.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

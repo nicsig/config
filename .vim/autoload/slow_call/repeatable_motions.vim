@@ -22,14 +22,14 @@ endif
 "}}}
 "    g,  g; {{{2
 
-nno <unique> g; g,zv
-nno <unique> g, g;zv
+nno g; g,zv
+nno g, g;zv
 
 "    gj  gk         vertical jump {{{2
 
 " Alternative: https://github.com/haya14busa/vim-edgemotion
-noremap <expr><silent><unique> gk <sid>vertical_jump_rhs(0)
-noremap <expr><silent><unique> gj <sid>vertical_jump_rhs(1)
+noremap <expr><silent> gk <sid>vertical_jump_rhs(0)
+noremap <expr><silent> gj <sid>vertical_jump_rhs(1)
 
 fu s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
@@ -165,12 +165,12 @@ endfu
 
 " These mappings  must be installed  *before* `repmap#make#all()` is  invoked to
 " make the motions repeatable.
-noremap <expr><unique> t  <sid>fts('t')
-noremap <expr><unique> T  <sid>fts('T')
-noremap <expr><unique> f  <sid>fts('f')
-noremap <expr><unique> F  <sid>fts('F')
-noremap <expr><unique> ss <sid>fts('s')
-noremap <expr><unique> SS <sid>fts('S')
+noremap <expr> t  <sid>fts('t')
+noremap <expr> T  <sid>fts('T')
+noremap <expr> f  <sid>fts('f')
+noremap <expr> F  <sid>fts('F')
+noremap <expr> ss <sid>fts('s')
+noremap <expr> SS <sid>fts('S')
 
 fu s:fts(cmd) abort
     " Why not `call feedkeys('zv', 'int')`?{{{
@@ -237,9 +237,9 @@ fu s:fts(cmd) abort
 endfu
 
 sil! call repmap#make#all({
-    \ 'mode':   '',
+    \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': 'F' ,  'fwd': 'f' },
     \              {'bwd': 'SS',  'fwd': 'ss'},
@@ -259,21 +259,21 @@ sil! call repmap#make#all({
 "}}}
 " Why making motions repeatable in this file?{{{
 "
-"     1. We source it AFTER Vim has started, so all plugins have been
-"        sourced and any custom motion has already been defined.
-"        We can be sure we're respecting the previous rule.
+"    1. We source it AFTER Vim has started, so all plugins have been
+"       sourced and any custom motion has already been defined.
+"       We can be sure we're respecting the previous rule.
 "
-"     2. The process can be slow. This file allows us to delay it
-"        until Vim has started, and to keep a short startup time.
+"    2. The process can be slow. This file allows us to delay it
+"       until Vim has started, and to keep a short startup time.
 "}}}
 
 " cycle through help topics relevant for last errors
 " we don't have a pair of motions to move in 2 directions,
 " so I just repeat the same keys for 'bwd' and 'fwd'
 sil! call repmap#make#all({
-    \ 'mode':    'n',
+    \ 'mode': 'n',
     \ 'buffer':  0,
-    \ 'from':    expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '!e',  'fwd': '!e'},
     \            ]
@@ -281,9 +281,9 @@ sil! call repmap#make#all({
 
 " move tabpage / rotate window
 sil! call repmap#make#all({
-    \ 'mode':   'n',
+    \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '<t'    ,  'fwd': '>t'},
     \              {'bwd': '<c-w>R',  'fwd': '<c-w>r'},
@@ -292,9 +292,9 @@ sil! call repmap#make#all({
 
 " built-in motions
 sil! call repmap#make#all({
-    \ 'mode':   '',
+    \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': "['",  'fwd': "]'"},
     \              {'bwd': '["',  'fwd': ']"'},
@@ -313,10 +313,10 @@ sil! call repmap#make#all({
     \            ],
     \ })
 
-" Why `nxo` for the mode? Why not simply an empty string?{{{
+" Why `nxo` for the mode?  Why not simply an empty string?{{{
 "
 " You can use `''` when the original motion is built-in or defined via `:[nore]map`.
-" In that  case, `maparg(motion,  '', 0,  1).mode` is a  space, which  our `lg#`
+" In that case, `maparg(motion, '', 0,  1).mode` is a space, which our `repmap#`
 " function recognizes as `nvo`.
 "
 " But  here,   `%`  is  not  built-in;   it's  a  custom  motion   installed  by
@@ -325,19 +325,26 @@ sil! call repmap#make#all({
 "
 "     ~/.vim/plugged/vim-matchup/autoload/matchup.vim:179
 "
-" If  you  pass the  mode  `''`  to  our `lg#`  function,  it  will pass  it  to
+" If  you pass  the mode  `''` to  our `repmap#`  function, it  will pass  it to
 " `maparg()`, which won't return a space for the mode, but `o`:
 "
 "                       vv
 "     :echo maparg('%', '', 0, 1).mode
 "     o~
 "
-" As a result, `%` and `g%` would be broken in normal and visual mode.
+" As a result, `%`  and `g%` would not be repeatable in  normal and visual mode,
+" because the wrapper mapping would only be installed in operator-pending mode.
+"
+" You can check this by doing this:
+"
+"    - comment the next function call
+"    - start a new Vim instance
+"    - run `:echo maparg(']-', '', 0, 1).mode`; the output should be 'o'
 "}}}
 sil! call repmap#make#all({
-    \ 'mode':   'nxo',
+    \ 'mode': 'nxo',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[-',  'fwd': ']-'},
     \            ],
@@ -345,9 +352,9 @@ sil! call repmap#make#all({
 
 " custom motions
 sil! call repmap#make#all({
-    \ 'mode':   'n',
+    \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
     \              {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
@@ -361,9 +368,9 @@ sil! call repmap#make#all({
     \ })
 
 sil! call repmap#make#all({
-    \ 'mode':   'n',
+    \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '<l'    ,  'fwd': '>l'},
     \              {'bwd': '<q'    ,  'fwd': '>q'},
@@ -371,9 +378,9 @@ sil! call repmap#make#all({
     \ })
 
 sil! call repmap#make#all({
-    \ 'mode':   '',
+    \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[`',  'fwd': ']`'},
     \              {'bwd': '[h',  'fwd': ']h'},
@@ -386,9 +393,9 @@ sil! call repmap#make#all({
     \ })
 
 sil! call repmap#make#all({
-    \ 'mode':   'n',
+    \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[e', 'fwd': ']e'},
     \            ]
@@ -396,9 +403,9 @@ sil! call repmap#make#all({
 
 " toggle settings
 sil! call repmap#make#all({
-    \ 'mode':   'n',
+    \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from':   expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[oC',  'fwd': ']oC'},
     \              {'bwd': '[oD',  'fwd': ']oD'},
@@ -406,7 +413,6 @@ sil! call repmap#make#all({
     \              {'bwd': '[oS',  'fwd': ']oS'},
     \              {'bwd': '[oc',  'fwd': ']oc'},
     \              {'bwd': '[od',  'fwd': ']od'},
-    \              {'bwd': '[of',  'fwd': ']of'},
     \              {'bwd': '[oh',  'fwd': ']oh'},
     \              {'bwd': '[oi',  'fwd': ']oi'},
     \              {'bwd': '[ol',  'fwd': ']ol'},

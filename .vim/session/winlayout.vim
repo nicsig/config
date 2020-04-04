@@ -136,7 +136,7 @@ arglocal
 silent! argdel *
 if bufexists('~/Desktop/ask.md') | buffer ~/Desktop/ask.md | else | edit ~/Desktop/ask.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -189,7 +189,7 @@ set winwidth=1
 arglocal
 silent! argdel *
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

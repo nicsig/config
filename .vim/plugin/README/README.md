@@ -94,9 +94,8 @@ No.
 Consider the scripts here as an extension of your `vimrc`.
 
 `<unique>` is for a plugin author who  doesn't want to overwrite the mappings of
-their users.
-`~/.vim/plugin/`  is  not  the  directory  of a  third-party  plugin,  it's  the
-directory of a user (you).
+their users. `~/.vim/plugin/` is not the directory of a third-party plugin, it's
+the directory of a user (you).
 
 You never use `<unique>` in your `vimrc`,  so be consistent and don't do it here
 either.

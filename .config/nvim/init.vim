@@ -526,15 +526,6 @@ endif
 " That is, after `:syntax enable` or after `vim-plug` has done its job.
 " Otherwise, the syntax elements it installs would be cleared.
 "}}}
-" Sometimes, the styles are not applied anymore!{{{
-"
-" In your config files and plugins, look for `syntax on` or `syntax enable`.
-" Whenever  you  run   one  of  these  commands,  you  need   to  reinstall  our
-" `styled_comments` autocmd, so that it  runs *after* the default syntax plugins
-" have been sourced; add this line right after `syntax on`:
-"
-"     call s:styled_comments()
-"}}}
 fu s:styled_comments() abort
     " Why do you include `help`?{{{
     "
@@ -578,6 +569,19 @@ fu s:styled_comments() abort
         au Syntax * if index(s:styled_comments_filetypes, expand('<amatch>')) >= 0
             \ |     sil! call lg#styled_comment#syntax()
             \ | endif
+        " Purpose:{{{
+        "
+        " We (or a plugin) may  temporarily disable the syntax highlighting globally
+        " with `:syn off`, then restore it with `:syn on`.
+        " In  that case,  the position  of the  autocmd which  installs the  default
+        " syntax  groups is  moved *after*  our  custom autocmd  which installs  the
+        " syntax groups related to comments.
+        "
+        " Because of this new order, the default autocmd undoes our custom one.
+        " We need to re-install our custom autocmd *after* the default one.
+        "}}}
+        au SourcePost $VIMRUNTIME/syntax/syntax.vim call s:styled_comments()
+            \ | call map(getwininfo(), {_,v -> lg#win_execute(v.winid, 'do styled_comments Syntax')})
     augroup END
 endfu
 call s:styled_comments()
@@ -889,7 +893,7 @@ fu s:reinstall_cleared_hg() abort
 
     " What does this code do?{{{
     "
-    " It iterates over all the windows in all the tabpages.
+    " It iterates over all visible windows.
     " For each  of them,  if it  has never  seen the  filetype of  the displayed
     " buffer, it reloads its syntax plugin.
     "}}}
@@ -898,19 +902,16 @@ fu s:reinstall_cleared_hg() abort
     " No.
     " To re-install the cleared HGs, you just need to reload the syntax plugin once.
     "}}}
-    let orig_winid = win_getid()
     let seen = {}
     for info in getwininfo()
         let ft = getbufvar(info.bufnr, '&ft')
         if !has_key(seen, ft)
             let seen[ft] = 1
             if ft isnot# ''
-                call win_gotoid(info.winid)
-                do Syntax
+                call lg#win_execute(info.winid, 'do Syntax')
             endif
         endif
     endfor
-    call win_gotoid(orig_winid)
 endfu
 
 " Why the guard?{{{
@@ -2858,10 +2859,10 @@ call s:remember_new_mappings([
 
 " When you find a new prefix, if it has a default meaning, disable it:
 "
-"         nno <pfx> <nop>
+"     nno <pfx> <nop>
 "
-" Do NOT do it here from the vimrc.
-" Do it from `~/.vim/after/plugin/disable.vim`: it's more reliable.
+" Do *not* do it here from the vimrc.
+" Do it from `~/.vim/after/plugin/nop.vim`: it's more reliable.
 " See the first comment there for an explanation.
 
 
@@ -3073,15 +3074,14 @@ ino <silent> <c-r> <c-r><c-p>
 " Suppose you  press `C-r`  in insert mode;  Vim sees that  you have  2 mappings
 " starting with `C-r`:
 "
-"     i  <C-R>       * <C-R><C-P>
-"     i  <C-R><C-R><C-R> * <C-\><C-O>:call plugin#fzf#registers('i')<CR>
+"     i  <C-R>  * <C-R><C-P>
+"     i  <C-R>F * <C-\><C-O>:call plugin#fzf#registers('i')<CR>
 "
-" It must wait another key to know which one you want to press.
+" It must wait for another key to know which one you want to press.
 "
 " Then, suppose you  press `C-o`; Vim now  knows that you don't want  to use the
-" 2nd mapping, but the  first mapping is still ok (it would  have been no matter
-" what  you would  have pressed  – except  a 2nd  `C-r` –  because its  lhs only
-" contains 1 key), and so Vim expands `C-r` into `C-r C-p`.
+" 2nd mapping, but the first mapping is  still ok, and so Vim expands `C-r` into
+" `C-r C-p`.
 "
 " In the end, the typeahead buffer contains:
 "
@@ -3886,19 +3886,6 @@ fu s:fix_display() abort
     "}}}
     exe 'do filetype '..&ft
 
-    " Purpose:{{{
-    "
-    " We (or a plugin) may  temporarily disable the syntax highlighting globally
-    " with `:syn off`, then restore it with `:syn on`.
-    " In  that case,  the position  of the  autocmd which  installs the  default
-    " syntax  groups is  moved *after*  our  custom autocmd  which installs  the
-    " syntax groups related to comments.
-    "
-    " Because of this new order, the default autocmd undoes our custom one.
-    " We need to re-install our custom autocmd *after* the default one.
-    "}}}
-    call s:styled_comments()
-
     " recompute folds
     let _ = foldlevel(1)
     " and their titles
@@ -3941,16 +3928,7 @@ fu s:fix_display() abort
     " It has not been re-installed by  our autocmd, because there was no `.conf`
     " file displayed anywhere.
     "}}}
-    "   Ok, but why `tabdo ... windo`?{{{
-    "
-    " We (or a plugin) may  temporarily disable the syntax highlighting globally
-    " with `:syn off`, then restore it with `:syn on`.
-    " In that  case, we need  to reinstall our  custom syntax groups  related to
-    " comments in *all* buffers currently displayed in a window.
-    "}}}
-    let curwin = win_getid()
-    tabdo let winnr = winnr() | windo do Syntax | exe winnr..'wincmd w'
-    call win_gotoid(curwin)
+    do Syntax
 
     " Purpose:{{{
     "
@@ -4473,10 +4451,6 @@ endfu
 nno <m-n> ]'
 nno <m-p> ['
 " }}}3
-" !f                  show info about current file {{{3
-
-nno !f <c-g>
-
 " _                   0_ {{{3
 
 " Issue:
@@ -6408,9 +6382,7 @@ augroup no_syntax_in_diff_mode
     au VimEnter * call s:if_diff_syn_clear()
     fu s:if_diff_syn_clear() abort
         if !&l:diff | return | endif
-        let curwin = win_getid()
-        windo syn clear
-        call win_gotoid(curwin)
+        call map(getwininfo(), {_,v -> lg#win_execute(v.winid, 'syn clear')})
     endfu
 augroup END
 
@@ -7722,10 +7694,10 @@ endfu
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     comment#object(
-"     fold#md#sort#by_size(
-"     fold#md#fde#stacked(
-"     fold#md#fde#toggle(
-"     fold#fdt#get(
+"     markdown#fold#sort#by_size(
+"     markdown#fold#foldexpr#stacked(
+"     markdown#fold#foldexpr#toggle(
+"     markdown#fold#foldtitle#get(
 "     qf#create_matches(
 "     qf#set_matches(
 "
@@ -9231,6 +9203,26 @@ endfu
 "     " load list of undo seq into location window
 "     " pressing Enter on an entry runs `:undo 123` in the associated buffer
 "     :UndoSeq
+"
+" 130 -
+"
+" We regularly have this error:
+"
+"     Error detected while processing function <SNR>16_LoadFTPlugin[2]..plugin#dirvish#undo_ftplugin:
+"     line   14:
+"     E31: No such mapping
+"
+" It comes from here:
+"
+"     " ~/.vim/autoload/plugin/dirvish.vim:15
+"     nunmap <buffer> p
+"
+" Is it because of one of these (?):
+"
+"     ~/.vim/autoload/plugin/ultisnips.vim:93
+"     ~/.vim/plugged/vim-fex/autoload/fex.vim:256
+"
+" Or maybe another ftplugin which somehow already removed the mapping?
 
 
 

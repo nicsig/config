@@ -93,7 +93,7 @@ exe '3resize ' . ((&lines * 1 + 16) / 33)
 exe '4resize ' . ((&lines * 24 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -111,7 +111,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/vim/funcref.md') | buffer ~/wiki/vim/funcref.md | else | edit ~/wiki/vim/funcref.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -151,7 +151,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/vim/qf.md') | buffer ~/wiki/vim/qf.md | else | edit ~/wiki/vim/qf.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

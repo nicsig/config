@@ -30,10 +30,9 @@
 " We should disable a key after all plugins have been sourced.
 " It's more reliable.
 "
-" Update:
-" This issue has been fixed:
-"     https://github.com/vim/vim/commit/f88a5bc10232cc3fac92dba4e8455f4c14311f8e
-"     https://github.com/neovim/neovim/commit/207cfce3dea64eca3b93735adfac0a75cc6c1a4a
+" Update: This issue has been fixed:
+" https://github.com/vim/vim/commit/f88a5bc10232cc3fac92dba4e8455f4c14311f8e
+" https://github.com/neovim/neovim/commit/207cfce3dea64eca3b93735adfac0a75cc6c1a4a
 "
 " Still, disabling a key after the plugins have been sourced seems more reliable.
 "}}}
@@ -52,32 +51,26 @@ fu s:cancel_prefix(prefixes) abort
         "         nmap s <Nop>
         "         xmap s <Nop>
         "}}}
-        exe 'nno '.pfx.' <nop>'
-        exe 'xno '.pfx.' <nop>'
-        " Are there other mappings to disable?{{{
+        exe 'nno '..pfx..' <nop>'
+        exe 'xno '..pfx..' <nop>'
+
+        " Let us cancel a prefix by pressing it twice.
+        " Not sure this is really needed.{{{
         "
-        " In the past I also disabled `pfx Esc`.
+        " But I think that sometimes, I press a prefix twice thinking the second
+        " keypress will cancel the first one.
         "
-        "     exe 'nno '.pfx.'<esc> <esc>'
-        "     exe 'xno '.pfx.'<esc> <esc>'
-        "
-        " But it doesn't seem necessary.
-        "
-        " If you press a prefix key  then Escape, since there's no mapping using
-        " `pfx Esc` as its lhs, and since it doesn't make any sense for Vim (for
-        " example  it's  not  an  operator combined  with  a  text-object),  Vim
-        " probably ignores the prefix, and only types Escape.
-        "
-        " Confirmed by:
-        "
-        "     :ino + <nop>
-        "     :startinsert
-        "     + Esc
-        "     " you get back to normal mode (meaning that Vim has pressed escape)
+        " That's  not what  happens;  the  first keypress  has  no effect  (it's
+        " remapped to `<nop>` then executed), but  the second one remains in the
+        " typeahead buffer.  So  the prefix can still be used  to form a mapping
+        " with the next keypress, which *I think* is unexpected in practice.
         "}}}
+        if maparg(pfx..pfx, 'n') is# ''
+            exe 'nno '..pfx..pfx..' <nop>'
+        endif
     endfor
 endfu
-call s:cancel_prefix(['+', '-', '<space>', '<bar>', 'U', 's', 'S'])
+call s:cancel_prefix(['+', '-', '<space>', '<bar>', 'U', 's', 'S', '<c-g>'])
 
 " You've disabled `s` and `S`. What about `sS` and `Ss`?{{{
 "

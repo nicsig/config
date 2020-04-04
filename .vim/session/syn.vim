@@ -107,7 +107,7 @@ exe '2resize ' . ((&lines * 1 + 16) / 33)
 exe '3resize ' . ((&lines * 26 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -206,7 +206,7 @@ wincmd w
 argglobal
 if bufexists("~/wiki/vim/highlighting.md") | buffer ~/wiki/vim/highlighting.md | else | edit ~/wiki/vim/highlighting.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

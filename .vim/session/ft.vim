@@ -48,7 +48,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -66,7 +66,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/logic/logic.md') | buffer ~/wiki/logic/logic.md | else | edit ~/wiki/logic/logic.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -99,7 +99,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -117,7 +117,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/weechat/abjects.md') | buffer ~/wiki/weechat/abjects.md | else | edit ~/wiki/weechat/abjects.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -174,7 +174,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -192,7 +192,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/shell/parameter.md') | buffer ~/wiki/shell/parameter.md | else | edit ~/wiki/shell/parameter.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -329,7 +329,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -349,7 +349,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/shell/redirection.md') | buffer ~/wiki/shell/redirection.md | else | edit ~/wiki/shell/redirection.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -378,7 +378,7 @@ set winminwidth=0
 set winwidth=1
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

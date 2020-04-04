@@ -19,7 +19,7 @@ wincmd t
 set winminheight=1 winheight=1 winminwidth=1 winwidth=1
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

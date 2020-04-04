@@ -25,7 +25,7 @@ exe '1resize ' . ((&lines * 1 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
@@ -45,7 +45,7 @@ wincmd w
 argglobal
 if bufexists("~/wiki/floating_point/glossary.md") | buffer ~/wiki/floating_point/glossary.md | else | edit ~/wiki/floating_point/glossary.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0

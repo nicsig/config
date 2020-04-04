@@ -13,6 +13,18 @@ call submode#map(       'tradewinds', 'n', 'r',       'h', '<plug>(tradewinds-h)
 call submode#map(       'tradewinds', 'n', 'r',       'j', '<plug>(tradewinds-j)')
 call submode#map(       'tradewinds', 'n', 'r',       'k', '<plug>(tradewinds-k)')
 call submode#map(       'tradewinds', 'n', 'r',       'l', '<plug>(tradewinds-l)')
+
+" z C-[hjkl]     resize windows {{{2
+
+call submode#enter_with('resize-window', 'n', 'r', 'z<c-h>', '<plug>(window-resize-h)')
+call submode#enter_with('resize-window', 'n', 'r', 'z<c-j>', '<plug>(window-resize-j)')
+call submode#enter_with('resize-window', 'n', 'r', 'z<c-k>', '<plug>(window-resize-k)')
+call submode#enter_with('resize-window', 'n', 'r', 'z<c-l>', '<plug>(window-resize-l)')
+
+call submode#map('resize-window', 'n', 'r', '<c-h>', '<plug>(window-resize-h)')
+call submode#map('resize-window', 'n', 'r', '<c-j>', '<plug>(window-resize-j)')
+call submode#map('resize-window', 'n', 'r', '<c-k>', '<plug>(window-resize-k)')
+call submode#map('resize-window', 'n', 'r', '<c-l>', '<plug>(window-resize-l)')
 "}}}1
 " Insert mode {{{1
 " C-g [<>]       indent {{{2
@@ -33,25 +45,11 @@ call submode#map(       'change-indent', 'i', '',      '<', '<c-d>')
 
 " Make `i^gj` and `i^gk` repeatable with `j` and `k`.
 
-call submode#enter_with('scroll-window', 'n', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
-call submode#map(       'scroll-window', 'n', 'r',      'j', '<plug>(scroll-window-down)')
-nno <silent> <plug>(scroll-window-down) <c-e>:redraw<cr>
-"                                            │
-"                                            └ needed because of 'lz'
+call submode#enter_with('scroll-window', 'i', 'r', '<c-g>j', '<c-x><c-e>' )
+call submode#map(       'scroll-window', 'i', 'r',      'j', '<c-x><c-e>')
 
-call submode#enter_with('scroll-window', 'n', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
-call submode#map(       'scroll-window', 'n', 'r',      'k', '<plug>(scroll-window-up)')
-nno <silent> <plug>(scroll-window-up) <c-y>:redraw<cr>
-
-
-" Do the same for insert mode.
-call submode#enter_with('scroll-window', 'i', 'r', '<c-g>j', '<plug>(scroll-window-down)' )
-call submode#map(       'scroll-window', 'i', 'r',      'j', '<plug>(scroll-window-down)')
-ino <plug>(scroll-window-down) <c-x><c-e>
-
-call submode#enter_with('scroll-window', 'i', 'r', '<c-g>k', '<plug>(scroll-window-up)' )
-call submode#map(       'scroll-window', 'i', 'r',      'k', '<plug>(scroll-window-up)')
-ino <plug>(scroll-window-up) <c-x><c-y>
+call submode#enter_with('scroll-window', 'i', 'r', '<c-g>k', '<c-x><c-y>' )
+call submode#map(       'scroll-window', 'i', 'r',      'k', '<c-x><c-y>')
 
 " C-x [jk]       duplicate char below/above {{{2
 " Why these mappings? {{{

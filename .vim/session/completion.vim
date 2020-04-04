@@ -46,7 +46,7 @@ wincmd w
 argglobal
 if bufexists('~/wiki/vim/complete.md') | buffer ~/wiki/vim/complete.md | else | edit ~/wiki/vim/complete.md | endif
 setlocal fdm=expr
-setlocal fde=fold#md#fde#stacked()
+setlocal fde=markdown#fold#foldexpr#stacked()
 setlocal fmr={{{,}}}
 setlocal fdi=#
 setlocal fdl=0
