@@ -74,8 +74,8 @@ set enable-bracketed-paste on
 #
 # From `man 3 readline /enable-keypad`:
 #
-# > When set to On, readline will try  to enable the application keypad when it is
-# > called.  Some systems need this to enable the arrow keys.
+# >     When set to On, readline will try  to enable the application keypad when it is
+# >     called.  Some systems need this to enable the arrow keys.
 #
 # By default, when readline is called, the terminal is in normal mode.
 # But  when  `enable-keypad` is  set,  readline  makes  the terminal  enter  the

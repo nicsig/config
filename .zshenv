@@ -688,32 +688,6 @@ export REPORTTIME=15
 #}}}
 export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
 
-# TERM {{{1
-
-# Let applications running in Vim's terminal know, that our terminal supports 256 colors.{{{
-#
-# Without  this line,  when opening  a terminal  buffer, most  of the  time, Vim
-# would  see  that  `$TERM`  doesn't begin  with  `xterm`  (e.g.  `st-256color`,
-# `tmux-256color`, ...), and would set `$TERM` with `xterm` as a fallback.
-#
-# As a  result, the applications  running in  the terminal buffer  would wrongly
-# think that our terminal doesn't support more than 8 or 16 colors.
-# This would break, for example, the zsh syntax highlighting plugin; whenever we
-# refer to a color beyond the 16  ANSI colors, the plugin would immediately fall
-# back on black.
-#
-# From `:h terminal-unix`
-#
-# > Environment variables are used to pass information to the running job:
-#
-# >     TERM    the name of the terminal, from the 'term' option or
-# >             $TERM in the GUI; falls back to "xterm" if it does not
-# >             start with "xterm"
-#}}}
-if [[ -n "${VIM_TERMINAL}" ]]; then
-  export TERM=xterm-256color
-fi
-
 # tldr {{{1
 
 # Configure the colors and styles of the output of `tldr`.

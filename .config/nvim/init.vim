@@ -3063,35 +3063,37 @@ ino <silent> <expr> <c-m> <sid>c_m()
 
 " C-r             ignore `'autoindent'` when inserting register {{{3
 
-ino <silent> <c-r> <c-r><c-p>
-"                       ├───┘
-"                       └ and fix the indentation while we're at it;
-"                         use `<c-o>` if you prefer to preserve the indentation
-
-" The previous `<c-r>` mapping breaks the default `:h i^r^o`; allow us to still use it.{{{
+" Why handling a block specially?{{{
 "
-" You may wonder why `:h i^r^o` gets broken.
+" The default `i^r` inserts a blockwise register as if it was linewise.
+" We don't want an inconsistency; our custom `i^r` should behave the same.
+"}}}
+ino <expr><silent> <c-r> getregtype(v:register) =~# '<c-v>' ? '<c-r>' : '<c-r><c-o>'
+" The previous `<c-r>` mapping breaks the default `:h i^r^p`; allow us to still use it.{{{
+"
+" You may wonder how `:h i^r^p` gets broken.
 " Suppose you  press `C-r`  in insert mode;  Vim sees that  you have  2 mappings
 " starting with `C-r`:
 "
-"     i  <C-R>  * <C-R><C-P>
+"     i  <C-R>  * <C-R><C-O>
 "     i  <C-R>F * <C-\><C-O>:call plugin#fzf#registers('i')<CR>
 "
-" It must wait for another key to know which one you want to press.
+" It must wait for  another key to know whether `C-r` needs  to be remapped, and
+" if so with which mapping.
 "
-" Then, suppose you  press `C-o`; Vim now  knows that you don't want  to use the
+" Then, suppose you  press `C-p`; Vim now  knows that you don't want  to use the
 " 2nd mapping, but the first mapping is  still ok, and so Vim expands `C-r` into
-" `C-r C-p`.
+" `C-r C-o`.
 "
 " In the end, the typeahead buffer contains:
 "
-"     C-r C-p C-o
+"     C-r C-o C-p
 "
-" Which is not what you wanted, i.e. `C-r C-o`.
+" Which is not what you wanted, i.e. `C-r C-p`.
 "}}}
-ino <silent> <c-r><c-o> <c-r><c-o>
-" the same issue could affect `:h i^r^p` if one day we use `<c-r><c-o>` in the `<c-r>` mapping
 ino <silent> <c-r><c-p> <c-r><c-p>
+" the same issue could affect `:h i^r^o` if one day we use `<c-r><c-p>` in the `<c-r>` mapping
+ino <silent> <c-r><c-o> <c-r><c-o>
 
 " C-s             save {{{3
 
@@ -3165,7 +3167,7 @@ endfu
 "    2. cuts its next occurrence
 "    3. inserts the previously inserted text and stop insert
 
-" After `<space>.`  has been pressed,  you can repeat  with `.`, <space>  is not
+" After `<space>.` has  been pressed, you can repeat with  `.`, `<space>` is not
 " needed anymore.
 nno <expr><silent> <space>. <sid>repeat_last_edit_on_last_text()
 
@@ -3974,45 +3976,26 @@ fu s:fix_macro() abort
     augroup fix_macro
         au! * <buffer>
         let s:fix_macro_c = c
-        " What does this autocmd do?{{{
+        " Do *not* use `:let` to set the register!  We really need `setreg()`.{{{
         "
-        " It makes sure that an escape character is present at the end of the recording.
-        "}}}
-        "   Why does it do that?{{{
-        "
-        " If the recording ends with a CR, for some reason, Vim adds a `C-j`:
+        " If the recording ends with a CR, `:let` would add a `C-j`:
         "
         "     :let @a = "/pat\r"
         "     :reg a
         "     "a   /pat^M^J~
         "                ^^
-        " Because of this, your macro may end  up moving the focus to the bottom
-        " window, or do sth else if `C-j` is locally mapped to some action.
+        " Because of  this, your macro  may do  sth unexpected if  you've mapped
+        " `C-j` (e.g. focusing the bottom window).
         "
-        " By making  sure an `Escape`  is always at the  end of a  recording, we
-        " prevent Vim from interfering with our macros.
-        "
-        " ---
-        "
-        " I suspect the explanation is contained at `:h file-formats`.
-        " It's as if Vim thought the text in  the string came from a file in DOS
-        " format (because `^M^J` is the `<EOL>` on DOS).
-        " This is  weird because  setting `'fileformat'` and  `'fileformats'` to
-        " `unix` does not fix the issue:
-        "
-        "     $ vim -es -Nu NONE +'set ffs=unix ff=unix|let @q = "xy\r"' +"pu=execute('reg q')" +'%p|qa!'
-        "     Type Name Content
-        "       l  "q   xy^M^J
-        "                   ^^
+        " Solution: Use  `setreg()`  to  specify   that  the  register  type  is
+        " characterwise, and not linewise.
         "}}}
-        au QuitPre <buffer> call setreg(s:fix_macro_c, substitute(getline(1), "\e"..'\@1<!$', "\e", ''))
-        \ | unlet! s:fix_macro_c
+        au QuitPre <buffer> call setreg(s:fix_macro_c, getline(1), 'c') | unlet! s:fix_macro_c
     augroup END
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
     nmap <buffer><nowait><silent> <cr> q
     nmap <buffer><nowait><silent> ZZ q
-    let line = substitute(getreg(c), "\<c-m>\<c-j>$", "\<c-m>", '')
-    call setline(1, line)
+    call setline(1, getreg(c))
     norm! 1|0f'
 endfu
 "}}}3
@@ -5629,10 +5612,6 @@ endfu
 " A filename can contain whitespace.
 "}}}
 com! -bar -nargs=+ -complete=buffer InAButNotInB call myfuncs#in_A_not_in_B(<f-args>)
-
-" IsPrime {{{2
-
-com! -bar -nargs=1 IsPrime echo lg#math#is_prime(<args>)
 
 " JoinBlocks {{{2
 
@@ -7694,10 +7673,6 @@ endfu
 " Move every function called from several scripts inside `vim-lg-lib`:
 "
 "     comment#object(
-"     markdown#fold#sort#by_size(
-"     markdown#fold#foldexpr#stacked(
-"     markdown#fold#foldexpr#toggle(
-"     markdown#fold#foldtitle#get(
 "     qf#create_matches(
 "     qf#set_matches(
 "
@@ -8236,7 +8211,7 @@ endfu
 " Try to use this technique in your plugin(s) instead of escaping.
 " Unless they really need to update the visual marks.
 "
-" See `:h col()` and `:h virtcol()`:
+" See `:h line()`:
 "
 " > v       In Visual mode: the start of the Visual area (the
 " >         cursor is the end).  When not in Visual mode
@@ -8255,6 +8230,26 @@ endfu
 " of the selection:
 "
 "     line('.') > getpos('v')[1] || line('.') == getpos('v')[1] && col('.') >= getpos('v')[2]
+"
+" And  here's a  mapping  which gets  you  the geometry  of  the current  visual
+" selection without quitting visual mode:
+"
+"     xno <expr> <c-b> GetVisualSelectionGeometry()
+"     fu GetVisualSelectionGeometry() abort
+"         let [curpos, pos_v] = [getcurpos()[1:2], getpos('v')[1:2]]
+"         let control_end = curpos[0] > pos_v[0] || curpos[0] == pos_v[0] && curpos[1] >= pos_v[1]
+"         if control_end
+"             let [start, end] = [pos_v, curpos]
+"         else
+"             let [start, end] = [curpos, pos_v]
+"         endif
+"         echom printf('the visual selection starts at line %d column %d and ends at line %d column %d',
+"             \ start[0], start[1], end[0], end[1])
+"         return ''
+"     endfu
+"
+" Note  that if  you've pressed  `O`, the  reported positions  do not  match the
+" upper-left and bottom-right corners, but the upper-right and bottom-left ones.
 "
 " 73 -
 "
