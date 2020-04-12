@@ -323,7 +323,6 @@ augroup my_ultisnips
     " ---
     "
     " To make some tests, use typometer: https://github.com/pavelfatin/typometer
-    "}}}
     if has('nvim')
         " Why the guard?{{{
         "
@@ -335,6 +334,7 @@ augroup my_ultisnips
             \ |     aug! UltiSnips_AutoTrigger
             \ | endif
     endif
+    "}}}
 augroup END
 
 " Miscellaneous {{{1

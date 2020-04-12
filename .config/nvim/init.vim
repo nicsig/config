@@ -372,7 +372,7 @@ Plug 'lervag/vimtex'
 
 " Other:
 Plug 'mbbill/undotree'
-Plug 'chrisbra/unicode.vim'
+Plug 'chrisbra/unicode.vim', {'branch': 'fix-fzf'}
 
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup. We delay them.
@@ -3647,6 +3647,8 @@ fu s:z_equal(_) abort
         "
         " It would be interesting in our notes, to explain that `t` must only be
         " used when necessary.
+        "
+        " Update: What was the issue?  I can't reproduce anything unexpected...
         "}}}
         call feedkeys('z=', 'in')
     catch
@@ -4682,9 +4684,9 @@ nno <silent> drr :<c-u>call myfuncs#set_reg(v:register)
 "
 "                    ┌ if we used a count, we probably don't care about wrapped lines
 "                    │
-nno <expr><silent> j v:count ? (v:count >= 5 ? "m'".v:count : '').'j' : 'gj'
-nno <expr><silent> k v:count ? (v:count >= 5 ? "m'".v:count : '').'k' : 'gk'
-"                              ├────────────────────────────────┘
+nno <expr><silent> j v:count ? (v:count >= 5 ? "m'"..v:count : '')..'j' : 'gj'
+nno <expr><silent> k v:count ? (v:count >= 5 ? "m'"..v:count : '')..'k' : 'gk'
+"                              ├─────────────────────────────────┘
 "                              └ if the count was bigger than 5,
 "                                we consider the motion as a jump useful to come back with `c-o`
 
@@ -8991,11 +8993,6 @@ endfu
 "
 " 119 -
 "
-" Should we have passed the `z` flag to `search()` and `searchpos()` all the time?
-" (to improve performance...)
-"
-" 120 -
-"
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
 "
@@ -9003,7 +9000,7 @@ endfu
 "
 " Note that `readdir()` has not been ported to Nvim yet.
 "
-" 121 -
+" 120 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -9016,7 +9013,7 @@ endfu
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 "
-" 122 -
+" 121 -
 "
 " Once Nvim supports `SafeState`, try to replace as many timers as possible:
 "
@@ -9040,13 +9037,13 @@ endfu
 " Naively, I would say yes. The longer a  command is delayed, the longer we stay
 " in an undesirable state...
 "
-" 123 -
+" 122 -
 "
 " We refer to dirvish in several locations in `vim-fex`.
 " I don't like that.
 " dirvish and fex are two different plugins.
 "
-" 124 -
+" 123 -
 "
 "     $ vim
 "     :h
@@ -9088,7 +9085,7 @@ endfu
 " recording; maybe  because it would  cause an infinite recursion  when pressing
 " `q` during a recording.
 "
-" 125 -
+" 124 -
 "
 " Remove all invocations of `setenv()` and `getenv()`.
 " Use global variables  instead; don't write them in uppercase  though; we don't
@@ -9096,7 +9093,7 @@ endfu
 "
 " Document somewhere how `[gs]etenv()` can be used.
 "
-" 126 -
+" 125 -
 "
 " Replace 0 and 1 with v:false, v:true whenever possible.
 "
@@ -9104,7 +9101,7 @@ endfu
 "     Cfilter! -other_plugins
 "     Cfilter! -tmp
 "
-" 127 -
+" 126 -
 "
 " Assimilate the `s:sendtoclipboard()` function, and the `~/bin/sendtoclipboard` script.
     fu s:sendtoclipboard(text) abort
@@ -9149,7 +9146,7 @@ endfu
     endfu
     nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
 "
-" 128 -
+" 127 -
 "
 " Write a refactoring command to convert a dictionary into its literal form:
 "
@@ -9168,7 +9165,7 @@ endfu
 " That is,  if some key contains  characters which are invalid  in `#{}`, cancel
 " the whole refactoring.
 "
-" 129 -
+" 128 -
 "
 " Create a command to cycle between different buffer states.
 " E.g.:
@@ -9199,7 +9196,7 @@ endfu
 "     " pressing Enter on an entry runs `:undo 123` in the associated buffer
 "     :UndoSeq
 "
-" 130 -
+" 129 -
 "
 " We regularly have this error:
 "

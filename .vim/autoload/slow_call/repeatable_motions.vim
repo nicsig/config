@@ -236,7 +236,7 @@ fu s:fts(cmd) abort
     return ''
 endfu
 
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': '',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -270,7 +270,7 @@ sil! call repmap#make#all({
 " cycle through help topics relevant for last errors
 " we don't have a pair of motions to move in 2 directions,
 " so I just repeat the same keys for 'bwd' and 'fwd'
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': 'n',
     \ 'buffer':  0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -280,7 +280,7 @@ sil! call repmap#make#all({
     \ })
 
 " move tabpage / rotate window
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -291,7 +291,7 @@ sil! call repmap#make#all({
     \ })
 
 " built-in motions
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': '',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -335,23 +335,31 @@ sil! call repmap#make#all({
 " As a result, `%`  and `g%` would not be repeatable in  normal and visual mode,
 " because the wrapper mapping would only be installed in operator-pending mode.
 "
-" You can check this by doing this:
+" You can check this like so:
 "
 "    - comment the next function call
 "    - start a new Vim instance
-"    - run `:echo maparg(']-', '', 0, 1).mode`; the output should be 'o'
+"    - run `:echo maparg('%', '', 0, 1).mode`; the output should be 'o'
 "}}}
-sil! call repmap#make#all({
-    \ 'mode': 'nxo',
-    \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
-    \ 'motions': [
-    \              {'bwd': '[-',  'fwd': ']-'},
-    \            ],
-    \ })
+" TODO: Review the previous comment.
+" In particular, I think the end is slightly wrong.
+" `%` and `g%` would be completely broken if you used `''` instead of `nvo`.
+" The  explanation  is  stale   because  we've  refactored  `vim-repmap`  and/or
+" `vim-lg`.
+for s:mode in ['n', 'x', 'o']
+    call repmap#make#all({
+        \ 'mode': s:mode,
+        \ 'buffer': 0,
+        \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+        \ 'motions': [
+        \              {'bwd': 'g%',  'fwd': '%'},
+        \              {'bwd': '[-',  'fwd': ']-'},
+        \            ],
+        \ })
+endfor
 
 " custom motions
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -367,7 +375,7 @@ sil! call repmap#make#all({
     \            ]
     \ })
 
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -377,7 +385,7 @@ sil! call repmap#make#all({
     \            ]
     \ })
 
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': '',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -392,7 +400,7 @@ sil! call repmap#make#all({
     \            ]
     \ })
 
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -402,7 +410,7 @@ sil! call repmap#make#all({
     \ })
 
 " toggle settings
-sil! call repmap#make#all({
+call repmap#make#all({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
