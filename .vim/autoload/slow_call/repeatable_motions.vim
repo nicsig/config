@@ -113,7 +113,7 @@ endfu
 " }}}1
 " Make `fx` motion, &friends, repeatable {{{1
 
-" To make `)` repeatable, we just need to invoke `repmap#make#all()`.
+" To make `)` repeatable, we just need to invoke `repmap#make#repeatable()`.
 " So, why do we  need extra mappings, and an extra  function, `s:fts()`, to make
 " `fx` (&friends) repeatable?
 " Answer:{{{
@@ -163,8 +163,8 @@ endfu
 "     repmap#make#is_repeating()
 "}}}
 
-" These mappings  must be installed  *before* `repmap#make#all()` is  invoked to
-" make the motions repeatable.
+" These  mappings  must  be  installed  *before*  `repmap#make#repeatable()`  is
+" invoked to make the motions repeatable.
 noremap <expr> t  <sid>fts('t')
 noremap <expr> T  <sid>fts('T')
 noremap <expr> f  <sid>fts('f')
@@ -236,7 +236,7 @@ fu s:fts(cmd) abort
     return ''
 endfu
 
-call repmap#make#all({
+call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -251,8 +251,8 @@ call repmap#make#all({
 
 " Rule: For a motion to be made repeatable, it must ALREADY be defined.{{{
 "
-" Don't invoke `repmap#make#all()` for a custom motion
-" which you're not sure whether it has been defined, or will be later.
+" Don't invoke `repmap#make#repeatable()`  for a custom motion  which you're not
+" sure whether it has been defined, or will be later.
 "
 " Indeed, the function needs to save all the information relative to the
 " original motion in a database.
@@ -270,7 +270,7 @@ call repmap#make#all({
 " cycle through help topics relevant for last errors
 " we don't have a pair of motions to move in 2 directions,
 " so I just repeat the same keys for 'bwd' and 'fwd'
-call repmap#make#all({
+call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer':  0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -280,7 +280,7 @@ call repmap#make#all({
     \ })
 
 " move tabpage / rotate window
-call repmap#make#all({
+call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -291,7 +291,7 @@ call repmap#make#all({
     \ })
 
 " built-in motions
-call repmap#make#all({
+call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -307,85 +307,33 @@ call repmap#make#all({
     \              {'bwd': '[]',  'fwd': ']['},
     \              {'bwd': '[c',  'fwd': ']c'},
     \              {'bwd': '[m',  'fwd': ']m'},
-    \              {'bwd': '[s',  'fwd': ']s'},
     \              {'bwd': '[{',  'fwd': ']}'},
-    \              {'bwd': 'g,',  'fwd': 'g;'},
     \            ],
     \ })
 
-" Why `nxo` for the mode?  Why not simply an empty string?{{{
-"
-" You can use `''` when the original motion is built-in or defined via `:[nore]map`.
-" In that case, `maparg(motion, '', 0,  1).mode` is a space, which our `repmap#`
-" function recognizes as `nvo`.
-"
-" But  here,   `%`  is  not  built-in;   it's  a  custom  motion   installed  by
-" `vim-matchup`.  And the  latter does not use `:[nore]map`; it  uses 3 separate
-" mappings; one for `n`, one for `x`, and one for `o`:
-"
-"     ~/.vim/plugged/vim-matchup/autoload/matchup.vim:179
-"
-" If  you pass  the mode  `''` to  our `repmap#`  function, it  will pass  it to
-" `maparg()`, which won't return a space for the mode, but `o`:
-"
-"                       vv
-"     :echo maparg('%', '', 0, 1).mode
-"     o~
-"
-" As a result, `%`  and `g%` would not be repeatable in  normal and visual mode,
-" because the wrapper mapping would only be installed in operator-pending mode.
-"
-" You can check this like so:
-"
-"    - comment the next function call
-"    - start a new Vim instance
-"    - run `:echo maparg('%', '', 0, 1).mode`; the output should be 'o'
-"}}}
-" TODO: Review the previous comment.
-" In particular, I think the end is slightly wrong.
-" `%` and `g%` would be completely broken if you used `''` instead of `nvo`.
-" The  explanation  is  stale   because  we've  refactored  `vim-repmap`  and/or
-" `vim-lg`.
-for s:mode in ['n', 'x', 'o']
-    call repmap#make#all({
-        \ 'mode': s:mode,
-        \ 'buffer': 0,
-        \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
-        \ 'motions': [
-        \              {'bwd': 'g%',  'fwd': '%'},
-        \              {'bwd': '[-',  'fwd': ']-'},
-        \            ],
-        \ })
-endfor
-
 " custom motions
-call repmap#make#all({
-    \ 'mode': 'n',
-    \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
-    \ 'motions': [
-    \              {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
-    \              {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
-    \              {'bwd': '[a'    ,  'fwd': ']a'},
-    \              {'bwd': '[b'    ,  'fwd': ']b'},
-    \              {'bwd': '[f'    ,  'fwd': ']f'},
-    \              {'bwd': '[l'    ,  'fwd': ']l'},
-    \              {'bwd': '[q'    ,  'fwd': ']q'},
-    \              {'bwd': '[t'    ,  'fwd': ']t'},
-    \            ]
-    \ })
-
-call repmap#make#all({
+call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '<l'    ,  'fwd': '>l'},
     \              {'bwd': '<q'    ,  'fwd': '>q'},
+    \              {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
+    \              {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
+    \              {'bwd': '[a'    ,  'fwd': ']a'},
+    \              {'bwd': '[b'    ,  'fwd': ']b'},
+    \              {'bwd': '[e'    ,  'fwd': ']e'},
+    \              {'bwd': '[f'    ,  'fwd': ']f'},
+    \              {'bwd': '[l'    ,  'fwd': ']l'},
+    \              {'bwd': '[q'    ,  'fwd': ']q'},
+    \              {'bwd': '[s'    ,  'fwd': ']s'},
+    \              {'bwd': '[t'    ,  'fwd': ']t'},
+    \              {'bwd': 'g,'    ,  'fwd': 'g;'},
     \            ]
     \ })
 
-call repmap#make#all({
+call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
@@ -400,17 +348,47 @@ call repmap#make#all({
     \            ]
     \ })
 
-call repmap#make#all({
-    \ 'mode': 'n',
+" Why `nxo` for the mode?  Why not simply an empty string?{{{
+"
+" You can use `''` when the original motion is built-in or defined via `:[nore]map`.
+" In the first case, repmap use `s:DEFAULT_MAPARG` whose `mode` key is a space.
+" In the latter case, `maparg(motion, '', 0, 1).mode` is a space.
+" In both cases, a space describes `nvo`.
+"
+" But  here,   `%`  is  not  built-in;   it's  a  custom  motion   installed  by
+" `vim-matchup`.  And  it's not installed  via `:[nore]map`, but via  3 separate
+" mapping commands; one for `n`, one for `x`, and one for `o`:
+"
+"     ~/.vim/plugged/vim-matchup/autoload/matchup.vim:179
+"
+" If  you pass  the mode  `''` to  our `repmap#`  function, it  will pass  it to
+" `maparg()`, which won't return a space for the mode, but `o`:
+"
+"                       vv
+"     :echo maparg('%', '', 0, 1).mode
+"     o~
+"
+" As a result,  `%` and `g%` will  be broken in normal and  visual mode, because
+" the database will only contain info for a motion in operator-pending mode.
+"
+" You can check this like so:
+"
+"    - comment the next function call
+"    - start a new Vim instance
+"    - run `:echo maparg('%', '', 0, 1).mode`; the output should be 'o'
+"}}}
+call repmap#make#repeatable({
+    \ 'mode': 'nxo',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '[e', 'fwd': ']e'},
-    \            ]
+    \              {'bwd': '[-',  'fwd': ']-'},
+    \              {'bwd': 'g%',  'fwd': '%'},
+    \            ],
     \ })
 
 " toggle settings
-call repmap#make#all({
+call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
     \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),

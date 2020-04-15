@@ -21,7 +21,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -31,12 +30,12 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-let s:l = 942 - ((23 * winheight(0) + 15) / 30)
+let s:l = 79 - ((78 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-942
-normal! 0
+79
+normal! 027|
 lcd ~/wiki/awk
 tabnext
 edit ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
@@ -451,10 +450,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
 argglobal
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 1 - ((0 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -464,7 +463,7 @@ lcd ~/wiki/vim
 wincmd w
 argglobal
 if bufexists("~/wiki/vim/popup.md") | buffer ~/wiki/vim/popup.md | else | edit ~/wiki/vim/popup.md | endif
-let s:l = 494 - ((16 * winheight(0) + 14) / 28)
+let s:l = 494 - ((16 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -472,59 +471,18 @@ normal! zt
 normal! 013|
 lcd ~/wiki/vim
 wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 28 + 16) / 33)
+exe '1resize ' . ((&lines * 29 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
 tabnext
 edit ~/wiki/vim/vimL.md
 set splitbelow splitright
 wincmd _ | wincmd |
 split
-1wincmd k
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe '1resize ' . ((&lines * 29 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
-argglobal
-let s:l = 222 - ((127 * winheight(0) + 14) / 29)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-222
-normal! 0
-lcd ~/wiki/vim
-wincmd w
-argglobal
-if bufexists("~/wiki/vim/mapping.md") | buffer ~/wiki/vim/mapping.md | else | edit ~/wiki/vim/mapping.md | endif
-let s:l = 566 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-566
-normal! 0
-lcd ~/wiki/vim
-wincmd w
-exe '1resize ' . ((&lines * 29 + 16) / 33)
-exe '2resize ' . ((&lines * 0 + 16) / 33)
-tabnext
-edit ~/.vim/plugged/vim-submode/autoload/submode.vim
-set splitbelow splitright
 wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-5wincmd k
-wincmd w
-wincmd w
+3wincmd k
 wincmd w
 wincmd w
 wincmd w
@@ -533,69 +491,55 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-wincmd =
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 27 + 16) / 33)
 argglobal
-let s:l = 77 - ((4 * winheight(0) + 0) / 0)
+let s:l = 232 - ((12 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-77
-normal! 0
+232
+normal! 03|
+lcd ~/wiki/vim
+wincmd w
+argglobal
+if bufexists("~/.vim/plugged/vim-submode/autoload/submode.vim") | buffer ~/.vim/plugged/vim-submode/autoload/submode.vim | else | edit ~/.vim/plugged/vim-submode/autoload/submode.vim | endif
+let s:l = 24 - ((23 * winheight(0) + 0) / 0)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+24
+normal! 046|
 lcd ~/.vim/plugged/vim-submode
 wincmd w
 argglobal
-if bufexists("~/.vim/autoload/slow_call/repeatable_motions.vim") | buffer ~/.vim/autoload/slow_call/repeatable_motions.vim | else | edit ~/.vim/autoload/slow_call/repeatable_motions.vim | endif
-let s:l = 349 - ((4 * winheight(0) + 0) / 0)
+if bufexists("~/Desktop/bug.md") | buffer ~/Desktop/bug.md | else | edit ~/Desktop/bug.md | endif
+let s:l = 201 - ((11 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-349
+201
 normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-repmap/autoload/repmap/make.vim") | buffer ~/.vim/plugged/vim-repmap/autoload/repmap/make.vim | else | edit ~/.vim/plugged/vim-repmap/autoload/repmap/make.vim | endif
-let s:l = 726 - ((130 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-726
-normal! 0
-lcd ~/.vim/plugged/vim-repmap
-wincmd w
-argglobal
 if bufexists("~/wiki/vim/mapping.md") | buffer ~/wiki/vim/mapping.md | else | edit ~/wiki/vim/mapping.md | endif
-let s:l = 658 - ((21 * winheight(0) + 0) / 0)
+let s:l = 946 - ((3 * winheight(0) + 13) / 27)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-658
-normal! 0
+946
+normal! 027|
 lcd ~/wiki/vim
 wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-lg-lib/autoload/lg/map.vim") | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/map.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/map.vim | endif
-let s:l = 205 - ((204 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-205
-normal! 0
-lcd ~/.vim/plugged/vim-lg-lib
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-lg-lib/.git/index") | buffer ~/.vim/plugged/vim-lg-lib/.git/index | else | edit ~/.vim/plugged/vim-lg-lib/.git/index | endif
-let s:l = 1 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-exe s:l
-normal! zt
-1
-normal! 0
-lcd ~/.vim/plugged/vim-lg-lib
-wincmd w
-6wincmd w
-wincmd =
-tabnext 13
+4wincmd w
+exe '1resize ' . ((&lines * 0 + 16) / 33)
+exe '2resize ' . ((&lines * 0 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 27 + 16) / 33)
+tabnext 12
 badd +1 ~/wiki/awk/sed.md
 badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 badd +1 ~/Desktop/ask.md
@@ -607,8 +551,7 @@ badd +1 ~/.vim/plugged/vim-completion/plugin/completion.vim
 badd +1 ~/Desktop/refactor.md
 badd +1 ~/Desktop/text-properties.md
 badd +1 ~/wiki/vim/sign.md
-badd +902 ~/wiki/vim/vimL.md
-badd +110 ~/.vim/plugged/vim-submode/autoload/submode.vim
+badd +232 ~/wiki/vim/vimL.md
 badd +1502 ~/wiki/vim/config.md
 badd +1 ~/wiki/vim/complete.md
 badd +37 ~/.vim/plugged/vim-vim/autoload/vim/refactor/method.vim
@@ -616,18 +559,16 @@ badd +69 ~/Desktop/vim.vim
 badd +88 ~/.vim/plugin/matchup.vim
 badd +4 ~/.vim/plugged/vim-fex/ftplugin/fex.vim
 badd +26 ~/wiki/vim/shell.md
-badd +208 ~/.vim/autoload/myfuncs.vim
+badd +719 ~/.vim/autoload/myfuncs.vim
 badd +302 ~/.vim/plugged/vim-completion/autoload/completion.vim
-badd +15 ~/.vim/plugged/vim-completion/autoload/completion/util.vim
+badd +8 ~/.vim/plugged/vim-completion/autoload/completion/util.vim
 badd +75 ~/.vim/plugged/vim-vim/autoload/vim/refactor/substitute.vim
 badd +2 ~/.vim/plugged/vim-vim/test/refactor/substitute.vim
-badd +86 ~/.vim/plugged/vim-quickhl/autoload/quickhl.vim
+badd +364 ~/.vim/plugged/vim-quickhl/autoload/quickhl.vim
 badd +261 ~/wiki/vim/popup.md
-badd +497 ~/wiki/vim/mapping.md
-badd +351 ~/.vim/autoload/slow_call/repeatable_motions.vim
-badd +127 ~/.vim/plugged/vim-repmap/autoload/repmap/make.vim
-badd +0 ~/.vim/plugged/vim-lg-lib/autoload/lg/map.vim
-badd +0 ~/.vim/plugged/vim-lg-lib/.git/index
+badd +24 ~/.vim/plugged/vim-submode/autoload/submode.vim
+badd +201 ~/Desktop/bug.md
+badd +946 ~/wiki/vim/mapping.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

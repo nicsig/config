@@ -4436,6 +4436,46 @@ endfu
 nno <m-n> ]'
 nno <m-p> ['
 " }}}3
+" @@ {{{3
+
+" Save the name of the last register executed interactively, to avoid a pitfall with `@@`.{{{
+"
+" During a  recording, if  you use a  mapping whose rhs  contains `@=`,  it will
+" reset the last executed register.
+"
+" More generally,  if you execute  `@b` during  a recording into  register `"a`,
+" `"b` will be considered  to be the last executed register,  not `"a`, and `@@`
+" will re-execute it.  If that happens,  you'll probably find `@@`'s behavior to
+" be unexpected.
+"
+"     vim -Nu NONE +'let @a = "a@a\e@b" | let @b = "a @b \e"'
+"     " press @a: '@a @b ' is inserted
+"     " press @@: ' @b'    is inserted
+"
+" To "fix" this,  we use this `@` wrapper  mapping to save the name  of the last
+" register  executed *interactively*.   We assume  that a  register is  executed
+" interactively iff no recording is active.
+" Note  that this  assumption  may  be wrong;  you  *could*  execute a  register
+" interactively while a recording is active.  But in practice, I doubt I'll ever
+" want to re-execute such a register with `@@`.
+" Usually, I press `@@` to re-execute  a register which I've executed previously
+" *outside* a recording.
+"}}}
+nno <expr> @ <sid>save_last_register_executed_interactively()
+fu s:save_last_register_executed_interactively() abort
+    " ask which register we want to execute
+    let char = nr2char(getchar(), 1)
+    if empty(reg_executing())
+        let s:last_register_executed_interactively = char
+    endif
+    return '@'..char
+endfu
+
+nno <expr> @@ <sid>atat()
+fu s:atat() abort
+    return '@'..get(s:, 'last_register_executed_interactively', '@')
+endfu
+
 " _                   0_ {{{3
 
 " Issue:

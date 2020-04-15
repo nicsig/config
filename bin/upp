@@ -85,11 +85,7 @@ fi
 
 # Functions {{{1
 main() { #{{{2
-  # make sure  the next information  which are going  to be logged  are visually
-  # well-separated from the previous ones, by creating an empty fold
-  printf -- '\n-----------'
-
-  print_title "$(date +%m-%d\ %H:%M)"
+  print_time
 
   install_dependencies
   download
@@ -120,15 +116,28 @@ main() { #{{{2
   xdg_mime_default
 }
 
-print_title() { #{{{2
-  width=${#1}
+print_time() { #{{{2
+  time="$(date +%m-%d\ %H:%M)"
+  width=${#time}
   dashes="$(printf -- '-%.0s' $(seq 1 "${width}"))"
   equals="$(printf -- '=%.0s' $(seq 1 "${width}"))"
   cat <<EOF
 
 $dashes
-$1
+$dashes
+$time
 $equals
+
+EOF
+}
+
+print_title() { #{{{2
+  width=${#1}
+  dashes="$(printf -- '-%.0s' $(seq 1 "${width}"))"
+  cat <<EOF
+
+$1
+$dashes
 
 EOF
 }
