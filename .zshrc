@@ -3759,6 +3759,19 @@ bindkey -r '^G'
 # Press `C-g C-g` to jump to the first tabstop and remove its default value.
 # Press `C-g  g` to  jump to the  first tabstop and  “reveal” its  default value
 # (remove the `{{` and `}}`).
+#
+# ---
+#
+# We could replace our code with this program:
+# https://github.com/denisidoro/navi
+#
+# It looks much more powerful, but there are a few things which annoy me.
+# It seems we don't see the final command which is executed.
+# Also: https://github.com/denisidoro/navi/issues/320
+#
+# Besides, the program is written in rust, so it's harder to tweak.
+# I'm pretty sure most of its  interesting features could be re-implemented with
+# fzf/zsh/awk.  Do it.
 
 FZF_SNIPPET_COMMAND_COLOR='\x1b[38;5;33m'
 FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;35m'
@@ -5159,7 +5172,7 @@ fi
 # }}}1
 
 # TODO: Try to customize the theme for the linux console (then remove `[[ -n "$DISPLAY" ]]`).
-if [[ -z "$NO_SYNTAX_HIGHLIGHTING" ]] && [[ -n "$DISPLAY" ]]; then
+if [[ -n "$DISPLAY" ]]; then
   . "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
   . "${HOME}/.zsh/syntax_highlighting.zsh"
 fi

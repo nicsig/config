@@ -35,15 +35,15 @@ endif
 " Beyond  this value,  creating a  mapping would  shadow the  `<` key,  probably
 " because it's not interpreted as a function key anymore.
 " We don't need to go as far as 37. On my current keyboard, the biggest function
-" key is F12. So, we take our garbage keys from there.
+" key is F12. So, we take our unused keys from there.
 "
 " Second, if we assigned Tab / S-Tab, it would make the code more complex.
 " Indeed, we would have to:
 "
-"    1. Capture the output of s:snr() in a global variable (g:snr_vimrc);
+"    1. Capture the output of `s:snr()` in a global variable (g:snr_vimrc);
 "       from our vimrc file.
 "
-"    2. Create the file ~/.vim/after/plugin/ultisnips.vim,
+"    2. Create the file `~/.vim/after/plugin/ultisnips.vim`,
 "       in which we would write:
 "
 "         ino  <silent> <tab>     <c-r>={g:snr_vimrc}expand_cycle_jump('N')<cr>
@@ -63,7 +63,7 @@ endif
 "         i  <s-tab>     *@<c-r>=UltiSnips#JumpBackwards()<cr>
 "         s  <s-tab>     *@<Esc>:call UltiSnips#JumpBackwards()<cr>
 "
-"       They are removed after the expansion (:h UltiSnips-triggers):
+"       They are removed after the expansion (`:h UltiSnips-triggers`):
 "
 "         > UltiSnips will only map the jump triggers while a snippet is
 "         > active to interfere as little as possible with other mappings.
@@ -112,14 +112,14 @@ let g:UltiSnipsJumpForwardTrigger  = '<S-F16>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-F17>'
 " Remove select mode mappings using printable characters {{{
 
-" From :h mapmode-s :
+" From `:h mapmode-s`:
 "
-" > Some commands work both in Visual and Select mode, some in only one.
-" > Note that quite often "Visual" is mentioned where both Visual and Select
-" > mode apply.
-" > NOTE: Mapping a printable character in Select mode may confuse the user.
-" > It's better to explicitly use :xmap, and :smap for printable characters.
-" > Or use :sunmap after defining the mapping.
+" >     Some commands work both in Visual and Select mode, some in only one.
+" >     Note that quite often "Visual" is mentioned where both Visual and Select
+" >     mode apply.
+" >     NOTE: Mapping a printable character in Select mode may confuse the user.
+" >     It's better to explicitly use :xmap, and :smap for printable characters.
+" >     Or use :sunmap after defining the mapping.
 "
 " It probably implies that mapping a printable character in select mode is a bad
 " idea. For example, suppose that a plugin install this mapping:

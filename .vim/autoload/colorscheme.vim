@@ -469,8 +469,8 @@ fu s:StatuslineNC() abort "{{{3
     "
     " I think that's because of `:h 'stl /User`:
     "
-    " > The difference between User{N} and StatusLine  will be applied
-    " > to StatusLineNC for the statusline of non-current windows.
+    " >     The difference between User{N} and StatusLine  will be applied
+    " >     to StatusLineNC for the statusline of non-current windows.
     "
     " Although, I  don't really understand  how that  explains how Vim  gets the
     " colors it uses to highlight the file path in a non-focused window...

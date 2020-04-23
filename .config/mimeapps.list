@@ -25,3 +25,5 @@ video/mp4=mpv.desktop;parole.desktop;
 image/gif=ristretto.desktop;
 text/x-log=gvim.desktop;
 text/plain=gvim.desktop;
+video/x-matroska=mpv.desktop;
+application/x-compressed-tar=file-roller.desktop;

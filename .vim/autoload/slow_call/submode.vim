@@ -69,8 +69,10 @@ call submode#enter('scrollwin', 'i', '', '<c-g>k', '<c-x><c-y>' )
 call submode#enter('char-around', 'i', 'r', '<c-x>j', '<plug>(duplicate-char-below)' )
 call submode#enter('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-char-above)' )
 
-ino <expr> <plug>(duplicate-char-below) <sid>duplicate_char_around(0)
-ino <expr> <plug>(duplicate-char-above) <sid>duplicate_char_around(1)
+ino <plug>(duplicate-char-below) <c-r><c-r>=<sid>duplicate_char_around(0)<cr>
+ino <plug>(duplicate-char-above) <c-r><c-r>=<sid>duplicate_char_around(1)<cr>
+"                                ^^^^^^^^^^
+"                                useful when we encounter some literal control character
 
 fu s:duplicate_char_around(above) abort
     " By default, `c-y` only duplicate the character right above.
@@ -79,9 +81,9 @@ fu s:duplicate_char_around(above) abort
     "
     " We use this function to reimplement `c-y` (and `c-e`) in a more powerful way.
 
-    let vcol = virtcol('.')
-    let line = search('\%'..vcol..'v.*\S', (a:above ? 'b' : '')..'nW')
-    let char = matchstr(getline(line), '\%'..vcol..'v.')
+    let col = col('.')
+    let line = search('\%'..col..'c.*\S', (a:above ? 'b' : '')..'nW')
+    let char = matchstr(getline(line), '\%'..col..'c.')
     return char
 endfu
 

@@ -103,7 +103,19 @@ augroup fzf_open_folds
     au!
     " press `zv` the next time Vim has nothing to do, *after* a buffer has been displayed in a window
     if !has('nvim')
-        au FileType fzf au BufWinEnter * ++once au SafeState * ++once norm! zv
+        " Why the `mode()` condition?{{{
+        "
+        " For some reason, in gVim, `norm! zv` makes the cursor move back one character when:
+        "
+        "    - the cursor is at the end of the line
+        "    - we're in insert mode
+        "    - fzf is configured to use a Vim window
+        "      (popup or not; i.e. `g:fzf_layout` contains a `window` key)
+        "
+        " At  least,  that's what  happens  when  we  try  to insert  a  unicode
+        " character with `vim-unichar` or `unicode.vim` via fzf.
+        "}}}
+        au FileType fzf au BufWinEnter * ++once au SafeState * ++once if mode() !=# 'i' | exe 'norm! zv' | endif
     else
         " Why the `mode()` guard?{{{
         "

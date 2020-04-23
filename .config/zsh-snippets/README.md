@@ -47,48 +47,6 @@ have to modify it.
 The one  created by `=()`  is a  regular file, that  you can change  without any
 warning.
 
-# Can't we use a key binding to disable the syntax highlighting in zsh?
-
-So, you're thinking about removing this snippet:
-
-    NO_SYNTAX_HIGHLIGHTING=yes exec zsh
-
-For the moment, I think a snippet is better.
-I don't know how frequent we'll want to disable the syntax highlighting.
-It may  be something  which we  use once  a week;  in that  case, I  don't think
-dedicating a key binding is worth it.
-
----
-
-But if you really want a key binding, you could try this:
-
-    bindkey -s '^G^H' 'NO_SYNTAX_HIGHLIGHTING=yes exec zsh\n'
-
-It works, but it requires the command-line to be empty before pressing the keys.
-
-An alternative would be:
-
-    __no_syntax_highlighting() {
-      emulate -L zsh
-      # we need `-i`; otherwise, for some reason, the shell quits
-      NO_SYNTAX_HIGHLIGHTING=yes exec zsh -i
-    }
-    zle -N __no_syntax_highlighting
-    bindkey '^G^H' __no_syntax_highlighting
-
-However for some reason, it raises the error message:
-
-    stty: 'standard input': Inappropriate ioctl for device
-
-because we have `stty -ixon` in our `~/.zshrc`.
-I've tried to fix the error message by adding the redirections:
-
-    >/dev/null </dev/null
-
-but it didn't work.
-If you  also redirect the  error stream  `>/dev/null </dev/null 2>&1`,  then the
-shell quits again.
-
 ##
 # About `sudo -E env "PATH=$PATH" zsh -c "!!"`
 ## why `-E`?

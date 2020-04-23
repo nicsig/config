@@ -28,6 +28,15 @@ nno g, g;zv
 "    gj  gk         vertical jump {{{2
 
 " Alternative: https://github.com/haya14busa/vim-edgemotion
+" TODO: We never use these mappings.  I don't find the motions intuitive.{{{
+"
+" The problem is that we've implemented them without a clear goal in mind.
+" When you feel the need to jump vertically, try to refactor the code so that it
+" better suits our needs.
+"
+" These mappings  *could* be useful  when we start  coding in python  which uses
+" indentation to specify when a construct ends.
+"}}}
 noremap <expr><silent> gk <sid>vertical_jump_rhs(0)
 noremap <expr><silent> gj <sid>vertical_jump_rhs(1)
 
@@ -55,9 +64,7 @@ fu s:vertical_jump_go(is_fwd, mode) abort
     endif
 
     let n = s:get_jump_height(a:is_fwd)
-    if n <= 0
-        return
-    endif
+    if n <= 0 | return | endif
 
     " temporarily disable folds before we move
     let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]

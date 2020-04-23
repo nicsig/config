@@ -489,7 +489,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
 
     if a:bang | return | endif
 
-    " If `a:lnum1 == a:lnum2`, it means `:XorLines` was called without a range.
+    " If `a:lnum1 == a:lnum2`, it means `:DiffLines` was called without a range.
     if a:lnum1 == a:lnum2
         let [lnum1, lnum2] = [line('.'), line('.')+1]
     else
@@ -503,60 +503,73 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
     let pat = ''
     for i in range(min_chars)
         if chars1[i] isnot# chars2[i]
-
-            " FIXME: for some reason, we need to write a dot at the end of each
-            " branch of the pattern, so we add 'v.' at the end instead of just 'v'.
-            " The problem seems to come from :lvim and the g flag.
+            " FIXME: We need to write `c.` instead of just `c`.{{{
+            "
+            " Otherwise, we may have duplicate entries.
+            " The problem seems to come from `:lvim` and the `g` flag.
             "
             " MWE:
             " This adds 2 duplicate entries in the location list instead of one:
             "
-            "     :lvim /\%1l\%2v/g %
+            "     :lvim /\%1l\%2c/g %
             "
             " This adds 2 duplicate entries in the location list, 3 in total instead of two:
             "
-            "     :lvim /\%1l\%2v\|\%1l\%3v/g %
+            "     :lvim /\%1l\%2c\|\%1l\%3c/g %
             "
             " This adds 2 couple of duplicate entries in the location list, 4 in total instead of two.
             "
-            "     :lvim /\%1l\%2v\|\%1l\%4v/g %
+            "     :lvim /\%1l\%2c\|\%1l\%4c/g %
             "
-            " It seems each time a `%{digit}v` anchor matches the beginning of a group
+            " It seems each time a `%{digit}c` anchor matches the beginning of a group
             " of consecutive characters, it adds 2 duplicate entries instead of one.
-
-            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum1..'l'..'\%'..(i+1)..'v.'
-            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum2..'l'..'\%'..(i+1)..'v.'
+            "}}}
+            " Don't use `virtcol()` and `\%v`.{{{
+            "
+            " It wouldn't work as expected  if the lines contain literal control
+            " characters, and more generally any multi-cell characters.
+            "}}}
+            let col1 = strlen(matchstr(line1, '^.\{'..(i+1)..'}'))
+            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum1..'l\%'..col1..'c.'
+            let col2 = strlen(matchstr(line2, '^.\{'..(i+1)..'}'))
+            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum2..'l\%'..col2..'c.'
         endif
     endfor
 
     " If one of the lines is longer than the other, we have to add its end in the pattern.
-    if len(chars1) > len(chars2)
-
-        " Suppose that the shortest line has 50 characters:
-        " it's better to write `\%>50v.` than `\%50v.*`.
+    if strlen(line1) > strlen(line2)
+        " It's better to write `\%>123c.` than `\%123c.*`.{{{
         "
-        " `\%>50v.` = any character after the 50th character:
+        " `\%>123c.` = any character after the 50th character.
         " This will add one entry in the loclist for *every* character.
         "
-        " `\%50v.*` = the *whole* set of characters after the 50th:
+        " `\%123c.*` = the *whole* set of characters after the 123th.
         " This will add only *one* entry in the loclist.
+        "}}}
+        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum1..'l'..'\%>'..strlen(line2)..'c.'
 
-        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum1..'l'..'\%>'..len(chars2)..'v.'
-
-    elseif len(chars1) < len(chars2)
-        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum2..'l'..'\%>'..len(chars1)..'v.'
+    elseif strlen(line1) < strlen(line2)
+        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum2..'l'..'\%>'..len(line1)..'c.'
     endif
 
     " Give the result
     if !empty(pat)
-        " Why silent?{{{
-        "
-        " If the  lines are long, `:lvim`  will print a long  message which will
-        " cause a hit-enter prompt:
-        "
-        "     (1 of 123): ...
-        "}}}
-        sil noa exe 'lvim /'..pat..'/g %'
+        try
+            " Why silent?{{{
+            "
+            " If the  lines are long, `:lvim`  will print a long  message which will
+            " cause a hit-enter prompt:
+            "
+            "     (1 of 123): ...
+            "}}}
+            sil noa exe 'lvim /'..pat..'/g %'
+        " E499 = empty file name
+        catch /^Vim\%((\a\+)\)\=:E499:/
+            echohl ErrorMsg
+            echom v:exception
+            echohl NONE
+            return
+        endtry
         let w:xl_match = matchadd('SpellBad', pat, -1)
     else
         echohl WarningMsg
@@ -907,17 +920,19 @@ fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     " We need  the cursor to be  positioned on the screen  position *before* the
     " tab,  because  that's  what  `strdisplaywidth()`  expects  as  its  second
     " argument.
-    "
-    " ---
-    "
-    " Couldn't you use the pattern `\t`, and `virtcol('.')-1`?
-    "
-    " No, because `virtcol()` returns the *last* screen position occupied by the
-    " tab character;  for `virtcol('.')-1`  to work, we  would need  the *first*
-    " screen position.
     "}}}
-    " If you want to preserve a tab used to indent a line, use this pattern instead:
+    " Couldn't I use the pattern `\t`, and `virtcol('.')-1`?{{{
+    "
+    " No,  because `virtcol()`  returns  the  index of  the  *last* screen  cell
+    " occupied by the tab character; for `virtcol('.')-1` to work, we would need
+    " the index of the *first* screen cell.
+    "}}}
+    " I want to preserve a tab used to indent a line!{{{
+    "
+    " Use this pattern instead:
+    "
     "     let pat = '\%(^\s*\)\@!\&\(.\)\t'
+    "}}}
     let pat = '^\t\|\(.\)\t'
     " Don't remove a leading tab in a heredoc.{{{
     "
@@ -1243,14 +1258,14 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         "   - otherwise, by default, an abbreviation should be 3 characters long
         "}}}
         call map(weighted_freq, {k,v ->
-        \ v * (strchars(k)
-        \ -
-        \ strchars(k) == 4
-        \ ? 2
-        \   : k[-1:-1] is# "s" && index(keys(freq), k[:strlen(k)-1]) >= 0
-        \   ?     4
-        \   :     3
-        \ )})
+            \ v * (strchars(k)
+            \ -
+            \ strchars(k) == 4
+            \ ? 2
+            \   : k[-1:-1] is# "s" && index(keys(freq), k[:strlen(k)-1]) >= 0
+            \   ?     4
+            \   :     3
+            \ )})
         let weighted_freq = sort(items(weighted_freq), {a, b -> b[1] - a[1]})
     endif
 
