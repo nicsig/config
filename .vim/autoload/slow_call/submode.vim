@@ -64,8 +64,6 @@ call submode#enter('scrollwin', 'i', '', '<c-g>k', '<c-x><c-y>' )
 "                      it's a little confusing
 "}}}
 
-"                                            ┌ recursive (remap {rhs})
-"                                            │
 call submode#enter('char-around', 'i', 'r', '<c-x>j', '<plug>(duplicate-char-below)' )
 call submode#enter('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-char-above)' )
 

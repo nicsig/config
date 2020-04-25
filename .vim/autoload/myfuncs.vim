@@ -43,8 +43,8 @@ endfu
 
 " This function is called directly from our `dr` and `drr` mappings.
 fu myfuncs#set_reg(reg_name) abort
-    " We save the name of the register which was called just before `dr` inside
-    " a script-local variable, for the dot command to know which register we
+    " We save the name of the register  which was called just before `dr` inside
+    " a script-local  variable, for the redo  command to know which  register we
     " used the first time.
     "
     " By default, it will be `"`.

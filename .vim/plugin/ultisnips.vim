@@ -17,7 +17,7 @@ endif
 " OTOH, if you  configure UltiSnips from this directory, when  UltiSnips will be
 " sourced, it will see you've chosen a key to expand a snippet:
 "
-"     let g:UltiSnipsExpandTrigger = '<S-F15>'
+"     let g:UltiSnipsExpandTrigger = '<S-F7>'
 "
 " So, it will use it to install the mappings.
 " And the key  we've chosen is purposefully NOT `Tab`,  so when `vim-completion`
@@ -26,7 +26,7 @@ endif
 
 " Mappings {{{1
 
-" Why S-F15..17 ? {{{
+" Why S-F7..9 ? {{{
 
 " First, because  I'm looking  for unused  keys, which will  stay unused  in the
 " future. Currently, the maximum value `xx` to create a <F-xx> {lhs} is `37`:
@@ -34,8 +34,6 @@ endif
 "
 " Beyond  this value,  creating a  mapping would  shadow the  `<` key,  probably
 " because it's not interpreted as a function key anymore.
-" We don't need to go as far as 37. On my current keyboard, the biggest function
-" key is F12. So, we take our unused keys from there.
 "
 " Second, if we assigned Tab / S-Tab, it would make the code more complex.
 " Indeed, we would have to:
@@ -107,9 +105,9 @@ endif
 "     UltiSnips overriding our mapping in this case, because there can't be
 "     a menu in select mode, so we don't need to cycle back).
 "}}}
-let g:UltiSnipsExpandTrigger       = '<S-F15>'
-let g:UltiSnipsJumpForwardTrigger  = '<S-F16>'
-let g:UltiSnipsJumpBackwardTrigger = '<S-F17>'
+let g:UltiSnipsExpandTrigger       = '<S-F7>'
+let g:UltiSnipsJumpForwardTrigger  = '<S-F8>'
+let g:UltiSnipsJumpBackwardTrigger = '<S-F9>'
 " Remove select mode mappings using printable characters {{{
 
 " From `:h mapmode-s`:
