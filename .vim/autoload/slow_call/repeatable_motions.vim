@@ -180,7 +180,7 @@ noremap <expr> ss <sid>fts('s')
 noremap <expr> SS <sid>fts('S')
 
 fu s:fts(cmd) abort
-    " Why not `call feedkeys('zv', 'nt')`?{{{
+    " Why not `call feedkeys('zv', 'int')`?{{{
     "
     " It  would interfere  with  `vim-sneak`,  when the  latter  asks for  which
     " character we want to move on.  `zv` would be interpreted like this:
@@ -192,8 +192,8 @@ fu s:fts(cmd) abort
     "}}}
     " How is this autocmd better?{{{
     "
-    " `feedkeys('zv', 'nt')` would IMMEDIATELY press `zv` (✘).
-    " The autocmd also presses `zv`, but only after a motion has occurred (✔).
+    " `feedkeys('zv', 'int')` would *immediately* press `zv` (✘).
+    " This autocmd also presses `zv`, but only after a motion has occurred (✔).
     "}}}
     au CursorMoved * ++once norm! zv
 

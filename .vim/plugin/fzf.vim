@@ -129,6 +129,24 @@ augroup fzf_open_folds
     endif
 augroup END
 
+augroup fzf_no_timeout
+    au!
+    " We could have a mapping which creates a timeout when we press `C-s`, `C-v`, or `C-t`.{{{
+    "
+    " For example,  at the  moment, we set  `'twk'` to `<c-s>`,  and to  avoid a
+    " timeout when we  press `C-s C-w` to focus another  window, we install this
+    " mapping:
+    "
+    "     tno <buffer><nowait> <c-s><c-w> <c-s><c-w>
+    "
+    " In turn, the latter can cause a timeout when we press `C-s` to open a file
+    " in a new split.
+    "}}}
+    au FileType fzf tno <buffer><nowait> <c-s> <c-s>
+    au FileType fzf tno <buffer><nowait> <c-v> <c-v>
+    au FileType fzf tno <buffer><nowait> <c-t> <c-t>
+augroup END
+
 " Mappings{{{1
 " `:map` {{{2
 
@@ -150,7 +168,7 @@ nno <space>fm<esc> <nop>
 " Would cause a timeout when we press `C-r C-r` to insert a register literally.
 "}}}
 cno <expr> <c-r><c-h>
-\    getcmdtype() =~ ':' ?  '<c-e><c-u>'..g:fzf_command_prefix..'History:<cr>'
+\    getcmdtype() =~ ':' ? '<c-e><c-u>'..g:fzf_command_prefix..'History:<cr>'
 \  : getcmdtype() =~ '[/?]' ? '<c-e><c-u><c-c>:'..g:fzf_command_prefix..'History/<cr>' : ''
 "                                        ^^^^^
 "                                        don't use `<esc>`; an empty pattern would search for the last pattern

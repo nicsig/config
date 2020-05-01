@@ -310,7 +310,7 @@ Plug 'lacygoill/vim-submode'
 Plug 'lacygoill/vim-tmux', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
 " Alternative: https://github.com/vim/vim/pull/3220#issuecomment-538651011
-Plug 'andymass/vim-tradewinds'
+Plug 'lacygoill/vim-tradewinds', {'branch': 'assimil'}
 Plug 'lacygoill/vim-unix'
 
 " Done:
@@ -2227,6 +2227,34 @@ set t_RV=
 "}}}
 let [&t_Ts, &t_Te] = ["\e[9m", "\e[29m"]
 
+" kB {{{3
+
+if $TERM =~# '^st\%(-256color\)$'
+    " `<S-Tab>` may not work in st, because Vim may not set `t_kB`.{{{
+    "
+    " Right now, for st, we use the terminfo description from the ncurses developer.
+    " It turns out that it cancels the `kcbt` capability:
+    "
+    "     st-256color|stterm-256color|simpleterm with 256 colors,
+    "             ccc@,
+    "             initc@, oc@, use=xterm+256color, use=st,
+    "                                              ^^^^^^
+    "     st|stterm| simpleterm,
+    "             use=st-0.7,
+    "             ^^^^^^^^^^
+    "     st-0.7|simpleterm 0.7,
+    "             ccc,
+    "             dim=\E[2m,
+    "             initc=\E]4;%p1%d;rgb\:%p2%{255}%*%{1000}%/%2.2X/%p3%{255}%*
+    "                   %{1000}%/%2.2X/%p4%{255}%*%{1000}%/%2.2X\E\\,
+    "             kcbt@, kent@, oc=\E]104\007,
+    "             ^^^^^
+    "
+    " As a result, Vim does not set `t_kB` when `$TERM` is `st`.
+    "}}}
+    exe "set t_kB=\e[Z"
+endif
+
 " ut {{{3
 
 " We don't really need this atm.
@@ -2738,33 +2766,14 @@ set wildmode=full
 "    - the rhs of a mapping
 "}}}
 
-" What does the value `26` stand for?{{{
-"
-"     C-z
-"}}}
-" What does `set wildcharm=26` imply?{{{
+" What does `set wildcharm=9` imply?{{{
 "
 " When you want  Vim to start a wildcard  expansion, in the rhs of  a mapping or
-" while recording a macro, you'll have to write/press `C-z`, instead of Tab.
-"
-" If you write/press Tab, the mapping/macro  won't work as expected, because the
-" Tab  characters  they  contain  will be  interpreted  literally  (no  wildcard
-" expansion).
+" while recording a macro, you must use Tab.
 "}}}
-"   Is there an alternative value?{{{
+" Which pitfall should I be aware of?{{{
 "
-" Yes, you could write:
-"
-"     set wildcharm=9
-"}}}
-"     Why would it be better?{{{
-"
-" Because you could write/press Tab in your mappings/macros, to make Vim start a
-" wildcard expansion, exactly like you would the rest of the time.
-"}}}
-"     Why don't you use it?{{{
-"
-" Suppose your macro contains Tab characters.
+" Suppose your recording contains Tab characters.
 " While on the command-line, *any* one  of them will start a wildcard expansion.
 " It may have unexpected results.
 " For a real example, run:
@@ -2778,14 +2787,53 @@ set wildmode=full
 "     % yank a
 "     @a
 "
-" They run the contents of the buffer as Ex commands (`@a` ⇔ `:@a`).
-" The buffer contains Tab characters.
-" They all make Vim start a wildcard expansion, but in the buffer they were just
-" used to separate some texts.
-" They were not supposed to expand anything.
+" They run the  contents of the buffer  as Ex commands, and  the latter contains
+" Tab characters.
+" Each Tab character makes Vim start a  wildcard expansion, but in the buffer it
+" was just used to separate some texts.  It was not supposed to expand anything.
+"}}}
+"   What could I do to avoid it?{{{
+"
+"     set wildcharm=26
+"}}}
+"     Why don't you do it?{{{
+"
+" Having to remember to press `C-z` during a recording is cumbersome.
+" You'll definitely forget about it,  then get unexpected results when replaying
+" some macro.
+"
+" ---
+"
+" Besides, if `'wcm'` is different than `'wc'`, it can trigger a weird bug which
+" breaks some command-line mode mappings.
+"
+" MWE:
+"
+"     $ vim -Nu NONE +'set wildmenu wcm=<c-z>' +'cno <c-j> <down>' +cd
+"     :e SPC Tab C-j
+"     " C-j should enter the directory; instead it inserts ^I
+"
+" It's probably a bug.  See:
+" https://github.com/vim/vim/issues/4954
+" https://groups.google.com/d/msg/vim_dev/xf5TRb4uR4Y/djk2dq2poaQJ
+" http://stackoverflow.com/a/14849216
+"
+" ---
+"
+" If you  change `'wcm'`, among other  things, in `vim-readline` you'll  need to
+" replace this mapping:
+"
+"     cno <m-n> <down>
+"
+" With:
+"
+"     cno <expr> <m-n> <down> feedkeys('<down>', 'in'..(empty(reg_executing()) ? '' : 't'))[-1]
+"
+" See  our  comments in  `cmdline#tab#custom()`  to  understand the  purpose  of
+" `reg_executing()`.
 "}}}
 set wildchar=9
-set wildcharm=26
+set wildcharm=9
 
 " winaltkeys {{{2
 
@@ -3424,7 +3472,7 @@ nno gV     '[V']
 
 " g SPC       break line {{{4
 
-nno <silent> g<space> :<c-u>set opfunc=<sid>break_line<bar>norm! g@l<cr>
+nno <silent> g<space> :<c-u>set opfunc=<sid>break_line<cr>g@l
 
 fu s:break_line(_) abort
     " I sometimes press `g SPC` by  accident after getting back to the beginning
@@ -3657,7 +3705,7 @@ xno <silent> myM :<c-u>call myfuncs#op_yank_matches_set_action(0, 0)
 "}}}
 " Do not replace `g@l` with `norm! g@l`.{{{
 "
-" The opfunc invokes `z=` which is an unfinished command (it requires the user input).
+" The opfunc invokes `z=` which is an incomplete command (it requires the user input).
 " As a  result, `:norm` would press Escape  and you would not be  able to choose
 " the fixed word.
 "}}}
@@ -3672,7 +3720,7 @@ fu s:z_equal(_) abort
     try
         setl spell
         if s:z_equal_count
-            return feedkeys(s:z_equal_count..'z=', 'n')
+            return feedkeys(s:z_equal_count..'z=', 'in')
         endif
         " Why not `norm! z=`?{{{
         "
@@ -3686,7 +3734,7 @@ fu s:z_equal(_) abort
         " >     {commands} does not finish a command, the last one
         " >     will be aborted as if <Esc> or <C-C> was typed.
         "}}}
-        call feedkeys('z=', 'n')
+        call feedkeys('z=', 'in')
     catch
         return lg#catch()
     finally
@@ -3698,7 +3746,7 @@ endfu
 " zd {{{4
 
 " make `zd` repeatable
-nno <silent> zd :<c-u>set opfunc=<sid>my_zd<bar>norm! g@l<cr>
+nno <silent> zd :<c-u>set opfunc=<sid>my_zd<cr>g@l
 
 fu s:my_zd(type) abort
     try
@@ -3731,20 +3779,20 @@ endfu
 " commands (easier to type lowercase characters):
 
 " mark word under cursor as good
-nno <silent> zg :<c-u>call <sid>repeat_which_spell_command('zG')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
-nno <silent> zG :<c-u>call <sid>repeat_which_spell_command('zg')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zg :<c-u>call <sid>repeat_which_spell_command('zG')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zG :<c-u>call <sid>repeat_which_spell_command('zg')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
 
 " mark word under cursor as wrong
-nno <silent> zw :<c-u>call <sid>repeat_which_spell_command('zW')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
-nno <silent> zW :<c-u>call <sid>repeat_which_spell_command('zw')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zw :<c-u>call <sid>repeat_which_spell_command('zW')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zW :<c-u>call <sid>repeat_which_spell_command('zw')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
 
 " undo the marking of word under cursor as good
-nno <silent> zug :<c-u>call <sid>repeat_which_spell_command('zuG')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
-nno <silent> zuG :<c-u>call <sid>repeat_which_spell_command('zug')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zug :<c-u>call <sid>repeat_which_spell_command('zuG')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zuG :<c-u>call <sid>repeat_which_spell_command('zug')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
 
 " undo the marking of word under cursor as wrong
-nno <silent> zuw :<c-u>call <sid>repeat_which_spell_command('zuW')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
-nno <silent> zuW :<c-u>call <sid>repeat_which_spell_command('zuw')<bar>set opfunc=<sid>repeatable_spell_commands<bar>norm! g@l<cr>
+nno <silent> zuw :<c-u>call <sid>repeat_which_spell_command('zuW')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
+nno <silent> zuW :<c-u>call <sid>repeat_which_spell_command('zuw')<bar>set opfunc=<sid>repeatable_spell_commands<cr>g@l
 
 fu s:repeat_which_spell_command(cmd) abort
     let s:repeat_this_spell_command = a:cmd
@@ -3772,10 +3820,10 @@ endfu
 " `[k`, `[j` align the beginning of the current line with the one of the previous/next line
 " `]k`, `]j` align the end of the current line with the one of the previous/next line
 
-nno <silent> [k :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<bar>norm! g@l<cr>
-nno <silent> [j :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<bar>norm! g@l<cr>
-nno <silent> ]k :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
-nno <silent> ]j :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<bar>norm! g@l<cr>
+nno <silent> [k :<c-u>call myfuncs#align_with_beginning_save_dir(-1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@l
+nno <silent> [j :<c-u>call myfuncs#align_with_beginning_save_dir(1)<bar>set opfunc=myfuncs#align_with_beginning<cr>g@l
+nno <silent> ]k :<c-u>call myfuncs#align_with_end_save_dir(-1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
+nno <silent> ]j :<c-u>call myfuncs#align_with_end_save_dir(1)<bar>set opfunc=myfuncs#align_with_end<cr>g@l
 " }}}3
 " | {{{3
 " |c         execute the Compiler {{{4
@@ -4296,7 +4344,7 @@ endfu
 
 " long data = dictionary, list, bulleted list
 
-nno <silent> +> :<c-u>set opfunc=myfuncs#long_data_split<bar>norm! g@l<cr>
+nno <silent> +> :<c-u>set opfunc=myfuncs#long_data_split<cr>g@l
 nno <silent> +< :<c-u>set opfunc=myfuncs#long_data_join<cr>g@
 xno <silent> +< :<c-u>call myfuncs#long_data_join('vis')<cr>
 
@@ -4553,7 +4601,7 @@ nno _ 0_
 
 " >>                  indent without 'shiftround' {{{3
 
-" You refer to `v:count1` in the mapping, then in the function. Isn't it too much?{{{
+" You refer to `v:count1` in the mapping, then in the function.  Isn't it redundant?{{{
 "
 " No.
 " In the mapping, you can't press `g@` without `v:count1`.
@@ -5082,7 +5130,7 @@ xno <silent> . :norm! .<cr>
 "
 " Repeat last macro on all the visually selected lines with `@{reg}`.
 "}}}
-" Why not `xno  @  :norm @<c-r>=nr2char(getchar())<cr><cr>`?{{{
+" Why not `xno @ :norm @<c-r>=nr2char(getchar())<cr><cr>`?{{{
 "
 " The  last carriage  return which  executes the  command (norm  @q^M) is  moved
 " before the register name (`norm @^Mq`).
@@ -6667,7 +6715,7 @@ augroup filter_special_file
     "
     "     au FileType tar sil %!pandoc -f docx -t markdown <afile>:p:S
     "
-    " ... but $VIMRUNTIME/plugin/tarPlugin.vim would leave some undesired
+    " ...  but  `$VIMRUNTIME/plugin/tarPlugin.vim`  would leave  some  undesired
     " messages inside the buffer; it's noise.
     " Maybe it's because the event is fired too early, and the built-in tar plugin
     " processes the buffer after the event.
@@ -6700,27 +6748,28 @@ fu s:filter_special_file() abort
         endif
 
         setl modifiable noreadonly
-        " About: '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' -'{{{
-        "                                                             │
-        "                                                             └ write output on STDOUT, which is piped to `par`
+        " About: '%!pdftotext -nopgbrk -layout -q -eol unix '..fname..' -'{{{
+        "                                                               │
+        "                                                               └ write output on STDOUT,
+        "                                                                 which is piped to `par(1)`
         "}}}
         " FIXME: Initially, we used the shell utility `fmt`:{{{
         "
-        "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | fmt -w78'
+        "     '%!pdftotext -nopgbrk -layout -q -eol unix '..fname..' - | fmt -w78'
         "
         " The formatting was awful (too much random spacing everywhere).
         " `par(1)` gives a more readable text:
         "
-        "     '%!pdftotext -nopgbrk -layout -q -eol unix '.fname.' - | par -w80rjeq'
+        "     '%!pdftotext -nopgbrk -layout -q -eol unix '..fname..' - | par -w80rjeq'
         "
         " However, there are still errors.
         " Look at the bottom of a `pdf` file filtered by `par(1)`, to find error
-        " messages. It's often  due to  a too long  “word” (more  precisely what
-        " `par(1)` considers a word). Because of this, a pdf is often truncated.
-        " So, I don't use it atm.
+        " messages.  It's  often due to a  too long “word” (more  precisely what
+        " `par(1)`  considers  a  word).   Because  of  this,  a  pdf  is  often
+        " truncated.  So, I don't use it atm.
         "
         " Try to fix these errors by  learning how to better configure `par(1)`,
-        " through  command-line  options,  and/or through  `$PARINIT`. Then  use
+        " through  command-line options,  and/or through  `$PARINIT`.  Then  use
         " `par(1)` to format a pdf.
         "}}}
         sil exe ext2cmd[ext]
@@ -7013,7 +7062,7 @@ augroup trailing_whitespace
     " because it's not code; so we don't care about its presence.
     "}}}
     exe 'au FileType '
-        \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_,v -> v isnot# ''}), ',')
+        \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_,v -> v != ''}), ',')
         \ ..' call s:trailing_whitespace(0)'
     " we still have an undesired match when we run `:VimPatches 8.1` *twice*
     au BufWinEnter * if &ft is# 'text' | call s:trailing_whitespace(0) | endif
@@ -7033,6 +7082,26 @@ fu s:trailing_whitespace(create_match) abort
     elseif a:create_match
        \ && !exists('w:my_trailing_whitespace')
        \ && index(s:NO_TRAILING_WHITESPACE_FT, &filetype) == -1
+       \ && &bt != ''
+        " Why the `&bt != ''` guard?{{{
+        "
+        "     $ vim +term
+        "     " run `$ ls` in the terminal buffer
+        "     " press `gf` on a file path to open a regular file in the window
+        "     " press `C-w w` twice to focus the other split window and get back
+        "     " press `C-^` to load back the terminal buffer
+        "
+        " Trailing whitespace is highlighted.
+        "
+        " ---
+        "
+        " Don't try to move the guard earlier:
+        "
+        "     if &bt != '' | return | endif
+        "
+        " It wouldn't  work; probably because  the match is installed  no matter
+        " what, and needs to be removed.
+        "}}}
         let w:my_trailing_whitespace = matchadd('Error', '\s\+$', -1)
     endif
 endfu
@@ -7049,6 +7118,8 @@ endfu
 " https://github.com/kana/vim-vspec
 " https://github.com/kana/vim-flavor
 " http://www.relishapp.com/kana/vim-flavor/docs
+"
+" https://github.com/dhruvasagar/vim-testify
 "
 " 2 - Implement the concept of "narrowing region".
 "
@@ -7261,7 +7332,7 @@ endfu
 "
 "     if has('nvim')
 "       cno <expr> ! getcmdtype() is# ':' && getcmdline() is# ''
-"                  \ ?     '!tmux split-window -c '.getcwd().' '
+"                  \ ?     '!tmux split-window -c '..getcwd()..' '
 "                  \ :     '!'
 "     endif
 "
@@ -7822,8 +7893,8 @@ endfu
 "
 " 48 -
 "
-" In  neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
-" current neovim instance. But what about vim?
+" In  Neovim there's  a plugin  to open  a file  from a  terminal buffer  in the
+" current Neovim instance. But what about Vim?
 "
 " https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
 " https://gist.github.com/andymass/bcd0a4956ed1a873d41f7265be6c6979
@@ -8574,12 +8645,12 @@ endfu
 " If you omit `<esc>` the result can even be wrong.
 " Watch this:
 "
-"     :ono <expr> ii 'T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())
+"     :ono <expr> ii 'T'..nr2char(getchar())..v:operator..'t'..nr2char(getchar())
 "     foo x_bar_y baz
 "     foo xctyar_y baz~
 "
 "                     vvvvv
-"     :ono <expr> ii '<esc>T'.nr2char(getchar()).v:operator.'t'.nr2char(getchar())
+"     :ono <expr> ii '<esc>T'..nr2char(getchar())..v:operator..'t'..nr2char(getchar())
 "     foo x_bar_y baz
 "     foo xy baz~
 "
@@ -9222,6 +9293,102 @@ endfu
 "     ~/.vim/plugged/vim-fex/autoload/fex.vim:256
 "
 " Or maybe another ftplugin which somehow already removed the mapping?
+"
+" 122 -
+"
+" Press `C-g C-j`, then run:
+"
+"     $ ls ~/Downloads
+"
+" Then, press `gf` on a file path.
+" A nested Vim instance opens the file.
+"
+" How do you quit this Vim instance?
+" When I press `i` to enter insert mode, why doesn't the color of the border gets green?
+" And why is the cursor wrongly positioned when I insert characters?
+"
+" If I press `C-g C-j` again:
+"
+"     Error detected while processing function terminal#toggle_popup#main[10]..<SNR>161_close:
+"     line    3:
+"     E994: Not allowed in a popup window
+"
+" MWE:
+"
+"     vim -Nu NONE -S <(cat <<'EOF'
+"         set hidden
+"         call term_start(&shell, #{hidden: v:true})->popup_create({'maxheight': 17, 'col': 7, 'minwidth': 103, 'border': [], 'line': 8, 'maxwidth': 103, 'minheight': 17})
+"     EOF
+"     )
+"
+" Update: All  these issues  come from  the fact  that you've  loaded a  regular
+" buffer in a popup window.  It should be impossible.  Only a terminal buffer is
+" allowed in a popup.
+"
+" Also, do you remember all the drawing issues  we had in the past in a terminal
+" popup, which we reported and were fixed?
+" https://github.com/vim/vim/releases/tag/v8.2.0328
+"
+" Some of them are still present in a popup displaying a regular buffer.
+" Including the one where the cursor moves outside the popup when you move it in
+" visual mode.
+"
+" ---
+"
+" I think we should report this issue,  so that `gf` (& friends) is forbidden in
+" a popup terminal.
+"
+" We could also map `gf` (& friends) so that they close the popup, then open the
+" file in a regular window.
+"
+" 123 -
+"
+" Read this: https://vi.stackexchange.com/questions/21798/how-to-change-local-directory-of-terminal-buffer-whenever-its-shell-change-direc
+" As well as `:h terminal-api`.
+" It could be useful to make Vim open a file in the current Vim instance instead
+" of a new (nested) one, when we're in  a terminal buffer and we press `gf` on a
+" file path.
+"
+" Also, set (N)Vim so that the local cwd is automatically reset to the cwd of the shell.
+"
+" Update: Actually, does it make sense?
+" What if we have changed the shell's cwd multiple times?
+" Which one should we use?  The last one?
+" Maybe that's not the right approach.
+" Instead, maybe we  should make `gf` (& friends) smarter;  it could inspect the
+" shell's cwd at the time the file path under the cursor was generated.
+" It would extract the info from the previous shell prompt relative to the cursor.
+"
+" 124 -
+"
+" Write `abcdef` a few times on a few lines in a file.
+" Press `dsscd` at the start of a line.
+" Press `.`  at the start of another  line: it works, but only if  you press `.`
+" before `CursorHold`.
+" It seems that  if `:update` is executed from a  `CursorHold` autocmd, then `.`
+" asks you  again for a  new pair of characters,  instead of using  the previous
+" one.
+"
+" Even weirder, if  you start with no config (just  vim-sneak), and press `dzcd`
+" (equivalent of `dsscd`  with our config), then no matter  whether `:update` is
+" run, `.` always asks you for a new pair of characters.  Why the difference?
+"
+" Goal: `.` should  always repeat the last edition; it should not  ask for a new
+" pair of characters.
+"
+" ---
+"
+" Write `abcdef` a few times in 2 files.
+" Open them in 2 vertical splits.
+" Press `dsscd` at the start of a line.
+" Press `.` at the start of another line.
+" Focus the other split.
+" Press `.` at the start of a line.
+" vim-sneak hangs, and this is printed on the command-line:
+"
+"     :call sneak#wrap(v:operator, sneak#util#getc(), sneak#util#getc(), sneak#util#getc(), sneak#util#getc())
+
+
 
 
 
@@ -9253,4 +9420,3 @@ endfu
 "    22. package
 "
 " Once finished, get back to studying the terminal and latex.
-

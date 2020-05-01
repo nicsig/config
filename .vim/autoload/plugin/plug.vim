@@ -1,22 +1,10 @@
 fu plugin#plug#move_between_commits(is_fwd) abort "{{{1
-    " There's no commit in the main / initial window.
-    "
-    " We're going to press `o` later  to open the preview window showing details
-    " about the commit under the cursor; this will raise an error if we haven't
-    " pressed `D` / executed `:PlugDiff`.
+    " look for the next commit
     if !search('^  \X*\zs\x', a:is_fwd ? '' : 'b')
+        " there's none
         return
     endif
-
-    " Alternative: call feedkeys('o', 'ix'){{{
-    "                                   │
-    "                                   └ necessary!
-    "
-    " Without  `x` Vim  will type  `o` *after*  having finished  processing this
-    " function. Because of this, `wincmd P`  will be executed before the preview
-    " window is opened,  which will raise an error, and  prevent the function to
-    " finish its work.
-    "}}}
+    " open the preview window to show details about the commit under the cursor
     norm o
 endfu
 

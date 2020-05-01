@@ -482,6 +482,14 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
         return
     endif
 
+    if empty(expand('%:p'))
+        echohl ErrorMsg
+        " `:lvim` fails in an unnamed buffer
+        echom 'Save the buffer in a file'
+        echohl None
+        return
+    endif
+
     if exists('w:xl_match')
         call matchdelete(w:xl_match)
         unlet w:xl_match
@@ -554,22 +562,14 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
 
     " Give the result
     if !empty(pat)
-        try
-            " Why silent?{{{
-            "
-            " If the  lines are long, `:lvim`  will print a long  message which will
-            " cause a hit-enter prompt:
-            "
-            "     (1 of 123): ...
-            "}}}
-            sil noa exe 'lvim /'..pat..'/g %'
-        " E499 = empty file name
-        catch /^Vim\%((\a\+)\)\=:E499:/
-            echohl ErrorMsg
-            echom v:exception
-            echohl NONE
-            return
-        endtry
+        " Why silent?{{{
+        "
+        " If the  lines are long, `:lvim`  will print a long  message which will
+        " cause a hit-enter prompt:
+        "
+        "     (1 of 123): ...
+        "}}}
+        sil noa exe 'lvim /'..pat..'/g %'
         let w:xl_match = matchadd('SpellBad', pat, -1)
     else
         echohl WarningMsg
@@ -1158,7 +1158,7 @@ fu s:trans_grab_visual() abort
 endfu
 " pyrolysis
 
-fu s:trans_output(job,exit_status) abort
+fu s:trans_output(job, exit_status) abort
     if a:exit_status == -1
         return
     endif
