@@ -243,8 +243,16 @@ call s:miscellaneous()
 
 " registers {{{2
 
-" Don't use `"""`.
+" Don't use `"""`."{{{
+"
 " We would type it too often by accident, and the fzf popup is too distracting.
-nno <silent> "F :<c-u>call plugin#fzf#registers('n')<cr>
-ino <silent> <c-r>F <c-\><c-o>:call plugin#fzf#registers('i')<cr>
+"}}}
+" Don't use `"F` either.{{{
+"
+" It's  a  valid command  (e.g. `"Fyy`  appends  the  current  line in  the  `f`
+" register).
+"}}}
+nno <silent> "<c-f> :<c-u>call plugin#fzf#registers('"')<cr>
+nno <silent> @<c-f> :<c-u>call plugin#fzf#registers('@')<cr>
+ino <silent> <c-r><c-f> <c-\><c-o>:call plugin#fzf#registers('<c-r>')<cr>
 

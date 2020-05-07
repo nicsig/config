@@ -24,7 +24,7 @@ fu plugin#fzf#commits(char) abort "{{{1
     noa exe 'lcd '..cwd
 endfu
 
-fu plugin#fzf#registers(mode) abort "{{{1
+fu plugin#fzf#registers(pfx) abort "{{{1
     let source = split(execute('reg'), '\n')[1:]
     " trim leading whitespace (useful to filter based on type; e.g. typing `^b` will leave only blockwise registers)
     call map(source, {_,v -> substitute(v, '^\s\+', '', '')})
@@ -35,13 +35,13 @@ fu plugin#fzf#registers(mode) abort "{{{1
     call fzf#run(fzf#wrap({
         \ 'source': source,
         \ 'options': '--ansi --nth=3.. --tiebreak=index +m',
-        \ 'sink': function('s:registers_sink', [a:mode])}))
+        \ 'sink': function('s:registers_sink', [a:pfx])}))
 endfu
 
-fu s:registers_sink(mode, line) abort
+fu s:registers_sink(pfx, line) abort
     let regname = matchstr(a:line, '"\zs\S')
-    if a:mode is# 'n'
-        call feedkeys('"'..regname, 'in')
+    if a:pfx =~# '["@]'
+        call feedkeys(a:pfx..regname, 'in')
     else
         call feedkeys((col('.') >= col('$') - 1 ? 'a' : 'i').."\<c-r>\<c-r>"..regname, 'in')
     endif

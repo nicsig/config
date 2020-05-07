@@ -8,8 +8,8 @@
 " Find a way to remove the built-in command `:Print`.
 " From `:h :Print`:
 "
-" > Just as ":print".  Was apparently added to Vi for people that keep the shift
-" > key pressed too long...
+" >     Just as ":print".  Was apparently added to Vi for people that keep the shift
+" >     key pressed too long...
 "}}}
 
 " `$VIMRUNTIME/plugin/manpager.vim:5`

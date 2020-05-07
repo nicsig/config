@@ -299,7 +299,25 @@ augroup my_ultisnips
     au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#prevent_memory_leak(v:true)
     " `sil!` to suppress errors when the event is fired twice consecutively
     " (yeah, for some reason, it can happen)
-    au User UltiSnipsExitLastSnippet sil! exe 'nunmap <buffer> :' | sil! nunmap <buffer> p
+    au User UltiSnipsExitLastSnippet sil! exe 'nunmap <buffer> :'
+        "\ Why not in dirvish? {{{
+        "\ .
+        "\ To suppress  `E31` when we open  a dirvish buffer while  a snippet is
+        "\ being expanded:
+        "\ .
+        "\     Error detected while processing function <SNR>16_LoadFTPlugin[2]..plugin#dirvish#undo_ftplugin:
+        "\     line   14:
+        "\     E31: No such mapping
+        "\
+        "\ For some reason, `b:undo_ftplugin` is executed; and the latter unmaps
+        "\ `p` (without `sil!`).  So there's no need to unmap `p` here.
+        "\
+        "\ Don't try  to understand why `b:undo_ftplugin`  is executed.  Dirvish
+        "\ seems full of special code.
+        "\ }}}
+        \ | if &ft isnot# 'dirvish'
+        \ |     exe 'sil! nunmap <buffer> p'
+        \ | endif
     " Pitfall: If you try to replace the `:` mapping with a `CmdlineEnter` autocmd, use `state()`:{{{
     "
     "     au User UltiSnipsEnterFirstSnippet au CmdlineEnter : ++once

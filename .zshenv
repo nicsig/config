@@ -674,7 +674,7 @@ export REPORTTIME=15
 #}}}
 # When I try to `:Gpush` a commit, the askpass program prompts me for a password.  I can't paste my password in it!{{{
 #
-# It has nothing to do with `SUDO_ASKPASS`.
+# This has nothing to do with `SUDO_ASKPASS`.
 # Since the commit `adba9c6`, fugitive runs the askpass program if `executable('ssh-askpass')`
 # is true.
 #

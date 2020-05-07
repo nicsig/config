@@ -595,7 +595,7 @@ fu s:styled_comments() abort "{{{2
     "
     " From `:h group-name`:
     "
-    " > *Underlined       text that stands out, HTML links
+    " >     *Underlined       text that stands out, HTML links
     "
     " Also, that's what the default markdown syntax plugin uses to highlight the
     " text of a link.

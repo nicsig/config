@@ -30,13 +30,6 @@ call submode#enter('resize-window', 'n', 'r', 'z<c-l>', '<plug>(window-resize-l)
 call submode#enter('change-indent', 'i', '', '<c-g>>', '<c-t>')
 call submode#enter('change-indent', 'i', '', '<c-g><', '<c-d>')
 
-" C-g [jk]       scroll window {{{2
-
-" Make `i^gj` and `i^gk` repeatable with `j` and `k`.
-
-call submode#enter('scrollwin', 'i', '', '<c-g>j', '<c-x><c-e>' )
-call submode#enter('scrollwin', 'i', '', '<c-g>k', '<c-x><c-y>' )
-
 " C-x [jk]       duplicate char below/above {{{2
 " Why these mappings? {{{
 "

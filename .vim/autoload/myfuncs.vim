@@ -44,7 +44,7 @@ endfu
 " This function is called directly from our `dr` and `drr` mappings.
 fu myfuncs#set_reg(reg_name) abort
     " We save the name of the register  which was called just before `dr` inside
-    " a script-local  variable, for the redo  command to know which  register we
+    " a script-local  variable, for the  dot command  to know which  register we
     " used the first time.
     "
     " By default, it will be `"`.
@@ -61,11 +61,9 @@ fu myfuncs#op_replace_without_yank(type) abort
         set selection=inclusive
 
         " save registers and types to restore later.
-        " FIXME:
-        " We save and restore the register which can be prefixed before the `dr` operator.
-        " Is it necessary?
-        " If so, have we done the same for the other operators which can be prefixed
-        " by a register?
+        " FIXME: We save and restore the register which can be prefixed before the `dr` operator.
+        " Is it necessary?  If so, have we done the same for the other operators
+        " which can be prefixed by a register?
         call lg#reg#save(['"', s:replace_reg_name])
 
         " Why do you save the visual marks?{{{
@@ -80,9 +78,8 @@ fu myfuncs#op_replace_without_yank(type) abort
         " TODO: review the previous comment; I don't understand how it's relevant to the current function.
         let visual_marks_save = [getpos("'<"), getpos("'>")]
 
-        " TODO:
-        " Should  we use  `getreg(..., 1)`  to properly  restore the  expression
-        " register.
+        " TODO: Should  we   use  `getreg(..., 1)`   to  properly   restore  the
+        " expression register?
         let replace_reg_contents = getreg(s:replace_reg_name)
         let replace_reg_type     = getregtype(s:replace_reg_name)
 
@@ -212,8 +209,8 @@ fu myfuncs#op_yank_matches(type) abort
 
         let mods  = 'keepj keepp'
         let range = (a:type is# 'char' || a:type is# 'line')
-                \ ?     line("'[").','.line("']")
-                \ :     line("'<").','.line("'>")
+                \ ?     line("'[")..','..line("']")
+                \ :     line("'<")..','..line("'>")
 
         let cmd = s:yank_where_match ? 'g' : 'v'
         let pat = s:yank_comments
@@ -236,9 +233,11 @@ fu myfuncs#op_yank_matches(type) abort
         call setreg(get(s:, 'yank_reg', '"'), @z, 'l')
     catch
         return lg#catch()
-
     finally
         call call('setreg', reg_save)
+        " emulate what Vim does with a  builtin operator; the cursor ends at the
+        " *start* of the text object
+        call cursor(matchstr(range, '\d\+'), 1)
     endtry
 endfu
 " }}}1
@@ -1186,11 +1185,9 @@ fu s:trans_output(job, exit_status) abort
 endfu
 
 fu myfuncs#trans_stop() abort
-    " FIXME: Start a new Vim instance and hit `!T` on a word:{{{
-    "
-    "     E121: Undefined variable: s:trans_job~
-    "}}}
-    call job_stop(s:trans_job)
+    if exists('s:trans_job')
+        call job_stop(s:trans_job)
+    endif
 endfu
 
 fu myfuncs#webpage_read(url) abort "{{{1

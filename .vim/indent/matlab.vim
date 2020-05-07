@@ -92,13 +92,13 @@ fu s:get_indent() abort "{{{1
     " And I  *think* that  the author  of the default  matlab indent  plugin has
     " chosen an arbitrary style regarding the indentation inside brackets:
     "
-    " > All warmed up yet? Great! Next I thought it  would be fun to see how one
-    " > could  go about  implementing  indenting of  MATLAB brackets. These  are
-    " > interesting for one reason: they require context beyond the current line
-    " > and the one above. Take, for example, this cell array literal:
-    " > [...]
-    " > When indenting the line  containing 22 we have to be  aware that we were
-    " > already inside one pair of braces.
+    " >     All warmed up yet? Great! Next I thought it  would be fun to see how one
+    " >     could  go about  implementing  indenting of  MATLAB brackets. These  are
+    " >     interesting for one reason: they require context beyond the current line
+    " >     and the one above. Take, for example, this cell array literal:
+    " >     [...]
+    " >     When indenting the line  containing 22 we have to be  aware that we were
+    " >     already inside one pair of braces.
     "
     " I find that their style leads to an "ugly" indentation.
     " Copy-paste the first block of code from this question inside a matlab file:

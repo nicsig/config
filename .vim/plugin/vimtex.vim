@@ -84,14 +84,14 @@ let g:vimtex_compiler_latexmk = {
 "
 " From `:h vimtex-faq-neovim`:
 "
-" > For backward search from PDF viewer to neovim, one needs the `neovim-remote`
-" > tool as described below.
+" >     For backward search from PDF viewer to neovim, one needs the `neovim-remote`
+" >     tool as described below.
 "
 " ...
 "
-" > If one downloads this tool  and sets the option |g:vimtex_compiler_progname|
-" > to `nvr`  (or the full  path, if `nvr` is  not in `$PATH`),  then everything
-" > should work.
+" >     If one downloads this tool  and sets the option |g:vimtex_compiler_progname|
+" >     to `nvr`  (or the full  path, if `nvr` is  not in `$PATH`),  then everything
+" >     should work.
 "}}}
 if has('nvim')
     let g:vimtex_compiler_progname = 'nvr'

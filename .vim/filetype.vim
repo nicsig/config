@@ -95,7 +95,7 @@ augroup filetypedetect
     au! BufRead,BufNewFile *.nfo,*.NFO setf nfo
 
     " rofi config files
-    " > Rofi themes use the .rasi file extension. The format is similar to .css.
+    " >     Rofi themes use the .rasi file extension. The format is similar to .css.
     " Source: https://github.com/DaveDavenport/rofi/wiki/Themes
     au! BufRead,BufNewFile *.rasi setf css
 
