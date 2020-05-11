@@ -84,8 +84,7 @@ endif
 "
 "    4. Install the following autocmd:
 "
-"           augroup ultisnips_custom
-"               au!
+"           augroup ultisnips_custom | au!
 "               au! User UltiSnipsEnterFirstSnippet
 "               au User  UltiSnipsEnterFirstSnippet iunmap <buffer> <nowait> <s-tab>
 "           augroup END
@@ -174,8 +173,7 @@ nno <silent> cou :<c-u>call plugin#ultisnips#toggle_autotrigger()<cr>
 
 " Autocmds {{{1
 
-augroup my_ultisnips
-    au!
+augroup my_ultisnips | au!
 
     " useful during a snippet expansion to prevent the highlighting of trailing whitespace,
     " and to get a flag in the status line
@@ -339,6 +337,7 @@ augroup my_ultisnips
     " ---
     "
     " To make some tests, use typometer: https://github.com/pavelfatin/typometer
+    "}}}
     if has('nvim')
         " Why the guard?{{{
         "
@@ -350,7 +349,6 @@ augroup my_ultisnips
             \ |     aug! UltiSnips_AutoTrigger
             \ | endif
     endif
-    "}}}
 augroup END
 
 " Miscellaneous {{{1

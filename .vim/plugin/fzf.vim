@@ -99,8 +99,7 @@ exe 'com -bar -bang '..g:fzf_command_prefix..'Snippets call fzf#vim#snippets({"o
 
 " Autocmds{{{1
 
-augroup fzf_open_folds
-    au!
+augroup fzf_open_folds | au!
     " press `zv` the next time Vim has nothing to do, *after* a buffer has been displayed in a window
     if !has('nvim')
         " Why the `mode()` condition?{{{
@@ -129,8 +128,7 @@ augroup fzf_open_folds
     endif
 augroup END
 
-augroup fzf_no_timeout
-    au!
+augroup fzf_no_timeout | au!
     " We could have a mapping which creates a timeout when we press `C-s`, `C-v`, or `C-t`.{{{
     "
     " For example,  at the  moment, we set  `'twk'` to `<c-s>`,  and to  avoid a
@@ -207,8 +205,7 @@ fu s:miscellaneous() abort
         exe 'nno <silent> <space>f'..char..' :<c-u>'..g:fzf_command_prefix..cmd..'<cr>'
     endfor
 
-    augroup remove_gvfs_from_oldfiles
-        au!
+    augroup remove_gvfs_from_oldfiles | au!
         " Rationale:{{{
         "
         " If you've opened ftp files with Vim:

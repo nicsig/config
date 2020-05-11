@@ -4,8 +4,7 @@ endif
 
 " conceal path in qf window after executing `:Glog`
 
-augroup my_fugitive
-    au!
+augroup my_fugitive | au!
     au CmdlineLeave : if getcmdline() is# 'Glog'
         \ | call plugin#fugitive#glog_conceal('on_quickfixcmdpost')
         \ | endif

@@ -2779,19 +2779,12 @@ alias gdb='\gdb -q'
 #
 # ---
 #
-# Write ` fm` (note the leading space); `fm` is highlighted as an alias (✔).
-# Press Enter to start ranger.
-# Press q to quit ranger.
-# `fm` is now highlighted in red (✘).
+# Same issue with the `fm` and `sh` aliases.
 #
 # ---
 #
-# Also, our `sh` alias is highlighted in red.
-#
-#     alias sh='$HOME/.local/bin/dash -E'
-#
-# It seems the  zsh syntax highlighting plugin doesn't like  you to override any
-# default command with an alias.
+# Also, it seems the zsh syntax highlighting plugin doesn't like you to override
+# any default command with an alias.
 #
 #     alias bash='foobar'
 #}}}

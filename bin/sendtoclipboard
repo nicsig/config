@@ -194,7 +194,7 @@ put() {
   # to the value of `set-clipboard`.
   #}}}
   if [ -n "${TMUX}" ]; then
-    seq="\033Ptmux;\033${seq}\033\\"
+    seq="\033Ptmux;\033${seq}\033\0134"
   fi
   # Why `%b`?{{{
   #
@@ -205,10 +205,10 @@ put() {
   #
   # From `man bash /printf/;/%b`:
   #
-  # > %b     causes printf to expand backslash escape sequences in the
-  # >        corresponding argument (except that \c terminates output,
-  # >        backslashes  in \', \", and \? are not removed, and octal
-  # >        escapes beginning with \0 may contain up to four digits).
+  # >   %b     causes printf to expand backslash escape sequences in the
+  # >          corresponding argument (except that \c terminates output,
+  # >          backslashes  in \', \", and \? are not removed, and octal
+  # >          escapes beginning with \0 may contain up to four digits).
   #}}}
   # Is there a risk that some part of the sequence is wrongly interpreted as a backslash escape sequence (like `\007`)?{{{
   #

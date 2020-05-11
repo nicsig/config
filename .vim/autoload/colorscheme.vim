@@ -250,8 +250,7 @@ fu colorscheme#cursorline(enable) abort "{{{2
             let s:culopt_save = &l:culopt
             let &l:culopt = 'screenline'
         endif
-        augroup my_cursorline
-            au!
+        augroup my_cursorline | au!
             " Why `BufWinEnter` and `BufWinLeave`?{{{
             "
             " If you load  another buffer in the current  window, `WinLeave` and

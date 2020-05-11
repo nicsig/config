@@ -12,8 +12,7 @@ if has('nvim')
     " low value (e.g. `80`) in a shell init file; but I keep it just in case.
     "}}}
     let g:man_hardwrap = 1
-    augroup my_man
-        au!
+    augroup my_man | au!
         au FileType man nmap <buffer><nowait><silent> <cr> <c-]>
         au FileType man nmap <buffer><nowait><silent> -t gO
     augroup END

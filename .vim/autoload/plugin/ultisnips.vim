@@ -50,8 +50,7 @@ fu plugin#ultisnips#toggle_autotrigger() abort "{{{1
         aug! UltiSnips_AutoTrigger
         echom '[UltiSnips AutoTrigger] OFF'
     else
-        augroup UltiSnips_AutoTrigger
-            au!
+        augroup UltiSnips_AutoTrigger | au!
             au InsertCharPre,TextChangedI,TextChangedP * call UltiSnips#TrackChange()
         augroup END
         echom '[UltiSnips AutoTrigger] ON'

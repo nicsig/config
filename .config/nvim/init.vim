@@ -383,8 +383,7 @@ fu s:delay_slow_call() abort
     runtime! autoload/slow_call/*.vim
 endfu
 
-augroup delay_slow_call
-    au!
+augroup delay_slow_call | au!
     " Do *not* use a simple timer:{{{
     "
     "     au VimEnter * call timer_start(1000, {->
@@ -560,8 +559,7 @@ fu s:styled_comments() abort
         xkb
         zsh
     END
-    augroup styled_comments
-        au!
+    augroup styled_comments | au!
         au FileType * if index(s:styled_comments_filetypes, expand('<amatch>')) >= 0
             \ |     sil! call lg#styled_comment#fold()
             \ |     sil! call lg#styled_comment#undo_ftplugin()
@@ -826,8 +824,7 @@ if index(map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'tmux', 'xterm'], {_,v -
     endif
 endif
 
-augroup my_color_scheme
-    au!
+augroup my_color_scheme | au!
     au ColorScheme * call colorscheme#customize()
 
     " What's the issue fixed by this autocommand?{{{
@@ -1145,8 +1142,7 @@ let &g:flp = '\m^\s*\%(\d\+[.)]\|[-*+]\)\s\+'
 "                                ├───┘
 "                                └ recognize unordered lists
 
-augroup my_default_formatlistpat
-    au!
+augroup my_default_formatlistpat | au!
     " We've configured the global value of 'flp'.
     " Do the same for its local value in ANY filetype.
     au FileType * let &l:flp = &g:flp
@@ -1560,8 +1556,7 @@ if has('vim_starting')
     " so that the statusline  is correctly drawn even if we  press `:` very fast
     " after (Neo)Vim has been started.
     "}}}
-    augroup startup_set_lazyredraw
-        au!
+    augroup startup_set_lazyredraw | au!
         au CursorHold,InsertEnter,CmdlineEnter *
             \   exe 'au! startup_set_lazyredraw'
             \ | aug! startup_set_lazyredraw
@@ -1587,8 +1582,7 @@ set noshowmatch
 "
 " Or you could install this autocmd which resets `'showmatch'` in html buffers:
 "
-"     augroup disable_showmatch_in_html_files
-"         au!
+"     augroup disable_showmatch_in_html_files | au!
 "         au BufEnter,WinEnter * let &showmatch = &ft is# 'html' ? 0 : 1
 "     augroup END
 "}}}
@@ -1782,8 +1776,7 @@ else
     " your buffer doesn't contain any sign, the sign column won't be visible; we
     " want it to be *always* visible.
     "}}}
-    augroup set_signcolumn
-        au!
+    augroup set_signcolumn | au!
         au BufWinEnter * if win_gettype() is# 'popup' | setl scl=yes | endif
     augroup END
     " Isn't the autocmd enough?{{{
@@ -1803,8 +1796,7 @@ endif
 " The issue doesn't affect Nvim.
 "}}}
 if !has('nvim')
-    augroup disable_signcolumn_in_terminal_buffer
-        au!
+    augroup disable_signcolumn_in_terminal_buffer | au!
         au TerminalWinOpen * setl scl=no
     augroup END
 endif
@@ -2360,8 +2352,7 @@ endif
 
 " In our vimrc file, we want the ability to jump from the call of a function
 " defined in `myfuncs.vim`, to its definition, with `C-]`.
-augroup tags_vimrc
-    au!
+augroup tags_vimrc | au!
     au BufReadPost $MYVIMRC setl tags=$HOME/.vim/autoload/tags
     " update the tags file whenever we write `myfuncs.vim`
     au BufWritePost $HOME/.vim/autoload/myfuncs.vim
@@ -2649,8 +2640,7 @@ endif
 if has('vim_starting')
     set ve=block
     const g:orig_virtualedit = &ve
-    augroup hoist_ve
-        au!
+    augroup hoist_ve | au!
         " TODO: The `[ve=onemore]` flag is visible when selecting some text and pressing `sa`.{{{
         "
         " It should not be visible.
@@ -3313,8 +3303,7 @@ nno <silent> <space>t :<c-u>exe (v:count ? v:count..'tabnew' : 'tabnew')<cr>
 " UM                undo changes during current session {{{4
 
 let s:changenr_save = {}
-augroup changenr_save
-    au!
+augroup changenr_save | au!
     au BufReadPost * call s:changenr_save()
 augroup END
 
@@ -3381,8 +3370,7 @@ endfu
 " Anyway, this issue  highlights the importance of getting  `<plug>` mappings to
 " override all of fugitive mappings.
 "}}}
-augroup unmap_fugitive
-    au!
+augroup unmap_fugitive | au!
     au FileType fugitive nunmap <buffer> U
 augroup END
 
@@ -3512,8 +3500,7 @@ nmap ga <plug>(EasyAlign)
 " configuration files by pressing `ZF`.
 " So, we try to make `gf` & friends smarter.
 
-augroup vimrc_mappings
-    au!
+augroup vimrc_mappings | au!
     au BufReadPost $MYVIMRC call s:install_vimrc_mappings()
 augroup END
 
@@ -4412,17 +4399,12 @@ nno <expr><silent> <cr> !empty(&buftype)
 
 " S-→    C-↑ ...      modified arrow keys {{{4
 
-" A  terminal  emulator  gives  its  name to  the  programs  through  the  shell
-" environment variable `$TERM`.
-
 " When  Vim runs  inside a  terminal whose  name begins  with `xterm`  (`xterm`,
 " `xterm-256color`), it automatically sets up  a few keys including the modified
 " arrow keys (`S-Left`, `S-Right`, `C-Up`, `C-Down` ...).
 "
 " However, if the name  of the terminal begins with `screen`  or `tmux`, it does
 " *not* set up those keys.
-" For  tmux  to  function  properly,   we  have  configured  `~/.shrc`  so  that
-" `$TERM=tmux-256color` (in tmux only, not in basic terminal emulator).
 " Because of this, Vim does *not* set up the modified arrow keys when we run it
 " inside tmux. This means we can't map any action to a modified arrow key.
 " For example, by  default Vim moves the  cursor by word in normal  mode when we
@@ -5445,7 +5427,7 @@ endif
 
 " ClearRegisters {{{2
 
-com! ClearRegisters call s:clear_registers()
+com! -bar ClearRegisters call s:clear_registers()
 
 fu s:clear_registers() abort
     let numeric = range(10)
@@ -5703,8 +5685,7 @@ endfu
 "
 " So, you're thinking about sth like this:
 "
-"     augroup strange_whitespace
-"         au!
+"     augroup strange_whitespace | au!
 "         au WinEnter * call s:strange_whitespace()
 "     augroup END
 "
@@ -6193,8 +6174,7 @@ com! -bar -nargs=? -range=% -complete=custom,myfuncs#wf_complete
 " MWE:
 "
 "     $ cat /tmp/vim.vim
-"         augroup test_sth
-"             au!
+"         augroup test_sth | au!
 "             au BufWritePost /tmp/vim.vim exe 'so '..expand('<afile>:p')
 "             au BufWritePost * let g:d_ebug = get(g:, 'd_ebug', 0) + 1
 "         augroup END
@@ -6212,8 +6192,7 @@ com! -bar -nargs=? -range=% -complete=custom,myfuncs#wf_complete
 " Form more ideas:
 " http://vim.wikia.com/wiki/Enhanced_command_window
 
-augroup my_cmdline_window
-    au!
+augroup my_cmdline_window | au!
     " Purpose:{{{
     "
     " By default, `Tab` is mapped to `C-x C-v` in the command-line window.
@@ -6273,8 +6252,7 @@ fu s:make_missing_dir(file, buf) abort
     endtry
 endfu
 
-augroup make_missing_dir
-    au!
+augroup make_missing_dir | au!
     au BufWritePre * call s:make_missing_dir(expand('<afile>:p'), +expand('<abuf>'))
 augroup END
 
@@ -6283,8 +6261,7 @@ augroup END
 " Temporarily commented, because I find it annoying now with `.vim`.
 " Keep it, because it could still be useful for other extensions.
 
-"     augroup DefaultExtension
-"         au!
+"     augroup DefaultExtension | au!
 "         au BufNewFile * ++nested call s:default_extension(expand('<afile>:p'))
 "     augroup END
 
@@ -6333,28 +6310,12 @@ augroup END
 " We want to automatically delete buffers which are empty and don't have a name.
 " So we install an autocmd listening to `BufHidden`.
 
-augroup wipe_noname_buffers
-    au!
-    " Why delay `s:wipe_noname()`?{{{
-    "
-    " It seems the BufHidden event occurs just before a buffer becomes hidden.
-    " Because of this, calling `s:wipe_noname()` immediately would wipe all noname
-    " buffers, except the most recent one we're creating by closing its last window.
-    "
-    " We have to wait a little bit, to be sure that the last noname buffer we've
-    " closed is really hidden.
-    "
-    " An  alternative would  be to  call  an intermediary  function which  would
-    " install a one-shot autocmd listening to BufEnter (this event happens right
-    " after BufHidden).
-    " At that moment, we  could be sure the last hidden  noname buffer is really
-    " hidden. And the autocmd would just have to call `s:wipe_noname()`.
-    "}}}
-    au BufHidden * call timer_start(0, {-> s:wipe_noname()})
+augroup wipe_noname_buffers | au!
+    au BufHidden * call s:wipe_noname()
 augroup END
 
 fu s:wipe_noname() abort
-    " do NOT wipe any buffer while a session is loading
+    " Do *not* wipe any buffer while a session is loading.{{{
     "
     " When we save a session, Vim writes some commands towards the beginning of
     " the session file, to check if the current buffer is a noname-empty buffer.
@@ -6364,21 +6325,21 @@ fu s:wipe_noname() abort
     " wipe the buffer before the end of the restoration of the session.
     " This will cause an error, because Vim will try to wipe the buffer a 2nd
     " time while it doesn't exist anymore.
+    "}}}
+    if exists('g:SessionLoad') | return | endif
 
-    if exists('g:SessionLoad')
-        return
-    endif
-
-    " Source: http://stackoverflow.com/a/6561076
-    let to_wipe = filter(range(1, bufnr('$')), {_,v ->
-    \    buflisted(v)
-    \ && empty(bufname(v))
-    \ && empty(win_findbuf(v))})
-    "    │
-    "    └ make sure the buffer is NOT displayed in any window
-
-    if !empty(to_wipe)
-        sil! exe 'bw! '..join(to_wipe, ' ')
+    let buf = +expand('<abuf>')
+    if buflisted(buf) && empty(bufname(buf)) && empty(win_findbuf(buf))
+        " Why the delay?{{{
+        "
+        "     $ vim -Nu NONE +'set hidden | au BufHidden * exe "bw! "..+expand("<abuf>")'
+        "     :new
+        "     :q
+        "     Error detected while processing BufHidden Autocommands for "*":~
+        "     E937: Attempt to delete a buffer that is in use: [NULL]~
+        "}}}
+        " `sil!` suppresses `E994` when a popup window is currently open
+        exe 'au BufEnter * ++once sil! bw! '..buf
     endif
 endfu
 
@@ -6398,8 +6359,7 @@ endfu
 "
 "     set ft=sh
 "}}}
-augroup filetype_linter
-    au!
+augroup filetype_linter | au!
     au WinEnter    filetype.vim,*/ftdetect/*.vim  call s:filetype_linter('enable')
     au BufWinLeave filetype.vim,*/ftdetect/*.vim  call s:filetype_linter('disable')
 augroup END
@@ -6434,8 +6394,7 @@ endfu
 " The status line in the right window displays `active`; I would expect it to display `inactive`.
 "}}}
 " https://github.com/vim/vim/issues/5243
-augroup fire_leave_events_on_startup
-    au!
+augroup fire_leave_events_on_startup | au!
     au VimEnter * call timer_start(0, {-> s:fire_leave_events()})
 augroup END
 fu s:fire_leave_events() abort
@@ -6449,8 +6408,7 @@ endfu
 
 " Highlight ansi codes {{{2
 
-augroup highlight_ansi
-    au!
+augroup highlight_ansi | au!
     " useful when we run sth like `$ trans word | vipe`
     au VimEnter * if $_ =~# '\C/vipe$' | call lg#textprop#ansi() | endif
     au StdinReadPost * call lg#textprop#ansi()
@@ -6458,8 +6416,7 @@ augroup END
 
 " Include shell cwd in 'path' {{{2
 
-augroup include_shell_cwd_in_path
-    au!
+augroup include_shell_cwd_in_path | au!
     " Rationale:{{{
     "
     " We want to be able to press `ZF` to  open a file path in a Vim split, when
@@ -6481,8 +6438,7 @@ augroup END
 
 " No syntax in diff mode {{{2
 
-augroup no_syntax_in_diff_mode
-    au!
+augroup no_syntax_in_diff_mode | au!
     " Why do you clear the syntax in a diff'ed buffer?{{{
     "
     " When  you're  comparing  the  differences between  two  files,  you're
@@ -6635,8 +6591,7 @@ augroup END
 "
 "     ~/.vim/plugged/vim-tmux/autoload/tmux/capture_pane.vim
 "}}}
-augroup make_clipboard_persist_after_quitting_vim
-    au!
+augroup make_clipboard_persist_after_quitting_vim | au!
     au VimLeave * call s:make_clipboard_persist_after_quitting_vim()
 augroup END
 
@@ -6708,8 +6663,7 @@ endfu
 "    - pdftotext
 "    - unrtf
 
-augroup filter_special_file
-    au!
+augroup filter_special_file | au!
     " Why not use `BufReadPost`?{{{
     "
     " It would indeed be more appropriate than `BufWinEnter`.
@@ -6789,15 +6743,13 @@ endfu
 
 " Regenerate helptags {{{2
 
-augroup regenerate_helptags
-    au!
+augroup regenerate_helptags | au!
     au BufWritePost ~/.vim/plugged/*/doc/*.txt exe 'helptags '..expand('<afile>:p:h')
 augroup END
 
 " Reload config {{{2
 
-augroup source_files
-    au!
+augroup source_files | au!
     " Why no `-merge`?{{{
     "
     " If you pass the `-merge` option to `xrdb`, the background color you choose
@@ -6825,8 +6777,7 @@ augroup END
 
 " Standard Input {{{2
 
-augroup my_stdin
-    au!
+augroup my_stdin | au!
     au StdInReadPost * if line2byte(line('$')+1) <= 2 | cquit | endif
 augroup END
 
@@ -6846,8 +6797,7 @@ augroup END
 " So  we do  it  here, for  every  spell binary  file, but  only  if the  binary
 " (.add.spl) is older than the original addition file (.add).
 
-augroup my_mkspell
-    au!
+augroup my_mkspell | au!
     " Why `map()`?{{{
     "
     " Because there can  be several spell files (one per  language), in which we
@@ -6878,7 +6828,7 @@ augroup END
 "     :try | e /tmp/file | catch | endtry
 "
 " If the  file is already  loaded in another instance,  it will raise  the error
-" `e325` (Attention: Found a swap file ...).
+" `E325` ("Attention: Found a swap file ...").
 "
 " But the error won't  be catched because Vim prompts us  with a question to
 " know what we want to do (edit, quit, ...).
@@ -6889,7 +6839,7 @@ augroup END
 "}}}
 " Why don't you use `set shm+=A`?{{{
 "
-" `set shm+=A` would completely bypass the  question and the existence of a swap
+" `set shm+=A` would completely bypass the question, and the existence of a swap
 " file would never be brought to our attention.
 "
 " In contrast, this  autocmd will still warn  us whenever a swap  file is found,
@@ -6902,13 +6852,13 @@ augroup END
 
 " A swap file has been found, and the file has been loaded in readonly mode!  What should I do?{{{
 "
-" If you only need to read the file, nothing. Just read it.
+" If you only need to read the file, nothing.  Just read it.
 "
 " If you need to edit the file, you have an issue.
 " Indeed, if  the autocmd hasn't  removed the swap file,  it means the  latter is
 " more recent than the file (or has the same timestamp).
 "
-" So, it could  contain valuable information, that you need  to recover *before*
+" So, it  could contain valuable information  that you need to  recover *before*
 " doing  any further  change (because  this valuable  information may  radically
 " alter the change you intend to do).
 "}}}
@@ -6937,24 +6887,23 @@ augroup END
 "}}}
 
 " (stolen from blueyed)
-augroup swapfile_handling
-    au!
+augroup swapfile_handling | au!
     au SwapExists * call s:handle_swapfile(expand('<afile>:p'))
 augroup END
 
 fu s:handle_swapfile(filename) abort
     " If the swap file is older than the file itself, just get rid of it.
     if getftime(v:swapname) < getftime(a:filename)
-        call s:warning_msg('Old swap file detected, and deleted:   '..a:filename)
+        call s:warn('Old swap file detected, and deleted:   '..a:filename)
         call delete(v:swapname)
         let v:swapchoice = 'e'
     else
-        call s:warning_msg('Swap file detected, opening read-only:   '..a:filename)
+        call s:warn('Swap file detected, opening read-only:   '..a:filename)
         let v:swapchoice = 'o'
     endif
 endfu
 
-fu s:warning_msg(msg) abort
+fu s:warn(msg) abort
     echohl WarningMsg
     " It seems that when `SwapExists` is fired, Vim executes `:echom` silently.
     unsilent echom a:msg
@@ -6973,8 +6922,7 @@ let s:NO_TRAILING_WHITESPACE_FT =<< trim END
     text
 END
 
-augroup trailing_whitespace
-    au!
+augroup trailing_whitespace | au!
     au VimEnter,WinEnter,InsertLeave * call s:trailing_whitespace(1)
     " Why do you delay the call to `s:trailing_whitespace()`?{{{
     "
@@ -7423,8 +7371,7 @@ endfu
       nno <expr> <c-g>t <sid>ltag(1)
       fu s:ltag(step) abort
           if a:step == 1
-              augroup my_ltag
-                  au!
+              augroup my_ltag | au!
                   " Why the timer?{{{
                   "
                   " If  we cancel,  or the  search fails  to find  anything, the
@@ -9226,6 +9173,8 @@ endfu
 " Instead, maybe we  should make `gf` (& friends) smarter;  it could inspect the
 " shell's cwd at the time the file path under the cursor was generated.
 " It would extract the info from the previous shell prompt relative to the cursor.
+
+
 
 
 
