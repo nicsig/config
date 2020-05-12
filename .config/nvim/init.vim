@@ -300,7 +300,6 @@ endif
 Plug 'lacygoill/vim-markdown'
 Plug 'andymass/vim-matchup'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
-Plug 'lacygoill/vim-repeat', {'branch': 'assimil'}
 Plug 'tpope/vim-rhubarb'
 " Alternative: https://github.com/t9md/vim-textmanip
 Plug 'lacygoill/vim-schlepp'
@@ -342,6 +341,7 @@ Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-qf'
 Plug 'lacygoill/vim-readline'
 Plug 'lacygoill/vim-reorder'
+Plug 'lacygoill/vim-repeat', {'branch': 'lg'}
 Plug 'lacygoill/vim-repmap'
 Plug 'lacygoill/vim-save'
 Plug 'lacygoill/vim-search'
@@ -6923,28 +6923,8 @@ let s:NO_TRAILING_WHITESPACE_FT =<< trim END
 END
 
 augroup trailing_whitespace | au!
-    au VimEnter,WinEnter,InsertLeave * call s:trailing_whitespace(1)
-    " Why do you delay the call to `s:trailing_whitespace()`?{{{
-    "
-    " When `UltiSnipsExitLastSnippet` is  fired, `g:expanding_snippet` may still
-    " exist (it probably depends on the order of our custom autocmds).
-    " In that case, the match won't be re-installed; we want it to be re-installed.
-    "}}}
-    " Why the `mode()` guard?{{{
-    "
-    "    1. Expand the `vimrc` snippet.
-    "    2. Press Tab repeatedly to traverse all the tabstops.
-    "    3. Insert `fu`.
-    "
-    " The `fu` snippet is automatically expanded (✔); the trailing whitespace is highlighted (✘).
-    "}}}
-    au User UltiSnipsExitLastSnippet if !has('nvim')
-        \ |     exe 'au SafeState * ++once if mode() is# "n" | call s:trailing_whitespace(1) | endif'
-        \ | else
-        \ |     call timer_start(0, {-> mode() is# 'n' ? s:trailing_whitespace(1) : ''})
-        \ | endif
-
-    au InsertEnter * call s:trailing_whitespace(0)
+    au VimEnter,WinEnter,InsertLeave * call s:trailing_whitespace(v:true)
+    au InsertEnter * call s:trailing_whitespace(v:false)
     " We don't want a match in a preview window.{{{
     "
     " The match is useful to let us  know that we should probably remove useless
@@ -6952,8 +6932,8 @@ augroup trailing_whitespace | au!
     " However, a preview window is not opened to *edit* text, but to *read* text.
     " In this context, the match is just noise.
     "}}}
-    au WinLeave * if &l:pvw | call s:trailing_whitespace(0) | endif
-    " We don't want a match in a terminal buffer when we quit terminal-job mode.{{{
+    au WinLeave * if &l:pvw | call s:trailing_whitespace(v:false) | endif
+    " We don't want a match in a terminal buffer when we quit Terminal-Job mode.{{{
     "
     " In  Vim,  the match  is  installed  when  we  open a  terminal  window
     " (`WinEnter`).
@@ -6976,8 +6956,39 @@ augroup trailing_whitespace | au!
     " been correctly set.
     "}}}
     if !has('nvim')
-        au TerminalWinOpen * call s:trailing_whitespace(0)
+        " Why `BufWinEnter`?{{{
+        "
+        "     :term
+        "     " write /etc/hosts in the buffer
+        "     " press:  C-\ C-n
+        "               gf
+        "               i Esc
+        "               C-^
+        "
+        " Without `BufWinEnter`, trailing whitespace is highlighted.
+        "}}}
+        au TerminalWinOpen,BufWinEnter * call s:trailing_whitespace(v:false)
     endif
+
+    " Why do you delay the call to `s:trailing_whitespace()`?{{{
+    "
+    " When `UltiSnipsExitLastSnippet` is  fired, `g:expanding_snippet` may still
+    " exist (it probably depends on the order of our custom autocmds).
+    " In that case, the match won't be re-installed; we want it to be re-installed.
+    "}}}
+    " Why the `mode()` guard?{{{
+    "
+    "    1. Expand the `vimrc` snippet.
+    "    2. Press Tab repeatedly to traverse all the tabstops.
+    "    3. Insert `fu`.
+    "
+    " The `fu` snippet is automatically expanded (✔); the trailing whitespace is highlighted (✘).
+    "}}}
+    au User UltiSnipsExitLastSnippet if !has('nvim')
+        \ |     exe 'au SafeState * ++once if mode() is# "n" | call s:trailing_whitespace(v:true) | endif'
+        \ | else
+        \ |     call timer_start(0, {-> mode() is# 'n' ? s:trailing_whitespace(v:true) : ''})
+        \ | endif
 
     " An undesirable match will be installed in a help buffer, even with `help` in `s:NO_TRAILING_WHITESPACE_FT`.{{{
     "
@@ -7020,7 +7031,7 @@ augroup trailing_whitespace | au!
     "}}}
     exe 'au FileType '
         \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_,v -> v != ''}), ',')
-        \ ..' call s:trailing_whitespace(0)'
+        \ ..' call s:trailing_whitespace(v:false)'
     " we still have an undesired match when we run `:VimPatches 8.1` *twice*
     au BufWinEnter * if &ft is# 'text' | call s:trailing_whitespace(0) | endif
 augroup END
@@ -9085,53 +9096,6 @@ endfu
 "
 " 115 -
 "
-" Press `C-g C-j`, then run:
-"
-"     $ ls ~/Downloads
-"
-" Then, press `gf` on a file path.
-" A nested Vim instance opens the file.
-"
-" How do you quit this Vim instance?
-" When I press `i` to enter insert mode, why doesn't the color of the border gets green?
-" And why is the cursor wrongly positioned when I insert characters?
-"
-" If I press `C-g C-j` again:
-"
-"     Error detected while processing function terminal#toggle_popup#main[10]..<SNR>161_close:
-"     line    3:
-"     E994: Not allowed in a popup window
-"
-" MWE:
-"
-"     vim -Nu NONE -S <(cat <<'EOF'
-"         set hidden
-"         call term_start(&shell, #{hidden: v:true})->popup_create({'maxheight': 17, 'col': 7, 'minwidth': 103, 'border': [], 'line': 8, 'maxwidth': 103, 'minheight': 17})
-"     EOF
-"     )
-"
-" Update: All  these issues  come from  the fact  that you've  loaded a  regular
-" buffer in a popup window.  It should be impossible.  Only a terminal buffer is
-" allowed in a popup.
-"
-" Also, do you remember all the drawing issues  we had in the past in a terminal
-" popup, which we reported and were fixed?
-" https://github.com/vim/vim/releases/tag/v8.2.0328
-"
-" Some of them are still present in a popup displaying a regular buffer.
-" Including the one where the cursor moves outside the popup when you move it in
-" visual mode.
-"
-" ---
-"
-" I think we should report this issue,  so that `gf` (& friends) is forbidden in
-" a popup terminal.
-"
-" We could also map `gf` (& friends) so that they close the popup, then open the
-" file in a regular window.
-"
-" 116 -
-"
 " Consider adding `sil!` to unmap all buffer-local mappings from `b:undo_ftplugin`.
 " We've lost some time  trying to understand why we sometimes  had an error when
 " opening a dirvish buffer. See:
@@ -9141,12 +9105,12 @@ endfu
 " But we didn't learn  much in the process; not sure  it's worth avoiding `sil!`
 " going forward.
 "
-" 117 - Find a fix for these console-related issues:
+" 116 - Find a fix for these console-related issues:
 "
 " https://vi.stackexchange.com/questions/25151/how-to-change-vim-cursor-shape-in-virtual-console
 " https://vi.stackexchange.com/questions/25093/how-to-use-16-color-colorscheme-in-tty
 "
-" 118 -
+" 117 -
 "
 " Read this: https://vi.stackexchange.com/questions/21798/how-to-change-local-directory-of-terminal-buffer-whenever-its-shell-change-direc
 " As well as `:h terminal-api`.
