@@ -15,17 +15,15 @@ endif
 "
 " See this: https://github.com/junegunn/fzf/issues/1055
 "}}}
-" let g:fzf_layout = {
-"    \ 'window': {
-"    \     'width': 0.9,
-"    \     'height': 0.6,
-"    \     'xoffset': 0.5,
-"    \     'yoffset': 0.5,
-"    \     'highlight': 'Comment',
-"    \     'border': 'sharp',
-"    \ }}
-
-" let g:fzf_layout = { 'window': '10new' }
+let g:fzf_layout = {
+\ 'window': {
+\     'width': 0.9,
+\     'height': 0.6,
+\     'xoffset': 0.5,
+\     'yoffset': 0.5,
+\     'highlight': 'Comment',
+\     'border': 'sharp',
+\ }}
 
 let g:fzf_action = {
     \ 'ctrl-t': 'tab split',

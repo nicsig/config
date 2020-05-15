@@ -1,0 +1,47 @@
+#!/bin/bash
+# Don't use `/bin/sh`.{{{
+#
+# We want to use `%q` in a `printf` command.
+# The latter is a shell builtin, which doesn't support `%q` in `sh(1)`.
+#}}}
+
+# Purpose: When run  from a shell inside  (N)Vim's terminal, open a  file in the
+# current (N)Vim instance rather than in a nested one.
+
+# Mnemonics: The `r` in `vimr` stands for *r*emote.
+# Inspiration: https://github.com/skywind3000/vim-terminal-help/blob/master/tools/utils/drop
+
+if [ -z "$1" ]; then
+  printf -- 'usage: vimr <file>\n'
+  exit 64
+fi
+
+if [ -z "$VIM_TERMINAL" ] && [ -z "$NVIM_LISTEN_ADDRESS" ]; then
+  printf -- 'Must be called inside Vim/Neovim\n'
+  exit 64
+fi
+
+if [ -n "$VIM_POPUP_TERMINAL" ]; then
+  printf -- 'Not allowed in a popup window\n'
+  exit 64
+fi
+
+# get absolute file path
+file="$(realpath -s "$1")"
+#                 │
+#                 └ -s, --strip, --no-symlinks don't expand symlinks
+
+# open file in the current Vim instance using `:h terminal-api`
+if [ -n "$VIM_TERMINAL" ]; then
+  # `%q` instead of `%s` to support file names containing quotes
+  printf -- '\033]51;["call", "Tapi_drop", "%q"]\007' "$file"
+# open file in the current Nvim instance using `nvr`; https://github.com/mhinz/neovim-remote
+else
+  if [ -x "$(command -v nvr 2>/dev/null)" ]; then
+    nvr --servername "$VIM_SERVERNAME" --remote-expr "$(printf -- 'Tapi_drop(0, "%q")' "$file")"
+  else
+    printf -- 'cannot find nvr executable, install neovim-remote\n'
+    exit 69
+  fi
+fi
+

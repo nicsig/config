@@ -51,7 +51,7 @@ set echo-control-characters off
 # It's not easy to compile a perfectly working bash.
 # And bash is essential; it must work perfectly.
 #
-# Don't try to compile. Last  time we tried, we broke the  package, and the only
+# Don't try to compile.  Last time we  tried, we broke the package, and the only
 # way to reinstall it, was to remove a bunch of files:
 #
 #     $ sudo rm /var/lib/dpkg/info/bash*
@@ -59,9 +59,8 @@ set echo-control-characters off
 # ---
 #
 # Why not compiling  into `/usr/local/` (which is what happens  by default btw),
-# and thus avoid `/bin/bash`?
-# We  could  keep  the latter  for  the  scripts,  and  use the  former  for  an
-# interactive usage...
+# and thus avoid `/bin/bash`?  We could keep the latter for the scripts, and use
+# the former for an interactive usage...
 #
 # Yes, but because of the difference of version, it would bring an inconsistency
 # between what  we try  in an  interactive shell,  and what  we experiment  in a

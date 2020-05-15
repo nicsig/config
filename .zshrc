@@ -188,14 +188,13 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
 #
 #     autoload -Uz vcs_info
 #     precmd_vcs_info() { vcs_info }
-#     precmd_functions+=( precmd_vcs_info )
+#     add-zsh-hook -Uz precmd precmd_vcs_info
 #     setopt prompt_subst
 #     RPROMPT=\$vcs_info_msg_0_
 #     # PROMPT=\$vcs_info_msg_0_'%# '
 #     zstyle ':vcs_info:git:*' formats '%b'
 #
-# Source:
-#     https://git-scm.com/book/en/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh
+# Source: https://git-scm.com/book/en/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh
 #
 # Issue:
 # When you cd into a non git directory (like `~`):
@@ -376,6 +375,10 @@ compdef vboxheadless=VBoxHeadless
 autoload -Uz bashcompinit
 bashcompinit
 
+# install completion  for the `nvr` command;  to see an effect,  don't forget to
+# insert at least a `-` before pressing Tab (e.g. `nvr - Tab`)
+source "$HOME/.zsh/my-completions/_nvr"
+
 # Why removing the alias `run-help`?{{{
 #
 # By default, `run-help` is merely an alias for `man`.
@@ -447,29 +450,29 @@ autoload -Uz run-help-sudo \
              run-help-sudo
 
 
-# When we hit C-w, don't delete back to a space, but to a space OR a slash.
+# When we hit `C-w`, don't delete back to a space, but to a space *or* a slash.
 # Useful to have more control over deletion on a filepath.
-#
 # http://stackoverflow.com/a/1438523
 autoload -Uz select-word-style
 select-word-style bash
-# Info: `backward-kill-word` is bound to C-w
-#
 # More flexible, easier solution (and more robust?):
 # http://stackoverflow.com/a/11200998
 
 
-# load `cdr` function to go back to previously visited directories
-# FIXME: comment to develop by reading `man zshcontrib`
-# (how to use it?, how it works?)
-autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
-add-zsh-hook chpwd chpwd_recent_dirs
+# Enable the `cdr` function.{{{
+#
+# It allows you to go back to previously visited directories.
+# See: `man zshcontrib /REMEMBERING RECENT DIRECTORIES/;/Installation`
+#}}}
+autoload -Uz cdr
+# log up to 30 directories
+zstyle ':chpwd:*' recent-dirs-max 30
 
 # What does the style 'format' control?{{{
 #
-# It controls the appearance of a description for each list of matches, when you
-# tab-complete a word on the command line.
-# Its value gives the format to print the message in.
+# The  appearance  of  a  description  for   each  list  of  matches,  when  you
+# tab-complete a word on the command line.   Its value gives the format to print
+# the message in.
 #
 # Example:
 #
@@ -483,20 +486,16 @@ add-zsh-hook chpwd chpwd_recent_dirs
 #
 # For example:
 #
-#     % echo Tab
+#     % echo SPC Tab
 #       → file
 #
-#     % true Tab
+#     % true SPC Tab
 #       → no argument or option
-#
-#     % cat qqq Tab
-#       → ˋfiles', ˋfile', or ˋcorrections'
 #}}}
 # What about '%D'?{{{
 #
 # If there  are no matches, the  description mentions the name  of each expected
-# list of matches.
-# `%d` separates those names with spaces, `%D` with newlines.
+# list of matches.  `%d` separates those names with spaces, `%D` with newlines.
 #
 # Don't use `%D` for any context which is not tagged with 'warnings';
 # it only works with 'warnings'.
@@ -522,8 +521,6 @@ add-zsh-hook chpwd chpwd_recent_dirs
 #    │ %K{123}...%k │ bacKground color │
 #    └──────────────┴──────────────────┘
 #}}}
-
-# zstyle ':completion:*:paths' ambiguous false
 
 # We set the 'format' style for some well-known tags.
 # When does a completer tag the description of a list of matches with 'messages'?{{{
@@ -609,7 +606,7 @@ zstyle ':completion:*:manuals' separate-sections true
 #
 #     % typeset - Tab
 #}}}
-# Why don't you set it?{{{
+#   Why don't you set it?{{{
 #
 # It's already set to true by default.
 #}}}
@@ -646,11 +643,8 @@ zstyle ':completion:*' list-prompt %SAt %p%s
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 #                                            ├────┘{{{
-#                                            └ `man zshexpn`
-#                                              > PARAMETER EXPANSION
-#                                              > Parameter Expansion Flags
-#                                              > s:string:
-#                                                     Force field splitting at the separator string.
+#                                            └ `man zshexpn /PARAMETER EXPANSION/;/Parameter Expansion Flags/;/^\s*s:string:`
+#                                               Force field splitting at the separator string.
 #}}}
 # TODO: read this: https://unix.stackexchange.com/a/477527/289772
 zstyle ':completion:*' list-colors ''
@@ -711,9 +705,6 @@ zstyle ':filter-select' case-insensitive yes
 # `(#i)` is a globbing flag which makes the following pattern case-insensitive.
 zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
 
-# creates an alias and precedes the command with
-# sudo if $EUID is not zero.
-
 # Respect these principles for ordering the sections:{{{
 #
 # `Plugins` should be near the beginning because  we need to be able to override
@@ -734,7 +725,7 @@ zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|av
 
 # if we execute a non-existing command, suggest us some package(s),
 # where we could find it (requires the deb package `command-not-found`)
-[[ -f /etc/zsh_command_not_found ]] && . /etc/zsh_command_not_found
+[[ -f /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
 
 # download fasd
 if [[ ! -f "${HOME}/bin/fasd" ]]; then
@@ -812,7 +803,7 @@ if [[ "$(command -v fasd)" -nt "${fasd_cache}" || ! -s "${fasd_cache}" ]]; then
     # > exists, even if CLOBBER is unset.
     #}}}
 fi
-. "${fasd_cache}"
+source "${fasd_cache}"
 unset fasd_cache
 # TODO: delete the cache from time to time (once per day)?{{{
 #
@@ -875,7 +866,7 @@ bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 #     shortcut widgets
 #     key binds and styles
 #     making sources
-[[ -f ${HOME}/.zsh/plugins/zaw/zaw.zsh ]] && . "${HOME}/.zsh/plugins/zaw/zaw.zsh"
+[[ -f ${HOME}/.zsh/plugins/zaw/zaw.zsh ]] && source "${HOME}/.zsh/plugins/zaw/zaw.zsh"
 
 # Why?{{{
 #
@@ -888,14 +879,14 @@ bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 #      instead we can fuzzy search it via its name
 #}}}
 [[ -f ${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh ]] && \
-. "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
+source "${HOME}/.zsh/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh"
 # TODO: It installs a keybinding on C-i (tab): zic-completion
 # But doing so, it overwrites a key binding from fzf: fzf-completion
 # Is it an issue?
 
 # source our custom aliases and functions (common to bash and zsh) last
 # so that they can override anything that could have been sourced before
-[[ -f ${HOME}/.shrc ]] && . "${HOME}/.shrc"
+[[ -f ${HOME}/.shrc ]] && source "${HOME}/.shrc"
 # TODO: Remove this once we've removed `~/.shrc`.
 
 # Functions {{{1
@@ -911,12 +902,69 @@ alias_is_it_free() { #{{{2
   apt-file -x search "/$1$"
 }
 
+cc() { #{{{2
+  emulate -L zsh
+  # It's more convenient to type `cc` to invoke the `cdr` function, and to use fzf, to jump to a recent directory.
+  # Wait.  Doesn't it conflict with our `cc` abbreviation?{{{
+  #
+  # No.  The abbreviation is meant to be used in the *middle* of the command-line.
+  # This function is meant to be used at the *start* of the command-line.
+  #}}}
+  local dir
+  dir="$(cdr -l | awk '{print $2}' | fzf -1 -0 --no-sort +m)"
+  #           │                           │  │
+  #           │                           │  └ exit immediately when there's no match
+  #           │                           └ automatically select the only match
+  #           └ lists the numbers and the corresponding directories in abbreviated form, one per line
+
+  if [[ "$dir" =~ '^~' ]]; then
+    # expand `~/` and named directories
+    # TODO: `${~name}` is probably wrong.{{{
+    #
+    # It's documented at: `man zshexpn /PARAMETER EXPANSION/;/${\~spec}`:
+    #
+    # >     Turn on the GLOB_SUBST option for the evaluation of spec; if the
+    # >     `~`  is  doubled,  turn  it  off.   When this option is set, the
+    # >     string resulting from the expansion will  be  interpreted  as  a
+    # >     pattern anywhere that is possible, such as in filename expansion
+    # >     and filename generation and pattern-matching contexts  like  the
+    # >     right hand side of the `=` and `!=` operators in conditions.
+    #}}}
+    dir=${~dir}
+  fi
+
+  # if the directory does not exist anymore, remove it from the log file on which `cdr` relies
+  # FIXME: `cd` fails to enter a directory containing a glob (e.g. `/tmp/a*b`){{{
+  #
+  #     $ mkdir /tmp/a\*b
+  #     $ cd /tmp/a\*b && cd
+  #     $ cc
+  #     # select '/tmp/a\*b'
+  #     cc:cd:36: no such file or directory: /tmp/a\*b~
+  #
+  # You get the same error if you pass the directory name to `cd` with quotes:
+  #
+  #     $ cd '/tmp/a\*b'
+  #     cd: no such file or directory: /tmp/a\*b~
+  #
+  # But removing the quotes around `$dir` does not help.
+  #
+  #     if ! cd "$dir"; then
+  #             ^    ^
+  #}}}
+  if ! cd "$dir"; then
+    cdr -P "$dir"
+    return 1
+  fi
+}
+
 cdt() { #{{{2
   emulate -L zsh
   cd "$(mktemp -d /tmp/.cdt.XXXXXXXXXX)"
 }
 
 chown2me() { #{{{2
+  emulate -L zsh
   # Purpose:{{{
   #
   # Running this function  may be necessary before manually  compiling a program
@@ -1122,6 +1170,7 @@ EOF
 }
 
 environ() { #{{{2
+  emulate -L zsh
   if [[ $# -ne 1 ]]; then
     cat <<EOF >&2
   purpose: print the environment variables of an arbitrary process
@@ -1307,6 +1356,7 @@ ff_audio_record() { #{{{2
 }
 
 ff_desktop_record() { #{{{2
+  emulate -L zsh
   ffmpeg -draw_mouse 1                     \
          -f x11grab                        \
          -framerate 25                     \
@@ -1657,6 +1707,7 @@ EOF
 }
 
 help() { #{{{2
+  emulate -L zsh
   # Rationale:{{{
   #
   # In bash, the equivalent of `run-help` is `help`.
@@ -1866,6 +1917,7 @@ nstring() { #{{{2
 # This matters whenever the output base is bigger than the input base.
 #}}}
 change-base () {
+    emulate -L zsh
     local from="$1"
     local to="$2"
     local value="$3"
@@ -2078,7 +2130,7 @@ nv() { #{{{2
 #       fi
 #     }
 #     # See: `man zshmisc /SPECIAL FUNCTIONS/;/Hook Functions`
-#     precmd_functions=(__restart_vim)
+#     add-zsh-hook -Uz precmd __restart_vim
 #}}}
 #   Why don't you use it?{{{
 #
@@ -2258,6 +2310,7 @@ EOF
 #}}}2
 
 shellcheck_wiki() { #{{{2
+  emulate -L zsh
   # Purpose: Get more information about an error found by shellcheck.
   xdg-open "https://github.com/koalaman/shellcheck/wiki/SC$1"
 }
@@ -2311,6 +2364,7 @@ EOF
 }
 
 tor() { #{{{2
+  emulate -L zsh
   # Why `cd ...`?  Why not running the desktop file with an absolute path?{{{
   #
   # Here's the shebang of the `.desktop` file:
@@ -2389,6 +2443,7 @@ truecolor() { #{{{2
 }
 
 var_what_have_you() { #{{{2
+  emulate -L zsh
   # Purpose:{{{
   #
   # Useful to check the contents of a value of an environment variable:
@@ -2466,15 +2521,16 @@ vim_startup() { #{{{2
   emulate -L zsh
   local tmp
   tmp="$(mktemp /tmp/.vim_startup.XXXXXXXXXX)"
-  vim --startuptime "${tmp}" \
+  vim --startuptime "$tmp" \
       +'q' startup_vim_file \
       && vim +'setl bt=nofile nobl bh=wipe noswf | set ft=' \
       +'sil 7,$!sort -rnk2' \
-      "${tmp}"
+      "$tmp"
 }
 #}}}2
 
 whichcomp() { #{{{2
+  emulate -L zsh
   # Ask zsh where a particular completion is being sourced from.
   # Where did you find the code?{{{
   #
@@ -2495,6 +2551,7 @@ EOF
 }
 
 xev_terse() { #{{{2
+  emulate -L zsh
   # Purpose:{{{
   #
   # Filter  the output  of  `xev` so  that it  contains  only information  about
@@ -2506,6 +2563,7 @@ xev_terse() { #{{{2
 }
 
 xev_terse_terse() { #{{{2
+  emulate -L zsh
   # Purpose:{{{
   #
   # Filter the  output of  `xev` so that  it contains only  the keycode  and the
@@ -2620,6 +2678,7 @@ zsh_sourced_files() { #{{{2
 #}}}2
 
 _fzf_compgen_dir() { #{{{2
+  emulate -L zsh
   # Use `fd`  instead of  the default  `find` command to  generate the  list for
   # directory completion.
   #    - `$1` is the base path to start traversal
@@ -2628,6 +2687,7 @@ _fzf_compgen_dir() { #{{{2
 }
 
 _fzf_compgen_path() { #{{{2
+  emulate -L zsh
   # Use `fd` instead of the default `find` command for listing path candidates.
   fd --hidden --follow . "$1"
 }
@@ -3317,18 +3377,67 @@ alias -s pdf="${PDFVIEWER}"
 # }}}1
 # Hooks {{{1
 
-# TODO: better explain how it works
-
-# There's no  `HISTIGNORE` option in  zsh, to ask  some commands to  be excluded
-# from the history.
+# What's a hook function?{{{
 #
-# Solution:
-# zsh provides a hook function `zshaddhistory` which can be used for that.
-# If `zshaddhistory_functions` contains  the name of a function  which returns a
-# non-zero value, the command is not saved in the history file.
-zshaddhistory_functions=(ignore_comments ignore_short_or_failed_cmds ignore_these_cmds)
+# A function which is run automatically at a specific point during shell execution.
+#}}}
+# How to list all of them?{{{
+#
+#     $ add-zsh-hook -L
+#}}}
+# Where is `add-zsh-hook` documented?{{{
+#
+# `man zshcontrib /Manipulating Hook Functions`.
+#}}}
+autoload -Uz add-zsh-hook
 
-ignore_comments() {
+# What's this `chpwd_recent_dirs` function?{{{
+#
+# A hook function which logs the most recent directories you've visited into a file.
+# The `cdr` function relies on this log to do its job.
+#}}}
+autoload -Uz chpwd_recent_dirs
+# What's this `chpwd`?{{{
+#
+# A hook which is triggered whenever you change the shell's cwd interactively.
+#}}}
+add-zsh-hook -Uz chpwd chpwd_recent_dirs
+
+# synchronize Vim's local cwd with the shell's one
+if [[ -n "$VIM_TERMINAL" ]]; then
+  add-zsh-hook -Uz chpwd _vim_lcd
+  _vim_lcd() {
+    # in Vim, see `:h terminal-api`
+    printf -- '\033]51;["call", "Tapi_lcd", "%q"]\007' "$(pwd)"
+  }
+# same thing in Nvim
+elif [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
+  add-zsh-hook -Uz chpwd _nvim_lcd
+  _nvim_lcd() {
+    nvr --servername "$VIM_SERVERNAME" --remote-expr "$(printf -- 'Tapi_lcd(0, "%q")' "$(pwd)")"
+  }
+fi
+
+# Exclude some commands from the history.{{{
+#
+# Solution: Use the `zshaddhistory` hook to exclude undesirable commands.
+# Any function it runs is passed the command name as the first argument.
+# For the command to be ignored, the function must return a non-zero value.
+# More specifically, it must return either:
+#
+#    - `1` = the command is removed from  the history of the session, as soon as
+#      you execute another command
+#
+#    - `2`  = the command  is still  in the history  of the session,  even after
+#      executing another command, so you can retrieve it by pressing `M-p` or `C-p`
+#
+# Note: Contrary to bash, there's no `HISTIGNORE` option in zsh.
+#}}}
+add-zsh-hook -Uz zshaddhistory _ignore_comments
+add-zsh-hook -Uz zshaddhistory _ignore_short_or_failed_cmds
+add-zsh-hook -Uz zshaddhistory _ignore_these_cmds
+
+_ignore_comments() {
   emulate -L zsh
   if [[ $1 =~ ^# ]]; then
     return 2
@@ -3337,7 +3446,7 @@ ignore_comments() {
   fi
 }
 
-ignore_short_or_failed_cmds() {
+_ignore_short_or_failed_cmds() {
   emulate -L zsh
   # ignore commands which are shorter than 5 characters
   # Why `-le 6` instead of `-le 5`?{{{
@@ -3353,7 +3462,7 @@ ignore_short_or_failed_cmds() {
   fi
 }
 
-ignore_these_cmds() {
+_ignore_these_cmds() {
   emulate -L zsh
   local first_word
   # zsh passes the command line to this function via $1
@@ -3388,16 +3497,7 @@ ignore_these_cmds() {
 
   # now we check whether it's somewhere in our array of commands to ignore
   # https://unix.stackexchange.com/a/411331/289772
-  if ((${cmds_to_ignore_in_history[(I)$first_word]})); then
-    # Why `2` instead of `1`?{{{
-    #
-    # `1` = the command is removed from the history of the session,
-    # as soon as you execute another command
-    #
-    # `2` = the command is still in the history of the session,
-    # even after executing another command,
-    # so you can retrieve it by pressing M-p or C-p
-    #}}}
+  if ((${_cmds_to_ignore_in_history[(I)$first_word]})); then
     return 2
   else
     return 0
@@ -3407,7 +3507,7 @@ ignore_these_cmds() {
 # The shell allows newlines to separate array elements.
 # So,  an array  assignment can  be split  over multiple  lines without  putting
 # backslashes on the end of the line.
-cmds_to_ignore_in_history=(
+_cmds_to_ignore_in_history=(
   api
   app
   aps
@@ -4058,8 +4158,7 @@ zle -N edit-command-line
 #            │ finishes or is suspended.
 #            │
 #            ├───────┐}}}
-__sane_vim() STTY=sane command vim +'au TextChanged,InsertLeave <buffer> sil! call source#fix_shell_cmd()' \
-                                   "$@"
+__sane_vim() STTY=sane command vim +'au TextChanged,InsertLeave <buffer> sil! call source#fix_shell_cmd()' "$@"
 
 sane-edit-command-line() {
   emulate -L zsh
@@ -4127,14 +4226,14 @@ bindkey '^X^H' _complete_help
 
 __reread_zshrc() {
   emulate -L zsh
-  . "${HOME}/.zshrc" 2>/dev/null
-#                    └─────────┤{{{
-#                              └ “stty: 'standard input': Inappropriate ioctl for device”
+  source "${HOME}/.zshrc" 2>/dev/null
+  #                       ├─────────┘
+  #                       └ “stty: 'standard input': Inappropriate ioctl for device”
 #
 # In case of an issue, this may help:
 #
-#     https://unix.stackexchange.com/a/370506/232487
-#     https://github.com/zsh-users/zsh/commit/4d007e269d1892e45e44ff92b6b9a1a205ff64d5#diff-c47c7c7383225ab55ff591cb59c41e6b
+# https://unix.stackexchange.com/a/370506/232487
+# https://github.com/zsh-users/zsh/commit/4d007e269d1892e45e44ff92b6b9a1a205ff64d5#diff-c47c7c7383225ab55ff591cb59c41e6b
 #}}}
 }
 zle -N __reread_zshrc
@@ -5166,8 +5265,8 @@ fi
 
 # TODO: Try to customize the theme for the linux console (then remove `[[ -n "$DISPLAY" ]]`).
 if [[ -n "$DISPLAY" ]]; then
-  . "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-  . "${HOME}/.zsh/syntax_highlighting.zsh"
+  source "${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  source "${HOME}/.zsh/syntax_highlighting.zsh"
 fi
 
 # noa vim //gj ~/Dropbox/conf/bin/**/*.sh ~/.shrc ~/.bashrc ~/.zshrc ~/.zshenv ~/.vim/plugged/vim-snippets/UltiSnips/sh.snippets | cw

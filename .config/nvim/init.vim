@@ -223,7 +223,8 @@ Plug 'lacygoill/vim-fex'
 Plug 'tpope/vim-fugitive'
 " You can pass more arguments to the fzf installer:
 "     $ ~/.fzf/install --help
-Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash'}
+" TODO: Remove the `frozen` key once this issue is fixed: https://github.com/junegunn/fzf/issues/2041
+Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash', 'frozen': 1}
 Plug 'junegunn/fzf.vim'
 Plug 'lacygoill/goyo.vim', {'branch': 'assimil'}
 Plug 'lacygoill/vim-graph'
@@ -779,6 +780,10 @@ set backspace=indent,eol,start
 "     if v:servername isnot# 'VIM' | return | endif
 "
 " And we can't send files remotely with `--remote` and friends.
+" And we can't access the `+` clipboard.
+"
+" Update: We could invoke  `remote_startserver()` to start a  server *after* the
+" startup and fix most of these issues...
 "}}}
 
 " color scheme {{{2
@@ -1930,7 +1935,7 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 "
 " MWE:
 "
-"     $ vim -Nu NONE +'let @+ = "hello\e:echom \"malicious code injected\"\ri"' +startinsert
+"     $ vim -Nu NONE +'let @+ = "clipboard\e:echom \"malicious code injected\"\ri"' +startinsert
 "     C-S-v
 "     Esc
 "     :mess
@@ -1960,7 +1965,7 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 " No, unfortunately.
 "
 " The protection  offered by  the bracketed  paste mode can  be bypassed  if the
-" pasted text contains `\e[201~`; it will end the bracketed mode prematurely.
+" pasted text contains `\e[201~`; the latter will end the bracketed mode prematurely.
 " This works  because, before sending the  text to the application,  some (all?)
 " terminals do not properly filter escape sequences before adding their own.
 "
@@ -1969,8 +1974,8 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 "
 " ---
 "
-" Also, the bracketed  paste mode is ignored  when you insert the  contents of a
-" register with `C-r`.
+" Also, the  bracketed paste mode does  not prevent Vim from  auto-indenting the
+" text when inserting the contents of a register with `C-r`.
 "
 " MWE:
 "
@@ -1994,13 +1999,13 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 " You can avoid the issue by pasting from normal mode (`"ap`), or inserting with
 " `C-r C-o` or `C-r C-p`.
 "}}}
-"   How many things need to be configured for it to work?{{{
+"   How many software layers need to support this mode for it to work properly?{{{
 "
 " The terminal and the application which is running in the foreground.
 "
-" But you don't need to configure the terminal; it just needs to be recent enough.
-" Except for tmux, which is a special case.
-" When you use the `paste-buffer` command, you must pass it the `-p` option.
+" You probably don't need to configure the  terminal; it just needs to be recent
+" enough.   Except  for  tmux, which  is  a  special  case.   When you  use  the
+" `paste-buffer` command, you must pass it the `-p` option.
 "
 " And  note that  whether the  foreground  application needs  to be  configured,
 " depends on its default configuration.
@@ -2038,10 +2043,9 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 " enable/disable the bracketed paste mode whenever it enters/leaves raw mode.
 " IOW, the raw and bracketed paste modes will be synchronized.
 "
-" You also need to set the options  `'t_PS'` and `'t_PE'` with the values
-" `CSI 200 ~` and `CSI 201 ~`.
-" Probably  to  let   Vim  know  which  sequences  it  must   interpret  as  the
-" beginning/end of a pasted text.
+" You also need  to set the options  `'t_PS'` and `'t_PE'` with  the values
+" `CSI 200 ~` and `CSI 201 ~`. Probably  to let Vim know which sequences it must
+" interpret as the beginning/end of a pasted text.
 "
 " For more info, see `:h xterm-bracketed-paste`.
 "
@@ -2097,21 +2101,15 @@ if has('vim_starting') && !has('gui_running') && !has('nvim')
 " Instead of:     enter Vim → enable bracketed paste
 "                 leave Vim → restore bracketed paste as it was before Vim was started
 "
-" Would sth bad  happen if the bracketed  paste mode was still  enabled when the
-" terminal leaves raw mode and enters cooked mode?
+" Theory:
+" Remember that you can start an external process from Vim (e.g. via `system()`).
+" While Vim is running, the foreground process may not be Vim, and it may or may
+" not want the terminal to be in bracketed paste mode.
+" I think  that's why  Vim disables  the bracketed paste  mode when  leaving raw
+" mode;  so that  the foreground  process does  not receive  sequences which  it
+" doesn't understand.
 "
-" Answer: I don't know, but it seems weird  to let the terminal add some special
-" sequences in  cooked mode; it already  has to interpret some  possible special
-" characters. Maybe there could be some unexpected interaction between the two.
-"
-" ---
-"
-" If sth bad can happen, then why  doesn't this issue also affect the shell?
-" The latter is in cooked mode, right?
-"
-" Answer: No, I don't think that the terminal is *always* in cooked mode.
-" I think  that when you  paste, it temporarily  enters raw mode,  to faithfully
-" transmit whatever text is contained in the clipboard selection to the shell.
+" See: https://github.com/vim/vim/issues/1638
 "}}}
 
 " Why `&t_BE is# ''`?{{{
@@ -3106,15 +3104,15 @@ ino <silent> <expr> <c-m> <sid>c_m()
 " The default `i^r` inserts a blockwise register as if it was linewise.
 " We don't want an inconsistency; our custom `i^r` should behave the same.
 "}}}
-ino <expr><silent> <c-r> getregtype(v:register) =~# '<c-v>' ? '<c-r>' : '<c-r><c-o>'
+ino <expr> <c-r> getregtype(v:register) =~# '<c-v>' ? '<c-r>' : '<c-r><c-o>'
 " The previous `<c-r>` mapping breaks the default `:h i^r^p`; allow us to still use it.{{{
 "
 " You may wonder how `:h i^r^p` gets broken.
 " Suppose you  press `C-r`  in insert mode;  Vim sees that  you have  2 mappings
 " starting with `C-r`:
 "
-"     i  <C-R>  * <C-R><C-O>
-"     i  <C-R>F * <C-\><C-O>:call plugin#fzf#registers('i')<CR>
+"     i  <C-R>      * <C-R><C-O>
+"     i  <C-R><C-F> * <C-\><C-O>:call plugin#fzf#registers('i')<CR>
 "
 " It must wait for  another key to know whether `C-r` needs  to be remapped, and
 " if so with which mapping.
@@ -3127,8 +3125,9 @@ ino <expr><silent> <c-r> getregtype(v:register) =~# '<c-v>' ? '<c-r>' : '<c-r><c
 "
 "     C-r C-o C-p
 "
-" Which is an invalid sequence, and not executed.
-" But that's not what you wanted; you wanted Vim to execute `C-r C-p`.
+" `C-r  C-o` is  valid, but  there  is no  register  named `C-p`,  so the  whole
+" sequence fails.  In  any case, that's not  what you wanted; you  wanted Vim to
+" execute `C-r C-p`.
 "}}}
 ino <c-r><c-p> <c-r><c-p>
 " the same issue could affect `:h i^r^o` if one day we use `<c-r><c-p>` in the `<c-r>` mapping
@@ -6253,7 +6252,7 @@ fu s:make_missing_dir(file, buf) abort
 endfu
 
 augroup make_missing_dir | au!
-    au BufWritePre * call s:make_missing_dir(expand('<afile>:p'), +expand('<abuf>'))
+    au BufWritePre * call s:make_missing_dir(expand('<afile>:p'), str2nr(expand('<abuf>')))
 augroup END
 
 " Default Extension {{{2
@@ -6328,11 +6327,11 @@ fu s:wipe_noname() abort
     "}}}
     if exists('g:SessionLoad') | return | endif
 
-    let buf = +expand('<abuf>')
-    if buflisted(buf) && empty(bufname(buf)) && empty(win_findbuf(buf))
+    let buf = str2nr(expand('<abuf>'))
+    if buflisted(buf) && empty(bufname(buf))
         " Why the delay?{{{
         "
-        "     $ vim -Nu NONE +'set hidden | au BufHidden * exe "bw! "..+expand("<abuf>")'
+        "     $ vim -Nu NONE +'set hidden | au BufHidden * exe "bw! "..str2nr(expand("<abuf>"))'
         "     :new
         "     :q
         "     Error detected while processing BufHidden Autocommands for "*":~
@@ -7233,27 +7232,23 @@ endfu
 "
 " However, mkdir seems limited to produce a complex hierarchy.
 " A better way would be to look at the syntax used by emmet to expand html
-" tags. Our mapping/command would parse a similar command to produce
+" tags.  Our mapping/command would parse a similar command to produce
 " a hierarchy of items of an arbitrary complexity.
 "
-" Also, have a look at the diagram in `:h syntax-loading`. Very interesting.
+" Also, have a look at the diagram in `:h syntax-loading`.  Very interesting.
 " Without this diagram, the explanations would be much more verbose, and less
-" readable. Implement a visual mapping, which would automatically draw the
+" readable.  Implement a visual mapping, which would automatically draw the
 " right diagram in front of the lines inside the selection (drawing `+`, `-`, `|`).
 "
 "     ~/Desktop/diagram
 "
 " Also, install mappings to draw vertical diagrams instead of horizontal ones.
-" Have a look at our notes about the try conditional for an example where it
+" Have a look at our notes about the `try` conditional for an example where it
 " would be useful.
 "
 " Try this:
 "
-"     % api cpanminus
-"     % sudo cpanm graph::easy
-"
-"     to uninstall later
-"     % sudo cpanm --uninstall graph::easy
+"     $ sudo aptitude install libgraph-easy-perl
 "
 " Write this in a file:
 "
@@ -7286,8 +7281,10 @@ endfu
 " You create  the skeleton of  the diagram with  graph-easy, then tweak  it with
 " vim-schlepp + vim-draw.
 "
-" Also, remember we've  created the `:BoxPrettify` command. Useful  to convert a
+" Also, remember we've created the  `:BoxPrettify` command.  Useful to convert a
 " raw ascii diagram, in a more polished one.
+"
+" Update: This utility could be very useful: https://github.com/jez/as-tree
 "
 " 11 -
 "
@@ -9109,36 +9106,6 @@ endfu
 "
 " https://vi.stackexchange.com/questions/25151/how-to-change-vim-cursor-shape-in-virtual-console
 " https://vi.stackexchange.com/questions/25093/how-to-use-16-color-colorscheme-in-tty
-"
-" 117 -
-"
-" Read this: https://vi.stackexchange.com/questions/21798/how-to-change-local-directory-of-terminal-buffer-whenever-its-shell-change-direc
-" As well as `:h terminal-api`.
-" It could be useful to make Vim open a file in the current Vim instance instead
-" of a new (nested) one, when we're in  a terminal buffer and we press `gf` on a
-" file path.
-"
-" Also, set (N)Vim so that the local cwd is automatically reset to the cwd of the shell.
-"
-" See also:
-" https://www.reddit.com/r/vim/comments/83ve6g/how_to_open_file_in_current_vim_instance_from/
-" https://gist.github.com/andymass/bcd0a4956ed1a873d41f7265be6c6979
-"
-" Update:
-" You could just install `:tno` mappings which open the file under the cursor in
-" the current Vim instance.
-" If the path is relative, you could inspect the prompt to extract the cwd.
-" https://www.reddit.com/r/vim/comments/feod1s/tips_for_avoiding_nested_vim_sessions_when/
-"
-" Update: Actually, does it make sense?
-" What if we have changed the shell's cwd multiple times?
-" Which one should we use?  The last one?
-" Maybe that's not the right approach.
-" Instead, maybe we  should make `gf` (& friends) smarter;  it could inspect the
-" shell's cwd at the time the file path under the cursor was generated.
-" It would extract the info from the previous shell prompt relative to the cursor.
-
-
 
 
 

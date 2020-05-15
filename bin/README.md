@@ -16,6 +16,14 @@ So, we install here a more recent version:
 
 ##
 # Where did you find the
+## `as-tree` binary?
+
+<https://github.com/jez/as-tree>
+
+Can be useful in Vim to get a tree view of an arbitrary subset of files in the cwd:
+
+    :to 40vnew | .!find . -name '*.vim' 2>/dev/null | as-tree
+
 ## `ch` bash script?
 
 <https://github.com/learnbyexample/command_help>

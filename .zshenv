@@ -171,6 +171,23 @@ export EDITOR="$VISUAL"
 #}}}
 unset VIM VIMRUNTIME MYVIMRC
 
+# `NVIM_TERMINAL` is an ad-hoc variable which can be useful to detect that we're in an Nvim terminal.
+# I can already know that just by inspecting `NVIM_LISTEN_ADDRESS`.  What's the point?{{{
+#
+# Yes, it works from the shell, but how to get the same information from (a nested) Nvim?
+# You can't inspect  `$NVIM_LISTEN_ADDRESS` there, because it's  *always* set in
+# Nvim, whether it was started from a regular terminal or from a (N)Vim terminal.
+#
+# We need a variable which is only set in an Nvim terminal.
+# AFAICT, there's no such variable, so we create one.
+#
+# We  need   this  info  to  bail   out  when  unnesting  (N)Vim   instances  in
+# `~/.vim/plugged/vim-terminal/plugin/terminal.vim`.
+#}}}
+if [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
+  export NVIM_TERMINAL=1
+fi
+
 # For some applications, it could be useful to use full paths (e.g. `/usr/local/bin/vim`):{{{
 # https://unix.stackexchange.com/questions/4859/visual-vs-editor-what-s-the-difference#comment5812_4861
 #
