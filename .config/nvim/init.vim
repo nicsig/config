@@ -265,6 +265,9 @@ Plug 'lacygoill/vim-graph'
 " `mpv(1)`, `zathura(1)`, ...
 " Indeed, by default, fasd ignore files  with spaces, unless you quote the name,
 " but we always forget to quote it.
+"
+" See also this Vim plugin:
+" https://github.com/mattn/vim-filewatcher
 "}}}
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'tweekmonster/helpful.vim'
@@ -2667,6 +2670,35 @@ endif
 "    - in the output of `expand()`, `glob()`, `globpath()`
 "}}}
 set wildignore&vim
+
+" Warning:
+" Do *not* add `*/.git/*` to `'wig'`!{{{
+"
+" It breaks the `:drop` command which we use in `Tapi_drop()`:
+"
+"     $ vim +term
+"     $ cd /tmp && git clone https://github.com/junegunn/fzf && cd fzf
+"     $ sed -i '1d' LICENSE && git add . && git commit -v
+"     Error detected while processing function Tapi_drop:
+"     line   14:
+"     E479: No match
+"
+" That's because `:drop` honors `'wildignore'`, which  makes it fail to open any
+" file whose path is matched by the option.
+"
+" ---
+"
+" There are other commands/functions which may honor the option (like `expand()`
+" when using a backtick expression), and which may unexpectedly fail to give the
+" right result when you include `*/.git/*`.
+"
+" ---
+"
+" Besides, justinmk and tpope explicitly recommend to *not* include `*/.git/*`:
+" https://www.reddit.com/r/vim/comments/626no2/vim_without_nerd_tree_or_ctrlp/dfkbm97/
+" https://github.com/tpope/vim-fugitive/issues/121#issuecomment-38720847
+"}}}
+
 " lock files (example: ~/.gksu.lock)
 set wildignore+=*.lock
 
@@ -2713,17 +2745,6 @@ let &wildignore ..= ','..&undodir..'/*.*.*,'
 "}}}
 
 set wildignore+=tags
-
-" A file in a `.git/` directory.
-set wildignore+=*/.git/*
-" If you see a `.git/` directory in dirvish, before tweaking this option, have a look at `fex#format_entries()`:{{{
-"
-"     ~/.vim/plugged/vim-fex/autoload/fex.vim:22
-"}}}
-" If this setting causes an issue, read this:{{{
-" https://www.reddit.com/r/vim/comments/626no2/vim_without_nerd_tree_or_ctrlp/dfkbm97/
-" https://github.com/tpope/vim-fugitive/issues/121#issuecomment-38720847
-    "}}}
 
 " Tab completion should be case-insensitive.
 " If we type `:e bar Tab`, and a file `Bar` exists, we should get:
@@ -6314,19 +6335,6 @@ augroup wipe_noname_buffers | au!
 augroup END
 
 fu s:wipe_noname() abort
-    " Do *not* wipe any buffer while a session is loading.{{{
-    "
-    " When we save a session, Vim writes some commands towards the beginning of
-    " the session file, to check if the current buffer is a noname-empty buffer.
-    " And towards the end, it wipes it.
-    " If we load a session from a noname-empty buffer, it will become hidden,
-    " our autocmd will kick in, this function will be invoked, and it will
-    " wipe the buffer before the end of the restoration of the session.
-    " This will cause an error, because Vim will try to wipe the buffer a 2nd
-    " time while it doesn't exist anymore.
-    "}}}
-    if exists('g:SessionLoad') | return | endif
-
     let buf = str2nr(expand('<abuf>'))
     if buflisted(buf) && empty(bufname(buf))
         " Why the delay?{{{
