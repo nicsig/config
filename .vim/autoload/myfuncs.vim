@@ -453,7 +453,6 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     let range = a:0 && a:1 =~# '\<vis\>' ? '*' : '%'
     let pat = to_search[a:to_delete][0]
     exe mods..range..global..'/'..escape(pat, '/')..'/d_'
-    if a:to_delete is# 'folds' | sil exe mods..range..'s/\s\+$//' | endif
 
     sil! update
     "  │

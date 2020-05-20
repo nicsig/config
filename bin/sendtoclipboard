@@ -100,10 +100,10 @@ buf=$(rlwrap cat "$@")
 #
 # It's documented at `man bash /SHELL BUILTIN COMMANDS`:
 #
-# > : [arguments]
-# >        No effect; the command does nothing beyond  expanding  arguments
-# >        and  performing any specified redirections.  A zero exit code is
-# >        returned.
+# >     : [arguments]
+# >            No effect; the command does nothing beyond  expanding  arguments
+# >            and  performing any specified redirections.  A zero exit code is
+# >            returned.
 #}}}
 [ -n "$TMUX" ] && tmux set-buffer "${buf}" ||:
 
@@ -153,7 +153,7 @@ len=$(printf -- '%s' "${buf}" | wc -c)
 # See <https://en.wikipedia.org/wiki/Base64#Output_padding> for the
 # `4*ceil(n/3)` length formula:
 #
-# > The ratio of output bytes to input bytes is 4:3 (33% overhead).
+# >     The ratio of output bytes to input bytes is 4:3 (33% overhead).
 # ...
 #}}}
 max=74994

@@ -8,11 +8,11 @@ Comment[fr]=Éditer des fichiers textes
 #
 # It's used by the system to determine whether the program is actually installed.
 #
-# > Path to  an executable  file on  disk used  to determine  if the  program is
-# > actually installed. If the path is not  an absolute path, the file is looked
-# > up in the $PATH environment variable. If the file is not present or if it is
-# > not  executable,  the entry  may  be  ignored (not  be  used  in menus,  for
-# > example).
+# >     Path to  an executable  file on  disk used  to determine  if the  program is
+# >     actually installed. If the path is not  an absolute path, the file is looked
+# >     up in the $PATH environment variable. If the file is not present or if it is
+# >     not  executable,  the entry  may  be  ignored (not  be  used  in menus,  for
+# >     example).
 #
 # See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
 #
@@ -35,10 +35,10 @@ TryExec=gvim
 #
 # Here's how `-f` is documented at `:h -f`:
 #
-# > GUI: Do not  disconnect from the  program that  started Vim. 'f'  stands for
-# > "foreground".  If omitted, the GUI forks a new process and exits the current
-# > one. "-f" should  be used when gvim  is started by a program  that will wait
-# > for the edit session to finish (e.g., mail or readnews).
+# >     GUI: Do not  disconnect from the  program that  started Vim. 'f'  stands for
+# >     "foreground".  If omitted, the GUI forks a new process and exits the current
+# >     one. "-f" should  be used when gvim  is started by a program  that will wait
+# >     for the edit session to finish (e.g., mail or readnews).
 #}}}
 # Do *not* use `--remote-tab-silent`!{{{
 #

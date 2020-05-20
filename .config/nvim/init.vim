@@ -223,8 +223,7 @@ Plug 'lacygoill/vim-fex'
 Plug 'tpope/vim-fugitive'
 " You can pass more arguments to the fzf installer:
 "     $ ~/.fzf/install --help
-" TODO: Remove the `frozen` key once this issue is fixed: https://github.com/junegunn/fzf/issues/2041
-Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash', 'frozen': 1}
+Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash'}
 Plug 'junegunn/fzf.vim'
 Plug 'lacygoill/goyo.vim', {'branch': 'assimil'}
 Plug 'lacygoill/vim-graph'
@@ -2958,10 +2957,10 @@ call s:remember_new_mappings([
 
 " Other benefit:
 "
-"       :no <leader>
-"       →
-"       displays all mappings installed by third-party plugins
-"       in normal / visual / operator-pending mode
+"     :no <leader>
+"     →
+"     displays all mappings installed by third-party plugins
+"     in normal / visual / operator-pending mode
 
 let mapleader = "\<s-f5>"
 
@@ -4496,6 +4495,20 @@ fu s:jump_to_definition() abort
     endtry
 endfu
 
+" C-a                 toggle some characters {{{4
+
+nno <expr> <c-a> <sid>c_a()
+
+fu s:c_a() abort
+    let char_under_cursor = matchstr(getline('.'), '\%'..col('.')..'c.')
+    if char_under_cursor is# '✘'
+        return 'r✔'
+    elseif char_under_cursor is# '✔'
+        return 'r✘'
+    endif
+    return "\<c-a>"
+endfu
+
 " C-np                move across tab pages {{{4
 
 nno <silent> <c-p> :<c-u>tabprevious<cr>
@@ -5293,9 +5306,9 @@ xno <expr> l <sid>v_l()
 "}}}
 fu s:v_l() abort
     let siso = &l:siso != -1 ? &l:siso : &g:siso
-    let number = &l:nu || &l:rnu ? 4 : 0
-    let scl = &l:scl isnot# 'no' ? 2 : 0
-    let offset = siso + number + scl
+    " this should evaluate to the total width of the fold/number/sign columns
+    let left_columns = wincol() - virtcol('.')
+    let offset = siso + left_columns
     return mode() is# "\<c-v>" && virtcol('.') == winwidth(0) - offset ? '' : 'l'
 endfu
 
@@ -6416,9 +6429,22 @@ endfu
 " Highlight ansi codes {{{2
 
 augroup highlight_ansi | au!
-    " useful when we run sth like `$ trans word | vipe`
-    au VimEnter * if $_ =~# '\C/vipe$' | call lg#textprop#ansi() | endif
-    au StdinReadPost * call lg#textprop#ansi()
+    " useful when we run sth like `$ trans word | vim -` or `$ trans word | vipe`
+    " Why the guard?{{{
+    "
+    " When Vim is invoked  inside a Vim terminal, we run  some custom code which
+    " quits  the nested  Vim instance,  and re-opens  the file(s)/buffer  in the
+    " outer instance.
+    "
+    " But if `#ansi()` has removed the ansi escape codes when Vim was invoked in
+    " the nested instance, then they will be absent in the outer one.
+    " We don't want that, we need these escape codes for `#ansi()` to do its job
+    " properly in the outer Vim instance.
+    "}}}
+    if empty($VIM_TERMINAL) && empty($NVIM_TERMINAL)
+        au StdinReadPost * call lg#textprop#ansi()
+        au VimEnter * if $_ =~# '\C/vipe$' | call lg#textprop#ansi() | endif
+    endif
 augroup END
 
 " Include shell cwd in 'path' {{{2
@@ -6781,6 +6807,57 @@ augroup source_files | au!
     "}}}
     au BufWritePost $MYVIMRC exe 'source '..expand('<afile>:p')
 augroup END
+
+" Send to server {{{2
+
+" Install a `]]` mapping  to send the current (N)Vim buffer  to a remote running
+" server, when Vim was started by `vipe`.   Useful to send the output of a shell
+" command to a running Vim instance.
+augroup send_to_server | au!
+    au StdinReadPost * call s:map_send_to_server()
+    au VimEnter * if $_ =~# '\C/vipe$' | call s:map_send_to_server() | endif
+augroup END
+
+fu s:map_send_to_server() abort
+    let file = $HOME..'/.vim/tmp/restart'
+    if filereadable(file)
+        let pgm = get(readfile(file), 0, '')
+    else
+        let pgm = 'vim'
+    endif
+
+    let bufname = expand('%:p')
+    if bufname is# ''
+        let bufname = tempname()
+        call writefile(getline(1, '$'), bufname)
+    endif
+
+    let b:_send_to_server = pgm..' --remote-tab '..bufname
+    nno <buffer><nowait><silent> ]] :<c-u>call <sid>send_to_server()<cr>
+endfu
+
+fu s:send_to_server() abort
+    if get(b:, '_did_send_to_server') | return | endif
+    sil call system(b:_send_to_server)
+    let b:_did_send_to_server = 1
+
+    if v:shell_error
+        echohl ErrorMsg
+        echom printf('the command "%s" failed', b:_send_to_server)
+        echohl NONE
+        return
+    endif
+
+    let msg = 'the buffer was sent to the '
+    if b:_send_to_server[:2] is# 'vim'
+        let msg ..= 'Vim server'
+    else
+        let msg ..= 'Neovim server'
+    endif
+    echohl ModeMsg
+    echom msg
+    echohl NONE
+endfu
 
 " Standard Input {{{2
 
@@ -9114,8 +9191,6 @@ endfu
 "
 " https://vi.stackexchange.com/questions/25151/how-to-change-vim-cursor-shape-in-virtual-console
 " https://vi.stackexchange.com/questions/25093/how-to-use-16-color-colorscheme-in-tty
-
-
 
 
 

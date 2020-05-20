@@ -8,6 +8,9 @@
 # It would break them too (maybe because it removes the space key binding?).
 #}}}
 bindkey -e
+# The previous command automatically installs a bunch of key bindings.
+# This one is annoying, because we hit it by accident too often.  It's distracting.
+bindkey -r '\eh'
 
 # Why 65536?{{{
 #
@@ -393,9 +396,11 @@ unalias run-help >/dev/null 2>&1
 # Where is this `run-help` function?{{{
 #
 # It should be in:
+#
 #     /usr/share/zsh/functions/Misc/run-help
 #
 # Otherwise, have a look at:
+#
 #     % dpkg -L zsh | grep /run-help$
 #}}}
 # What should I do if `run-help` doesn't work?{{{
@@ -412,15 +417,17 @@ unalias run-help >/dev/null 2>&1
 #
 # If they are not in the directory, try to generate them.
 # Download this perl script:
-#     https://github.com/zsh-users/zsh/blob/master/Util/helpfiles
+# https://github.com/zsh-users/zsh/blob/master/Util/helpfiles
 #
 # And use it:
+#
 #     perl /path/to/helpfiles  dest
 #                              │
 #                              └ where you want the helpfiles to be written
 #
 # Then, export  `HELPDIR` with the  value of  the directory where  you generated
 # your helpfiles:
+#
 #     export HELPDIR=/path/to/dir
 #}}}
 autoload -Uz run-help
@@ -918,8 +925,7 @@ cc() { #{{{2
   #           └ lists the numbers and the corresponding directories in abbreviated form, one per line
 
   if [[ "$dir" =~ '^~' ]]; then
-    # expand `~/` and named directories
-    # TODO: `${~name}` is probably wrong.{{{
+    # `${~name}` to expand `~/` and named directories{{{
     #
     # It's documented at: `man zshexpn /PARAMETER EXPANSION/;/${\~spec}`:
     #
@@ -1954,147 +1960,193 @@ nv() { #{{{2
 #    │
 #    └ You want to prevent the  change of `IFS` from affecting the current shell?
 # Ok. Then, use `local IFS`.
-# Do *not*  use parentheses  to surround  the body  of the  function and  create a
-# subshell. It could cause an issue when we suspend then restart Vim.
+# Do *not*  use parentheses to  surround the body of  the function and  create a
+# subshell.  It could cause an issue when we suspend then restart Vim.
 # https://unix.stackexchange.com/a/445192/289772
 
   emulate -L zsh
 
-  # check whether a Vim server is running
-  #
-  #                              ┌ Why do we look for a server whose name is VIM?{{{
-  #                              │
-  #                              │ By default, when we execute:
-  #                              │         vim --remote file
-  #                              │
-  #                              │ ... without `--servername`, Vim tries to open `file` in a Vim server
-  #                              │ whose name is VIM.
-  #                              │ So, we'll use this name for our default server.
-  #                              │ This way, we won't have to specify the name of the server later.
-  #                              │}}}
-  if vim --serverlist | grep -qx VIM; then
-  #                           ││{{{
-  #                           │└ eXact match
-  #                           │
-  #                           │  gVim starts with a server whose name is GVIM.
-  #                           │  Because of this, if gVim is running and you don't pass `-x` to `grep`,
-  #                           │  you wouldn't be able to restart Vim (SPC R).
-  #                           │
-  #                           └ be quiet (no output); if you find sth, just return 0
-  #}}}
-
-    # From now on, assume a VIM server is running.
-
-    # If no argument was given, just start a new Vim session.
-    if [[ $# -eq 0 ]]; then
-      vim
-
-    # If the 1st argumennt is `-b`, we want to edit binary files.
-    elif [[ $1 == -b ]]; then
-      # Get rid of `-b` before send the rest of the arguments to the server, by
-      # shifting the arguments to the right.
-      shift 1
-      # Make sure that the shell uses a space, and only a space, to separate
-      # 2 consecutive arguments, when it will expand the special parameter `$*`.
-      local IFS=' '
-
-      # send the filenames to the server
-      vim --remote "$@"
-      # For each buffer in the arglist:{{{
-      #
-      #    - enable the 'binary' option.
-      #      Among other things, il will prevent Vim from doing any kind of
-      #      conversion, which could damage the files.
-      #
-      #    - set the filetype to `xxd` (to have syntax highlighting)
-      #}}}
-      vim --remote-send ":argdo setl binary ft=xxd<cr>"
-      # filter the contents of the binary buffer through `xxd`
-      vim --remote-send ":argdo %!xxd<cr><cr>"
-
-    # If the 1st argument is `-d`, we want to compare files.
-    elif [[ $1 == -d ]]; then
-      shift 1
-      local IFS=' '
-      # open a new tabpage
-      vim --remote-send ":tabnew<cr>"
-      # send the files to the server
-      vim --remote "$@"
-      # display the buffers of the arglist in a dedicated vertical split
-      vim --remote-send ":argdo vsplit<cr>:q<cr>"
-      # execute `:diffthis` in each window
-      vim --remote-send ":windo diffthis<cr>"
-
-    # If the 1st argument is `-o`, we want to open each file in a dedicated horizontal split
-    elif [[ $1 == "-o" ]]; then
-
-      shift 1
-      local IFS=' '
-
-      vim --remote-send ":split<cr>"
-      vim --remote "$@"
-      vim --remote-send ":argdo split<cr>:q<cr><cr>"
-      #                                  ├────┘
-      #                                  └ close last window, because the last file
-      #                                    is displayed twice, in 2 windows
-
-    # If the 1st argument is `-O`, we want to open each file in a dedicated vertical split
-    elif [[ $1 == -O ]]; then
-      shift 1
-      local IFS=' '
-      vim --remote-send ":vsplit<cr>"
-      vim --remote "$@"
-      vim --remote-send ":argdo vsplit<cr>:q<cr><cr>"
-
-    # If the 1st argument is `-p`, we want to open each file in a dedicated tabpage.
-    elif [[ $1 == -p ]]; then
-      shift 1
-      local IFS=' '
-      vim --remote-send ":tabnew<cr>"
-      vim --remote "$@"
-      vim --remote-send ":argdo tabedit<cr>:q<cr>"
-
-    # If the 1st argument is `-q`, we want to populate the qfl with the output of a shell command.{{{
-    #
-    # The syntax should be:
-    #
-    #               ┌ Use single quotes to prevent the current shell from expanding a glob.
-    #               │ The glob is for the Vim function `system()`, which will send it back
-    #               │ to another shell later.
-    #               │
-    #         nv -q 'grep -Rn foo *'
-    #
-    # This syntax is NOT possible with Vim:
-    #
-    #         vim -q grep -Rn foo *       ✘
-    #
-    # With Vim, you should type:
-    #
-    #         vim -q =(grep -Rn foo *)    ✔
-    #}}}
-    elif [[ $1 == -q ]]; then
-      shift 1
-      local IFS=' '
-
-      # Why not `$@`?{{{
-      #
-      # $@ would be expanded into:
-      #
-      #     '$1' '$2' ...
-      #
-      # ... but `system()` expects a single string.
-      #}}}
-      vim --remote-send ":cexpr system('$*')<cr>"
-
-    # If no option was used, `-[bdoOpq]`, we just want to send files to the server.
-    else
-      vim --remote "$@"
-    fi
-
-  # Finally, if `grep` didn't find any VIM server earlier, start one.
+  local file pgm server
+  file="$HOME/.vim/tmp/restart"
+  if [[ -f "$file" ]]; then
+    pgm="$(<"$file")"
   else
-    # For Nvim, use `--listen` instead of `--servername`.
-    vim -w /tmp/.vimkeys --servername VIM "$@"
+    pgm='vim'
+  fi
+  if [[ "$pgm" == 'vim' ]]; then
+    server='VIM'
+  else
+    # Make sure to specify the full path to the socket.{{{
+    #
+    # Otherwise, if you restart Nvim after changing the cwd, the server name may
+    # not be respected:
+    #
+    #     $ nvim -u NONE -i NONE --listen 'TEST' +'cd / | qa'
+    #     $ nvim -u NONE -i NONE --listen 'TEST'
+    #     :echo v:servername
+    #     /tmp/nvimwKc4Ve/0~
+    #
+    # Right before changing Nvim's cwd for the first time, Nvim creates a socket
+    # in the cwd.
+    #
+    # Removing this socket fixes the issue.
+    # Or, specifying an absolute path to the socket:
+    #
+    #     $ nvim -u NONE -i NONE --listen '/tmp/TEST' +'cd / | qa'
+    #     $ nvim -u NONE -i NONE --listen '/tmp/TEST'
+    #     :echo v:servername
+    #     /tmp/TEST~
+    #
+    # In any case,  something needs to be  done, because it can be  an issue for
+    # `vim-session` if  it checks the server  name matches a known  value before
+    # trying to restore the last session.
+    #}}}
+    server='/tmp/nvimsocket'
+  fi
+
+  # if no server is running, just start one
+  # Why do you look for a server whose name is VIM?{{{
+  #
+  # By default, when you execute:
+  #
+  #     $ vim --remote file
+  #
+  # ... without `--servername`, Vim tries to open `file` in a Vim server
+  # whose name is VIM.
+  # So, we use this name for our default server.
+  # This way, we won't have to specify the name of the server later.
+  # }}}
+  # Why the `-x` flag for `grep(1)`?{{{
+  #
+  # It stands for "eXact match".
+  #
+  # It's  necessary to  handle the  case where  gVim is  currently running;  the
+  # latter becomes a server  whose name is GVIM.  Because of  this, if you don't
+  # pass `-x` to `grep(1)`, you can't restart Vim (`SPC R`) while gVim is running.
+  #}}}
+  if ! "$pgm" --serverlist | grep -qx "$server"; then
+    if [[ "$pgm" == 'vim' ]]; then
+      vim -w /tmp/.vimkeys --servername "$server" "$@"
+    else
+      nvim -w /tmp/.vimkeys --listen "$server" "$@"
+    fi
+    return
+  fi
+
+  # if no argument was given, just start a new Vim session
+  if [[ $# -eq 0 ]]; then
+    "$pgm"
+    return
+  fi
+
+  # From now on, you can assume a server is running.
+
+  # Save the tmux pane id of the Vim server now.  *Before* the other `--remote-*`.{{{
+  #
+  # Otherwise, there would  be a noticeable delay between the  moment the server
+  # has executed/evaluated our command, and the moment it's focused.
+  #}}}
+  if [[ -n "$TMUX" ]]; then
+    pane_id="$("$pgm" --remote-expr "\$TMUX_PANE")"
+  fi
+
+  # if the 1st argumennt is `-b`, we want to edit binary files
+  if [[ $1 == -b ]]; then
+    # Get rid of `-b` before send the rest of the arguments to the server, by
+    # shifting the arguments to the right.
+    shift 1
+    # Make sure that the shell uses a space, and only a space, to separate
+    # 2 consecutive arguments, when it will expand the special parameter `$*`.
+    local IFS=' '
+
+    # send the filenames to the server
+    "$pgm" --remote "$@" --servername "$server"
+    # For each buffer in the arglist:{{{
+    #
+    #    - enable the 'binary' option.
+    #      Among other things, il will prevent Vim from doing any kind of
+    #      conversion, which could damage the files.
+    #
+    #    - set the filetype to `xxd` (to have syntax highlighting)
+    #}}}
+    "$pgm" --remote-send ":argdo setl binary ft=xxd<cr>" --servername "$server"
+    # filter the contents of the binary buffer through `xxd`
+    "$pgm" --remote-send ":argdo %!xxd<cr><cr>" --servername "$server"
+
+  # if the 1st argument is `-d`, we want to compare files
+  elif [[ $1 == -d ]]; then
+    shift 1
+    local IFS=' '
+    # open a new tabpage
+    "$pgm" --remote-send ":tabnew<cr>" --servername "$server"
+    # send the files to the server
+    "$pgm" --remote "$@" --servername "$server"
+    # display the buffers of the arglist in a dedicated vertical split
+    "$pgm" --remote-send ":argdo vsplit<cr>:q<cr>" --servername "$server"
+    # execute `:diffthis` in each window
+    "$pgm" --remote-send ":windo diffthis<cr>" --servername "$server"
+
+  # if the 1st argument is `-o`, we want to open each file in a dedicated horizontal split
+  elif [[ $1 == "-o" ]]; then
+    shift 1
+    local IFS=' '
+
+    "$pgm" --remote-send ":split<cr>" --servername "$server"
+    "$pgm" --remote "$@" --servername "$server"
+    # Why `:q<cr>`?{{{
+    #
+    # To close the last window, because the last file is displayed twice, in 2
+    # windows.
+    #}}}
+    "$pgm" --remote-send ":argdo split<cr>:q<cr><cr>" --servername "$server"
+
+  # if the 1st argument is `-O`, we want to open each file in a dedicated vertical split
+  elif [[ $1 == -O ]]; then
+    shift 1
+    local IFS=' '
+    "$pgm" --remote-send ":vsplit<cr>" --servername "$server"
+    "$pgm" --remote "$@" --servername "$server"
+    "$pgm" --remote-send ":argdo vsplit<cr>:q<cr><cr>" --servername "$server"
+
+  # if the 1st argument is `-p`, we want to open each file in a dedicated tab page
+  elif [[ $1 == -p ]]; then
+    shift 1
+    local IFS=' '
+    "$pgm" --remote-send ":tabnew<cr>" --servername "$server"
+    "$pgm" --remote "$@" --servername "$server"
+    "$pgm" --remote-send ":argdo tabedit<cr>:q<cr>" --servername "$server"
+
+  # if the 1st argument is `-q`, we want to populate the qfl with the output of a shell command
+  elif [[ $1 == -q ]]; then
+    shift 1
+    local IFS=' '
+
+    # Why don't you just send the shell command to Vim, and make it execute via `:cexpr system()`?{{{
+    #
+    # It makes the code needlessly more complex:
+    #
+    #    - it causes Vim to start yet another shell (via `system()`)
+    #
+    #    - `system()`'s shell shell is run in Vim's cwd, instead of your original shell's cwd;
+    #      if they're different, you may get unexpected results
+    #}}}
+    tmp="$(mktemp /tmp/.vim_quickfix.XXXXXXXXXX)"
+    # let's write the command into the errorfile so that we can set the title of the qf window
+    printf -- "$@\n" >"$tmp"
+    # `${=name}` and `${~name}` to perform resp. word-splitting and globbing
+    ${~${=@}} >>"$tmp" 2>/dev/null
+    "$pgm" --remote-expr "qf#nv('$tmp')" --servername "$server"
+
+  # if no option was used (`-[bdoOpq]`) we just want to send files to the server
+  else
+    "$pgm" --remote "$@" --servername "$server"
+  fi
+
+  # focus the Vim server
+  if [[ -n "$TMUX" ]]; then
+    tmux switchc -Z -t "$pane_id"
+    # need to redraw if the tmux pane is zoomed
+    "$pgm" --remote-send '<c-l>'
   fi
 }
 
@@ -2103,7 +2155,7 @@ nv() { #{{{2
 # MWE:
 #
 #     $ vim
-#     :call system('kill -USR1 $(ps -p '.getpid().' -o ppid=)') | q
+#     :call system('kill -USR1 $(ps -p '..getpid()..' -o ppid=)') | q
 #     :stop
 #     $ fg
 #     fg: no current job~
@@ -2160,10 +2212,6 @@ __catch_signal_usr1() {
   trap __catch_signal_usr1 USR1
   # useful to get rid of error messages which were displayed during last Vim session
   clear
-  # TODO: If we quit Neovim, we should restart Neovim, not Vim.
-  # Idea: Use  `USR2` when  quitting  Nvim;  install a  second  trap; each  trap
-  # invokes `nv`  with an argument  or a variable set  to let the  function know
-  # which program it must invoke.
   nv
 }
 
@@ -2380,7 +2428,7 @@ tor() { #{{{2
   #     $ cd ~/.local/bin/tor-browser_en-US/
   #     $ ./start-tor-browser.desktop --register-app
   #}}}
-  cd ~/.local/bin/tor-browser_en-US/
+  cd "$HOME/.local/bin/tor-browser_en-US/"
   ./start-tor-browser.desktop
   cd - >/dev/null
 }
@@ -3222,10 +3270,10 @@ alias sh='$HOME/.local/bin/dash -E'
 # command name), but yes, sudo can be followed by `VAR=value`.
 # From `man sudo /DESCRIPTION/;/VAR=value`:
 #
-# > Environment variables to be set for the command may also be passed on the
-# > command line in the form of VAR=value, e.g.
-# > LD_LIBRARY_PATH=/usr/local/pkg/lib.  Variables passed on the command line
-# > are subject to restrictions imposed by the security policy plugin.
+# >     Environment variables to be set for the command may also be passed on the
+# >     command line in the form of VAR=value, e.g.
+# >     LD_LIBRARY_PATH=/usr/local/pkg/lib.  Variables passed on the command line
+# >     are subject to restrictions imposed by the security policy plugin.
 #}}}
 #     So why don't you use it?  Why `env`?{{{
 #
@@ -3268,7 +3316,7 @@ alias sh='$HOME/.local/bin/dash -E'
 # our `ls` alias (`ls` is only the second word, not the first).
 # The solution is given at `man zshbuiltins /^\s*alias`:
 #
-# > A trailing space in value causes the next word to be checked for alias expansion.
+# >     A trailing space in value causes the next word to be checked for alias expansion.
 #}}}
 alias sudo='\sudo -E env "PATH=$PATH" '
 #                                    ^
@@ -3408,13 +3456,13 @@ if [[ -n "$VIM_TERMINAL" ]]; then
   add-zsh-hook -Uz chpwd _vim_lcd
   _vim_lcd() {
     # in Vim, see `:h terminal-api`
-    printf -- '\033]51;["call", "Tapi_lcd", "%q"]\007' "$(pwd)"
+    printf -- '\033]51;["call", "Tapi_exe", ["lcd", "%q"]]\007' "$(pwd)"
   }
 # same thing in Nvim
 elif [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
   add-zsh-hook -Uz chpwd _nvim_lcd
   _nvim_lcd() {
-    nvr --servername "$VIM_SERVERNAME" --remote-expr "$(printf -- 'Tapi_lcd(0, "%q")' "$(pwd)")"
+    nvr --remote-expr "$(printf -- 'Tapi_exe(0, ["lcd", "%q"])' "$(pwd)")"
   }
 fi
 

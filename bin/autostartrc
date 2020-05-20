@@ -106,7 +106,7 @@ redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
 #
 # Finally:
 #
-# > ... the unclutter source code is terrible, so I wrote xbanish.
+# >     ... the unclutter source code is terrible, so I wrote xbanish.
 #
 # And indeed the source code of xbanish is shorter.
 # Use `$ apt-get source` to get the source code of unclutter.

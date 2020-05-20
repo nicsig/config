@@ -759,7 +759,7 @@ fu s:cursor() abort "{{{2
     if !exists('g:termname')
         " in case `vim-lg` is not enabled
         try
-            " never write a global constant in uppercase; it could raise `E741` because we include `!` in `'vi'`
+            " never write a *global* constant in uppercase; it could raise `E741` if you include `!` in `'vi'`
             const g:termname = lg#termname()
         catch
             const g:termname = 'st'

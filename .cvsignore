@@ -17,13 +17,13 @@
 #
 # That's what tpope recommends in the README file for pathogen.
 #
-# > I'll teach you how to ignore tags globally:
+# >     I'll teach you how to ignore tags globally:
 #
 #     $ git config --global core.excludesfile '~/.cvsignore'
 #     $ echo tags >> ~/.cvsignore
 #
-# > While any filename will work, I've chosen to follow the ancient tradition of
-# > .cvsignore because utilities like rsync use it, too.
+# >     While any filename will work, I've chosen to follow the ancient tradition of
+# >     .cvsignore because utilities like rsync use it, too.
 #
 # Source: https://github.com/tpope/vim-pathogen
 #}}}

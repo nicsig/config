@@ -5,10 +5,10 @@
 #
 # From: https://unix.stackexchange.com/a/59194/289772
 #
-# > You can set your  own key bindings with the lesskey  program.  Create a file
-# > called .lesskey in your home directory containing your keybindings, then run
-# > the lesskey command  to convert them into a form  that less understands (the
-# > compiled bindings are stored in ~/.less).
+# >     You can set your  own key bindings with the lesskey  program.  Create a file
+# >     called .lesskey in your home directory containing your keybindings, then run
+# >     the lesskey command  to convert them into a form  that less understands (the
+# >     compiled bindings are stored in ~/.less).
 #}}}
 
 # scroll to the left/right by pressing `h` and `l`
@@ -16,28 +16,28 @@
 #
 # From: https://unix.stackexchange.com/a/59194/289772
 #
-# > There is no command that scrolls one character left or right.
-# > You can  do that by  passing the numeric argument  1 to the  left-scroll and
-# > right-scroll commands.
+# >     There is no command that scrolls one character left or right.
+# >     You can  do that by  passing the numeric argument  1 to the  left-scroll and
+# >     right-scroll commands.
 #
-# > You can't directly set a binding for a command with an argument, but you can
-# > **set a binding to run a command and then parse more keys**.
-# > So run the noaction command, then parse  a key sequence that runs the scroll
-# > command with the desired arguments.
+# >     You can't directly set a binding for a command with an argument, but you can
+# >     **set a binding to run a command and then parse more keys**.
+# >     So run the noaction command, then parse  a key sequence that runs the scroll
+# >     command with the desired arguments.
 #
 # ---
 #
 # Also, from `man lesskey /PRECEDENCE`:
 #
-# > a key may be defined to do nothing by using the action "noaction".
+# >     a key may be defined to do nothing by using the action "noaction".
 #
 # And from `man lesskey /COMMAND SECTION`:
 #
-# > An action may be followed by an "extra" string.
-# > When such a command is entered  while running less, the action is performed,
-# > and then the extra string is parsed, just as if it were typed in to less.
-# > This feature can be  used in certain cases to extend  the functionality of a
-# > command.
+# >     An action may be followed by an "extra" string.
+# >     When such a command is entered  while running less, the action is performed,
+# >     and then the extra string is parsed, just as if it were typed in to less.
+# >     This feature can be  used in certain cases to extend  the functionality of a
+# >     command.
 # }}}
 # Doesn't our `h` key binding shadow the default help command?{{{
 #
@@ -51,4 +51,21 @@ l noaction 3\e)
 \^ no-scroll
 _ no-scroll
 $ end-scroll
+
+e visual
+# `visual` fails if `less(1)` reads from its stdin:{{{
+#
+#     Cannot edit standard input  (press RETURN)~
+#
+# Workaround: pipe the input of `less(1)` to Vim:
+# https://unix.stackexchange.com/a/43460/289772
+#}}}
+E noaction g|$vim -^M
+#          │││├───┘│{{{
+#          ││││    └ we're on the less command-line; validate the command
+#          │││└ the arbitrary shell command is `vim -`
+#          ││└ the section goes from the current screen up to the bottom of the input
+#          │└ pipe a section of the input to an arbitrary shell command
+#          └ go to beginning of input
+#}}}
 

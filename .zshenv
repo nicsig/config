@@ -304,11 +304,11 @@ export LC_ALL=en_US.UTF-8
 # If you still see control characters, you can use `r` instead of `R`.
 # However, from `man less`:
 #
-# > Warning: when the  -r option is used,  less cannot keep track  of the actual
-# > appearance of the  screen (since this depends on how  the screen responds to
-# > each type of control character).
-# > Thus, various display problems may result, such as long lines being split in
-# > the wrong place.
+# >     Warning: when the  -r option is used,  less cannot keep track  of the actual
+# >     appearance of the  screen (since this depends on how  the screen responds to
+# >     each type of control character).
+# >     Thus, various display problems may result, such as long lines being split in
+# >     the wrong place.
 #}}}
 #   `S`?{{{
 #
@@ -584,10 +584,10 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/Vcs/dasht/man:${M
 #
 # From `man upstart /--user`:
 #
-# > --user Starts  in user mode, as used for user sessions. Upstart will be
-# >        run as an unprivileged user, reading  configuration  files  from
-# >        configuration locations as per roughly XDG Base Directory Speci‐
-# >        fication. See init(5) for further details.
+# >     --user Starts  in user mode, as used for user sessions. Upstart will be
+# >            run as an unprivileged user, reading  configuration  files  from
+# >            configuration locations as per roughly XDG Base Directory Speci‐
+# >            fication. See init(5) for further details.
 #
 # I think that because of `--user`, the upstart process reads `~/.profile` which contains:
 #
@@ -719,9 +719,9 @@ export TLDR_QUOTE='italic'
 
 # Make WeeChat use less CPU.{{{
 #
-# >   8.3. How can I tweak WeeChat to use less CPU?
-# >   ...
-# >   Set the TZ variable (for example: export TZ="Europe/Paris"), to prevent frequent access to file /etc/localtime.
+# >     8.3. How can I tweak WeeChat to use less CPU?
+# >     ...
+# >     Set the TZ variable (for example: export TZ="Europe/Paris"), to prevent frequent access to file /etc/localtime.
 #
 # https://weechat.org/files/doc/devel/weechat_faq.en.html#cpu_usage
 #}}}

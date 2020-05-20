@@ -19,9 +19,9 @@ fi
 #
 # https://unix.stackexchange.com/a/88266/232487
 #
-# > Many distributions,  display managers and desktop  environments arrange to
-# > run ~/.profile, either by explicitly  sourcing it from the startup scripts
-# > or by running a login shell.
+# >     Many distributions,  display managers and desktop  environments arrange to
+# >     run ~/.profile, either by explicitly  sourcing it from the startup scripts
+# >     or by running a login shell.
 #}}}
 # Does `$PATH` get its value only from here? #{{{
 #
@@ -49,10 +49,10 @@ fi
 #}}}
 # Why don't you use `export` for `$PATH`?{{{
 #
-# > You don't  need export if  the variable is  already in the  environment: any
-# > change of the  value of the variable is reflected  in the environment.¹ PATH
-# > is pretty much always in the environment; all unix systems set it very early
-# > on (usually in the very first process, in fact).
+# >     You don't  need export if  the variable is  already in the  environment: any
+# >     change of the  value of the variable is reflected  in the environment.¹ PATH
+# >     is pretty much always in the environment; all unix systems set it very early
+# >     on (usually in the very first process, in fact).
 #
 # Source: https://unix.stackexchange.com/a/26059/289772
 #}}}

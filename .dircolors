@@ -155,7 +155,7 @@
 #
 # Here's how it's documented at `man console_codes`:
 #
-# > 2       set half-bright (simulated with color on a color display)
+# >     2       set half-bright (simulated with color on a color display)
 #
 # It makes the terminal emulate the color whose code follows the semicolon, in a
 # half-bright tone.
