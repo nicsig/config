@@ -3390,7 +3390,7 @@ endfu
 " override all of fugitive mappings.
 "}}}
 augroup unmap_fugitive | au!
-    au FileType fugitive nunmap <buffer> U
+    au FileType fugitive sil! nunmap <buffer> U
 augroup END
 
 nno <silent> Ud :<c-u>Gdiff<cr>
