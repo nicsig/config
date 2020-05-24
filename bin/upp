@@ -17,7 +17,7 @@
 # Otherwise, there can be spurious bugs in the current session.
 # To avoid them, start Vim from a NEW shell.
 #}}}
-# Tmux: Do *not* compile from a commit which has not been checked by travis!{{{
+# tmux: Do *not* compile from a commit which has not been checked by travis!{{{
 #
 # This kind of commit doesn't have an `autogen.sh` file.
 # And I think that `$ git describe` fails on such a commit...

@@ -40,16 +40,14 @@ TryExec=gvim
 # >     one. "-f" should  be used when gvim  is started by a program  that will wait
 # >     for the edit session to finish (e.g., mail or readnews).
 #}}}
-# Do *not* use `--remote-tab-silent`!{{{
+# Why starting a server?{{{
 #
-#     Exec=gvim --remote-tab-silent -f %F
-#     # gVim opens a file named `-f`
+# I  don't  want the  file  manager  to  open a  new  gVim  window each  time  I
+# double-click on a file.  I only want one window for all the files.
 #
-#     Exec=gvim -f --remote-tab-silent %F
-#     Exec=gvim -f %F --remote-tab-silent
-#     # gVim is not started
-# }}}
-Exec=gvim -f %F
+# See also: https://unix.stackexchange.com/q/588202/289772
+#}}}
+Exec=gvim -f --servername GVIM --remote-tab-silent %F
 Terminal=false
 Type=Application
 Keywords=Text;editor;

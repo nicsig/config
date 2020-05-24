@@ -3166,10 +3166,6 @@ alias qmv='\qmv --format=destination-only'
 
 alias fm='[[ -n "${TMUX}" ]] && [[ $(\tmux display -p "#W") == "zsh" ]] && \tmux rename-window fm; ranger'
 
-# rg {{{3
-
-alias rg='\rg -LS --vimgrep --color=auto'
-
 # sh {{{3
 
 # Purpose:{{{
@@ -4801,74 +4797,64 @@ bindkey -s '\eZ' '$(!!|fzf)'
 #          without `-s`, `sudo` would be interpreted as the name of a zle widget
 # }}}2
 # Menuselect {{{2
-# Warning: I've disabled all key bindings using a printable character.{{{
-#
-# It's annoying  to type a  key expecting a character  to be inserted,  while in
-# reality it's going to select another entry in the completion menu.
-#}}}
 
-# use vi-like keys in menu completion
-# bindkey -M menuselect 'h' backward-char
-#        │
+# Do *not* write this:
+#
+#     bindkey -M menuselect '^J' down-line-or-history
+#
+# It works in any terminal, except one opened from Vim.
+# The latter doesn't seem able to  distinguish `C-m` from `C-j`. At least when a
+# completion menu is opened.  Because of  that, when we would hit Enter/C-m, Vim
+# would move the cursor down, instead of selecting the current entry.
+bindkey -M menuselect '^J' down-line-or-history
+#        │{{{
 #        └ selects the `menuselect` keymap
 #
 #           `bindkey -l` lists all the keymap names
 #            for more info: man zshzle
-# bindkey -M menuselect 'l' forward-char
-# Do NOT write this:
-#         bindkey -M menuselect '^J' down-line-or-history
-#
-# It works in any terminal, except one opened from Vim.
-# The latter doesn't seem able to  distinguish `C-m` from `C-j`. At least when a
-# completion menu is  opened. Because of that, when we would  hit Enter/C-m, Vim
-# would move the cursor down, instead of selecting the current entry.
-# bindkey -M menuselect 'j' down-line-or-history
-bindkey -M menuselect '^J' down-line-or-history
-# bindkey -M menuselect 'k' up-line-or-history
+#}}}
 bindkey -M menuselect '^K' up-line-or-history
 
 bindkey -M menuselect '^H' backward-char
-# bindkey -M menuselect 'b' backward-char
-# bindkey -M menuselect 'B' backward-char
-# bindkey -M menuselect 'e' forward-char
-# bindkey -M menuselect 'E' forward-char
 bindkey -M menuselect '^L' forward-char
-# bindkey -M menuselect 'w' forward-char
-# bindkey -M menuselect 'W' forward-char
 
-# bindkey -M menuselect '^' beginning-of-line
-# bindkey -M menuselect '_' beginning-of-line
-# bindkey -M menuselect '$' end-of-line
-
-# bindkey -M menuselect 'gg' beginning-of-history
-# bindkey -M menuselect 'G'  end-of-history
-
-# TODO: How to repeat a zle function?{{{
+# Why do I need these 2 intermediate key bindings?{{{
 #
-# bindkey -M menuselect '^D'  5 down-line-or-history    ✘
+# The alternative would be sth like this:
 #
-#     __fast_down_line_or_history() {
-#       zle down-line-or-history
+#     fast-down-line-or-history() {
+#         zle down-line-or-history -n 5
 #     }
-#     zle -N __fast_down_line_or_history
-#     bindkey -M menuselect '^D'  __fast_down_line_or_history
+#     zle -N fast-down-line-or-history
+#     bindkey -M menuselect '^D' fast-down-line-or-history
 #
-# Actually, the problem comes from the `menuselect` keymap.
-# We can't bind any custom widget in this keymap:
-#
-#     __some_widget() {
-#       zle end-of-history
+#     fast-up-line-or-history() {
+#         zle up-line-or-history -n 5
 #     }
-#     zle -N __some_widget
-#     bindkey -M menuselect 'G' __some_widget
+#     zle -N fast-up-line-or-history
+#     bindkey -M menuselect '^U' fast-up-line-or-history
 #
+# But it wouldn't work because:
 #
-# G will insert G instead of moving the cursor on the last line of the
-# completion menu.
+# >     Note  that  the following  always  perform  the  same  task within  the  menu
+# >     selection map and cannot be replaced by user defined widgets, nor can the set
+# >     of functions be extended:
 #
-# Read:
-# man zshmodules (section `Menu selection`)
-# }}}
+# IOW, you can't bind any custom widget in the `menuselect` keymap.
+#
+# See:
+#
+#   - `man zshmodules /THE ZSH\/COMPLIST MODULE/;/Menu selection`
+#   - https://unix.stackexchange.com/a/588002/289772
+#}}}
+bindkey -M menuselect '\ej' down-line-or-history
+bindkey -M menuselect '\ek' up-line-or-history
+bindkey -M menuselect -s '^D' '\ej\ej\ej\ej\ej'
+bindkey -M menuselect -s '^U' '\ek\ek\ek\ek\ek'
+
+# move the mark to the first line of the next/previous group of matches
+bindkey -M menuselect '\ed' vi-forward-blank-word
+bindkey -M menuselect '\eu' vi-backward-blank-word
 
 bindkey -M menuselect '^O' accept-and-menu-complete
 #                          │
@@ -4878,10 +4864,10 @@ bindkey -M menuselect '^O' accept-and-menu-complete
 # By default `M-a` is bound to `accept-and-hold` which does the same thing.
 # `fzf.vim` seems to use `M-a` to do something vaguely similar: selecting
 # multiple entries in a menu.
-# Should we get rid of this C-o key binding and prefer M-a?
+# Should we get rid of this `C-o` key binding and prefer `M-a`?
 
-# In Vim we quit the completion menu with C-q (custom).
-# We want to do the same in zsh (by default it's C-g in zsh).
+# In Vim we quit the completion menu with `C-q` (custom).
+# We want to do the same in zsh (by default it's `C-g` in zsh).
 bindkey -M menuselect '^Q' send-break
 # }}}1
 # Abbreviations {{{1
@@ -5268,7 +5254,7 @@ setopt RM_STAR_SILENT
 # the option 'default-terminal'  in `tmux.conf`), which is one of  the few valid
 # value ({screen|tmux}[-256color]).
 #
-# One way to be sure that we're not connected to Tmux , is to check that `$TERM`
+# One way to be sure that we're not connected to tmux , is to check that `$TERM`
 # is set to 'xterm'.
 # That's the default value set by xfce4-terminal.
 #

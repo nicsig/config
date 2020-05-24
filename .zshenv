@@ -667,6 +667,11 @@ export PDFVIEWER=zathura
 # The report can be formatted with `TIMEFMT` (man zshparam).
 export REPORTTIME=15
 
+# ripgrep {{{1
+
+# https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md#configuration-file
+export RIPGREP_CONFIG_PATH="$HOME/.config/ripgreprc"
+
 # sudo {{{1
 
 # Purpose:{{{

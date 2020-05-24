@@ -35,8 +35,7 @@ endif
 " ---
 "
 " Alternatively, you can download it and read its documentation at:
-"
-"     http://personal.psu.edu/jcc8//software/latexmk-jcc/
+" http://personal.psu.edu/jcc8//software/latexmk-jcc/
 "
 " Once the script is downloaded, move it in `~/bin`.
 " Rename it into `latexmk` (i.e. remove `.pl`), or update the value of the

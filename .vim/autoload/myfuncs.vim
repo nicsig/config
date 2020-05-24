@@ -1013,6 +1013,38 @@ fu s:search_todo_text(dict) abort
     return dict
 endfu
 
+fu myfuncs#send_to_server() abort "{{{1
+    let file = $HOME..'/.vim/tmp/restart'
+    if filereadable(file)
+        let pgm = get(readfile(file), 0, '')
+    else
+        let pgm = 'vim'
+    endif
+
+    let file = expand('%:p')
+    if file is# ''
+        let file = tempname()
+        call writefile(getline(1, '$'), file)
+    endif
+
+    let cmd = pgm..' --remote-tab '..shellescape(file)
+    sil call system(cmd)
+
+    if v:shell_error
+        echohl ErrorMsg
+        echom printf('the command "%s" failed', cmd)
+        echohl NONE
+        return
+    endif
+
+    let msg = printf('the %s was sent to the %s server',
+        \ expand('%:p') is# '' ? 'buffer' : 'file',
+        \ pgm is# 'vim' ? 'Vim' : 'Neovim')
+    echohl ModeMsg
+    echom msg
+    echohl NONE
+endfu
+
 fu myfuncs#tab_toc() abort "{{{1
     if index(['help', 'man', 'markdown'], &ft) == -1
         return

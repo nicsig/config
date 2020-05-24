@@ -1,0 +1,11 @@
+# https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md#configuration-file
+
+--color=auto
+--follow
+
+# if you were to write this on the command-line, you would have to surround the glob with quotes
+--glob=!.git/*
+
+--hidden
+--smart-case
+--vimgrep

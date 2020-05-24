@@ -1272,25 +1272,16 @@ let g:ft_ignore_pat = '\.\%(Z\|gz\|bz2\|zip\|tgz\|log\)$\|^/proc/'
 " :grep {{{2
 
 " Define rg as the program to call when using the Ex commands: `:[l]grep[add]`.
-
-" What's `-L`?{{{
+" Don't write `2>/dev/null`.{{{
 "
-" `--follow`
+" It's useless here because of the default value of `'shellpipe'`:
 "
-" Follow symbolic links.
-" }}}
-"     `-S`?{{{
+"     shellpipe=2>&1| tee
+"               ^^^^
 "
-" `--smart-case`
+" The errors would be still parsed as invalid entries in your qfl.
 "}}}
-"     `--vimgrep`?{{{
-"
-" It disables the color codes in the output (⇔ `--color never`).
-" It prevents the matches from being grouped by file (⇔ `--no-heading`).
-" It  shows every  match on  its  own line,  including line  numbers and  column
-" numbers.
-"}}}
-set grepprg=rg\ -LS\ --vimgrep\ 2>/dev/null
+set grepprg=rg
 
 " Define how the output of rg must be parsed:
 "
@@ -1301,7 +1292,7 @@ set grepprg=rg\ -LS\ --vimgrep\ 2>/dev/null
 "               │  │  │  │
 set grepformat=%f:%l:%c:%m,%f:%l:%m
 "   │
-"   └ default value:  %f:%l:%m,%f:%l%m,%f  %l%m
+"   └ default value:  `%f:%l:%m,%f:%l%m,%f  %l%m`
 
 " hidden {{{2
 
@@ -2821,7 +2812,7 @@ set wildmode=full
 "     :e SPC Tab C-j
 "     " C-j should enter the directory; instead it inserts ^I
 "
-" It's probably a bug.  See:
+" See:
 " https://github.com/vim/vim/issues/4954
 " https://groups.google.com/d/msg/vim_dev/xf5TRb4uR4Y/djk2dq2poaQJ
 " http://stackoverflow.com/a/14849216
@@ -2835,10 +2826,7 @@ set wildmode=full
 "
 " With:
 "
-"     cno <expr> <m-n> <down> feedkeys('<down>', 'in'..(empty(reg_executing()) ? '' : 't'))[-1]
-"
-" See  our  comments in  `cmdline#tab#custom()`  to  understand the  purpose  of
-" `reg_executing()`.
+"     cno <expr> <m-n> <down> feedkeys('<down>', 'in'..(empty(reg_recording()) ? 't' : ''))[-1]
 "}}}
 set wildchar=9
 set wildcharm=9
@@ -2970,9 +2958,9 @@ let maplocalleader = "\<s-f6>"
 " Command-Line {{{2
 " C-r C-h       fuzzy search history {{{3
 
-" Why not C-r C-r?{{{
+" Why not `C-r C-r`?{{{
 "
-" Already taken (:h c^r^r).
+" Already taken (`:h c^r^r`).
 "}}}
 " Why not C-r C-r C-r ?{{{
 "
@@ -3285,7 +3273,7 @@ nno <silent> <space>an :<c-u>arglocal %<cr>
 "}}}
 nno <silent> <space>i :<c-u>call <sid>run_current_line('websearch')<cr>
 
-" Tmux command-prompt has too limited editing capabilities.
+" tmux command-prompt has too limited editing capabilities.
 " Let's use a Vim buffer to leverage Vim's editing capabilities.
 nno <silent> <space>x :<c-u>call <sid>run_current_line('tmuxprompt')<cr>
 
@@ -3705,14 +3693,14 @@ nno <expr> z. 'zszH'
 " No, it will simply repeat the previous edit.
 " Consider this text:
 "
-"     Hellzo peozple.
+"     Helzo peozple.
 "
 " Move your cursor on `Hellzo`, and press `z=` to fix it.
 " Move your cursor on `peozple`, and press `.` to repeat.
-" Vim will simply replace the word with `Hello`, it won't try to fix `people`.
+" Vim will simply replace the word with `Hello`, it won't try to fix `peozple`.
 "
-" This is normal, do NOT try to change the code so that it opens a new menu.
-" From `z=`:
+" This is normal, do *not* try to change the code so that it opens a new menu.
+" From `:h z=`:
 "
 " >     When a word was replaced the redo command "." will
 " >     repeat the word replacement.  This works like "ciw",
@@ -5120,7 +5108,7 @@ xno <c-g>n :norm!<space>
 " Do not try to install an `<expr>` mapping which would return the keys.{{{
 "
 " Before the  function checks the  position of the  visual marks, you  must have
-" quit the visual mode so that they  have been updated.
+" quit visual mode so that they have been updated.
 " But you can't do that if the function is called while the text is locked.
 "}}}
 xno <silent> / :<c-u>call <sid>visual_slash()<cr>
@@ -5130,9 +5118,10 @@ fu s:visual_slash() abort
     else
         " Do not reselect the visual selection with `gv`.{{{
         "
-        " It would make move the end of the selection.
-        " That's not what we want.
-        " We want to search in the last visual selection.
+        " It could make move the end of the selection when you type some pattern
+        " which matches inside.  That's not what we want.
+        " We want to search  in the last visual selection as  it was defined; we
+        " don't want to redefine it in the process.
         "}}}
         call feedkeys('/\%V', 'in')
     endif
@@ -5556,7 +5545,7 @@ fu s:diff_orig() abort
     exe 'vnew '..tempfile
     setl buftype=nofile nobuflisted noswapfile nowrap
 
-    sil 0r #
+    sil 0r ++edit #
     $d_
     setl nomodifiable readonly
 
@@ -6810,54 +6799,10 @@ augroup END
 
 " Send to server {{{2
 
-" Install a `]]` mapping  to send the current (N)Vim buffer  to a remote running
-" server, when Vim was started by `vipe`.   Useful to send the output of a shell
-" command to a running Vim instance.
-augroup send_to_server | au!
-    au StdinReadPost * call s:map_send_to_server()
-    au VimEnter * if $_ =~# '\C/vipe$' | call s:map_send_to_server() | endif
-augroup END
-
-fu s:map_send_to_server() abort
-    let file = $HOME..'/.vim/tmp/restart'
-    if filereadable(file)
-        let pgm = get(readfile(file), 0, '')
-    else
-        let pgm = 'vim'
-    endif
-
-    let bufname = expand('%:p')
-    if bufname is# ''
-        let bufname = tempname()
-        call writefile(getline(1, '$'), bufname)
-    endif
-
-    let b:_send_to_server = pgm..' --remote-tab '..bufname
-    nno <buffer><nowait><silent> ]] :<c-u>call <sid>send_to_server()<cr>
-endfu
-
-fu s:send_to_server() abort
-    if get(b:, '_did_send_to_server') | return | endif
-    sil call system(b:_send_to_server)
-    let b:_did_send_to_server = 1
-
-    if v:shell_error
-        echohl ErrorMsg
-        echom printf('the command "%s" failed', b:_send_to_server)
-        echohl NONE
-        return
-    endif
-
-    let msg = 'the buffer was sent to the '
-    if b:_send_to_server[:2] is# 'vim'
-        let msg ..= 'Vim server'
-    else
-        let msg ..= 'Neovim server'
-    endif
-    echohl ModeMsg
-    echom msg
-    echohl NONE
-endfu
+" Install a mapping  to send the current (N)Vim buffer/file  to a remote running
+" server.   This is  useful –  in particular  – to  send the  output of  a shell
+" command to our main Vim instance.
+nno <silent> ]<c-s> :<c-u>call myfuncs#send_to_server()<cr>
 
 " Standard Input {{{2
 
@@ -7007,7 +6952,7 @@ let s:NO_TRAILING_WHITESPACE_FT =<< trim END
 END
 
 augroup trailing_whitespace | au!
-    au VimEnter,WinEnter,InsertLeave * call s:trailing_whitespace(v:true)
+    au VimEnter,WinEnter,BufWinEnter,InsertLeave * call s:trailing_whitespace(v:true)
     au InsertEnter * call s:trailing_whitespace(v:false)
     " We don't want a match in a preview window.{{{
     "
@@ -7040,6 +6985,7 @@ augroup trailing_whitespace | au!
     " been correctly set.
     "}}}
     if !has('nvim')
+        au TerminalWinOpen * call s:trailing_whitespace(v:false)
         " Why `BufWinEnter`?{{{
         "
         "     :term
@@ -7050,8 +6996,14 @@ augroup trailing_whitespace | au!
         "               C-^
         "
         " Without `BufWinEnter`, trailing whitespace is highlighted.
+        "
+        " ---
+        "
+        " Btw, `BufWinEnter`  can't replace `TerminalWinOpen`;  probably because
+        " `'buftype'` has not been set when  the first `BufWinEnter` is fired in
+        " a terminal buffer.
         "}}}
-        au TerminalWinOpen,BufWinEnter * call s:trailing_whitespace(v:false)
+        au BufWinEnter * if &bt is# 'terminal' | call s:trailing_whitespace(v:false) | endif
     endif
 
     " Why do you delay the call to `s:trailing_whitespace()`?{{{
@@ -7102,7 +7054,7 @@ augroup trailing_whitespace | au!
     " As a result, the next time you ask to see the same help file, Vim has to read
     " the file again, which triggers `BufReadPre`, `FileType` and `BufReadPost`.
     "}}}
-    au BufWinEnter {$VIMRUNTIME,$HOME/.vim,$HOME/.vim/*}/doc/*.txt call s:trailing_whitespace(0)
+    au BufWinEnter {$VIMRUNTIME,$HOME/.vim,$HOME/.vim/*}/doc/*.txt call s:trailing_whitespace(v:false)
     " Same issue when we split a window to read a text file:{{{
     "
     "     :e /tmp/vim.vim
@@ -7114,10 +7066,10 @@ augroup trailing_whitespace | au!
     " because it's not code; so we don't care about its presence.
     "}}}
     exe 'au FileType '
-        \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_,v -> v != ''}), ',')
-        \ ..' call s:trailing_whitespace(v:false)'
+       \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_,v -> v != ''}), ',')
+       \ ..' call s:trailing_whitespace(v:false)'
     " we still have an undesired match when we run `:VimPatches 8.1` *twice*
-    au BufWinEnter * if &ft is# 'text' | call s:trailing_whitespace(0) | endif
+    au BufWinEnter * if &ft is# 'text' | call s:trailing_whitespace(v:false) | endif
 augroup END
 
 fu s:trailing_whitespace(create_match) abort
@@ -7187,20 +7139,20 @@ endfu
 "
 " 3 - Implement ]n, ]s, ]u, ]x, ]y from unimpaired.vim
 "
-" 4 - Tmux navigation
-" La navigation entre les panes de Tmux et les viewports de Vim n'est pas
+" 4 - tmux navigation
+" La navigation entre les panes de tmux et les viewports de Vim n'est pas
 " cohérente.
-" Pour aller dans un pane Tmux depuis Vim, on peut taper C-{hjkl}.
-" Mais en sens inverse (Tmux → Vim), il faut passer par le préfixe Tmux, `pfx + hjkl`.
+" Pour aller dans un pane tmux depuis Vim, on peut taper C-{hjkl}.
+" Mais en sens inverse (tmux → Vim), il faut passer par le préfixe tmux, `pfx + hjkl`.
 " On a fait ça pour ne pas perdre les raccourcis readline dans le shell.
 " On devrait peut  être associer un keycode modificateur (Hyper?)  sur la touche
 " Super  (ou la  touche  ctrl gauche?),  et  se servir  de  cette dernière  pour
-" naviguer entre Tmux et Vim: Super + {hjkl}.
+" naviguer entre tmux et Vim: Super + {hjkl}.
 "
 " Plus généralement, revoir tout le code tmuxnavigator et repenser la
 " navigation.
 " Trop d'incohérences.
-" Navigation entre onglets  Vim, viewports Vim, panes Tmux,  fenêtres Tmux, Tmux
+" Navigation entre onglets  Vim, viewports Vim, panes tmux,  fenêtres tmux, tmux
 " <-> Vim ...
 " C'est un gros bordel:
 "
@@ -7209,9 +7161,9 @@ endfu
 " Autre Idée:
 "
 "     C-hjkl             pour naviguer entre viewports et onglets  Vim.  (facile?)
-"     Left Right Down Up "                   panes     et fenêtres Tmux. (difficile?)
+"     Left Right Down Up "                   panes     et fenêtres tmux. (difficile?)
 "
-" For the Tmux part, we would need to define conditional mappings.
+" For the tmux part, we would need to define conditional mappings.
 " Maybe draw inspiration from here:
 " http://stackoverflow.com/a/12380693
 "

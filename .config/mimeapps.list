@@ -27,3 +27,5 @@ text/x-log=gvim.desktop;
 text/plain=gvim.desktop;
 video/x-matroska=mpv.desktop;
 application/x-compressed-tar=file-roller.desktop;
+text/x-python=gvim.desktop;
+text/markdown=gvim.desktop;
