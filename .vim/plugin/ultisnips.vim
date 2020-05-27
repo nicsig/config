@@ -179,6 +179,15 @@ augroup my_ultisnips | au!
     " and to get a flag in the status line
     au User UltiSnipsEnterFirstSnippet let g:expanding_snippet = 1
     au User UltiSnipsExitLastSnippet unlet! g:expanding_snippet
+    " necessary in case a wrong snippet causes UltiSnips to dump a stack trace in a new window{{{
+    "
+    " Because in that case `UltiSnipsExitLastSnippet` is not fired.
+    "
+    " Btw, don't  use `WinLeave`.   Focusing a  different window  displaying the
+    " same buffer does not end the  snippet expansion.  OTOH, the expansion does
+    " end when you focus a different buffer.
+    "}}}
+    au User UltiSnipsEnterFirstSnippet au BufLeave * ++once unlet! g:expanding_snippet
 
     " An expanded snippet may break the detection of the current fold.{{{
     "

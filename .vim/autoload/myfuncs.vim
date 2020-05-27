@@ -1,5 +1,16 @@
+fu s:snr() abort
+    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
+endfu
+let s:snr = get(s:, 'snr', s:snr())
+
 " Operators {{{1
-fu myfuncs#op_grep(type, ...) abort "{{{2
+fu myfuncs#op_grep(...) abort "{{{2
+    if !a:0
+        let &opfunc = 'myfuncs#op_grep'
+        return 'g@'
+    endif
+
+    let type = a:0 == 1 ? a:1 : 'Ex'
     let cb_save  = &cb
     let sel_save = &selection
     let reg_save = ['"', getreg('"'), getregtype('"')]
@@ -8,19 +19,58 @@ fu myfuncs#op_grep(type, ...) abort "{{{2
         set cb-=unnamed cb-=unnamedplus
         set selection=inclusive
 
-        if a:type is# 'char'
+        if type is# 'char'
             norm! `[v`]y
-        elseif a:type is# 'line'
-            norm! '[V']y
-        elseif a:type is# 'block'
-            sil exe "norm! `[\<c-v>`]y"
-        elseif a:type is# 'vis'
-            norm! gvy
+        endif
+        if @" =~# "\n" || type is# 'line' || type is# 'block'
+            " `rg(1)` is is line-oriented, unless you use `-U`
+            " (which we don't because it's slower and consume more memory)
+            return
         endif
 
-        let cmd = 'rg 2>/dev/null -FLS --vimgrep '..shellescape((a:0 ? a:1 : @"))
-        let use_loclist = a:0 ? a:2 : 0
-        if a:type is# 'Ex' && use_loclist
+        if type is# 'Ex'
+            " Why does `2>/dev/null` work here but not in `'grepprg'`?{{{
+            "
+            " They don't run the shell command in the same way:
+            "
+            "     " system()
+            "     (rg foobar /etc)>/tmp/... 2>&1
+            "
+            "     " 'grepprg'
+            "     :!rg foobar /etc 2>&1| tee /tmp/...
+            "
+            " In the first case, `2>/dev/null` is useful:
+            "
+            "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
+            "         ^^^^^^^^^^^
+            "
+            " It prevents errors from being written in the temp file.
+            "
+            " In the second case, `2>/dev/null` is useless:
+            "
+            "     :!rg 2>/dev/null foobar /etc 2>&1| tee /tmp/...
+            "          ^^^^^^^^^^^
+            "
+            " Because, it's overridden by `2>&1` which comes from `'shellpipe'`.
+            " In contrast,  `system()` uses `'shellredir'`, which  also includes
+            " `2>&1`, but it  doesn't have the same effect,  because the command
+            " is run in a subshell via braces:
+            "
+            "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
+            "     ^                          ^
+            "
+            " From `:h system() /braces`:
+            "
+            " >     For Unix, braces are put around {expr} to allow for
+            " >     concatenated commands.
+            "}}}
+            let cmd = 'rg 2>/dev/null '..a:1
+            let use_loclist = a:2
+        else
+            let cmd = 'rg 2>/dev/null --fixed-strings '..shellescape(@")
+            let use_loclist = 0
+        endif
+        if type is# 'Ex' && use_loclist
             sil let items = getloclist(0, {'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
             call setloclist(0, [], ' ', {'items': items, 'title': cmd})
             do <nomodeline> QuickFixCmdPost lwindow
@@ -41,22 +91,14 @@ endfu
 
 " op_replace_without_yank {{{2
 
-" This function is called directly from our `dr` and `drr` mappings.
-fu myfuncs#set_reg(reg_name) abort
-    " We save the name of the register  which was called just before `dr` inside
-    " a script-local  variable, for the  dot command  to know which  register we
-    " used the first time.
-    "
-    " By default, it will be `"`.
-    " Or `+` if we have prepended the value 'unnamedplus' in the 'clipboard'
-    " option's value.
-
-    let s:replace_reg_name = a:reg_name
-endfu
-
-fu myfuncs#op_replace_without_yank(type) abort
-    let cb_save  = &cb
-    let sel_save = &selection
+fu myfuncs#op_replace_without_yank(...) abort
+    if !a:0
+        let &opfunc = 'myfuncs#op_replace_without_yank'
+        return 'g@'
+    endif
+    let replace_reg_name = v:register
+    let type = a:1
+    let [cb_save, sel_save] = [&cb, &selection]
     try
         set selection=inclusive
 
@@ -64,7 +106,7 @@ fu myfuncs#op_replace_without_yank(type) abort
         " FIXME: We save and restore the register which can be prefixed before the `dr` operator.
         " Is it necessary?  If so, have we done the same for the other operators
         " which can be prefixed by a register?
-        call lg#reg#save(['"', s:replace_reg_name])
+        call lg#reg#save(['"', replace_reg_name])
 
         " Why do you save the visual marks?{{{
         "
@@ -80,8 +122,8 @@ fu myfuncs#op_replace_without_yank(type) abort
 
         " TODO: Should  we   use  `getreg(..., 1)`   to  properly   restore  the
         " expression register?
-        let replace_reg_contents = getreg(s:replace_reg_name)
-        let replace_reg_type     = getregtype(s:replace_reg_name)
+        let replace_reg_contents = getreg(replace_reg_name)
+        let replace_reg_type     = getregtype(replace_reg_name)
 
         " build condition to check if we're replacing the current line
 
@@ -98,19 +140,19 @@ fu myfuncs#op_replace_without_yank(type) abort
         " So, `g@` will pass the type `char`.
         " So, our function will trim the leading / ending whitespace.
         " We don't want that for a single line.
-        " For multiple lines, yes. A single one, no.
-        " We use the `replace_current_line` condition to be informed when this
-        " case happens. We treat it as linewise motion/text-object, to keep the
+        " For multiple lines, yes.  A single one, no.
+        " We use the  `replace_current_line` condition to be  informed when this
+        " case happens.  We treat it as linewise motion/text-object, to keep the
         " indentation.
 
-        if a:type is# 'line' || replace_current_line
-            exe 'keepj norm! ''[V'']"'.s:replace_reg_name.'p'
+        if type is# 'line' || replace_current_line
+            exe 'keepj norm! ''[V'']"'..replace_reg_name..'p'
             norm! gv=
 
-        elseif a:type is# 'block'
-            exe "keepj norm! `[\<c-v>`]\"".s:replace_reg_name.'p'
+        elseif type is# 'block'
+            exe "keepj norm! `[\<c-v>`]\""..replace_reg_name..'p'
 
-        elseif a:type is# 'char'
+        elseif type is# 'char'
             " If  pasting linewise  contents in  a *characterwise*  motion, trim
             " surrounding whitespace from the content to be pasted.
             "
@@ -118,18 +160,17 @@ fu myfuncs#op_replace_without_yank(type) abort
             " *Just* the  leading whitespace of  the first line, and  the ending
             " whitespace of the last.
             if replace_reg_type is# 'V'
-                call setreg(s:replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
+                call setreg(replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
             endif
 
-            exe 'keepj norm! `[v`]"'.s:replace_reg_name.'p'
+            exe 'keepj norm! `[v`]"'..replace_reg_name..'p'
         endif
 
     catch
         return lg#catch()
     finally
-        let &cb  = cb_save
-        let &sel = sel_save
-        call lg#reg#restore(['"', s:replace_reg_name])
+        let [&cb, &sel] = [cb_save, sel_save]
+        call lg#reg#restore(['"', replace_reg_name])
         " TODO: Is  it  possible  that  the   previous  paste  has  removed  the
         " characters where the visual marks were originally?
         " Could the positions of the saved marks be invalid?
@@ -146,63 +187,27 @@ fu s:trimws_ml(s) abort
     return substitute(a:s, '^\_s*\(.\{-}\)\_s*$', '\1', '')
 endfu
 
-" op_toggle_alignment {{{2
-
-fu s:is_right_aligned(line1, line2) abort
-    let first_non_empty_line = search('\S', 'cnW', a:line2)
-    let length = strlen(getline(first_non_empty_line))
-    for line in getline(a:line1, a:line2)
-        if strlen(line) != length && line !~# '^\s*$'
-            return 0
-        endif
-    endfor
-    return 1
-endfu
-
-fu myfuncs#op_toggle_alignment(type) abort
-    if a:type is# 'vis'
-        let [mark1, mark2] = ["'<", "'>"]
-    else
-        let [mark1, mark2] = ["'[", "']"]
+fu myfuncs#op_trim_ws(...) abort "{{{2
+    if !a:0
+        let &opfunc = 'myfuncs#op_trim_ws'
+        return 'g@'
     endif
-    if s:is_right_aligned(line(mark1), line(mark2))
-        exe mark1..','..mark2..'left'
-        exe 'norm! '..mark1..'='..mark2
-    else
-        exe mark1..','..mark2..'right'
-    endif
-endfu
-fu myfuncs#op_trim_ws(type) abort "{{{2
     if &l:binary || &ft is# 'diff'
         return
     endif
-    if a:type is# 'vis'
-        let range = line("'<")..','..line("'>")
-    else
-        let range = line("'[")..','..line("']")
-    endif
+    let range = line("'[")..','..line("']")
     exe range..'TW'
 endfu
 
-" op_yank_matches {{{2
+" op_yank {{{2
 
-" `s:yank_where_match` is a boolean flag:
-"
-"     1 → yank the lines where a match is found
-"     0 → yank the other lines
-"
-" `s:yank_comments` is another boolean flag:
-"
-"     1 → the pattern describes commented lines
-"     0 → the pattern is simply @/
-
-fu myfuncs#op_yank_matches_set_action(yank_where_match, yank_comments) abort
-    let s:yank_where_match = a:yank_where_match
-    let s:yank_comments = a:yank_comments
-    let s:yank_reg = v:register
+fu myfuncs#op_yank_setup(what) abort
+    let s:op_yank = {'what': a:what, 'register': v:register}
+    let &opfunc = s:snr..'op_yank'
+    return 'g@'
 endfu
 
-fu myfuncs#op_yank_matches(type) abort
+fu s:op_yank(type) abort
     let reg_save = ['z', getreg('z'), getregtype('z')]
     try
         let @z = ''
@@ -212,8 +217,8 @@ fu myfuncs#op_yank_matches(type) abort
                 \ ?     line("'[")..','..line("']")
                 \ :     line("'<")..','..line("'>")
 
-        let cmd = s:yank_where_match ? 'g' : 'v'
-        let pat = s:yank_comments
+        let cmd = s:op_yank.what is# 'g//' || s:op_yank.what is# 'comments' ? 'g' : 'v'
+        let pat = s:op_yank.what is# 'code' || s:op_yank.what is# 'comments'
               \ ?     '^\s*\C\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')
               \ :     @/
 
@@ -222,7 +227,7 @@ fu myfuncs#op_yank_matches(type) abort
         " Remove empty lines.
         " We can't use the pattern `\_^\s*\n` to describe an empty line, because
         " we aren't in a buffer:    `@z` is just a big string
-        if !s:yank_where_match
+        if s:op_yank.what is# 'v//' || s:op_yank.what is# 'code'
             let @z = substitute(@z, '\n\%(\s*\n\)\+', '\n', 'g')
         endif
 
@@ -230,7 +235,7 @@ fu myfuncs#op_yank_matches(type) abort
         " we don't want this one; remove it
         let @z = substitute(@z, "^\n", '', '')
 
-        call setreg(get(s:, 'yank_reg', '"'), @z, 'l')
+        call setreg(s:op_yank.register, @z, 'l')
     catch
         return lg#catch()
     finally
@@ -242,24 +247,25 @@ fu myfuncs#op_yank_matches(type) abort
 endfu
 " }}}1
 
-fu myfuncs#align_with_beginning(type) abort "{{{1
-    exe 'left '..indent(line('.')+s:align_with_beginning_dir)
+" align line {{{1
+
+fu myfuncs#align_line_setup(key) abort
+    let s:align_line_key = a:key
+    let &opfunc = s:snr..'align_line'
+    return 'g@l'
 endfu
 
-fu myfuncs#align_with_end(type) abort
-    " length of text to align on the current line
-    let text_length = strchars(matchstr(getline('.'), '\S.*$'))
-    " length of the previous/next line
-    let neighbour_length = strchars(getline(line('.') + s:align_with_end_dir))
-    exe 'left '..(neighbour_length - text_length)
-endfu
-
-fu myfuncs#align_with_beginning_save_dir(dir) abort
-    let s:align_with_beginning_dir = a:dir
-endfu
-
-fu myfuncs#align_with_end_save_dir(dir) abort
-    let s:align_with_end_dir = a:dir
+fu s:align_line(_) abort
+    let offset = s:align_line_key[1] is# 'j' ? 1 : -1
+    if s:align_line_key[0] is# '['
+        exe 'left '..indent(line('.') + offset)
+    else
+        " length of text to align on the current line
+        let text_length = strchars(matchstr(getline('.'), '\S.*$'), 1)
+        " length of the previous/next line
+        let neighbour_length = strchars(getline(line('.') + offset), 1)
+        exe 'left '..(neighbour_length - text_length)
+    endif
 endfu
 
 " box_create / destroy {{{1
@@ -286,7 +292,11 @@ endfu
 "
 " The peculiarity here, is the variable number of cells per line (2 on the first
 " one, 3 on the second one, 4 on the last ones).
-fu myfuncs#box_create(_) abort
+fu myfuncs#box_create(...) abort
+    if !a:0
+        let &opfunc = 'myfuncs#box_create'
+        return 'g@'
+    endif
     try
         " draw `|` on the left of the paragraph
         exe "norm! _vip\<c-v>^I|"
@@ -389,8 +399,13 @@ fu s:box_create_separations() abort
     call setreg('x', @x, 'V')
 endfu
 
-fu myfuncs#box_destroy(type) abort
-    let [lnum1, lnum2] = [line("'{"), line("'}")]
+fu myfuncs#box_destroy(...) abort
+    if !a:0
+        let &opfunc = 'myfuncs#box_destroy'
+        return 'g@'
+    endif
+
+    let [lnum1, lnum2] = [line("'["), line("']")]
     let range = lnum1..','..lnum2
     " remove box (except pretty bars: │)
     sil exe range..'s/[─┴┬├┤┼└┘┐┌]//ge'
@@ -750,7 +765,7 @@ fu myfuncs#join_blocks(first_reverse) abort "{{{1
     endtry
 endfu
 
-fu myfuncs#long_data_join(type, ...) abort "{{{1
+fu myfuncs#long_data_join(...) abort "{{{1
     " This function should do the following conversion:{{{
     "
     "     let list = [1,
@@ -760,25 +775,24 @@ fu myfuncs#long_data_join(type, ...) abort "{{{1
     " →
     "     let list = [1, 2, 3, 4]
     "}}}
+    if !a:0
+        let &opfunc = 'myfuncs#long_data_join'
+        return 'g@'
+    endif
+
+    let range = line("'[")..','..line("']")
+
+    let bullets = '[-*+]'
+    let join_bulleted_list = getline('.') =~# '^\s*'..bullets
+
     try
-        if a:type is# 'char' || a:type is# 'line' || a:type is# 'block'
-            let range = line("'[")..','..line("']")
-        elseif a:type is# 'vis'
-            let range = line("'<")..','..line("'>")
-        else
-            return
-        endif
-
-        let bullets = '[-*+]'
-        let join_bulleted_list = getline('.') =~# '^\s*'..bullets
-
         if join_bulleted_list
             sil exe 'keepj keepp'..range..'s/^\s*\zs'..bullets..'\s*//'
             sil exe 'keepj keepp'..range..'-s/$/,/'
             sil exe range..'j'
         else
             sil exe 'keepj keepp '..range..'s/\n\s*\\//ge'
-            call cursor(a:type is# 'vis' ? line("'<") : line("'["), 1)
+            call cursor(line("'["), 1)
             sil keepj keepp s/\m\zs\s*,\ze\s\=[\]}]//e
         endif
     catch
@@ -786,7 +800,11 @@ fu myfuncs#long_data_join(type, ...) abort "{{{1
     endtry
 endfu
 
-fu myfuncs#long_data_split(_) abort "{{{1
+fu myfuncs#long_data_split(...) abort "{{{1
+    if !a:0
+        let &opfunc = 'myfuncs#long_data_split'
+        return 'g@l'
+    endif
     let line = getline('.')
 
     let is_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
@@ -1021,10 +1039,21 @@ fu myfuncs#send_to_server() abort "{{{1
         let pgm = 'vim'
     endif
 
-    let file = expand('%:p')
-    if file is# ''
+    sil undo | let contains_ansi = search("\e", 'n') | sil redo
+    let bufname = expand('%:p')
+    if bufname is# '' || bufname =~# '^\C/proc/'
         let file = tempname()
         call writefile(getline(1, '$'), file)
+        " if the buffer contained ansi escape codes, we want them to be sent to the Vim server
+        if contains_ansi
+            sil undo
+            call writefile(getline(1, '$'), file)
+            sil redo
+        else
+            call writefile(getline(1, '$'), file)
+        endif
+    else
+        let file = bufname
     endif
 
     let cmd = pgm..' --remote-tab '..shellescape(file)
@@ -1037,8 +1066,14 @@ fu myfuncs#send_to_server() abort "{{{1
         return
     endif
 
+    " highlight ansi codes; useful for when you run sth like `$ trans word | vipe`
+    if contains_ansi && ($_ =~# '\C/vipe$' || bufname is# '')
+        let cmd = pgm..' --remote-expr "lg#textprop#ansi()"'
+        sil call system(cmd)
+    endif
+
     let msg = printf('the %s was sent to the %s server',
-        \ expand('%:p') is# '' ? 'buffer' : 'file',
+        \ bufname is# '' ? 'buffer' : 'file',
         \ pgm is# 'vim' ? 'Vim' : 'Neovim')
     echohl ModeMsg
     echom msg
@@ -1259,7 +1294,7 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     "
     "    - not containing any letter
 
-    call filter(words, {_,v -> strchars(v) >= min_length && strchars(v) <= 30 && v =~ '\a'})
+    call filter(words, {_,v -> strchars(v, 1) >= min_length && strchars(v, 1) <= 30 && v =~ '\a'})
 
     " put all of them in lowercase
     call map(words, {_,v -> tolower(v)})
@@ -1286,9 +1321,9 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         "   - otherwise, by default, an abbreviation should be 3 characters long
         "}}}
         call map(weighted_freq, {k,v ->
-            \ v * (strchars(k)
+            \ v * (strchars(k, 1)
             \ -
-            \ strchars(k) == 4
+            \ strchars(k, 1) == 4
             \ ? 2
             \   : k[-1:-1] is# "s" && index(keys(freq), k[:strlen(k)-1]) >= 0
             \   ?     4

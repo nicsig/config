@@ -60,10 +60,16 @@ call submode#enter('change-indent', 'i', '', '<c-g><', '<c-d>')
 call submode#enter('char-around', 'i', 'r', '<c-x>j', '<plug>(duplicate-char-below)' )
 call submode#enter('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-char-above)' )
 
-ino <plug>(duplicate-char-below) <c-r><c-r>=<sid>duplicate_char_around(0)<cr>
-ino <plug>(duplicate-char-above) <c-r><c-r>=<sid>duplicate_char_around(1)<cr>
-"                                ^^^^^^^^^^
-"                                useful when we encounter some literal control character
+" Don't remove `<silent>`.{{{
+"
+" Sometimes, the rhs may be briefly displayed.
+" Right now, it happens  when we smash the keys in  `myfuncs.vim` while the file
+" is displayed in two tab pages, and we're focusing the second one.
+"}}}
+ino <silent> <plug>(duplicate-char-below) <c-r><c-r>=<sid>duplicate_char_around(0)<cr>
+ino <silent> <plug>(duplicate-char-above) <c-r><c-r>=<sid>duplicate_char_around(1)<cr>
+"                                         ^^^^^^^^^^
+"                                         useful when we encounter some literal control character
 
 fu s:duplicate_char_around(above) abort
     " By default, `c-y` only duplicate the character right above.
