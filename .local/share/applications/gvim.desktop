@@ -1,57 +1,34 @@
 [Desktop Entry]
+Version=1.0
+Type=Application
 Name=gVim
 GenericName=Text Editor
-GenericName[fr]=Éditeur de texte
 Comment=Edit text files
-Comment[fr]=Éditer des fichiers textes
-# What's the purpose of `TryExec`?{{{
-#
-# It's used by the system to determine whether the program is actually installed.
-#
-# >     Path to  an executable  file on  disk used  to determine  if the  program is
-# >     actually installed. If the path is not  an absolute path, the file is looked
-# >     up in the $PATH environment variable. If the file is not present or if it is
-# >     not  executable,  the entry  may  be  ignored (not  be  used  in menus,  for
-# >     example).
-#
-# See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
-#
-# ---
-#
-# Do *not* pass any argument to `gvim` here (e.g. `-f`).
-# As an example, the system would fail to find a binary named `gvim -f`.
-#}}}
-TryExec=gvim
-# What's the purpose of `Exec`?{{{
-#
-# It's the command which will actually be run if the system did find the program
-# mentioned in `TryExec`.
-#}}}
-#   How is it defined in the default gVim desktop file?{{{
-#
-#     $ grep -i 'exec' /usr/local/share/applications/gvim.desktop
-#     TryExec=gvim~
-#     Exec=gvim -f %F~
-#
-# Here's how `-f` is documented at `:h -f`:
-#
-# >     GUI: Do not  disconnect from the  program that  started Vim. 'f'  stands for
-# >     "foreground".  If omitted, the GUI forks a new process and exits the current
-# >     one. "-f" should  be used when gvim  is started by a program  that will wait
-# >     for the edit session to finish (e.g., mail or readnews).
-#}}}
-# Why starting a server?{{{
-#
-# I  don't  want the  file  manager  to  open a  new  gVim  window each  time  I
-# double-click on a file.  I only want one window for all the files.
-#
-# See also: https://unix.stackexchange.com/q/588202/289772
-#}}}
-Exec=gvim -f --servername GVIM --remote-tab-silent %F
-Terminal=false
-Type=Application
-Keywords=Text;editor;
 Icon=gvim
-Categories=Utility;TextEditor;
-StartupNotify=true
+TryExec=gvim
+# We use a script to handle the case where gVim is started without any file argument.{{{
+#
+# If we double-click on  a file in thunar, we want gVim to  be started with this
+# command:
+#
+#     gvim -f --servername GVIM --remote-tab-silent %F
+#
+# But, if we just  click on the gVim icon in the whisker  menu, or just run gVim
+# from rofi, the previous command won't work:
+#
+#     $ gvim -f --servername GVIM --remote-tab-silent
+#     ...~
+#     Argument missing after: "--remote-tab-silent"~
+#     ...~
+#
+# In this case, we need gVim to be started with just the `gvim` command.
+# I don't know how to test whether `%F`  is expanded into an empty string, so we
+# delegate this task to a shell script.
+#}}}
+Exec=sh -c "\\$HOME/bin/gvim-menu %F"
+NoDisplay=false
+Categories=TextEditor;Utility;
+Keywords=Text;editor;
 MimeType=text/english;text/plain;text/x-makefile;text/x-c++hdr;text/x-c++src;text/x-chdr;text/x-csrc;text/x-java;text/x-moc;text/x-pascal;text/x-tcl;text/x-tex;application/x-shellscript;text/x-c;text/x-c++;
+StartupNotify=true
+Terminal=false

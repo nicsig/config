@@ -17,6 +17,7 @@ Or press `|c` while in Vim (custom mapping).
 
 <https://wiki.archlinux.org/index.php/St#Desktop_entry>
 
+##
 ## `typometer`?
 
 I looked at the desktop file of gVim, and copied the most useful keys.
@@ -44,14 +45,14 @@ Without, `desktop-file-validate(1)` will complain:
 
 This is due to the [specification][2]:
 
-> Note that the  general escape rule for  values of type string  states that the
-> backslash character can be escaped as ("\\") as well and that this escape rule
-> is applied before the quoting rule.
-> As such,  to unambiguously represent a  literal backslash character in  a quoted
-> argument in a  desktop entry file requires the use  of four successive backslash
-> characters ("\\\\").
-> Likewise, a literal dollar sign in a  quoted argument in a desktop entry file is
-> unambiguously represented with ("\\$").
+>     Note that the  general escape rule for  values of type string  states that the
+>     backslash character can be escaped as ("\\") as well and that this escape rule
+>     is applied before the quoting rule.
+>     As such,  to unambiguously represent a  literal backslash character in  a quoted
+>     argument in a  desktop entry file requires the use  of four successive backslash
+>     characters ("\\\\").
+>     Likewise, a literal dollar sign in a  quoted argument in a desktop entry file is
+>     unambiguously represented with ("\\$").
 
 ##
 # Field code
@@ -59,10 +60,10 @@ This is due to the [specification][2]:
 
 An alphabetic character prefixed by `%` which is replaced at runtime.
 
-> A number of  special field codes have  been defined which will  be expanded by
-> the file manager or program launcher when encountered in the command line.
-> Field  codes consist  of the  percentage character  ("%") followed  by an  alpha
-> character.
+>     A number of  special field codes have  been defined which will  be expanded by
+>     the file manager or program launcher when encountered in the command line.
+>     Field  codes consist  of the  percentage character  ("%") followed  by an  alpha
+>     character.
 
 ## What's `%F`?
 
@@ -80,10 +81,10 @@ name of the program was found.
 
 From the spec:
 
-> This specification defines  3 types of desktop  entries: Application (type 1),
-> Link (type 2) and Directory (type 3).
-> To allow the addition of new  types in the future, implementations should ignore
-> desktop entries with an unknown type.
+>     This specification defines  3 types of desktop  entries: Application (type 1),
+>     Link (type 2) and Directory (type 3).
+>     To allow the addition of new  types in the future, implementations should ignore
+>     desktop entries with an unknown type.
 
 ## What's the difference between the `Exec` key and the `TryExec` key?
 
@@ -98,20 +99,20 @@ IOW, `Exec` can contain a field code like `%F`.
 
 Here's how the spec describes `TryExec`:
 
-> Path  to an  executable file  on  disk used  to  determine if  the program  is
-> actually installed.
-> If  the path  is not  an  absolute path,  the file  is  looked up  in the  $PATH
-> environment variable.
-> If the file is not present or if  it is not executable, the entry may be ignored
-> (not be used in menus, for example).
+>     Path  to an  executable file  on  disk used  to  determine if  the program  is
+>     actually installed.
+>     If  the path  is not  an  absolute path,  the file  is  looked up  in the  $PATH
+>     environment variable.
+>     If the file is not present or if  it is not executable, the entry may be ignored
+>     (not be used in menus, for example).
 
 And `Exec`:
 
-> Program to execute, possibly with arguments.
-> See the Exec key for details on how this key works.
-> The Exec key is required if DBusActivatable is not set to true.
-> Even if DBusActivatable is true, Exec should be specified for compatibility with
-> implementations that do not understand DBusActivatable.
+>     Program to execute, possibly with arguments.
+>     See the Exec key for details on how this key works.
+>     The Exec key is required if DBusActivatable is not set to true.
+>     Even if DBusActivatable is true, Exec should be specified for compatibility with
+>     implementations that do not understand DBusActivatable.
 
 ##
 ## Where should I put an icon file?
@@ -164,21 +165,21 @@ You get the right size, and a more fitting weight:
 ## What's the purpose of the key
 ### `Categories`?
 
-> Categories in which the  entry should be shown in a  menu (for possible values
-> see the Desktop Menu Specification).
+>     Categories in which the  entry should be shown in a  menu (for possible values
+>     see the Desktop Menu Specification).
 
 ### `Comment`?
 
-> Tooltip for the entry, for example "View sites on the Internet".
-> The value should not be redundant with the values of Name and GenericName.
+>     Tooltip for the entry, for example "View sites on the Internet".
+>     The value should not be redundant with the values of Name and GenericName.
 
 ### `Keywords`?
 
-> A list of strings which may be  used in addition to other metadata to describe
-> this entry.
-> This can be useful e.g. to facilitate searching through entries.
-> The values  are not  meant for  display, and  should not  be redundant  with the
-> values of Name or GenericName.
+>     A list of strings which may be  used in addition to other metadata to describe
+>     this entry.
+>     This can be useful e.g. to facilitate searching through entries.
+>     The values  are not  meant for  display, and  should not  be redundant  with the
+>     values of Name or GenericName.
 
 ### `StartupNotify`?
 

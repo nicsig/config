@@ -127,3 +127,23 @@ Same as above.
 Although, in  practice, it doesn't seem  to be necessary, but  it's mentioned in
 `:h debug-gcc`, so better be safe than sorry.
 
+##
+# Pitfalls
+## When I press `C-g C-g` to jump to a placeholder, it's not removed!
+
+Make sure  your placeholder  does not contain  any metacharacter  which `sed(1)`
+could interpret specially in the pattern field of a substitution command.
+
+If it  does contain  one, make  sure it's "escaped"  in this  substitution (from
+`_fzf_snippet_placeholder()`):
+
+    BUFFER=$(echo -E $BUFFER | sed "s${A}${placeholder}${A}${A}")
+                                         ^^^^^^^^^^^^^^
+
+To do so, make sure it's inside this collection:
+
+    placeholder=$(sed 's/[$*.]/[&]/g' <<<"$placeholder")
+                         ├───┘ ├─┘
+                         │     └ by surrounding them with brackets
+                         └ "escape" dollar, star and dot
+

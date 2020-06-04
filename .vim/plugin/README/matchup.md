@@ -1002,8 +1002,8 @@ But the command does work without an appended question mark.
 Second,  it says  that running  `:MatchupWhereAmI?` twice  in the  same position
 gives a more verbose output:
 
-> Running this command twice in the same position will give
-> more verbose output.
+>     Running this command twice in the same position will give
+>     more verbose output.
 
 That doesn't seem to be the case.
 Try it in a C file from the Vim project, in a deeply nested block.
@@ -1021,12 +1021,12 @@ one is enough.
 
 ---
 
-> If are having any other performance issues, please open a new issue and
-> report the output of `:MatchupShowTimes`.
+>     If are having any other performance issues, please open a new issue and
+>     report the output of `:MatchupShowTimes`.
 
 It should start with:
 
-> If **you** are having ...
+>     If **you** are having ...
 
 ##
 
@@ -1045,19 +1045,20 @@ We could ask for an option letting the user choose their own keys.
 
 ---
 
-> {count}cs%
+>     {count}cs%
 
-> Change {count}th surrounding matching words.
-> This only works  for open and close words.
-> If  vim-surround is  installed, you  can type  replacements according  to that
-> plugin's rules.
-> Otherwise, match-up will give you the  opportunity to type a single character.
-> Some simple replacement pairs are supported.
-> Requires |g:matchup_surround_enabled| = 1.
+>     Change {count}th surrounding matching words.
+>     This only works  for open and close words.
+>     If  vim-surround is  installed, you  can type  replacements according  to that
+>     plugin's rules.
+>     Otherwise, match-up will give you the  opportunity to type a single character.
+>     Some simple replacement pairs are supported.
+>     Requires |g:matchup_surround_enabled| = 1.
 
 What does this sentence mean?:
-> If  vim-surround is  installed, you  can type  replacements according  to that
-> plugin's rules.
+
+>     If  vim-surround is  installed, you  can type  replacements according  to that
+>     plugin's rules.
 
 Temporarily install `vim-surround` and make some tests to understand.
 
@@ -1093,8 +1094,8 @@ There may be others.
 I think  that `vim-sandwich` is  not as  well integrated as  `vim-surround`, and
 andymass knows it. From the README:
 
-> An  alternative plugin  is vim-sandwich,  which allows  more complex  surround
-> replacement rules but is not currently supported.
+>     An  alternative plugin  is vim-sandwich,  which allows  more complex  surround
+>     replacement rules but is not currently supported.
 
 We need  to better understand  `vim-sandwich` to  determine whether it  would be
 worth it  to ask for  a better integration; maybe  it can already  do everything

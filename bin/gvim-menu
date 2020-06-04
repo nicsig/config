@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -z "$@" ]; then
+  gvim
+else
+  gvim -f --servername GVIM --remote-tab-silent "$@"
+fi
+

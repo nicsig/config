@@ -42,7 +42,9 @@ ulimit -c 65536
 # http://unix.stackexchange.com/a/72092/125618
 # https://en.wikipedia.org/wiki/Software_flow_control
 #}}}
-stty -ixon
+# alternative: stty -ixon
+stty stop undef
+stty start undef
 # disable SIGQUIT signal
 # Why?{{{
 #
@@ -3916,7 +3918,7 @@ FZF_SNIPPET_COMMENT_COLOR='\x1b[38;5;35m'
 # snippet selection
 _fzf_snippet_main_widget() {
   emulate -L zsh
-  if grep -q '{{' <<<"${BUFFER}"; then
+  if grep -q '{{' <<<"$BUFFER"; then
     _fzf_snippet_placeholder
   else
     local selected
@@ -3941,12 +3943,12 @@ _fzf_snippet_placeholder() {
   # We can  use it here thanks  to grep's `-P` option  which allows us to  use a
   # PCRE regex.
   #}}}
-  strp=$(grep -Z -P -b -o "\{\{.+?\}\}" <<<"${BUFFER}")
-  strp=$(head -1 <<<"${strp}")
-  pos=$(cut -d ":" -f1 <<<"${strp}")
+  strp=$(grep -Z -P -b -o "\{\{.+?\}\}" <<<"$BUFFER")
+  strp=$(head -1 <<<"$strp")
+  pos=$(cut -d ":" -f1 <<<"$strp")
   placeholder=${strp#*:}
   if [[ -n "$1" ]]; then
-    BUFFER=$(echo -E ${BUFFER} | sed 's/{{//; s/}}//')
+    BUFFER=$(echo -E $BUFFER | sed 's/{{//; s/}}//')
     CURSOR=$((${pos} + ${#placeholder} - 4))
   else
     # What's `A`?{{{
@@ -3994,7 +3996,10 @@ _fzf_snippet_placeholder() {
     #     foo  baz~
     #}}}
     A="$(tr 'x' '\001' <<<'x')"
-    BUFFER=$(echo -E ${BUFFER} | sed "s${A}${placeholder}${A}${A}")
+    # don't interpret a special character like `*` as a metacharacter in the next substitution;
+    # we want the text in the placeholder to be parsed literally (like with `\V` in Vim)
+    placeholder=$(sed 's/[$*.]/[&]/g' <<<"$placeholder")
+    BUFFER=$(echo -E $BUFFER | sed "s${A}${placeholder}${A}${A}")
     CURSOR=pos
   fi
 }

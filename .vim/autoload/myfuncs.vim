@@ -685,7 +685,6 @@ fu myfuncs#gtfo_open_term(dir) abort
         sil call system('tmux splitw -h -c '..shellescape(a:dir))
     elseif s:IS_X_RUNNING
         sil call system(s:LAUNCH_TERM..' '..shellescape(a:dir)..' &')
-        redraw!
     else
         call s:gtfo_error('failed to open terminal')
     endif
@@ -1350,7 +1349,7 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     endif
 
     exe 'vert res '..(max(map(getline(1, '$'), {_,v -> strchars(v, 1)}))+4)
-    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
+    nno <buffer><expr><nowait> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
     wincmd p
 endfu
 

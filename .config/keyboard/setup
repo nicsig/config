@@ -53,8 +53,12 @@ main() {
   # and  finally pressing  `C-d` in  the  previous pane  where `$  time cat`  is
   # running.
   #}}}
-  xset r rate 175 40
-  # FIXME: Sometimes, `xset(1)` is not executed.  Should we add a `sleep(1)`?
+  # TODO: Sometimes, `xset(1)` has no effect.  So, we add a `sleep(1)`.{{{
+  #
+  # If it doesn't fix the issue, try to increase the sleeping time.
+  # If it still doesn't fix the issue, remove it, and find another fix.
+  #}}}
+  sleep 1; xset r rate 175 40
 }
 
 main 2>&1 | tee -a "${LOGFILE}"

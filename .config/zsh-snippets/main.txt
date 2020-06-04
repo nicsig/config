@@ -1,4 +1,5 @@
 for f in *; do echo cp "${{f}}" "${{{f}.bak}}";done § backup files
+for f in {{/tmp/}}*.vim; do vim -Nu "$f" --cmd "echom '$f'"; if [[ $? != 0 ]]; then break; fi; done § test different option values
 
 gdb -n -ex 'thread apply all bt full' -batch {{/path/to/tmux}} {{/path/to/core}} >backtrace.txt § get backtrace after tmux crash
 

@@ -24,7 +24,7 @@ sil! call lg#set_stl('%y%=%l ', '%y')
 
 let b:url = 'https://www.startpage.com/do/search?cat=&language=english&cmd=process_search&query='
 
-nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
+nno <buffer><expr><nowait> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 nno <buffer><nowait><silent> <cr> :<c-u>call plugin#websearch#main()<cr>
 nmap <buffer><nowait><silent> ZZ <cr>
 

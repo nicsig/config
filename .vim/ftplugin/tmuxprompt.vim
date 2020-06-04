@@ -12,7 +12,7 @@ setl cul
 
 sil! call lg#set_stl('%y%=%l ', '%y')
 
-nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
+nno <buffer><expr><nowait> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 " Why `command-prompt`?  Why not running the command directly (`system('tmux '..getline('.'))`)?{{{
 "
 " First, it allows you to review the command before it's run.
