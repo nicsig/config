@@ -1,5 +1,3 @@
-if has('nvim') | finish | endif
-
 " Rationale:{{{
 "
 " Atm,  we  set `'termwinkey'`  with  the  value `<c-s>`  (see  `vim-readline`),

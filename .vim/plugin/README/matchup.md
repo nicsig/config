@@ -1101,8 +1101,3 @@ We need  to better understand  `vim-sandwich` to  determine whether it  would be
 worth it  to ask for  a better integration; maybe  it can already  do everything
 that `[count]cs%` does.
 
-##
-## Report issues with floating window in Nvim
-
-<https://github.com/andymass/vim-matchup/issues/80>
-

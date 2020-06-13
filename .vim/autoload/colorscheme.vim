@@ -114,20 +114,6 @@ fu colorscheme#set() abort "{{{2
         #3971ed
         #ffffff
     END
-
-    " Nvim needs the same kind of configuration.
-    " Why do you run the previous code even in Nvim?{{{
-    "
-    " To avoid duplicating the hex color codes.
-    "}}}
-    if has('nvim')
-        for i in range(16)
-            " See `:h terminal-configuration` for more info about these
-            " `g:terminal_color_` variables.
-            let g:terminal_color_{i} = g:terminal_ansi_colors[i]
-        endfor
-        unlet! g:terminal_ansi_colors
-    endif
 endfu
 
 fu colorscheme#customize() abort "{{{2
@@ -246,10 +232,8 @@ fu colorscheme#cursorline(enable) abort "{{{2
         " we want  only the  current *screen*  line to  be highlighted,  not the
         " whole *text* line.
         "}}}
-        if !has('nvim')
-            let s:culopt_save = &l:culopt
-            let &l:culopt = 'screenline'
-        endif
+        let s:culopt_save = &l:culopt
+        let &l:culopt = 'screenline'
         augroup my_cursorline | au!
             " Why `BufWinEnter` and `BufWinLeave`?{{{
             "
@@ -258,10 +242,10 @@ fu colorscheme#cursorline(enable) abort "{{{2
             " It may happen, for example, when  you move in the quickfix list by
             " pressing `]q`.
             "}}}
-            au VimEnter,BufWinEnter,WinEnter * setl cul   | if !has('nvim') | let &l:culopt = 'screenline' | endif
-            au BufWinLeave,WinLeave          * setl nocul | if !has('nvim') | let &l:culopt = s:culopt_save | endif
-            au InsertEnter                   * setl nocul | if !has('nvim') | let &l:culopt = s:culopt_save | endif
-            au InsertLeave                   * setl cul   | if !has('nvim') | let &l:culopt = 'screenline' | endif
+            au VimEnter,BufWinEnter,WinEnter * setl cul   | let &l:culopt = 'screenline'
+            au BufWinLeave,WinLeave          * setl nocul | let &l:culopt = s:culopt_save
+            au InsertEnter                   * setl nocul | let &l:culopt = s:culopt_save
+            au InsertLeave                   * setl cul   | let &l:culopt = 'screenline'
         augroup END
     elseif !a:enable && &l:cul
         " When is this guard necessary?{{{
@@ -274,10 +258,8 @@ fu colorscheme#cursorline(enable) abort "{{{2
             aug! my_cursorline
         endif
         setl nocul
-        if !has('nvim')
-            let &l:culopt = get(s:, 'culopt_save', &l:culopt)
-            unlet! s:culopt_save
-        endif
+        let &l:culopt = get(s:, 'culopt_save', &l:culopt)
+        unlet! s:culopt_save
     endif
 endfu
 
@@ -434,8 +416,7 @@ fu s:TabLine() abort "{{{3
     if has('gui_running')
         let cmd = 'hi TabLine gui=none guifg=%s'
     elseif &tgc
-        let attr = has('nvim') ? 'gui' : 'cterm'
-        let cmd = 'hi TabLine term=none '..attr..'=none guifg=%s'
+        let cmd = 'hi TabLine term=none cterm=none guifg=%s'
     else
         let cmd = 'hi TabLine term=none cterm=none gui=none ctermfg=%s'
     endif
@@ -462,10 +443,9 @@ fu s:Title() abort "{{{3
         exe 'hi TitleBoldItalic gui=bold,italic guifg='..title_fg
 
     elseif &tgc
-        let attr = has('nvim') ? 'gui' : 'cterm'
-        exe 'hi TitleItalic '..attr..'=italic guifg='..title_fg
-        exe 'hi TitleBold '..attr..'=bold guifg='..title_fg
-        exe 'hi TitleBoldItalic '..attr..'=bold,italic guifg='..title_fg
+        exe 'hi TitleItalic cterm=italic guifg='..title_fg
+        exe 'hi TitleBold cterm=bold guifg='..title_fg
+        exe 'hi TitleBoldItalic cterm=bold,italic guifg='..title_fg
 
     else
         exe 'hi TitleItalic term=italic cterm=italic ctermfg='..title_fg
@@ -520,9 +500,8 @@ fu s:User() abort "{{{3
         let cmd2 = 'hi User2 gui=%s guifg=%s guibg=%s'
 
     elseif &tgc
-        let attr = has('nvim') ? 'gui' : 'cterm'
-        let cmd1 = 'hi User1 '..attr..'=%s guifg=%s guibg=%s'
-        let cmd2 = 'hi User2 '..attr..'=%s guifg=%s guibg=%s'
+        let cmd1 = 'hi User1 cterm=%s guifg=%s guibg=%s'
+        let cmd2 = 'hi User2 cterm=%s guifg=%s guibg=%s'
 
     else
         let cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
@@ -664,28 +643,26 @@ fu s:styled_comments() abort "{{{2
         exe 'hi markdownBlockquoteCodeSpan guibg='..bg..' guifg='..statement_fg
         exe 'hi markdownBlockquoteItalic gui=italic guifg='..statement_fg
 
-    " the only relevant attributes in a truecolor terminal are `guifg`, `guibg`,
-    " and `cterm` (Vim) or `gui` (Neovim)
+    " the only relevant attributes in a truecolor terminal are `guifg`, `guibg`, and `cterm`
     elseif &tgc
         exe 'hi CommentCodeSpan guifg='..comment_fg..' guibg='..bg
         exe 'hi markdownCodeSpan guibg='..bg
 
-        let attr = has('nvim') ? 'gui' : 'cterm'
-        exe 'hi CommentBold '..attr..'=bold guifg='..comment_fg
-        exe 'hi CommentBoldItalic '..attr..'=bold,italic guifg='..comment_fg
-        exe 'hi CommentItalic '..attr..'=italic guifg='..comment_fg
+        exe 'hi CommentBold cterm=bold guifg='..comment_fg
+        exe 'hi CommentBoldItalic cterm=bold,italic guifg='..comment_fg
+        exe 'hi CommentItalic cterm=italic guifg='..comment_fg
 
         exe 'hi markdownListItem guifg='..repeat_fg
-        exe 'hi markdownListItemBold '..attr..'=bold guifg='..repeat_fg
-        exe 'hi markdownListItemBoldItalic '..attr..'=bold,italic guifg='..repeat_fg
+        exe 'hi markdownListItemBold cterm=bold guifg='..repeat_fg
+        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg='..repeat_fg
         exe 'hi markdownListItemCodeSpan guifg='..repeat_fg..' guibg='..bg
-        exe 'hi markdownListItemItalic '..attr..'=italic guifg='..repeat_fg
+        exe 'hi markdownListItemItalic cterm=italic guifg='..repeat_fg
 
         exe 'hi markdownBlockquote guifg='..statement_fg
-        exe 'hi markdownBlockquoteBold '..attr..'=bold guifg='..statement_fg
-        exe 'hi markdownBlockquoteBoldItalic '..attr..'=bold,italic guifg='..statement_fg
+        exe 'hi markdownBlockquoteBold cterm=bold guifg='..statement_fg
+        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg='..statement_fg
         exe 'hi markdownBlockquoteCodeSpan guifg='..statement_fg..' guibg='..bg
-        exe 'hi markdownBlockquoteItalic '..attr..'=italic guifg='..statement_fg
+        exe 'hi markdownBlockquoteItalic cterm=italic guifg='..statement_fg
 
     " the only relevant attributes in a non-truecolor terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
@@ -816,82 +793,6 @@ fu s:cursor() abort "{{{2
     "
     " It should only affect the current tmux pane.
     "}}}
-    " TODO: In Nvim, we should set `'gcr'` instead of sending an OSC 12 sequence manually.{{{
-    "
-    " https://github.com/neovim/neovim/wiki/FAQ#how-to-change-cursor-color-in-the-terminal
-    "
-    " Unfortunately, right now, it only works in xterm, not in st.
-    " And it doesn't work inside tmux, unless you temporarily reset `$TERM`:
-    "
-    "     " start xterm
-    "     $ tmux -Lx
-    "     $ TERM=xterm-256color nvim
-    "       ^^^^^^^^^^^^^^^^^^^
-    "
-    "     :hi Cursor guifg=red guibg=red
-    "     :set gcr=n-v-c:block-Cursor
-    "
-    " Also, note that the wiki says that `'gcr'` works only if `'tgc'` is set.
-    "
-    " ---
-    "
-    " I suspect that there are two issues.
-    "
-    " First, Nvim probably does not send the sequence to change the cursor color
-    " when it doesn't recognize the name of the terminal.
-    " This would explain why it fails inside tmux, where `$TERM` is `tmux-256color`.
-    "
-    " Second, Nvim probably uses hexcodes or rgb spec, instead of decimal codes,
-    " which  would explain  why it  fails in  st, even  if we  temporarily reset
-    " `$TERM` to `xterm-256color`.
-    "
-    " I *think* the first issue is a Nvim bug.
-    " Because we've already configured tmux so that it relays an OSC 12 sequence
-    " to the outer terminal.
-    "
-    "     ~/.tmux/terminal-overrides.conf
-    "     /\\E]12
-    "
-    " The setting has been correctly applied, as confirmed by:
-    "
-    "     $ tmux info | grep Cs
-    "     11: Cs: (string) \033]12;%p1%s\a~
-    "
-    " So, if  the outer terminal  doesn't change  the cursor color,  it probably
-    " means that Nvim didn't send the sequence.
-    " I guess  that Nvim  only sends it  for some known  values of  `$TERM`, and
-    " `tmux-256color` is not one of them.
-    "
-    " Besides, our terminfo  db is up-to-date, and we can  see that the relevant
-    " capability has the  exact same value for the  entries `xterm-256color` and
-    " `tmux-256color`:
-    "
-    "     $ infocmp -1x xterm-256color | grep ']12'
-    "             Cs=\E]12;%p1%s\007,~
-    "
-    "     $ infocmp -1x tmux-256color | grep ']12'
-    "             Cs=\E]12;%p1%s\007,~
-    "
-    " As for the second issue, there is nothing you can do, except modifying the
-    " patch which adds  support for OSC 12  sequences in st, so  that the latter
-    " accepts hexcodes and rgb specifications.
-    "
-    " ---
-    "
-    " If you find  a way to make  it work in xterm/st  inside/outside tmux, make
-    " the guard before `call s:cursor()` more restrictive:
-    "
-    "     if &bg is# 'dark'
-    "     →
-    "     if &bg is# 'dark' && !has('nvim')
-    "
-    " Same thing in the next autocmd listening to `VimLeavePre`:
-    "
-    "     au VimLeavePre * ++once if &bg is# 'dark' | call s:restore_cursor_color() | endif
-    "     →
-    "     au VimLeavePre * ++once if &bg is# 'dark' && !has('nvim') | call s:restore_cursor_color() | endif
-    "                                               ^^^^^^^^^^^^^^^
-    "}}}
     let color = g:cursor_color[&bg][g:termname is# 'st-256color' ? 'st' : 'other']
     " Why?{{{
     "
@@ -932,11 +833,7 @@ endfu
 fu s:restore_cursor_color() abort "{{{2
     let seq = get(g:cursor_color.light, get(g:, 'termname', '') is# 'st-256color' ? 'st' : 'other')
     let seq = "\e]12;"..seq.."\x07"
-    if !has('nvim')
-        let &t_te ..= seq
-    else
-        call writefile([seq], '/dev/tty', 'b')
-    endif
+    let &t_te ..= seq
 endfu
 " }}}1
 " Utilities {{{1

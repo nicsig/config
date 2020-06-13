@@ -32,7 +32,6 @@
 "
 " Update: This issue has been fixed:
 " https://github.com/vim/vim/commit/f88a5bc10232cc3fac92dba4e8455f4c14311f8e
-" https://github.com/neovim/neovim/commit/207cfce3dea64eca3b93735adfac0a75cc6c1a4a
 "
 " Still, disabling a key after the plugins have been sourced seems more reliable.
 "}}}
@@ -51,8 +50,12 @@ fu s:cancel_prefix(prefixes) abort
         "         nmap s <Nop>
         "         xmap s <Nop>
         "}}}
-        exe 'nno '..pfx..' <nop>'
-        exe 'xno '..pfx..' <nop>'
+        " Don't use `..`!{{{
+        "
+        " It regularly raises errors when we try an old Vim version.
+        "}}}
+        exe 'nno ' . pfx . ' <nop>'
+        exe 'xno ' . pfx . ' <nop>'
 
         " Let us cancel a prefix by pressing it twice.
         " Not sure this is really needed.{{{
@@ -65,8 +68,8 @@ fu s:cancel_prefix(prefixes) abort
         " typeahead buffer.  So  the prefix can still be used  to form a mapping
         " with the next keypress, which *I think* is unexpected in practice.
         "}}}
-        if maparg(pfx..pfx, 'n') is# ''
-            exe 'nno '..pfx..pfx..' <nop>'
+        if maparg(pfx.pfx, 'n') is# ''
+            exe 'nno ' . pfx . pfx . ' <nop>'
         endif
     endfor
 endfu
@@ -126,11 +129,6 @@ ino <expr> <c-n> pumvisible() ? '<c-n>' : ''
 
 " Don't suspend if I press C-z by accident from visual mode.
 vno <c-z> <nop>
-
-" Same thing in normal mode, because of some bugs:
-" https://unix.stackexchange.com/questions/q/445051/289772
-" https://unix.stackexchange.com/questions/q/445239/289772
-nno <c-z> <nop>
 
 " do  dp {{{1
 

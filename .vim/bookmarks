@@ -1,4 +1,5 @@
 A:$HOME/wiki/admin/admin.md
+B:$HOME/Desktop/bug.md
 C:$HOME/wiki/vim/ex.md
 D:$HOME/wiki/diff.md
 F:$HOME/.vim/autoload/myfuncs.vim
@@ -10,7 +11,7 @@ N:$HOME/.vim/doc/misc/notes
 P:$HOME/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py
 S:$HOME/wiki/shell/shell.md
 T:$HOME/wiki/tmux/tmux.md
-U:/tmp/file
+U:
 V:$HOME/wiki/vim/
 W:$HOME/wiki/weechat/weechat.md
 X:$HOME/.Xresources

@@ -186,38 +186,6 @@ So, if colors are wrong in a terminal buffer, they will also be wrong in an fzf 
 For more info, read our comments in `~/.vim/autoload/colorscheme.vim`, above the
 `g:terminal_ansi_colors` assignment.
 
-### Why are the colors different in an fzf buffer in Vim vs in Nvim?
-
-I don't know.
-For some reason, they choose different colors in the terminal palette.
-However, Nvim seems to be more consistent in its choices inside/outside tmux.
-
----
-
-For example, let's consider the color of the currently selected entry in `:FzHistory`.
-
-In xterm:
-
-   - Vim uses color 254
-   - Nvim uses color 7
-
-In xterm + tmux:
-
-   - Vim uses color 227
-   - Nvim uses color 7 (255 if you don't set the `Tc` terminfo extension in `tmux.conf`)
-
-Now, let's consider the `> Hist` prompt.
-
-In xterm:
-
-   - Vim uses color 110
-   - Nvim uses color 68
-
-In xterm + tmux:
-
-   - Vim uses color 4
-   - Nvim uses color 68
-
 ###
 ### I want to get the hex color code of some text in an fzf buffer.
 #### I need to hover my mouse over the text, but the window is automatically closed when I press Escape!

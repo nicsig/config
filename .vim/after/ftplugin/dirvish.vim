@@ -1,9 +1,7 @@
 " Options {{{1
 
-sil! call lg#set_stl(
-    \ '%y %F%<%=%l/%L ',
-    \ '%y %F')
-" in a squashed dirvish window, display the line/column position is useless (noise)
+let &l:stl = '%!g:statusline_winid == win_getid() ? "%y %F%<%=%l/%L " : "%y %F"'
+" in a squashed dirvish window, displaying the line/column position is useless (noise)
 
 " Mappings {{{1
 " -m {{{2

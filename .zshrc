@@ -93,8 +93,8 @@ stty quit undef
 # Why this dollar sign?{{{
 #
 # By prefixing the string  with a dollar sign, you can  include single quotes by
-# escaping them  (man [bash|zshmisc]  > QUOTING); otherwise,  you would  need to
-# write `'\''`, which is less readable
+# escaping  them (`man  zshmisc /QUOTING`;  otherwise, you  would need  to write
+# `'\''`, which is less readable.
 #}}}
 # What's `%F{blue}`?{{{
 #
@@ -110,8 +110,7 @@ stty quit undef
 # And the path to a named directory is replaced with its name;
 # if the result is shorter and if you've referred to it in a command at least once.
 #
-#     man zshparam
-#     /PARAMETERS USED BY THE SHELL
+#     man zshparam /PARAMETERS USED BY THE SHELL
 #}}}
 # What's `%f`?{{{
 #
@@ -121,8 +120,7 @@ stty quit undef
 #
 # It adds an indicator showing whether the last command succeeded ($?).
 #
-#     man zshmisc
-#     /CONDITIONAL SUBSTRINGS IN PROMPTS
+#     man zshmisc /CONDITIONAL SUBSTRINGS IN PROMPTS
 #
 # The syntax of a conditional substring in a prompt is:
 #
@@ -163,9 +161,9 @@ stty quit undef
 # be considered as being part of the command name.
 #}}}
 PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
-# TODO: add git branch in prompt{{{
-#
-#     # https://stackoverflow.com/a/12935606/9780968
+
+# include git info inside prompt
+# Which alternatives could I use?{{{
 #
 #     setopt PROMPT_SUBST
 #     autoload -Uz vcs_info
@@ -177,8 +175,8 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
 #     zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
 #     zstyle ':vcs_info:*' enable git
 #
-#     ┌ see `man zshcontrib` > +vi-git-myfirsthook()
-#     │
+#   # ┌ see `man zshcontrib /+vi-git-myfirsthook()`
+#   # │
 #     +vi-git-untracked() {
 #       if [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == 'true' ]] && \
 #       [[ $(git ls-files --other --directory --exclude-standard | sed q | wc -l | tr -d ' ') == 1 ]]; then
@@ -186,10 +184,12 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
 #       fi
 #     }
 #
-#     precmd () { vcs_info }
+#     precmd() { vcs_info }
 #     PROMPT='%F{5}[%F{2}%n%F{5}] %F{3}%3~ ${vcs_info_msg_0_} %f%# '
 #
-# Alternative:
+# Source: https://stackoverflow.com/a/12935606/9780968
+#
+# ---
 #
 #     autoload -Uz vcs_info
 #     precmd_vcs_info() { vcs_info }
@@ -200,12 +200,28 @@ PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
 #     zstyle ':vcs_info:git:*' formats '%b'
 #
 # Source: https://git-scm.com/book/en/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh
-#
-# Issue:
-# When you cd into a non git directory (like `~`):
-#
-#     VCS_INFO_detect_p4:79: maximum nested function level reached; increase FUNCNEST?
 #}}}
+#   Why don't you use any of them?{{{
+#
+# They rely on a function called `vcs_info` documented at `man zshcontrib`.
+# But the documentation is quite long/complex (≈ 1000 lines atm).
+# And I'm not sure how to use it to get all the info I want.
+#
+# OTOH, the `git-prompt` script seems easier to understand.
+# The documentation in the original script is much shorter.
+# Besides, it seems specialized to git, while `vcs_info` seems more universal.
+# But I don't care about other version control systems; I only use git.
+# Finally, it  seems more bare-bones;  there is  no abstraction layer  like with
+# `vcs_info`.  So, if we have an issue, it should be easier to fix.
+#}}}
+source "$HOME/bin/git-prompt.sh"
+# enable parameter expansion, command substitution and arithmetic expansion inside prompts
+setopt PROMPT_SUBST
+# The optional argument passed to `__git_ps1` is used as a format string.
+# The `%s` token is the placeholder for the shown status.
+RPROMPT='$(__git_ps1 " (%s)")'
+GIT_PS1_SHOWUPSTREAM='auto'
+
 # TODO: add indicator to see nested shells.{{{
 #
 #   https://github.com/wincent/wincent
@@ -379,10 +395,6 @@ compdef vboxheadless=VBoxHeadless
 #}}}
 autoload -Uz bashcompinit
 bashcompinit
-
-# install completion  for the `nvr` command;  to see an effect,  don't forget to
-# insert at least a `-` before pressing Tab (e.g. `nvr - Tab`)
-source "$HOME/.zsh/my-completions/_nvr"
 
 # Why removing the alias `run-help`?{{{
 #
@@ -1508,8 +1520,19 @@ fix() { #{{{2
 
   # For more info: https://unix.stackexchange.com/q/79684/289772
   reset
+
   stty sane
-  stty -ixon
+  # those settings come from the ouputof `stty(1)` in a non-broken terminal
+  stty speed 38400
+  stty quit undef
+  stty start undef
+  stty stop undef
+  # breaks does *not* cause an interrupt signal
+  stty -brkint
+  stty -imaxbel
+  # assume input characters are UTF-8 encoded
+  stty iutf8
+
   # What's the `rs1` capability?{{{
   #
   # A Reset String.
@@ -1969,42 +1992,7 @@ nv() { #{{{2
   emulate -L zsh
 
   local file pgm server
-  file="$HOME/.vim/tmp/restart"
-  if [[ -f "$file" ]]; then
-    pgm="$(<"$file")"
-  else
-    pgm='vim'
-  fi
-  if [[ "$pgm" == 'vim' ]]; then
-    server='VIM'
-  else
-    # Make sure to specify the full path to the socket.{{{
-    #
-    # Otherwise, if you restart Nvim after changing the cwd, the server name may
-    # not be respected:
-    #
-    #     $ nvim -u NONE -i NONE --listen 'TEST' +'cd / | qa'
-    #     $ nvim -u NONE -i NONE --listen 'TEST'
-    #     :echo v:servername
-    #     /tmp/nvimwKc4Ve/0~
-    #
-    # Right before changing Nvim's cwd for the first time, Nvim creates a socket
-    # in the cwd.
-    #
-    # Removing this socket fixes the issue.
-    # Or, specifying an absolute path to the socket:
-    #
-    #     $ nvim -u NONE -i NONE --listen '/tmp/TEST' +'cd / | qa'
-    #     $ nvim -u NONE -i NONE --listen '/tmp/TEST'
-    #     :echo v:servername
-    #     /tmp/TEST~
-    #
-    # In any case,  something needs to be  done, because it can be  an issue for
-    # `vim-session` if  it checks the server  name matches a known  value before
-    # trying to restore the last session.
-    #}}}
-    server='/tmp/nvimsocket'
-  fi
+  server='VIM'
 
   # if no server is running, just start one
   # Why do you look for a server whose name is VIM?{{{
@@ -2026,18 +2014,14 @@ nv() { #{{{2
   # latter becomes a server  whose name is GVIM.  Because of  this, if you don't
   # pass `-x` to `grep(1)`, you can't restart Vim (`SPC R`) while gVim is running.
   #}}}
-  if ! "$pgm" --serverlist | grep -qx "$server"; then
-    if [[ "$pgm" == 'vim' ]]; then
-      vim -w /tmp/.vimkeys --servername "$server" "$@"
-    else
-      nvim -w /tmp/.vimkeys --listen "$server" "$@"
-    fi
+  if ! vim --serverlist | grep -qx "$server"; then
+    vim -w /tmp/.vimkeys --servername "$server" "$@"
     return
   fi
 
   # if no argument was given, just start a new Vim session
   if [[ $# -eq 0 ]]; then
-    "$pgm"
+    vim
     return
   fi
 
@@ -2049,7 +2033,7 @@ nv() { #{{{2
   # has executed/evaluated our command, and the moment it's focused.
   #}}}
   if [[ -n "$TMUX" ]]; then
-    pane_id="$("$pgm" --remote-expr "\$TMUX_PANE")"
+    pane_id="$(vim --remote-expr "\$TMUX_PANE")"
   fi
 
   # if the 1st argumennt is `-b`, we want to edit binary files
@@ -2062,7 +2046,7 @@ nv() { #{{{2
     local IFS=' '
 
     # send the filenames to the server
-    "$pgm" --remote "$@" --servername "$server"
+    vim --remote "$@" --servername "$server"
     # For each buffer in the arglist:{{{
     #
     #    - enable the 'binary' option.
@@ -2071,52 +2055,52 @@ nv() { #{{{2
     #
     #    - set the filetype to `xxd` (to have syntax highlighting)
     #}}}
-    "$pgm" --remote-send ":argdo setl binary ft=xxd<cr>" --servername "$server"
+    vim --remote-send ":argdo setl binary ft=xxd<cr>" --servername "$server"
     # filter the contents of the binary buffer through `xxd`
-    "$pgm" --remote-send ":argdo %!xxd<cr><cr>" --servername "$server"
+    vim --remote-send ":argdo %!xxd<cr><cr>" --servername "$server"
 
   # if the 1st argument is `-d`, we want to compare files
   elif [[ $1 == -d ]]; then
     shift 1
     local IFS=' '
     # open a new tabpage
-    "$pgm" --remote-send ":tabnew<cr>" --servername "$server"
+    vim --remote-send ":tabnew<cr>" --servername "$server"
     # send the files to the server
-    "$pgm" --remote "$@" --servername "$server"
+    vim --remote "$@" --servername "$server"
     # display the buffers of the arglist in a dedicated vertical split
-    "$pgm" --remote-send ":argdo vsplit<cr>:q<cr>" --servername "$server"
+    vim --remote-send ":argdo vsplit<cr>:q<cr>" --servername "$server"
     # execute `:diffthis` in each window
-    "$pgm" --remote-send ":windo diffthis<cr>" --servername "$server"
+    vim --remote-send ":windo diffthis<cr>" --servername "$server"
 
   # if the 1st argument is `-o`, we want to open each file in a dedicated horizontal split
   elif [[ $1 == "-o" ]]; then
     shift 1
     local IFS=' '
 
-    "$pgm" --remote-send ":split<cr>" --servername "$server"
-    "$pgm" --remote "$@" --servername "$server"
+    vim --remote-send ":split<cr>" --servername "$server"
+    vim --remote "$@" --servername "$server"
     # Why `:q<cr>`?{{{
     #
     # To close the last window, because the last file is displayed twice, in 2
     # windows.
     #}}}
-    "$pgm" --remote-send ":argdo split<cr>:q<cr><cr>" --servername "$server"
+    vim --remote-send ":argdo split<cr>:q<cr><cr>" --servername "$server"
 
   # if the 1st argument is `-O`, we want to open each file in a dedicated vertical split
   elif [[ $1 == -O ]]; then
     shift 1
     local IFS=' '
-    "$pgm" --remote-send ":vsplit<cr>" --servername "$server"
-    "$pgm" --remote "$@" --servername "$server"
-    "$pgm" --remote-send ":argdo vsplit<cr>:q<cr><cr>" --servername "$server"
+    vim --remote-send ":vsplit<cr>" --servername "$server"
+    vim --remote "$@" --servername "$server"
+    vim --remote-send ":argdo vsplit<cr>:q<cr><cr>" --servername "$server"
 
   # if the 1st argument is `-p`, we want to open each file in a dedicated tab page
   elif [[ $1 == -p ]]; then
     shift 1
     local IFS=' '
-    "$pgm" --remote-send ":tabnew<cr>" --servername "$server"
-    "$pgm" --remote "$@" --servername "$server"
-    "$pgm" --remote-send ":argdo tabedit<cr>:q<cr>" --servername "$server"
+    vim --remote-send ":tabnew<cr>" --servername "$server"
+    vim --remote "$@" --servername "$server"
+    vim --remote-send ":argdo tabedit<cr>:q<cr>" --servername "$server"
 
   # if the 1st argument is `-q`, we want to populate the qfl with the output of a shell command
   elif [[ $1 == -q ]]; then
@@ -2137,75 +2121,54 @@ nv() { #{{{2
     printf -- "$@\n" >"$tmp"
     # `${=name}` and `${~name}` to perform resp. word-splitting and globbing
     ${~${=@}} >>"$tmp" 2>/dev/null
-    "$pgm" --remote-expr "qf#nv('$tmp')" --servername "$server"
+    vim --remote-expr "qf#nv('$tmp')" --servername "$server"
 
   # if no option was used (`-[bdoOpq]`) we just want to send files to the server
   else
-    "$pgm" --remote "$@" --servername "$server"
+    vim --remote "$@" --servername "$server"
   fi
 
   # focus the Vim server
   if [[ -n "$TMUX" ]]; then
     tmux switchc -Z -t "$pane_id"
     # need to redraw if the tmux pane is zoomed
-    "$pgm" --remote-send '<c-l>'
+    vim --remote-send '<c-l>'
   fi
 }
 
-# FIXME: If we restart Vim, then suspend it, we can't resume it by executing `fg`.{{{
+restarting_vim=
+# Don't restart Vim directly from a trap!{{{
 #
-# MWE:
+# If  you restart  Vim, then  suspend it,  you  won't be  able to  resume it  by
+# executing `fg`.
 #
-#     $ vim
-#     :call system('kill -USR1 $(ps -p '..getpid()..' -o ppid=)') | q
-#     :stop
-#     $ fg
-#     fg: no current job~
-#     # you may need to repeat the process twice before seeing this error
-#
-# https://unix.stackexchange.com/a/445192/289772
-#}}}
-# Which solution could I try?{{{
-#
-# You could restart Vim from a hook.
-#
-#     restarting_vim=
+#     # minimal zshrc
+#     # shell function to start Vim in a custom way
+#     nv() {
+#       vim -Nu NONE
+#     }
+#     # trap to restart Vim
 #     trap __catch_signal_usr1 USR1
 #     __catch_signal_usr1() {
 #       trap __catch_signal_usr1 USR1
 #       clear
-#       restarting_vim=1
+#       nv
 #     }
-#     __restart_vim() {
-#       emulate -L zsh
-#       if [[ -n "${restarting_vim}" ]]; then
-#         restarting_vim=
-#         nv
-#       fi
-#     }
-#     # See: `man zshmisc /SPECIAL FUNCTIONS/;/Hook Functions`
-#     add-zsh-hook -Uz precmd __restart_vim
-#}}}
-#   Why don't you use it?{{{
 #
-# Vim is restarted the first time, but *not* the next times.
-# The issue is  not with the trap, nor  with the flag, because if  I execute any
-# command (ex: `ls(1)`), causing a new prompt to be displayed, Vim is restarted.
-# Besides, if we add some command after `nv` (ex: `echo 'hello'`), the message
-# is correctly displayed even when Vim is not restarted, which means that this
-# `if` block is always correctly processed.
+#     # start Vim
+#     $ nv
+#     # restart Vim
+#     :call system('kill -USR1 $(ps -p '..getpid()..' -o ppid=)')
+#     :q
+#     # suspend Vim
+#     :stop
+#     # bring back Vim
+#     $ fg
+#     fg: no current job~
+#     ^^^^^^^^^^^^^^^^^^
+#     don't understand; zsh seems to have lost the job
 #
-# For some reason, `nv` is ignored.
-# Replacing `nv` with `vim` doesn't fix the issue.
-#
-# ---
-#
-# The issue seems specific to zsh; the code works fine in bash.
-#
-# ---
-#
-# If you suspend +  `fg` Vim after every restart, you can  restart as many times
-# as you want.
+# Probably a zsh bug: https://unix.stackexchange.com/a/445192/289772
 #}}}
 # set a trap for when we send the signal `USR1` from our Vim mapping `SPC R`
 trap __catch_signal_usr1 USR1
@@ -2214,8 +2177,48 @@ __catch_signal_usr1() {
   trap __catch_signal_usr1 USR1
   # useful to get rid of error messages which were displayed during last Vim session
   clear
-  nv
+  restarting_vim=1
 }
+
+__restart_vim() {
+  emulate -L zsh
+  if [[ -n "$restarting_vim" ]]; then
+    restarting_vim=
+    nv
+    # simulate a keypress on Enter
+    # Why?{{{
+    #
+    # To make Vim restart  the second time we press `SPC R`  (and the third one,
+    # fourth one, ...).
+    #
+    # Indeed, Vim is restarted the first time, but *not* the next times.
+    # Not sure why.
+    #
+    # In any case, any executed command (even  an empty one) causes a new prompt
+    # to be  displayed, precmd  functions to  be executed again,  and Vim  to be
+    # finally restarted.
+    #
+    # ---
+    #
+    # The issue is not with the trap, nor  with the flag, because if we add some
+    # command  after  `nv`  (ex:  `echo  'hello'`),  the  message  is  correctly
+    # displayed even when Vim is not restarted, which means that this `if` block
+    # is always correctly processed.
+    #
+    # Replacing `nv` with `vim` doesn't fix the issue.
+    #}}}
+    #   Is there an alternative?{{{
+    #
+    # You could  try to automatically suspend  Vim then `fg` it  back after each
+    # restart; it works but it's ugly though...
+    #}}}
+    xdotool key KP_Enter
+  fi
+}
+
+autoload -Uz add-zsh-hook
+# See: `man zshmisc /SPECIAL FUNCTIONS/;/Hook Functions`
+add-zsh-hook -Uz precmd __restart_vim
 
 palette(){ #{{{2
   emulate -L zsh
@@ -3454,13 +3457,7 @@ if [[ -n "$VIM_TERMINAL" ]]; then
   add-zsh-hook -Uz chpwd _vim_lcd
   _vim_lcd() {
     # in Vim, see `:h terminal-api`
-    printf -- '\033]51;["call", "Tapi_exe", ["lcd", "%q"]]\007' "$(pwd)"
-  }
-# same thing in Nvim
-elif [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
-  add-zsh-hook -Uz chpwd _nvim_lcd
-  _nvim_lcd() {
-    nvr --remote-expr "$(printf -- 'Tapi_exe(0, ["lcd", "%q"])' "$(pwd)")"
+    printf -- '\033]51;["call", "Tapi_exe", "lcd %q"]\007' "$(pwd)"
   }
 fi
 
@@ -3598,6 +3595,26 @@ _cmds_to_ignore_in_history=(
 # Example:
 #
 #     bindkey -s '^Xr' '^A^Kfor f in *; do echo mv \"$f\" \"${f}\";done\e7^B'
+#}}}
+
+# TODO: Should we prefix every built-in widget name with a dot?{{{
+#
+# From `man zshzle /\.'`:
+#
+# >     Each built-in widget has two names: its normal canonical name,
+# >     and  the same name preceded by a '.'.  The '.' name is special:
+# >     it can't be rebound to a different widget.  This makes the widget
+# >     available even when its usual name has been redefined.
+#
+# Would it make our code more reliable?
+#
+# Look for the  pattern `zle\%( -N\)\@!` in this file,  and *consider* this kind
+# of refactoring:
+#
+#     zle list-choices
+#     →
+#     zle .list-choices
+#         ^
 #}}}
 
 # fzf {{{2
@@ -3771,6 +3788,13 @@ fi
 
 # S-Tab {{{2
 
+# use S-Tab to cycle backward during a completion
+bindkey '\e[Z' reverse-menu-complete
+#        ├──┘
+#        └ the shell doesn't seem to recognize the keysym "S-Tab"
+#          but when we press "S-Tab", the terminal sends the sequence "Esc [ Z"
+#          so we use it in the lhs of our key binding
+
 # TODO: To document.
 #
 # Source: https://unix.stackexchange.com/a/32426/232487
@@ -3788,29 +3812,30 @@ __reverse_menu_complete_or_list_files() {
     # FIXME: why doesn't `s-tab` cycle backward?{{{
     #
     # MWE:
-    #         autoload -Uz compinit
-    #         compinit
-    #         zstyle ':completion:*' menu select
-    #         __reverse_menu_complete_or_list_files() {
-    #           emulate -L zsh
-    #           if [[ $#BUFFER == 0 ]]; then
-    #             BUFFER="ls "
-    #             CURSOR=3
-    #             zle list-choices
-    #             zle backward-kill-word
-    #           else
-    #             zle reverse-menu-complete
-    #           fi
-    #         }
-    #         zle -N __reverse_menu_complete_or_list_files
-    #         bindkey '\e[Z' __reverse_menu_complete_or_list_files
+    #
+    #     autoload -Uz compinit
+    #     compinit
+    #     zstyle ':completion:*' menu select
+    #     __reverse_menu_complete_or_list_files() {
+    #       emulate -L zsh
+    #       if [[ $#BUFFER == 0 ]]; then
+    #         BUFFER="ls "
+    #         CURSOR=3
+    #         zle list-choices
+    #         zle backward-kill-word
+    #       else
+    #         zle reverse-menu-complete
+    #       fi
+    #     }
+    #     zle -N __reverse_menu_complete_or_list_files
+    #     bindkey '\e[Z' __reverse_menu_complete_or_list_files
     #
     # If I replace `reverse-menu-complete` with `backward-kill-word`,
     # `zle` deletes the previous word as expected, so why doesn't
     # `reverse-menu-complete` work as expected?
     #
     # It  seems that  `reverse-menu-complete` is  unable to  detect that  a menu
-    # completion is  opened. Therefore, it  simply tries  to COMPLETE  the entry
+    # completion is opened.  Therefore, it  simply tries to *complete* the entry
     # selected in the menu, instead of cycling backward.
     #}}}
     zle reverse-menu-complete
@@ -3821,17 +3846,10 @@ __reverse_menu_complete_or_list_files() {
 # Why is it commented?{{{
 #
 # Currently,  this key  binding breaks  the behavior  of `s-tab`  when we  cycle
-# through the candidates of a completion menu.
+# through the candidates of a completion menu.  See the previous fix_me.
 #}}}
 #     zle -N __reverse_menu_complete_or_list_files
 #     bindkey '\e[Z' __reverse_menu_complete_or_list_files
-
-# use S-Tab to cycle backward during a completion
-bindkey '\e[Z' reverse-menu-complete
-#        ├──┘
-#        └ the shell doesn't seem to recognize the keysym `S-Tab`
-#          but when we press `S-Tab`, the terminal receives the escape sequence `escape + [ + Z`
-#          so we use them in the lhs of our key binding
 
 # Ctrl {{{2
 # C-SPC      set-mark-command {{{3
@@ -3858,12 +3876,12 @@ bindkey '^^' __previous_directory
 # Don't  display all  possible shell  commands when  I press  `C-d` on  an empty
 # command-line which only contains whitespace; just close the shell.
 #
-# Also, don't terminate the shell in a (N)Vim popup terminal.
+# Also, don't terminate the shell in a Vim popup terminal.
 # It could lead to many issues; look for `IGNORE_EOF` in `~/.zshenv`.
 #}}}
 __delete-char-or-list() {
-  # we're in a (N)Vim terminal
-  if [[ -n "$VIM_TERMINAL" || -n "$NVIM_LISTEN_ADDRESS" ]]; then
+  # we're in a Vim terminal
+  if [[ -n "$VIM_TERMINAL" ]]; then
     if [[ "$BUFFER" =~ '^\s*$' ]]; then
       :
     else
@@ -4339,59 +4357,81 @@ bindkey '^XH' my-run-help
 #}}}
 bindkey '^Xh' describe-key-briefly
 # }}}3
-# C-z        fancy_ctrl_z {{{3
+# C-z        ctrl_z {{{3
 
-# FIXME:
-# I can't bring a suspended process to the foreground anymore.
-# MWE:
-#
-#     $ vim
-#     C-z
-#     C-z
-
-# Hit `C-z` to temporarily discard the current command line.
-# If the command line is empty, instead, resume execution of the last paused
-# background process, so that we can put a running command in the background
-# with 2 `C-z`.
-# Try to reimplement what is shown here:
-# https://www.youtube.com/watch?v=SW-dKIO3IOI
-#
+# Foreground the last job or temporarily discard the current command line.
+# Inspiration:
 # https://unix.stackexchange.com/a/10851/232487
-__fancy_ctrl_z() {
+# https://www.youtube.com/watch?v=SW-dKIO3IOI
+__ctrl_z() {
   emulate -L zsh
 
   # if the current line is empty ...
   if [[ $#BUFFER -eq 0 ]]; then
   #     │
   #     └ size of the buffer
-    bg
-    # ... redisplay the edit buffer (to get rid of a message)
-    zle redisplay
-    # Without `zle redisplay`, when we hit `C-z` while the command line is empty,
-    # we would always have an annoying message:
+
+    # Why don't you just run `fg` directly?{{{
     #
-    #     if there's a paused job:
-    #             [1]    continued  sleep 100
+    # The code would not work as expected the fourth time you press `C-z` consecutively.
+    # It should resume Vim, but it would not.
     #
-    #     if there's no paused job:
-    #             __fancy_ctrl_z:bg:18: no current job
+    # MWE:
+    #
+    #     # minimal zshrc
+    #     nv() {
+    #       vim -Nu NONE
+    #     }
+    #     ctrl_z() {
+    #       if [[ $#BUFFER -eq 0 ]]; then
+    #         fg
+    #       else
+    #         zle push-input
+    #       fi
+    #     }
+    #     zle -N ctrl_z
+    #     bindkey '^Z' ctrl_z
+    #
+    #     $ nv
+    #     " press: C-z
+    #     # press: C-z
+    #     " press: C-z
+    #     # press: C-z
+    #       ctrl_z:fg:2: no current job~
+    #
+    # Besides, when the command-line is empty, there would be an annoying message:
+    #
+    #     # if there's a paused job
+    #     [1]    continued  sleep 100~
+    #
+    #     # if there's no paused job
+    #     __ctrl_z:bg:18: no current job~
+    #
+    # To get rid of it, you would need to run this command:
+    #
+    #     zle redisplay
+    #}}}
+    BUFFER=fg; zle accept-line
   else
-    # Push the entire current multiline construct onto the buffer stack.
+    # Push the entire current multiline construct onto the buffer stack.{{{
+    #
     # If it's only a single line, this is exactly like `push-line`.
     # Next time the editor starts up or is popped with `get-line`, the construct
     # will be popped off the top of the buffer stack and loaded into the editing
     # buffer.
+    #}}}
     zle push-input
   fi
 }
-zle -N __fancy_ctrl_z
-# NOTE:
-# This  key  binding  won't prevent  us  to  put  a  foreground process  in  the
-# background. When  we hit  `C-z` while  a process  is in  the foreground,  it's
-# probably the terminal driver which intercepts the keystroke and sends a signal
-# to the process to  pause it. In other words, `C-z` should  reach zsh only if
-# no process has the control of the terminal.
-bindkey '^Z' __fancy_ctrl_z
+# This key binding won't prevent us to put a foreground process in the background.{{{
+#
+# When we  hit `C-z`  while a process  is in the  foreground, it's  probably the
+# terminal  driver which  intercepts the  keystroke and  sends a  signal to  the
+# process  to pause  it.  In  other words,  `C-z` should  reach zsh  only if  no
+# process has the control of the terminal.
+#}}}
+zle -N __ctrl_z
+bindkey '^Z' __ctrl_z
 # }}}2
 # Meta {{{2
 # M-[!$/@~]    _bash_complete-word {{{3
@@ -4803,19 +4843,11 @@ bindkey -s '\eZ' '$(!!|fzf)'
 # }}}2
 # Menuselect {{{2
 
-# Do *not* write this:
-#
-#     bindkey -M menuselect '^J' down-line-or-history
-#
-# It works in any terminal, except one opened from Vim.
-# The latter doesn't seem able to  distinguish `C-m` from `C-j`. At least when a
-# completion menu is opened.  Because of  that, when we would hit Enter/C-m, Vim
-# would move the cursor down, instead of selecting the current entry.
 bindkey -M menuselect '^J' down-line-or-history
 #        │{{{
-#        └ selects the `menuselect` keymap
+#        └ selects the "menuselect" keymap
 #
-#           `bindkey -l` lists all the keymap names
+#           "bindkey -l" lists all the keymap names
 #            for more info: man zshzle
 #}}}
 bindkey -M menuselect '^K' up-line-or-history

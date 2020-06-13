@@ -1250,7 +1250,6 @@ https://vi.stackexchange.com/questions/2009/how-do-i-make-vim-look-in-a-set-of-d
 
 color scheme
 https://vi.stackexchange.com/questions/6780/how-do-i-preserve-my-colorscheme-when-i-sudo-to-root
-https://vi.stackexchange.com/questions/8575/neovim-default-colors-dont-match-vims
 https://vi.stackexchange.com/questions/8607/how-do-putty-kitty-ansi-colors-affect-vim-colorschemes/
 
 conceal
@@ -1268,7 +1267,6 @@ https://vi.stackexchange.com/questions/6773/how-can-i-make-vims-flowing-aware-of
 https://vi.stackexchange.com/questions/6705/use-shell-variable-substitution-with-current-filepath
 https://vi.stackexchange.com/questions/6238/how-can-i-make-a-slow-ish-system-call-in-a-statusline-without-corrupting-the-d
 https://vi.stackexchange.com/questions/5941/summary-of-functions-in-current-file
-https://vi.stackexchange.com/questions/5869/edit-neovim-terminal-commandline-within-the-same-neovim-instance
 https://vi.stackexchange.com/questions/5667/escape-return-value-key-in-mapping-function
 https://vi.stackexchange.com/questions/3920/is-it-possible-to-use-a-delegate-or-to-pass-a-function-as-argument-in-vimscript
 https://vi.stackexchange.com/questions/8958/align-code-functions-documentation

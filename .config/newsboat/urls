@@ -5,7 +5,6 @@ https://unix.stackexchange.com/feeds/tag/vim
 https://vi.stackexchange.com/feeds
 
 https://www.reddit.com/r/vim.rss
-https://www.reddit.com/r/neovim.rss
 https://sourceforge.net/p/ansifilter/activity/feed
 https://github.com/koalaman/shellcheck/releases.atom
 https://github.com/mkropat/jumpapp/commits/master.atom
@@ -16,7 +15,6 @@ https://github.com/wofr06/lesspipe/commits/master.atom
 https://github.com/Clavelito/indent-awk.vim/commits/master.atom
 https://github.com/changyuheng/zsh-interactive-cd/commits/master.atom
 https://github.com/learnbyexample/command_help/commits/master.atom
-https://github.com/neovim/neovim/commits/master.atom
 https://github.com/oltodosel/interSubs/commits/master.atom
 https://github.com/ranger/ranger/commits/master.atom
 https://github.com/tmux/tmux/commits/master.atom
@@ -29,6 +27,5 @@ https://github.com/zsh-users/zsh/commits/master.atom
 https://github.com/Igglybuff/awesome-piracy/commits/master.atom
 https://github.com/sunaku/home/commits/master/bin/yank.atom
 https://git.pwmt.org/pwmt/zathura/commits/master.atom
-https://neovim.io/news.xml
 https://tug.org/rss/tug.xml
 https://weechat.org/blog/feed/atom

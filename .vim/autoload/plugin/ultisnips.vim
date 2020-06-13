@@ -66,7 +66,6 @@ fu plugin#ultisnips#save_info() abort "{{{1
         \ 'st -v': systemlist('st -v')[0],
         \ 'tmux -V': systemlist('tmux -V')[0],
         \ 'vim --version': system('vim --version | sed -n "1s/VIM - Vi IMproved\|(.*//gp ; 2p" | tr -d "\n"'),
-        \ 'nvim --version': systemlist('nvim --version | sed -n "1p"')[0],
         \ 'xterm -v': systemlist('xterm -v')[0],
         \ 'zsh --version' : systemlist('zsh --version')[0],
         \ }

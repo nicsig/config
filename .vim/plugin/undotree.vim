@@ -47,6 +47,7 @@ fu g:Undotree_CustomMap() abort "{{{1
     nno <buffer><nowait><silent> D :<c-u>call plugin#undotree#diff_toggle()<cr>
 
     " dummy item to get an empty status line
-    sil! call lg#set_stl('%h')
+    setl stl=%h
+    let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')..'| set stl<'
 endfu
 

@@ -383,9 +383,9 @@ XTerm*disallowedWindowOps: 20,21,SetXprop
 !
 ! Here's how `selectToClipboard` is documented:
 !
-! > Tells xterm whether to  use the PRIMARY or CLIPBOARD for  SELECT tokens in the
-! > selection  mechanism. [...]  The default  is “false”,  which tells  it to  use
-! > PRIMARY.
+! >     Tells xterm whether to  use the PRIMARY or CLIPBOARD for  SELECT tokens in the
+! >     selection  mechanism. [...]  The default  is “false”,  which tells  it to  use
+! >     PRIMARY.
 !}}}
 !   In the previous example, can't you specify the clipboard with `c`?{{{
 !
@@ -439,8 +439,8 @@ XTerm*fastScroll: true
 ! Let us paste the clipboard selection by pressing `C-S-v`.
 ! Source: https://unix.stackexchange.com/a/225076/277716
 XTerm*VT100.Translations: #override \
-                 Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
-                 Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD)
 
 ! Colors (for all X programs) {{{1
 

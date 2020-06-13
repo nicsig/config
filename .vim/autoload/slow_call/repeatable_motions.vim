@@ -37,8 +37,8 @@ nno g, g;zv
 " These mappings  *could* be useful  when we start  coding in python  which uses
 " indentation to specify when a construct ends.
 "}}}
-noremap <expr> gk <sid>vertical_jump_rhs(0)
-noremap <expr> gj <sid>vertical_jump_rhs(1)
+noremap <expr><silent> gk <sid>vertical_jump_rhs(0)
+noremap <expr><silent> gj <sid>vertical_jump_rhs(1)
 
 fu s:snr()
     return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')

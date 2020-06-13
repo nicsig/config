@@ -11,9 +11,9 @@ fu myfuncs#op_grep(...) abort "{{{2
     endif
 
     let type = a:0 == 1 ? a:1 : 'Ex'
-    let cb_save  = &cb
+    let cb_save = &cb
     let sel_save = &selection
-    let reg_save = ['"', getreg('"'), getregtype('"')]
+    let reg_save = ['"', getreg('"', 1, 1), getregtype('"')]
 
     try
         set cb-=unnamed cb-=unnamedplus
@@ -83,108 +83,79 @@ fu myfuncs#op_grep(...) abort "{{{2
     catch
         return lg#catch()
     finally
-        let &cb  = cb_save
+        let &cb = cb_save
         let &sel = sel_save
         call call('setreg', reg_save)
     endtry
 endfu
 
-" op_replace_without_yank {{{2
-
-fu myfuncs#op_replace_without_yank(...) abort
+fu myfuncs#op_replace_without_yank(...) abort "{{{2
     if !a:0
         let &opfunc = 'myfuncs#op_replace_without_yank'
         return 'g@'
     endif
-    let replace_reg_name = v:register
+    let reg = v:register
     let type = a:1
     let [cb_save, sel_save] = [&cb, &selection]
+    " save registers and types to restore later.
+    let reg_save = ['"', getreg('"', 1, 1), getregtype('"')]
     try
-        set selection=inclusive
+        set cb-=unnamed cb-=unnamedplus sel=inclusive
 
-        " save registers and types to restore later.
-        " FIXME: We save and restore the register which can be prefixed before the `dr` operator.
-        " Is it necessary?  If so, have we done the same for the other operators
-        " which can be prefixed by a register?
-        call lg#reg#save(['"', replace_reg_name])
-
-        " Why do you save the visual marks?{{{
-        "
-        " Suppose you select some lines.
-        " Then you search some word inside (`/\%Vword`).
-        " You replace it (`ciwreplacement`).
-        " You press `n` to go to the next occurrence of the word, and repeat the
-        " edit.
-        " It won't work, because the visual selection has been altered.
-        "}}}
-        " TODO: review the previous comment; I don't understand how it's relevant to the current function.
         let visual_marks_save = [getpos("'<"), getpos("'>")]
 
-        " TODO: Should  we   use  `getreg(..., 1)`   to  properly   restore  the
-        " expression register?
-        let replace_reg_contents = getreg(replace_reg_name)
-        let replace_reg_type     = getregtype(replace_reg_name)
-
-        " build condition to check if we're replacing the current line
-
-        let replace_current_line =     line("'[") == line("']")
-        \                          &&  col("'[") == 1
-        \                          && (col("']") == col('$')-1 || col('$') == 1)
-
-        " If we copy a line containing leading whitespace, and try to replace
-        " another line like this: `0dr$`
-        " The leading whitespace (indentation) will be removed.
-        " Why?
-        "
-        " Because the text on which we operate doesn't include the ending newline.
-        " So, `g@` will pass the type `char`.
-        " So, our function will trim the leading / ending whitespace.
-        " We don't want that for a single line.
-        " For multiple lines, yes.  A single one, no.
-        " We use the  `replace_current_line` condition to be  informed when this
-        " case happens.  We treat it as linewise motion/text-object, to keep the
-        " indentation.
-
-        if type is# 'line' || replace_current_line
-            exe 'keepj norm! ''[V'']"'..replace_reg_name..'p'
+        if type is# 'line'
+            exe 'keepj norm! ''[V'']"'..reg..'p'
             norm! gv=
 
         elseif type is# 'block'
-            exe "keepj norm! `[\<c-v>`]\""..replace_reg_name..'p'
+            exe "keepj norm! `[\<c-v>`]\""..reg..'p'
 
         elseif type is# 'char'
-            " If  pasting linewise  contents in  a *characterwise*  motion, trim
-            " surrounding whitespace from the content to be pasted.
+            " Tweak linewise register so that it better fits inside a characterwise text.{{{
             "
-            " *Not* the trailing whitespace on each line.
-            " *Just* the  leading whitespace of  the first line, and  the ending
-            " whitespace of the last.
-            if replace_reg_type is# 'V'
-                call setreg(replace_reg_name, s:trimws_ml(replace_reg_contents), 'v')
+            " That is:
+            "
+            "    - reset its type to characterwise
+            "    - trim the leading whitespace in front of the first line
+            "    - trim the trailing whitespace at the end of the last line
+            "
+            " Consider this text:
+            "
+            "     a
+            "     b c d
+            "
+            " If you press `dd` to delete the  `a` line, then press `drl` on the
+            " `c` character, you get:
+            "
+            "     b a d
+            "
+            " If you didn't tweak the register, you would get:
+            "
+            "        b
+            "        a
+            "     d
+            "
+            " Which is probably not what you want.
+            "}}}
+            if getregtype(reg) is# 'V'
+                " trim whitespace surrounding the text
+                let reg_save[1][0] = substitute(reg_save[1][0], '^\s*', '', '')
+                let reg_save[1][-1] = substitute(reg_save[1][-1], '\s*$', '', '')
+                " and reset the type to characterwise
+                call setreg(reg, reg_save[1], 'c')
             endif
 
-            exe 'keepj norm! `[v`]"'..replace_reg_name..'p'
+            exe 'keepj norm! `[v`]"'..reg..'p'
         endif
-
     catch
         return lg#catch()
     finally
         let [&cb, &sel] = [cb_save, sel_save]
-        call lg#reg#restore(['"', replace_reg_name])
-        " TODO: Is  it  possible  that  the   previous  paste  has  removed  the
-        " characters where the visual marks were originally?
-        " Could the positions of the saved marks be invalid?
-        " If so, would it raise an error?
-        " Should  we check  the validity  of  these positions  before trying  to
-        " restore the marks?
+        call call('setreg', reg_save)
         call setpos("'<", visual_marks_save[0])
         call setpos("'>", visual_marks_save[1])
     endtry
-endfu
-
-" TRIM WhiteSpace Multi-Line
-fu s:trimws_ml(s) abort
-    return substitute(a:s, '^\_s*\(.\{-}\)\_s*$', '\1', '')
 endfu
 
 fu myfuncs#op_trim_ws(...) abort "{{{2
@@ -199,9 +170,7 @@ fu myfuncs#op_trim_ws(...) abort "{{{2
     exe range..'TW'
 endfu
 
-" op_yank {{{2
-
-fu myfuncs#op_yank_setup(what) abort
+fu myfuncs#op_yank_setup(what) abort "{{{2
     let s:op_yank = {'what': a:what, 'register': v:register}
     let &opfunc = s:snr..'op_yank'
     return 'g@'
@@ -396,7 +365,7 @@ fu s:box_create_separations() abort
 
     " Make the contents of the register linewise, so we don't need to hit
     " `"x]p`, but simply `"xp`.
-    call setreg('x', @x, 'V')
+    call setreg('x', @x, 'l')
 endfu
 
 fu myfuncs#box_destroy(...) abort
@@ -902,9 +871,6 @@ fu myfuncs#plugin_install(url) abort "{{{1
 
     call win_gotoid(win_orig)
     call win_gotoid(win_plug)
-    if has('nvim')
-        UpdateRemotePlugins
-    endif
 endfu
 
 fu myfuncs#plugin_global_variables(keyword) abort "{{{1
@@ -1031,13 +997,6 @@ fu s:search_todo_text(dict) abort
 endfu
 
 fu myfuncs#send_to_server() abort "{{{1
-    let file = $HOME..'/.vim/tmp/restart'
-    if filereadable(file)
-        let pgm = get(readfile(file), 0, '')
-    else
-        let pgm = 'vim'
-    endif
-
     sil undo | let contains_ansi = search("\e", 'n') | sil redo
     let bufname = expand('%:p')
     if bufname is# '' || bufname =~# '^\C/proc/'
@@ -1055,7 +1014,7 @@ fu myfuncs#send_to_server() abort "{{{1
         let file = bufname
     endif
 
-    let cmd = pgm..' --remote-tab '..shellescape(file)
+    let cmd = 'vim --remote-tab '..shellescape(file)
     sil call system(cmd)
 
     if v:shell_error
@@ -1067,13 +1026,12 @@ fu myfuncs#send_to_server() abort "{{{1
 
     " highlight ansi codes; useful for when you run sth like `$ trans word | vipe`
     if contains_ansi && ($_ =~# '\C/vipe$' || bufname is# '')
-        let cmd = pgm..' --remote-expr "lg#textprop#ansi()"'
+        let cmd = 'vim --remote-expr "lg#textprop#ansi()"'
         sil call system(cmd)
     endif
 
-    let msg = printf('the %s was sent to the %s server',
-        \ bufname is# '' ? 'buffer' : 'file',
-        \ pgm is# 'vim' ? 'Vim' : 'Neovim')
+    let msg = printf('the %s was sent to the Vim server',
+        \ bufname is# '' ? 'buffer' : 'file')
     echohl ModeMsg
     echom msg
     echohl NONE
@@ -1110,7 +1068,7 @@ fu myfuncs#tab_toc() abort "{{{1
     let is_help_file = &bt is# 'help'
 
     " The width of the current window is going to be reduced by the TOC window.
-    " Long lines may be wrapped. I don't like wrapped lines.
+    " Long lines may be wrapped.  I don't like wrapped lines.
     setl nowrap
 
     do <nomodeline> QuickFixCmdPost lwindow
@@ -1349,7 +1307,7 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     endif
 
     exe 'vert res '..(max(map(getline(1, '$'), {_,v -> strchars(v, 1)}))+4)
-    nno <buffer><expr><nowait> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
+    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
     wincmd p
 endfu
 

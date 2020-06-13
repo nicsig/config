@@ -85,13 +85,9 @@ END
 endfu
 
 fu plugin#undotree#diff_toggle() abort "{{{2
-    if has('nvim')
-        let pv_bufnr = get(filter(tabpagebuflist(), {_,v -> getwinvar(bufwinnr(v), '&pvw', 0)}), 0, 0)
-    else
-        let pv_bufnr = tabpagebuflist()
-            \ ->filter({_,v -> getwinvar(bufwinnr(v), '&pvw', 0)})
-            \ ->get(0, 0)
-    endif
+    let pv_bufnr = tabpagebuflist()
+        \ ->filter({_,v -> getwinvar(bufwinnr(v), '&pvw', 0)})
+        \ ->get(0, 0)
     " if there is already a preview window, ask the user to close it (to avoid `E590`)
     if pv_bufnr && bufname(pv_bufnr) !~# '^diffpanel_\d\+$'
         unsilent echo 'close the preview window first'
@@ -103,19 +99,15 @@ fu plugin#undotree#diff_toggle() abort "{{{2
     endif
     call t:undotree.Action('DiffToggle')
     if exists('t:undotree_prevwinid')
-        call lg#win_execute(t:undotree_prevwinid, 'do <nomodeline> WinEnter')
+        call win_execute(t:undotree_prevwinid, 'do <nomodeline> WinEnter')
     endif
 endfu
 
 fu plugin#undotree#close_diff_panel() abort "{{{2
     " This function is public because we need to be able to call it when we press `SPC q`.
-    if has('nvim')
-        let bufnr = get(filter(tabpagebuflist(), {_,v -> getbufvar(v, '&ft') is# 'undotree'}), 0, 0)
-    else
-        let bufnr = tabpagebuflist()
-            \ ->filter({_,v -> getbufvar(v, '&ft') is# 'undotree'})
-            \ ->get(0, 0)
-    endif
+    let bufnr = tabpagebuflist()
+        \ ->filter({_,v -> getbufvar(v, '&ft') is# 'undotree'})
+        \ ->get(0, 0)
     if bufnr
         let winnr = bufwinnr(bufnr)
         exe winnr..'wincmd w'
@@ -128,15 +120,20 @@ fu plugin#undotree#close_diff_panel() abort "{{{2
         echo 'press "D" from the undotree buffer for signs to be removed'
     endif
 endfu
+
+fu plugin#undotree#stl() "{{{2
+    return g:statusline_winid == win_getid()
+        \ ? ' %l,%c%=%{&l:pvw ? "[pvw]" : ""}%p%% '
+        \ : '%=%{&l:pvw ? "[pvw]" : ""}%p%% '
+endfu
 "}}}1
 " Core {{{1
 fu s:customize_diff_panel() abort "{{{2
     setl pvw
     " In the diff panel, the undotree plugin sets a status line, which I don't find useful.
     " Let's use our own.
-    sil! call lg#set_stl(
-        \ ' %l,%c%=%{&l:pvw ? "[pvw]" : ""}%p%% ',
-        \ '%=%{&l:pvw ? "[pvw]" : ""}%p%% ')
+    let &l:stl = '%!plugin#undotree#stl()'
+    let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')..'| set stl<'
     nno <buffer><nowait><silent> q :<c-u>call plugin#undotree#close_diff_panel()<cr>
 endfu
 

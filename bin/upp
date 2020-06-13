@@ -8,10 +8,6 @@
 #   ≈ 2 min   for zsh
 #}}}
 
-# Nvim: If a network connection fails during the compilation, the latter will also fail.{{{
-#
-# In that case, re-try a compilation (now or a bit later).
-#}}}
 # Vim: After an update, in case of an issue, restart Vim in a new shell!{{{
 #
 # Otherwise, there can be spurious bugs in the current session.
@@ -39,7 +35,6 @@ typeset -A URLS=( \
   [gawk]=git://git.savannah.gnu.org/gawk.git \
   [jumpapp]=https://github.com/mkropat/jumpapp \
   [mpv]=https://github.com/mpv-player/mpv-build \
-  [nvim]=https://github.com/neovim/neovim \
   [tmux]=https://github.com/tmux/tmux \
   [trans]=https://github.com/soimort/translate-shell \
   [surfraw]=https://gitlab.com/surfraw/Surfraw \
@@ -107,7 +102,7 @@ main() { #{{{2
   build
 
   # If we've compiled against a specific commit hash, we're probably bisecting a
-  # bug. Don't install the binary. We just need it to make some tests.
+  # bug.  Don't install the binary.  We just need it to make some tests.
   if [[ -n "$COMMIT_HASH" ]]; then
     return
   fi
@@ -166,12 +161,6 @@ install_dependencies() { #{{{2
       libncurses5-dev \
       luajit libluajit-5.1-dev \
       python3-dev
-  elif [[ "$PGM" == 'nvim' ]]; then
-    sudo aptitude install libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
-    # `:h python-provider`
-    python3 -m pip install --user --upgrade pynvim
-    # `:h vimtex-faq-neovim`
-    python3 -m pip install --user --upgrade neovim-remote
   elif [[ "$PGM" == 'tmux' ]]; then
     # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
     sudo aptitude install \
@@ -281,7 +270,7 @@ configure() { #{{{2
     sh autogen.sh
     # TODO: When you update your OS, try to pass `--enable-utf8proc` to `./configure`.{{{
     #
-    # It may fix various issues in (N)Vim when editing a line containing some emojis
+    # It may fix various issues in Vim when editing a line containing some emojis
     #
     # See: https://www.youtube.com/watch?v=F91VWOelFNE&t=346s
     #
@@ -414,14 +403,6 @@ build() { #{{{2
     # https://github.com/mpv-player/mpv-build#dependencies
     #}}}
     ./rebuild
-
-  elif [[ "$PGM" == 'nvim' ]]; then
-    make CMAKE_BUILD_TYPE=Release
-    #    ├──────────────────────┘
-    #    └ Full compiler optimisations and no debug information.
-    #      Expect the best performance from this build type.
-    #      Often used by package maintainers.
-
   else
     make
     # What to do if the zsh manpages are not installed?{{{
@@ -477,11 +458,7 @@ print_version() { #{{{2
 
 uninstall() { #{{{2
   print_title 'uninstall'
-  if [[ "$PGM" == 'nvim' ]]; then
-    # https://github.com/neovim/neovim/wiki/Installing-Neovim#uninstall
-    sudo rm /usr/local/bin/nvim
-    sudo rm -r /usr/local/share/nvim/
-  elif [[ "$PGM" == 'mpv' ]]; then
+  if [[ "$PGM" == 'mpv' ]]; then
     # https://github.com/mpv-player/mpv-build/blob/master/uninstall
     sudo ./uninstall
   else
@@ -498,13 +475,7 @@ install() { #{{{2
     sudo make install
   fi
 
-  if [[ $PGM == 'nvim' ]]; then
-    # In a  manpage, when we press  the default `gO` command, open  the TOC on
-    # the *left* rather than at the bottom.
-    sudo sed -i.bak \
-         -e '/function! man#show_toc()/,/endfunction/s/lopen/lefta vert lopen 40/' \
-         /usr/local/share/nvim/runtime/autoload/man.vim
-  elif [[ $PGM == 'zsh' ]] && ! grep -qx '/usr/local/bin/zsh' /etc/shells; then
+  if [[ $PGM == 'zsh' ]] && ! grep -qx '/usr/local/bin/zsh' /etc/shells; then
     # https://unix.stackexchange.com/a/111367/289772
     echo '/usr/local/bin/zsh' | sudo tee -a /etc/shells
     # change login shell for the current user
@@ -576,15 +547,6 @@ xdg_mime_default() { #{{{2
   # Once the `gvim.desktop` file is installed,  it doesn't make gVim the default
   # program for text files.
   # It just informs the system that gVim *can* open some of them.
-  #
-  # ---
-  #
-  # Btw, the default `nvim.desktop` file lists the same types of files.
-  # For the moment, I prefer gVim to be the default.
-  # In the future,  you may choose Nvim  instead; in that case,  parse this file
-  # instead (found with `$ locate nvim.desktop`):
-  #
-  #     /usr/local/share/applications/nvim.desktop
   #}}}
   grep -i 'mimetype' /usr/local/share/applications/gvim.desktop \
     | sed 's/mimetype=//i; s/;/ /g' \

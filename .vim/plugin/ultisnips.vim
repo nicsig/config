@@ -334,30 +334,6 @@ augroup my_ultisnips | au!
     " That's what  happens atm  with the  `if` snippet, when  you jump  from the
     " `else` tabstop.
     "}}}
-
-    " The autotrigger feature of UltiSnips has a *very* negative impact on the latency/jitter in Nvim.{{{
-    "
-    " MWE:
-    "
-    "     500i some text
-    "     " takes around 6 seconds when the UltiSnips autocmd is installed
-    "     " instantaneous when it's uninstalled
-    "
-    " ---
-    "
-    " To make some tests, use typometer: https://github.com/pavelfatin/typometer
-    "}}}
-    if has('nvim')
-        " Why the guard?{{{
-        "
-        " To avoid an error if we run  the python tool `nvr` from a Vim terminal
-        " (which probably doesn't make sense, but I don't like errors).
-        "}}}
-        au VimEnter * if exists('#UltiSnips_AutoTrigger')
-            \ |     exe 'au! UltiSnips_AutoTrigger'
-            \ |     aug! UltiSnips_AutoTrigger
-            \ | endif
-    endif
 augroup END
 
 " Miscellaneous {{{1

@@ -6,11 +6,6 @@ endif
 
 " Variables{{{1
 
-" Do *not* use `{'window': 'split'}`!{{{
-"
-" Otherwise, in  Neovim, when you  invoke an fzf  Ex command (like  `:FZF`), you
-" will have 2 windows with an identical terminal buffer.
-"}}}
 " I have an issue!{{{
 "
 " See this: https://github.com/junegunn/fzf/issues/1055
@@ -101,31 +96,19 @@ exe 'com -bar -bang '..g:fzf_command_prefix..'Snippets call fzf#vim#snippets({"o
 
 augroup fzf_open_folds | au!
     " press `zv` the next time Vim has nothing to do, *after* a buffer has been displayed in a window
-    if !has('nvim')
-        " Why the `mode()` condition?{{{
-        "
-        " For some reason, in gVim, `norm! zv` makes the cursor move back one character when:
-        "
-        "    - the cursor is at the end of the line
-        "    - we're in insert mode
-        "    - fzf is configured to use a Vim window
-        "      (popup or not; i.e. `g:fzf_layout` contains a `window` key)
-        "
-        " At  least,  that's what  happens  when  we  try  to insert  a  unicode
-        " character with `vim-unichar` or `unicode.vim` via fzf.
-        "}}}
-        au FileType fzf au BufWinEnter * ++once au SafeState * ++once if mode() !=# 'i' | exe 'norm! zv' | endif
-    else
-        " Why the `mode()` guard?{{{
-        "
-        " To avoid this issue when we execute an fzf command twice:
-        "
-        "     Error detected while processing function <lambda>443:
-        "     line    1:
-        "     Can't re-enter normal mode from terminal mode
-        "}}}
-        au FileType fzf au BufWinEnter * ++once call timer_start(0, {-> mode() is# 'n' && execute('norm! zv')})
-    endif
+    " Why the `mode()` condition?{{{
+    "
+    " For some reason, in gVim, `norm! zv` makes the cursor move back one character when:
+    "
+    "    - the cursor is at the end of the line
+    "    - we're in insert mode
+    "    - fzf is configured to use a Vim window
+    "      (popup or not; i.e. `g:fzf_layout` contains a `window` key)
+    "
+    " At least,  that's what happens when  we try to insert  a unicode character
+    " with `vim-unichar` or `unicode.vim` via fzf.
+    "}}}
+    au FileType fzf au BufWinEnter * ++once au SafeState * ++once if mode() !=# 'i' | exe 'norm! zv' | endif
 augroup END
 
 augroup fzf_no_timeout | au!
