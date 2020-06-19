@@ -33,13 +33,13 @@ map  [fullscreen]  u  scroll half-up
 map                D  toggle_page_mode
 map  [fullscreen]  D  toggle_page_mode
 
-# toggle the fullscreen mode when `f` is pressed
-map                f  toggle_fullscreen
-map  [fullscreen]  f  toggle_fullscreen
+# toggle the fullscreen mode when `F` is pressed
+map                F  toggle_fullscreen
+map  [fullscreen]  F  toggle_fullscreen
 
 # open a link in the browser
-map                F  follow
-map  [fullscreen]  F  follow
+map                f  follow
+map  [fullscreen]  f  follow
 
 # reload document (reduces memory consumption a little)
 map                r  reload

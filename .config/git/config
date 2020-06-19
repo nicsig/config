@@ -9,7 +9,7 @@
         ; Useful to  get reminded of what  changes the commit includes,  and use
         ; that info to write a better commit title.
         ;
-        ; See the commit.verbose configuration variable in git-config(1).
+        ; See the commit.verbose configuration variable in `man git-config(1)`.
         ;}}}
 	verbose = true
 [core]

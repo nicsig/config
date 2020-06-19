@@ -61,182 +61,18 @@ stty start undef
 #}}}
 stty quit undef
 
-# How to use one of the custom prompts available by default?{{{
-#
-# initialize the prompt system
-#
-#     autoload -Uz promptinit
-#     promptinit
-#
-# To choose a theme, use these commands:
-#
-#    ┌─────────────────────┬──────────────────────────┐
-#    │ prompt -l           │ list available themes    │
-#    ├─────────────────────┼──────────────────────────┤
-#    │ prompt -p           │ preview available themes │
-#    ├─────────────────────┼──────────────────────────┤
-#    │ prompt <your theme> │ enable a theme           │
-#    ├─────────────────────┼──────────────────────────┤
-#    │ prompt off          │ no theme                 │
-#    └─────────────────────┴──────────────────────────┘
-#}}}
-# Why a newline in the prompt?{{{
-#
-# It's easier to copy-paste a command,  without having to remove a possible long
-# filepath.
-#}}}
-
-# What's `PS1`?{{{
-#
-# A variable which can be used to set the left prompt.
-#}}}
-# Why this dollar sign?{{{
-#
-# By prefixing the string  with a dollar sign, you can  include single quotes by
-# escaping  them (`man  zshmisc /QUOTING`;  otherwise, you  would need  to write
-# `'\''`, which is less readable.
-#}}}
-# What's `%F{blue}`?{{{
-#
-# It sets the color to blue.
-#
-#     man zshmisc /SIMPLE PROMPT ESCAPES/;/Shell state
-#}}}
-# What's `%~`?{{{
-#
-# It inserts the path to the current working directory.
-#
-# `$HOME` is replaced with `~`.
-# And the path to a named directory is replaced with its name;
-# if the result is shorter and if you've referred to it in a command at least once.
-#
-#     man zshparam /PARAMETERS USED BY THE SHELL
-#}}}
-# What's `%f`?{{{
-#
-# It resets the color.
-#}}}
-# What's `%(?..[%?] )`?{{{
-#
-# It adds an indicator showing whether the last command succeeded ($?).
-#
-#     man zshmisc /CONDITIONAL SUBSTRINGS IN PROMPTS
-#
-# The syntax of a conditional substring in a prompt is:
-#
-#     %(x.true-text.false-text)
-#       │ │        ││
-#       │ │        │└ text to display if the condition is false
-#       │ │        │
-#       │ │        └ separator between the 3 tokens
-#       │ │          (it can be any character which is not in `true-text`)
-#       │ │
-#       │ └ text to display if the condition is true
-#       │
-#       └ test character (condition)
-#         it can be preceded by any number to be used during the evaluation of the test
-#         Example:
-#
-#             123?  ⇔  was the exit status of the last command 123?
-#
-# So:
-#
-#     $(?..[%?] )
-#       │├┘├───┘
-#       ││ └ otherwise display the exit status (`%?`),
-#       ││   surrounded by brackets, and followed by a space
-#       ││
-#       │└ if the condition was true, display nothing
-#       │
-#       └ was the exit status of the last command 0?
-#         (without any number, zsh assumes 0)
-#}}}
-# Why this weird percent sign at the end?{{{
-#
-# We use it to move to the start of the previous prompts with a tmux key binding.
-#
-# Do *not* use a no-break space instead.
-# If you copy the command, paste it  in your notes without removing the no-break
-# space, then try to “source” it with `+s`, it won't work because the space will
-# be considered as being part of the command name.
-#}}}
-PS1=$'%F{blue}%~%f %F{red}%(?..[%?] )%f\n٪ '
-
-# include git info inside prompt
-# Which alternatives could I use?{{{
-#
-#     setopt PROMPT_SUBST
-#     autoload -Uz vcs_info
-#     zstyle ':vcs_info:*' stagedstr 'M'
-#     zstyle ':vcs_info:*' unstagedstr 'M'
-#     zstyle ':vcs_info:*' check-for-changes true
-#     zstyle ':vcs_info:*' actionformats '%F{5}[%F{2}%b%F{3}|%F{1}%a%F{5}]%f '
-#     zstyle ':vcs_info:*' formats '%F{5}[%F{2}%b%F{5}] %F{2}%c%F{3}%u%f'
-#     zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
-#     zstyle ':vcs_info:*' enable git
-#
-#   # ┌ see `man zshcontrib /+vi-git-myfirsthook()`
-#   # │
-#     +vi-git-untracked() {
-#       if [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == 'true' ]] && \
-#       [[ $(git ls-files --other --directory --exclude-standard | sed q | wc -l | tr -d ' ') == 1 ]]; then
-#         hook_com[unstaged]+='%F{1}??%f'
-#       fi
-#     }
-#
-#     precmd() { vcs_info }
-#     PROMPT='%F{5}[%F{2}%n%F{5}] %F{3}%3~ ${vcs_info_msg_0_} %f%# '
-#
-# Source: https://stackoverflow.com/a/12935606/9780968
-#
-# ---
-#
-#     autoload -Uz vcs_info
-#     precmd_vcs_info() { vcs_info }
-#     add-zsh-hook -Uz precmd precmd_vcs_info
-#     setopt prompt_subst
-#     RPROMPT=\$vcs_info_msg_0_
-#     # PROMPT=\$vcs_info_msg_0_'%# '
-#     zstyle ':vcs_info:git:*' formats '%b'
-#
-# Source: https://git-scm.com/book/en/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh
-#}}}
-#   Why don't you use any of them?{{{
-#
-# They rely on a function called `vcs_info` documented at `man zshcontrib`.
-# But the documentation is quite long/complex (≈ 1000 lines atm).
-# And I'm not sure how to use it to get all the info I want.
-#
-# OTOH, the `git-prompt` script seems easier to understand.
-# The documentation in the original script is much shorter.
-# Besides, it seems specialized to git, while `vcs_info` seems more universal.
-# But I don't care about other version control systems; I only use git.
-# Finally, it  seems more bare-bones;  there is  no abstraction layer  like with
-# `vcs_info`.  So, if we have an issue, it should be easier to fix.
-#}}}
-source "$HOME/bin/git-prompt.sh"
-# enable parameter expansion, command substitution and arithmetic expansion inside prompts
+# prompt
+# ------
+# our `prompt.zsh` script relies on the `add-zsh-hook` function
+# See:
+# `man zshcontrib /Manipulating Hook Functions`
+# `man zshmisc /SPECIAL FUNCTIONS/;/Hook Functions`
+autoload -Uz add-zsh-hook
+# and on `PROMPT_SUBST` being set;
+# the latter enables parameter expansion, command substitution and arithmetic expansion inside the prompt
 setopt PROMPT_SUBST
-# The optional argument passed to `__git_ps1` is used as a format string.
-# The `%s` token is the placeholder for the shown status.
-RPROMPT='$(__git_ps1 " (%s)")'
-GIT_PS1_SHOWUPSTREAM='auto'
-
-# TODO: add indicator to see nested shells.{{{
-#
-#   https://github.com/wincent/wincent
-#   https://raw.githubusercontent.com/wincent/wincent/media/prompt-root-shlvl-3.png
-#}}}
-# TODO: add indicator to see background processes.{{{
-#
-#   https://github.com/wincent/wincent
-#   https://raw.githubusercontent.com/wincent/wincent/media/prompt-bg.png
-#}}}
-# TODO: add indicator to better see we're root.{{{
-#
-#   https://github.com/wincent/wincent
-#   https://raw.githubusercontent.com/wincent/wincent/media/prompt-root.png
-#}}}
+# set the prompt
+source "$HOME/bin/prompt.zsh"
 
 # Why?{{{
 #
@@ -415,7 +251,7 @@ unalias run-help >/dev/null 2>&1
 #
 # Otherwise, have a look at:
 #
-#     % dpkg -L zsh | grep /run-help$
+#     $ dpkg -L zsh | grep /run-help$
 #}}}
 # What should I do if `run-help` doesn't work?{{{
 #
@@ -486,6 +322,144 @@ select-word-style bash
 # See: `man zshcontrib /REMEMBERING RECENT DIRECTORIES/;/Installation`
 #}}}
 autoload -Uz cdr
+
+# Respect these principles for ordering the sections:{{{
+#
+# `Plugins` should be near the beginning because  we need to be able to override
+# whatever interface they install.
+#
+# `Abbreviations` should be  right after `Key Bindings` because  it installs key
+# bindings.
+#
+# `Syntax Highlighting` should  be at the end, because the  documentation of the
+# plugin explains  that it must  be sourced after  all custom widgets  have been
+# created (i.e., after all `zle -N` calls).
+# Indeed, the plugin creates a wrapper around each widget.
+# If we source it  before some custom widgets, it will still  work, but it won't
+# be able to properly highlight the latters.
+#}}}
+
+# Options {{{1
+# Never use `setopt` to unset an option.{{{
+#
+# Because, when you'll  search the option name in `man  zshoptions`, you'll lose
+# time wondering why you can't find the name.
+#
+#     # ✔
+#     unsetopt LIST_BEEP
+#              ^^^^^^^^^ you can find this in `man zshoptions`
+#
+#     # ✘
+#     setopt NOLIST_BEEP
+#            ^^^^^^^^^^^ you can't find this in `man zshoptions`
+#}}}
+
+# Let us `cd` into a directory just by typing its name, without `cd`:{{{
+#
+#     my_dir/  ⇔  cd my_dir/
+#
+# Only works when `SHIN_STDIN` (SHell INput STanDard INput) is set, i.e. when the
+# commands are being read from standard input, i.e. in interactive use.
+#
+# Works in combination with `CDPATH`:
+#     $ cd /tmp
+#     $ Downloads
+#     $ pwd
+#     ~/Downloads/
+#
+# Works with completion:
+#     $ Do Tab
+#     Documents/  Downloads/
+#}}}
+setopt AUTO_CD
+
+# allow the expansion of `{a..z}` and `{1..9}`
+setopt BRACE_CCL
+
+# don't allow a `>` redirection to overwrite the contents of an existing file
+# use `>|` to override the option
+# setopt NO_CLOBBER
+
+# Try to correct the spelling of commands. The shell variable CORRECT_IGNORE may
+# be set to a pattern to match words that will never be offered as corrections.
+setopt CORRECT
+
+# Whenever a command  completion or spelling correction is  attempted, make sure
+# the entire command path ($PATH?) is hashed first.
+# This makes  the first completion slower  but avoids false reports  of spelling
+# errors.
+setopt HASH_LIST_ALL
+
+setopt BANG_HIST                 # Treat the '!' character specially during expansion.
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
+setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
+setopt HIST_BEEP                 # Beep when accessing nonexistent history.
+
+# allow comments even in interactive shells
+setopt INTERACTIVE_COMMENTS
+
+# never ring the bell on an ambiguous completion
+unsetopt LIST_BEEP
+
+# display PID when suspending processes as well
+setopt LONG_LIST_JOBS
+
+# Make zsh perform filename expansion on the command arguments of the form `var=val`.{{{
+#
+# zsh doesn't do it by default.
+#
+# MWE:
+#     $ unsetopt MAGIC_EQUAL_SUBST
+#     $ dd if=/dev/zero bs=1M count=1 of=~/test2
+#                                        ^
+#                                        ✘ not expanded into `/home/user`
+#
+#     $ echo foo=~/bar:~/baz
+#          → foo=~/bar:~/baz
+#                ^     ^
+#                ✘     ✘
+#
+# This behavior differs from bash.
+#}}}
+# It also has the positive side effect of allowing filename completion.{{{
+#
+#     $ echo var=/us Tab
+#}}}
+setopt MAGIC_EQUAL_SUBST
+
+# On an ambiguous completion, instead of listing possibilities,
+# insert the first match immediately.
+# This makes us enter the menu in a single Tab, instead of 2.
+setopt MENU_COMPLETE
+
+# Don't push multiple copies of the same directory onto the directory stack.
+setopt PUSHD_IGNORE_DUPS
+
+# Allow us to include a single quote inside a single-quoted string, just by doubling it.{{{
+#
+#     echo 'foo''bar'
+#     foo'bar~
+#
+# Like in vimscript.  This is more readable than `'\''`.
+#
+# Note that if your string is enclosed between `$'` and `'`, you can't include a
+# single quote by writing `''`; you need to write `\'`.  See `man zshmisc /QUOTING`.
+#}}}
+setopt RC_QUOTES
+
+# Do not query the user before executing `rm *` or `rm path/*`
+setopt RM_STAR_SILENT
+
+# Zstyles {{{1
+
 # log up to 30 directories
 zstyle ':chpwd:*' recent-dirs-max 30
 
@@ -497,9 +471,11 @@ zstyle ':chpwd:*' recent-dirs-max 30
 #
 # Example:
 #
-#     % zstyle ':completion:*' format 'foo %d bar'
-#     % true Tab
+#                                      vvv    vvv
+#     $ zstyle ':completion:*' format 'foo %d bar'
+#     $ true Tab
 #         → “foo no argument or option bar”
+#            ^^^                       ^^^
 #}}}
 # How is the sequence '%d' expanded?{{{
 #
@@ -507,10 +483,10 @@ zstyle ':chpwd:*' recent-dirs-max 30
 #
 # For example:
 #
-#     % echo SPC Tab
+#     $ echo SPC Tab
 #       → file
 #
-#     % true SPC Tab
+#     $ true SPC Tab
 #       → no argument or option
 #}}}
 # What about '%D'?{{{
@@ -523,8 +499,8 @@ zstyle ':chpwd:*' recent-dirs-max 30
 #}}}
 # How to print the text in bold?  In standout mode?  Underlined?{{{
 #
-# You can use the same escape sequences you would use in a prompt,
-# described in `man zshmisc`, section EXPANSION OF PROMPT SEQUENCES:
+# You can use the same escape sequences  you would use in a prompt, described at
+# `man zshmisc /EXPANSION OF PROMPT SEQUENCES`:
 #
 #    ┌─────────┬───────────┐
 #    │ %B...%b │ Bold      │
@@ -546,21 +522,31 @@ zstyle ':chpwd:*' recent-dirs-max 30
 # We set the 'format' style for some well-known tags.
 # When does a completer tag the description of a list of matches with 'messages'?{{{
 #
-# When there can't be any completion.
-# Ex:
-#     % true Tab
-#}}}
-# What about 'descriptions'?{{{
+# When there can't be any completion:
 #
-# When there are matches.
-# Ex:
-#     % echo Tab
+#     $ true SPC Tab
+#     no argument or option~
 #}}}
-# What about 'warnings'?{{{
+#   What about 'descriptions'?{{{
 #
-# When there are no matches.
-# Ex:
-#     % cat qqq Tab
+# When there are matches:
+#
+#     $ true Tab
+#     external command~
+#     true~
+#     builtin command~
+#     true~
+#     shell function~
+#     truecolor~
+#}}}
+#   What about 'warnings'?{{{
+#
+# When there are no matches:
+#
+#     $ cat qqq Tab
+#     No matches:~
+#     file~
+#     corrections~
 #}}}
 zstyle ':completion:*:messages'     format '%d'
 zstyle ':completion:*:descriptions' format '%F{232}%K{230}%d%f%k'
@@ -568,12 +554,13 @@ zstyle ':completion:*:warnings'     format $'No matches:\n%D'
 
 # What does `group-name` control?{{{
 #
-# It allows you to group the matches with particular tags to the same list.
+# It allows you to group matches with the same tag.
+# See `man zshcompsys /Standard Styles/;/group-name`
 #}}}
-# Why do you set it to an empty string?{{{
+#   Why do you set it to an empty string?{{{
 #
-# When we don't name our group  (empty string), the completion system groups the
-# matches according to their tag:
+# When we  don't name our group  (empty string), the completion  system uses the
+# tag as the name of the group:
 #
 #    - external command
 #    - builtin command
@@ -593,7 +580,7 @@ zstyle ':completion:*:warnings'     format $'No matches:\n%D'
 #                               which  restricts   the  style  to   a  completion
 #                               triggered in command position.
 #
-# Alternatively,  if you  couldn't use the  glob pattern in  the tag  field, you
+# Alternatively, if  you couldn't  use the  glob pattern in  the tag  field, you
 # could write this instead:
 #
 #     zstyle ':completion:*:*:-command-:*:commands'       group-name commands
@@ -625,7 +612,7 @@ zstyle ':completion:*:manuals' separate-sections true
 #
 # Try it on this command:
 #
-#     % typeset - Tab
+#     $ typeset - Tab
 #}}}
 #   Why don't you set it?{{{
 #
@@ -647,7 +634,8 @@ zstyle ':completion:*' list-separator '  #'
 # argument.
 #
 # Example:
-#     % fetchmail --a Tab
+#
+#     $ fetchmail --a Tab
 #     option
 #     --all         # retrieve old and new messages
 #     --antispam    # ,   set antispam response values
@@ -660,46 +648,53 @@ zstyle ':completion:*' list-separator '  #'
 #}}}
 zstyle ':completion:*' auto-description 'specify: %d'
 
-zstyle ':completion:*' list-prompt %SAt %p%s
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-#                                            ├────┘{{{
-#                                            └ `man zshexpn /PARAMETER EXPANSION/;/Parameter Expansion Flags/;/^\s*s:string:`
-#                                               Force field splitting at the separator string.
+zstyle ':completion:*' list-prompt '%SAt %p%s'
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+zstyle ':completion:*:default' list-colors "${(s.:.)LS_COLORS}"
+#                                             ^^^^^^{{{
+# `man zshexpn /PARAMETER EXPANSION/;/Parameter Expansion Flags/;/^\s*s:string:`
+# Force field splitting at the separator string.
 #}}}
 # TODO: read this: https://unix.stackexchange.com/a/477527/289772
 zstyle ':completion:*' list-colors ''
 
-zstyle ':completion:*' completer _expand _complete _correct _approximate
-# show completion menu when number of options is at least 2
-# Warning: It has a side effect:{{{
+zstyle ':completion:*' completer '_expand' '_complete' '_correct' '_approximate'
+# allow navigation in completion menu{{{
 #
-#   % cd /u/l/m Tab a
-#               │   │
-#               │   └ remove suggestions
-#               └ prints suggestions
+#     $ cat >/tmp/.zshrc <<'EOF'
+#         mkdir /tmp/dir; touch /tmp/dir/file{1..2}
+#         autoload -Uz compinit
+#         compinit
+#     EOF
+#     ; ZDOTDIR=/tmp zsh
 #
-# Without this style,  the suggestions would stay printed, even  after we insert
-# 'a'.
+#     $ ls /tmp/dir/
+#     # press:  Tab Tab Tab
+#     # result:  the third Tab inserts "file1" but does not select the entry in the completion menu
+#
+#     $ zstyle ':completion:*' menu select
+#     $ ls /tmp/dir/
+#     # press:  Tab Tab Tab
+#     # result:  the third Tab inserts "file1" *and* selects the entry in the completion menu
 #}}}
-zstyle ':completion:*' menu select=2
+zstyle ':completion:*' menu 'select'
 # not sure, but the first part of the next command probably makes completion
 # case-insensitive:    https://unix.stackexchange.com/q/185537/232487
 # TODO: Sometimes, it doesn't work as I would want.{{{
 #
 # For   example,  suppose   I  have   the   directory  `lol/`   and  the   movie
 # `The.Lego.Movie.2.1080p.HDRip.X264.AC3-EVO.mkv`:
+#
 #     $ mpv lego Tab
-#     →
-#     $ mpv lol
+#     # result:  $ mpv lol
+#
 # However:
+#
 #     $ mpv the Tab
-#     →
-#     $ mpv The.Lego.Movie.2.1080p.HDRip.X264.AC3-EVO.mkv
+#     # result:  $ mpv The.Lego.Movie.2.1080p.HDRip.X264.AC3-EVO.mkv
 #}}}
 zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
-zstyle ':completion:*' menu select=long
-zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' use-compctl 'false'
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 # This zstyle is important to make our `environ` function be completed with *all* the running processes.{{{
@@ -709,38 +704,20 @@ zstyle ':completion:*:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd
 #}}}
 zstyle ':completion:*:processes' command 'ps -A'
 
-# Necessary to be able to move in a completion menu:
-#
-#     bindkey -M menuselect '^L' forward-char
-zstyle ':completion:*' menu select
 # enable case-insensitive search (useful for the `zaw` plugin)
-zstyle ':filter-select' case-insensitive yes
+zstyle ':filter-select' case-insensitive 'yes'
 # Suggest us only video files when we tab complete `mpv(1)`.
 #
 # TODO: To explain.
 # Source: https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
 #
-# `(-.)`  is a  glob qualifier  restricting the  expansion to  regular files  or
-# symlinks pointing to to regular files.
-# `(-/)` does the same thing but for directories.
 # `(#i)` is a globbing flag which makes the following pattern case-insensitive.
-zstyle ':completion:*:*:mpv:*' file-patterns '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' '*:all-files'
-
-# Respect these principles for ordering the sections:{{{
-#
-# `Plugins` should be near the beginning because  we need to be able to override
-# whatever interface they install.
-#
-# `Abbreviations` should be  right after `Key Bindings` because  it installs key
-# bindings.
-#
-# `Syntax Highlighting` should  be at the end, because the  documentation of the
-# plugin explains  that it must  be sourced after  all custom widgets  have been
-# created (i.e., after all `zle -N` calls).
-# Indeed, the plugin creates a wrapper around each widget.
-# If we source it  before some custom widgets, it will still  work, but it won't
-# be able to properly highlight the latters.
-#}}}
+# `(-.)`  is a  glob qualifier  restricting the  expansion to  regular files  or
+# symlinks pointing  to to  regular files.  `(-/)` does the  same thing  but for
+# directories.
+zstyle ':completion:*:*:mpv:*' file-patterns \
+  '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' \
+  '*:all-files'
 
 # Plugins {{{1
 
@@ -2216,8 +2193,6 @@ __restart_vim() {
   fi
 }
 
-autoload -Uz add-zsh-hook
-# See: `man zshmisc /SPECIAL FUNCTIONS/;/Hook Functions`
 add-zsh-hook -Uz precmd __restart_vim
 
 palette(){ #{{{2
@@ -2248,7 +2223,7 @@ EOF
   # https://stackoverflow.com/a/19358402/9780968
   # TODO: Make it preserve hyperlinks.{{{
   #
-  # For some people, the output pdf preserve the hyperlinks.
+  # For some people, the output pdf preserves the hyperlinks.
   # https://stackoverflow.com/questions/2507766/merge-convert-multiple-pdf-files-into-one-pdf/19358402#comment94073595_19358402
   #
   # Not for me.
@@ -2719,14 +2694,14 @@ xt() { #{{{2
 zsh_sourced_files() { #{{{2
   emulate -L zsh
   local logfile='zsh_log'
-  script -c 'zsh -o SOURCE_TRACE' "${logfile}"
+  script -c 'zsh -o SOURCE_TRACE' "$logfile"
   # FIXME: How to exit the subshell started by `script(1)`?{{{
   #
   # If I execute `exit` here, not only  will the subshell be terminated, but the
   # current function too.
   #}}}
-  sed -i '/^+/!d' "${logfile}"
-  "${EDITOR}" "${logfile}"
+  sed -i '/^+/!d' "$logfile"
+  "$EDITOR" "$logfile"
 }
 #}}}2
 
@@ -2798,7 +2773,7 @@ _fzf_compgen_path() { #{{{2
 #                                                    ^^^^^^
 #}}}
 
-# TODO: regular aliases seem really shitty. Convert as many of them as possible into functions.
+# TODO: regular aliases seem really shitty.  Convert as many of them as possible into functions.
 
 # regular {{{2
 # apt {{{3
@@ -2906,10 +2881,10 @@ alias gdb='\gdb -q'
 
 # Usage:{{{
 #
-#     % config status
-#     % config add /path/to/file
-#     % config commit -m 'my message'
-#     % config push
+#     $ config status
+#     $ config add /path/to/file
+#     $ config commit -m 'my message'
+#     $ config push
 #}}}
 alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
 alias config_push='config add -u && config commit -m "update" && config push'
@@ -3097,50 +3072,6 @@ alias nb='newsboat -q'
 # `nethogs` is a utility showing  which processes are consuming bandwidth on our
 # network interface.
 alias net_watch='nethogs enp3s0'
-
-# options {{{3
-
-# Purpose:{{{
-#
-# You want to know the state of an option (enabled or disabled).
-# Execute this alias, and look for the option name in both buffers.
-#
-# Once you find it, check the buffer where you found it.
-# In the left buffer, read the value as it is:
-#
-#     autocd     → 'autocd' is enabled
-#     nolistbeep → 'list_beep' is disabled
-#
-# In the right buffer, reverse the reading:
-#
-#     noaliases  → 'aliases' is ENabled
-#     chaselinks → 'chaselinks' is DISabled
-# }}}
-# Why do I need to reverse the meaning of the info I read in the right buffer? {{{
-#
-# Because the meaning of the output of `unsetopt` is:
-#
-#     the values of these options is NOT ...
-#
-# This 'NOT' reverses the reading:
-#
-#     NOT nooption = NOT disabled = enabled
-#     NOT option   = NOT enabled  = disabled
-# }}}
-# Is there an alternative?{{{
-#
-# Yes:  `set -o`.
-#}}}
-# Why don't you use it?{{{
-#
-# It  doesn't tell  you whether  the  default values  of the  options have  been
-# changed.
-#}}}
-alias options='vim -O =(setopt) =(unsetopt)'
-#                       │         │
-#                       │         └ options whose default value has NOT changed
-#                       └ options whose default value has changed
-
 
 # ps {{{3
 
@@ -3399,6 +3330,13 @@ alias website_cwd='{ python3 -m http.server >/dev/null 2>&1 & ;} && disown %'
 
 alias what_is_my_ip='curl ifconfig.me'
 
+# zsh_options {{{3
+
+# To know how all options are currently set, you can simply run `set -o`.
+# But this  alias gives  you extra info;  it tells you  which options  have been
+# reset from their default value.
+alias zsh_options='vim -O =(setopt) =(unsetopt) +"call myfuncs#zshoptions()"'
+
 # zsh_sourcetrace {{{3
 
 # get the list of files sourced by zsh
@@ -3434,11 +3372,6 @@ alias -s pdf="${PDFVIEWER}"
 #
 #     $ add-zsh-hook -L
 #}}}
-# Where is `add-zsh-hook` documented?{{{
-#
-# `man zshcontrib /Manipulating Hook Functions`.
-#}}}
-autoload -Uz add-zsh-hook
 
 # What's this `chpwd_recent_dirs` function?{{{
 #
@@ -4136,14 +4069,14 @@ bindkey '^X?' __complete_debug
 #
 # `end-of-list` allows you to make a list of matches persistent.
 #
-#     % echo $HO C-d
+#     $ echo $HO C-d
 #         → parameter
 #           HOME  HOST    # this list may be erased if you repress C-d later
 #
-#     % echo $HO C-x C-d D
+#     $ echo $HO C-x C-d D
 #         → parameter
 #           HOME  HOST    # this list is printed forever
-#     % echo $HO          # new prompt automatically populated with the previous command
+#     $ echo $HO          # new prompt automatically populated with the previous command
 #}}}
 bindkey '^X^D' end-of-list
 
@@ -5111,113 +5044,6 @@ bindkey -M isearch ' ' self-insert
 #
 # ... as soon as you would type a  space in a search, you would leave the latter
 # and go back to the regular command line.
-
-# Options {{{1
-# Never use `setopt` to unset an option.{{{
-#
-# Because, when you'll  search the option name in `man  zshoptions`, you'll lose
-# time wondering why you can't find the name.
-#
-#     # ✔
-#     unsetopt LIST_BEEP
-#              ^^^^^^^^^ you can find this in `man zshoptions`
-#
-#     # ✘
-#     setopt NOLIST_BEEP
-#            ^^^^^^^^^^^ you can't find this in `man zshoptions`
-#}}}
-
-# Let us `cd` into a directory just by typing its name, without `cd`:{{{
-#
-#     my_dir/  ⇔  cd my_dir/
-#
-# Only works when `SHIN_STDIN` (SHell INput STanDard INput) is set, i.e. when the
-# commands are being read from standard input, i.e. in interactive use.
-#
-# Works in combination with `CDPATH`:
-#     $ cd /tmp
-#     $ Downloads
-#     $ pwd
-#     ~/Downloads/
-#
-# Works with completion:
-#     $ Do Tab
-#     Documents/  Downloads/
-#}}}
-setopt AUTO_CD
-
-# allow the expansion of `{a..z}` and `{1..9}`
-setopt BRACE_CCL
-
-# don't allow a `>` redirection to overwrite the contents of an existing file
-# use `>|` to override the option
-# setopt NO_CLOBBER
-
-# Try to correct the spelling of commands. The shell variable CORRECT_IGNORE may
-# be set to a pattern to match words that will never be offered as corrections.
-setopt CORRECT
-
-# Whenever a command  completion or spelling correction is  attempted, make sure
-# the entire command path ($PATH?) is hashed first.
-# This makes  the first completion slower  but avoids false reports  of spelling
-# errors.
-setopt HASH_LIST_ALL
-
-setopt BANG_HIST                 # Treat the '!' character specially during expansion.
-setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
-setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
-setopt SHARE_HISTORY             # Share history between all sessions.
-setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
-setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
-setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
-setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
-setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
-setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
-setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
-setopt HIST_BEEP                 # Beep when accessing nonexistent history.
-
-# allow comments even in interactive shells
-setopt INTERACTIVE_COMMENTS
-
-# never ring the bell on an ambiguous completion
-unsetopt LIST_BEEP
-
-# display PID when suspending processes as well
-setopt LONG_LIST_JOBS
-
-# Make zsh perform filename expansion on the command arguments of the form `var=val`.{{{
-#
-# zsh doesn't do it by default.
-#
-# MWE:
-#     % unsetopt MAGIC_EQUAL_SUBST
-#     % dd if=/dev/zero bs=1M count=1 of=~/test2
-#                                        ^
-#                                        ✘ not expanded into `/home/user`
-#
-#     % echo foo=~/bar:~/baz
-#          → foo=~/bar:~/baz
-#                ^     ^
-#                ✘     ✘
-#
-# This behavior differs from bash.
-#}}}
-# It also has the positive side effect of allowing filename completion.{{{
-#
-#     % echo var=/us Tab
-#}}}
-setopt MAGIC_EQUAL_SUBST
-
-# On an ambiguous completion, instead of listing possibilities,
-# insert the first match immediately.
-# This makes us enter the menu in a single Tab, instead of 2.
-setopt MENU_COMPLETE
-
-# Don't push multiple copies of the same directory onto the directory stack.
-setopt PUSHD_IGNORE_DUPS
-
-# Do not query the user before executing `rm *` or `rm path/*`
-setopt RM_STAR_SILENT
 
 # Variables {{{1
 # WARNING: Make sure this `Variables` section is always after `Functions`.{{{

@@ -2,7 +2,7 @@
 
 " Why this setting?{{{
 "
-" When we use gVim, we don't want `$VIMRUNTIME/menu.vim` to be sourced.
+" When we use the GUI, we don't want `$VIMRUNTIME/menu.vim` to be sourced.
 " We won't use the menu. It makes Vim start around 50ms slower.
 " https://www.reddit.com/r/vim/comments/5l939k/recommendation_deinvim_as_a_plugin_manager/dbu74zd/
 "
@@ -644,8 +644,13 @@ set backspace=indent,eol,start
 "    What pitfalls should I be aware of?{{{
 "
 " 1. It pollutes the clipboard selection after every yank, delete, change.
+"
 " 2. It alters the clipboard selection when inserting a character from select mode.
+"
 " 3. It may break a plugin which forgets to temporarily reset 'cb' to its default value.
+"
+" 4. It forces you to temporarily reset 'cb' whenever you write a custom operator which yanks some text.
+"    (because a good operator should have as fewer side-effects as possible)
 "
 " For `2.`, see: https://vi.stackexchange.com/a/22127/17449
 "}}}
@@ -2557,7 +2562,7 @@ set wildcharm=9
 
 " winaltkeys {{{2
 
-" disable `alt + {char}` key bindings used in gVim to access some menu entries
+" Disable `alt + {char}` key bindings used in the GUI to access some menu entries.
 " They could shadow some of our custom mappings using the meta modifier key.
 
 set winaltkeys=no
@@ -2694,7 +2699,7 @@ cno <expr> <c-r><c-h> getcmdtype() =~ '[/?]' ? '<Esc>:FzHistory/<cr>' : 'FzHisto
 
 " C-r C-l       insert current line {{{3
 
-cno <c-r><c-l> <c-\>e <sid>insert_current_line()<cr>
+cno <c-r><c-l> <c-r><c-r>=<sid>insert_current_line()<cr>
 fu s:insert_current_line() abort
     let cml = matchstr(&l:cms, '\S*\ze\s*%s')
     let cml = '\%(\V'..escape(cml, '\')..'\m\)\='
@@ -3283,22 +3288,6 @@ nno <silent> goF :<c-u>call myfuncs#gtfo_open_gui(getcwd())<cr>
 
 nno <silent> got :<c-u>call myfuncs#gtfo_open_term(expand('%:p:h', 1))<cr>
 nno <silent> goT :<c-u>call myfuncs#gtfo_open_term(getcwd())<cr>
-
-" gQ {{{4
-
-" In Ex mode,  every time we press a  key which is expanded into the  value of a
-" custom function,  if the latter contains  empty lines, it will  raise an error
-" (E501, E749).
-"
-" So, we  install a wrapper around  `gQ` to temporarily disable  all mappings in
-" command-line mode.
-
-"             ┌ make sure we have visited the command-line at least once since Vim's startup
-"             │ otherwise E501:
-"             │ probably because custom command-line mappings haven't been installed yet,
-"             │ so `ToggleEditingCommands 0` is useless / too soon
-"             ├───┐
-nno <expr> gQ ":\e"..execute('ToggleEditingCommands 0', 'silent!')..'gQ'
 
 " gt  gT      search todo/fixme (Tags) {{{4
 
@@ -4169,24 +4158,39 @@ endfu
 nno <expr> <c-a> <sid>c_a()
 
 fu s:c_a() abort
-    let pos = searchpos('[✘✔]', 'cW', line('.'))
+    let pos = searchpos('[✘✔$٪]', 'cW', line('.'))
     if pos == [0,0]
         return "\<c-a>"
     endif
-    let col = pos[1]
-    let char_under_cursor = matchstr(getline('.'), '\%'..col..'c.')
-    if char_under_cursor is# '✘'
-        " Why returning a `|` motion?{{{
-        "
-        " From `:h :map-<expr>`:
-        "
-        " >    - Moving the cursor is allowed, but it is restored afterwards.
-        "}}}
-        return col..'|r✔'
-    else
-        return col..'|r✘'
-    endif
+    let char_under_cursor = matchstr(getline('.'), '\%'..pos[1]..'c.')
+    let old2new = {
+        \ '✘': '✔',
+        \ '✔': '✘',
+        \ '$': '٪',
+        \ '٪': '$',
+        \ }
+    if !has_key(old2new, char_under_cursor) | return '' | endif
+    let new_char = old2new[char_under_cursor]
+    " Why returning a `|` motion?{{{
+    "
+    " From `:h :map-<expr>`:
+    "
+    " >    - Moving the cursor is allowed, but it is restored afterwards.
+    "}}}
+    let vcol = virtcol('.')
+    return vcol..'|r'..new_char
 endfu
+
+" C-g                 run simple macro {{{4
+
+" run a simple "macro" on all the lines
+" What do you mean by "simple"?{{{
+"
+" It doesn't contain many keys, and it doesn't alter the addresses of the lines.
+" Remember that `:norm` – like most Ex  commands – doesn't mark the lines in its
+" range, contrary to `:g`.
+"}}}
+nno <c-g>n :%norm!<space>
 
 " C-np                move across tab pages {{{4
 
@@ -4388,19 +4392,25 @@ fu s:fix_multiline_shellcmd() abort
     let reg = getreg('+', 1, 1)
     let regtype = getregtype('+')
     let cml = matchstr(&l:cms, '\S*\ze\s*%s')
+    let cml = '\%(\V'..escape(cml, '\')..'\m\)\='
 
     " remove possible dollar sign in front of a shell command
-    let pat = '^\s*\%('..cml..'\)\=\s*\$'
+    let pat = '^\s*'..cml..'\s*\$'
     if reg[0] =~# pat
         let reg[0] = substitute(reg[0], pat, '', '')
     endif
 
-    " remove possible indentation in front of terminating `EOF`
+    " remove possible indentation/comment leader in front of terminating `EOF`
     if len(reg) > 1
-        let pat = '^\s*\%('..cml..'\)\=\s*\zeEOF$'
-        let idx = match(reg, pat)
-        if idx != -1
-            let indent = matchstr(reg[idx], pat)
+        " Why do you look for `EOF` only on the first line of the register?{{{
+        "
+        " We don't want to remove the  indentation if we're copying a bug report
+        " which  includes some  heredoc.   We  need it  so  that it's  correctly
+        " formatted as a codeblock on whatever forum we paste it.
+        "}}}
+        if reg[0] =~# '<<''\=EOF''\=$'
+            let eof_line = reg[match(reg, '^\s*'..cml..'\s*EOF$')]
+            let indent = matchstr(eof_line, '^\s*'..cml..'\s*')
             call map(reg, {_,v -> substitute(v, indent, '', '')})
         endif
     endif
@@ -4748,15 +4758,6 @@ snor <c-d> <c-\><c-n>i<del>
 "    - automatically adds `\<`,`\>` around the pattern, if we don't surround it with slashes
 "}}}
 xno <c-g>g <c-\><c-n>:keepj keepp *g/\%V/#<left><left>
-
-" run a simple "macro" on lines in visual selection
-" What do you mean by "simple"?{{{
-"
-" It doesn't contain many keys, and it  doesn't alter the addresses of the lines
-" inside the selection.  Remember that `:norm` – like most Ex commands – doesn't
-" mark the lines in its range, contrary to `:g`.
-"}}}
-xno <c-g>n :norm!<space>
 
 " /           search only in visual selection {{{3
 
@@ -5513,8 +5514,20 @@ com! -bar -nargs=1 PI call myfuncs#plugin_install(<q-args>)
 com! -bar PUP call s:plugins_update()
 
 fu s:plugins_update() abort
-    " :h spellfile-cleanup
-    runtime spell/cleanadd.vim
+    " `:h spellfile-cleanup`
+    " `sil!` to suppress `E108`.{{{
+    "
+    " The issue comes from this line:
+    "
+    "     " $VIMRUNTIME/spell/cleanadd.vim:30
+    "     unlet s:fname
+    "
+    " The `s:fname`  variable may not exist  if the `for` loop  iterates over an
+    " empty list; i.e. if this expression is empty:
+    "
+    "     split(globpath(&rtp, "spell/*.add"), "\n")
+    "}}}
+    sil! runtime spell/cleanadd.vim
 
     " Install `wfrench` package. Useful for dictionary completion.
     if system('aptitude show wfrench | grep "^State"')[:-2] =~? 'state:\s*not\s\+installed'
@@ -6255,6 +6268,8 @@ augroup filter_special_file | au!
 augroup END
 
 fu s:filter_special_file() abort
+    " TODO: I once had a huge pdf undo file in `~/.vim/tmp/undo`.
+    " Should we reset some options like `'undofile'` and `'swapfile'`?
     if get(b:, 'did_filter_special_file', 0)
         return
     endif

@@ -177,7 +177,7 @@ fu myfuncs#op_yank_setup(what) abort "{{{2
 endfu
 
 fu s:op_yank(type) abort
-    let reg_save = ['z', getreg('z'), getregtype('z')]
+    let reg_save = ['z', getreg('z', 1, 1), getregtype('z')]
     try
         let @z = ''
 
@@ -193,18 +193,16 @@ fu s:op_yank(type) abort
 
         exe mods..' '..range..cmd..'/'..escape(pat, '/')..'/y Z'
 
-        " Remove empty lines.
-        " We can't use the pattern `\_^\s*\n` to describe an empty line, because
-        " we aren't in a buffer:    `@z` is just a big string
+        " remove empty lines
         if s:op_yank.what is# 'v//' || s:op_yank.what is# 'code'
-            let @z = substitute(@z, '\n\%(\s*\n\)\+', '\n', 'g')
+            let new = getreg('z', 1, 1)->filter('v:val !~# "^\\s*$"')
+            call setreg('z', new, 'l')
         endif
 
-        " the first time we've appended a match to `@z`, it created a newline
-        " we don't want this one; remove it
-        let @z = substitute(@z, "^\n", '', '')
-
-        call setreg(s:op_yank.register, @z, 'l')
+        " the first  time we've  appended a  match to the  `z` register,  it has
+        " appended a newline; we don't want it; remove it
+        let final = getreg('z', 1, 1)[1:]
+        call setreg(s:op_yank.register, final, 'l')
     catch
         return lg#catch()
     finally
@@ -358,14 +356,14 @@ fu s:box_create_separations() abort
     "
     " ... and store it inside `x` register.
     " So that we can paste it wherever we want.
-    let @x = getline(line("'{")+1)
-    let @x = substitute(@x, '\S', '├', '')
-    let @x = substitute(@x, '.*\zs\S', '┤', '')
-    let @x = substitute(@x, '┬', '┼', 'g')
+    let line = getline(line("'{")+1)
+    let line = substitute(line, '\S', '├', '')
+    let line = substitute(line, '.*\zs\S', '┤', '')
+    let line = substitute(line, '┬', '┼', 'g')
 
     " Make the contents of the register linewise, so we don't need to hit
     " `"x]p`, but simply `"xp`.
-    call setreg('x', @x, 'l')
+    call setreg('x', [line], 'l')
 endfu
 
 fu myfuncs#box_destroy(...) abort
@@ -926,8 +924,14 @@ fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     " We could try sth like `^\Cz\=shHereDoc$`,  but it seems there exists other
     " possible syntax groups (e.g. `shHereDoc03`).
     "}}}
+    " FIXME: `strdisplaywidth()` doesn't handle conceal.{{{
+    "
+    " It works as if `'cole'` was set to 0.
+    " This  matters, e.g.,  for a  blockquote containing  a tab  character in  a
+    " markdown file, where the leading `> ` is concealed because `'cole'` is 3.
+    "}}}
     let l:Rep = {->
-        \ match(map(synstack(line('.'), col('.')), {_,v -> synIDattr(v, 'name')}), 'heredoc') != -1
+        \ synstack(line('.'), col('.'))->map({_,v -> synIDattr(v, 'name')})->match('heredoc') != -1
         \ ? submatch(0)
         \ : submatch(1)..repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))}
     " We need the loop because there may be several tabs consecutively.{{{
@@ -1313,5 +1317,37 @@ endfu
 
 fu myfuncs#wf_complete(_a, _l, _p) abort
     return join(['-min_length', '-weighted'], "\n")
+endfu
+
+fu myfuncs#zshoptions() abort "{{{1
+    " this function is invoked from the zsh alias `options` (defined in our zshrc)
+
+    call append(0, '# options whose value has been reset')
+    wincmd l
+    call append(0, '# options which have kept their default value')
+
+    " reverse the state of the options in the right window
+    " Why? {{{
+    "
+    " Because the meaning of the output of `unsetopt` is:
+    "
+    "     the values of these options is NOT ...
+    "
+    " This 'NOT' reverses the reading:
+    "
+    "     NOT nooption = NOT disabled = enabled
+    "     NOT option   = NOT enabled  = disabled
+    " }}}
+    "   Is there an alternative?{{{
+    "
+    " Yes:  `set -o`.
+    "}}}
+    "     Why don't you use it?{{{
+    "
+    " It  doesn't tell  you whether  the  default values  of the  options have  been
+    " changed.
+    "}}}
+    sil keepj keepp 1;/^[^ \#]/,$s/^../\=submatch(0) is# 'no' ? '' : 'no'..submatch(0)/e
+    1
 endfu
 
