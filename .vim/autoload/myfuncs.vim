@@ -11,13 +11,11 @@ fu myfuncs#op_grep(...) abort "{{{2
     endif
 
     let type = a:0 == 1 ? a:1 : 'Ex'
-    let cb_save = &cb
-    let sel_save = &selection
-    let reg_save = ['"', getreg('"', 1, 1), getregtype('"')]
+    let [cb_save, sel_save] = [&cb, &sel]
+    let reg_save = getreginfo('"')
 
     try
-        set cb-=unnamed cb-=unnamedplus
-        set selection=inclusive
+        set cb-=unnamed cb-=unnamedplus sel=inclusive
 
         if type is# 'char'
             norm! `[v`]y
@@ -42,14 +40,14 @@ fu myfuncs#op_grep(...) abort "{{{2
             " In the first case, `2>/dev/null` is useful:
             "
             "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
-            "         ^^^^^^^^^^^
+            "         ^---------^
             "
             " It prevents errors from being written in the temp file.
             "
             " In the second case, `2>/dev/null` is useless:
             "
             "     :!rg 2>/dev/null foobar /etc 2>&1| tee /tmp/...
-            "          ^^^^^^^^^^^
+            "          ^---------^
             "
             " Because, it's overridden by `2>&1` which comes from `'shellpipe'`.
             " In contrast,  `system()` uses `'shellredir'`, which  also includes
@@ -83,9 +81,8 @@ fu myfuncs#op_grep(...) abort "{{{2
     catch
         return lg#catch()
     finally
-        let &cb = cb_save
-        let &sel = sel_save
-        call call('setreg', reg_save)
+        let [&cb, &sel] = [cb_save, sel_save]
+        call setreg('"', reg_save)
     endtry
 endfu
 
@@ -96,66 +93,69 @@ fu myfuncs#op_replace_without_yank(...) abort "{{{2
     endif
     let reg = v:register
     let type = a:1
-    let [cb_save, sel_save] = [&cb, &selection]
-    " save registers and types to restore later.
-    let reg_save = ['"', getreg('"', 1, 1), getregtype('"')]
+    let [cb_save, sel_save] = [&cb, &sel]
+    let reg_save = getreginfo('"')
+    let visual_marks_save = [getpos("'<"), getpos("'>")]
     try
         set cb-=unnamed cb-=unnamedplus sel=inclusive
-
-        let visual_marks_save = [getpos("'<"), getpos("'>")]
-
         if type is# 'line'
             exe 'keepj norm! ''[V'']"'..reg..'p'
             norm! gv=
-
         elseif type is# 'block'
             exe "keepj norm! `[\<c-v>`]\""..reg..'p'
-
         elseif type is# 'char'
-            " Tweak linewise register so that it better fits inside a characterwise text.{{{
-            "
-            " That is:
-            "
-            "    - reset its type to characterwise
-            "    - trim the leading whitespace in front of the first line
-            "    - trim the trailing whitespace at the end of the last line
-            "
-            " Consider this text:
-            "
-            "     a
-            "     b c d
-            "
-            " If you press `dd` to delete the  `a` line, then press `drl` on the
-            " `c` character, you get:
-            "
-            "     b a d
-            "
-            " If you didn't tweak the register, you would get:
-            "
-            "        b
-            "        a
-            "     d
-            "
-            " Which is probably not what you want.
-            "}}}
-            if getregtype(reg) is# 'V'
-                " trim whitespace surrounding the text
-                let reg_save[1][0] = substitute(reg_save[1][0], '^\s*', '', '')
-                let reg_save[1][-1] = substitute(reg_save[1][-1], '\s*$', '', '')
-                " and reset the type to characterwise
-                call setreg(reg, reg_save[1], 'c')
-            endif
-
-            exe 'keepj norm! `[v`]"'..reg..'p'
+            call s:handle_char(reg)
         endif
     catch
         return lg#catch()
     finally
         let [&cb, &sel] = [cb_save, sel_save]
-        call call('setreg', reg_save)
+        call setreg('"', reg_save)
         call setpos("'<", visual_marks_save[0])
         call setpos("'>", visual_marks_save[1])
     endtry
+endfu
+
+fu s:handle_char(reg) abort
+    let reg_save = getreginfo(a:reg)
+
+    let contents = get(reg_save, 'regcontents', [])
+    if get(reg_save, 'regtype', '') is# 'V' && !empty(contents)
+        " Tweak linewise register so that it better fits inside a characterwise text.{{{
+        "
+        " That is:
+        "
+        "    - reset its type to characterwise
+        "    - trim the leading whitespace in front of the first line
+        "    - trim the trailing whitespace at the end of the last line
+        "
+        " Consider this text:
+        "
+        "     a
+        "     b c d
+        "
+        " If you press `dd` to delete the  `a` line, then press `drl` on the
+        " `c` character, you get:
+        "
+        "     b a d
+        "
+        " If you didn't tweak the register, you would get:
+        "
+        "        b
+        "        a
+        "     d
+        "
+        " Which is probably not what you want.
+        "}}}
+        " trim whitespace surrounding the text
+        let contents[0] = substitute(contents[0], '^\s*', '', '')
+        let contents[-1] = substitute(contents[-1], '\s*$', '', '')
+        " and reset the type to characterwise
+        call setreg(a:reg, contents, 'c')
+    endif
+
+    exe 'keepj norm! `[v`]"'..a:reg..'p'
+    call setreg(a:reg, reg_save)
 endfu
 
 fu myfuncs#op_trim_ws(...) abort "{{{2
@@ -177,14 +177,12 @@ fu myfuncs#op_yank_setup(what) abort "{{{2
 endfu
 
 fu s:op_yank(type) abort
-    let reg_save = ['z', getreg('z', 1, 1), getregtype('z')]
+    let reg_save = getreginfo('z')
     try
         let @z = ''
 
-        let mods  = 'keepj keepp'
-        let range = (a:type is# 'char' || a:type is# 'line')
-                \ ?     line("'[")..','..line("']")
-                \ :     line("'<")..','..line("'>")
+        let mods = 'keepj keepp'
+        let range = line("'[")..','..line("']")
 
         let cmd = s:op_yank.what is# 'g//' || s:op_yank.what is# 'comments' ? 'g' : 'v'
         let pat = s:op_yank.what is# 'code' || s:op_yank.what is# 'comments'
@@ -193,20 +191,25 @@ fu s:op_yank(type) abort
 
         exe mods..' '..range..cmd..'/'..escape(pat, '/')..'/y Z'
 
-        " remove empty lines
-        if s:op_yank.what is# 'v//' || s:op_yank.what is# 'code'
-            let new = getreg('z', 1, 1)->filter('v:val !~# "^\\s*$"')
-            call setreg('z', new, 'l')
+        let z_reg = getreginfo('z')
+        let contents = z_reg.regcontents
+        " the first  time we've  appended a  match to the  `z` register,  it has
+        " appended a newline; we *never* want it; remove it
+        if contents[0] is# ''
+            call remove(contents, 0)
         endif
 
-        " the first  time we've  appended a  match to the  `z` register,  it has
-        " appended a newline; we don't want it; remove it
-        let final = getreg('z', 1, 1)[1:]
-        call setreg(s:op_yank.register, final, 'l')
+        " remove *all* empty line in some other cases
+        if s:op_yank.what is# 'v//' || s:op_yank.what is# 'code'
+            call filter(contents, 'v:val !~# "^\\s*$"')
+            call setreg('z', contents, 'l')
+        endif
+
+        call setreg(s:op_yank.register, contents, 'l')
     catch
         return lg#catch()
     finally
-        call call('setreg', reg_save)
+        call setreg('z', reg_save)
         " emulate what Vim does with a  builtin operator; the cursor ends at the
         " *start* of the text object
         call cursor(matchstr(range, '\d\+'), 1)

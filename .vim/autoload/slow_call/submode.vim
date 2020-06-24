@@ -68,7 +68,7 @@ call submode#enter('char-around', 'i', 'r', '<c-x>k', '<plug>(duplicate-char-abo
 "}}}
 ino <silent> <plug>(duplicate-char-below) <c-r><c-r>=<sid>duplicate_char_around(0)<cr>
 ino <silent> <plug>(duplicate-char-above) <c-r><c-r>=<sid>duplicate_char_around(1)<cr>
-"                                         ^^^^^^^^^^
+"                                         ^--------^
 "                                         useful when we encounter some literal control character
 
 fu s:duplicate_char_around(above) abort

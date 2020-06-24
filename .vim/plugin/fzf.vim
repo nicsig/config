@@ -151,7 +151,7 @@ nno <space>fm<esc> <nop>
 cno <expr> <c-r><c-h>
 \    getcmdtype() =~ ':' ? '<c-e><c-u>'..g:fzf_command_prefix..'History:<cr>'
 \  : getcmdtype() =~ '[/?]' ? '<c-e><c-u><c-c>:'..g:fzf_command_prefix..'History/<cr>' : ''
-"                                        ^^^^^
+"                                        ^---^
 "                                        don't use `<esc>`; an empty pattern would search for the last pattern
 "                                        and raise an error if it can't be found
 

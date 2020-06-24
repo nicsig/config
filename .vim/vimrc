@@ -658,7 +658,7 @@ set backspace=indent,eol,start
 " TODO: It would be nice to set the option like this:{{{
 "
 "     set cb=autoselect,exclude:.*
-"                       ^^^^^^^^^^
+"                       ^--------^
 "
 " Because it would slightly reduce startup time.
 " For more info, see: https://stackoverflow.com/a/17719528/9780968
@@ -1159,7 +1159,7 @@ set foldminlines=0
 "     $VIMRUNTIME/filetype.vim:40
 "}}}
 let g:ft_ignore_pat = '\.\%(Z\|gz\|bz2\|zip\|tgz\|log\)$\|^/proc/'
-"                                                 ^^^     ^^^^^^^
+"                                                 ^-^     ^-----^
 
 " :grep {{{2
 
@@ -1169,7 +1169,7 @@ let g:ft_ignore_pat = '\.\%(Z\|gz\|bz2\|zip\|tgz\|log\)$\|^/proc/'
 " It's useless here because of the default value of `'shellpipe'`:
 "
 "     shellpipe=2>&1| tee
-"               ^^^^
+"               ^--^
 "
 " The errors would be still parsed as invalid entries in your qfl.
 "}}}
@@ -1215,7 +1215,7 @@ fu s:inex() abort
     " Handle the case where the cursor is on the environment variable name:
     "
     "     ${HOME}/bin/README.md
-    "      ^^^^^^
+    "      ^----^
     "}}}
     "   The third branch?{{{
     "
@@ -1477,7 +1477,7 @@ set nrformats+=unsigned
 " As you can see, between the path of the cwd and this path, 4 directories are missing:
 "
 "     ~/.vim/plugged/vimtex/autoload/unite/sources/vimtex.vim
-"            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"            ^----------------------------^
 "
 " So, if you write `3` after `**`, you won't be able to open `sources/vimtex.vim`
 " in a new split, by pressing `C-w f`.
@@ -1969,17 +1969,17 @@ if $TERM =~# '^st\%(-256color\)$'
     "     st-256color|stterm-256color|simpleterm with 256 colors,
     "             ccc@,
     "             initc@, oc@, use=xterm+256color, use=st,
-    "                                              ^^^^^^
+    "                                              ^----^
     "     st|stterm| simpleterm,
     "             use=st-0.7,
-    "             ^^^^^^^^^^
+    "             ^--------^
     "     st-0.7|simpleterm 0.7,
     "             ccc,
     "             dim=\E[2m,
     "             initc=\E]4;%p1%d;rgb\:%p2%{255}%*%{1000}%/%2.2X/%p3%{255}%*
     "                   %{1000}%/%2.2X/%p4%{255}%*%{1000}%/%2.2X\E\\,
     "             kcbt@, kent@, oc=\E]104\007,
-    "             ^^^^^
+    "             ^---^
     "
     " As a result, Vim does not set `t_kB` when `$TERM` is `st`.
     "}}}
@@ -2933,19 +2933,39 @@ endfu
 " SPC {{{3
 " . {{{4
 
-" `.` repeats the last edit.
-" But if we want to repeat it on the same text which we've just changed (`@"`),
-" we have to look for it manually.
+" Problem:{{{
 "
-" Solution:
-" install a mapping which:
+" Suppose you've just changed the word `foo` into `bar`.
+" There's no easy way to repeat this change on all subsequent `foo`s.
+" You need to first look for `foo`: `/foo CR`.
+" Then, you need to:
 "
-"    1. puts the last changed text in the search register
-"    2. cuts its next occurrence
-"    3. inserts the previously inserted text and stop insert
-
-" After `<space>.` has  been pressed, you can repeat with  `.`, `<space>` is not
-" needed anymore.
+"    - move to each `foo` by pressing `n`
+"    - press `.` to repeat the change
+"
+" If you have  `n` words to change, that's  `4 + 2*n` keypresses (4  to look for
+" `foo`, then 2 more for each change).
+"}}}
+" Solution:{{{
+"
+" Include the `n` motion inside the change (somewhat similar to `^ifoo` vs `Ifoo`).
+" You can  do so by  installing a mapping  leveraging the `gn`  text-object; the
+" mapping should:
+"
+"    1. put the last changed text in the search register (`@"` → `@/`)
+"    2. cut the next occurrence of the latter
+"    3. insert the previously inserted text and stop insert (`C-@`)
+"
+" After `SPC .` has been pressed, you can repeat a change with `.`.
+" `SPC` is not needed anymore.
+"
+" IOW, after you've  changed the first `foo`,  you can change the  next `n` ones
+" with `2 + (n - 1)` keypresses.
+"
+" This is much more efficient:
+"
+"     2 + n-1  <  4 + 2*n
+"}}}
 nno <expr> <space>. <sid>repeat_last_edit_on_last_text()
 
 fu s:repeat_last_edit_on_last_text() abort
@@ -2955,12 +2975,12 @@ fu s:repeat_last_edit_on_last_text() abort
     "                                       ┌ last changed text
     "                                       │
     let last_text = '\V'..substitute(escape(@", '\'), '\n', '\\n', 'g')
-    " The last changed text may contain newlines, but if it ENDs with one, we
+    " The last changed text may contain newlines,  but if it *ends* with one, we
     " usually don't want it.
     let last_text = substitute(last_text, '\\n$', '', '')
     let @/ = last_text
 
-    set hlsearch
+    set hls
     "          ┌ insert the previously inserted text and stop insert
     "          ├────┐
     return "cgn\<c-@>"
@@ -4360,7 +4380,8 @@ nno <expr> "" <sid>easy_and_custom_paste()
 xno "" "+
 
 fu s:easy_and_custom_paste() abort
-    let [contents, type] = [getreg('+', 1, 1), getregtype('+')]
+    let reginfo = getreginfo('+')
+    let contents = get(reginfo, 'regcontents', [])
     " We manipulate the `+` register in case we're going to paste it.
     " But what if we're going to yank some text into it?{{{
     "
@@ -4375,8 +4396,8 @@ fu s:easy_and_custom_paste() abort
             call map(contents, {_,v -> substitute(v, '^\s*\zshttp.*', '<&>', '')})
         endif
     endif
-    call map(contents, {_,v -> substitute(v, '٪', '$', 'g')})
-    call setreg('+', contents, type)
+    let reginfo.contents = map(contents, {_,v -> substitute(v, '٪', '$', 'g')})
+    call setreg('+', reginfo)
     return '"+'
 endfu
 
@@ -4389,33 +4410,34 @@ augroup END
 fu s:fix_multiline_shellcmd() abort
     if v:register isnot# '+' | return | endif
 
-    let reg = getreg('+', 1, 1)
-    let regtype = getregtype('+')
+    let reginfo = getreginfo('+')
+    let contents = get(reginfo, 'regcontents', [])
+
     let cml = matchstr(&l:cms, '\S*\ze\s*%s')
     let cml = '\%(\V'..escape(cml, '\')..'\m\)\='
 
     " remove possible dollar sign in front of a shell command
     let pat = '^\s*'..cml..'\s*\$'
-    if reg[0] =~# pat
-        let reg[0] = substitute(reg[0], pat, '', '')
+    if contents[0] =~# pat
+        let contents[0] = substitute(contents[0], pat, '', '')
     endif
 
     " remove possible indentation/comment leader in front of terminating `EOF`
-    if len(reg) > 1
+    if len(contents) > 1
         " Why do you look for `EOF` only on the first line of the register?{{{
         "
         " We don't want to remove the  indentation if we're copying a bug report
         " which  includes some  heredoc.   We  need it  so  that it's  correctly
         " formatted as a codeblock on whatever forum we paste it.
         "}}}
-        if reg[0] =~# '<<''\=EOF''\=$'
-            let eof_line = reg[match(reg, '^\s*'..cml..'\s*EOF$')]
+        if contents[0] =~# '<<''\=EOF''\=$'
+            let eof_line = contents[match(contents, '^\s*'..cml..'\s*EOF$')]
             let indent = matchstr(eof_line, '^\s*'..cml..'\s*')
-            call map(reg, {_,v -> substitute(v, indent, '', '')})
+            call map(contents, {_,v -> substitute(v, indent, '', '')})
         endif
     endif
 
-    call setreg('+', reg, regtype)
+    call setreg('+', reginfo)
 endfu
 
 " { }                 move by paragraphs {{{3
@@ -4904,10 +4926,10 @@ xno <expr> < <sid>niceblock('<')
 
 " With this  mapping, we can  always access the last  text we deleted  in visual
 " mode, from the `v` register.
-xno <expr> d 'd'..timer_start(0, {-> setreg('v', getreg('"', 1, 1), getregtype('"'))})[-1]
+xno <expr> d 'd'..timer_start(0, {-> getreginfo('"')->setreg('v')})[-1]
 
 " same thing when we yank
-xno <expr> y 'y'..timer_start(0, {-> setreg('v', getreg('"', 1, 1), getregtype('"'))})[-1]
+xno <expr> y 'y'..timer_start(0, {-> getreginfo('"')->setreg('v')})[-1]
 
 " h l         disable at the beginning/end of line in visual block mode {{{3
 
@@ -4919,7 +4941,7 @@ xno <expr> y 'y'..timer_start(0, {-> setreg('v', getreg('"', 1, 1), getregtype('
 " blocked on its last cell:
 "
 "     tab character
-"     vvvvvvvv
+"     v------v
 "     <------>xxx
 "            ^
 "            'h' could not move before that cell
@@ -5105,7 +5127,7 @@ fu s:clear_registers() abort
     let numeric = range(10)
     let alpha = map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)')
     let other = ['-', '*', '+', '/', '=']
-    call map(numeric + alpha + other, 'setreg(v:val, "")')
+    call map(numeric + alpha + other, 'setreg(v:val, {})')
 endfu
 
 " CombineParamValues {{{2
@@ -5156,10 +5178,10 @@ com! -bar -range=% CombineParamValues call s:combine_param_values(<line1>, <line
 fu s:combine_param_values(lnum1, lnum2) abort
     let param_values = map(filter(getline(a:lnum1, a:lnum2), {_,v -> v != ''}), {_,v -> split(v)})
     if len(param_values) < 2 | return | endif
-    let save = [getreg('"', 1, 1), getregtype('"')]
+    let reg_save = getreginfo('"')
     let @" = join(s:combine(param_values), "\n")
     exe 'norm! '..a:lnum1..'GV'..a:lnum2..'G""p'
-    call setreg('"', save[0], save[1])
+    call setreg('"', reg_save)
     sil exe '''<,''>EasyAlign *\ '
 endfu
 
@@ -5349,7 +5371,7 @@ endfu
 "     :LogEvents! WinEnter
 "     :sp /tmp/file
 "     12:34  WinEnter  /home/user/.vim/vimrc~
-"                      ^^^^^^^^^^^^^^^^^^^^^
+"                      ^-------------------^
 "                      ✘ we would need `/tmp/file`, but the latter has not yet been loaded~
 "}}}
 com! -bar -range=% HlWeirdWhitespace call s:hl_weird_whitespace()
@@ -5913,26 +5935,55 @@ augroup END
 " Delete Noname Buffers {{{2
 
 " We want to automatically delete buffers which are empty and don't have a name.
-" So we install an autocmd listening to `BufHidden`.
+
+if has('vim_starting')
+    let s:noname_buffers = []
+endif
 
 augroup wipe_noname_buffers | au!
-    au BufHidden * call s:wipe_noname()
+    " Do *not* try to wipe the noname buffer right away!{{{
+    "
+    " We tried in the past, but it conflicted with other plugins in subtle ways,
+    " creating  hard-to-debug issues.   We also  tried to  delay until  the next
+    " `BufEnter`, which fixed some issues, like this one:
+    "
+    "     $ vim -Nu NONE +'set hidden | au BufHidden * exe "bw! "..str2nr(expand("<abuf>"))'
+    "     :new
+    "     :q
+    "     Error detected while processing BufHidden Autocommands for "*":~
+    "     E937: Attempt to delete a buffer that is in use: [NULL]~
+    "
+    " but not all  issues can be fixed  like that.  In particular,  we still had
+    " this issue:
+    "
+    "     $ vim +h +q +'call feedkeys("\<space>U")'
+    "     Error detected while processing function window#unclose#restore:~
+    "     line   20:~
+    "     E16: Invalid range: 2wincmd w~
+    "
+    " So now, instead, we just register the buffer number in a list, and we wipe
+    " all buffers in that list on  the next `CursorHold`.  It's good enough.  We
+    " don't need to wipe a noname buffer *immediately*.
+    "}}}
+    au BufHidden * call s:register_noname_for_wiping()
+    au CursorHold * call s:wipe_noname()
 augroup END
 
-fu s:wipe_noname() abort
+fu s:register_noname_for_wiping() abort
     let buf = str2nr(expand('<abuf>'))
     if buflisted(buf) && empty(bufname(buf))
-        " Why the delay?{{{
-        "
-        "     $ vim -Nu NONE +'set hidden | au BufHidden * exe "bw! "..str2nr(expand("<abuf>"))'
-        "     :new
-        "     :q
-        "     Error detected while processing BufHidden Autocommands for "*":~
-        "     E937: Attempt to delete a buffer that is in use: [NULL]~
-        "}}}
-        " `sil!` suppresses `E994` when a popup window is currently open
-        exe 'au BufEnter * ++once sil! bw! '..buf
+        call add(s:noname_buffers, buf)
     endif
+endfu
+
+fu s:wipe_noname() abort
+    for buf in s:noname_buffers
+        if buflisted(buf) && empty(bufname(buf))
+            sil! exe 'bw! '..buf
+        else
+            call filter(s:noname_buffers, 'v:val != '..buf)
+        endif
+    endfor
 endfu
 
 " Filetype Linter {{{2
@@ -8023,7 +8074,7 @@ endfu
 " To prevent this, you could install these mappings:
 "
 "              necessary in Vim to not break readline mappings on the command-line
-"              vvvvv
+"              v---v
 "     cno <esc><esc> <c-e><c-u><c-c>
 "     cno <c-c> <c-e><c-u><c-c>
 "
@@ -8108,7 +8159,7 @@ endfu
 " https://github.com/vim/vim/releases/tag/v8.1.2302
 "
 "     :vim /'\[\|'\]/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
-"           ^^^^^^^^
+"           ^------^
 "           the pattern should look for more things (`:w` command, `:up` command, ...)
 "
 " ---
@@ -8361,6 +8412,7 @@ endfu
 " Study and document the new `flatten()` function.
 " In particular, read the tests:
 " https://github.com/vim/vim/commit/077a1e670ad69ef4cefc22103ca6635bd269e764
+
 
 
 

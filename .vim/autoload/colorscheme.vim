@@ -172,7 +172,7 @@ fu colorscheme#customize() abort "{{{2
     "     " ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
     "     " /fu s:lightness(
     "     let level = g:seoul256_background - 233 + 1
-    "                 ^^^^^^^^^^^^^^^^^^^^^
+    "                 ^-------------------^
     "                 must exist, otherwise an error is raised
     "}}}
     if &bg is# 'light' | let g:seoul256_background = 237 | endif
@@ -301,7 +301,7 @@ fu s:CursorLine() abort "{{{3
     " Add the bold value:
     "
     "     hi CursorLine term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=NONE guibg=NONE
-    "                        ^^^^                 ^^^^               ^^^^
+    "                        ^--^                 ^--^               ^--^
     "}}}
     hi CursorLine term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
 endfu

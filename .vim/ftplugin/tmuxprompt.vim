@@ -73,7 +73,7 @@ nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!
 " To avoid starting a shell, which would require escaping some characters:
 "
 "     :<c-u>sil call system('tmux command-prompt -I '..shellescape(substitute(getline('.'), '#', '##', 'g')))<cr>
-"                                                      ^^^^^^^^^^^
+"                                                      ^---------^
 "}}}
 " Why do you double the number signs?  Why don't you use `#{l:}` instead?{{{
 "

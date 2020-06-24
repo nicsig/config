@@ -311,8 +311,8 @@ configure() { #{{{2
     #
     # ---
     #
-    # `enable-gui=gtk2` is also unnecessary atm, because it's also set by default;
-    # however, I prefer to be sure that gVim still uses gtk2 in the future.
+    # `enable-gui=gtk2` is also unnecessary atm, because it's also set by default.
+    # However, I prefer to be sure that gVim still uses gtk2 in the future.
     # Last time I checked, gtk3 increased the latency.
     #}}}
     # Don't use `--with-python3-config-dir`;  it's deprecated.{{{

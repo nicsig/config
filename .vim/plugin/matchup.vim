@@ -45,7 +45,7 @@ let g:matchup_matchparen_offscreen = {'method': 'popup'}
 " Although, you can mitigate it by setting the `scrolloff` key:
 "
 "     let g:matchup_matchparen_offscreen = {'method': 'popup', 'scrolloff': 1}
-"                                                              ^^^^^^^^^^^^^^
+"                                                              ^------------^
 "
 " Finally, the status line position is *fixed*;  so you have to look for the `Δ`
 " symbol to  know whether the open/mid/close  word is above or  below the cursor
@@ -82,7 +82,7 @@ let g:matchup_transmute_enabled = 1
 "     <div>
 "       text
 "     </div>
-"       ^^^
+"       ^-^
 "      changed automatically (in parallel)
 "}}}
 " It doesn't work!{{{

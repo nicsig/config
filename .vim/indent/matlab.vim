@@ -255,7 +255,7 @@ fu s:continues_on_next_line(lnum) abort "{{{1
     "}}}
     " Note: In the original plugin, the test checks whether the position is *not* highlighted by a comment/string.{{{
     "
-    "            vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    "            v-----------------------------v
     "     elseif !s:IsCommentOrString(a:lnum, c) | return 1 | endif
     "     " $VIMRUNTIME/indent/matlab.vim:50
     "
@@ -267,7 +267,7 @@ fu s:continues_on_next_line(lnum) abort "{{{1
     " As a result, we need to create the helper function `s:is_line_continuation()`.
     " But the name is already taken in the original plugin.
     "
-    "                 vvvvvvvvvvvvvvvvvv
+    "                 v----------------v
     "     function! s:IsLineContinuation(lnum)
     "     " $VIMRUNTIME/indent/matlab.vim:45
     "

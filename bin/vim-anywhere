@@ -4,8 +4,11 @@
 # https://www.reddit.com/r/vim/comments/82178l/use_vim_to_edit_text_anywhere/
 # https://snippets.martinwagner.co/2018-03-04/vim-anywhere
 
+# TODO: How about this more sophisticated script?
+# https://www.reddit.com/r/vim/comments/hdouex/vim_has_given_me_crippling_depression/fvmi514/
+
 file=$(mktemp)
-urxvt -e vim "$file"
+xterm -e vim "$file"
 
 cat "$file" | xsel -ib
 rm "$file"
