@@ -2966,24 +2966,26 @@ endfu
 "
 "     2 + n-1  <  4 + 2*n
 "}}}
-nno <expr> <space>. <sid>repeat_last_edit_on_last_text()
+nno <expr> <space>. <sid>repeat_last_edit_on_last_changed_text()
 
-fu s:repeat_last_edit_on_last_text() abort
+fu s:repeat_last_edit_on_last_changed_text() abort
     " put the last changed text inside the search register, so that we can refer
     " to it with the text-object `gn`
-
-    "                                       ┌ last changed text
-    "                                       │
-    let last_text = '\V'..substitute(escape(@", '\'), '\n', '\\n', 'g')
-    " The last changed text may contain newlines,  but if it *ends* with one, we
-    " usually don't want it.
-    let last_text = substitute(last_text, '\\n$', '', '')
-    let @/ = last_text
-
+    let changed = getreg('"', 1, 1)
+    if empty(changed) | return | endif
+    call map(changed, {_,v -> escape(v, '\')})
+    if len(changed) == 1
+        let pat = changed[0]
+    else
+        " can't join with real newlines: they would be translated as NULs in the search register
+        " we need to join with the *atom* `\n`
+        let pat = changed->join('\n')
+    endif
+    call setreg('/', '\V'..pat, 'c')
     set hls
-    "          ┌ insert the previously inserted text and stop insert
-    "          ├────┐
     return "cgn\<c-@>"
+    "          ├────┘
+    "          └ insert the previously inserted text and stop insert
 endfu
 
 " aa    ac    ad    al    an    arglist {{{4
@@ -3765,11 +3767,10 @@ nno <silent> =m :<c-u>call <sid>fix_macro()<cr>
 fu s:fix_macro() abort
     " don't open several windows if we press `=m` several times consecutively
     if exists('s:fix_macro_c') | return | endif
-    let c = getchar()
-    if c < 97 || c > 123
+    let c = getchar()->nr2char()
+    if c !~# '[[:lower:]]'
         return
     endif
-    let c = nr2char(c)
     " Why don't you use the command-line window?{{{
     "
     " When the  register contains some  special characters (like `C-u`),  and we
@@ -3808,21 +3809,23 @@ endfu
 
 " We remap `-a`  to a function of  the `unicode.vim` plugin which  gives us more
 " info about the character under the cursor.
-" In   particular,   its   unicode   name,   html   entity   (&entity_name;   OR
-" &#entity_number;), and digraph inside parentheses (if there's one defined).
+" In   particular,   its  unicode   name,   html   entity  (`&entity_name;`   OR
+" `&#entity_number;`), and digraph inside parentheses (if there's one defined).
 "
 " We also capture the  output of the command in the `o` register,  to be able to
 " dump it in a buffer.
 nno <silent> -a  :<c-u>call <sid>unicode_ga()<cr>
 fu s:unicode_ga() abort
-    let @o = substitute(execute('UnicodeName', 'silent!'), '\s*$', '', '')
+    let out = execute('UnicodeName', 'silent!')->substitute('\s*$', '', '')
+    call setreg('o', [out], 'c')
     UnicodeName
 endfu
 
 " We remap `-8` to `g8` for consistency.
 nno <silent> -8  :<c-u>call <sid>get_charbyte()<cr>
 fu s:get_charbyte() abort
-    let @o = substitute(execute('norm! g8', 'silent!')[1:], '\s*$', '', '')
+    let out = execute('norm! g8', 'silent!')[1:]->substitute('\s*$', '', '')
+    call setreg('o', [out], 'c')
     echo @o
 endfu
 
@@ -3837,7 +3840,7 @@ nno <silent> -c :<c-u>call myfuncs#tab_toc()<cr>
 
 nno <silent>  -f  :<c-u>call <sid>print_filetype()<cr>
 fu s:print_filetype() abort
-    let @o = !empty(&ft) ? &ft : '∅'
+    call setreg('o', [!empty(&ft) ? &ft : '∅'], 'c')
     echohl Title
     echo '[filetype] '..@o
     echohl NONE <cr>
@@ -3863,13 +3866,16 @@ fu s:print_cwd() abort
         tabpage: %s
         global:  %s
     END
-    let @o = printf(join(fmt, "\n"), getcwd(), getcwd(-1, 0), getcwd(-1))
+    call map(fmt, {i,v -> [getcwd(), getcwd(-1, 0), getcwd(-1)][i]->printf(v)})
+        "\ 'c' instead of 'l' to prevent the insertion of a trailing newline
+        \ ->setreg('o', 'c')
     echo @o
 endfu
 
 fu s:print_full_path() abort
     if &bt is# 'quickfix'
-        let @o = get(w:, 'quickfix_title', 'no title')
+        let out = get(w:, 'quickfix_title', 'no title')
+        call setreg('o', [out], 'c')
         echo @o
         return
     endif
@@ -3882,11 +3888,12 @@ fu s:print_full_path() abort
     if fname is# ''
         let @o = '[No Name]'
     elseif &buftype is# 'quickfix'
-        let @o = w:quickfix_title
+        call setreg('o', [w:quickfix_title], 'c')
     else
         if fname[0] is# '/' || fname =~# '^\l\+://'
             let resolved = resolve(fname)
-            let @o = resolved is# fname ? fname : fname..' -> '..resolved
+            let out = resolved is# fname ? fname : fname..' -> '..resolved
+            call setreg('o', [out], 'c')
         else
             " Why is adding the current working directory sometimes necessary?{{{
             "
@@ -3897,7 +3904,8 @@ fu s:print_full_path() abort
             "     :e foo/bar
             "     :echo expand('%:p')
             "}}}
-            let @o = getcwd()..'/'..fname
+            let out = getcwd()..'/'..fname
+            call setreg('o', [out], 'c')
         endif
     endif
 
@@ -6408,6 +6416,86 @@ augroup source_files | au!
     "}}}
     au BufWritePost $MYVIMRC exe 'source '..expand('<afile>:p')
 augroup END
+
+" Restrict Abbreviations {{{2
+
+" Purpose:{{{
+"
+" An abbreviation may sometimes be unexpectedly expanded at the end of a word:
+"
+"     vim -Nu NONE -S <(cat <<'EOF'
+"         set bs=start
+"         inorea ab cd
+"         pu!='yyyy'
+"         norm! 3|
+"         call feedkeys("i\<c-u>xxab ", 't')
+"     EOF
+"     )
+"
+" The buffer contains the line:
+"
+"     xxcd yy
+"
+" Notice how `ab`  has been expanded into  `cd`, even though `ab` was  part of a
+" bigger word `xxab`.
+"
+" Not sure what's the rationale behind this behavior but it's documented at
+" `:h abbreviations /rule`:
+"
+" >     full-id   In front of the match is a non-keyword character, **or this is where**
+" >               **the line or insertion starts.**
+"
+" In any case, I never want this,and when  that happens we have to roll back the
+" expansion which is distracting.  Let's try to disable it.
+"}}}
+augroup restrict_abbreviations | au!
+    au InsertEnter * let s:start_insertion = col('.')
+    au InsertCharPre * call s:restrict_abbreviations()
+augroup END
+
+fu s:restrict_abbreviations() abort
+    " Purpose:{{{
+    "
+    " Suppress  a  possible abbreviation  expansion  by  preceding a  triggering
+    " non-keyword (typically a space) with `C-v`.
+    "}}}
+
+    " Why the `-1` in `s:start_insertion -1`?{{{
+    "
+    " To handle  the case where  we enter insert mode  right after a  space, and
+    " type an abbreviation immediately.
+    "}}}
+    if v:char =~# '\k'
+        "\ there must be a non-keyword between the cursor and the point where we entered insert mode
+        "\ if not, bail out
+        \ || s:start_insertion -1 <= searchpos('[^[:keyword:]]', 'bn')[1]
+        "\ we probably don't need this to be run when keys are pressed from the rhs of a mapping;
+        "\ the less frequently we run this code, the lower the risk we encounter some unexpected side-effect
+        \ || state() =~# 'm'
+        return
+    endif
+    " Do *not* pass the `i` flag to `feedkeys()`!{{{
+    "
+    " If you do, the keys returned by an insert mode mapping whose rhs evaluates
+    " an expression would be reversed:
+    "
+    "     vim -Nu NONE -S <(cat <<'EOF'
+    "         au InsertCharPre * call feedkeys("\<c-v>"..v:char, 'i') | let v:char = ''
+    "         ino X <c-r>='abc'<cr>
+    "         call feedkeys('iX')
+    "     EOF
+    "     )
+    "
+    "     " resulting buffer:  cba
+    "     " expected buffer:   abc
+    "
+    " ---
+    "
+    " This issue should be avoided thanks to the previous `state()` guard, but still...
+    "}}}
+    call feedkeys("\<c-v>"..v:char)
+    let v:char = ''
+endfu
 
 " Send to server {{{2
 

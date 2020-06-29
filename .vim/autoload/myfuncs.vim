@@ -15,7 +15,7 @@ fu myfuncs#op_grep(...) abort "{{{2
     let reg_save = getreginfo('"')
 
     try
-        set cb-=unnamed cb-=unnamedplus sel=inclusive
+        set cb= sel=inclusive
 
         if type is# 'char'
             norm! `[v`]y
@@ -97,12 +97,12 @@ fu myfuncs#op_replace_without_yank(...) abort "{{{2
     let reg_save = getreginfo('"')
     let visual_marks_save = [getpos("'<"), getpos("'>")]
     try
-        set cb-=unnamed cb-=unnamedplus sel=inclusive
+        set cb= sel=inclusive
         if type is# 'line'
             exe 'keepj norm! ''[V'']"'..reg..'p'
             norm! gv=
         elseif type is# 'block'
-            exe "keepj norm! `[\<c-v>`]\""..reg..'p'
+            exe "keepj norm! `[\<c-v>`]"..'"'..reg..'p'
         elseif type is# 'char'
             call s:handle_char(reg)
         endif
@@ -150,12 +150,19 @@ fu s:handle_char(reg) abort
         " trim whitespace surrounding the text
         let contents[0] = substitute(contents[0], '^\s*', '', '')
         let contents[-1] = substitute(contents[-1], '\s*$', '', '')
-        " and reset the type to characterwise
-        call setreg(a:reg, contents, 'c')
+        call deepcopy(reg_save)
+            "\ and reset the type to characterwise
+            \ ->extend({'regcontents': contents, 'regtype': c})
+            \ ->setreg(a:reg)
     endif
 
-    exe 'keepj norm! `[v`]"'..a:reg..'p'
-    call setreg(a:reg, reg_save)
+    try
+        exe 'keepj norm! `[v`]"'..a:reg..'p'
+    catch
+        return lg#catch()
+    finally
+        call setreg(a:reg, reg_save)
+    endtry
 endfu
 
 fu myfuncs#op_trim_ws(...) abort "{{{2
@@ -177,43 +184,40 @@ fu myfuncs#op_yank_setup(what) abort "{{{2
 endfu
 
 fu s:op_yank(type) abort
-    let reg_save = getreginfo('z')
+    let mods = 'keepj keepp'
+    let range = line("'[")..','..line("']")
+
+    let cmd = s:op_yank.what is# 'g//' || s:op_yank.what is# 'comments' ? 'g' : 'v'
+    let pat = s:op_yank.what is# 'code' || s:op_yank.what is# 'comments'
+          \ ?     '^\s*\C\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')
+          \ :     @/
+
+    let z_save = getreginfo('z')
     try
-        let @z = ''
-
-        let mods = 'keepj keepp'
-        let range = line("'[")..','..line("']")
-
-        let cmd = s:op_yank.what is# 'g//' || s:op_yank.what is# 'comments' ? 'g' : 'v'
-        let pat = s:op_yank.what is# 'code' || s:op_yank.what is# 'comments'
-              \ ?     '^\s*\C\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')
-              \ :     @/
-
+        call setreg('z', {})
         exe mods..' '..range..cmd..'/'..escape(pat, '/')..'/y Z'
-
-        let z_reg = getreginfo('z')
-        let contents = z_reg.regcontents
-        " the first  time we've  appended a  match to the  `z` register,  it has
-        " appended a newline; we *never* want it; remove it
-        if contents[0] is# ''
-            call remove(contents, 0)
-        endif
-
-        " remove *all* empty line in some other cases
-        if s:op_yank.what is# 'v//' || s:op_yank.what is# 'code'
-            call filter(contents, 'v:val !~# "^\\s*$"')
-            call setreg('z', contents, 'l')
-        endif
-
-        call setreg(s:op_yank.register, contents, 'l')
+        let yanked = getreginfo('z')->get('regcontents', [])
     catch
         return lg#catch()
     finally
-        call setreg('z', reg_save)
+        call setreg('z', z_save)
         " emulate what Vim does with a  builtin operator; the cursor ends at the
         " *start* of the text object
         call cursor(matchstr(range, '\d\+'), 1)
     endtry
+
+    " the first  time we've  appended a  match to the  `z` register,  it has
+    " appended a newline; we *never* want it; remove it
+    if yanked[0] is# ''
+        call remove(yanked, 0)
+    endif
+
+    " remove *all* empty lines in some other cases
+    if s:op_yank.what is# 'v//' || s:op_yank.what is# 'code'
+        call filter(yanked, 'v:val !~# "^\\s*$"')
+    endif
+
+    call setreg(s:op_yank.register, yanked, 'l')
 endfu
 " }}}1
 
