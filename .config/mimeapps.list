@@ -30,3 +30,4 @@ application/x-compressed-tar=file-roller.desktop;
 text/x-python=gvim.desktop;
 text/markdown=gvim.desktop;
 text/vtt=gvim.desktop;
+application/x-subrip=gvim.desktop;

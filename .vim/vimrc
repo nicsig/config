@@ -2129,9 +2129,16 @@ augroup END
 " files though, nor temporary files; it would quickly take too much space).
 " Read files in `backup` session.
 "
-" And read these:
+" ---
+"
+" Read these:
 " https://www.zachpfeffer.com/single-post/Practice-Recovering-a-File-in-Vim
 " https://begriffs.com/posts/2019-07-19-history-use-vim.html#backups-and-undo
+"
+" ---
+"
+" Try to expose the info given by `swapinfo()` via a custom command.
+" Maybe it could open a scratch buffer to display the info.
 
 " TODO: The undo/backup files are never removed by Vim, and they can take a lot of space over time.{{{
 "
@@ -4186,7 +4193,7 @@ endfu
 nno <expr> <c-a> <sid>c_a()
 
 fu s:c_a() abort
-    let pos = searchpos('[✘✔$٪]', 'cW', line('.'))
+    let pos = searchpos('[✘✔]', 'cW', line('.'))
     if pos == [0,0]
         return "\<c-a>"
     endif
@@ -4194,8 +4201,6 @@ fu s:c_a() abort
     let old2new = {
         \ '✘': '✔',
         \ '✔': '✘',
-        \ '$': '٪',
-        \ '٪': '$',
         \ }
     if !has_key(old2new, char_under_cursor) | return '' | endif
     let new_char = old2new[char_under_cursor]
@@ -4733,9 +4738,9 @@ xno <silent> af :<c-u>call <sid>textobj_func(0)<cr>
 ono <silent> af :<c-u>norm Vaf<cr>
 
 fu s:textobj_func(inside) abort
-    if search('^\s*fu\%[nction]', 'bcW')
+    if search('^\C\s*\%(fu\%[nction]\|def\)\>', 'bcW')
         norm! m<
-        call search('^\s*endf\%[unction]\s*$', 'eW')
+        call search('^\C\s*\%(endf\%[unction]\|enddef\)\s*$', 'eW')
         norm! m>
         exe 'norm! gv$'..(a:inside ? 'koj' : '')
         " we want a linewise selection no matter the original visual mode
@@ -5124,8 +5129,8 @@ let s:PGM2CFGFILES = {
 "
 "     :CGrep 'a'\''b"c'
 "}}}
-com! -nargs=1 CGrep call myfuncs#op_grep(<q-args>, 0)
-com! -nargs=1 LGrep call myfuncs#op_grep(<q-args>, 1)
+com! -nargs=1 CGrep call myfuncs#op_grep_core(<q-args>, v:false)
+com! -nargs=1 LGrep call myfuncs#op_grep_core(<q-args>, v:true)
 
 " ClearRegisters {{{2
 
@@ -8412,7 +8417,7 @@ endfu
             " I think  that's because the script  is called via `system()`  and thus
             " has no controlling terminal; so the sequence is written nowhere.
             "}}}
-            call writefile([seq], '/dev/tty', 'b')
+            call echoraw(seq)
         endif
     endfu
     nno <silent> <space>y y:<c-u>call <sid>sendtoclipboard(@0)<cr>
@@ -8500,6 +8505,19 @@ endfu
 " Study and document the new `flatten()` function.
 " In particular, read the tests:
 " https://github.com/vim/vim/commit/077a1e670ad69ef4cefc22103ca6635bd269e764
+"
+" 111 -
+"
+" Adapt this for `:map` (& friends like `:nno`), `:[ic]norea`, `:au`, and `:set`:
+" https://github.com/vim/vim/issues/6373#issuecomment-652664179
+"
+" AFAICT, those  are the only commands  which include a `Last  set from` message
+" when the verbosity level  is increased, and thus they are  the only ones whose
+" output can be converted into a qfl.
+"
+" Suggestion: Don't install a `:Verbose` command  (we already have one, it would
+" need to be adapted).  Instead, install a `CmdlineLeave` autocmd which inspects
+" the command-line.
 
 
 

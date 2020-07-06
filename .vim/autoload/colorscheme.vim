@@ -179,6 +179,10 @@ fu colorscheme#customize() abort "{{{2
 
     call colorscheme#cursorline(&bg is# 'dark') " (re)set `'cul'`
 
+    " the cursor does not seem to need any customization in the GUI;
+    " seoul256 correctly sets its color depending on which version we're using (light vs dark)
+    if has('gui_running') | return | endif
+
     " If we start Vim with a dark color scheme, the cursor must be visible.{{{
     "
     " We use a  light color scheme in  our terminal, and we  have configured our
@@ -727,8 +731,8 @@ fu s:cursor() abort "{{{2
     "
     " To send this sequence to the terminal, you can:
     "
+    "    - invoke `echoraw(seq)`
     "    - execute `:!printf 'seq'`
-    "    - invoke `writefile([seq], '/dev/tty', 'b')` (only in the terminal, not in gVim)
     "    - append it to `&t_ti` (or `&t_SI`, but the effect would be delayed until you quit insert mode)
     "}}}
 
@@ -794,35 +798,8 @@ fu s:cursor() abort "{{{2
     " It should only affect the current tmux pane.
     "}}}
     let color = g:cursor_color[&bg][g:termname is# 'st-256color' ? 'st' : 'other']
-    " Why?{{{
-    "
-    " We may execute a `printf` command, via `:!`.
-    " And it may contain a `#` character (prefix in hex code).
-    " On Vim's  command-line, this  character is  automatically expanded  in the
-    " name of the alternate file; we don't want that.
-    "}}}
-    let color = escape(color, '#')
-
-    " When do I need double quotes?{{{
-    "
-    " You don't need them if you send the sequence to the terminal via `:!printf`.
-    " You *do* need them, if you send the sequence via `writefile()`:
-    "
-    "     call writefile([seq], '/dev/tty', 'b')
-    "}}}
     let seq = "\033]12;"..color.."\007"
-
-    if has('gui_running')
-        " You can't write to the tty in gVim:{{{
-        "
-        "     $ gvim
-        "     :call writefile(["\033]12;3\007"], '/dev/tty', 'b')
-        "     E482: Can't create file /dev/tty~
-        "}}}
-        exe 'sil !printf '..shellescape(seq)
-    else
-        call writefile([seq], '/dev/tty', 'b')
-    endif
+    call echoraw(seq)
 
     " When we  quit Vim, we  want to restore the  cursor color so  that it's
     " visible on a light background, because  we use a light color scheme in

@@ -4,116 +4,94 @@ endfu
 let s:snr = get(s:, 'snr', s:snr())
 
 " Operators {{{1
-fu myfuncs#op_grep(...) abort "{{{2
-    if !a:0
-        let &opfunc = 'myfuncs#op_grep'
-        return 'g@'
-    endif
-
-    let type = a:0 == 1 ? a:1 : 'Ex'
-    let [cb_save, sel_save] = [&cb, &sel]
-    let reg_save = getreginfo('"')
-
-    try
-        set cb= sel=inclusive
-
-        if type is# 'char'
-            norm! `[v`]y
-        endif
-        if @" =~# "\n" || type is# 'line' || type is# 'block'
-            " `rg(1)` is is line-oriented, unless you use `-U`
-            " (which we don't because it's slower and consume more memory)
-            return
-        endif
-
-        if type is# 'Ex'
-            " Why does `2>/dev/null` work here but not in `'grepprg'`?{{{
-            "
-            " They don't run the shell command in the same way:
-            "
-            "     " system()
-            "     (rg foobar /etc)>/tmp/... 2>&1
-            "
-            "     " 'grepprg'
-            "     :!rg foobar /etc 2>&1| tee /tmp/...
-            "
-            " In the first case, `2>/dev/null` is useful:
-            "
-            "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
-            "         ^---------^
-            "
-            " It prevents errors from being written in the temp file.
-            "
-            " In the second case, `2>/dev/null` is useless:
-            "
-            "     :!rg 2>/dev/null foobar /etc 2>&1| tee /tmp/...
-            "          ^---------^
-            "
-            " Because, it's overridden by `2>&1` which comes from `'shellpipe'`.
-            " In contrast,  `system()` uses `'shellredir'`, which  also includes
-            " `2>&1`, but it  doesn't have the same effect,  because the command
-            " is run in a subshell via braces:
-            "
-            "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
-            "     ^                          ^
-            "
-            " From `:h system() /braces`:
-            "
-            " >     For Unix, braces are put around {expr} to allow for
-            " >     concatenated commands.
-            "}}}
-            let cmd = 'rg 2>/dev/null '..a:1
-            let use_loclist = a:2
-        else
-            let cmd = 'rg 2>/dev/null --fixed-strings '..shellescape(@")
-            let use_loclist = 0
-        endif
-        if type is# 'Ex' && use_loclist
-            sil let items = getloclist(0, {'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
-            call setloclist(0, [], ' ', {'items': items, 'title': cmd})
-            do <nomodeline> QuickFixCmdPost lwindow
-        else
-            sil let items = getqflist({'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
-            call setqflist([], ' ', {'items': items, 'title': cmd})
-            do <nomodeline> QuickFixCmdPost cwindow
-        endif
-
-    catch
-        return lg#catch()
-    finally
-        let [&cb, &sel] = [cb_save, sel_save]
-        call setreg('"', reg_save)
-    endtry
+fu myfuncs#op_grep() abort "{{{2
+    let &opfunc = 'lg#opfunc'
+    let g:opfunc_core = 'myfuncs#op_grep_core'
+    return 'g@'
 endfu
 
-fu myfuncs#op_replace_without_yank(...) abort "{{{2
-    if !a:0
-        let &opfunc = 'myfuncs#op_replace_without_yank'
-        return 'g@'
+fu myfuncs#op_grep_core(...) abort
+    let type = a:0 == 1 ? a:1 : 'Ex'
+    if type is# 'char'
+        norm! `[v`]y
     endif
+    if type is# 'line' || type is# 'block' || type is# 'char' && @" =~# "\n"
+        " `rg(1)` is is line-oriented, unless you use `-U`
+        " (which we don't because it's slower and consume more memory)
+        return
+    endif
+
+    if type is# 'Ex'
+        let pat = a:1
+        let use_loclist = a:2
+        " Why does `2>/dev/null` work here but not in `'grepprg'`?{{{
+        "
+        " They don't run the shell command in the same way:
+        "
+        "     " system()
+        "     (rg foobar /etc)>/tmp/... 2>&1
+        "
+        "     " 'grepprg'
+        "     :!rg foobar /etc 2>&1| tee /tmp/...
+        "
+        " In the first case, `2>/dev/null` is useful:
+        "
+        "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
+        "         ^---------^
+        "
+        " It prevents errors from being written in the temp file.
+        "
+        " In the second case, `2>/dev/null` is useless:
+        "
+        "     :!rg 2>/dev/null foobar /etc 2>&1| tee /tmp/...
+        "          ^---------^
+        "
+        " Because, it's overridden by `2>&1` which comes from `'shellpipe'`.
+        " In contrast,  `system()` uses `'shellredir'`, which  also includes
+        " `2>&1`, but it  doesn't have the same effect,  because the command
+        " is run in a subshell via braces:
+        "
+        "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
+        "     ^                          ^
+        "
+        " From `:h system() /braces`:
+        "
+        " >     For Unix, braces are put around {expr} to allow for
+        " >     concatenated commands.
+        "}}}
+        let cmd = 'rg 2>/dev/null '..a:1
+    else
+        let use_loclist = 0
+        let cmd = 'rg 2>/dev/null --fixed-strings '..shellescape(@")
+    endif
+
+    if type is# 'Ex' && use_loclist
+        sil let items = getloclist(0, {'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
+        call setloclist(0, [], ' ', {'items': items, 'title': cmd})
+        do <nomodeline> QuickFixCmdPost lwindow
+    else
+        sil let items = getqflist({'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
+        call setqflist([], ' ', {'items': items, 'title': cmd})
+        do <nomodeline> QuickFixCmdPost cwindow
+    endif
+endfu
+
+fu myfuncs#op_replace_without_yank() abort "{{{2
+    let &opfunc = 'lg#opfunc'
+    let g:opfunc_core = 'myfuncs#op_replace_without_yank_core'
+    return 'g@'
+endfu
+
+fu myfuncs#op_replace_without_yank_core(type) abort
     let reg = v:register
-    let type = a:1
-    let [cb_save, sel_save] = [&cb, &sel]
-    let reg_save = getreginfo('"')
-    let visual_marks_save = [getpos("'<"), getpos("'>")]
-    try
-        set cb= sel=inclusive
-        if type is# 'line'
-            exe 'keepj norm! ''[V'']"'..reg..'p'
-            norm! gv=
-        elseif type is# 'block'
-            exe "keepj norm! `[\<c-v>`]"..'"'..reg..'p'
-        elseif type is# 'char'
-            call s:handle_char(reg)
-        endif
-    catch
-        return lg#catch()
-    finally
-        let [&cb, &sel] = [cb_save, sel_save]
-        call setreg('"', reg_save)
-        call setpos("'<", visual_marks_save[0])
-        call setpos("'>", visual_marks_save[1])
-    endtry
+    if a:type is# 'line'
+        exe 'keepj norm! ''[V'']"'..reg..'p'
+        norm! gv=
+    elseif a:type is# 'block'
+        exe "keepj norm! `[\<c-v>`]"..'"'..reg..'p'
+    elseif a:type is# 'char'
+        call s:handle_char(reg)
+    endif
 endfu
 
 fu s:handle_char(reg) abort
