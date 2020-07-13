@@ -545,21 +545,25 @@ call setenv('MANSECT', $MYMANSECT)
 "
 " Update:
 "
-" Tryt this:
+" Try this:
 "
-"     $ cat <<'EOF' >~/.ctags
+"     $ cat <<'EOF' >~/.config/ctags/markdown.ctags
 "     --langdef=markdown
 "     --langmap=markdown:.md
-"     --regex-markdown=/|(.*)|/\1/
+"     --regex-markdown=/|(.*)|/\1/h,heading,headings/
 "     EOF
 "
-"     $ cd ~/wiki/vim/ ctags -R .
+"     $ cd ~/wiki/vim/ && ctags -R .
 "
 " Source: https://stackoverflow.com/a/25742823/9780968
 "
 " Write `| foobar |` in one of your notes, and one line below write `foobar`.
 " Press `C-]` on `foobar`: the cursor jumps onto `| foobar |`.
 " But it doesn't work when `foobar` is above `| foobar |`, nor across files...
+"
+" Update: It doesn't seem to work anymore.  `ctags(1)` complains with:
+"
+"     ctags: Language "markdown" already defined~
 "}}}
 " Used in our notes when we create links between files, in a wiki on a topic.
 call setenv('MY_WIKI', $HOME..'/wiki')
@@ -1199,12 +1203,15 @@ set history=1000
 
 " includeexpr (gf) {{{2
 
-fu s:snr()
-    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-endfu
-let s:snr = get(s:, 'snr', s:snr())
+if !exists('s:SID')
+    fu s:SID() abort
+        return expand('<sfile>')->matchstr('<SNR>\zs\d\+\ze_SID$')->str2nr()
+    endfu
+    let s:SID = s:SID()->printf('<SNR>%d_')
+    delfu s:SID
+endif
 
-let &includeexpr = s:snr..'inex()'
+let &includeexpr = s:SID .. 'inex()'
 
 fu s:inex() abort
     let line = getline('.')
@@ -2889,8 +2896,8 @@ ino <silent> <c-s> <esc>:sil update<cr>
 
 " M-a  M-e {{{3
 
-sil! call lg#map#meta('a', '<c-r>='..s:snr..'move_by_sentence(1)<cr>', 'i', 's')
-sil! call lg#map#meta('e', '<c-r>='..s:snr..'move_by_sentence(0)<cr>', 'i', 's')
+sil! call lg#map#meta('a', '<c-r>=' .. s:SID .. 'move_by_sentence(1)<cr>', 'i', 's')
+sil! call lg#map#meta('e', '<c-r>=' .. s:SID .. 'move_by_sentence(0)<cr>', 'i', 's')
 
 fu s:move_by_sentence(fwd) abort
     if a:fwd
@@ -3517,7 +3524,7 @@ nno <expr> zuW <sid>spell_command_setup('zuw')
 
 fu s:spell_command_setup(cmd) abort
     let s:spell_command = a:cmd
-    let &opfunc = s:snr..'spell_command'
+    let &opfunc = s:SID .. 'spell_command'
     return 'g@l'
 endfu
 
@@ -4354,7 +4361,7 @@ nno <expr> << <sid>indent_with_shiftround_setup('<<')
 
 fu s:indent_with_shiftround_setup(cmd) abort
     let s:indent_with_shiftround = {'cmd': a:cmd}
-    let &opfunc = s:snr..'indent_with_shiftround'
+    let &opfunc = s:SID .. 'indent_with_shiftround'
     return 'g@l'
 endfu
 
@@ -4430,7 +4437,7 @@ fu s:fix_multiline_shellcmd() abort
     let cml = '\%(\V'..escape(cml, '\')..'\m\)\='
 
     " remove possible dollar sign in front of a shell command
-    let pat = '^\s*'..cml..'\s*\$'
+    let pat = '^\s*'..cml..'\s*\$\s'
     if contents[0] =~# pat
         let contents[0] = substitute(contents[0], pat, '', '')
     endif
@@ -4451,6 +4458,39 @@ fu s:fix_multiline_shellcmd() abort
     endif
 
     call setreg('+', reginfo)
+endfu
+
+" Issue: Fix `E353` in case `"+` has been written into from another Vim instance.{{{
+"
+" Indeed, the previous mapping and autocmd write into `"+`; now watch this:
+"
+"     " first Vim instance
+"     $ vim -Nu NONE -i NONE +"pu!='first' | norm! \"+y$" +'reg "+'
+"
+"     " second Vim instance
+"     $ vim -Nu NONE -i NONE +'let @+ = "second"'
+"
+"     " from first Vim instance
+"     E353: Nothing in register "~
+"     :reg "+
+"     Type Name Content~
+"       c  "+   second~
+"
+" For  some reason,  writing into  `"+` from  a second  Vim instance  breaks the
+" connection from `""` to `"+` in the first instance.
+"}}}
+" Solution: run `:reg "` before putting the unnamed register.{{{
+"
+" For some reason, this reconnects `""` to `"+`.
+"}}}
+" https://github.com/vim/vim/issues/6435
+nno <expr> p <sid>put('p')
+nno <expr> P <sid>put('P')
+xno <expr> p <sid>put('p')
+xno <expr> P <sid>put('P')
+fu s:put(key) abort
+    sil reg "
+    return a:key
 endfu
 
 " { }                 move by paragraphs {{{3
@@ -5231,7 +5271,7 @@ fu s:diff_orig() abort
     setl buftype=nofile nobuflisted noswapfile nowrap
 
     sil 0r ++edit #
-    $d_
+    keepj $d_
     setl nomodifiable readonly
 
     diffthis
@@ -5770,7 +5810,7 @@ fu s:tldr(shellcmd) abort
     call map(out, {_,v -> substitute(v, '^-', '#', '')})
     call map(out, {_,v -> substitute(v, '^  ', '    ', '')})
     sp /tmp/.tldr.md
-    %d_
+    keepj %d_
     call setline(1, out)
     keepj keepp g/^#/call append('.', '')
     update
@@ -8518,7 +8558,6 @@ endfu
 " Suggestion: Don't install a `:Verbose` command  (we already have one, it would
 " need to be adapted).  Instead, install a `CmdlineLeave` autocmd which inspects
 " the command-line.
-
 
 
 

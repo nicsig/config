@@ -17,11 +17,6 @@ if exists('b:did_indent')
     finish
 endif
 
-fu s:snr() abort
-    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-endfu
-let s:snr = get(s:, 'snr', s:snr())
-let &l:inde = s:snr..'get_indent()'
 setl indk=0=elsei
 
 let b:did_indent = 1
@@ -86,6 +81,7 @@ fu s:get_indent() abort "{{{1
         return final_indent
     endif
 endfu
+let &l:inde = function('s:get_indent')->string() .. '()'
 
 fu s:get_unclosed_lvl(lnum, pat) abort "{{{1
     let [opening_tokens, closing_tokens] = s:submatches_counts(a:lnum, a:pat)

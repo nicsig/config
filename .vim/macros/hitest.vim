@@ -34,7 +34,7 @@ fu s:hitest() abort "{{{1
     let &l:tw = &columns
 
     " insert highlight settings
-    %d_
+    keepj %d_
     put =execute('hi')
 
     " remove the colored xxx items

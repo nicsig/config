@@ -32,6 +32,7 @@ GIT_REPOS="${HOME}/Vcs/"
 
 typeset -A URLS=( \
   [ansifilter]=https://gitlab.com/saalen/ansifilter.git \
+  [ctags]=https://github.com/universal-ctags/ctags \
   [gawk]=git://git.savannah.gnu.org/gawk.git \
   [jumpapp]=https://github.com/mkropat/jumpapp \
   [mpv]=https://github.com/mpv-player/mpv-build \
@@ -141,39 +142,17 @@ install_dependencies() { #{{{2
   print_title 'install dependencies'
   sudo aptitude install make
 
-  if [[ "$PGM" == 'vim' ]]; then
-    # `build-dep vim` is not enough{{{
-    #
-    # Actually it seems it does nothing.
-    # Is it because we don't uncomment the right lines in `/etc/apt/sources.list`?
-    #}}}
-    # In case of a missing dependency, see:
-    # https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
-    # TODO: Should we also install:{{{
-    #
-    #    - libgtk2.0-dev
-    #    - libx11-dev
-    #    - libxpm-dev
-    #    - libxt-dev
-    # ?
-    #}}}
+  if [[ "$PGM" == 'ctags' ]]; then
+    # taken from `~/Vcs/ctags/docs/autotools.rst`
     sudo aptitude install \
-      libncurses5-dev \
-      luajit libluajit-5.1-dev \
-      python3-dev
-  elif [[ "$PGM" == 'tmux' ]]; then
-    # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
-    sudo aptitude install \
-      autotools-dev \
-      bison \
-      build-essential \
-      debhelper \
-      dh-autoreconf \
-      file \
-      libevent-dev \
-      libncurses5-dev \
-      libutempter-dev \
-      pkg-config
+           gcc make \
+           pkg-config autoconf automake \
+           python3-docutils \
+           libseccomp-dev \
+           libjansson-dev \
+           libyaml-dev \
+           libxml2-dev
+
   elif [[ "$PGM" == 'mpv' ]]; then
     # Warning: You probably need other packages.{{{
     #
@@ -204,6 +183,41 @@ install_dependencies() { #{{{2
       nasm \
       pkg-config \
       python3-docutils
+
+  elif [[ "$PGM" == 'tmux' ]]; then
+    # https://github.com/tmux/tmux/blob/4ce26b039386caac51abdf1bf78541a500423c18/.travis.yml#L9
+    sudo aptitude install \
+      autotools-dev \
+      bison \
+      build-essential \
+      debhelper \
+      dh-autoreconf \
+      file \
+      libevent-dev \
+      libncurses5-dev \
+      libutempter-dev \
+      pkg-config
+
+  elif [[ "$PGM" == 'vim' ]]; then
+    # `build-dep vim` is not enough{{{
+    #
+    # Actually it seems it does nothing.
+    # Is it because we don't uncomment the right lines in `/etc/apt/sources.list`?
+    #}}}
+    # In case of a missing dependency, see:
+    # https://github.com/Valloric/YouCompleteMe/wiki/Building-Vim-from-source
+    # TODO: Should we also install:{{{
+    #
+    #    - libgtk2.0-dev
+    #    - libx11-dev
+    #    - libxpm-dev
+    #    - libxt-dev
+    # ?
+    #}}}
+    sudo aptitude install \
+      libncurses5-dev \
+      luajit libluajit-5.1-dev \
+      python3-dev
   fi
 }
 
@@ -251,8 +265,14 @@ clean() { #{{{2
 
 configure() { #{{{2
   print_title 'configure'
+
   if [[ "$PGM" == 'ansifilter' ]]; then
     sed -i.bak 's:^PREFIX.*:PREFIX = /usr/local:' makefile
+
+  elif [[ "$PGM" == 'ctags' ]]; then
+    # taken from `~/Vcs/ctags/docs/autotools.rst`
+    ./autogen.sh
+    ./configure
 
   elif [[ "$PGM" == 'gawk' ]]; then
     # `--enable-mpfr` allows us to use the `-M` command-line option.

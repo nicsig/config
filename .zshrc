@@ -3301,6 +3301,10 @@ alias ubuntu-code-name='lsb_release -sc'
 
 alias ubuntu-version='cat /etc/issue'
 
+# vi {{{3
+
+alias vi='vim -Nu NONE -S /tmp/.vim'
+
 # VirtualBox {{{3
 
 alias vb='VBoxManage'

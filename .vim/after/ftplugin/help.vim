@@ -1,16 +1,5 @@
 " TODO: Move the `notes` and `galore` files into markdown files.
 
-fu s:snr()
-    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-endfu
-let s:snr = get(s:, 'snr', s:snr())
-
-if expand('<afile>:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
-    setl fdm=expr
-    let &l:fdt = s:snr..'fold_text()'
-    let &l:fde = s:snr..'fold_expr()'
-endif
-
 fu s:fold_expr() abort "{{{1
     return getline(v:lnum) =~# '^=\+$' ? '>1' : 1
 endfu
@@ -18,6 +7,16 @@ endfu
 fu s:fold_text() abort "{{{1
     return getline(nextnonblank(v:foldstart+1))
 endfu
+
+" options {{{1
+
+" Leave this section below the functions definitions.
+
+if expand('<afile>:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
+    setl fdm=expr
+    let &l:fdt = function('s:fold_text')->string() .. '()'
+    let &l:fde = function('s:fold_expr')->string() .. '()'
+endif
 
 " Teardown {{{1
 

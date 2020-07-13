@@ -1,7 +1,10 @@
-fu s:snr() abort
-    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-endfu
-let s:snr = get(s:, 'snr', s:snr())
+if !exists('s:SID')
+    fu s:SID() abort
+        return expand('<sfile>')->matchstr('<SNR>\zs\d\+\ze_SID$')->str2nr()
+    endfu
+    let s:SID = s:SID()->printf('<SNR>%d_')
+    delfu s:SID
+endif
 
 " Operators {{{1
 fu myfuncs#op_grep() abort "{{{2
@@ -157,7 +160,7 @@ endfu
 
 fu myfuncs#op_yank_setup(what) abort "{{{2
     let s:op_yank = {'what': a:what, 'register': v:register}
-    let &opfunc = s:snr..'op_yank'
+    let &opfunc = s:SID .. 'op_yank'
     return 'g@'
 endfu
 
@@ -173,7 +176,7 @@ fu s:op_yank(type) abort
     let z_save = getreginfo('z')
     try
         call setreg('z', {})
-        exe mods..' '..range..cmd..'/'..escape(pat, '/')..'/y Z'
+        exe mods..' '..range..cmd..':'..escape(pat, ':')..':y Z'
         let yanked = getreginfo('z')->get('regcontents', [])
     catch
         return lg#catch()
@@ -203,7 +206,7 @@ endfu
 
 fu myfuncs#align_line_setup(key) abort
     let s:align_line_key = a:key
-    let &opfunc = s:snr..'align_line'
+    let &opfunc = s:SID .. 'align_line'
     return 'g@l'
 endfu
 
@@ -419,7 +422,22 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     let mods = 'keepj keepp '
     let range = a:0 && a:1 =~# '\<vis\>' ? '*' : '%'
     let pat = to_search[a:to_delete][0]
-    exe mods..range..global..'/'..escape(pat, '/')..'/d_'
+    " Don't use `/` as a delimiter.{{{
+    "
+    " It's tricky.
+    "
+    " Suppose you've just  searched for a pattern containing a  slash with a `/`
+    " command.   Vim will  have automatically  escaped the  slash in  the search
+    " register.  So, you should not escape it a second time with `escape()`.
+    "
+    " But suppose `pat`  comes from sth else,  like a `?` search;  in that case,
+    " there's no reason to believe that Vim  has already escaped `/`, and you do
+    " need to do it yourself.
+    "
+    " Let's avoid this  conundrum altogether, by using a delimiter  which is not
+    " `/` nor `?`.
+    "}}}
+    exe mods..range..global..':'..escape(pat, ':')..':d_'
 
     sil! update
     "  │
@@ -785,7 +803,7 @@ endfu
 
 fu myfuncs#only_selection(lnum1,lnum2) abort "{{{1
     let lines = getline(a:lnum1,a:lnum2)
-    keepj sil %d_
+    sil keepj %d_
     call setline(1, lines)
 endfu
 

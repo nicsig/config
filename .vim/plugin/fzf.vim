@@ -234,5 +234,5 @@ call s:miscellaneous()
 "}}}
 nno <silent> "<c-f> :<c-u>call plugin#fzf#registers('"')<cr>
 nno <silent> @<c-f> :<c-u>call plugin#fzf#registers('@')<cr>
-ino <silent> <c-r><c-f> <c-\><c-o>:call plugin#fzf#registers('<c-r>')<cr>
+ino <silent> <c-r><c-f> <c-\><c-o>:call plugin#fzf#registers('<lt>c-r>')<cr>
 

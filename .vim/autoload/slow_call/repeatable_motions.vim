@@ -40,11 +40,6 @@ nno g, g;zv
 noremap <expr><silent> gk <sid>vertical_jump_rhs(0)
 noremap <expr><silent> gj <sid>vertical_jump_rhs(1)
 
-fu s:snr()
-    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-endfu
-let s:snr = get(s:, 'snr', s:snr())
-
 fu s:vertical_jump_rhs(is_fwd) abort
     let mode = mode(1)
 
@@ -52,8 +47,8 @@ fu s:vertical_jump_rhs(is_fwd) abort
         let mode = "\<c-v>\<c-v>"
     endif
 
-    return printf(":\<c-u>call %svertical_jump_go(%d,%s)\<cr>",
-        \ s:snr, a:is_fwd, string(mode))
+    return printf(":\<c-u>call %s(%d,%s)\<cr>",
+        \ function('s:vertical_jump_go'), a:is_fwd, string(mode))
 endfu
 
 fu s:vertical_jump_go(is_fwd, mode) abort

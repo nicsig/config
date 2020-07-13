@@ -38,7 +38,7 @@ endif
 " Second, if we assigned Tab / S-Tab, it would make the code more complex.
 " Indeed, we would have to:
 "
-"    1. Capture the output of `s:snr()` in a global variable (g:snr_vimrc);
+"    1. Capture the output of `s:SID()` in a global variable (`g:sid_vimrc`);
 "       from our vimrc file.
 "
 "    2. Create the file `~/.vim/after/plugin/ultisnips.vim`,

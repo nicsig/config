@@ -57,11 +57,6 @@ endif
 
 let b:did_indent = 1
 
-fu s:snr() abort
-    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-endfu
-let s:snr = get(s:, 'snr', s:snr())
-let &l:inde = s:snr..'get_indent()'
 let &l:indk = "!\x06,o,O,e,0=end,0=elseif,0=case,0=otherwise,0=catch,0=function,0=elsei"
 
 " the last value of `b:changedtick`
@@ -187,6 +182,7 @@ fu s:get_indent() abort "{{{1
     let b:MATLAB_lastline = v:lnum
     return final_indent
 endfu
+let &l:inde = function('s:get_indent')->string() .. '()'
 
 fu s:get_unclosed_lvl(lnum, pat, ...) abort "{{{1
     let [opening_tokens, closing_tokens; rest] = call('s:submatches_counts', [a:lnum, a:pat] + a:000)

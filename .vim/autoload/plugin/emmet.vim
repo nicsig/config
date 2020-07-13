@@ -116,7 +116,7 @@ endfu
 " Core {{{1
 fu s:set_undo_ftplugin() abort "{{{2
     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-        \ ..'| call '..s:snr..'undo_ftplugin()'
+        \ .. '| call ' .. function('s:undo_ftplugin')->string() .. '()'
 endfu
 
 fu s:undo_ftplugin() abort "{{{2
@@ -151,10 +151,3 @@ fu s:undo_ftplugin() abort "{{{2
     xunmap <buffer> <c-g><c-m>
     xunmap <buffer> <c-g>p
 endfu
-"}}}1
-" Utilities {{{1
-fu s:snr() abort "{{{2
-    return matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_')
-endfu
-let s:snr = get(s:, 'snr', s:snr())
-
