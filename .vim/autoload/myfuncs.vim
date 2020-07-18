@@ -2,14 +2,16 @@ if !exists('s:SID')
     fu s:SID() abort
         return expand('<sfile>')->matchstr('<SNR>\zs\d\+\ze_SID$')->str2nr()
     endfu
-    let s:SID = s:SID()->printf('<SNR>%d_')
+    const s:SID = s:SID()->printf('<SNR>%d_')
     delfu s:SID
 endif
 
 " Operators {{{1
 fu myfuncs#op_grep() abort "{{{2
     let &opfunc = 'lg#opfunc'
-    let g:opfunc_core = 'myfuncs#op_grep_core'
+    let g:opfunc = {
+        \ 'core': 'myfuncs#op_grep_core',
+        \ }
     return 'g@'
 endfu
 
@@ -81,7 +83,11 @@ endfu
 
 fu myfuncs#op_replace_without_yank() abort "{{{2
     let &opfunc = 'lg#opfunc'
-    let g:opfunc_core = 'myfuncs#op_replace_without_yank_core'
+    let g:opfunc = {
+        \ 'core': 'myfuncs#op_replace_without_yank_core',
+        "\ we don't need to yank the text-object, and don't want `v:register` nor `""` to mutate
+        \ 'yank': v:false,
+        \ }
     return 'g@'
 endfu
 

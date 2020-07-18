@@ -13,12 +13,12 @@ fu plugin#matchparen#install_dummy_autocmds() abort
     " MWE:
     "
     "     $ cat <<'EOF' >/tmp/vimrc
-    "     nno <expr> "" Func()
-    "     fu Func() abort
-    "         au TextChanged * ++once s/^\s*\zshttp.*/<&>/e
-    "         return '"+'
-    "     endfu
-    "     au VimEnter * exe 'au! matchparen' | au! my_dummy_autocmds
+    "         nno <expr> "" Func()
+    "         fu Func() abort
+    "             au TextChanged * ++once s/^\s*\zshttp.*/<&>/e
+    "             return '"+'
+    "         endfu
+    "         au VimEnter * exe 'au! matchparen' | au! my_dummy_autocmds
     "     EOF
     "
     " The purpose  of this vimrc is  to automatically surround a  url with angle

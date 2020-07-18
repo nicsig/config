@@ -58,10 +58,11 @@ augroup filetypedetect
     " Why?{{{
     "
     " Sometimes (always?), the snippet definition file for `zsh`
-    " (~/.vim/UltiSnips/zsh.snippets) has the wrong filetype:
+    " (`~/.vim/UltiSnips/zsh.snippets`) has the wrong filetype:
     " `zsh` instead of `snippets`.
     "
     " This is annoying, because we can't expand our snippet `snip`, defined here:
+    "
     "     ~/.vim/UltiSnips/snippets.snippets
     "
     " The problem comes  from Vim, because it wrongly assumes  that a file whose
@@ -79,11 +80,14 @@ augroup filetypedetect
     "     zsh~
     "
     " Worse:
-    "     vim zsh_foo.bar   >  :echo &ft  →  zsh
+    "
+    "     $ vim zsh_foo.bar
+    "     :echo &ft
+    "     zsh~
     "
     " It comes from $VIMRUNTIME/filetype.vim:2105:
     "
-    "         au BufNewFile,BufRead zsh*,zlog*      call s:StarSetf('zsh')
+    "     au BufNewFile,BufRead zsh*,zlog*      call s:StarSetf('zsh')
     "}}}
     au! BufRead,BufNewFile zsh.snippets setf snippets
 
@@ -115,3 +119,7 @@ augroup filetypedetect
     au! BufRead,BufNewFile ~/.config/zsh-snippets/main.txt setf zshsnippets
 augroup END
 
+
+augroup filetypedetect
+    au! BufNewFile,BufRead /path/to/dir/*.md setf markdown
+augroup END

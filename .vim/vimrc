@@ -1207,7 +1207,7 @@ if !exists('s:SID')
     fu s:SID() abort
         return expand('<sfile>')->matchstr('<SNR>\zs\d\+\ze_SID$')->str2nr()
     endfu
-    let s:SID = s:SID()->printf('<SNR>%d_')
+    const s:SID = s:SID()->printf('<SNR>%d_')
     delfu s:SID
 endif
 
@@ -4311,7 +4311,7 @@ sil! call lg#map#meta('p', "['", 'n', '')
 " will re-execute it.  If that happens,  you'll probably find `@@`'s behavior to
 " be unexpected.
 "
-"     vim -Nu NONE +'let @a = "a@a\e@b" | let @b = "a @b \e"'
+"     $ vim -Nu NONE +'let @a = "a@a\e@b" | let @b = "a @b \e"'
 "     " press @a: '@a @b ' is inserted
 "     " press @@: ' @b'    is inserted
 "
@@ -4450,7 +4450,7 @@ fu s:fix_multiline_shellcmd() abort
         " which  includes some  heredoc.   We  need it  so  that it's  correctly
         " formatted as a codeblock on whatever forum we paste it.
         "}}}
-        if contents[0] =~# '<<''\=EOF''\=$'
+        if contents[0] =~# '<<-\=\([''"]\=\)EOF\1$'
             let eof_line = contents[match(contents, '^\s*'..cml..'\s*EOF$')]
             let indent = matchstr(eof_line, '^\s*'..cml..'\s*')
             call map(contents, {_,v -> substitute(v, indent, '', '')})
@@ -4612,8 +4612,8 @@ nno <expr> $ &virtualedit is# 'block' ? '$' : 'g_'
 "     )
 "
 "     / a$
-"     C-v G h A '
-"     g$ .
+"     " press:  C-v G h A ' Esc
+"     " press:  g$.
 "
 " Result:
 "
@@ -5566,8 +5566,7 @@ fu s:plugins_to_commit() abort
 
     call filter(output, {_,v -> v =~# '^\S'})
     call map(output, {_,v -> glob($HOME..'/.vim/plugged/'..v..'/*', 0, 1)[0]})
-    call map(output, {_,v -> {'filename': v, 'valid': 1}})
-    call setqflist([], ' ', {'items': output, 'title': 'Plugins to commit'})
+    call setqflist([], ' ', {'lines': output, 'efm': '%f', 'title': 'Plugins to commit'})
     cw
 endfu
 
@@ -6085,7 +6084,9 @@ endfu
 "
 " MWE:
 "
-"     vim -Nu NONE --cmd 'au BufWinEnter,WinEnter * setl stl=active' --cmd 'au BufWinLeave,WinLeave * setl stl=NOT\ active' -O /tmp/file{1..2}
+"     $ vim -Nu NONE --cmd 'au BufWinEnter,WinEnter * setl stl=active' \
+"       --cmd 'au BufWinLeave,WinLeave * setl stl=NOT\ active' \
+"       -O /tmp/file{1..2}
 "
 " The status line in the right window displays `active`; I would expect it to display `inactive`.
 "}}}
@@ -6468,7 +6469,7 @@ augroup END
 "
 " An abbreviation may sometimes be unexpectedly expanded at the end of a word:
 "
-"     vim -Nu NONE -S <(cat <<'EOF'
+"     $ vim -Nu NONE -S <(cat <<'EOF'
 "         set bs=start
 "         inorea ab cd
 "         pu!='yyyy'
@@ -6524,7 +6525,7 @@ fu s:restrict_abbreviations() abort
     " If you do, the keys returned by an insert mode mapping whose rhs evaluates
     " an expression would be reversed:
     "
-    "     vim -Nu NONE -S <(cat <<'EOF'
+    "     $ vim -Nu NONE -S <(cat <<'EOF'
     "         au InsertCharPre * call feedkeys("\<c-v>"..v:char, 'i') | let v:char = ''
     "         ino X <c-r>='abc'<cr>
     "         call feedkeys('iX')
@@ -7221,7 +7222,7 @@ endfu
 " Refactor all our functions which populate the qfl to offload work to a single
 " function in `vim-qf`?
 "
-"     vim /set\%(qf\|loc\)list/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
+"     :vim /set\%(qf\|loc\)list/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
 " 21 -
 "
@@ -7268,7 +7269,7 @@ endfu
 " No need to check `if &bt is# 'quickfix'` before applying conceal, abort and/or
 " try conditional are enough.  Sure?
 "
-"     vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
+"     :vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
 " 24 -
 "
@@ -8096,7 +8097,7 @@ endfu
 " Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
 " Or maybe we should just do it for comparisons where no operand is a number:
 "
-"     vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
+"     :vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
 " 81 -
 "
@@ -8413,9 +8414,9 @@ endfu
 "
 " Replace 0 and 1 with v:false, v:true whenever possible.
 "
-"     vim /\%(\%(^\s*"\|{{{\|}}}\).*\)\@<!\<[01]\>/gj  $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
-"     Cfilter! -other_plugins
-"     Cfilter! -tmp
+"     :vim /\%(\%(^\s*"\|{{{\|}}}\).*\)\@<!\<[01]\>/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
+"     :Cfilter! -other_plugins
+"     :Cfilter! -tmp
 "
 " 102 -
 "
