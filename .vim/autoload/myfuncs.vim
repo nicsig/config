@@ -87,12 +87,17 @@ fu myfuncs#op_replace_without_yank() abort "{{{2
         \ 'core': 'myfuncs#op_replace_without_yank_core',
         "\ we don't need to yank the text-object, and don't want `v:register` nor `""` to mutate
         \ 'yank': v:false,
+        "\ a third-party text-object might not know that it should pass `v:register` to the opfunc
+        "\ https://github.com/wellle/targets.vim/issues/253
+        \ 'register': v:register,
         \ }
+        " TODO: You can  remove the `v:register`  key (here and in  our snippet)
+        " once https://github.com/vim/vim/issues/6374 is fixed.
     return 'g@'
 endfu
 
 fu myfuncs#op_replace_without_yank_core(type) abort
-    let reg = v:register
+    let reg = get(g:opfunc, 'register', '"')
     if a:type is# 'line'
         exe 'keepj norm! ''[V'']"'..reg..'p'
         norm! gv=
@@ -139,7 +144,7 @@ fu s:handle_char(reg) abort
         let contents[-1] = substitute(contents[-1], '\s*$', '', '')
         call deepcopy(reg_save)
             "\ and reset the type to characterwise
-            \ ->extend({'regcontents': contents, 'regtype': c})
+            \ ->extend({'regcontents': contents, 'regtype': 'c'})
             \ ->setreg(a:reg)
     endif
 
@@ -458,7 +463,7 @@ endfu
 fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
     if a:option is# '-h' || a:option is# '--help'
         let usage =<< trim END
-            :DiffLines allows you to see and cycle through the differences between 2 lines
+            :DiffLines lets you see and cycle through the differences between 2 lines
 
             usage:
                 :5,10DiffLines    diff between lines 5 and 10

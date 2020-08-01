@@ -6,7 +6,7 @@ F:$HOME/.vim/autoload/myfuncs.vim
 G:$HOME/wiki/git/git.md
 J:$HOME/Dropbox/others_vimrc/justinmk.vim
 L:$HOME/wiki/l2l.md
-M:/tmp/md.md
+M:$HOME/wiki/bug.md
 N:$HOME/.vim/doc/misc/notes
 O:$HOME/bin/prompt.zsh
 P:$HOME/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py

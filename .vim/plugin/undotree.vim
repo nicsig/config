@@ -30,7 +30,7 @@ fu g:Undotree_CustomMap() abort "{{{1
     " Purpose: Override the builtin help which doesn't take into account our custom mappings.
     nno <buffer><nowait><silent> ? :<c-u>call plugin#undotree#show_help()<cr>
 
-    " Purpose: set the preview flag in the diff panel, which allows us to:{{{
+    " Purpose: set the preview flag in the diff panel, which lets us:{{{
     "
     "    1. view its contents without focusing it (otherwise, it's squashed to 0 lines)
     "    2. scroll its contents without focusing it (`M-j`, ...)

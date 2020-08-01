@@ -51,6 +51,9 @@ fu s:set_recipes() abort
                          \ + [{'buns': ['“', '”'], 'input': ['u"']}]
                          \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
                          \ + [{'buns': ['«', '»'], 'input': ['u<']}]
+                         \ + [{'buns': ['```diff', '```'], 'input': ['D'],
+                         "\ make sure that the diff is clamped to the right border of the window
+                         \     'command': ['exe "''[,'']s/^\\s\\{" .. indent("''[") .. "}//e"']}]
 
     " We need to remove some recipes.{{{
     "

@@ -2195,9 +2195,9 @@ Live interactive mode can be started with either `<Plug>(LiveEasyAlign)` map or
 ordinary interactive mode by pressing `C-p`. (P for Preview)
 
 In live interactive mode, you have to type in the same delimiter (or `C-x` on
-regular expression) again to finalize the alignment. This allows you to
-preview the result of the alignment and freely change the delimiter using
-backspace key without leaving the interactive mode.
+regular expression) again  to finalize the alignment. This lets  you preview the
+result of  the alignment  and freely  change the  delimiter using  backspace key
+without leaving the interactive mode.
 
 
 < Non-interactive mode >______________________________________________________~

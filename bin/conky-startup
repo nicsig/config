@@ -47,7 +47,7 @@ cd "${HOME}/.config/conky/" || exit
 #
 # Usually, conky reads its config in `~/.config/conky/conky.conf`.
 # With the `-c` option, you can specify another path.
-# This allows you to start several conky modules with different configs.
+# This lets you start several conky modules with different configs.
 #}}}
 conky -c "${HOME}/.config/conky/time.lua" &
 conky -c "${HOME}/.config/conky/system.lua" &

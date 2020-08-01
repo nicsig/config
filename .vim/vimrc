@@ -6,24 +6,66 @@
 " We won't use the menu. It makes Vim start around 50ms slower.
 " https://www.reddit.com/r/vim/comments/5l939k/recommendation_deinvim_as_a_plugin_manager/dbu74zd/
 "
-" The default value is 'aegimrLtT'.
-" We could also let 'go' unchanged, and write this instead:
+" The default value is `aegimrLtT`.
+" We could also let `'go'` unchanged, and write this instead:
 "
 "     let did_install_default_menus = 1
 "     let did_install_syntax_menu = 1
 "
 " In this case, we would keep the menu bar but avoid loading the default menus.
-" For more info, see :h menu.vim
+" For more info, see `:h menu.vim`.
 "}}}
 " Why here, before the plugins, and not after, with the other options?{{{
 "
 " From `:h 'go-M`:
 "
-" Note that  this flag  must be added  in the .vimrc  file, before  switching on
-" syntax  or filetype  recognition (...;  the  `:syntax on`  and `:filetype  on`
-" commands load the menu too). `:filetype on` and `:syntax on` source menu.vim.
+" >     Note that  this flag  must be added  in the .vimrc  file, before  switching on
+" >     syntax  or filetype  recognition (...;  the  `:syntax on`  and `:filetype  on`
+" >     commands load the menu too). `:filetype on` and `:syntax on` source menu.vim.
 "}}}
 set guioptions=M
+" In the GUI, let us interrupt an external process by pressing `C-c`.{{{
+"
+" For more info, see:
+" `:h go-!`
+" https://github.com/vim/vim/issues/6565#issuecomment-665783322
+"
+" ---
+"
+" This also has an extra benefit; it makes `:grep` faster when the latter is not
+" prefixed with `:silent`:
+"
+"     $ vim -g -f -Nu NONE -i NONE -S <(cat <<'EOF'
+"         cd $VIMRUNTIME
+"         let time = reltime()
+"         grep the **/*
+"         let time = reltime(time)->reltimestr()->matchstr('.*\..\{,3}')
+"         let msg = time .. ' seconds to run :grep WITHOUT ''go-!'
+"         call writefile([msg], '/tmp/vim.grep.log', 'a')
+"         qa!
+"     EOF
+"     )
+"
+"     $ vim -g -f -Nu NONE -i NONE -S <(cat <<'EOF'
+"         set go+=!
+"         cd $VIMRUNTIME
+"         let time = reltime()
+"         grep the **/*
+"         let time = reltime(time)->reltimestr()->matchstr('.*\..\{,3}')
+"         let msg = time .. ' seconds to run :grep WITH ''go-!'
+"         call writefile([msg], '/tmp/vim.grep.log', 'a')
+"         qa!
+"     EOF
+"     )
+"
+"     $ cat /tmp/vim.grep.log
+"     17.487 seconds to run :grep WITHOUT 'go-!~
+"      9.451 seconds to run :grep WITH 'go-!~
+"
+" Note that with `:silent`, `:grep` is *much* faster in the GUI.
+" See: https://github.com/vim/vim/issues/85#issuecomment-644611109
+"}}}
+set guioptions+=!
 
 " Plugins {{{1
 " Disable plugins {{{2
@@ -76,7 +118,7 @@ let g:loaded_vimball = 1
 "
 " ---
 "
-" Update: netrw also allows you to edit a remote file located at an arbitrary url.
+" Update: netrw also lets you edit a remote file located at an arbitrary url.
 "
 " For example, if you press `Zf` on this url:
 " https://salsa.debian.org/printing-team/cups/raw/debian/master/cups/utf8demo.txt
@@ -494,7 +536,7 @@ fu s:styled_comments() abort
         " We need to re-install our custom autocmd *after* the default one.
         "}}}
         au SourcePost $VIMRUNTIME/syntax/syntax.vim call s:styled_comments()
-            \ | call map(getwininfo(), {_,v -> win_execute(v.winid, 'do styled_comments Syntax')})
+            \ | call map(getwininfo(), {_, v -> win_execute(v.winid, 'do styled_comments Syntax')})
     augroup END
 endfu
 call s:styled_comments()
@@ -713,7 +755,7 @@ set backspace=indent,eol,start
 " Most terminals support true colors; and even  if I test one which doesn't from
 " time to time, I won't be running tmux inside.
 "}}}
-if index(map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'tmux', 'xterm'], {_,v -> v..'-256color'}), $TERM) >= 0
+if index(map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'tmux', 'xterm'], {_, v -> v..'-256color'}), $TERM) >= 0
     "\ xfce4-terminal lies about its identity
     "\ and doesn't support true color on Ubuntu 16.04
     \ && $COLORTERM isnot# 'xfce4-terminal'
@@ -2987,7 +3029,7 @@ fu s:repeat_last_edit_on_last_changed_text() abort
     " to it with the text-object `gn`
     let changed = getreg('"', 1, 1)
     if empty(changed) | return | endif
-    call map(changed, {_,v -> escape(v, '\')})
+    call map(changed, {_, v -> escape(v, '\')})
     if len(changed) == 1
         let pat = changed[0]
     else
@@ -3236,7 +3278,7 @@ nno <expr> g<space> <sid>break_line()
 
 fu s:break_line(...) abort
     if !a:0
-        let &opfunc = matchstr(expand('<sfile>'), '<SNR>\w*$')
+        let &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
         return 'g@l'
     endif
 
@@ -3302,7 +3344,7 @@ fu s:try_to_edit_plugin_config(cmd) abort
         let files =  [$HOME..'/.vim/plugin/'..plugin..'.vim']
         let files += [$HOME..'/.vim/after/plugin/'..plugin..'.vim']
         let files += [$HOME..'/.vim/autoload/slow_call/'..plugin..'.vim']
-        call filter(files, {_,v -> filereadable(v)})
+        call filter(files, {_, v -> filereadable(v)})
         if empty(files)
             echo 'There''s no config file for '..string(plugin)
             return
@@ -3445,7 +3487,7 @@ nno <expr> z= <sid>z_equal()
 
 fu s:z_equal(...) abort
     if !a:0
-        let &opfunc = matchstr(expand('<sfile>'), '<SNR>\w*$')
+        let &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
         return 'g@l'
     endif
     try
@@ -3474,7 +3516,7 @@ nno <expr> zd <sid>my_zd()
 
 fu s:my_zd(...) abort
     if !a:0
-        let &opfunc = matchstr(expand('<sfile>'), '<SNR>\w*$')
+        let &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
         return 'g@l'
     endif
     try
@@ -3880,7 +3922,7 @@ fu s:print_cwd() abort
         tabpage: %s
         global:  %s
     END
-    call map(fmt, {i,v -> [getcwd(), getcwd(-1, 0), getcwd(-1)][i]->printf(v)})
+    call map(fmt, {i, v -> [getcwd(), getcwd(-1, 0), getcwd(-1)][i]->printf(v)})
         "\ 'c' instead of 'l' to prevent the insertion of a trailing newline
         \ ->setreg('o', 'c')
     echo @o
@@ -3962,7 +4004,7 @@ fu s:faq() abort
     endif
 
     let this_tab = tabpagenr()
-    let win_in_this_tab = filter(getwininfo(), {_,v -> v.tabnr == this_tab})
+    let win_in_this_tab = filter(getwininfo(), {_, v -> v.tabnr == this_tab})
     let faq_file = $XDG_RUNTIME_VIM..'/faq'
 
     for win in win_in_this_tab
@@ -3973,12 +4015,12 @@ fu s:faq() abort
         endif
     endfor
 
-    call map(deepcopy(win_in_this_tab), {_,v -> getwinvar(v.winnr, '&pvw', 0)})
+    call map(deepcopy(win_in_this_tab), {_, v -> getwinvar(v.winnr, '&pvw', 0)})
     if index(win_in_this_tab , 1) != -1
         return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
-    if index(map(deepcopy(win_in_this_tab), {_,v -> bufname(v.bufnr)}), faq_file) != -1
+    if index(map(deepcopy(win_in_this_tab), {_, v -> bufname(v.bufnr)}), faq_file) != -1
         echo 'a window displaying  '..faq_file..'  already exists'
         return ''
     endif
@@ -4008,7 +4050,7 @@ fu s:edit_readme() abort
     let files = glob(expand('%:p:h')..'/*', 0, 1)
     let kwd = '\%(readme\|contents\)'
     let pat = '\c/'..kwd..'\%(\..\{-}\)\=$'
-    let readmes = filter(files, {_,v -> v =~# pat})
+    let readmes = filter(files, {_, v -> v =~# pat})
     let readme = get(readmes, 0, '')
     if filereadable(readme) || isdirectory(readme)
         exe 'sp '..readme
@@ -4033,8 +4075,8 @@ endfu
 " Why did you remove `-S`, which showed all our snippets?{{{
 "
 " `SPC fs` is better.
-" It  allows   us  to   fuzzy  search  our   snippets,  and   can  automatically
-" inserts+expands the selected tab trigger.
+" It lets  us fuzzy search  our snippets, and can  automatically inserts+expands
+" the selected tab trigger.
 "}}}
 nno <silent> -s :<c-u>UltiSnipsEdit<cr>
 
@@ -4068,7 +4110,7 @@ xno <expr> +< myfuncs#long_data_join()
 nno <expr> +e <sid>emphasize()
 fu s:emphasize(...) abort
     if !a:0
-        let &opfunc = matchstr(expand('<sfile>'), '<SNR>\w*$')
+        let &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
         return 'g@l'
     endif
     let word = expand('<cword>')
@@ -4201,7 +4243,7 @@ nno <expr> <c-a> <sid>c_a()
 
 fu s:c_a() abort
     let pos = searchpos('[✘✔]', 'cW', line('.'))
-    if pos == [0,0]
+    if pos == [0, 0]
         return "\<c-a>"
     endif
     let char_under_cursor = matchstr(getline('.'), '\%'..pos[1]..'c.')
@@ -4410,13 +4452,13 @@ fu s:easy_and_custom_paste() abort
     " register.
     "}}}
     if &ft is# 'markdown'
-        call map(contents, {_,v -> substitute(v, '’', "'", 'g')})
-        call map(contents, {_,v -> substitute(v, '\w\zs \ze, \w', '', 'g')})
+        call map(contents, {_, v -> substitute(v, '’', "'", 'g')})
+        call map(contents, {_, v -> substitute(v, '\w\zs \ze, \w', '', 'g')})
         if getline('.') =~# '^\S\|^$'
-            call map(contents, {_,v -> substitute(v, '^\s*\zshttp.*', '<&>', '')})
+            call map(contents, {_, v -> substitute(v, '^\s*\zshttp.*', '<&>', '')})
         endif
     endif
-    let reginfo.contents = map(contents, {_,v -> substitute(v, '٪', '$', 'g')})
+    let reginfo.contents = map(contents, {_, v -> substitute(v, '٪', '$', 'g')})
     call setreg('+', reginfo)
     return '"+'
 endfu
@@ -4450,10 +4492,10 @@ fu s:fix_multiline_shellcmd() abort
         " which  includes some  heredoc.   We  need it  so  that it's  correctly
         " formatted as a codeblock on whatever forum we paste it.
         "}}}
-        if contents[0] =~# '<<-\=\([''"]\=\)EOF\1$'
+        if contents[0] =~# '<<-\=\([''"]\=\)EOF\1'
             let eof_line = contents[match(contents, '^\s*'..cml..'\s*EOF$')]
             let indent = matchstr(eof_line, '^\s*'..cml..'\s*')
-            call map(contents, {_,v -> substitute(v, indent, '', '')})
+            call map(contents, {_, v -> substitute(v, indent, '', '')})
         endif
     endif
 
@@ -4702,6 +4744,27 @@ endfu
 
 xno <silent> iE G$ogg0
 ono <silent> iE :<c-u>norm ViE<cr>
+
+" iF {{{3
+
+ono <silent> iF :norm ViF<cr>
+xno <silent> iF :<c-u>call <sid>fenced_codeblock('inside')<cr>
+
+ono <silent> aF :norm VaF<cr>
+xno <silent> aF :<c-u>call <sid>fenced_codeblock('around')<cr>
+
+fu s:fenced_codeblock(what) abort
+    if a:what is# 'around'
+        if !search('^```\l*$', 'bW') | return | endif
+        norm! V
+        call search('^```$', 'W')
+    else
+        if !search('^```\l*$', 'bW') | return | endif
+        norm! jV
+        if !search('^```$', 'W') | return | endif
+        norm! k
+    endif
+endfu
 
 " iN {{{3
 
@@ -5106,7 +5169,7 @@ fu s:cfg(pgm) abort
         echohl NONE
         return
     endif
-    call filter(files, {_,v -> filereadable(expand(v))})
+    call filter(files, {_, v -> filereadable(expand(v))})
     if empty(files) | echo 'no readable file' | endif
     for file in files
         exe 'sp '..file
@@ -5229,7 +5292,7 @@ endfu
 com! -bar -range=% CombineParamValues call s:combine_param_values(<line1>, <line2>)
 
 fu s:combine_param_values(lnum1, lnum2) abort
-    let param_values = map(filter(getline(a:lnum1, a:lnum2), {_,v -> v != ''}), {_,v -> split(v)})
+    let param_values = map(filter(getline(a:lnum1, a:lnum2), {_, v -> v != ''}), {_, v -> split(v)})
     if len(param_values) < 2 | return | endif
     let reg_save = getreginfo('"')
     let @" = join(s:combine(param_values), "\n")
@@ -5250,6 +5313,27 @@ fu s:combine(param_values) abort
         let res = s:combine([s:combine(a:param_values[:-2]), a:param_values[-1]])
     endif
     return res
+endfu
+
+" Def {{{2
+
+" `:def` – contrary to `:fu` – doesn't support any completion.
+" https://github.com/vim/vim/issues/6525
+" Let's fix that.
+
+cnorea <expr> def getcmdtype() is# ':' && getcmdpos() == 4 ? 'Def' : 'def'
+com! -bar -complete=custom,s:def_complete -nargs=? Def exe s:def(<q-args>)
+fu s:def_complete(argLead, _l, _p) abort
+    return getcompletion(a:argLead, 'function')->join("\n")
+endfu
+fu s:def(name) abort
+    let name = trim(a:name, '()')
+    try
+        exe 'def ' .. name
+    catch
+        return 'echoerr ' .. string(v:exception)
+    endtry
+    return ''
 endfu
 
 " DiffLines {{{2
@@ -5289,7 +5373,7 @@ fu s:diff_orig() abort
     return ''
 endfu
 
-fu s:diff_orig_restore_settings(conceallevel,_) abort
+fu s:diff_orig_restore_settings(conceallevel, _) abort
     exe 'setl conceallevel='..a:conceallevel
     diffoff!
     norm! zvzz
@@ -5539,7 +5623,7 @@ com! -bar -bang -nargs=1 JoinBlocks
 "     :'<,'>OnlySelection
 "     :12,34OnlySelection
 
-com! -bar -range=% OnlySelection call myfuncs#only_selection(<line1>,<line2>)
+com! -bar -range=% OnlySelection call myfuncs#only_selection(<line1>, <line2>)
 
 " PluginsToCommit {{{2
 
@@ -5553,19 +5637,19 @@ fu s:plugins_to_commit() abort
     endif
 
     let my_plugins = readfile($MYVIMRC)
-    call filter(my_plugins, {_,v -> v =~# '^\s*Plug\s\+''lacygoill/'})
-    call map(my_plugins, {_,v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
+    call filter(my_plugins, {_, v -> v =~# '^\s*Plug\s\+''lacygoill/'})
+    call map(my_plugins, {_, v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
     let my_plugins = join(my_plugins)
     sil let output = systemlist('commit-these-vim-plugins '..my_plugins)
     " we may have removed a plugin, but not executed `:Plugclean` yet
-    call filter(output, {_,v -> v !~# 'No such file or directory'})
+    call filter(output, {_, v -> v !~# 'No such file or directory'})
     if output ==# []
         echom '[PluginsToCommit]: nothing to commit'
         return
     endif
 
-    call filter(output, {_,v -> v =~# '^\S'})
-    call map(output, {_,v -> glob($HOME..'/.vim/plugged/'..v..'/*', 0, 1)[0]})
+    call filter(output, {_, v -> v =~# '^\S'})
+    call map(output, {_, v -> glob($HOME..'/.vim/plugged/'..v..'/*', 0, 1)[0]})
     call setqflist([], ' ', {'lines': output, 'efm': '%f', 'title': 'Plugins to commit'})
     cw
 endfu
@@ -5691,7 +5775,7 @@ com! -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
 
 " RemoveSwapFiles {{{2
 
-com! -bar RemoveSwapFiles call map(glob($HOME..'/.vim/tmp/swap/*', 1, 1), {_,v -> delete(v)})
+com! -bar RemoveSwapFiles call map(glob($HOME..'/.vim/tmp/swap/*', 1, 1), {_, v -> delete(v)})
 
 " RemoveTabs {{{2
 
@@ -5699,7 +5783,7 @@ com! -bar RemoveSwapFiles call map(glob($HOME..'/.vim/tmp/swap/*', 1, 1), {_,v -
 " with a nr of spaces which will occupy the same nr of cells.
 "
 " Before using it, set 'ts' (2,4,8) so that the text is aligned.
-com! -bar -range=% RemoveTabs call myfuncs#remove_tabs(<line1>,<line2>)
+com! -bar -range=% RemoveTabs call myfuncs#remove_tabs(<line1>, <line2>)
 
 " Retab {{{2
 
@@ -5716,7 +5800,7 @@ com! -bar -range=% RemoveTabs call myfuncs#remove_tabs(<line1>,<line2>)
 " Mnemonic: we use spaces as the default way to indent, so it makes sense to
 " to use a bang only for the less useful conversion: spaces → tabs
 
-com! -bar -bang -range=% Retab call s:retab(<line1>,<line2>, <bang>0)
+com! -bar -bang -range=% Retab call s:retab(<line1>, <line2>, <bang>0)
 
 fu s:retab(line1, line2, bang) abort
     let view = winsaveview()
@@ -5805,9 +5889,9 @@ fu s:tldr(shellcmd) abort
         echo out[0]
         return
     endif
-    call map(out, {_,v -> substitute(v, '\e.\{-}m\|\%x0f', '', 'g')})
-    call map(out, {_,v -> substitute(v, '^-', '#', '')})
-    call map(out, {_,v -> substitute(v, '^  ', '    ', '')})
+    call map(out, {_, v -> substitute(v, '\e.\{-}m\|\%x0f', '', 'g')})
+    call map(out, {_, v -> substitute(v, '^-', '#', '')})
+    call map(out, {_, v -> substitute(v, '^  ', '    ', '')})
     sp /tmp/.tldr.md
     keepj %d_
     call setline(1, out)
@@ -5819,8 +5903,8 @@ endfu
 
 " TW {{{2
 
-com! -bar -range=% TW call s:trim_whitespace(<line1>,<line2>)
-fu s:trim_whitespace(line1,line2) abort
+com! -bar -range=% TW call s:trim_whitespace(<line1>, <line2>)
+fu s:trim_whitespace(line1, line2) abort
     let view = winsaveview()
     sil exe 'keepj keepp '..a:line1..','..a:line2..'s/\s\+$//e'
     call winrestview(view)
@@ -5838,7 +5922,7 @@ com! -bar -nargs=1 WebPageRead call myfuncs#webpage_read(<q-args>)
 
 com! -bar -nargs=? -range=% -complete=custom,myfuncs#wf_complete
     \ WordFrequency
-    \ call myfuncs#word_frequency(<line1>,<line2>, <q-args>)
+    \ call myfuncs#word_frequency(<line1>, <line2>, <q-args>)
 " }}}1
 " Autocmds {{{1
 " Warning: If you need to write an autocmd listening to `BufWritePost`, put it *before* the one sourcing our vimrc.{{{
@@ -6169,7 +6253,7 @@ augroup no_syntax_in_diff_mode | au!
     au VimEnter * call s:if_diff_syn_clear()
     fu s:if_diff_syn_clear() abort
         if !&l:diff | return | endif
-        call map(getwininfo(), {_,v -> win_execute(v.winid, 'syn clear')})
+        call map(getwininfo(), {_, v -> win_execute(v.winid, 'syn clear')})
     endfu
 augroup END
 
@@ -6340,7 +6424,7 @@ endfu
 
 " Read special files {{{2
 
-" The following autocmd  allows us to read  special files like a pdf  or an odt.
+" The following autocmd lets us read special files like a pdf or an odt.
 " They use a few shell utilities as filter:
 "
 "    - antiword
@@ -6581,8 +6665,8 @@ augroup my_mkspell | au!
     " http://vi.stackexchange.com/a/5052/6960
     "}}}
     au VimEnter * call map(glob('~/.vim/spell/*.add', 1, 1),
-        \ {_,v -> filereadable(v) && !filereadable(v..'.spl') || (getftime(v) > getftime(v..'.spl'))
-        \         && execute('mkspell! '..fnameescape(v))})
+        \ {_, v -> filereadable(v) && !filereadable(v..'.spl') || (getftime(v) > getftime(v..'.spl'))
+        \          && execute('mkspell! '..fnameescape(v))})
 augroup END
 
 " Swap file handling "{{{2
@@ -6800,7 +6884,7 @@ augroup trailing_whitespace | au!
     " because it's not code; so we don't care about its presence.
     "}}}
     exe 'au FileType '
-       \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_,v -> v != ''}), ',')
+       \ ..join(filter(copy(s:NO_TRAILING_WHITESPACE_FT), {_, v -> v != ''}), ',')
        \ ..' call s:trailing_whitespace(v:false)'
     " we still have an undesired match when we run `:VimPatches 8.1` *twice*
     au BufWinEnter * if &ft is# 'text' | call s:trailing_whitespace(v:false) | endif

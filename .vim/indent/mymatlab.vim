@@ -94,7 +94,7 @@ fu s:submatches_counts(lnum, pat) abort "{{{1
     let g = 0 | while g < 999 | let g += 1
         " TODO: Does `z` improve perf on big files? Make some tests.
         " TODO: The `p` flag is neat.{{{
-        " It allows you search for several patterns simultaneously, and to react
+        " It lets you  search for several patterns simultaneously,  and to react
         " differently depending on which one is found:
         "
         "     :echo searchpos('\(pat1\)\|\(pat2\)\|\(\<pat3\)', 'p')

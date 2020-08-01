@@ -40,7 +40,7 @@ class my_edit(Command): #{{{1
         # This is a generic function to print text in ranger.
         self.fm.notify("Let's edit the file " + target_filename + "!")
 
-        # Using bad=True in fm.notify allows you to print error messages:
+        # Using bad=True in fm.notify lets you print error messages:
         if not os.path.exists(target_filename):
             self.fm.notify("The given file does not exist!", bad=True)
             return

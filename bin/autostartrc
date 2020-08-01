@@ -78,8 +78,8 @@ redshift-gtk -l 48.573392:7.752353 -t 5700:4700 &
 
 # Why don't you use unclutter anymore?{{{
 #
-# It  interfered  with the  `interSubs`  script  which  allows  us to  read  the
-# translation of subtitles.
+# It interfered with  the `interSubs` script which lets us  read the translation
+# of subtitles.
 #
 # In the past, we used a shell function to toggle the process:
 #

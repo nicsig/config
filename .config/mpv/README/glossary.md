@@ -40,7 +40,7 @@ pixel.
 The  more the  original amount  was  bright (255)  or  dark (0),  the less  it's
 affected by the gamma change.
 
-This allows you to make details appear in SLIGHTLY dark areas of an image, while
+This lets  you make  details appear in  SLIGHTLY dark areas  of an  image, while
 minimizing the effect on VERY dark/bright areas.
 IOW, contrary  to brightness which  affects the pixels UNIFORMLY,  gamma affects
 them PROPORTIONALLY to how close to 127 their current level of light.

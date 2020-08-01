@@ -94,7 +94,7 @@ For more info: <https://unix.stackexchange.com/a/2184/289772>
 I've copied it from `/usr/share/zsh/functions/Completion/X/_zathura`.
 
 By default, it doesn't suggest epub  files, but we've installed a zathura plugin
-(zathura-pdf-mupdf) which allows us to do that.
+(zathura-pdf-mupdf) which lets us do that.
 So, after the `for pf ...` loop, I've added this line:
 
     supported_filetypes+="epub"

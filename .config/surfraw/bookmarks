@@ -41,13 +41,14 @@ keyhero             https://www.keyhero.com/profile/               # keyboard # 
 youtube             https://www.youtube.com/                       # youtube
 cli_subreddit       https://www.reddit.com/r/commandline/          # cli # linux # reddit # shell
 horriblesubs        http://horriblesubs.info/                      # anime # warez # p2p
-bash_google_style   https://google.github.io/styleguide/shell.xml  # bash
+bash_google_style   https://google.github.io/styleguide/shell.xml  # bash styleguide
 bash_pitfalls       http://mywiki.wooledge.org/BashPitfalls        # bash
 deviant_art_gallery http://arsenixc.deviantart.com/gallery/        # wallpapers
 rizonrice           https://rizonrice.github.io/resources          # software # wallpapers
 devdocs             https://devdocs.io/                            # documentation # programming
 discover_new_music  http://www.gnoosic.com/                        # music
 
+documentation_style_guide               https://developers.google.com/style # google styleguide
 mechanical_keyboard                     https://www.reddit.com/r/vim/comments/6dqjbc/mechanical_keyboard_guide_for_those_who_want_to/ # guide # keyboard
 brain_vs_deep_learning                  http://wayback.archive.org/web/20161022151908/https://timdettmers.wordpress.com/2015/07/27/brain-vs-deep-learning-singularity/    # deep_learning
 97_things_every_programmer_should_know  http://programmer.97things.oreilly.com/wiki/index.php/97_Things_Every_Programmer_Should_Know # programming

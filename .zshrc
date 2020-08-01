@@ -318,7 +318,7 @@ select-word-style bash
 
 # Enable the `cdr` function.{{{
 #
-# It allows you to go back to previously visited directories.
+# It lets you go back to previously visited directories.
 # See: `man zshcontrib /REMEMBERING RECENT DIRECTORIES/;/Installation`
 #}}}
 autoload -Uz cdr
@@ -554,7 +554,7 @@ zstyle ':completion:*:warnings'     format $'No matches:\n%D'
 
 # What does `group-name` control?{{{
 #
-# It allows you to group matches with the same tag.
+# It lets you group matches with the same tag.
 # See `man zshcompsys /Standard Styles/;/group-name`
 #}}}
 #   Why do you set it to an empty string?{{{
@@ -3303,7 +3303,7 @@ alias ubuntu-version='cat /etc/issue'
 
 # vi {{{3
 
-alias vi='vim -Nu NONE -S /tmp/.vim'
+alias vi='vim -Nu NONE -S /tmp/t.vim'
 
 # VirtualBox {{{3
 
@@ -3895,8 +3895,8 @@ _fzf_snippet_placeholder() {
   #
   # A non-greedy `+` quantifier.
   # It's the equivalent of `\{-}` in Vim.
-  # We can  use it here thanks  to grep's `-P` option  which allows us to  use a
-  # PCRE regex.
+  # We can  use it here thanks  to grep's `-P` option  which lets us use  a PCRE
+  # regex.
   #}}}
   strp=$(grep -Z -P -b -o "\{\{.+?\}\}" <<<"$BUFFER")
   strp=$(head -1 <<<"$strp")
@@ -3978,6 +3978,20 @@ __kill_line_or_region() {
 }
 zle -N __kill_line_or_region
 bindkey '^K' __kill_line_or_region
+
+# C-x C-k    kill-buffer {{{3
+
+# We can already press `C-e C-u` to clear a command-line.  What's the point?{{{
+#
+# The command-line could contain several lines of code (e.g. heredoc).
+# In that case, `C-e C-u` would only clear the current line, not the other ones.
+#
+# Also, we need `kill-buffer`  to be bound to some key so that  we can invoke it
+# via tmux in `vim-tmux`.
+#
+# For more info, see `man zshzle /kill-buffer`.
+#}}}
+bindkey '^X^K' kill-buffer
 
 # C-q        quote_word_or_region {{{3
 
@@ -4071,7 +4085,7 @@ bindkey '^X?' __complete_debug
 
 # Purpose:{{{
 #
-# `end-of-list` allows you to make a list of matches persistent.
+# `end-of-list` lets you make a list of matches persistent.
 #
 #     $ echo $HO C-d
 #         → parameter
@@ -4091,7 +4105,7 @@ zle -N edit-command-line
 
 # Why this wrapper function around the `vim(1)` command?{{{
 #
-# It allows us to customize the environment.
+# It lets us customize the environment.
 #
 # Atm, we simply add an autocmd to remove the leading dollar in front of a shell
 # command, which  we often  paste when  we copy some  code from  the web  or our
@@ -4578,7 +4592,7 @@ bindkey '\eo' down-case-word
 
 # Alternative: Use `M-u` as a prefix, and create a submode in which you don't need the prefix.{{{
 #
-# For example, this code allows you to enter a submode by pressing `M-u`.
+# For example, this code lets you enter a submode by pressing `M-u`.
 # In this submode, you can change the case of a word by pressing `u`, `i` or `o`.
 # The submode is quit automatically after a few seconds.
 #
@@ -4972,7 +4986,7 @@ __abbrev_expand() {
   #}}}
     LBUFFER+=${(e)abbrev[$MATCH]:-$MATCH}
     #        │  │{{{
-    #        │  └ allows us to use an abbreviation whose rhs contains parameter expansion flags
+    #        │  └ lets us use an abbreviation whose rhs contains parameter expansion flags
     #        │    for example, thanks to `(e)`, you could use this abbreviation:
     #        │
     #        │        'cc' '&& cd ${${${${(z)BUFFER}[3]}##*/}%%.*}'

@@ -8,8 +8,8 @@
 --
 -- Description:
 --
---  Allows you to perform video rotation which perfectly
---  cycles through all 360 degrees without any glitches.
+-- Lets  you perform  video  rotation  which perfectly  cycles  through all  360
+-- degrees without any glitches.
 --
 -- -----------------------------------------------------------
 

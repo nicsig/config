@@ -15,7 +15,7 @@ let &l:stl = '%!g:statusline_winid == win_getid() ? "%y%=%l " : "%y"'
 nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 " Why `command-prompt`?  Why not running the command directly (`system('tmux '..getline('.'))`)?{{{
 "
-" First, it allows you to review the command before it's run.
+" First, it lets you review the command before it's run.
 " So you  can check that tmux  will indeed run  what you've written in  your Vim
 " buffer, and that nothing (Vim, shell) interfered.
 "

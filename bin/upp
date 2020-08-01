@@ -46,6 +46,17 @@ typeset -A URLS=( \
 
 LOGDIR="${HOME}/log"
 [[ -d "$LOGDIR" ]] || mkdir "$LOGDIR"
+# TODO: A log file may grow too big over time.{{{
+#
+# This can  be an issue: Vim may  take too much time  when we open the  file, or
+# when we try to fold it.
+#
+# Solution: Don't write the logs for compilations performed on different days in
+# the same  file.  Use one  file per  day.  Also, try  to use some  utility like
+# `logrotate(8)` to compress and archive  old log files.  Only keep uncompressed
+# the log  file for  the current  day (or  week, or  month); compress  the rest.
+# Check out how Ubuntu handles its log files in `/var/log`.
+#}}}
 LOGFILE="${LOGDIR}/$(basename "$0" .sh)-${PGM}.log"
 
 # Sanitize input {{{1
@@ -275,7 +286,7 @@ configure() { #{{{2
     ./configure
 
   elif [[ "$PGM" == 'gawk' ]]; then
-    # `--enable-mpfr` allows us to use the `-M` command-line option.
+    # `--enable-mpfr` lets us use the `-M` command-line option.
     # Requires a package (`libmpfr4`?) which should be installed by
     # `$ aptitude build-dep gawk`.
     ./bootstrap.sh && ./configure --enable-mpfr

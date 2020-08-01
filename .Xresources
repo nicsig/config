@@ -46,9 +46,9 @@
 !}}}
 !   Why do you use this new value?{{{
 !
-! It allows  us to send an  OSC 52 sequence  (stored in the `Ms`  capability) to
-! write arbitrary text in xterm's clipboard, probably because it doesn't include
-! the name 'SetSelection'.
+! It lets us  send an OSC 52  sequence (stored in the `Ms`  capability) to write
+! arbitrary text in  xterm's clipboard, probably because it  doesn't include the
+! name 'SetSelection'.
 !
 ! Also, this value is recommended in `man tmux /set-clipboard`:
 !
@@ -81,8 +81,8 @@
 ! Extended window control sequences can be abused in a script.
 !
 ! It's better  to let 'allowWindowOps' with  its default value 'false',  and set
-! 'disallowedWindowOps' which allows  you to fine-tune which  sequences you want
-! to allow.
+! 'disallowedWindowOps' which  lets you  fine-tune which  sequences you  want to
+! allow.
 !}}}
 XTerm*disallowedWindowOps: 20,21,SetXprop
 
@@ -148,8 +148,8 @@ XTerm*faceSize: 20
 
 ! This *drastically* improves the bandwidth output performance of xterm.{{{
 !
-! It allows xterm  to drop some screen  updates to catch up with  the flow, when
-! your command outputs a lot of data.
+! It lets xterm  drop some screen updates  to catch up with the  flow, when your
+! command outputs a lot of data.
 !
 ! MWE:
 !

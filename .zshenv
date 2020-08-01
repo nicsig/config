@@ -399,7 +399,7 @@ export MANPAGER='nvim +Man! -u ~/.vim/mini_init.vim'
 #
 # But what if you prefer to give the priority to the section 3?
 # That's where `$MANSECT` comes in.
-# It allows you to change the priority of the man sections.
+# It lets you change the priority of the man sections.
 # Here, I export the default value given in:
 #
 #     /etc/manpath.config
@@ -505,8 +505,8 @@ export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 #     https://askubuntu.com/a/633924/867754
 #
 # This means that since we have `~/bin`  in our `$PATH`, `man(1)` will look into
-# `~/share/man`; IOW, this allows us to install manpages locally (!= system-wide
-# in `/usr/share/man`).
+# `~/share/man`; IOW, this  lets us install manpages locally  (!= system-wide in
+# `/usr/share/man`).
 #}}}
 export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/Vcs/dasht/man:${MANPATH}:
 

@@ -254,8 +254,8 @@ call repmap#make#repeatable({
 "       sourced and any custom motion has already been defined.
 "       We can be sure we're respecting the previous rule.
 "
-"    2. The process can be slow. This file allows us to delay it
-"       until Vim has started, and to keep a short startup time.
+"    2. The process can be slow. This file lets us delay it until Vim
+"       has started, and to keep a short startup time.
 "}}}
 
 " cycle through help topics relevant for last errors
