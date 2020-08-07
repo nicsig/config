@@ -19,7 +19,7 @@
 #}}}
 selection="$(xsel -p)"
 seq="\e[200~${selection}\e[201~"
-# FIXME: Doesn't work in gnome-terminal nor in xterm. But works in st and urxvt.{{{
+# FIXME: Doesn't work in gnome-terminal nor in xterm.  But works in st and urxvt.{{{
 #
 # MWE:
 #

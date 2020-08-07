@@ -67,29 +67,29 @@ fu s:main() abort
     if expand('%:p') isnot# s:fname
         let fname = fnameescape(s:fname)
         unlet s:fname
-        if &mod || line('$') != 1 || getline(1) isnot# ''
-            exe 'new '..fname
+        if &mod || line('$') != 1 || getline(1) != ''
+            exe 'new ' .. fname
         else
-            exe 'edit '..fname
+            exe 'edit ' .. fname
         endif
     endif
 
     syn clear
-    call cursor(1,1)
+    call cursor(1, 1)
     let lnum1 = search('black_on_white', 'cW')
     let lnum2 = search('lightcyan_on_black', 'cnW') + 1
 
     while search('_on_', 'W') < lnum2 + 2
-        let col1 = substitute(expand('<cword>'), '\(\a\+\)_on_\a\+', '\1', '')
-        let col2 = substitute(expand('<cword>'), '\a\+_on_\(\a\+\)', '\1', '')
+        let col1 = expand('<cword>')->substitute('\(\a\+\)_on_\a\+', '\1', '')
+        let col2 = expand('<cword>')->substitute('\a\+_on_\(\a\+\)', '\1', '')
         exe printf('hi col_%s_%s ctermfg=%s guifg=%s ctermbg=%s guibg=%s',
             \ col1, col2, col1, col1, col2, col2)
         exe printf('syn keyword col_%s_%s %s_on_%s',
             \ col1, col2, col1, col2)
     endwhile
 
-    let range = lnum1..','..lnum2
-    exe range..'g/^" \a/call s:highlight()'
+    let range = lnum1 .. ',' .. lnum2
+    exe range .. 'g/^" \a/call s:highlight()'
 
     nohlsearch
 endfu

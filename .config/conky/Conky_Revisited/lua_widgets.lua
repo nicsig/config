@@ -22,7 +22,7 @@ Modes:
 ]]--
 mode = 1
 
--- Adjust conky elements on x-axis. Positive and negative number moves elements to left and right, respectively.
+-- Adjust conky elements on x-axis.  Positive and negative number moves elements to left and right, respectively.
 adjust = 59
 
 -- Adjust background area width.
@@ -34,7 +34,7 @@ drive_paths = {"/home", "/"}
 -- Names of drives for free space status.
 drive_names = {"Home", "Root"}
 
---Number of drives to show free space status. Adjust the conky "height"-parameter in config manually to adjust for the increase in Conky height when adding more drives.
+--Number of drives to show free space status.  Adjust the conky "height"-parameter in config manually to adjust for the increase in Conky height when adding more drives.
 drives = 2
 
 

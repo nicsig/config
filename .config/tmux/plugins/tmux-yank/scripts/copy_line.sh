@@ -14,8 +14,8 @@ get_tmux_copy_mode() {
     TMUX_COPY_MODE="$(tmux show-option -gwv mode-keys)"
 }
 
-# The command when on ssh with latency. To make it work in this case too,
-# sleep is added.
+# The command when on ssh with latency.  To make it work in this case too, sleep
+# is added.
 add_sleep_for_remote_shells() {
     local pane_command
     pane_command="$(tmux display-message -p '#{pane_current_command}')"

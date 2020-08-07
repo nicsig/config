@@ -1,4 +1,4 @@
-# Installing `ansifilter` is recommended. It improves the removal of color codes.
+# Installing `ansifilter` is recommended.  It improves the removal of color codes.
 # FIXME: `ansifilter` fails to properly parse the command-lines,{{{
 # probably because of the syntax highlighting of our zsh plugin.
 #

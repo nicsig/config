@@ -1,6 +1,6 @@
 " Interface {{{1
 fu plugin#undotree#show() abort "{{{2
-    if &bt isnot# ''
+    if &bt != ''
         echo printf('no undotree for a special buffer (&bt == %s)', &bt)
         return
     endif
@@ -25,7 +25,7 @@ fu plugin#undotree#show() abort "{{{2
     " But undotree often  temporarily focuses regular windows on  its own (among
     " other things to add/remove signs when we open/close the diff panel).
     " So, you  would need to find  a way to ignore  those involuntary `WinEnter`
-    " events. Or  you   could  try  to   refactor  undotree  so  that   it  uses
+    " events.   Or  you  could  try  to   refactor  undotree  so  that  it  uses
     " `win_execute()`.
     "}}}
     let t:undotree_prevwinid = win_getid()
@@ -53,7 +53,7 @@ fu plugin#undotree#show() abort "{{{2
     " So, we need  a guard to be  sure that we customize the  right diff buffer;
     " that is one which is associated to an undotree buffer.
     "}}}
-    au FileType diff ++once if getwinvar(winnr('#'), '&ft') is# 'undotree'
+    au FileType diff ++once if winnr('#')->getwinvar('&ft') is# 'undotree'
         \ | call s:customize_diff_panel()
         \ | endif
 
@@ -64,29 +64,29 @@ endfu
 fu plugin#undotree#show_help() abort "{{{2
     let help =<< END
    ===== Marks =====
->num< : The current state
-{num} : The next redo state
-[num] : The latest state
-  s   : Saved states
-  S   : The last saved state
+>num<: The current state
+{num}: The next redo state
+[num]: The latest state
+  s: Saved states
+  S: The last saved state
 
   ===== Hotkeys =====
-u : Undo
-<c-r> : Redo
-} : Move to the previous saved state
-{ : Move to the next saved state
-) : Move to the previous undo state
-( : Move to the next undo state
-D : Toggle the diff panel
-T : Toggle relative timestamp
-C : Clear undo history (with confirmation)
+u: Undo
+<c-r>: Redo
+}: Move to the previous saved state
+{: Move to the next saved state
+): Move to the previous undo state
+(: Move to the next undo state
+D: Toggle the diff panel
+T: Toggle relative timestamp
+C: Clear undo history (with confirmation)
 END
     echo join(help, "\n")
 endfu
 
 fu plugin#undotree#diff_toggle() abort "{{{2
     let pv_bufnr = tabpagebuflist()
-        \ ->filter({_,v -> getwinvar(bufwinnr(v), '&pvw', 0)})
+        \ ->filter({_, v -> bufwinnr(v)->getwinvar('&pvw', 0)})
         \ ->get(0, 0)
     " if there is already a preview window, ask the user to close it (to avoid `E590`)
     if pv_bufnr && bufname(pv_bufnr) !~# '^diffpanel_\d\+$'
@@ -106,11 +106,11 @@ endfu
 fu plugin#undotree#close_diff_panel() abort "{{{2
     " This function is public because we need to be able to call it when we press `SPC q`.
     let bufnr = tabpagebuflist()
-        \ ->filter({_,v -> getbufvar(v, '&ft') is# 'undotree'})
+        \ ->filter({_, v -> getbufvar(v, '&ft') is# 'undotree'})
         \ ->get(0, 0)
     if bufnr
         let winnr = bufwinnr(bufnr)
-        exe winnr..'wincmd w'
+        exe winnr .. 'wincmd w'
         if &ft is# 'undotree'
             call t:undotree.Action('DiffToggle')
         else
@@ -133,7 +133,7 @@ fu s:customize_diff_panel() abort "{{{2
     " In the diff panel, the undotree plugin sets a status line, which I don't find useful.
     " Let's use our own.
     let &l:stl = '%!plugin#undotree#stl()'
-    let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')..'| set stl<'
+    let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe') .. '| set stl<'
     nno <buffer><nowait><silent> q :<c-u>call plugin#undotree#close_diff_panel()<cr>
 endfu
 

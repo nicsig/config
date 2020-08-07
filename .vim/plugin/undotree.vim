@@ -38,7 +38,7 @@ fu g:Undotree_CustomMap() abort "{{{1
     " Regarding  `1.`,   you  could   achieve  the   same  result   by  tweaking
     " `s:height_should_be_reset()` in `vim-window`, and include this condition:
     "
-    "     \ ||  (bufname(winbufnr(a:nr)) =~# '^diffpanel_\d\+$')
+    "     \ || (winbufnr(a:nr)->bufname() =~# '^diffpanel_\d\+$')
     "
     " Regarding `2.`, if you had to focus the diff panel to scroll its contents,
     " its height would be maximized; you  could find this sudden height increase
@@ -48,6 +48,6 @@ fu g:Undotree_CustomMap() abort "{{{1
 
     " dummy item to get an empty status line
     setl stl=%h
-    let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')..'| set stl<'
+    let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe') .. '| set stl<'
 endfu
 

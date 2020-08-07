@@ -43,7 +43,7 @@
 #     xdotool search --onlyvisible --class firefox
 #
 # I think it's because there's no easy way to detect whether a window is
-# visible. And `xdotool` seems to detect the visibility of a window, only in the
+# visible.  And `xdotool` seems to detect the visibility of a window, only in the
 # current virtual destkop:    https://github.com/jordansissel/xdotool/issues/23
 
 is_visible="$(xdotool search --onlyvisible --class "$1" 2>/dev/null)"

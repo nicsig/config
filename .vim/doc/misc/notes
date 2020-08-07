@@ -5,12 +5,12 @@ Create Hyper modifier to install various global key bindings
 
 https://www.reddit.com/r/vim/comments/5kgw7x/what_sort_of_vim_tricks_are_there_for_editing_text/dboofjy/
 
-CapsLock is the  evil. Escape is an  improvement, but when you  realise that vim
+CapsLock is the  evil.  Escape is an  improvement, but when you  realise that vim
 was designed on a keyboard with the Ctrl key in that spot, default commands make
 a lot more sense.
 
 I have the CapsLock key function as Ctrl when held and Escape when tapped, using
-xcape. It's beautiful. Here are my configs: .Xmodmap
+xcape.  It's beautiful.  Here are my configs: .Xmodmap
 
 clear      lock
 clear   control
@@ -39,7 +39,7 @@ xmodmap ~/.Xmodmap &
 xcape -t 170 &
 setxkbmap us -option ctrl:nocaps -option shift:both_capslock
 
-(the -t 170 flag gives a timeout; here, it will only register quick taps as Escape. Adjust to taste)
+(the -t 170 flag gives a timeout; here, it will only register quick taps as Escape.  Adjust to taste)
 
 ==============================================================================
 There are inconsistencies between the different implementations of the modulo
@@ -112,7 +112,7 @@ Toutes les fenêtres pour lesquelles cette option est active scrollent de façon
 
     This is a comma-separated list of words that specifies how
     'scrollbind' windows should behave.  'sbo' stands for ScrollBind
-    Options. The following words are available:
+    Options.  The following words are available:
 
         ver     Bind vertical scrolling for 'scrollbind' windows
 
@@ -265,7 +265,7 @@ List modification ~
         /.\{-}\ze\d/ élimine tout le texte qui précède le 1er chiffre
         en excluant/préservant (\ze) ce dernier
 
-        FIXME: Ne semble pas très fiable. Tester là-dessus:
+        FIXME: Ne semble pas très fiable.  Tester là-dessus:
 
                 foo 69
                 bar 9
@@ -1372,9 +1372,9 @@ endfu
 searchpos({pattern} [, {flags} [, {stopline} [, {timeout}]]])   *searchpos()*
 
         Same as |search()|, but returns a |List| with the line and
-        column position of the match. The first element of the |List|
+        column position of the match.  The first element of the |List|
         is the line number and the second element is the byte index of
-        the column position of the match. If no match is found,
+        the column position of the match.  If no match is found,
         returns [0, 0].
         Example: >
 
@@ -1406,7 +1406,7 @@ These lines manage my line wrapping settings and also show a colored column at 8
 
 See :help fo-table and the Vimcasts on soft wrapping and hard wrapping for more information.
 
-Finally, I really like TextMate’s “save on losing focus” feature. I can’t remember a time when I didn’t want to save a file after tabbing away from my editor (especially with version control and Vim’s persistent undo):
+Finally, I really like TextMate’s “save on losing focus” feature.  I can’t remember a time when I didn’t want to save a file after tabbing away from my editor (especially with version control and Vim’s persistent undo):
 
 au FocusLost * :wa
 
@@ -1914,7 +1914,7 @@ Okay now what can you do?
         Ctrl + t - insert file from fzf into command
 
 Neat right! Now if you are a vim user  there is more, add the fzf plugin to your
-~/.vimrc,  along  with  this  snippet. Obviously  customise  the  bindings,  and
+~/.vimrc,  along  with  this  snippet.  Obviously  customise  the  bindings,  and
 excludes / includes to your workflows!
 
         let g:rg_command = '
@@ -1927,7 +1927,7 @@ excludes / includes to your workflows!
 You now have a  killer free text search with :F that uses  ripgrep and is faster
 than any I've seen before.
 
-I've done  more with this, but  want to leave it  there for now. There  are even
+I've done  more with this, but  want to leave it  there for now.  There  are even
 more goodies in my .vimrc, and in  my .bashrc, including auto installing fzf and
 ripgrep (admittedly  hackily) from the .vimrc  and a nice snippet  that uses fzf
 for git logs.
@@ -1965,12 +1965,12 @@ showtool.
 Update update...
 
 A few  people have  pointed out that  doing this doesn't  work for  fzf's Ctrl+T
-completion or the Alt+C completion. Thanks  to @mikepqr, for letting me know the
-work around for Ctrl+T. I have updated the configurations at the top of the post
+completion or the Alt+C completion.  Thanks  to @mikepqr, for letting me know the
+work around for Ctrl+T.  I have updated the configurations at the top of the post
 with what he sent me.
 
 Alt+C  has proved  a bit  tricky  to get  working  with ripgrep,  as rg  doesn't
-natively support searching  just for directories. Instead I have  been using bfs
+natively support searching  just for directories.  Instead I have  been using bfs
 (https://github.com/tavianator/bfs) by adding the following to me config.
 
         export FZF_ALT_C_COMMAND="bfs -type d -nohidden"
@@ -1996,9 +1996,9 @@ rg instead:
 
         let g:ackprg = 'rg --vimgrep --no-heading'
 
-One of my favourite plugins, fzf.vim has built-in support for ag. I’ve created
-an experimental fork that  adds support for rg to it. My fork  adds the :Rg user
-command, which works the same way as the existing :Ag command. To use my version
+One of my favourite plugins, fzf.vim has built-in support for ag.  I’ve created
+an experimental fork that  adds support for rg to it.  My fork  adds the :Rg user
+command, which works the same way as the existing :Ag command.  To use my version
 of the plugin with vim-plug add the following to your .vimrc:
 
         Plug 'wezm/fzf.vim', { 'branch': 'rg' }
@@ -2025,7 +2025,7 @@ Voca
             Pour éviter de devoir reconfigurer ces options à chaque fois qu'on veut réaliser un même alignement,
             on peut associer un simple caractère à un ensemble prédéfini d'options.
 
-            Ce caractère est appelé délimiteur. Par défaut, 8 délimiteurs sont définis:
+            Ce caractère est appelé délimiteur.  Par défaut, 8 délimiteurs sont définis:
 
                     espace
                     =
@@ -2153,7 +2153,7 @@ Exemples en mode visuel:
 Using regular expressions~
 
 Instead of finishing the command with a predefined delimiter key, you can type
-in a regular expression after `C-x`. For example, if you want to align text around all occurrences of numbers:
+in a regular expression after `C-x`.  For example, if you want to align text around all occurrences of numbers:
 
         - Enter
         - `*`
@@ -2191,11 +2191,11 @@ carefully adjusted, try "live interactive mode" where you can preview the
 result of the alignment on-the-fly as you type in.
 
 Live interactive mode can be started with either `<Plug>(LiveEasyAlign)` map or
-`:LiveEasyAlign` command. Or you can switch to live interactive mode while in
+`:LiveEasyAlign` command.  Or you can switch to live interactive mode while in
 ordinary interactive mode by pressing `C-p`. (P for Preview)
 
 In live interactive mode, you have to type in the same delimiter (or `C-x` on
-regular expression) again  to finalize the alignment. This lets  you preview the
+regular expression) again  to finalize the alignment.  This lets  you preview the
 result of  the alignment  and freely  change the  delimiter using  backspace key
 without leaving the interactive mode.
 
@@ -2225,7 +2225,7 @@ A command can end with alignment options, in Vim dictionary format.
 
 `stick_to_left` of 1 means that the matched delimiter should be positioned
 right next to the preceding token, and `left_margin` of 0 removes the margin
-on the left. So we get:
+on the left.  So we get:
 >
     apple;: banana::   cake
     data;;  exchange:; format
@@ -2238,7 +2238,7 @@ You can even omit spaces between the arguments, so concisely (or cryptically):
 
  - `:EasyAlign*/[:;]\+/{'s':1,'l':0}`
 
-Nice. But let's make it even shorter. Option values can be written in shorthand notation.
+Nice.  But let's make it even shorter.  Option values can be written in shorthand notation.
 
  - `:EasyAlign*/[:;]\+/<l0`
 
@@ -2280,7 +2280,7 @@ operators.
                 :aaa => 3 }
 <
 In non-blockwise visual mode (`v` / `V`), `Enter =` won't work since the
-assignment operator in the first line gets in the way. So we instead enter
+assignment operator in the first line gets in the way.  So we instead enter
 blockwise-visual mode (`C-v`), and select the text around`=>` operators, then press `Enter =`
 >
     my_hash = { :a   => 1,
@@ -2334,7 +2334,7 @@ Option name       | Shortcut key | Abbreviated | Global variable                
 < Filtering lines >___________________________________________________________~
 
 With `filter` option, you can align lines that only match or do not match a
-given pattern. There are several ways to set the pattern.
+given pattern.  There are several ways to set the pattern.
 
         1. Press `C-f` in interactive mode and type in `g/pat/` or `v/pat/`
         2. In command-line, it can be written in dictionary format: `{'filter': 'g/pat/'}`
@@ -2358,7 +2358,7 @@ Examples~
 < Ignoring delimiters in comments or strings >________________________________~
 
 EasyAlign can be configured to ignore delimiters in certain syntax highlight
-groups, such as code comments or strings. By default, delimiters that are
+groups, such as code comments or strings.  By default, delimiters that are
 highlighted as code comments or strings are ignored.
 >
     " Default:
@@ -2409,7 +2409,7 @@ For example if you set `ignore_groups` option to be an empty list, you get
     }
 <
 If a pattern in `ignore_groups` is prepended by a `!`, it will have the
-opposite meaning. For instance, if `ignore_groups` is given as `['!Comment']`,
+opposite meaning.  For instance, if `ignore_groups` is given as `['!Comment']`,
 delimiters that are not highlighted as Comment will be ignored during the
 alignment.
 
@@ -2429,7 +2429,7 @@ that do not have N-th delimiter.
 
         4. If `ignore_unmatched` is 0, they are not ignored regardless of the mode
 
-Let's take an example. When we align the following code block around the (1st)
+Let's take an example.  When we align the following code block around the (1st)
 colons,
 >
     {
@@ -2501,8 +2501,8 @@ In interactive mode, you can change the option value with `C-d`.
 
 < Adjusting indentation >_____________________________________________________~
 
-By default :EasyAlign command keeps the original indentation of the lines. But
-then again we have `indentation` option. See the following example.
+By default :EasyAlign command keeps the original indentation of the lines.  But
+then again we have `indentation` option.  See the following example.
 >
     # Lines with different indentation
       apple = 1
@@ -2648,8 +2648,8 @@ OTHER OPTIONS
 
 {It is reported}{8} that 'foldmethod' value of `expr` or `syntax` can
 significantly slow down the alignment when editing a large, complex file with
-many folds. To alleviate this issue, EasyAlign provides an option to
-temporarily set 'foldmethod' to `manual` during the alignment task. In order
+many folds.  To alleviate this issue, EasyAlign provides an option to
+temporarily set 'foldmethod' to `manual` during the alignment task.  In order
 to enable this feature, set `g:easy_align_bypass_fold` switch to 1.
 >
     let g:easy_align_bypass_fold = 1
@@ -2660,7 +2660,7 @@ to enable this feature, set `g:easy_align_bypass_fold` switch to 1.
 < Left/right/center mode switch in interactive mode >_________________________~
 
 In interactive mode, you can choose the alignment mode you want by pressing
-enter keys. The non-bang command, `:EasyAlign` starts in left-alignment mode
+enter keys.  The non-bang command, `:EasyAlign` starts in left-alignment mode
 and changes to right and center mode as you press enter keys, while the bang
 version first starts in right-alignment mode.
 

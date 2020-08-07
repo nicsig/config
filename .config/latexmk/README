@@ -3104,7 +3104,7 @@ ADVANCED CONFIGURATION: Some extra resources and advanced tricks
 
        Suppose in the LaTeX file there is a  command  \includegraphics{graph},
        and  an xfig file "graph.fig" exists.  On a first run, pdflatex reports
-       a missing file, named "graph". Latexmk succeeds in  making  "graph.pdf"
+       a missing file, named "graph".  Latexmk succeeds in  making  "graph.pdf"
        by calling "make graph.pdf", and after completion of its work, it lists
        "fig.pdf" among the dependents of the file latexmk is making.  Then let
        "fig.fig"  be  updated,  and  then let make be run.  Make first remakes

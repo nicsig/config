@@ -11,14 +11,14 @@ endif
 " See this: https://github.com/junegunn/fzf/issues/1055
 "}}}
 let g:fzf_layout = {
-\ 'window': {
-\     'width': 0.9,
-\     'height': 0.6,
-\     'xoffset': 0.5,
-\     'yoffset': 0.5,
-\     'highlight': 'Comment',
-\     'border': 'sharp',
-\ }}
+    \ 'window': {
+    \     'width': 0.9,
+    \     'height': 0.6,
+    \     'xoffset': 0.5,
+    \     'yoffset': 0.5,
+    \     'highlight': 'Comment',
+    \     'border': 'sharp',
+    \ }}
 
 let g:fzf_action = {
     \ 'ctrl-t': 'tab split',
@@ -64,15 +64,15 @@ let g:fzf_command_prefix = 'Fz'
 "
 " See: https://www.reddit.com/r/vim/comments/b88ohz/fzf_ignore_directoryfilename_while_searching/ejwn384/
 "}}}
-exe 'com -bang -nargs=* '..g:fzf_command_prefix..'Rg
+exe 'com -bang -nargs=* ' .. g:fzf_command_prefix .. 'Rg
     \ call fzf#vim#grep(
-    \   "rg 2>/dev/null --column --line-number --no-heading --color=always --smart-case "..shellescape(<q-args>), 1,
+    \   "rg 2>/dev/null --column --line-number --no-heading --color=always --smart-case " .. shellescape(<q-args>), 1,
     \   <bang>0 ? fzf#vim#with_preview({"options": "--delimiter=: --nth=4.."}, "up:60%")
     \           : fzf#vim#with_preview({"options": "--delimiter=: --nth=4.."}, "right:50%:hidden", "?"),
     \   <bang>0)'
 
 exe 'com -bang -nargs=? -complete=dir '
-    \ ..g:fzf_command_prefix..'Files call fzf#vim#files(<q-args>, fzf#vim#with_preview("right:50%"), <bang>0)'
+    \ .. g:fzf_command_prefix .. 'Files call fzf#vim#files(<q-args>, fzf#vim#with_preview("right:50%"), <bang>0)'
 
 " `:FzSnippets` prints the description of the snippets (✔), but doesn't use it when filtering the results (✘).{{{
 
@@ -90,7 +90,7 @@ exe 'com -bang -nargs=? -complete=dir '
 "     /FIELD INDEX EXPRESSION
 "     ..     All the fields
 "}}}
-exe 'com -bar -bang '..g:fzf_command_prefix..'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
+exe 'com -bar -bang ' .. g:fzf_command_prefix .. 'Snippets call fzf#vim#snippets({"options": "-n .."}, <bang>0)'
 
 " Autocmds{{{1
 
@@ -131,7 +131,7 @@ augroup END
 " Mappings{{{1
 " `:map` {{{2
 
-exe 'nno <silent> <space>fmn :<c-u>'..g:fzf_command_prefix..'Maps<cr>'
+exe 'nno <silent> <space>fmn :<c-u>' .. g:fzf_command_prefix .. 'Maps<cr>'
 nmap <space>fmi i<plug>(fzf-maps-i)
 nmap <space>fmx v<plug>(fzf-maps-x)
 nmap <space>fmo y<plug>(fzf-maps-o)
@@ -149,8 +149,8 @@ nno <space>fm<esc> <nop>
 " Would cause a timeout when we press `C-r C-r` to insert a register literally.
 "}}}
 cno <expr> <c-r><c-h>
-\    getcmdtype() =~ ':' ? '<c-e><c-u>'..g:fzf_command_prefix..'History:<cr>'
-\  : getcmdtype() =~ '[/?]' ? '<c-e><c-u><c-c>:'..g:fzf_command_prefix..'History/<cr>' : ''
+\    getcmdtype() =~ ':' ? '<c-e><c-u>' .. g:fzf_command_prefix .. 'History:<cr>'
+\  : getcmdtype() =~ '[/?]' ? '<c-e><c-u><c-c>:' .. g:fzf_command_prefix .. 'History/<cr>' : ''
 "                                        ^---^
 "                                        don't use `<esc>`; an empty pattern would search for the last pattern
 "                                        and raise an error if it can't be found
@@ -185,7 +185,7 @@ fu s:miscellaneous() abort
         \ }
 
     for [char, cmd] in items(key2cmd)
-        exe 'nno <silent> <space>f'..char..' :<c-u>'..g:fzf_command_prefix..cmd..'<cr>'
+        exe 'nno <silent> <space>f' .. char .. ' :<c-u>' .. g:fzf_command_prefix .. cmd .. '<cr>'
     endfor
 
     augroup remove_gvfs_from_oldfiles | au!
@@ -216,7 +216,7 @@ fu s:miscellaneous() abort
         " The latter is read after our vimrc, so we can't clean `v:oldfiles` right now.
         " We need to wait for Vim to have fully started up.
         "}}}
-        au VimEnter * call filter(v:oldfiles, {_,v -> v !~# '/gvfs/'})
+        au VimEnter * call filter(v:oldfiles, {_, v -> v !~# '/gvfs/'})
     augroup END
 endfu
 call s:miscellaneous()

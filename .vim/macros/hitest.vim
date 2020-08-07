@@ -24,18 +24,18 @@ fu s:hitest() abort "{{{1
     call s:options_set()
 
     " Open a new window if the current one isn't empty
-    if line('$') != 1 || getline(1) isnot# ''
+    if line('$') != 1 || getline(1) != ''
         new
     endif
 
-    sil exe 'edit '.tempname()
+    sil exe 'edit ' .. tempname()
 
     setl noswf noet sw=16 ts=16
     let &l:tw = &columns
 
     " insert highlight settings
     keepj %d_
-    put =execute('hi')
+    call execute('hi')->split('\n')->setline(1)
 
     " remove the colored xxx items
     keepj keepp %s/xxx//e
@@ -104,9 +104,9 @@ fu s:pretty_formatting() abort "{{{1
     keepj keepp g/^\S/j
 
     " find out first syntax highlighting
-    let various = &highlight . ',:Normal,:Cursor,:,'
+    let various = &highlight .. ',:Normal,:Cursor,:,'
     let i = 1
-    while various =~ ':'.substitute(getline(i), '\s.*$', ',', '')
+    while various =~ ':' .. getline(i)->substitute('\s.*$', ',', '')
         let i += 1
         if i > line('$') | break | endif
     endwhile
@@ -114,17 +114,17 @@ fu s:pretty_formatting() abort "{{{1
     " insert headlines
     call append(0, ['Highlight groups for various occasions', '--------------------------------------'])
 
-    if i < line('$')-1
-        call append(i+1, ['', 'Syntax highlighting groups', '--------------------------'])
+    if i < line('$') - 1
+        call append(i + 1, ['', 'Syntax highlighting groups', '--------------------------'])
     endif
 
-    call cursor(1,1)
+    call cursor(1, 1)
 endfu
 
 fu s:options_save() abort "{{{1
-    let s:report   = &report
+    let s:report = &report
     let s:wrapscan = &wrapscan
-    let s:ww       = &ww
+    let s:ww = &ww
 endfu
 
 fu s:options_set() abort "{{{1
@@ -137,9 +137,9 @@ fu s:options_set() abort "{{{1
 endfu
 
 fu s:options_restore() abort "{{{1
-    let &report   = s:report
+    let &report = s:report
     let &wrapscan = s:wrapscan
-    let &ww       = s:ww
+    let &ww = s:ww
     unlet! s:report s:wrapscan s:ww
 endfu
 " }}}1

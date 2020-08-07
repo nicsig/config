@@ -116,7 +116,7 @@ endfu
 " Core {{{1
 fu s:set_undo_ftplugin() abort "{{{2
     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-        \ .. '| call ' .. function('s:undo_ftplugin')->string() .. '()'
+        \ .. '| call ' .. expand('<SID>') .. 'undo_ftplugin()'
 endfu
 
 fu s:undo_ftplugin() abort "{{{2

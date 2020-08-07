@@ -58,7 +58,7 @@ fu plugin#matchparen#install_dummy_autocmds() abort
         "
         " So, sth like this:
         "
-        "     if !exists('#'..event)
+        "     if !exists('#' .. event)
         "     ...
         "     endif
         "
@@ -69,7 +69,7 @@ fu plugin#matchparen#install_dummy_autocmds() abort
         " up with no autocmd listening to our event.
         "}}}
         augroup my_dummy_autocmds
-            exe 'au! '..event..' * "'
+            exe 'au! ' .. event .. ' * "'
         augroup END
     endfor
 endfu

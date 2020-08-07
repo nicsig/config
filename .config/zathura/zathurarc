@@ -156,7 +156,7 @@ set statusbar-basename true
 # Copy the selected text inside the CLIPBOARD clipboard{{{
 #
 # By default, when  we select some text  in zathura, it's copied  in the PRIMARY
-# clipboard, which we  can access via the  `*` register. We want to  use the `+`
+# clipboard, which we  can access via the  `*` register.  We want to  use the `+`
 # register instead, because  it's more consistent with other  programs (like the
 # browser).
 #}}}

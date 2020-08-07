@@ -20,7 +20,7 @@ endif
 setl indk=0=elsei
 
 let b:did_indent = 1
-let b:undo_indent = get(b:, 'undo_indent', 'exe')..'| setl inde< indk<'
+let b:undo_indent = get(b:, 'undo_indent', 'exe') .. '| setl inde< indk<'
 
 if exists('*s:get_indent') | finish | endif
 
@@ -45,12 +45,12 @@ let s:OPEN_KEYWORDS =<< trim END
 END
 
 const s:KWD_PAT =
-\ '\C\<\('
-\     ..join(s:OPEN_KEYWORDS, '\|')
-\     ..'\|'
-\     ..'^\s*\zs\%(else\|elseif\|case\|otherwise\|catch\)'
-\ ..'\)\>'
-\ ..'\|\S\s*\zs\(\<end\>\)'
+    \ '\C\<\('
+    \     .. join(s:OPEN_KEYWORDS, '\|')
+    \     .. '\|'
+    \     .. '^\s*\zs\%(else\|elseif\|case\|otherwise\|catch\)'
+    \ .. '\)\>'
+    \ .. '\|\S\s*\zs\(\<end\>\)'
 unlet! s:OPEN_KEYWORDS
 "}}}1
 
@@ -81,7 +81,7 @@ fu s:get_indent() abort "{{{1
         return final_indent
     endif
 endfu
-let &l:inde = function('s:get_indent')->string() .. '()'
+let &l:inde = expand('<SID>') .. 'get_indent()'
 
 fu s:get_unclosed_lvl(lnum, pat) abort "{{{1
     let [opening_tokens, closing_tokens] = s:submatches_counts(a:lnum, a:pat)
@@ -101,7 +101,7 @@ fu s:submatches_counts(lnum, pat) abort "{{{1
         "
         " Try to document this; and check whether we could/should have used it in the past.
         "}}}
-        let flags = 'pz'..(g == 1 ? 'c' : '')
+        let flags = 'pz' .. (g == 1 ? 'c' : '')
         let [lnum, col, submatch] = searchpos(a:pat, flags, a:lnum)
         " if there is no match now, there won't be any match in the future; stop counting
         if !submatch | break | endif
@@ -127,7 +127,7 @@ fu s:submatches_counts(lnum, pat) abort "{{{1
 endfu
 
 fu s:is_comment_or_string(lnum, col) abort "{{{1
-    return synIDattr(synIDtrans(synID(a:lnum, a:col, 1)), 'name')
+    return synID(a:lnum, a:col, 1)->synIDtrans()->synIDattr('name')
         \ =~# 'Comment\|String\|Todo'
 endfu
 

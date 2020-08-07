@@ -51,7 +51,7 @@ We may not use this plugin in the future.
 In which case, `g:plugs` won't exist, but we may still want to load `vim-lg-lib`.
 
 2. doesn't seem to work.
-I don't know why. It should.
+I don't know why.  It should.
 It seems `v:errmsg` is empty even when  there's an error, or it gets populated
 by another error...
 

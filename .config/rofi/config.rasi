@@ -37,7 +37,7 @@ configuration {
 /* The latter specifies the defaults for each element. */
 
 /* *//*}}}*/
-/* Don't move this section. Leave it at the top! *//*{{{*/
+/* Don't move this section.  Leave it at the top! *//*{{{*/
 
 /* It makes inheritance of properties clearer. */
 

@@ -204,7 +204,7 @@ directColor: true
 ! Warning:
 ! The syntax highlighting applied by the `zsh-syntax-highlighting` plugin
 ! may override some of these colors for some tokens.
-! Atm, it's the case for the double/single quoted strings. They aren't colored
+! Atm, it's the case for the double/single quoted strings.  They aren't colored
 ! by the yellow defined in this file.
 
 ! The values are mostly copied from the google light color scheme (cf. terminal.sexy).

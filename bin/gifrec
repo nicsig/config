@@ -66,8 +66,8 @@ main() { #{{{2
 }
 
 get_geometry() { #{{{2
-  # We use tmux in fullscreen. But if  we want to capture something, it probably
-  # doesn't need the whole screen. Think about a Vim session for example.
+  # We use tmux in fullscreen.  But if we want to capture something, it probably
+  # doesn't need the whole screen.  Think about a Vim session for example.
   if [[ -n "${TMUX}" ]]; then
     X=0
     # 0 would capture a black and thin horizontal line at the top
@@ -139,7 +139,7 @@ start_recording() { #{{{2
     # https://github.com/wavexx/screenkey#command-line-placement
     screenkey -g 1330x800+0+0
   else
-    # We can't start screenkey as a job. It does it automatically.
+    # We can't start screenkey as a job.  It does it automatically.
     # So, we can't save its pid with:    screenkey_pid=$!
     # We'll kill it with `killall screenkey`, instead of `kill <pid>`.
     screenkey
@@ -160,7 +160,7 @@ stop_everything() { #{{{2
   #     kill %+
   #
   # But, the advantage of the current method is that even if we start other jobs
-  # in the future, we'll still kill the right one. No need to change anything.
+  # in the future, we'll still kill the right one.  No need to change anything.
 
   killall screenkey
 }

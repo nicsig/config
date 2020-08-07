@@ -12,8 +12,8 @@ setl cul
 
 let &l:stl = '%!g:statusline_winid == win_getid() ? "%y%=%l " : "%y"'
 
-nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
-" Why `command-prompt`?  Why not running the command directly (`system('tmux '..getline('.'))`)?{{{
+nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
+" Why `command-prompt`?  Why not running the command directly (`system('tmux ' .. getline('.'))`)?{{{
 "
 " First, it lets you review the command before it's run.
 " So you  can check that tmux  will indeed run  what you've written in  your Vim
@@ -72,8 +72,9 @@ nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!
 "
 " To avoid starting a shell, which would require escaping some characters:
 "
-"     :<c-u>sil call system('tmux command-prompt -I '..shellescape(substitute(getline('.'), '#', '##', 'g')))<cr>
-"                                                      ^---------^
+"     :<c-u>sil system('tmux command-prompt -I '
+"         \ .. getline('.')->substitute('#', '##', 'g')->shellescape())<cr>
+"         "                                              ^-----------^
 "}}}
 " Why do you double the number signs?  Why don't you use `#{l:}` instead?{{{
 "
@@ -85,12 +86,17 @@ nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!
 "           ✘
 "}}}
 nno <buffer><nowait><silent> <cr>
-    \ :<c-u>sil :call job_start(['tmux', 'command-prompt', '-I', substitute(getline('.'), '#', '##', 'g')])<cr>
+    \ :<c-u>sil call job_start([
+    \     'tmux',
+    \     'command-prompt',
+    \     '-I',
+    \     getline('.')->substitute('#', '##', 'g')
+    \ ])<cr>
 
 nmap <buffer><nowait><silent> ZZ <cr>
 
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'| call tmuxprompt#undo_ftplugin()'
+    \ .. '| call tmuxprompt#undo_ftplugin()'
 

@@ -151,7 +151,7 @@ fu s:set_buffer_local_options() abort
     "
     " So, you're thinking about sth like this:
     "
-    "     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')..'| setl mps< | unlet! b:match_ignorecase b:match_words'
+    "     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe') .. '| setl mps< | unlet! b:match_ignorecase b:match_words'
     "
     " It would make sense  if we set them for *some* filetypes  only; but we set
     " them for *all* filetypes, so setting `b:undo_ftplugin` is useless.

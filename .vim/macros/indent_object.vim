@@ -20,11 +20,11 @@ fu s:in_indentation() abort "{{{1
 
     " move to beginning of line and get virtcol (current indentation level)
     norm! ^
-    let vCol = virtcol(getline('.') =~# '^\s*$' ? '$' : '.')
+    let vCol = (getline('.') =~# '^\s*$' ? '$' : '.')->virtcol()
 
     " pattern matching anything except empty lines and lines with recorded
     " indentation level
-    let pat = '^\%(\s*\%'..vCol..'v\|^$\)\@!'
+    let pat = '^\%(\s*\%' .. vCol .. 'v\|^$\)\@!'
 
     " find first match (backwards & don't wrap or move cursor)
     let start = search(pat, 'bWn') + 1
@@ -38,13 +38,13 @@ fu s:in_indentation() abort "{{{1
     endif
 
     " go to start (this includes empty lines) and--importantly--column 0
-    exe 'norm! '..start..'G0'
+    exe 'norm! ' .. start .. 'G0'
 
     " skip empty lines (unless already on one .. need to be in column 0)
     call search('^[^\n\r]', 'Wc')
 
     " go to end (this includes empty lines)
-    exe 'norm! Vo'..end..'G'
+    exe 'norm! Vo' .. end .. 'G'
 
     " skip backwards to last selected non-empty line
     call search('^[^\n\r]', 'bWc')
@@ -72,11 +72,11 @@ fu s:around_indentation() abort "{{{1
 
     " move to beginning of line and get virtcol (current indentation level)
     norm! ^
-    let vCol = virtcol(getline('.') =~# '^\s*$' ? '$' : '.')
+    let vCol = (getline('.') =~# '^\s*$' ? '$' : '.')->virtcol()
 
     " pattern matching anything except empty lines and lines with recorded
     " indentation level
-    let pat = '^\%(\s*\%'..vCol..'v\|^$\)\@!'
+    let pat = '^\%(\s*\%' .. vCol .. 'v\|^$\)\@!'
 
     " find first match (backwards & don't wrap or move cursor)
     let start = search(pat, 'Wbn') + 1
@@ -114,14 +114,14 @@ fu s:around_indentation() abort "{{{1
         " one line too far down
         "
         " NOTE: exe "norm! 0G" still goes  to end-of-buffer just like "norm! G",
-        " so it's ok if end is kept as 0. As mentioned above, this means that it
-        " will match until end of buffer, but that is what I want anyway (change
-        " code if you don't want)
+        " so it's ok if  end is kept as 0.  As mentioned  above, this means that
+        " it will  match until  end of buffer,  but that is  what I  want anyway
+        " (change code if you don't want)
         let end -= 1
     endif
 
     " finally, select from start to end
-    exe 'norm! '..start..'G0V'..end..'G$o'
+    exe 'norm! ' .. start .. 'G0V' .. end .. 'G$o'
 endfu
 " }}}1
 

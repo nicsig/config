@@ -1,4 +1,4 @@
-# Warning: ANY script in this directory will be automatically sourced. Even if it's inside a subdirectory.
+# Warning: ANY script in this directory will be automatically sourced.  Even if it's inside a subdirectory.
 
     $ mkdir -p ~/.vim/after/plugin/foo/bar/ && \
       echo 'let g:set_from_vim_after_plugin = 1' >>~/.vim/after/plugin/foo/bar/baz.vim

@@ -18,11 +18,11 @@
 "
 " In fact, it depends on the order of installation of the mappings:
 "
-"     $ vim -Nu NONE +'nno s <nop>' +'nno sab de' +'echo mapcheck("s", "n") is# ""'
+"     $ vim -Nu NONE +'nno s <nop>' +'nno sab de' +'echo mapcheck("s", "n") == ""'
 "     0~
 "     ✔
 "
-"     $ vim -Nu NONE +'nno sab de' +'nno s <nop>' +'echo mapcheck("s", "n") is# ""'
+"     $ vim -Nu NONE +'nno sab de' +'nno s <nop>' +'echo mapcheck("s", "n") == ""'
 "     1~
 "     ✘
 "
@@ -68,19 +68,19 @@ fu s:cancel_prefix(prefixes) abort
         " typeahead buffer.  So  the prefix can still be used  to form a mapping
         " with the next keypress, which *I think* is unexpected in practice.
         "}}}
-        if maparg(pfx.pfx, 'n') is# ''
+        if maparg(pfx . pfx, 'n') == ''
             exe 'nno ' . pfx . pfx . ' <nop>'
         endif
     endfor
 endfu
 call s:cancel_prefix(['+', '-', '<space>', '<bar>', 'U', 's', 'S', '<c-g>'])
 
-" You've disabled `s` and `S`. What about `sS` and `Ss`?{{{
+" You've disabled `s` and `S`.  What about `sS` and `Ss`?{{{
 "
 " Disabling those is useless.
 "
 " When  you press  `s` after  `S`, `S`  is automatically  canceled (look  at the
-" command-line; 'showcmd'). Only `S` remains.
+" command-line; 'showcmd').  Only `S` remains.
 " If you  wait for the timeout,  our `nno S  <nop>` mapping will be  used, which
 " will make sure nothing happens.
 "}}}
@@ -98,9 +98,9 @@ nno ]] <nop>
 
 " Why do you disable keyword completion?{{{
 "
-" When I want to move the cursor backward with C-b, I suspect I hit C-n
-" by accident instead. Very annoying (slow popup menu; breaks workflow).
-" We can still use C-p though.
+" When I want to  move the cursor backward with `C-b`, I suspect  I hit `C-n` by
+" accident instead.  Very  annoying (slow popup menu; breaks  workflow).  We can
+" still use C-p though.
 "}}}
 ino <expr> <c-n> pumvisible() ? '<c-n>' : ''
 
@@ -141,7 +141,7 @@ nno <expr> dp &l:diff ? 'dp' : ''
 " go Esc {{{1
 
 " When we cancel `go` with Escape, Vim moves the cursor to the top of the
-" buffer (1st byte, see `:h go`). Annoying.
+" buffer (1st byte, see `:h go`).  Annoying.
 nno go<esc> <nop>
 
 " Uu {{{1
@@ -163,7 +163,7 @@ nno Uu <nop>
 " It does this for normal, visual and operator-pending mode.
 "
 " I find  this annoying,  because when  I hit  the key  by accident,  the cursor
-" jumps. Besides, we already have `,`.
+" jumps.  Besides, we already have `,`.
 "}}}
 " Could I remove these lines in the future?{{{
 "
@@ -186,7 +186,7 @@ endif
 " Rationale:{{{
 "
 " The  default mappings  installed by  `vim-sneak`  are too  inconsistent to  be
-" memorized. They also conflict with `vim-sandwich`.
+" memorized.  They also conflict with `vim-sandwich`.
 "}}}
 if maparg('z', 'o') =~? 'sneak'
     ounmap z
@@ -198,7 +198,7 @@ endif
 " }}}
 "   normal mode?{{{
 "
-"     put =filter(split(execute('nno'), '\n'), {_,v -> v =~? 'sneak' && v !~? '^n\s\+\%([ft,;]\\|<plug>\)'})
+"     put =execute('nno')->split('\n')->filter({_, v -> v =~? 'sneak' && v !~? '^n\s\+\%([ft,;]\\|<plug>\)'})
 "
 " We invoke `filter()` to ignore:
 "
@@ -210,11 +210,11 @@ endif
 "}}}
 "   visual mode?{{{
 "
-"     put =filter(split(execute('xno'), '\n'), {_,v -> v =~? 'sneak' && v !~? '^x\s\+\%([ft,;]\\|<plug>\)'})
+"     put =execute('xno')->split('\n')->filter({_, v -> v =~? 'sneak' && v !~? '^x\s\+\%([ft,;]\\|<plug>\)'})
 "}}}
 "   operator-pending mode?{{{
 "
-"     put =filter(split(execute('ono'), '\n'), {_,v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)'})
+"     put =execute('ono')->split('\n')->filter({_, v -> v =~? 'sneak' && v !~? '^o\s\+\%([ft,;]\\|<plug>\)'})
 "}}}
 
 " no_vim_maps {{{2
@@ -223,7 +223,7 @@ endif
 "
 "     $VIMRUNTIME/ftplugin/vim.vim
 "
-" ... defines the buffer-local mappings `["`, `]"`. I don't want them, because I
+" ... defines the buffer-local mappings `["`, `]"`.  I don't want them, because I
 " use other global  mappings (same keys), which are more  powerful (support more
 " filetypes).
 "

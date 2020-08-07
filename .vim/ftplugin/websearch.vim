@@ -24,12 +24,12 @@ let &l:stl = '%!g:statusline_winid == win_getid() ? "%y%=%l " : "%y"'
 
 let b:url = 'https://www.startpage.com/do/search?cat=&language=english&cmd=process_search&query='
 
-nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
+nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
 nno <buffer><nowait><silent> <cr> :<c-u>call plugin#websearch#main()<cr>
 nmap <buffer><nowait><silent> ZZ <cr>
 
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'| call websearch#undo_ftplugin()'
+    \ .. '| call websearch#undo_ftplugin()'
 

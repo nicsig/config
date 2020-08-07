@@ -1092,7 +1092,7 @@ There may be others.
 ---
 
 I think  that `vim-sandwich` is  not as  well integrated as  `vim-surround`, and
-andymass knows it. From the README:
+andymass knows it.  From the README:
 
 >     An  alternative plugin  is vim-sandwich,  which allows  more complex  surround
 >     replacement rules but is not currently supported.

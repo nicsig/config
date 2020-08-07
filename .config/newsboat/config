@@ -72,7 +72,7 @@ bind-key l open
 # by default, it's `p` which I find confusing
 bind-key N prev-unread
 # Now, we've lost the `toggle-article-read` function.
-# Restore it. We use `X` for “eXchange”.
+# Restore it.  We use `X` for “eXchange”.
 bind-key X toggle-article-read
 
 # toggle  the read flag  for the currently  selected article, and  clears delete

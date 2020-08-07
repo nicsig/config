@@ -1,32 +1,35 @@
 " Init {{{1
 
+import Termname from 'term.vim'
+import Derive from 'lg/syntax.vim'
+
 " map greyscale colors from decimal to hexadecimal
 const s:DEC2HEX = {
-\ '232': '#080808',
-\ '233': '#121212',
-\ '234': '#1c1c1c',
-\ '235': '#262626',
-\ '236': '#303030',
-\ '237': '#3a3a3a',
-\ '238': '#444444',
-\ '239': '#4e4e4e',
-\ '240': '#585858',
-\ '241': '#626262',
-\ '242': '#6c6c6c',
-\ '243': '#767676',
-\ '244': '#808080',
-\ '245': '#8a8a8a',
-\ '246': '#949494',
-\ '247': '#9e9e9e',
-\ '248': '#a8a8a8',
-\ '249': '#b2b2b2',
-\ '250': '#bcbcbc',
-\ '251': '#c6c6c6',
-\ '252': '#d0d0d0',
-\ '253': '#dadada',
-\ '254': '#e4e4e4',
-\ '255': '#eeeeee',
-\ }
+    \ '232': '#080808',
+    \ '233': '#121212',
+    \ '234': '#1c1c1c',
+    \ '235': '#262626',
+    \ '236': '#303030',
+    \ '237': '#3a3a3a',
+    \ '238': '#444444',
+    \ '239': '#4e4e4e',
+    \ '240': '#585858',
+    \ '241': '#626262',
+    \ '242': '#6c6c6c',
+    \ '243': '#767676',
+    \ '244': '#808080',
+    \ '245': '#8a8a8a',
+    \ '246': '#949494',
+    \ '247': '#9e9e9e',
+    \ '248': '#a8a8a8',
+    \ '249': '#b2b2b2',
+    \ '250': '#bcbcbc',
+    \ '251': '#c6c6c6',
+    \ '252': '#d0d0d0',
+    \ '253': '#dadada',
+    \ '254': '#e4e4e4',
+    \ '255': '#eeeeee',
+    \ }
 
 " Interface {{{1
 fu colorscheme#set() abort "{{{2
@@ -154,7 +157,7 @@ fu colorscheme#customize() abort "{{{2
     "
     " This is not what we want; we want the dark one.
     " We must  make sure  that –  if we're using  the light  color scheme  – the
-    " variable is  set to a  value inside the range  `[233,239]`; so that  if we
+    " variable is  set to a  value inside the range  `[233, 239]`; so that  if we
     " later decide to switch to the dark color scheme, we *can*.
     " We pick `237` because it's right in the middle, and is the default value.
     "
@@ -194,7 +197,7 @@ fu colorscheme#customize() abort "{{{2
         " Why the timer?{{{
         "
         " `s:cursor()` needs to know the name of the terminal.
-        " It does so by calling  `lg#termname()` which in turn calls `system()`.
+        " It does so by calling  `s:Termname()` which in turn calls `system()`.
         " `system()` is slow: we don't want to increase the startup time.
         "
         " ---
@@ -268,8 +271,8 @@ fu colorscheme#cursorline(enable) abort "{{{2
 endfu
 
 fu colorscheme#save_last_version() abort "{{{2
-    let line = 'let g:last_color_scheme = '..get(g:, 'seoul256_current_bg', 253)
-    call writefile([line], $HOME..'/.vim/colors/my/last_version.vim')
+    let line = 'let g:last_color_scheme = ' .. get(g:, 'seoul256_current_bg', 253)
+    call writefile([line], $HOME .. '/.vim/colors/my/last_version.vim')
 endfu
 " }}}1
 " Core {{{1
@@ -334,7 +337,7 @@ fu s:EndOfBuffer() abort "{{{3
     "     E420: BG color unknown ~
     "}}}
     if execute('hi Normal') =~# 'ctermbg'
-        if $DISPLAY is# ''
+        if $DISPLAY == ''
             hi EndOfBuffer ctermfg=bg
         else
             hi EndOfBuffer ctermfg=bg guifg=bg
@@ -365,7 +368,7 @@ fu s:StatuslineNC() abort "{{{3
     " Why do you pass this extra `cterm` argument?{{{
     "
     " If we  are in  gui or in  a true color  terminal, then  `synIDattr()` will
-    " return an hexadecimal number. We can't easily make it less/more light.
+    " return an hexadecimal number.  We can't easily make it less/more light.
     " We need  a decimal  number to which  we can apply  a simple  offset; later
     " we'll convert the result back in hexadecimal via `s:DEC2HEX`.
     "
@@ -383,9 +386,9 @@ fu s:StatuslineNC() abort "{{{3
         " default, delek, koehler, morning, peachpuff, shine, zellner.
         "}}}
         let bg = get(s:DEC2HEX, bg, '#808080')
-        exe 'hi StatuslineNC guibg='..bg
+        exe 'hi StatuslineNC guibg=' .. bg
     else
-        exe 'hi StatuslineNC ctermbg='..bg
+        exe 'hi StatuslineNC ctermbg=' .. bg
     endif
     " In a non-focused window, we highlight the file path with `User1`.  That's not the colors which are applied!{{{
     "
@@ -409,13 +412,13 @@ fu s:TabLine() abort "{{{3
     " the purpose of this function is to remove the underline value from the HG `TabLine`
 
     let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
+        \ 'fg': 0,
+        \ 'bg': 0,
+        \ 'bold': 0,
+        \ 'reverse': 0,
         \ }
 
-    call map(attributes, {k -> synIDattr(synIDtrans(hlID('Tabline')), k)})
+    call map(attributes, {k -> hlID('Tabline')->synIDtrans()->synIDattr(k)})
 
     if has('gui_running')
         let cmd = 'hi TabLine gui=none guifg=%s'
@@ -426,9 +429,9 @@ fu s:TabLine() abort "{{{3
     endif
 
     " For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
-    " Tabline doesn't have any value in gui. In this case, executing the command
-    " will fail.
-    if attributes.fg is# '' | return | endif
+    " Tabline  doesn't have  any  value in  gui.  In  this  case, executing  the
+    " command will fail.
+    if attributes.fg == '' | return | endif
     exe printf(cmd, attributes.fg)
 endfu
 
@@ -440,21 +443,21 @@ fu s:Title() abort "{{{3
         " It prevents us from using the bold style.
         " So, we remove this attribute.
         hi clear Title
-        exe 'hi Title guifg='..title_fg
+        exe 'hi Title guifg=' .. title_fg
 
-        exe 'hi TitleItalic gui=italic guifg='..title_fg
-        exe 'hi TitleBold gui=bold guifg='..title_fg
-        exe 'hi TitleBoldItalic gui=bold,italic guifg='..title_fg
+        exe 'hi TitleItalic gui=italic guifg=' .. title_fg
+        exe 'hi TitleBold gui=bold guifg=' .. title_fg
+        exe 'hi TitleBoldItalic gui=bold,italic guifg=' .. title_fg
 
     elseif &tgc
-        exe 'hi TitleItalic cterm=italic guifg='..title_fg
-        exe 'hi TitleBold cterm=bold guifg='..title_fg
-        exe 'hi TitleBoldItalic cterm=bold,italic guifg='..title_fg
+        exe 'hi TitleItalic cterm=italic guifg=' .. title_fg
+        exe 'hi TitleBold cterm=bold guifg=' .. title_fg
+        exe 'hi TitleBoldItalic cterm=bold,italic guifg=' .. title_fg
 
     else
-        exe 'hi TitleItalic term=italic cterm=italic ctermfg='..title_fg
-        exe 'hi TitleBold term=bold cterm=bold ctermfg='..title_fg
-        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg='..title_fg
+        exe 'hi TitleItalic term=italic cterm=italic ctermfg=' .. title_fg
+        exe 'hi TitleBold term=bold cterm=bold ctermfg=' .. title_fg
+        exe 'hi TitleBoldItalic term=bold,italic cterm=bold,italic ctermfg=' .. title_fg
     endif
 endfu
 
@@ -466,12 +469,12 @@ fu s:Underlined() abort "{{{3
     " So, we reset the  HG with the `underline` style, and the  colors of the HG
     " `Conditional` (because this one is blue).
     "}}}
-    sil! call lg#syntax#derive('Underlined', 'Conditional', 'term=underline cterm=underline gui=underline')
+    sil! call s:Derive('Underlined', 'Conditional', 'term=underline cterm=underline gui=underline')
 endfu
 
 fu s:CommentUnderlined() abort "{{{3
     " define the `CommentUnderlined` HG (useful for urls in comments)
-    sil! call lg#syntax#derive('CommentUnderlined', 'Comment', 'term=underline cterm=underline gui=underline')
+    sil! call s:Derive('CommentUnderlined', 'Comment', 'term=underline cterm=underline gui=underline')
 endfu
 
 fu s:User() abort "{{{3
@@ -491,13 +494,13 @@ fu s:User() abort "{{{3
     "}}}
 
     let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
+        \ 'fg': 0,
+        \ 'bg': 0,
+        \ 'bold': 0,
+        \ 'reverse': 0,
         \ }
 
-    call map(attributes, {k -> synIDattr(synIDtrans(hlID('StatusLine')), k)})
+    call map(attributes, {k -> hlID('StatusLine')->synIDtrans()->synIDattr(k)})
 
     if has('gui_running')
         let cmd1 = 'hi User1 gui=%s guifg=%s guibg=%s'
@@ -525,25 +528,25 @@ fu s:User() abort "{{{3
     "
     "     Error detected while processing function <SNR>18_set_user_hg:~
     "     E421: Color name or number not recognized: ctermfg= ctermbg=~
-    if attributes.fg is# '' || attributes.bg is# ''
+    if attributes.fg == '' || attributes.bg == ''
         return
     endif
 
-    let style1 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? '' : 'reverse')
-    if style1 is# '' | return | endif
+    let style1 = (attributes.bold ? 'bold,' : '') .. (attributes.reverse ? '' : 'reverse')
+    if style1 == '' | return | endif
 
     exe printf(cmd1, style1, attributes.fg, attributes.bg)
 
-    let style2 = (attributes.bold ? 'bold,' : '')..(attributes.reverse ? 'reverse' : '')
-    if style2 is# '' | return | endif
+    let style2 = (attributes.bold ? 'bold,' : '') .. (attributes.reverse ? 'reverse' : '')
+    if style2 == '' | return | endif
 
-    let todo_fg = synIDattr(synIDtrans(hlID('Todo')), 'fg')
+    let todo_fg = hlID('Todo')->synIDtrans()->synIDattr('fg')
     exe printf(cmd2, style2, todo_fg, attributes.bg)
 endfu
 fu s:VertSplit() abort "{{{3
     " When  you split  a  window  vertically, Vim  uses  `VertSplit`  to draw  2
     " vertical lines, and in the middle it puts a white vertical line.
-    " That's too much. I only need one black vertical line.
+    " That's too much.  I only need one black vertical line.
     "
     " For some reason, linking `VertSplit` to `Normal` gets us the desired result.
     hi! link VertSplit Normal
@@ -628,66 +631,66 @@ fu s:styled_comments() abort "{{{2
 
     " the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
     if has('gui_running')
-        exe 'hi CommentCodeSpan guifg='..comment_fg..' guibg='..bg
-        exe 'hi markdownCodeSpan guibg='..bg
+        exe 'hi CommentCodeSpan guifg=' .. comment_fg .. ' guibg=' .. bg
+        exe 'hi markdownCodeSpan guibg=' .. bg
 
-        exe 'hi CommentBold gui=bold guifg='..comment_fg
-        exe 'hi CommentBoldItalic gui=bold,italic guifg='..comment_fg
-        exe 'hi CommentItalic gui=italic guifg='..comment_fg
+        exe 'hi CommentBold gui=bold guifg=' .. comment_fg
+        exe 'hi CommentBoldItalic gui=bold,italic guifg=' .. comment_fg
+        exe 'hi CommentItalic gui=italic guifg=' .. comment_fg
 
-        exe 'hi markdownListItem guifg='..repeat_fg
-        exe 'hi markdownListItemBold gui=bold guifg='..repeat_fg
-        exe 'hi markdownListItemBoldItalic gui=bold,italic guifg='..repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='..repeat_fg..' guibg='..bg
-        exe 'hi markdownListItemItalic gui=italic guifg='..repeat_fg
+        exe 'hi markdownListItem guifg=' .. repeat_fg
+        exe 'hi markdownListItemBold gui=bold guifg=' .. repeat_fg
+        exe 'hi markdownListItemBoldItalic gui=bold,italic guifg=' .. repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg=' .. repeat_fg .. ' guibg=' .. bg
+        exe 'hi markdownListItemItalic gui=italic guifg=' .. repeat_fg
 
-        exe 'hi markdownBlockquote guifg='..statement_fg
-        exe 'hi markdownBlockquoteBold gui=bold guifg='..statement_fg
-        exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg='..statement_fg
-        exe 'hi markdownBlockquoteCodeSpan guibg='..bg..' guifg='..statement_fg
-        exe 'hi markdownBlockquoteItalic gui=italic guifg='..statement_fg
+        exe 'hi markdownBlockquote guifg=' .. statement_fg
+        exe 'hi markdownBlockquoteBold gui=bold guifg=' .. statement_fg
+        exe 'hi markdownBlockquoteBoldItalic gui=bold,italic guifg=' .. statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guibg=' .. bg .. ' guifg=' .. statement_fg
+        exe 'hi markdownBlockquoteItalic gui=italic guifg=' .. statement_fg
 
     " the only relevant attributes in a truecolor terminal are `guifg`, `guibg`, and `cterm`
     elseif &tgc
-        exe 'hi CommentCodeSpan guifg='..comment_fg..' guibg='..bg
-        exe 'hi markdownCodeSpan guibg='..bg
+        exe 'hi CommentCodeSpan guifg=' .. comment_fg .. ' guibg=' .. bg
+        exe 'hi markdownCodeSpan guibg=' .. bg
 
-        exe 'hi CommentBold cterm=bold guifg='..comment_fg
-        exe 'hi CommentBoldItalic cterm=bold,italic guifg='..comment_fg
-        exe 'hi CommentItalic cterm=italic guifg='..comment_fg
+        exe 'hi CommentBold cterm=bold guifg=' .. comment_fg
+        exe 'hi CommentBoldItalic cterm=bold,italic guifg=' .. comment_fg
+        exe 'hi CommentItalic cterm=italic guifg=' .. comment_fg
 
-        exe 'hi markdownListItem guifg='..repeat_fg
-        exe 'hi markdownListItemBold cterm=bold guifg='..repeat_fg
-        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg='..repeat_fg
-        exe 'hi markdownListItemCodeSpan guifg='..repeat_fg..' guibg='..bg
-        exe 'hi markdownListItemItalic cterm=italic guifg='..repeat_fg
+        exe 'hi markdownListItem guifg=' .. repeat_fg
+        exe 'hi markdownListItemBold cterm=bold guifg=' .. repeat_fg
+        exe 'hi markdownListItemBoldItalic cterm=bold,italic guifg=' .. repeat_fg
+        exe 'hi markdownListItemCodeSpan guifg=' .. repeat_fg .. ' guibg=' .. bg
+        exe 'hi markdownListItemItalic cterm=italic guifg=' .. repeat_fg
 
-        exe 'hi markdownBlockquote guifg='..statement_fg
-        exe 'hi markdownBlockquoteBold cterm=bold guifg='..statement_fg
-        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg='..statement_fg
-        exe 'hi markdownBlockquoteCodeSpan guifg='..statement_fg..' guibg='..bg
-        exe 'hi markdownBlockquoteItalic cterm=italic guifg='..statement_fg
+        exe 'hi markdownBlockquote guifg=' .. statement_fg
+        exe 'hi markdownBlockquoteBold cterm=bold guifg=' .. statement_fg
+        exe 'hi markdownBlockquoteBoldItalic cterm=bold,italic guifg=' .. statement_fg
+        exe 'hi markdownBlockquoteCodeSpan guifg=' .. statement_fg .. ' guibg=' .. bg
+        exe 'hi markdownBlockquoteItalic cterm=italic guifg=' .. statement_fg
 
     " the only relevant attributes in a non-truecolor terminal are `term`, `cterm`, `ctermfg` and `ctermbg`
     else
-        exe 'hi CommentCodeSpan ctermfg='..comment_fg..' ctermbg='..bg
-        exe 'hi markdownCodeSpan ctermbg='..bg
+        exe 'hi CommentCodeSpan ctermfg=' .. comment_fg .. ' ctermbg=' .. bg
+        exe 'hi markdownCodeSpan ctermbg=' .. bg
 
-        exe 'hi CommentBold term=bold cterm=bold ctermfg='..comment_fg
-        exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg='..comment_fg
-        exe 'hi CommentItalic term=italic cterm=italic ctermfg='..comment_fg
+        exe 'hi CommentBold term=bold cterm=bold ctermfg=' .. comment_fg
+        exe 'hi CommentBoldItalic term=bold,italic cterm=bold,italic ctermfg=' .. comment_fg
+        exe 'hi CommentItalic term=italic cterm=italic ctermfg=' .. comment_fg
 
-        exe 'hi markdownListItem ctermfg='..repeat_fg
-        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg='..repeat_fg
-        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg='..repeat_fg
-        exe 'hi markdownListItemCodeSpan ctermfg='..repeat_fg..' ctermbg='..bg
-        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg='..repeat_fg
+        exe 'hi markdownListItem ctermfg=' .. repeat_fg
+        exe 'hi markdownListItemBold term=bold cterm=bold ctermfg=' .. repeat_fg
+        exe 'hi markdownListItemBoldItalic term=bold,italic cterm=bold,italic ctermfg=' .. repeat_fg
+        exe 'hi markdownListItemCodeSpan ctermfg=' .. repeat_fg .. ' ctermbg=' .. bg
+        exe 'hi markdownListItemItalic term=italic cterm=italic ctermfg=' .. repeat_fg
 
-        exe 'hi markdownBlockquote ctermfg='..statement_fg
-        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg='..statement_fg
-        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg='..statement_fg
-        exe 'hi markdownBlockquoteCodeSpan ctermfg='..statement_fg..' ctermbg='..bg
-        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg='..statement_fg
+        exe 'hi markdownBlockquote ctermfg=' .. statement_fg
+        exe 'hi markdownBlockquoteBold term=bold cterm=bold ctermfg=' .. statement_fg
+        exe 'hi markdownBlockquoteBoldItalic term=bold,italic cterm=bold,italic ctermfg=' .. statement_fg
+        exe 'hi markdownBlockquoteCodeSpan ctermfg=' .. statement_fg .. ' ctermbg=' .. bg
+        exe 'hi markdownBlockquoteItalic term=italic cterm=italic ctermfg=' .. statement_fg
     endif
 endfu
 
@@ -713,7 +716,7 @@ fu s:misc() abort "{{{2
     "}}}
     " create `PopupSign` from `WarningMsg`
     " override the `guibg` or `ctermbg` attribute, using the colors of the `Normal` HG
-    call lg#syntax#derive('PopupSign', 'WarningMsg', {'bg': 'Normal'})
+    sil! call s:Derive('PopupSign', 'WarningMsg', {'bg': 'Normal'})
 endfu
 
 fu s:cursor() abort "{{{2
@@ -736,12 +739,12 @@ fu s:cursor() abort "{{{2
     "    - append it to `&t_ti` (or `&t_SI`, but the effect would be delayed until you quit insert mode)
     "}}}
 
-    " `lg#termname()` is a bit slow (it invokes `system()`); let's save its output
+    " `s:Termname()` is a bit slow (it invokes `system()`); let's save its output
     if !exists('g:termname')
         " in case `vim-lg` is not enabled
         try
             " never write a *global* constant in uppercase; it could raise `E741` if you include `!` in `'vi'`
-            const g:termname = lg#termname()
+            const g:termname = s:Termname()
         catch
             const g:termname = 'st'
         endtry
@@ -798,7 +801,7 @@ fu s:cursor() abort "{{{2
     " It should only affect the current tmux pane.
     "}}}
     let color = g:cursor_color[&bg][g:termname is# 'st-256color' ? 'st' : 'other']
-    let seq = "\033]12;"..color.."\007"
+    let seq = "\033]12;" .. color .. "\007"
     call echoraw(seq)
 
     " When we  quit Vim, we  want to restore the  cursor color so  that it's
@@ -809,7 +812,7 @@ endfu
 
 fu s:restore_cursor_color() abort "{{{2
     let seq = get(g:cursor_color.light, get(g:, 'termname', '') is# 'st-256color' ? 'st' : 'other')
-    let seq = "\e]12;"..seq.."\x07"
+    let seq = "\e]12;" .. seq .. "\x07"
     let &t_te ..= seq
 endfu
 " }}}1
@@ -817,11 +820,11 @@ endfu
 fu s:get_attributes(hg, ...) abort "{{{2
     let mode = a:0 ? [a:1] : []
     let attributes = {
-        \ 'fg'      : 0,
-        \ 'bg'      : 0,
-        \ 'bold'    : 0,
-        \ 'reverse' : 0,
+        \ 'fg': 0,
+        \ 'bg': 0,
+        \ 'bold': 0,
+        \ 'reverse': 0,
         \ }
-    return map(attributes, {k -> call('synIDattr', [synIDtrans(hlID(a:hg)), k] + mode)})
+    return map(attributes, {k -> call('synIDattr', [hlID(a:hg)->synIDtrans(), k] + mode)})
 endfu
 

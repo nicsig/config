@@ -24,12 +24,14 @@ endif
 " will be sourced, there'll be no conflict.
 "}}}
 
+import Derive from 'lg/syntax.vim'
+
 " Mappings {{{1
 
 " Why S-F7..9 ? {{{
 
 " First, because  I'm looking  for unused  keys, which will  stay unused  in the
-" future. Currently, the maximum value `xx` to create a <F-xx> {lhs} is `37`:
+" future.  Currently, the maximum value `xx` to create a <F-xx> {lhs} is `37`:
 " https://github.com/vim/vim/blob/8858498516108432453526f07783f14c9196e112/src/keymap.h#L194
 "
 " Beyond  this value,  creating a  mapping would  shadow the  `<` key,  probably
@@ -38,7 +40,7 @@ endif
 " Second, if we assigned Tab / S-Tab, it would make the code more complex.
 " Indeed, we would have to:
 "
-"    1. Capture the output of `s:SID()` in a global variable (`g:sid_vimrc`);
+"    1. Capture the output of `expand('<SID>')` in a global variable (`g:sid_vimrc`);
 "       from our vimrc file.
 "
 "    2. Create the file `~/.vim/after/plugin/ultisnips.vim`,
@@ -104,8 +106,8 @@ endif
 "     UltiSnips overriding our mapping in this case, because there can't be
 "     a menu in select mode, so we don't need to cycle back).
 "}}}
-let g:UltiSnipsExpandTrigger       = '<S-F7>'
-let g:UltiSnipsJumpForwardTrigger  = '<S-F8>'
+let g:UltiSnipsExpandTrigger = '<S-F7>'
+let g:UltiSnipsJumpForwardTrigger = '<S-F8>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-F9>'
 " Remove select mode mappings using printable characters {{{
 
@@ -119,7 +121,7 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-F9>'
 " >     Or use :sunmap after defining the mapping.
 "
 " It probably implies that mapping a printable character in select mode is a bad
-" idea. For example, suppose that a plugin install this mapping:
+" idea.  For example, suppose that a plugin install this mapping:
 "
 "     :snor z abc
 "
@@ -209,7 +211,7 @@ augroup my_ultisnips | au!
     "         setl fdm=marker
     "     EOF
     "
-    "     $ vim -Nu /tmp/vimrc +"%d|0pu=['\\\"{{'..'{', '\\\"}}'..'}']" /tmp/vim.vim
+    "     $ vim -Nu /tmp/vimrc +"%d|0pu=['\\\"{{' .. '{', '\\\"}}' .. '}']" /tmp/vim.vim
     "     " press:
     "     "   zo to open the fold
     "     "   O to open new line inside the fold
@@ -252,9 +254,9 @@ augroup my_ultisnips | au!
         \ | endif
 
     " let us know when a snippet is being expanded
-    sil! call lg#syntax#derive('Ulti', 'Visual', 'term=bold cterm=bold gui=bold')
+    sil! call s:Derive('Ulti', 'Visual', 'term=bold cterm=bold gui=bold')
     au User MyFlags call statusline#hoist('buffer', '%#Ulti#%{plugin#ultisnips#status()}',
-        \ 55, expand('<sfile>')..':'..expand('<sflnum>'))
+        \ 55, expand('<sfile>') .. ':' .. expand('<sflnum>'))
 
     " Inserting the output of a shell command in a snippet can cause visual artifacts.{{{
     "
@@ -328,7 +330,7 @@ augroup my_ultisnips | au!
     " Pitfall: If you try to replace the `:` mapping with a `CmdlineEnter` autocmd, use `state()`:{{{
     "
     "     au User UltiSnipsEnterFirstSnippet au CmdlineEnter : ++once
-    "         \ if state('m') is# '' | call plugin#ultisnips#cancel_expansion() | endif
+    "         \ if state('m') == '' | call plugin#ultisnips#cancel_expansion() | endif
     "
     " Without the `state()` guard, you may exit a snippet prematurely.
     " That's what  happens atm  with the  `if` snippet, when  you jump  from the
@@ -354,7 +356,7 @@ let g:UltiSnipsEditSplit = 'horizontal'
 " This has also the benefit of increasing the performance, because UltiSnips
 " won't search the rtp.
 "}}}
-let g:UltiSnipsSnippetDirectories = [$HOME..'/.vim/plugged/vim-snippets/UltiSnips']
+let g:UltiSnipsSnippetDirectories = [$HOME .. '/.vim/plugged/vim-snippets/UltiSnips']
 
 " Prevent UltiSnips from looking for SnipMate snippets.{{{
 "

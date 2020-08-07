@@ -79,8 +79,8 @@ fu s:duplicate_char_around(above) abort
     " We use this function to reimplement `c-y` (and `c-e`) in a more powerful way.
 
     let col = col('.')
-    let line = search('\%'..col..'c.*\S', (a:above ? 'b' : '')..'nW')
-    let char = matchstr(getline(line), '\%'..col..'c.')
+    let line = search('\%' .. col .. 'c.*\S', (a:above ? 'b' : '') .. 'nW')
+    let char = getline(line)->matchstr('\%' .. col .. 'c.')
     return char
 endfu
 

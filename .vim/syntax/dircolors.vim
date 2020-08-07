@@ -59,16 +59,16 @@ highlight default link dircolorsEscape    Special
 function! s:set_guicolors() abort
     let s:termguicolors = {}
 
-    let s:termguicolors[0]  = "Black"
-    let s:termguicolors[1]  = "DarkRed"
-    let s:termguicolors[2]  = "DarkGreen"
-    let s:termguicolors[3]  = "DarkYellow"
-    let s:termguicolors[4]  = "DarkBlue"
-    let s:termguicolors[5]  = "DarkMagenta"
-    let s:termguicolors[6]  = "DarkCyan"
-    let s:termguicolors[7]  = "Gray"
-    let s:termguicolors[8]  = "DarkGray"
-    let s:termguicolors[9]  = "Red"
+    let s:termguicolors[0] = "Black"
+    let s:termguicolors[1] = "DarkRed"
+    let s:termguicolors[2] = "DarkGreen"
+    let s:termguicolors[3] = "DarkYellow"
+    let s:termguicolors[4] = "DarkBlue"
+    let s:termguicolors[5] = "DarkMagenta"
+    let s:termguicolors[6] = "DarkCyan"
+    let s:termguicolors[7] = "Gray"
+    let s:termguicolors[8] = "DarkGray"
+    let s:termguicolors[9] = "Red"
     let s:termguicolors[10] = "Green"
     let s:termguicolors[11] = "Yellow"
     let s:termguicolors[12] = "Blue"
@@ -90,7 +90,7 @@ function! s:set_guicolors() abort
     for r in xterm_palette
         for g in xterm_palette
             for b in xterm_palette
-                let s:termguicolors[cur_col] = '#' . r . g . b
+                let s:termguicolors[cur_col] = '#' .. r .. g .. b
                 let cur_col += 1
             endfor
         endfor
@@ -98,16 +98,16 @@ function! s:set_guicolors() abort
 
     for i in range(24)
         let g = i * 0xa + 8
-        let s:termguicolors[i + 232] = '#' . g . g . g
+        let s:termguicolors[i + 232] = '#' .. g .. g .. g
     endfor
 endfunction
 
 function! s:get_hi_str(color, place) abort
     if a:color >= 0 && a:color <= 255
         if has('gui_running')
-            return ' gui' . a:place . '=' . s:termguicolors[a:color]
+            return ' gui' .. a:place .. '=' .. s:termguicolors[a:color]
         elseif a:color <= 7 || &t_Co == 256 || &t_Co == 88
-            return ' cterm' . a:place . '=' . a:color
+            return ' cterm' .. a:place .. '=' .. a:color
         endif
     endif
     return ''
@@ -140,7 +140,7 @@ function! s:preview_color(linenr) abort
     let hi_str = ''
     let hi_attrs = []
     while len(colors) > 0
-        let item = str2nr(remove(colors, 0))
+        let item = remove(colors, 0)->str2nr()
         if item == 1
             call add(hi_attrs, 'bold')
         elseif item == 3
@@ -181,22 +181,22 @@ function! s:preview_color(linenr) abort
     silent! execute 'syntax list'
     redir END
 
-    if s:currentmatch !~# '\/\\_s\\zs' . colordef . '\\ze\\_s\/'
+    if s:currentmatch !~# '\/\\_s\\zs' .. colordef .. '\\ze\\_s\/'
         " Append the buffer number to avoid problems with other dircolors
         " buffers interfering
         let bufnr = bufnr('%')
-        execute 'syntax match dircolorsColor' . b:dc_next_index . '_' . bufnr .
-              \ ' "\_s\zs' . colordef . '\ze\_s"'
+        execute 'syntax match dircolorsColor' .. b:dc_next_index .. '_' .. bufnr ..
+            \ ' "\_s\zs' .. colordef .. '\ze\_s"'
         let hi_attrs_str = ''
         if !empty(hi_attrs)
             if has('gui_running')
-                let hi_attrs_str = ' gui=' . join(hi_attrs, ',')
+                let hi_attrs_str = ' gui=' .. join(hi_attrs, ',')
             else
-                let hi_attrs_str = ' cterm=' . join(hi_attrs, ',')
+                let hi_attrs_str = ' cterm=' .. join(hi_attrs, ',')
             endif
         endif
-        execute 'highlight default dircolorsColor' . b:dc_next_index . '_' .
-              \ bufnr . hi_str . hi_attrs_str
+        execute 'highlight default dircolorsColor' .. b:dc_next_index .. '_' ..
+            \ bufnr .. hi_str .. hi_attrs_str
         let b:dc_next_index += 1
     endif
 endfunction
@@ -206,8 +206,8 @@ function! s:reset_colors() abort
     if b:dc_next_index > 0
         let bufnr = bufnr('%')
         for i in range(b:dc_next_index)
-            execute 'syntax clear dircolorsColor' . i . '_' . bufnr
-            execute 'highlight clear dircolorsColor' . i . '_' . bufnr
+            execute 'syntax clear dircolorsColor' .. i .. '_' .. bufnr
+            execute 'highlight clear dircolorsColor' .. i .. '_' .. bufnr
         endfor
         let b:dc_next_index = 0
     endif

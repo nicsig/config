@@ -106,7 +106,7 @@ Clipboard usage (Windows, OSX)
 
    Windows comes with a [194]clipboard and OSX comes with a [195]pasteboard.
 
-   Both work like  most users would expect them to  work. You copy selected text
+   Both work like  most users would expect them to  work.  You copy selected text
    with ctrl+c/cmd+c and paste them in another application with ctrl+v/cmd+v.
 
    Note that  copied text is actually  transferred to the clipboard,  so you can
@@ -114,7 +114,7 @@ Clipboard usage (Windows, OSX)
    without problems.
 
    Whenever  this  happens,  the  clipboard  register *  gets  filled  with  the
-   selection. From Vim  use "*y  and "*p  to yank and  paste from  the clipboard
+   selection.  From Vim  use "*y  and "*p  to yank and  paste from  the clipboard
    respectively.
 
    If you don't  even want to specify the  * register all the time,  put this in
@@ -142,17 +142,17 @@ Clipboard usage (Windows, OSX)
 
 Clipboard usage (Linux, BSD, ...)
 
-   If your OS uses [196]X, things  work a bit different. X implements the [197]X
+   If your OS uses [196]X, things  work a bit different.  X implements the [197]X
    Window System  Protocol which happens to  be at major version  11 since 1987,
    hence X is also often called X11.
 
    Prior, in  X10, [198]cut buffers were  introduced that kind of  worked like a
    clipboard as in copied  text was actually hold by X and  it was accessible by
-   all ofter  applications. This mechanism  still exists  in X,  but its  use is
+   all ofter  applications.  This mechanism  still exists  in X,  but its  use is
    deprecated now and most software doesn't use it anymore.
 
    Nowadays  data   is  transferred  between   applications  by  the   means  of
-   [199]selections. From  the 3  selection atoms  defined,  only 2  are used  in
+   [199]selections.  From  the 3  selection atoms  defined,  only 2  are used  in
    practice: PRIMARY and CLIPBOARD.
 
    Selections work roughly like this:
@@ -188,7 +188,7 @@ Clipboard usage (Linux, BSD, ...)
         set clipboard^=unnamedplus  " + register
 
    This will  make all yank/delete/put operations  use either * or  + instead of
-   the unnamed register  ". Afterwards you can  simply use y or  p for accessing
+   the unnamed register  ".  Afterwards you can  simply use y or  p for accessing
    your chosen X selection.
 
    Related help:
@@ -204,9 +204,9 @@ Handling backup, swap, undo, and viminfo files
    Backup files:
 
    You can  tell Vim to  keep a  backup of the  original file before  writing to
-   it. By default Vim keeps a backup  but immediately removes it when writing to
-   the file  was successful  (:set writebackup). If you  always want  the latest
-   backup file to persist, :set  backup. Or you disable backups altogether, :set
+   it.  By default Vim keeps a backup  but immediately removes it when writing to
+   the file  was successful  (:set writebackup).  If you  always want  the latest
+   backup file to persist, :set  backup.  Or you disable backups altogether, :set
    nobackup nowritebackup.
 
    Let's see what I added last to my vimrc..
@@ -219,23 +219,23 @@ $ diff ~/.vim/vimrc ~/.vim/files/backup/vimrc-vimbackup
 
    Swap files:
 
-   You  came  up  with an  idea  for  the  best  scifi novel  ever. After  being
+   You  came  up  with an  idea  for  the  best  scifi novel  ever.  After  being
    in  the  flow for  hours  and  writing  several  thousands of  words..  power
    outage! That's  the  moment  you  realize   that  the  last  time  you  saved
    ~/wicked_alien_invaders_from_outer_space.txt was.. well, you never did.
 
    But not all hope  is lost! When editing a file, Vim creates  a swap file that
-   contains unsaved  changes. Try it  for yourself,  open any  file and  get the
-   current  swap file  by using  :swapname. You can  also disable  swap file  by
+   contains unsaved  changes.  Try it  for yourself,  open any  file and  get the
+   current  swap file  by using  :swapname.  You can  also disable  swap file  by
    putting :set noswapfile in your vimrc.
 
    By default the swap file is created  in the same directory as the edited file
    and called  something like  .file.swp, updated either  all 200  characters or
    when you  haven't typed  anything for  4 seconds, and  deleted when  you stop
-   editing the file. You  can change these numbers with :h  'updatecount' and :h
+   editing the file.  You  can change these numbers with :h  'updatecount' and :h
    'updatetime'.
 
-   Due to  the power  outage, the  swap file  was never  deleted. If you  do vim
+   Due to  the power  outage, the  swap file  was never  deleted.  If you  do vim
    ~/wicked_alien_invaders_from_outer_space.txt, Vim will  prompt you to recover
    the file.
 
@@ -243,8 +243,8 @@ $ diff ~/.vim/vimrc ~/.vim/files/backup/vimrc-vimbackup
 
    Undo files:
 
-   The [200]undo tree is kept in memory  and will be lost when Vim quits. If you
-   want it to  persist, :set undofile. This will save the  undo file for ~/foo.c
+   The [200]undo tree is kept in memory  and will be lost when Vim quits.  If you
+   want it to  persist, :set undofile.  This will save the  undo file for ~/foo.c
    in ~/foo.c.un~.
 
    Related help: :h 'undofile' and :h undo-persistence
@@ -253,7 +253,7 @@ $ diff ~/.vim/vimrc ~/.vim/files/backup/vimrc-vimbackup
 
    When backup,  swap, and undo  files are all  about text state,  viminfo files
    are  used for  saving  everything  else that  would  otherwise  be lost  when
-   quitting Vim. The viminfo file keeps histories (command line, search, input),
+   quitting Vim.  The viminfo file keeps histories (command line, search, input),
    registers, marks, buffer list, global variables etc.
 
    By default the viminfo is written to ~/.viminfo.
@@ -274,7 +274,7 @@ $ diff ~/.vim/vimrc ~/.vim/files/backup/vimrc-vimbackup
         set viminfo     ='100,n$HOME/.vim/files/info/viminfo
 
    The directory ~/.vim/files  has to be created beforehand,  otherwise Vim will
-   spew errors. If you often work on new hosts, you might want to automate it:
+   spew errors.  If you often work on new hosts, you might want to automate it:
 
         if exists('*mkdir') && !isdirectory($HOME.'/.vim/files')
             call mkdir($HOME.'/.vim/files')
@@ -282,13 +282,13 @@ $ diff ~/.vim/vimrc ~/.vim/files/backup/vimrc-vimbackup
 
    NOTE: If you edit  a file on a  multi-user system and Vim prompts  you that a
    swap file already exists, it probably  means that someone else is editing the
-   file at the moment. You lose this "feature"  when you save your swap files in
+   file at the moment.  You lose this "feature"  when you save your swap files in
    the home directory.
 
 ==============================================================================
 Editing remote files
 
-   Vim comes with  the netrw plugin that enables  editing remote files. Actually
+   Vim comes with  the netrw plugin that enables  editing remote files.  Actually
    it transfers  the remote  file to  a local  temporary file  via scp,  opens a
    buffer using  that file, and  writes the changes back  to the remote  file on
    saving.
@@ -324,7 +324,7 @@ MatchIt
    corresponding } or #ifdef respectively.
 
    Vim comes  bundled with a plugin  called matchit.vim which is  not enabled by
-   default. It makes % also cycle through HTML tags, if/else/endif constructs in
+   default.  It makes % also cycle through HTML tags, if/else/endif constructs in
    VimL etc. and introduces a few new commands.
 
    To always load the plugin, put this in your vimrc:
@@ -339,7 +339,7 @@ MatchIt
         :!cp $VIMRUNTIME/macros/matchit.txt ~/.vim/doc
         :helptags ~/.vim/doc
 
-   The  plugin is  ready to  use  now. See  :h matchit-intro  for the  supported
+   The  plugin is  ready to  use  now.  See  :h matchit-intro  for the  supported
    commands and :h matchit-languages for the supported languages.
 
    That said, it's easy to define your own matching pairs:
@@ -359,7 +359,7 @@ Tips
 
 Saner CTRL-L
 
-   By default <c-l> clears and redraws the screen (like :redraw!). The following
+   By default <c-l> clears and redraws the screen (like :redraw!).  The following
    mapping does the same, plus de-highlighting  the matches found via /, ? etc.,
    plus  fixing syntax  highlighting (sometimes  Vim loses  highlighting due  to
    complex highlighting rules),  plus force updating the  syntax highlighting in
@@ -442,11 +442,11 @@ Profiling at runtime
    All code that was executed during profiling will be shown.
    Every line, how often it was executed and how much time it took.
 
-   Most of the time that will be plugin code the user isn't familiar with, but if you're investigating a certain issue, jump to the bottom of the log. Here are two different sections FUNCTIONS SORTED ON TOTAL TIME and FUNCTIONS SORTED ON SELF TIME that are worth gold. On a quick glance you can see, if a certain function is taking too long.
+   Most of the time that will be plugin code the user isn't familiar with, but if you're investigating a certain issue, jump to the bottom of the log.  Here are two different sections FUNCTIONS SORTED ON TOTAL TIME and FUNCTIONS SORTED ON SELF TIME that are worth gold.  On a quick glance you can see, if a certain function is taking too long.
 
 Verbosity
 
-   Another useful way for observing what Vim is currently doing is increasing the verbosity level. Currently Vim supports 9 different levels.  See :h 'verbose' for the full list.
+   Another useful way for observing what Vim is currently doing is increasing the verbosity level.  Currently Vim supports 9 different levels.  See :h 'verbose' for the full list.
 
         :e /tmp/foo
         :set verbose=2
@@ -466,7 +466,7 @@ Verbosity
 :verb set ai?
 "      Last set from ~/.vim/vimrc
 
-   Naturally, the higher the verbosity level the more overwhelming the output. But fear no more, you can simply redirect the output to a file:
+   Naturally, the higher the verbosity level the more overwhelming the output.  But fear no more, you can simply redirect the output to a file:
 
         :set verbosefile=/tmp/foo | 15verbose echo "foo" | vsplit /tmp/foo
 
@@ -475,7 +475,7 @@ Debugging Vim scripts
    If you ever used a command-line debugger before, :debug will quickly feel familiar.
 
    Simply  prepend :debug  to any  other command  and you'll  be put  into debug
-   mode. That is, the execution will stop at the first line about to be executed
+   mode.  That is, the execution will stop at the first line about to be executed
    and that line will be displayed.
 
    See :h >cont and  below for the 6 available debugger  commands and note that,
@@ -538,12 +538,12 @@ Debugging syntax files
 Standard plugins
 
    Surprising to  many people, Vim  comes with a handful  of plugins on  its own
-   that all get loaded by default. Check  :scriptnames after starting Vim to see
+   that all get loaded by default.  Check  :scriptnames after starting Vim to see
    all sourced files.
 
-   Most of them will  never get used, so disable them as  you see fit. They will
+   Most of them will  never get used, so disable them as  you see fit.  They will
    still be shown as sourced, but only  the first lines actually get read before
-   Vim bails out. No further code (mappings, commands, logic) will be processed.
+   Vim bails out.  No further code (mappings, commands, logic) will be processed.
 
      Plugin          Disable it using..                        Help
    2html      let g:loaded_2html_plugin = 1     :h 2html
@@ -564,27 +564,27 @@ Quirks
 Editing small files is slow
 
    There are two things which can have a huge impact on performance:
-    1. Complex regular expressions. Particular the Ruby syntax file caused people to have slowdowns in the past. (Also see [242]Debugging syntax files.)
-    2. Screen redraws. Some features force all lines to redraw.
+    1. Complex regular expressions.  Particular the Ruby syntax file caused people to have slowdowns in the past. (Also see [242]Debugging syntax files.)
+    2. Screen redraws.  Some features force all lines to redraw.
 
    Typical culprit Why? Solution?
 
-   ┌────────────────────────┬───────────────────────────────────────────────────────────────────────────────────┐
-   │ :set cursorline        │ Causes all lines to redraw. :set nocursorline                                     │
-   ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┤
-   │ :set cursorcolumn      │ Causes all lines to redraw. :set nocursorcolumn                                   │
-   ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┤
-   │ :set relativenumber    │ Causes all lines to redraw. :set norelativenumber                                 │
-   ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┤
-   │ :set foldmethod=syntax │ If the syntax file is slow already, this makes it even worse.                     │
-   │                        │ :set foldmethod=manual, :set foldmethod=marker or [243]FastFold                   │
-   ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┤
-   │ :set synmaxcol=3000    │ Due to internal representation, Vim has problems with long lines in general.      │
-   │                        │ Highlights columns till column 3000. :set synmaxcol=200                           │
-   ├────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┤
-   │ matchparen.vim         │ Loaded by default. Uses regular expressions to find the accompanying parenthesis. │
-   │                        │ Disable plugin: :h matchparen                                                     │
-   └────────────────────────┴───────────────────────────────────────────────────────────────────────────────────┘
+   ┌────────────────────────┬────────────────────────────────────────────────────────────────────────────────────┐
+   │ :set cursorline        │ Causes all lines to redraw. :set nocursorline                                      │
+   ├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+   │ :set cursorcolumn      │ Causes all lines to redraw. :set nocursorcolumn                                    │
+   ├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+   │ :set relativenumber    │ Causes all lines to redraw. :set norelativenumber                                  │
+   ├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+   │ :set foldmethod=syntax │ If the syntax file is slow already, this makes it even worse.                      │
+   │                        │ :set foldmethod=manual, :set foldmethod=marker or [243]FastFold                    │
+   ├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+   │ :set synmaxcol=3000    │ Due to internal representation, Vim has problems with long lines in general.       │
+   │                        │ Highlights columns till column 3000. :set synmaxcol=200                            │
+   ├────────────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+   │ matchparen.vim         │ Loaded by default.  Uses regular expressions to find the accompanying parenthesis. │
+   │                        │ Disable plugin: :h matchparen                                                      │
+   └────────────────────────┴────────────────────────────────────────────────────────────────────────────────────┘
 
    NOTE: You only need to do this if you experience actual performance drawbacks.
    In most cases using the things mentioned above is absolutely fine.
@@ -601,7 +601,7 @@ Editing huge files is slow
         vim -u NONE -N
 
    This should make navigation quite a lot faster, especially since no expensive
-   regular expressions  for syntax highlighting  are used. You should  also tell
+   regular expressions  for syntax highlighting  are used.  You should  also tell
    Vim not to use swapfiles and viminfo files to avoid long delays on writing:
 
         vim -n -u NONE -i NONE -N
@@ -618,10 +618,10 @@ Newline used for NUL
 Temporary files
 Backup files
 
-Before  saving a  file,  Vim creates  a  backup  file. If  writing  to disk  was
+Before  saving a  file,  Vim creates  a  backup  file.  If  writing  to disk  was
 successful, the backup file will be deleted.
 
-With :set  backup, the  backup will  persist. This means,  the backup  file will
+With :set  backup, the  backup will  persist.  This means,  the backup  file will
 always have the same  content as the original file before  the most recent save.
 It's up to you to decide whether this is useful or not.
 
@@ -669,10 +669,10 @@ Swap files
 
 When editing a file, unsaved changes get written to a swap file.
 
-Get the name of the current swap file with :swapname. Disable them with :set noswapfile.
+Get the name of the current swap file with :swapname.  Disable them with :set noswapfile.
 
 A swap file gets updated either all 200 characters or when nothing was typed for
-4 seconds. They get deleted when you stop editing the file. You can change these
+4 seconds.  They get deleted when you stop editing the file.  You can change these
 numbers with :h 'updatecount' and :h 'updatetime'.
 
 If Vim gets killed (e.g. power outage), you lose all changes since the last time
@@ -690,8 +690,8 @@ different  versions  of  a file.  If  you  don't  want  that behaviour,  see  :h
 
 Undo files
 
-The undo tree is kept in memory and will  be lost when Vim quits. If you want it
-to  persist,  :set  undofile. This  will  save  the  undo  file for  ~/foo.c  in
+The undo tree is kept in memory and will  be lost when Vim quits.  If you want it
+to  persist,  :set  undofile.  This  will  save  the  undo  file for  ~/foo.c  in
 ~/foo.c.un~.
 
 :h 'undofile'

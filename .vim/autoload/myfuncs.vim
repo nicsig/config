@@ -1,14 +1,9 @@
-if !exists('s:SID')
-    fu s:SID() abort
-        return expand('<sfile>')->matchstr('<SNR>\zs\d\+\ze_SID$')->str2nr()
-    endfu
-    const s:SID = s:SID()->printf('<SNR>%d_')
-    delfu s:SID
-endif
+import Catch from 'lg.vim'
+import Opfunc from 'lg.vim' | const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 " Operators {{{1
 fu myfuncs#op_grep() abort "{{{2
-    let &opfunc = 'lg#opfunc'
+    let &opfunc = s:SID .. 'Opfunc'
     let g:opfunc = {
         \ 'core': 'myfuncs#op_grep_core',
         \ }
@@ -64,10 +59,10 @@ fu myfuncs#op_grep_core(...) abort
         " >     For Unix, braces are put around {expr} to allow for
         " >     concatenated commands.
         "}}}
-        let cmd = 'rg 2>/dev/null '..a:1
+        let cmd = 'rg 2>/dev/null ' .. a:1
     else
         let use_loclist = 0
-        let cmd = 'rg 2>/dev/null --fixed-strings '..shellescape(@")
+        let cmd = 'rg 2>/dev/null --fixed-strings ' .. shellescape(@")
     endif
 
     if type is# 'Ex' && use_loclist
@@ -82,7 +77,7 @@ fu myfuncs#op_grep_core(...) abort
 endfu
 
 fu myfuncs#op_replace_without_yank() abort "{{{2
-    let &opfunc = 'lg#opfunc'
+    let &opfunc = s:SID .. 'opfunc'
     let g:opfunc = {
         \ 'core': 'myfuncs#op_replace_without_yank_core',
         "\ we don't need to yank the text-object, and don't want `v:register` nor `""` to mutate
@@ -99,10 +94,10 @@ endfu
 fu myfuncs#op_replace_without_yank_core(type) abort
     let reg = get(g:opfunc, 'register', '"')
     if a:type is# 'line'
-        exe 'keepj norm! ''[V'']"'..reg..'p'
+        exe 'keepj norm! ''[V'']"' .. reg .. 'p'
         norm! gv=
     elseif a:type is# 'block'
-        exe "keepj norm! `[\<c-v>`]"..'"'..reg..'p'
+        exe "keepj norm! `[\<c-v>`]" .. '"' .. reg .. 'p'
     elseif a:type is# 'char'
         call s:handle_char(reg)
     endif
@@ -149,9 +144,9 @@ fu s:handle_char(reg) abort
     endif
 
     try
-        exe 'keepj norm! `[v`]"'..a:reg..'p'
+        exe 'keepj norm! `[v`]"' .. a:reg .. 'p'
     catch
-        return lg#catch()
+        return Catch()
     finally
         call setreg(a:reg, reg_save)
     endtry
@@ -165,32 +160,32 @@ fu myfuncs#op_trim_ws(...) abort "{{{2
     if &l:binary || &ft is# 'diff'
         return
     endif
-    let range = line("'[")..','..line("']")
-    exe range..'TW'
+    let range = line("'[") .. ',' .. line("']")
+    exe range .. 'TW'
 endfu
 
 fu myfuncs#op_yank_setup(what) abort "{{{2
     let s:op_yank = {'what': a:what, 'register': v:register}
-    let &opfunc = s:SID .. 'op_yank'
+    let &opfunc = expand('<SID>') .. 'op_yank'
     return 'g@'
 endfu
 
 fu s:op_yank(type) abort
     let mods = 'keepj keepp'
-    let range = line("'[")..','..line("']")
+    let range = line("'[") .. ',' .. line("']")
 
     let cmd = s:op_yank.what is# 'g//' || s:op_yank.what is# 'comments' ? 'g' : 'v'
     let pat = s:op_yank.what is# 'code' || s:op_yank.what is# 'comments'
-          \ ?     '^\s*\C\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')
-          \ :     @/
+        \ ?     '^\s*\C\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\')
+        \ :     @/
 
     let z_save = getreginfo('z')
     try
         call setreg('z', {})
-        exe mods..' '..range..cmd..':'..escape(pat, ':')..':y Z'
+        exe mods .. ' ' .. range .. cmd .. ':' .. escape(pat, ':') .. ':y Z'
         let yanked = getreginfo('z')->get('regcontents', [])
     catch
-        return lg#catch()
+        return Catch()
     finally
         call setreg('z', z_save)
         " emulate what Vim does with a  builtin operator; the cursor ends at the
@@ -200,7 +195,7 @@ fu s:op_yank(type) abort
 
     " the first  time we've  appended a  match to the  `z` register,  it has
     " appended a newline; we *never* want it; remove it
-    if yanked[0] is# ''
+    if yanked[0] == ''
         call remove(yanked, 0)
     endif
 
@@ -217,20 +212,20 @@ endfu
 
 fu myfuncs#align_line_setup(key) abort
     let s:align_line_key = a:key
-    let &opfunc = s:SID .. 'align_line'
+    let &opfunc = expand('<SID>') .. 'align_line'
     return 'g@l'
 endfu
 
 fu s:align_line(_) abort
     let offset = s:align_line_key[1] is# 'j' ? 1 : -1
     if s:align_line_key[0] is# '['
-        exe 'left '..indent(line('.') + offset)
+        exe 'left ' .. (line('.') + offset)->indent()
     else
         " length of text to align on the current line
-        let text_length = strchars(matchstr(getline('.'), '\S.*$'), 1)
+        let text_length = getline('.')->matchstr('\S.*$')->strchars(1)
         " length of the previous/next line
-        let neighbour_length = strchars(getline(line('.') + offset), 1)
-        exe 'left '..(neighbour_length - text_length)
+        let neighbour_length = (line('.') + offset)->getline()->strchars(1)
+        exe 'left ' .. (neighbour_length - text_length)
     endif
 endfu
 
@@ -281,7 +276,7 @@ fu myfuncs#box_create(...) abort
         " character:
         let col_pos = []
         let i = 0
-        for char in split(getline('.'), '\zs')
+        for char in getline('.')->split('\zs')
             let i += 1
             if char is# '|'
                 let col_pos += [i]
@@ -300,16 +295,16 @@ fu myfuncs#box_create(...) abort
 
         " Replace the remaining `|` with `│`:
         let first_line = line("'{") + 2
-        let last_line  = line("'}") - 2
+        let last_line = line("'}") - 2
         for i in range(first_line, last_line)
             for j in col_pos
-                exe 'norm! '..i..'G'..j..'|r│'
+                exe 'norm! ' .. i .. 'G' .. j .. '|r│'
             endfor
         endfor
 
         call s:box_create_separations()
     catch
-        return lg#catch()
+        return Catch()
     endtry
 endfu
 
@@ -322,17 +317,17 @@ fu s:box_create_border(where, col_pos) abort
         " replace all characters with `─`
         norm! v$r─
         " draw corners
-        exe 'norm! '..col_pos[0]..'|r┌'..col_pos[-1]..'|r┐'
+        exe 'norm! ' .. col_pos[0] .. '|r┌' .. col_pos[-1] .. '|r┐'
     else
         " duplicate the `┌────┐` border below the box
         t'}-
         " draw corners
-        exe 'norm! '..col_pos[0]..'|r└'..col_pos[-1]..'|r┘'
+        exe 'norm! ' .. col_pos[0] .. '|r└' .. col_pos[-1] .. '|r┘'
     endif
 
     " draw the '┬' or '┴' characters:
     for pos in col_pos[1:-2]
-        exe 'norm! '..pos..'|r'..(a:where is# 'top' ? '┬' : '┴')
+        exe 'norm! ' .. pos .. '|r' .. (a:where is# 'top' ? '┬' : '┴')
     endfor
 endfu
 
@@ -343,7 +338,7 @@ fu s:box_create_separations() abort
     "
     " ... useful to make our table more readable.
     norm! '{++yyp
-    call setline('.', substitute(getline('.'), '[^│┼]', ' ', 'g'))
+    call getline('.')->substitute('[^│┼]', ' ', 'g')->setline('.')
 
     " Delete it in the `s` (s for space) register, so that it's stored inside
     " default register and we can paste it wherever we want.
@@ -355,7 +350,7 @@ fu s:box_create_separations() abort
     "
     " ... and store it inside `x` register.
     " So that we can paste it wherever we want.
-    let line = getline(line("'{")+1)
+    let line = (line("'{") + 1)->getline()
     let line = substitute(line, '\S', '├', '')
     let line = substitute(line, '.*\zs\S', '┤', '')
     let line = substitute(line, '┬', '┼', 'g')
@@ -372,30 +367,30 @@ fu myfuncs#box_destroy(...) abort
     endif
 
     let [lnum1, lnum2] = [line("'["), line("']")]
-    let range = lnum1..','..lnum2
+    let range = lnum1 .. ',' .. lnum2
     " remove box (except pretty bars: │)
-    sil exe range..'s/[─┴┬├┤┼└┘┐┌]//ge'
+    sil exe range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
 
     " replace pretty bars with regular bars
     " necessary, because we will need them to align the contents of the
     " paragraph later
-    sil exe range..'s/│/|/ge'
+    sil exe range .. 's/│/|/ge'
 
     " remove the bars at the beginning and at the end of the lines
     " we don't want them, because they would mess up the creation of a box
     " later
-    sil exe range..'s/|//e'
-    sil exe range..'s/.*\zs|//e'
+    sil exe range .. 's/|//e'
+    sil exe range .. 's/.*\zs|//e'
 
     " trim whitespace
-    sil exe range..'TW'
+    sil exe range .. 'TW'
     " remove empty lines
-    sil exe range..'-g/^\s*$/d_'
+    sil exe range .. '-g/^\s*$/d_'
 
-    call append(lnum1-1, [''])
+    call append(lnum1 - 1, [''])
 
     " position the cursor on the upper left corner of the paragraph
-    exe 'norm! '..lnum1..'Gj_'
+    exe 'norm! ' .. lnum1 .. 'Gj_'
 endfu
 
 fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
@@ -414,16 +409,20 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     "}}}
     let pos = getcurpos()
     let global = a:0 && a:1 =~# '\<reverse\>' ? 'v' : 'g'
-    let cml = '\V'..escape(matchstr(&l:cms, '\S*\ze\s*%s'), '\')..'\m'
+    if &ft is# 'vim'
+        let cml = '["#]'
+    else
+        let cml = '\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\') .. '\m'
+    endif
     let to_search = {
         \ 'empty': ['^\s*$', '^'],
-        \ 'comments': ['^\s*'..cml, '^\%(\s*'..cml..'\)\@!'],
-        \ '@/': [@/, '^\%(.*'..@/..'\m\)\@!'],
+        \ 'comments': ['^\s*' .. cml, '^\%(\s*' .. cml .. '\)\@!'],
+        \ '@/': [@/, '^\%(.*' .. @/ .. '\m\)\@!'],
         \ }
     let wont_be_deleted = to_search[a:to_delete][global is# 'g']
     " necessary if the pattern matches on the current line, but the match starts
     " before our current position
-    exe 'norm! '..(pos[1] == 1 ? '1|' : 'k$')
+    exe 'norm! ' .. (pos[1] == 1 ? '1|' : 'k$')
     call search(wont_be_deleted, pos[1] == 1 ? 'c' : '')
     " if the match is on our original line, restore the column position
     if line('.') == pos[1] | call setpos('.', pos) | endif
@@ -448,7 +447,7 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     " Let's avoid this  conundrum altogether, by using a delimiter  which is not
     " `/` nor `?`.
     "}}}
-    exe mods..range..global..':'..escape(pat, ':')..':d_'
+    exe mods .. range .. global .. ':' .. escape(pat, ':') .. ':d_'
 
     sil! update
     "  │
@@ -476,7 +475,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
         return
     endif
 
-    if empty(expand('%:p'))
+    if expand('%:p')->empty()
         echohl ErrorMsg
         " `:lvim` fails in an unnamed buffer
         echom 'Save the buffer in a file'
@@ -493,7 +492,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
 
     " If `a:lnum1 == a:lnum2`, it means `:DiffLines` was called without a range.
     if a:lnum1 == a:lnum2
-        let [lnum1, lnum2] = [line('.'), line('.')+1]
+        let [lnum1, lnum2] = [line('.'), line('.') + 1]
     else
         let [lnum1, lnum2] = [a:lnum1, a:lnum2]
     endif
@@ -531,10 +530,10 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
             " It wouldn't work as expected  if the lines contain literal control
             " characters, and more generally any multi-cell characters.
             "}}}
-            let col1 = strlen(matchstr(line1, '^.\{'..(i+1)..'}'))
-            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum1..'l\%'..col1..'c.'
-            let col2 = strlen(matchstr(line2, '^.\{'..(i+1)..'}'))
-            let pat ..= (empty(pat) ? '' : '\|')..'\%'..lnum2..'l\%'..col2..'c.'
+            let col1 = matchstr(line1, '^.\{' .. (i + 1) .. '}')->strlen()
+            let pat ..= (empty(pat) ? '' : '\|') .. '\%' .. lnum1 .. 'l\%' .. col1 .. 'c.'
+            let col2 = matchstr(line2, '^.\{' .. (i + 1) .. '}')->strlen()
+            let pat ..= (empty(pat) ? '' : '\|') .. '\%' .. lnum2 .. 'l\%' .. col2 .. 'c.'
         endif
     endfor
 
@@ -548,10 +547,10 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
         " `\%123c.*` = the *whole* set of characters after the 123th.
         " This will add only *one* entry in the loclist.
         "}}}
-        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum1..'l'..'\%>'..strlen(line2)..'c.'
+        let pat ..= (!empty(pat) ? '\|' : '') .. '\%' .. lnum1 .. 'l' .. '\%>' .. strlen(line2) .. 'c.'
 
     elseif strlen(line1) < strlen(line2)
-        let pat ..= (!empty(pat) ? '\|' : '')..'\%'..lnum2..'l'..'\%>'..len(line1)..'c.'
+        let pat ..= (!empty(pat) ? '\|' : '') .. '\%' .. lnum2 .. 'l' .. '\%>' .. len(line1) .. 'c.'
     endif
 
     " Give the result
@@ -563,7 +562,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
         "
         "     (1 of 123): ...
         "}}}
-        sil noa exe 'lvim /'..pat..'/g %'
+        sil noa exe 'lvim /' .. pat .. '/g %'
         let w:xl_match = matchadd('SpellBad', pat, -1)
     else
         echohl WarningMsg
@@ -601,29 +600,31 @@ fu myfuncs#dump_wiki(url) abort "{{{1
 
     let [x_save, y_save] = [getpos("'x"), getpos("'y")]
     try
-        let url = trim(a:url, '/')..'.wiki'
-        let tempdir = substitute(tempname(), '.*/\zs.\{-}', '', '')
-        sil call system('git clone '..shellescape(url)..' '..tempdir)
-        let files = glob(tempdir..'/*', 0, 1)
-        call map(files, {_,v -> substitute(v, '^\C\V'..tempdir..'/', '', '')})
-        call filter(files, {_,v -> v !~# '\c_\=footer\%(\.md\)\=$'})
+        let url = trim(a:url, '/') .. '.wiki'
+        let tempdir = tempname()->substitute('.*/\zs.\{-}', '', '')
+        sil call system('git clone ' .. shellescape(url) .. ' ' .. tempdir)
+        let files = glob(tempdir .. '/*', 0, 1)
+        call map(files, {_, v -> substitute(v, '^\C\V' .. tempdir .. '/', '', '')})
+        call filter(files, {_, v -> v !~# '\c_\=footer\%(\.md\)\=$'})
 
         norm! mx
-        call append('.', files+[''])
-        exe 'norm! '..(len(files)+1)..'j'
+        call append('.', files + [''])
+        exe '+' .. (2 * (len(files) + 1))
         norm! my
 
         sil keepj keepp 'x+,'y-s/^/# /
-        sil keepj keepp 'x+,'y-g/^./exe 'keepalt r '..tempdir..'/'..getline('.')[2:]
-        sil keepj keepp 'x+,'y-g/^=\+\s*$/d_ | call setline(line('.')-1, substitute(getline(line('.')-1), '^', '## ', ''))
-        sil keepj keepp 'x+,'y-g/^-\+\s*$/d_ | call setline(line('.')-1, substitute(getline(line('.')-1), '^', '### ', ''))
+        sil keepj keepp 'x+,'y-g/^./exe 'keepalt r ' .. tempdir .. '/' .. getline('.')[2:]
+        sil keepj keepp 'x+,'y-g/^=\+\s*$/d_
+            \ | eval (line('.') - 1)->getline()->substitute('^', '## ', '')->setline(line('.') - 1)
+        sil keepj keepp 'x+,'y-g/^-\+\s*$/d_
+            \ | eval (line('.') - 1)->getline()->substitute('^', '### ', '')->setline(line('.') - 1)
         sil keepj keepp 'x+,'y-s/^#.\{-}\n\zs\s*\n\ze##//
 
-        sil keepj keepp 'x+,'y-g/^#\%(#\)\@!/call append(line('.')-1, '#')
+        sil keepj keepp 'x+,'y-g/^#\%(#\)\@!/call append(line('.') - 1, '#')
         sil update
 
     catch
-        return lg#catch()
+        return Catch()
 
     finally
         call setpos("'x", x_save)
@@ -637,23 +638,23 @@ fu s:gtfo_init() abort
     let s:IS_TMUX = !empty($TMUX)
     " terminal Vim running within a GUI environment
     let s:IS_X_RUNNING = !empty($DISPLAY) && $TERM isnot# 'linux'
-    let s:LAUNCH_TERM  = 'urxvt -cd'
+    let s:LAUNCH_TERM = 'urxvt -cd'
 endfu
 
 fu s:gtfo_error(s) abort
-    echohl ErrorMsg | echom '[GTFO] '..a:s | echohl None
+    echohl ErrorMsg | echom '[GTFO] ' .. a:s | echohl None
 endfu
 
 fu myfuncs#gtfo_open_gui(dir) abort
     if s:gtfo_is_not_valid(a:dir)
         return
     endif
-    sil call system('xdg-open '..shellescape(a:dir)..' &')
+    sil call system('xdg-open ' .. shellescape(a:dir) .. ' &')
 endfu
 
 fu s:gtfo_is_not_valid(dir) abort
     if !isdirectory(a:dir) "this happens if a directory was deleted outside of vim.
-        call s:gtfo_error('invalid/missing directory: '..a:dir)
+        call s:gtfo_error('invalid/missing directory: ' .. a:dir)
         return 1
     endif
 endfu
@@ -663,9 +664,9 @@ fu myfuncs#gtfo_open_term(dir) abort
         return
     endif
     if s:IS_TMUX
-        sil call system('tmux splitw -h -c '..shellescape(a:dir))
+        sil call system('tmux splitw -h -c ' .. shellescape(a:dir))
     elseif s:IS_X_RUNNING
-        sil call system(s:LAUNCH_TERM..' '..shellescape(a:dir)..' &')
+        sil call system(s:LAUNCH_TERM .. ' ' .. shellescape(a:dir) .. ' &')
     else
         call s:gtfo_error('failed to open terminal')
     endif
@@ -678,7 +679,7 @@ endif
 
 fu myfuncs#in_A_not_in_B(...) abort "{{{1
     let [fileA, fileB] = a:000
-    if len(getbufline(fileA, 1, '$')) < len(getbufline(fileB, 1, '$'))
+    if getbufline(fileA, 1, '$')->len() < getbufline(fileB, 1, '$')->len()
         let [fileA, fileB] = [fileB, fileA]
     endif
 
@@ -697,10 +698,10 @@ fu myfuncs#in_A_not_in_B(...) abort "{{{1
     " see a  file anymore, only  its contents, which  removes some noise  in the
     " output.
     "}}}
-    sil let output = systemlist('diff -U $(wc -l < '..fileA..') '..fileA..' '..fileB.." | grep '^-' | sed 's/^-//g'")
+    sil let output = systemlist('diff -U $(wc -l < ' .. fileA .. ') ' .. fileA .. ' ' .. fileB .. " | grep '^-' | sed 's/^-//g'")
 
-    call map(output, {_,v -> {'text': v}})
-    call setloclist(0, [], ' ', {'items': output, 'title': 'in  '..fileA..'  but not in  '..fileB})
+    call map(output, {_, v -> {'text': v}})
+    call setloclist(0, [], ' ', {'items': output, 'title': 'in  ' .. fileA .. '  but not in  ' .. fileB})
 
     do <nomodeline> QuickFixCmdPost lopen
     call qf#set_matches('myfuncs#in_A_not_in_B', 'Conceal', 'double_bar')
@@ -717,26 +718,26 @@ fu myfuncs#join_blocks(first_reverse) abort "{{{1
         return ''
     endif
 
-    let end_first_block    = line1 + (line2 - line1 + 1)/2 - 1
-    let range_first_block  = line1..','..end_first_block
-    let range_second_block = (end_first_block + 1)..','..line2
-    let mods               = 'keepj keepp '
+    let end_first_block = line1 + (line2 - line1 + 1) / 2 - 1
+    let range_first_block = line1 .. ',' .. end_first_block
+    let range_second_block = (end_first_block + 1) .. ',' .. line2
+    let mods = 'keepj keepp '
 
     let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
     let &l:fen = 0
     try
         if a:first_reverse
-            sil exe range_first_block..'d'
-            sil exe end_first_block..'put'
+            sil exe range_first_block .. 'd'
+            sil exe end_first_block .. 'put'
         endif
 
-        sil exe mods..range_second_block.."s/^/\x01/e"
-        sil exe mods..range_first_block..'g/^/'..(end_first_block + 1)..'m.|-j'
+        sil exe mods .. range_second_block .. "s/^/\x01/e"
+        sil exe mods .. range_first_block .. 'g/^/' .. (end_first_block + 1) .. 'm.|-j'
 
         sil *!column -s $'\x01' -t
 
     catch
-        return lg#catch()
+        return Catch()
     finally
         if winbufnr(winid) == bufnr
             let [tabnr, winnr] = win_id2tabwin(winid)
@@ -760,23 +761,23 @@ fu myfuncs#long_data_join(...) abort "{{{1
         return 'g@'
     endif
 
-    let range = line("'[")..','..line("']")
+    let range = line("'[") .. ',' .. line("']")
 
     let bullets = '[-*+]'
-    let join_bulleted_list = getline('.') =~# '^\s*'..bullets
+    let join_bulleted_list = getline('.') =~# '^\s*' .. bullets
 
     try
         if join_bulleted_list
-            sil exe 'keepj keepp'..range..'s/^\s*\zs'..bullets..'\s*//'
-            sil exe 'keepj keepp'..range..'-s/$/,/'
-            sil exe range..'j'
+            sil exe 'keepj keepp' .. range .. 's/^\s*\zs' .. bullets .. '\s*//'
+            sil exe 'keepj keepp' .. range .. '-s/$/,/'
+            sil exe range .. 'j'
         else
-            sil exe 'keepj keepp '..range..'s/\n\s*\\//ge'
-            call cursor(line("'["), 1)
+            sil exe 'keepj keepp ' .. range .. 's/\n\s*\\//ge'
+            call cursor("'[", 1)
             sil keepj keepp s/\m\zs\s*,\ze\s\=[\]}]//e
         endif
     catch
-        return lg#catch()
+        return Catch()
     endtry
 endfu
 
@@ -795,20 +796,20 @@ fu myfuncs#long_data_split(...) abort "{{{1
         " symbol (`[` or `{`), add a space:
         sil keepj keepp s/\m[\[{]\s\@!\zs/ /e
         " Move the first item in the list on a dedicated line.
-        sil keepj keepp s/\m[\[{]\zs/\="\n"..first_line_indent.."    \\"/e
+        sil keepj keepp s/\m[\[{]\zs/\="\n" .. first_line_indent .. "    \\"/e
         " split the data
-        sil keepj keepp s/,\zs/\="\n"..first_line_indent..'    \'/ge
+        sil keepj keepp s/,\zs/\="\n" .. first_line_indent .. '    \'/ge
         " move the closing symbol on a dedicated line
-        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n"..first_line_indent.."    \\ "/e
+        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n" .. first_line_indent .. "    \\ "/e
 
     elseif has_comma
         " We use `strdisplaywidth()` because the indentation could contain tabs.
-        let indent_lvl = strdisplaywidth(matchstr(line, '.\{-}\ze\S'))
+        let indent_lvl = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
         let indent_txt = repeat(' ', indent_lvl)
         sil keepj keepp s/\m\ze\S/- /e
         let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
-        let l:Rep = {-> "\n"..indent_txt..'- '}
-        sil exe 'keepj keepp s/'..pat..'/\=l:Rep()/ge'
+        let l:Rep = {-> "\n" .. indent_txt .. '- '}
+        sil exe 'keepj keepp s/' .. pat .. '/\=l:Rep()/ge'
     endif
 endfu
 
@@ -825,7 +826,7 @@ fu myfuncs#plugin_install(url) abort "{{{1
         return
     endif
     let rep = 'Plug ''\1/\2'''
-    let plug_line  = substitute(a:url, pat, rep, '')
+    let plug_line = substitute(a:url, pat, rep, '')
     let to_install = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
 
     let win_orig = win_getid()
@@ -857,10 +858,10 @@ fu myfuncs#plugin_install(url) abort "{{{1
         if !search('^\s*"\=\s*Plug ''.\{-}/.\{-}/\=''', 'W')
             break
         endif
-        let plugin_on_current_line = matchstr(getline('.'), 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze/\=''')
+        let plugin_on_current_line = getline('.')->matchstr('Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze/\=''')
     endwhile
 
-    call append(line('.')-1, plug_line)
+    call append(line('.') - 1, plug_line)
     update
     " Why?{{{
     "
@@ -877,16 +878,16 @@ fu myfuncs#plugin_install(url) abort "{{{1
 
     call win_gotoid(win_vimrc) | q
 
-    " Before going back to the `vim-plug` window, we go back to the original
-    " one. This way, once we are in `vim-plug`, the previous window will be
-    " the original one, and we can go back there with `C-w w`.
+    " Before going  back to the  `vim-plug` window, we  go back to  the original
+    " one.  This way, once we are in `vim-plug`, the previous window will be the
+    " original one, and we can go back there with `C-w w`.
 
     call win_gotoid(win_orig)
     call win_gotoid(win_plug)
 endfu
 
 fu myfuncs#plugin_global_variables(keyword) abort "{{{1
-    if a:keyword is# ''
+    if a:keyword == ''
         let usage =<< trim END
         usage:
 
@@ -896,9 +897,11 @@ fu myfuncs#plugin_global_variables(keyword) abort "{{{1
         echo join(usage, "\n")
         return
     endif
-    let variables = items(filter(deepcopy(g:),
-        \ {k -> k =~# '\C\V'..escape(a:keyword, '\') && k !~# '\%(loaded\|did_plugin_\)'}))
-    call map(variables, {_,v -> v[0]..' = '..string(v[1])})
+    let variables = deepcopy(g:)
+        \ ->filter({k -> k =~# '\C\V' .. escape(a:keyword, '\')
+        \             && k !~# '\%(loaded\|did_plugin_\)'})
+        \ ->items()
+    call map(variables, {_, v -> v[0] .. ' = ' .. string(v[1])})
     new
     setl bt=nofile nobl noswf nowrap
     call setline(1, variables)
@@ -907,17 +910,17 @@ endfu
 fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     let view = winsaveview()
     let mods = 'sil keepj keepp'
-    let range = a:line1..','..a:line2
+    let range = a:line1 .. ',' .. a:line2
     " Why not simply `\t`?{{{
     "
     " We need  the cursor to be  positioned on the screen  position *before* the
     " tab,  because  that's  what  `strdisplaywidth()`  expects  as  its  second
     " argument.
     "}}}
-    " Couldn't I use the pattern `\t`, and `virtcol('.')-1`?{{{
+    " Couldn't I use the pattern `\t`, and `virtcol('.') - 1`?{{{
     "
     " No,  because `virtcol()`  returns  the  index of  the  *last* screen  cell
-    " occupied by the tab character; for `virtcol('.')-1` to work, we would need
+    " occupied by the tab character; for `virtcol('.') - 1` to work, we would need
     " the index of the *first* screen cell.
     "}}}
     " I want to preserve a tab used to indent a line!{{{
@@ -945,9 +948,9 @@ fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     " markdown file, where the leading `> ` is concealed because `'cole'` is 3.
     "}}}
     let l:Rep = {->
-        \ synstack(line('.'), col('.'))->map({_,v -> synIDattr(v, 'name')})->match('heredoc') != -1
+        \ synstack('.', col('.'))->map({_, v -> synIDattr(v, 'name')})->match('heredoc') != -1
         \ ? submatch(0)
-        \ : submatch(1)..repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))}
+        \ : submatch(1) .. repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))}
     " We need the loop because there may be several tabs consecutively.{{{
     "
     " If that happens, a single substitution would fail to replace all of them, for
@@ -958,33 +961,33 @@ fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     " If a line contains 8 tabs, the first iteration will replace the tabs 1, 3, 5 and 7.
     " The second iteration will replace the tabs 2, 4, 6 and 8.
     "}}}
-    for i in [1,2]
-        exe mods..' '..range..'s/'..pat..'/\=l:Rep()/ge'
+    for i in [1, 2]
+        exe mods .. ' ' .. range .. 's/' .. pat .. '/\=l:Rep()/ge'
     endfor
     call winrestview(view)
 endfu
 
 fu myfuncs#search_todo(where) abort "{{{1
     try
-        sil noa exe 'lvim /\CFIX'..'ME\|TO'..'DO/j '..(a:where is# 'buffer' ? '%' : './**/*')
-    catch /^Vim\%((\a\+)\)\?:E480:/
-        echom 'no TO'..'DO or FIX'..'ME'
+        sil noa exe 'lvim /\CFIX' .. 'ME\|TO' .. 'DO/j ' .. (a:where is# 'buffer' ? '%' : './**/*')
+    catch /^Vim\%((\a\+)\)\=:E480:/
+        echom 'no TO' .. 'DO or FIX' .. 'ME'
         return
     catch
-        return lg#catch()
+        return Catch()
     endtry
 
-    " Because we've prefixed `:lvim` with `:noa`, our autocmd which opens a qf window
-    " hasn't kicked in. We must manually open it.
+    " Because we've prefixed  `:lvim` with `:noa`, our autocmd which  opens a qf
+    " window hasn't kicked in.  We must manually open it.
     do <nomodeline> QuickFixCmdPost lwindow
     if &bt isnot# 'quickfix' | return | endif
 
-    "                                        ┌ Tweak the text of each entry when there's a line
-    "                                        │ with just `todo` or `fixme`;
-    "                                        │ replace it with the text of the next non empty line instead
-    "                                        │
-    let items = map(getloclist(0), {_,v -> s:search_todo_text(v)})
-    call setloclist(0, [], 'r', {'items': items, 'title': 'FIX'..'ME & TO'..'DO'})
+    "                                         ┌ Tweak the text of each entry when there's a line
+    "                                         │ with just `todo` or `fixme`;
+    "                                         │ replace it with the text of the next non empty line instead
+    "                                         │
+    let items = getloclist(0)->map({_, v -> s:search_todo_text(v)})
+    call setloclist(0, [], 'r', {'items': items, 'title': 'FIX' .. 'ME & TO' .. 'DO'})
 
     if &bt isnot# 'quickfix'
         return
@@ -998,7 +1001,7 @@ endfu
 fu s:search_todo_text(dict) abort
     let dict = a:dict
     " if the text only contains `fixme` or `todo`
-    if dict.text =~# '\c\%(fixme\|todo\):\=\s*\%('..split(&l:fmr, ',')[0]..'\)\=\s*$'
+    if dict.text =~# '\c\%(fixme\|todo\):\=\s*\%(' .. split(&l:fmr, ',')[0] .. '\)\=\s*$'
         let bufnr = dict.bufnr
         " get the text of the next line, which is not empty (contains at least one keyword character)
         " Why using `readfile()` instead of `getbufline()`?{{{
@@ -1008,8 +1011,8 @@ fu s:search_todo_text(dict) abort
         " There's no guarantee that all buffers in which a fixme/todo is present
         " is currently listed.
         "}}}
-        let lines = readfile(bufname(bufnr), 0, dict.lnum + 4)[-4:]
-        let dict.text = get(filter(lines, {_,v -> v =~ '\k'}), 0, '')
+        let lines = bufname(bufnr)->readfile(0, dict.lnum + 4)[-4:]
+        let dict.text = filter(lines, {_, v -> v =~ '\k'})->get(0, '')
     endif
     return dict
 endfu
@@ -1017,22 +1020,22 @@ endfu
 fu myfuncs#send_to_server() abort "{{{1
     sil undo | let contains_ansi = search("\e", 'n') | sil redo
     let bufname = expand('%:p')
-    if bufname is# '' || bufname =~# '^\C/proc/'
+    if bufname == '' || bufname =~# '^\C/proc/'
         let file = tempname()
-        call writefile(getline(1, '$'), file)
+        call getline(1, '$')->writefile(file)
         " if the buffer contained ansi escape codes, we want them to be sent to the Vim server
         if contains_ansi
             sil undo
-            call writefile(getline(1, '$'), file)
+            call getline(1, '$')->writefile(file)
             sil redo
         else
-            call writefile(getline(1, '$'), file)
+            call getline(1, '$')->writefile(file)
         endif
     else
         let file = bufname
     endif
 
-    let cmd = 'vim --remote-tab '..shellescape(file)
+    let cmd = 'vim --remote-tab ' .. shellescape(file)
     sil call system(cmd)
 
     if v:shell_error
@@ -1043,13 +1046,13 @@ fu myfuncs#send_to_server() abort "{{{1
     endif
 
     " highlight ansi codes; useful for when you run sth like `$ trans word | vipe`
-    if contains_ansi && ($_ =~# '\C/vipe$' || bufname is# '')
+    if contains_ansi && ($_ =~# '\C/vipe$' || bufname == '')
         let cmd = 'vim --remote-expr "lg#textprop#ansi()"'
         sil call system(cmd)
     endif
 
     let msg = printf('the %s was sent to the Vim server',
-        \ bufname is# '' ? 'buffer' : 'file')
+        \ bufname == '' ? 'buffer' : 'file')
     echohl ModeMsg
     echom msg
     echohl NONE
@@ -1061,22 +1064,22 @@ fu myfuncs#tab_toc() abort "{{{1
     endif
 
     let patterns = {
-        \ 'man'     : '\S\zs',
+        \ 'man': '\S\zs',
         \ 'markdown': '^\%(#\+\)\=\S.\zs',
-        \ 'help'    : '\S\ze\*$\|^\s*\*\zs\S',
+        \ 'help': '\S\ze\*$\|^\s*\*\zs\S',
         \ }
 
     let syntaxes = {
-        \ 'man'     : 'heading\|title',
+        \ 'man': 'heading\|title',
         \ 'markdown': 'markdownH\d\+',
-        \ 'help'    : 'helpHyperTextEntry\|helpStar',
+        \ 'help': 'helpHyperTextEntry\|helpStar',
         \ }
 
     let toc = []
     for lnum in range(1, line('$'))
-        let col = match(getline(lnum), patterns[&ft])
-        if col != -1 && synIDattr(synID(lnum, col, 1), 'name') =~? syntaxes[&ft]
-            let text = substitute(getline(lnum), '\s\+', ' ', 'g')
+        let col = getline(lnum)->match(patterns[&ft])
+        if col != -1 && synID(lnum, col, 1)->synIDattr('name') =~? syntaxes[&ft]
+            let text = getline(lnum)->substitute('\s\+', ' ', 'g')
             call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
         endif
    endfor
@@ -1128,7 +1131,7 @@ fu myfuncs#trans(first_time, ...) abort
     endif
 
     " remove characters which cause issue during the translation
-    let garbage = '["`*]'..(!empty(&l:cms) ? '\|'..matchstr(&l:cms, '\S*\ze\s*%s') : '')
+    let garbage = '["`*]' .. (!empty(&l:cms) ? '\|' .. matchstr(&l:cms, '\S*\ze\s*%s') : '')
     let chunk = substitute(s:trans_chunks[0], garbage, '', 'g')
 
     " reduce excessive whitespace
@@ -1144,11 +1147,11 @@ fu myfuncs#trans(first_time, ...) abort
     " to the file after the callback has been invoked
     " use `exit_cb` instead
     let opts = {
-               \ 'out_io':   'file',
-               \ 'out_name': s:trans_tempfile,
-               \ 'err_io':   'null',
-               \ 'exit_cb':  function('s:trans_output'),
-               \ }
+        \ 'out_io': 'file',
+        \ 'out_name': s:trans_tempfile,
+        \ 'err_io': 'null',
+        \ 'exit_cb': function('s:trans_output'),
+        \ }
 
     " send the first chunk in the list of chunks to `trans`
     "
@@ -1156,17 +1159,16 @@ fu myfuncs#trans(first_time, ...) abort
     " at each whitespace before being sent to `trans`.
     " This makes the translation wrong (because no global context), and the
     " voice pauses after each word.
-    " Besides, it's a good habit to invoke a shell so that our command is
-    " properly parsed by the latter. Otherwise, I don't know how Vim parses
-    " it.
+    " Besides,  it's a  good habit  to invoke  a shell  so that  our command  is
+    " properly parsed by the latter.  Otherwise, I don't know how Vim parses it.
     let s:trans_job = job_start([
         \ '/bin/bash',
         \ '-c',
         \
         \ 'trans -brief -speak'
-        \ ..' -t '..get(s:, 'trans_target', 'fr')
-        \ ..' -s '..get(s:, 'trans_source', 'en')
-        \ ..' '..shellescape(chunk)]
+        \ .. ' -t ' .. get(s:, 'trans_target', 'fr')
+        \ .. ' -s ' .. get(s:, 'trans_source', 'en')
+        \ .. ' ' .. shellescape(chunk)]
         \ , opts)
 
     " remove it from the list of chunks
@@ -1176,23 +1178,23 @@ endfu
 fu myfuncs#trans_cycle() abort
     let s:trans_target = {'fr': 'en', 'en': 'fr'}[get(s:, 'trans_target', 'fr')]
     let s:trans_source = {'fr': 'en', 'en': 'fr'}[get(s:, 'trans_source', 'en')]
-    echo '[trans] '..s:trans_source..' → '..s:trans_target
+    echo '[trans] ' .. s:trans_source .. ' → ' .. s:trans_target
 endfu
 
 fu s:trans_grab_visual() abort
     let [lnum1, lnum2] = [line("'<"), line("'>")]
-    let [c1, c2] = [col("'<"),  col("'>)")]
+    let [c1, c2] = [col("'<"), col("'>)")]
 
     " single line visual selection
     if lnum1 == lnum2
-        let text = matchstr(getline(lnum1), '\%'..c1..'c.*\%'..c2..'c.\=\ze.*$')
+        let text = getline(lnum1)->matchstr('\%' .. c1 .. 'c.*\%' .. c2 .. 'c.\=\ze.*$')
     else
         " multi lines
-        let first  = matchstr(getline(lnum1), '\%'..c1..'c.*$')
-        let last   = ' '..matchstr(getline(lnum2), '^.\{-}\%'..c2..'c.\=')
-        let middle = (lnum2 - lnum1) > 1 ? ' '..join(getline(lnum1+1,lnum2-1), ' ') : ''
+        let first = getline(lnum1)->matchstr('\%' .. c1 .. 'c.*$')
+        let last = ' ' .. getline(lnum2)->matchstr('^.\{-}\%' .. c2 .. 'c.\=')
+        let middle = (lnum2 - lnum1) > 1 ? ' ' .. getline(lnum1 + 1, lnum2 - 1)->join(' ') : ''
 
-        let text = first..middle..last
+        let text = first .. middle .. last
     endif
     return text
 endfu
@@ -1219,7 +1221,7 @@ fu s:trans_output(job, exit_status) abort
     "     medium:  < 150 "           →  one invocation, scratch buffer
     "     long  :  > 200 "           →  several invocations, scratch buffer
 
-    echo join(readfile(s:trans_tempfile), ' ')
+    echo readfile(s:trans_tempfile)->join(' ')
     if len(s:trans_chunks)
         call myfuncs#trans(0)
     endif
@@ -1236,8 +1238,8 @@ fu myfuncs#webpage_read(url) abort "{{{1
         echo 'w3m is not installed'
         return
     endif
-    let tempfile = tempname()..'/webpage'
-    exe 'tabe '..tempfile
+    let tempfile = tempname() .. '/webpage'
+    exe 'tabe ' .. tempfile
     " Alternative shell command:{{{
     "
     "     $ lynx -dump -width=1000 url
@@ -1245,17 +1247,19 @@ fu myfuncs#webpage_read(url) abort "{{{1
     "                         └ high nr to be sure that
     "                           `lynx` won't break long lines of code
     "}}}
-    sil exe 'r !w3m -cols 100 '..shellescape(a:url, 1)
+    sil exe 'r !w3m -cols 100 ' .. shellescape(a:url, 1)
     setl bt=nofile nobl noswf nowrap
 endfu
 
 fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
-    let flags  = {
+    let flags = {
         \  'min_length': matchstr(a:1, '-min_length\s\+\zs\d\+'),
         \  'weighted': stridx(a:1, '-weighted') != -1,
         \ }
 
-    let words = split(join(getline(a:line1, a:line2), "\n"), '\%(\%(\k\@!\|\d\).\)\+')
+    let words = getline(a:line1, a:line2)
+        \ ->join("\n")
+        \ ->split('\%(\%(\k\@!\|\d\).\)\+')
     let min_length = !empty(flags.min_length) ? flags.min_length : 4
 
     " remove anything which is:
@@ -1269,10 +1273,10 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
     "
     "    - not containing any letter
 
-    call filter(words, {_,v -> strchars(v, 1) >= min_length && strchars(v, 1) <= 30 && v =~ '\a'})
+    call filter(words, {_, v -> strchars(v, 1) >= min_length && strchars(v, 1) <= 30 && v =~ '\a'})
 
     " put all of them in lowercase
-    call map(words, {_,v -> tolower(v)})
+    call map(words, {_, v -> tolower(v)})
 
     let freq = {}
     for word in words
@@ -1295,25 +1299,25 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         "
         "   - otherwise, by default, an abbreviation should be 3 characters long
         "}}}
-        call map(weighted_freq, {k,v ->
+        call map(weighted_freq, {k, v ->
             \ v * (strchars(k, 1)
             \ -
             \ strchars(k, 1) == 4
             \ ? 2
-            \   : k[-1:-1] is# "s" && index(keys(freq), k[:strlen(k)-1]) >= 0
+            \   : k[-1:-1] is# "s" && keys(freq)->index(k[:strlen(k) - 1]) >= 0
             \   ?     4
             \   :     3
             \ )})
-        let weighted_freq = sort(items(weighted_freq), {a, b -> b[1] - a[1]})
+        let weighted_freq = items(weighted_freq)->sort({a, b -> b[1] - a[1]})
     endif
 
     " put the result in a vertical viewport
-    let tempfile = tempname()..'/WordFrequency'
-    exe 'lefta '..(&columns/3)..'vnew '..tempfile
+    let tempfile = tempname() .. '/WordFrequency'
+    exe 'lefta ' .. (&columns/3) .. 'vnew ' .. tempfile
     setl bh=delete bt=nofile nobl noswf wfw nowrap pvw
 
     for item in flags.weighted ? weighted_freq : items(freq)
-        call append('$', join(item))
+        call join(item)->append('$')
     endfor
 
     " format output into aligned columns
@@ -1324,8 +1328,8 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
         " Probably because there's nothing to align in it.
     endif
 
-    exe 'vert res '..(max(map(getline(1, '$'), {_,v -> strchars(v, 1)}))+4)
-    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q<cr>'
+    exe 'vert res ' .. (range(1, line('$'))->map("virtcol([v:val, '$'])")->max() + 4)
+    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
     wincmd p
 endfu
 
@@ -1361,7 +1365,7 @@ fu myfuncs#zshoptions() abort "{{{1
     " It  doesn't tell  you whether  the  default values  of the  options have  been
     " changed.
     "}}}
-    sil keepj keepp 1;/^[^ \#]/,$s/^../\=submatch(0) is# 'no' ? '' : 'no'..submatch(0)/e
+    sil keepj keepp 1;/^[^ \#]/,$s/^../\=submatch(0) is# 'no' ? '' : 'no' .. submatch(0)/e
     1
 endfu
 

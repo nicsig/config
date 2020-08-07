@@ -228,8 +228,8 @@ shopt -s globstar
 # append to the history file, don't overwrite it
 shopt -s histappend
 
-# After a failed history expansion (e.g.: !<too big number>), don't give me an
-# empty prompt. Reload it (unexpanded) into the readline editing buffer for
+# After a failed  history expansion (e.g.: !<too big number>),  don't give me an
+# empty prompt.   Reload it  (unexpanded) into the  readline editing  buffer for
 # correction.
 shopt -s histreedit
 

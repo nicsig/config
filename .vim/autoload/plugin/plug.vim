@@ -9,10 +9,10 @@ fu plugin#plug#move_between_commits(is_fwd) abort "{{{1
 endfu
 
 fu plugin#plug#show_documentation() abort "{{{1
-    let name = matchstr(getline('.'), '^- \zs\S\+\ze:')
+    let name = getline('.')->matchstr('^- \zs\S\+\ze:')
     if has_key(g:plugs, name)
-        for doc in split(globpath(g:plugs[name].dir, 'doc/*.txt'), '\n')
-            exe 'tabe +setf\ help '.doc
+        for doc in globpath(g:plugs[name].dir, 'doc/*.txt')->split('\n')
+            exe 'tabe +setf\ help ' .. doc
         endfor
     endif
 endfu

@@ -213,7 +213,7 @@ Press `vis"` while the cursor is where the bar is:
         b|ar
         " baz
 
-It should select the sandwich. It doesn't.
+It should select the sandwich.  It doesn't.
 Same issue with `vis'` and:
 
         ' foo
@@ -250,7 +250,7 @@ Read this (taken from vim-surround note), and try to reimplement it:
     entre chaque paire consécutive de `\1 … \1`.
     On ne peut pas se référer plusieurs fois au texte d'origine.
     IOW, on ne peut pas utiliser plusieurs fois `\r`.
-    Le 1er sera bien remplacé par le text-object d'origine. Mais les autres
+    Le 1er sera bien remplacé par le text-object d'origine.  Mais les autres
     seront traduits en CR littéraux.
     Il est nécessaire d'utiliser des doubles quotes.
     On peut utiliser jusqu'à 7 input différents:

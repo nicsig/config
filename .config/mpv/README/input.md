@@ -15,7 +15,7 @@
 
 ##
 # bind
-## `#` is already used to begin a comment. So, how to assign a key to `#`?
+## `#` is already used to begin a comment.  So, how to assign a key to `#`?
 
 Use `SHARP` in your key binding.
 Example:

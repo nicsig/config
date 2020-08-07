@@ -27,7 +27,7 @@
 #
 # Source: https://github.com/tpope/vim-pathogen
 #}}}
-# Some of your globs don't begin with a star. Does Git add one automatically?{{{
+# Some of your globs don't begin with a star.  Does Git add one automatically?{{{
 #
 # No.
 # If there's no star, it simply means we don't need one.

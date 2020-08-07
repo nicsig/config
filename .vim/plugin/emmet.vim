@@ -4,7 +4,7 @@ endif
 
 " Options {{{1
 
-" We don't want global mappings. We prefer buffer-local ones.
+" We don't want global mappings.  We prefer buffer-local ones.
 let g:user_emmet_install_global = 0
 
 " We only need mappings in insert and visual mode (not normal).

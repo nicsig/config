@@ -15,7 +15,7 @@ fi
 #
 # We source `bashrc` only in interactive shells, but maybe some programs are NOT
 # started from  an interactive shell  and still rely  on `$PATH` to  be properly
-# set. Maybe some which are started by the display manager?
+# set.  Maybe some which are started by the display manager?
 #
 # https://unix.stackexchange.com/a/88266/232487
 #
@@ -27,7 +27,7 @@ fi
 #
 # No.
 #
-# Ubuntu sets  `PATH` in `/etc/environment` or  `/etc/login.defs`. This explains
+# Ubuntu sets `PATH` in  `/etc/environment` or `/etc/login.defs`.  This explains
 # why when we disable all our  config files, `$PATH` still contains some values,
 # including `$HOME/bin` and `$HOME/.local/bin`.
 #

@@ -1,7 +1,8 @@
 finish
 
 " TODO: Finish refactoring/assimilating this  code using variable names/snippets
-" from `~/.vim/indent/mymatlab.vim`. Also, integrate the comments from the latter.
+" from  `~/.vim/indent/mymatlab.vim`.  Also,  integrate  the  comments from  the
+" latter.
 
 " You can test the script on this text:{{{
 "
@@ -24,23 +25,23 @@ finish
 "
 "     ans =
 "     {
-"       [1,1] =
+"       [1, 1] =
 "       {
-"         [1,1] = 1
-"         [1,2] = 1
-"         [1,3] = 1
-"         [1,4] = 9
-"         [1,5] = hello
-"         [1,6] = 3
+"         [1, 1] = 1
+"         [1, 2] = 1
+"         [1, 3] = 1
+"         [1, 4] = 9
+"         [1, 5] = hello
+"         [1, 6] = 3
 "       }
-"       [2,1] =
+"       [2, 1] =
 "       {
-"         [1,1] = 1
-"         [1,2] = 1
-"         [1,3] = 1
-"         [1,4] = -33
-"         [1,5] = world
-"         [1,6] = 3
+"         [1, 1] = 1
+"         [1, 2] = 1
+"         [1, 3] = 1
+"         [1, 4] = -33
+"         [1, 5] = world
+"         [1, 6] = 3
 "       }
 "     }
 "
@@ -69,13 +70,13 @@ let b:MATLAB_was_lc = 0
 let b:MATLAB_bracketlevel = 0
 
 let b:did_indent = 1
-let b:undo_indent = get(b:, 'undo_indent', 'exe')..'| setl inde< indk<'
+let b:undo_indent = get(b:, 'undo_indent', 'exe') .. '| setl inde< indk<'
 
 if exists('*s:get_indent') | finish | endif
 
 let s:end = '\<end\>\%([^({]*[)}]\)\@!' " array indexing heuristic
 let s:open_pat = 'for\|if\|parfor\|spmd\|switch\|try\|while\|classdef\|properties\|methods\|events\|enumeration'
-let s:start_pat = '\C\<\%(function\|'..s:open_pat..'\)\>'
+let s:start_pat = '\C\<\%(function\|' .. s:open_pat .. '\)\>'
 const s:BRACKET_PAT = '\([[{]\)\|\([]}]\)'
 
 fu s:get_indent() abort "{{{1
@@ -152,10 +153,10 @@ fu s:get_indent() abort "{{{1
         \ ..    s:open_pat
         \ ..    '\|function'
         \ ..    '\|\%(^\s*\)\@<=\%(else\|elseif\|case\|otherwise\|catch\)'
-        \ ..'\)\>'
-        \ ..'\|\S\s*\zs\('..s:end..'\)'
+        \ .. '\)\>'
+        \ .. '\|\S\s*\zs\(' .. s:end .. '\)'
     let [open, close, b_open, b_close] = prevlnum
-        \ ? s:submatches_counts(prevlnum, pair_pat..'\|'..s:BRACKET_PAT)
+        \ ? s:submatches_counts(prevlnum, pair_pat .. '\|' .. s:BRACKET_PAT)
         \ : [0, 0, 0, 0]
     let curbracketlevel = b:MATLAB_bracketlevel + b_open - b_close
 
@@ -163,7 +164,7 @@ fu s:get_indent() abort "{{{1
     let submatch = search('\C^\s*\zs\<\%(end\|else\|elseif\|catch\|\(case\|otherwise\|function\)\)\>', 'cpz', v:lnum)
     if submatch && !s:is_comment_or_string(v:lnum, col('.'))
         " align end, et cetera with start of block
-        let [lnum, col] = searchpairpos(s:start_pat, '',  '\C'..s:end, 'bW',
+        let [lnum, col] = searchpairpos(s:start_pat, '', '\C' .. s:end, 'bW',
             \ 's:is_comment_or_string(line("."), col("."))')
         let final_indent = lnum
             \ ? indent(lnum) + shiftwidth() * (s:get_unclosed_lvl(lnum, pair_pat, col) + submatch == 2)
@@ -172,8 +173,8 @@ fu s:get_indent() abort "{{{1
         " Count how many blocks the previous line opens/closes
         " Line continuations/brackets indent once per statement
         let final_indent = (prevlnum > 0) * indent(prevlnum) + shiftwidth() * (open - close
-        \ + (b:MATLAB_bracketlevel ? -!curbracketlevel : !!curbracketlevel)
-        \ + (curbracketlevel <= 0) * (above_lc - b:MATLAB_was_lc))
+            \ + (b:MATLAB_bracketlevel ? -!curbracketlevel : !!curbracketlevel)
+            \ + (curbracketlevel <= 0) * (above_lc - b:MATLAB_was_lc))
     endif
 
     let b:MATLAB_was_lc = above_lc
@@ -182,7 +183,7 @@ fu s:get_indent() abort "{{{1
     let b:MATLAB_lastline = v:lnum
     return final_indent
 endfu
-let &l:inde = function('s:get_indent')->string() .. '()'
+let &l:inde = expand('<SID>') .. 'get_indent()'
 
 fu s:get_unclosed_lvl(lnum, pat, ...) abort "{{{1
     let [opening_tokens, closing_tokens; rest] = call('s:submatches_counts', [a:lnum, a:pat] + a:000)
@@ -210,12 +211,12 @@ fu s:is_comment_or_string(lnum, col) abort "{{{1
     "
     " Besides, it simplifies the pattern to the right of `=~#`.
     "}}}
-    return synIDattr(synIDtrans(synID(a:lnum, a:col, 1)), 'name')
+    return synID(a:lnum, a:col, 1)->synIDtrans()->synIDattr('name')
         \ =~# 'Comment\|String\|Todo'
 endfu
 
 fu s:is_line_continuation(lnum, col) abort "{{{1
-    return synIDattr(synID(a:lnum, a:col, 1), 'name')
+    return synID(a:lnum, a:col, 1)->synIDattr('name')
         \ =~# 'matlabLineContinuation'
 endfu
 
@@ -228,7 +229,7 @@ fu s:continues_on_next_line(lnum) abort "{{{1
 
     let line = getline(a:lnum)
     let col = match(line, '\.\{3}\s*$')
-    " Note: The original plugin uses a while loop. I don't understand why. It seems useless.{{{
+    " Note: The original plugin uses a while loop.  I don't understand why.  It seems useless.{{{
     "
     "     $VIMRUNTIME/indent/matlab.vim:47
     "
@@ -239,7 +240,7 @@ fu s:continues_on_next_line(lnum) abort "{{{1
     "
     " See our comment at the top of `~/.vim/after/syntax/matlab.vim`.
     "}}}
-    " Note: In the original plugin, `col` is not incremented by 1. I think it's a mistake.{{{
+    " Note: In the original plugin, `col` is not incremented by 1.  I think it's a mistake.{{{
     "
     "                                         ✘
     "                                         v
@@ -255,7 +256,7 @@ fu s:continues_on_next_line(lnum) abort "{{{1
     "     elseif !s:IsCommentOrString(a:lnum, c) | return 1 | endif
     "     " $VIMRUNTIME/indent/matlab.vim:50
     "
-    " It  looks  wrong. I  think  we   should  check  whether  the  position  is
+    " It  looks  wrong.   I  think  we should  check  whether  the  position  is
     " highlighted by `matlabLineContinuation`.
     "
     " Rationale: A positive assertion is more restrictive.

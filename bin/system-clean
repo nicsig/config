@@ -4,7 +4,7 @@
 
 # Il ne devrait être exécutable que par root (chmod go-x).
 
-# Il reste à terminer. On pourra entre autres s'inspirer de ce thread :
+# Il reste à terminer.  On pourra entre autres s'inspirer de ce thread :
 # https://www.debian-fr.org/aptitude-gestion-des-dependances-et-orphelins-t35575.html
 
 # On vérifie que le script est bien lancé par root.

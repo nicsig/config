@@ -11,7 +11,7 @@ fu plugin#websearch#main() abort
     " I care about the search being  more predictable, even when it contains special
     " characters.
     "}}}
-    let query = substitute(getline('.'), '"', '', 'g')
+    let query = getline('.')->substitute('"', '', 'g')
     " An ampersand can truncate the query.{{{
     "
     "     $ xdg-open 'https://www.startpage.com/do/search?query=foo & bar'
@@ -25,6 +25,6 @@ fu plugin#websearch#main() abort
     let query = substitute(query, '&', '%26', 'g')
     " Same issue with an equal sign.
     let query = substitute(query, '=', '%3d', 'g')
-    sil call system('xdg-open '..shellescape(b:url..query))
+    sil call system('xdg-open ' .. shellescape(b:url .. query))
     q!
 endfu

@@ -11,7 +11,7 @@
 " In your head, you count from 1.
 " For items in a list, Vim counts from 0.
 
-" Do NOT  adapt your way of  counting to Vim. Your reasoning  is more important.
+" Do *not*  adapt your way of  counting to Vim.  Your reasoning  is more important.
 " To index an item in a list, initialize `i` to 1 , and use `i-1`.
 " But when you read `i-1`, in your head, keep thinking "this is the i-th item":
 

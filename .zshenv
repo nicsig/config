@@ -701,7 +701,7 @@ export TZ='Europe/Paris'
 
 # directories relative to which various kinds of user-specific files should be written
 # For more info, see: https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
-# The link talks about data files. What are they?{{{
+# The link talks about data files.  What are they?{{{
 #
 #    - trash
 #    - icons
@@ -872,7 +872,7 @@ export XDG_RUNTIME_DIR=/run/user/$UID
         # the previous iteration has added an  extra colon at the beginning), so
         # there's no need to add a colon.
         # During the  third iteration,  `rebuild` contains sth  like `:foo:bar`,
-        # then  `:foo:bar:baz`  and  so  on. There's   always  a  colon  at  the
+        # then  `:foo:bar:baz`  and  so  on.   There's always  a  colon  at  the
         # beginning.
         # }}}
         case "${rebuild}": in

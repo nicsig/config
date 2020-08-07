@@ -128,7 +128,7 @@ xbanish &
 
 # Purpose:{{{
 #
-# Configure xterm. In  particular, make its  background identical to the  one in
+# Configure xterm.  In  particular, make its background identical to  the one in
 # urxvt (instead of black by default).
 #}}}
 xrdb -cpp "$(command -v cpp) -traditional-cpp" "${HOME}"/.Xresources &

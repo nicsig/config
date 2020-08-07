@@ -26,8 +26,7 @@
 "     echo line[1] =~ '\w'
 "     v:true~
 "}}}
-
-def ccomplete#Complete(findstart: number, base: string): any # {{{1
+def ccomplete#Complete(findstart: number, base: string): any #{{{1
     if findstart
         # Locate the start of the item, including ".", "->" and "[...]".
         let line = getline('.')
@@ -146,7 +145,7 @@ def ccomplete#Complete(findstart: number, base: string): any # {{{1
         # TODO: join previous line if it makes sense
         let line = getline('.')
         let col = col('.')
-        if stridx(strpart(line, 0, col), ';') != -1
+        if strpart(line, 0, col)->stridx(';') != -1
             # Handle multiple declarations on the same line.
             let col2 = col - 1
             while strpart(line, col2, 1) != ';'
@@ -155,7 +154,7 @@ def ccomplete#Complete(findstart: number, base: string): any # {{{1
             line = strpart(line, col2 + 1)
             col -= col2
         endif
-        if stridx(strpart(line, 0, col), ',') != -1
+        if strpart(line, 0, col)->stridx(',') != -1
             # Handle multiple declarations on the same line in a function
             # declaration.
             let col2 = col - 1
@@ -277,7 +276,7 @@ def ccomplete#Complete(findstart: number, base: string): any # {{{1
     return map(res, {_, v -> Tagline2item(v, brackets)})
 enddef
 
-def GetAddition(line: string, match: string, memarg: list<dict<any>>, bracket: bool): string # {{{1
+def GetAddition(line: string, match: string, memarg: list<dict<any>>, bracket: bool): string #{{{1
     # Guess if the item is an array.
     if bracket && match(line, match .. '\s*\[') > 0
         return '['
@@ -295,7 +294,7 @@ def GetAddition(line: string, match: string, memarg: list<dict<any>>, bracket: b
     return ''
 enddef
 
-def Tag2item(val: dict<any>) # {{{1
+def Tag2item(val: dict<any>) #{{{1
     # Turn the tag info "val" into an item for completion.
     # "val" is is an item in the list returned by taglist().
     # If it is a variable we may add "." or "->".  Don't do it for other types,
@@ -324,7 +323,7 @@ def Tag2item(val: dict<any>) # {{{1
     return res
 enddef
 
-def Dict2info(dict: dict<any>): string # {{{1
+def Dict2info(dict: dict<any>): string #{{{1
     # Use all the items in dictionary for the "info" entry.
     let info = ''
     for k in keys(dict)->sort()
@@ -357,7 +356,7 @@ fu s:ParseTagline(line) abort "{{{1
             " Find end of cmd, it may contain Tabs.
             while n < len(l) && l[n] !~ '/;"$'
                 let n += 1
-                let d['cmd'] .= "  " .. l[n]
+                let d['cmd'] ..= '  ' .. l[n]
             endwhile
         endif
         for i in range(n + 1, len(l) - 1)
@@ -374,7 +373,7 @@ fu s:ParseTagline(line) abort "{{{1
     return d
 endfu
 
-def Tagline2item(val: dict<any>, brackets: string): dict<any> # {{{1
+def Tagline2item(val: dict<any>, brackets: string): dict<any> #{{{1
     # Turn a match item "val" into an item for completion.
     # "val['match']" is the matching item.
     # "val['tagline']" is the tagline in which the last part was found.
@@ -387,7 +386,7 @@ def Tagline2item(val: dict<any>, brackets: string): dict<any> # {{{1
         res['info'] = val['info']
     else
         # Parse the tag line and add each part to the "info" entry.
-        let s = Dict2info(s:ParseTagline(line))
+        let s = s:ParseTagline(line)->Dict2info()
         if s != ''
             res['info'] = s
         endif
@@ -417,7 +416,7 @@ def Tagline2item(val: dict<any>, brackets: string): dict<any> # {{{1
     return res
 enddef
 
-def Tagcmd2extra(cmd: string, name: string, fname: string): string # {{{1
+def Tagcmd2extra(cmd: string, name: string, fname: string): string #{{{1
     # Turn a command from a tag line to something that is useful in the menu
     let x: string
     if cmd =~ '^/^'
@@ -436,7 +435,7 @@ def Tagcmd2extra(cmd: string, name: string, fname: string): string # {{{1
     return x
 enddef
 
-def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<string> # {{{1
+def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<string> #{{{1
     # Find composing type in "lead" and match items[0] with it.
     # Repeat this recursively for items[1], if it's there.
     # When resolving typedefs "depth" is used to avoid infinite recursion.
@@ -497,12 +496,12 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<s
             let cmd = item['cmd']
             let ei = matchend(cmd, 'typedef\s\+')
             if ei > 1
-                let cmdtokens = split(strpart(cmd, ei), '\s\+\|\<')
+                let cmdtokens = strpart(cmd, ei)->split('\s\+\|\<')
                 if len(cmdtokens) > 1
                     if cmdtokens[0] == 'struct' || cmdtokens[0] == 'union' || cmdtokens[0] == 'class'
                         let name = ''
                         # Use the first identifier after the "struct" or "union"
-                        for ti in range(len(cmdtokens) - 1)
+                        for ti in (len(cmdtokens) - 1)->range()
                             if cmdtokens[ti] =~ '^\w'
                                 name = cmdtokens[ti]
                                 break
@@ -572,35 +571,11 @@ fu s:StructMembers(typename, items, all) abort "{{{1
 
         if a:all == 0
             " Store the result to be able to use it again later.
-            " TODO(mine): In Vim9 script, why does this raise E1088? {{{
+            " TODO(mine): When you'll refactor this function in a `:def` function:{{{
             "
-            "     s:grepCache[_typename] = qflist
-            "
-            " MWE:
-            "
-            "     vim9script
-            "     s:dict = {}
-            "     def Func()
-            "         s:dict['key'] = 'val'
-            "     enddef
-            "     Func()
-            "     E1088: cannot use an index on s:dict~
-            "
-            " Is it a bug?
-            " If yes, report it.  If no, document the pitfall.
-            " It's the same issue  that we have documented at the  top of the autoload
-            " script in `vim-search`.
-            "
-            " Anyway, here is an alternative:
-            "
-            "     extend(s:grepCache, {_typename: qflist})
-            "
-            " ---
-            "
-            " Btw,  about  `_typename`,  at  this point  in  the  refactoring,  you'll
-            " probably  need   to  have  created  a   secondary  variable  `_typename`
-            " initialized by `typename`.   Here is what the code  should probably look
-            " like around:
+            " you'll  probably  need  to   have  created  a  secondary  variable
+            " `_typename`  initialized by  `typename`.   Here is  what the  code
+            " should probably look like around:
             "
             "     let _typename: string
             "     while 1
@@ -612,7 +587,7 @@ fu s:StructMembers(typename, items, all) abort "{{{1
             "       _typename = substitute(typename, ':[^:]*::', ':', '')
             "     endwhile
             "     if all == 0
-            "       extend(s:grepCache, {_typename: qflist})
+            "       s:grepCache[_typename] = qflist
             "     endif
             " }}}
             let s:grepCache[a:typename] = qflist
@@ -690,7 +665,7 @@ fu s:StructMembers(typename, items, all) abort "{{{1
     return []
 endfu
 
-def SearchMembers(matches: list<dict<any>>, items: list<string>, all: number): list<any> # {{{1
+def SearchMembers(matches: list<dict<any>>, items: list<string>, all: number): list<any> #{{{1
     # TODO(mine): Should the function return type be `list<string>` instead?
     # Or maybe `list<dict<any>>`?
 

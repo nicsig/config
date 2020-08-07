@@ -43,17 +43,17 @@ fu s:set_recipes() abort
     "}}}
     " TODO: https://www.reddit.com/r/vim/comments/c3aeoy/always_loathed/
     let g:sandwich#recipes = g:sandwich#default_recipes
-                         \ + [{'buns': ['\e[3m', '\e[0m'], 'input': ['si']}]
-                         \ + [{'buns': ['\e[1m', '\e[0m'], 'input': ['sb']}]
-                         \ + [{'buns': ['\e[1;3m', '\e[0m'], 'input': ['sB']}]
-                         \ + [{'buns': ['– ', ' –'], 'input': ['d']}]
-                         \ + [{'buns': ['`', "'"], 'input': ['g']}]
-                         \ + [{'buns': ['“', '”'], 'input': ['u"']}]
-                         \ + [{'buns': ['‘', '’'], 'input': ["u'"]}]
-                         \ + [{'buns': ['«', '»'], 'input': ['u<']}]
-                         \ + [{'buns': ['```diff', '```'], 'input': ['D'],
-                         "\ make sure that the diff is clamped to the right border of the window
-                         \     'command': ['exe "''[,'']s/^\\s\\{" .. indent("''[") .. "}//e"']}]
+        \ + [{'buns': ['\e[3m', '\e[0m'],   'input': ['si']}]
+        \ + [{'buns': ['\e[1m', '\e[0m'],   'input': ['sb']}]
+        \ + [{'buns': ['\e[1;3m', '\e[0m'], 'input': ['sB']}]
+        \ + [{'buns': ['– ', ' –'],         'input': ['d']}]
+        \ + [{'buns': ['`', "'"],           'input': ['g']}]
+        \ + [{'buns': ['“', '”'],           'input': ['u"']}]
+        \ + [{'buns': ['‘', '’'],           'input': ["u'"]}]
+        \ + [{'buns': ['«', '»'],           'input': ['u<']}]
+        \ + [{'buns': ['```diff', '```'],   'input': ['D'],
+        "\ make sure that the diff is clamped to the right border of the window
+        \     'command': ['exe "''[,'']s/^\\s\\{" .. indent("''[") .. "}//e"']}]
 
     " We need to remove some recipes.{{{
     "
@@ -110,12 +110,12 @@ fu s:set_recipes() abort
     " we know not to cause any issue.
     " IOW, a whitelist is more reliable than a blacklist.
     let problematic_recipes = [
-        \ {'noremap':     0,
+        \ {'noremap': 0,
         \  'expr_filter': ['operator#sandwich#kind() is# "replace"'],
-        \  'kind':        ['replace', 'textobj'],
-        \  'external':    ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
-        \  'input':       ['t'],
-        \  'synchro':     1},
+        \  'kind': ['replace', 'textobj'],
+        \  'external': ["\<plug>(textobj-sandwich-tagname-i)", "\<plug>(textobj-sandwich-tagname-a)"],
+        \  'input': ['t'],
+        \  'synchro': 1},
         \ ]
 
     for recipe in problematic_recipes

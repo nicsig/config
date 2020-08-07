@@ -89,8 +89,10 @@ let g:vimtex_compiler_latexmk = {
 "
 " ... insert `~0`, it should be replaced with `\emptyset`.
 "
-" For more info, see:    :h vimtex-imaps
-" And:                   :VimtexImapsList
+" For more info, see:
+"
+"     :h vimtex-imaps
+"     :VimtexImapsList
 "}}}
 let g:vimtex_imaps_leader = '~'
 

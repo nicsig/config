@@ -2,6 +2,8 @@ if stridx(&rtp, 'vim-lg-lib') == -1
     finish
 endif
 
+import Catch from 'lg.vim'
+
 " Define some motions {{{1
 "       Why define them here? Why not in vimrc?{{{
 "
@@ -47,7 +49,7 @@ fu s:vertical_jump_rhs(is_fwd) abort
         let mode = "\<c-v>\<c-v>"
     endif
 
-    return printf(":\<c-u>call %s(%d,%s)\<cr>",
+    return printf(":\<c-u>call %s(%d, %s)\<cr>",
         \ function('s:vertical_jump_go'), a:is_fwd, string(mode))
 endfu
 
@@ -65,7 +67,7 @@ fu s:vertical_jump_go(is_fwd, mode) abort
     let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
     let &l:fen = 0
     try
-        exe 'norm! '..(a:is_fwd ? n..'j' : n..'k')
+        exe 'norm! ' .. (a:is_fwd ? n .. 'j' : n .. 'k')
     finally
         " restore folds
         if winbufnr(winid) == bufnr
@@ -81,18 +83,18 @@ fu s:vertical_jump_go(is_fwd, mode) abort
 endfu
 
 fu s:get_jump_height(is_fwd) abort
-    let vcol = '\%'..virtcol('.')..'v'
+    let vcol = '\%' .. virtcol('.') .. 'v'
     let flags = a:is_fwd ? 'nW' : 'bnW'
 
     " a line where there IS a character in the same column,
     " then one where there is NOT
-    let lnum1 = search(vcol..'.*\n\%(.*'..vcol..'.\)\@!', flags)
+    let lnum1 = search(vcol .. '.*\n\%(.*' .. vcol .. '.\)\@!', flags)
 
     " a line where there is NOT a character in the same column,
     " then one where there IS
-    let lnum2 = search('^\%(.*'..vcol..'.\)\@!.*\n.*\zs'..vcol, flags)
+    let lnum2 = search('^\%(.*' .. vcol .. '.\)\@!.*\n.*\zs' .. vcol, flags)
 
-    let lnums = filter([lnum1, lnum2], {_,v -> v > 0})
+    let lnums = filter([lnum1, lnum2], {_, v -> v > 0})
 
     return a:is_fwd
         \ ?     min(lnums) - line('.')
@@ -106,10 +108,10 @@ nno <silent> >t :<c-u>call <sid>move_tabpage('+1')<cr>
 
 fu s:move_tabpage(where) abort
     try
-        exe 'tabmove '..a:where
+        exe 'tabmove ' .. a:where
     catch /^Vim\%((\a\+)\)\=:E474:/
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 " }}}1
@@ -133,8 +135,8 @@ endfu
 " `f` is not a sufficient information to successfully repeat `fx`.
 " 2 solutions:
 "
-"         1. save `x` to later repeat `fx`
-"         2. repeat `fx` by pressing Vim's default `;` motion
+"    1. save `x` to later repeat `fx`
+"    2. repeat `fx` by pressing Vim's default `;` motion
 "
 " The 1st solution will work with `tx` and `Tx`, but only the 1st time.
 " After that, the  cursor won't move, because  it will always be  stopped by the
@@ -222,7 +224,7 @@ fu s:fts(cmd) abort
         "}}}
         call feedkeys(move_fwd ? "\<plug>Sneak_;" : "\<plug>Sneak_,", 'i')
     else
-        call feedkeys("\<plug>Sneak_"..a:cmd, 'i')
+        call feedkeys("\<plug>Sneak_" .. a:cmd, 'i')
     endif
     return ''
 endfu
@@ -230,11 +232,11 @@ endfu
 call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': 'F' ,  'fwd': 'f' },
-    \              {'bwd': 'SS',  'fwd': 'ss'},
-    \              {'bwd': 'T' ,  'fwd': 't' },
+    \              {'bwd': 'F', 'fwd': 'f' },
+    \              {'bwd': 'SS', 'fwd': 'ss'},
+    \              {'bwd': 'T', 'fwd': 't' },
     \            ],
     \ })
 
@@ -250,11 +252,11 @@ call repmap#make#repeatable({
 "}}}
 " Why making motions repeatable in this file?{{{
 "
-"    1. We source it AFTER Vim has started, so all plugins have been
+"    1. We source it *after* Vim has started, so all plugins have been
 "       sourced and any custom motion has already been defined.
 "       We can be sure we're respecting the previous rule.
 "
-"    2. The process can be slow. This file lets us delay it until Vim
+"    2. The process can be slow.  This file lets us delay it until Vim
 "       has started, and to keep a short startup time.
 "}}}
 
@@ -263,10 +265,10 @@ call repmap#make#repeatable({
 " so I just repeat the same keys for 'bwd' and 'fwd'
 call repmap#make#repeatable({
     \ 'mode': 'n',
-    \ 'buffer':  0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'buffer': 0,
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '!e',  'fwd': '!e'},
+    \              {'bwd': '!e', 'fwd': '!e'},
     \            ]
     \ })
 
@@ -274,10 +276,10 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '<t'    ,  'fwd': '>t'},
-    \              {'bwd': '<c-w>R',  'fwd': '<c-w>r'},
+    \              {'bwd': '<t', 'fwd': '>t'},
+    \              {'bwd': '<c-w>R', 'fwd': '<c-w>r'},
     \            ]
     \ })
 
@@ -285,20 +287,20 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': "['",  'fwd': "]'"},
-    \              {'bwd': '["',  'fwd': ']"'},
-    \              {'bwd': '[#',  'fwd': ']#'},
-    \              {'bwd': '[(',  'fwd': '])'},
-    \              {'bwd': '[*',  'fwd': ']*'},
-    \              {'bwd': '[/',  'fwd': ']/'},
-    \              {'bwd': '[M',  'fwd': ']M'},
-    \              {'bwd': '[S',  'fwd': ']S'},
-    \              {'bwd': '[]',  'fwd': ']['},
-    \              {'bwd': '[c',  'fwd': ']c'},
-    \              {'bwd': '[m',  'fwd': ']m'},
-    \              {'bwd': '[{',  'fwd': ']}'},
+    \              {'bwd': "['", 'fwd': "]'"},
+    \              {'bwd': '["', 'fwd': ']"'},
+    \              {'bwd': '[#', 'fwd': ']#'},
+    \              {'bwd': '[(', 'fwd': '])'},
+    \              {'bwd': '[*', 'fwd': ']*'},
+    \              {'bwd': '[/', 'fwd': ']/'},
+    \              {'bwd': '[M', 'fwd': ']M'},
+    \              {'bwd': '[S', 'fwd': ']S'},
+    \              {'bwd': '[]', 'fwd': ']['},
+    \              {'bwd': '[c', 'fwd': ']c'},
+    \              {'bwd': '[m', 'fwd': ']m'},
+    \              {'bwd': '[{', 'fwd': ']}'},
     \            ],
     \ })
 
@@ -306,36 +308,36 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '<l'    ,  'fwd': '>l'},
-    \              {'bwd': '<q'    ,  'fwd': '>q'},
-    \              {'bwd': '[<c-l>',  'fwd': ']<c-l>'},
-    \              {'bwd': '[<c-q>',  'fwd': ']<c-q>'},
-    \              {'bwd': '[a'    ,  'fwd': ']a'},
-    \              {'bwd': '[b'    ,  'fwd': ']b'},
-    \              {'bwd': '[e'    ,  'fwd': ']e'},
-    \              {'bwd': '[f'    ,  'fwd': ']f'},
-    \              {'bwd': '[l'    ,  'fwd': ']l'},
-    \              {'bwd': '[q'    ,  'fwd': ']q'},
-    \              {'bwd': '[s'    ,  'fwd': ']s'},
-    \              {'bwd': '[t'    ,  'fwd': ']t'},
-    \              {'bwd': 'g,'    ,  'fwd': 'g;'},
+    \              {'bwd': '<l', 'fwd': '>l'},
+    \              {'bwd': '<q', 'fwd': '>q'},
+    \              {'bwd': '[<c-l>', 'fwd': ']<c-l>'},
+    \              {'bwd': '[<c-q>', 'fwd': ']<c-q>'},
+    \              {'bwd': '[a', 'fwd': ']a'},
+    \              {'bwd': '[b', 'fwd': ']b'},
+    \              {'bwd': '[e', 'fwd': ']e'},
+    \              {'bwd': '[f', 'fwd': ']f'},
+    \              {'bwd': '[l', 'fwd': ']l'},
+    \              {'bwd': '[q', 'fwd': ']q'},
+    \              {'bwd': '[s', 'fwd': ']s'},
+    \              {'bwd': '[t', 'fwd': ']t'},
+    \              {'bwd': 'g,', 'fwd': 'g;'},
     \            ]
     \ })
 
 call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '[`',  'fwd': ']`'},
-    \              {'bwd': '[h',  'fwd': ']h'},
-    \              {'bwd': '[r',  'fwd': ']r'},
-    \              {'bwd': '[u',  'fwd': ']u'},
-    \              {'bwd': '[U',  'fwd': ']U'},
-    \              {'bwd': '[z',  'fwd': ']z'},
-    \              {'bwd': 'gk',  'fwd': 'gj'},
+    \              {'bwd': '[`', 'fwd': ']`'},
+    \              {'bwd': '[h', 'fwd': ']h'},
+    \              {'bwd': '[r', 'fwd': ']r'},
+    \              {'bwd': '[u', 'fwd': ']u'},
+    \              {'bwd': '[U', 'fwd': ']U'},
+    \              {'bwd': '[z', 'fwd': ']z'},
+    \              {'bwd': 'gk', 'fwd': 'gj'},
     \            ]
     \ })
 
@@ -371,10 +373,10 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'nxo',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '[-',  'fwd': ']-'},
-    \              {'bwd': 'g%',  'fwd': '%'},
+    \              {'bwd': '[-', 'fwd': ']-'},
+    \              {'bwd': 'g%', 'fwd': '%'},
     \            ],
     \ })
 
@@ -382,26 +384,26 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p')..':'..expand('<slnum>'),
+    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
     \ 'motions': [
-    \              {'bwd': '[oC',  'fwd': ']oC'},
-    \              {'bwd': '[oD',  'fwd': ']oD'},
-    \              {'bwd': '[oL',  'fwd': ']oL'},
-    \              {'bwd': '[oS',  'fwd': ']oS'},
-    \              {'bwd': '[oc',  'fwd': ']oc'},
-    \              {'bwd': '[od',  'fwd': ']od'},
-    \              {'bwd': '[oh',  'fwd': ']oh'},
-    \              {'bwd': '[oi',  'fwd': ']oi'},
-    \              {'bwd': '[ol',  'fwd': ']ol'},
-    \              {'bwd': '[on',  'fwd': ']on'},
-    \              {'bwd': '[op',  'fwd': ']op'},
-    \              {'bwd': '[oq',  'fwd': ']oq'},
-    \              {'bwd': '[os',  'fwd': ']os'},
-    \              {'bwd': '[ot',  'fwd': ']ot'},
-    \              {'bwd': '[ov',  'fwd': ']ov'},
-    \              {'bwd': '[ow',  'fwd': ']ow'},
-    \              {'bwd': '[oy',  'fwd': ']oy'},
-    \              {'bwd': '[oz',  'fwd': ']oz'},
+    \              {'bwd': '[oC', 'fwd': ']oC'},
+    \              {'bwd': '[oD', 'fwd': ']oD'},
+    \              {'bwd': '[oL', 'fwd': ']oL'},
+    \              {'bwd': '[oS', 'fwd': ']oS'},
+    \              {'bwd': '[oc', 'fwd': ']oc'},
+    \              {'bwd': '[od', 'fwd': ']od'},
+    \              {'bwd': '[oh', 'fwd': ']oh'},
+    \              {'bwd': '[oi', 'fwd': ']oi'},
+    \              {'bwd': '[ol', 'fwd': ']ol'},
+    \              {'bwd': '[on', 'fwd': ']on'},
+    \              {'bwd': '[op', 'fwd': ']op'},
+    \              {'bwd': '[oq', 'fwd': ']oq'},
+    \              {'bwd': '[os', 'fwd': ']os'},
+    \              {'bwd': '[ot', 'fwd': ']ot'},
+    \              {'bwd': '[ov', 'fwd': ']ov'},
+    \              {'bwd': '[ow', 'fwd': ']ow'},
+    \              {'bwd': '[oy', 'fwd': ']oy'},
+    \              {'bwd': '[oz', 'fwd': ']oz'},
     \            ]
     \ })
 

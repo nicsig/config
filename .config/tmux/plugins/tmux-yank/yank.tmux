@@ -29,8 +29,8 @@ error_handling_if_command_not_present() {
     fi
 }
 
-# `yank_without_newline` binding isn't intended to be used by the user. It is
-# a helper for `copy_line` command.
+# `yank_without_newline` binding isn't intended to be used by the user.  It is a
+# helper for `copy_line` command.
 set_copy_mode_bindings() {
     local copy_command="$1"
     local copy_wo_newline_command

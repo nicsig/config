@@ -13,5 +13,5 @@ nmap <buffer> p o
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'| call plugin#plug#undo_ftplugin()'
+    \ .. '| call plugin#plug#undo_ftplugin()'
 

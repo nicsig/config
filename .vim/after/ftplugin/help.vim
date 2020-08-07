@@ -5,21 +5,21 @@ fu s:fold_expr() abort "{{{1
 endfu
 
 fu s:fold_text() abort "{{{1
-    return getline(nextnonblank(v:foldstart+1))
+    return nextnonblank(v:foldstart+1)->getline()
 endfu
 
 " options {{{1
 
 " Leave this section below the functions definitions.
 
-if expand('<afile>:p') =~# $HOME..'/.vim/doc/misc/\%(notes\|galore\)'
+if expand('<afile>:p') =~# $HOME .. '/.vim/doc/misc/\%(notes\|galore\)'
     setl fdm=expr
-    let &l:fdt = function('s:fold_text')->string() .. '()'
-    let &l:fde = function('s:fold_expr')->string() .. '()'
+    let &l:fdt = expand('<SID>') .. 'fold_text()'
+    let &l:fde = expand('<SID>') .. 'fold_expr()'
 endif
 
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ ..'| setl fde< fdm< fdt<'
+    \ .. '| setl fde< fdm< fdt<'
 

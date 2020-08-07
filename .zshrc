@@ -215,7 +215,7 @@ compdef vboxheadless=VBoxHeadless
 # What's the purpose of these commands?{{{
 #
 # For some  commands, like `tldr`,  there's no easy  way to find/generate  a zsh
-# completion function. But there's one for bash.
+# completion function.  But there's one for bash.
 # In this case, it can be useful to use the bash completion function.
 # To do so, we need to install a compatibility layer to emulate `compgen` and `complete`.
 #
@@ -289,7 +289,7 @@ autoload -Uz run-help
 # By default, it's the help of `sudo` which would be shown.
 #
 # Note, that  `run-help` will  first show you  that `sudo` is  an alias  on your
-# machine. Press any key to get the manpage of `aptitude`.
+# machine.  Press any key to get the manpage of `aptitude`.
 #
 # Do  the  same  thing for  various  other  commands  (if  you type  `git  add`,
 # `run-help` should show you the help of `git-add`, ...).
@@ -380,8 +380,9 @@ setopt BRACE_CCL
 # use `>|` to override the option
 # setopt NO_CLOBBER
 
-# Try to correct the spelling of commands. The shell variable CORRECT_IGNORE may
-# be set to a pattern to match words that will never be offered as corrections.
+# Try to  correct the spelling  of commands.  The shell  variable CORRECT_IGNORE
+# may  be set  to  a  pattern to  match  words that  will  never  be offered  as
+# corrections.
 setopt CORRECT
 
 # Whenever a command  completion or spelling correction is  attempted, make sure
@@ -859,7 +860,7 @@ bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 #    4. press enter key to execute default action, or Meta-enter to write one
 #
 # TODO:
-# Read the whole readme. In particular the sections:
+# Read the whole readme.  In particular the sections:
 #
 #     shortcut widgets
 #     key binds and styles
@@ -1961,7 +1962,7 @@ hex2dec() change-base 16  A "$1"
 nv() { #{{{2
 #    │
 #    └ You want to prevent the  change of `IFS` from affecting the current shell?
-# Ok. Then, use `local IFS`.
+# Ok.  Then, use `local IFS`.
 # Do *not*  use parentheses to  surround the body of  the function and  create a
 # subshell.  It could cause an issue when we suspend then restart Vim.
 # https://unix.stackexchange.com/a/445192/289772
@@ -2437,7 +2438,7 @@ truecolor() { #{{{2
   # How do we make them evolve?{{{
   #
   # To produce a specrum of colors,  they need to evolve in completely different
-  # ways. So, we make:
+  # ways.  So, we make:
   #
   #    - `r` decrease from 255  (to make the specrum begin from very red)
   #                 to     0  (to get most shades of red)
@@ -2656,8 +2657,8 @@ xt() { #{{{2
   # Purpose:{{{
   #
   # Extract an archive using the `atool` command.
-  # Then,  cd  into  the  directory  where  the  contents  of  the  archive  was
-  # extracted. The code is taken from `:Man atool`.
+  # Then, cd into the directory where the contents of the archive was extracted.
+  # The code is taken from `:Man atool`.
   #}}}
   emulate -L zsh
 
@@ -3573,8 +3574,8 @@ bindkey '^T' transpose-chars
 
 # Delete {{{2
 
-# The delete key doesn't work in zsh. Let's fix it.
-# The sequence is hard-coded. I don't like that, because it may not be portable across different environments.{{{
+# The delete key doesn't work in zsh.  Let's fix it.
+# The sequence is hard-coded.  I don't like that, because it may not be portable across different environments.{{{
 #
 # If you want sth more portable, you could try this:
 #
@@ -3604,7 +3605,7 @@ bindkey '^T' transpose-chars
 bindkey '\e[3~' delete-char
 
 # The previous key binding is enough to fix the delete key in most terminals.
-# But not in st. For the latter, we also need this:
+# But not in st.  For the latter, we also need this:
 if [[ -n "${DISPLAY}" ]]; then
   zle-line-init() { echoti smkx }
   zle-line-finish() { echoti rmkx }
@@ -4016,7 +4017,7 @@ __quote_word_or_region() {
 zle -N __quote_word_or_region
 #    │
 #    └ -N widget [ function ]
-# Create a user-defined  widget. When the new widget is invoked  from within the
+# Create a user-defined widget.  When the  new widget is invoked from within the
 # editor, the specified shell function is called.
 # If no function name is specified, it defaults to the same name as the widget.
 bindkey '^Q' __quote_word_or_region
@@ -4030,10 +4031,11 @@ bindkey '^U' backward-kill-line
 
 # C-x        (prefix) {{{3
 
-# NOTE: It seems we can't bind anything to `C-x C-c`, because `C-c` is interpreted as
-# an interrupt signal sent to kill the foreground process. Even if hit after `C-x`.
+# NOTE: It  seems  we  can't  bind  anything to  `C-x  C-c`,  because  `C-c`  is
+# interpreted as an interrupt signal sent  to kill the foreground process.  Even
+# if hit after `C-x`.
 #
-# It's probably  done by the terminal  driver. Maybe we could disable  this with
+# It's probably done  by the terminal driver.  Maybe we  could disable this with
 # `stty` (the  output of  `stty -a` contains  `intr = ^C`),  but it  wouldn't be
 # wise, because it's too important.
 # We would need to find a way to disable it only after `C-x`.
@@ -4475,14 +4477,14 @@ bindkey '^Z' __ctrl_z
 #     24 bar~
 #
 # Next press `i`: nothing happens.
-# This is unexpected. Why?
+# This is unexpected.  Why?
 #
 # Finally release `i`:
 #
 #     64 Alt_L~
 #     108 ISO_Level3_Shift~
 #
-# This is also unexpected. Why?
+# This is also unexpected.  Why?
 #
 # Temporary Solution:
 # Make another additional key generate `~`.
@@ -4652,7 +4654,7 @@ bindkey '\eo' down-case-word
 # functions
 #
 #        This  associative  array  maps names of enabled functions to their
-#        definitions. Setting a key in it is like defining a function with the
+#        definitions.  Setting a key in it is like defining a function with the
 #        name given by the key and the body given by the value.  Unsetting  a
 #        key removes the definition for the function named by the key.
 
@@ -4702,8 +4704,8 @@ bindkey '\ee' __expand_aliases
 # Explain how it works.
 # Also,   what's   the   difference   between   `__normalize_command_line`   and
 # `__expand_aliases`?
-# They seem to do the same thing. If that's so, then remove one of the functions
-# and key bindings.
+# They  seem to  do  the same  thing.   If that's  so, then  remove  one of  the
+# functions and key bindings.
 __normalize_command_line() {
   functions[__normalize_command_line_tmp]=$BUFFER
   BUFFER=${${functions[__normalize_command_line_tmp]#$'\t'}//$'\n\t'/$'\n'}
@@ -5016,7 +5018,7 @@ __abbrev_expand() {
       #     awk '{ print $ }'
       #
       # but zsh inserts a space before the cursor, no matter the value we give
-      # to `CURSOR`. How to avoid this?
+      # to `CURSOR`.  How to avoid this?
       # CURSOR=$(($#LBUFFER))
       # NOTE: by default, CURSOR=$#LBUFFER
     elif [[ $MATCH = 'pf' ]]; then
