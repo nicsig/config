@@ -338,27 +338,7 @@ fu s:delay_slow_call() abort
     aug! delay_slow_call
 
     " source `autoload/toggle_settings.vim`
-    " Do *not* use `:ru` to source the autoload script manually!{{{
-    "
-    "     ✘
-    "     runtime autoload/toggle_settings.vim
-    "
-    " We  have a  public function  in that  script (`#auto_open_fold()`),  and a
-    " mapping which  calls it.  When you'll  press the mapping, Vim  will source
-    " the  script a  second  time.  Yes,  even though  the  function is  already
-    " defined, Vim will source the script  a second time.  Vim doesn't care that
-    " the function  is already  defined; it  checks whether  you ever  called an
-    " autoload function with the same prefix.   If you did not, Vim searches for
-    " a script matching the prefix and sources it.
-    "
-    " We  do have  a  guard  which prevents  the  script  from being  re-sourced
-    " entirely,  but even  then, it  would cause  our imported  functions to  be
-    " uninstalled.
-    "
-    " TODO: Find a MWE.  Improve and finish the explanation.
-    "}}}
-    call toggle_settings#_()
-
+    runtime autoload/toggle_settings.vim
     runtime! autoload/slow_call/*.vim
 endfu
 
@@ -366,7 +346,7 @@ augroup delay_slow_call | au!
     " Do *not* use a simple timer:{{{
     "
     "     au VimEnter * call timer_start(1000, {->
-    "         \       [toggle_settings#_(), execute('runtime! autoload/slow_call/*.vim', '')]
+    "         \     execute('runtime autoload/toggle_settings.vim | runtime! autoload/slow_call/*.vim')
     "         \ })
     "
     " It could cause issues, for example, if you enter insert mode quickly (i.e.
@@ -421,8 +401,8 @@ call plug#end()
 " }}}1
 " Imports {{{1
 
-import {Catch, Win_getid} from 'lg.vim'
 import MapMeta from 'lg/map.vim'
+import {Catch, Win_getid} from 'lg.vim'
 
 " Options 2 {{{1
 " Encoding {{{2
@@ -3350,10 +3330,6 @@ nno <silent> goF :<c-u>eval getcwd()->myfuncs#gtfo_open_gui()<cr>
 nno <silent> got :<c-u>eval expand('%:p:h', 1)->myfuncs#gtfo_open_term()<cr>
 nno <silent> goT :<c-u>eval getcwd()->myfuncs#gtfo_open_term()<cr>
 
-" gt  gT      search todo/fixme (Tags) {{{4
-
-nno <silent> gt :<c-u>call myfuncs#search_todo('buffer')<cr>
-nno <silent> gT :<c-u>call myfuncs#search_todo('project')<cr>
 "}}}3
 " m {{{3
 " m/  m?         put current location in loclist {{{4
@@ -4261,6 +4237,13 @@ nno <c-g>n :%norm!<space>
 
 nno <silent> <c-p> :<c-u>tabprevious<cr>
 nno <silent> <c-n> :<c-u>exe (v:count > 1 ? v:count : '') .. 'tabnext'<cr>
+
+" C-q t  C-q T        search Todo, fixme, ... {{{4
+
+nno <silent> <c-q>t :<c-u>call myfuncs#search_todo('buffer')<cr>
+nno <silent> <c-q>T :<c-u>call myfuncs#search_todo('project')<cr>
+"               │
+"               └ quickfix
 
 " C-w s               send to tab page {{{4
 
@@ -6179,8 +6162,8 @@ augroup highlight_ansi | au!
     " properly in the outer Vim instance.
     "}}}
     if empty($VIM_TERMINAL)
-        au StdinReadPost * call lg#textprop#ansi()
-        au VimEnter * if $_ =~# '\C/vipe$' | call lg#textprop#ansi() | endif
+        au StdinReadPost * runtime macros/ansi.vim
+        au VimEnter * if $_ =~# '\C/vipe$' | runtime macros/ansi.vim | endif
     endif
 augroup END
 

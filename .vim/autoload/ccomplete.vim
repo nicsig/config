@@ -295,10 +295,10 @@ def GetAddition(line: string, match: string, memarg: list<dict<any>>, bracket: b
 enddef
 
 def Tag2item(val: dict<any>) #{{{1
-    # Turn the tag info "val" into an item for completion.
-    # "val" is is an item in the list returned by taglist().
-    # If it is a variable we may add "." or "->".  Don't do it for other types,
-    # such as a typedef, by not including the info that GetAddition() uses.
+# Turn the tag info "val" into an item for completion.
+# "val" is is an item in the list returned by taglist().
+# If it is a variable we may add "." or "->".  Don't do it for other types,
+# such as a typedef, by not including the info that GetAddition() uses.
     let res = {'match': val['name']}
 
     res['extra'] = Tagcmd2extra(val['cmd'], val['name'], val['filename'])
@@ -324,7 +324,7 @@ def Tag2item(val: dict<any>) #{{{1
 enddef
 
 def Dict2info(dict: dict<any>): string #{{{1
-    # Use all the items in dictionary for the "info" entry.
+# Use all the items in dictionary for the "info" entry.
     let info = ''
     for k in keys(dict)->sort()
         info  ..= k .. repeat(' ', 10 - len(k))
@@ -374,9 +374,9 @@ fu s:ParseTagline(line) abort "{{{1
 endfu
 
 def Tagline2item(val: dict<any>, brackets: string): dict<any> #{{{1
-    # Turn a match item "val" into an item for completion.
-    # "val['match']" is the matching item.
-    # "val['tagline']" is the tagline in which the last part was found.
+# Turn a match item "val" into an item for completion.
+# "val['match']" is the matching item.
+# "val['tagline']" is the tagline in which the last part was found.
     let line = val['tagline']
     let add = GetAddition(line, val['match'], [val], brackets == '')
     let res = {'word': val['match'] .. brackets .. add }
@@ -417,7 +417,7 @@ def Tagline2item(val: dict<any>, brackets: string): dict<any> #{{{1
 enddef
 
 def Tagcmd2extra(cmd: string, name: string, fname: string): string #{{{1
-    # Turn a command from a tag line to something that is useful in the menu
+# Turn a command from a tag line to something that is useful in the menu
     let x: string
     if cmd =~ '^/^'
         # The command is a search command, useful to see what it is.
@@ -436,10 +436,10 @@ def Tagcmd2extra(cmd: string, name: string, fname: string): string #{{{1
 enddef
 
 def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<string> #{{{1
-    # Find composing type in "lead" and match items[0] with it.
-    # Repeat this recursively for items[1], if it's there.
-    # When resolving typedefs "depth" is used to avoid infinite recursion.
-    # Return the list of matches.
+# Find composing type in "lead" and match items[0] with it.
+# Repeat this recursively for items[1], if it's there.
+# When resolving typedefs "depth" is used to avoid infinite recursion.
+# Return the list of matches.
 
     # Use the text up to the variable name and split it in tokens.
     let tokens = split(lead, '\s\+\|\<')
@@ -666,12 +666,12 @@ fu s:StructMembers(typename, items, all) abort "{{{1
 endfu
 
 def SearchMembers(matches: list<dict<any>>, items: list<string>, all: number): list<any> #{{{1
-    # TODO(mine): Should the function return type be `list<string>` instead?
-    # Or maybe `list<dict<any>>`?
+# TODO(mine): Should the function return type be `list<string>` instead?
+# Or maybe `list<dict<any>>`?
 
-    # For matching members, find matches for following items.
-    # When "all" is non-zero find all, otherwise just return 1 if there is any
-    # member.
+# For matching members, find matches for following items.
+# When "all"  is non-zero  find all,  otherwise just  return 1  if there  is any
+# member.
     let res = []
     for i in len(matches)->range()
         let typename = ''

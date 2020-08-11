@@ -98,7 +98,7 @@ init_term_cmds() {
 		esac
 	} 2>/dev/null
 
-	# osx's termcap doesn't have italics.  The below adds support for iTerm2
+	# osx's termcap doesn't have italics. The below adds support for iTerm2
 	# and is harmless on Terminal.app
 	[ "$(get_platform)" = "osx" ] && {
 		italic=$(printf "\033[3m")
@@ -152,7 +152,7 @@ trim() {
 	printf %s "$var"
 }
 
-# an idiot-level recognition of tldr's markdown.  Needs improvement, or
+# an idiot-level recognition of tldr's markdown. Needs improvement, or
 # subcontracting out to a markdown -> ANSI formatting command
 display_tldr() {
 	last_token=''
@@ -304,7 +304,7 @@ while [ $# -gt 0 ]; do
 		usage
 		;;
 	*)
-		# there are pages with hypens in them, such as git-tag.  The below converts
+		# there are pages with hypens in them, such as git-tag. The below converts
 		# `tldr git tag` to the hyphenated version
 		hyphenated=$(printf %s "$*" | tr ' ' '-')
 		page=${hyphenated:-''}

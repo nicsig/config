@@ -175,8 +175,11 @@ fu s:op_yank(type) abort
     let range = line("'[") .. ',' .. line("']")
 
     let cmd = s:op_yank.what is# 'g//' || s:op_yank.what is# 'comments' ? 'g' : 'v'
+    let cml = &ft is# 'vim'
+        \ ?     '["#]'
+        \ :     '\C\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\')
     let pat = s:op_yank.what is# 'code' || s:op_yank.what is# 'comments'
-        \ ?     '^\s*\C\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\')
+        \ ?     '^\s*' .. cml
         \ :     @/
 
     let z_save = getreginfo('z')
@@ -1047,7 +1050,7 @@ fu myfuncs#send_to_server() abort "{{{1
 
     " highlight ansi codes; useful for when you run sth like `$ trans word | vipe`
     if contains_ansi && ($_ =~# '\C/vipe$' || bufname == '')
-        let cmd = 'vim --remote-expr "lg#textprop#ansi()"'
+        let cmd = 'vim --remote-expr "execute(''runtime macros/ansi.vim'')"'
         sil call system(cmd)
     endif
 

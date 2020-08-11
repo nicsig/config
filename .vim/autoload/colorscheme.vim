@@ -1,6 +1,6 @@
 " Init {{{1
 
-import Termname from 'term.vim'
+import Termname from 'lg/term.vim'
 import Derive from 'lg/syntax.vim'
 
 " map greyscale colors from decimal to hexadecimal
