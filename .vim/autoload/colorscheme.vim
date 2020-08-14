@@ -394,8 +394,8 @@ fu s:StatuslineNC() abort "{{{3
     "
     " I think that's because of `:h 'stl /User`:
     "
-    " >     The difference between User{N} and StatusLine  will be applied
-    " >     to StatusLineNC for the statusline of non-current windows.
+    "    > The difference between User{N} and StatusLine  will be applied
+    "    > to StatusLineNC for the statusline of non-current windows.
     "
     " Although, I  don't really understand  how that  explains how Vim  gets the
     " colors it uses to highlight the file path in a non-focused window...
@@ -580,7 +580,7 @@ fu s:styled_comments() abort "{{{2
     "
     " From `:h group-name`:
     "
-    " >     *Underlined       text that stands out, HTML links
+    "    > *Underlined       text that stands out, HTML links
     "
     " Also, that's what the default markdown syntax plugin uses to highlight the
     " text of a link.
@@ -601,7 +601,7 @@ fu s:styled_comments() abort "{{{2
     " It seems to be the most meaningful choice.
     " From `:h group-name`:
     "
-    " >     Delimiter character that needs attention
+    "    > Delimiter character that needs attention
     "}}}
     hi link markdownPointer    Delimiter
     hi link markdownTable      Structure

@@ -32,5 +32,5 @@ setl indk-=)
 " Teardown {{{1
 
 let b:undo_indent = get(b:, 'undo_indent', 'exe')
-    \ .. '| setl indk<'
+    \ .. '| set indk<'
 

@@ -8,8 +8,8 @@
 " you end up copying the whole body of the function.
 " Because `yii` means:
 "
-" >    copy up to / down to a line  which has a lower indentation level than the
-" >    current one.
+"    > copy up to / down to a line  which has a lower indentation level than the
+"    > current one.
 
 fu s:in_indentation() abort "{{{1
     " select all text in current indentation level excluding any empty lines

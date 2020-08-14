@@ -19,9 +19,9 @@
 "
 " From `:h 'go-M`:
 "
-" >     Note that  this flag  must be added  in the .vimrc  file, before  switching on
-" >     syntax  or filetype  recognition (...;  the  `:syntax on`  and `:filetype  on`
-" >     commands load the menu too). `:filetype on` and `:syntax on` source menu.vim.
+"    > Note that  this flag  must be added  in the .vimrc  file, before  switching on
+"    > syntax  or filetype  recognition (...;  the  `:syntax on`  and `:filetype  on`
+"    > commands load the menu too). `:filetype on` and `:syntax on` source menu.vim.
 "}}}
 set guioptions=M
 " In the GUI, let us interrupt an external process by pressing `C-c`.{{{
@@ -217,7 +217,7 @@ Plug 'lacygoill/vim-graph'
 "     % vim ~/wiki/web/practice/htdocs/index.html
 "     open the file in firefox too, then edit the file in Vim, then watch the page in firefox
 "
-" Issue:
+" Problem:
 " Your tags will be generated only in git projects.
 " Not in projects using other VCS systems (`.hg/`, `.bzr/`, ...).
 "
@@ -333,14 +333,14 @@ Plug 'chrisbra/unicode.vim'
 
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup.  We delay them.
-fu s:delay_slow_call() abort
+def s:delay_slow_call()
     au! delay_slow_call
     aug! delay_slow_call
 
-    " source `autoload/toggle_settings.vim`
+    # source `autoload/toggle_settings.vim`
     runtime autoload/toggle_settings.vim
     runtime! autoload/slow_call/*.vim
-endfu
+enddef
 
 augroup delay_slow_call | au!
     " Do *not* use a simple timer:{{{
@@ -451,10 +451,10 @@ set termencoding=utf-8
 "
 " From: https://github.com/junegunn/vim-plug/wiki/faq
 "
-" >     vim-plug does not require any extra statement other than plug#begin()
-" >     and plug#end(). You can remove filetype off, filetype plugin indent on
-" >     and syntax on from your .vimrc as they are automatically handled by
-" >     plug#begin() and plug#end().
+"    > vim-plug does not require any extra statement other than plug#begin()
+"    > and plug#end(). You can remove filetype off, filetype plugin indent on
+"    > and syntax on from your .vimrc as they are automatically handled by
+"    > plug#begin() and plug#end().
 "
 " See also: https://github.com/junegunn/vim-plug/issues/83
 "}}}
@@ -474,15 +474,15 @@ set termencoding=utf-8
 " That is, after `:syntax enable` or after `vim-plug` has done its job.
 " Otherwise, the syntax elements it installs would be cleared.
 "}}}
-fu s:styled_comments() abort
-    " Why do you include `help`?{{{
-    "
-    " We sometimes  lose the  conceal in a  help window, when  the help  file is
-    " already displayed in another window.
-    " Including `help` in this list fixes the issue, because `'cole'` is applied
-    " from an autocmd listening to `BufWinEnter`.
-    "}}}
-    let s:styled_comments_filetypes =<< trim END
+def s:styled_comments()
+    # Why do you include `help`?{{{
+    #
+    # We sometimes  lose the  conceal in a  help window, when  the help  file is
+    # already displayed in another window.
+    # Including `help` in this list fixes the issue, because `'cole'` is applied
+    # from an autocmd listening to `BufWinEnter`.
+    #}}}
+    s:styled_comments_filetypes =<< trim END
         awk
         c
         cheat
@@ -510,27 +510,27 @@ fu s:styled_comments() abort
     END
     augroup styled_comments | au!
         au FileType * if index(s:styled_comments_filetypes, expand('<amatch>')) >= 0
-            \ |     sil! call lg#styled_comment#fold()
-            \ |     sil! call lg#styled_comment#undo_ftplugin()
+            \ |     sil! lg#styled_comment#fold()
+            \ |     sil! lg#styled_comment#undo_ftplugin()
             \ | endif
         au Syntax * if index(s:styled_comments_filetypes, expand('<amatch>')) >= 0
-            \ |     sil! call lg#styled_comment#syntax()
+            \ |     sil! lg#styled_comment#syntax()
             \ | endif
-        " Purpose:{{{
-        "
-        " We (or a plugin) may  temporarily disable the syntax highlighting globally
-        " with `:syn off`, then restore it with `:syn on`.
-        " In  that case,  the position  of the  autocmd which  installs the  default
-        " syntax  groups is  moved *after*  our  custom autocmd  which installs  the
-        " syntax groups related to comments.
-        "
-        " Because of this new order, the default autocmd undoes our custom one.
-        " We need to re-install our custom autocmd *after* the default one.
-        "}}}
-        au SourcePost $VIMRUNTIME/syntax/syntax.vim call s:styled_comments()
-            \ | call getwininfo()->map({_, v -> win_execute(v.winid, 'do styled_comments Syntax')})
+        # Purpose:{{{
+        #
+        # We (or a plugin) may  temporarily disable the syntax highlighting globally
+        # with `:syn off`, then restore it with `:syn on`.
+        # In  that case,  the position  of the  autocmd which  installs the  default
+        # syntax  groups is  moved *after*  our  custom autocmd  which installs  the
+        # syntax groups related to comments.
+        #
+        # Because of this new order, the default autocmd undoes our custom one.
+        # We need to re-install our custom autocmd *after* the default one.
+        #}}}
+        au SourcePost $VIMRUNTIME/syntax/syntax.vim s:styled_comments()
+            \ | getwininfo()->map({_, v -> win_execute(v.winid, 'do styled_comments Syntax')})
     augroup END
-endfu
+enddef
 call s:styled_comments()
 
 " Gui {{{2
@@ -798,56 +798,56 @@ augroup my_color_scheme | au!
     au ColorScheme * call s:reinstall_cleared_hg()
 augroup END
 
-fu s:reinstall_cleared_hg() abort
-    " Why don't you simply run `:do Syntax`?{{{
-    "
-    " Suppose you have two windows, one with a python buffer, and the other with
-    " an html buffer.
-    " You change the color scheme while in the python buffer.
-    " The HGs whose attributes are defined in `$VIMRUNTIME/syntax/html.vim` will
-    " be cleared.
-    " But since you're  in a python buffer, `:do Syntax`  will reload the python
-    " syntax plugin, while you need to reload the html syntax plugin.
-    "}}}
-    " Why don't you manually re-install every cleared HG?{{{
-    "
-    " It would create duplication.
-    " Some HGs would be installed from a syntax plugin, and from this file.
-    " If one day their definition is updated  in the syntax plugin, we would have an
-    " inconsistency.
-    "
-    " Besides, we would be constantly chasing new cleared HGs, and even then, we
-    " could miss some of them; it's not reliable.
-    "}}}
-    " Which alternative could I use?{{{
-    "
-    "     :doautoall syntax
-    "
-    " But it's too slow when we have a lot of buffers.
-    "}}}
+def s:reinstall_cleared_hg()
+    # Why don't you simply run `:do Syntax`?{{{
+    #
+    # Suppose you have two windows, one with a python buffer, and the other with
+    # an html buffer.
+    # You change the color scheme while in the python buffer.
+    # The HGs whose attributes are defined in `$VIMRUNTIME/syntax/html.vim` will
+    # be cleared.
+    # But since you're  in a python buffer, `:do Syntax`  will reload the python
+    # syntax plugin, while you need to reload the html syntax plugin.
+    #}}}
+    # Why don't you manually re-install every cleared HG?{{{
+    #
+    # It would create duplication.
+    # Some HGs would be installed from a syntax plugin, and from this file.
+    # If one day their definition is updated  in the syntax plugin, we would have an
+    # inconsistency.
+    #
+    # Besides, we would be constantly chasing new cleared HGs, and even then, we
+    # could miss some of them; it's not reliable.
+    #}}}
+    # Which alternative could I use?{{{
+    #
+    #     :doautoall syntax
+    #
+    # But it's too slow when we have a lot of buffers.
+    #}}}
 
-    " What does this code do?{{{
-    "
-    " It iterates over all visible windows.
-    " For each  of them,  if it  has never  seen the  filetype of  the displayed
-    " buffer, it reloads its syntax plugin.
-    "}}}
-    " If I have several buffers with the same filetype, don't I need to fire `Syntax` for each of them?{{{
-    "
-    " No.
-    " To re-install the cleared HGs, you just need to reload the syntax plugin once.
-    "}}}
+    # What does this code do?{{{
+    #
+    # It iterates over all visible windows.
+    # For each  of them,  if it  has never  seen the  filetype of  the displayed
+    # buffer, it reloads its syntax plugin.
+    #}}}
+    # If I have several buffers with the same filetype, don't I need to fire `Syntax` for each of them?{{{
+    #
+    # No.
+    # To re-install the cleared HGs, you just need to reload the syntax plugin once.
+    #}}}
     let seen = {}
     for info in getwininfo()
         let ft = getbufvar(info.bufnr, '&ft')
         if !has_key(seen, ft)
-            let seen[ft] = 1
+            seen[ft] = 1
             if ft != ''
-                call win_execute(info.winid, 'do Syntax')
+                win_execute(info.winid, 'do Syntax')
             endif
         endif
     endfor
-endfu
+enddef
 
 " In a console, we want a readable color scheme.
 if $DISPLAY == ''
@@ -1012,9 +1012,9 @@ set diffopt+=vertical
 "
 " 2. besides:
 "
-" >     Myers has  been the universal  default diff  algorithm for so  long that
-" >     enabling an alternative algorithm by default in a low-level component of
-" >     our world (Git, Vim, etc.) could cause issues down the line.
+"    > Myers has  been the universal  default diff  algorithm for so  long that
+"    > enabling an alternative algorithm by default in a low-level component of
+"    > our world (Git, Vim, etc.) could cause issues down the line.
 "
 " Source: https://www.reddit.com/r/vim/comments/a26phr/the_power_of_diff_vimways_124/eavzmke/
 "}}}
@@ -1512,9 +1512,9 @@ set nrformats+=unsigned
 "
 " Inspiration: https://begriffs.com/posts/2019-07-19-history-use-vim.html#include-and-path
 "
-" >     The `**`  with a  number like `**3`  bounds the depth  of the  search in
-" >     subdirectories. It’s wise  to add  depth bounds where  you can  to avoid
-" >     identifier searches that lock up.
+"    > The `**`  with a  number like `**3`  bounds the depth  of the  search in
+"    > subdirectories. It’s wise  to add  depth bounds where  you can  to avoid
+"    > identifier searches that lock up.
 "}}}
 set path=.,**5
 "        │ │
@@ -1843,11 +1843,11 @@ if !has('gui_running')
 " depends on its default configuration.
 " For example, zsh automatically sets the parameter `zle_bracketed_paste`:
 "
-" >     This two-element array  contains the terminal escape  sequences for enabling
-" >     and  disabling  the  feature. These  escape sequences  are  used  to  enable
-" >     bracketed paste when ZLE is active and disable it at other times.  Unsetting
-" >     the  parameter has  the  effect  of ensuring  that  bracketed paste  remains
-" >     disabled.
+"    > This two-element array  contains the terminal escape  sequences for enabling
+"    > and  disabling  the  feature. These  escape sequences  are  used  to  enable
+"    > bracketed paste when ZLE is active and disable it at other times.  Unsetting
+"    > the  parameter has  the  effect  of ensuring  that  bracketed paste  remains
+"    > disabled.
 "
 " Which enables the bracketed paste mode.
 " But if you unset the parameter, you disable the mode.
@@ -1881,21 +1881,21 @@ if !has('gui_running')
 "
 " For more info, see `:h xterm-bracketed-paste`.
 "
-" >     When the 't_BE' option is set then  't_BE' will be sent to the terminal when
-" >     entering "raw"  mode and 't_BD'  when leaving  "raw" mode.  The  terminal is
-" >     then  expected to  put 't_PS'  before pasted  text and  't_PE' after  pasted
-" >     text.  This  way Vim can separate  text that is pasted  from characters that
-" >     are typed.  The pasted text is handled  like when the middle mouse button is
-" >     used, it is inserted literally and not interpreted as commands.
+"    > When the 't_BE' option is set then  't_BE' will be sent to the terminal when
+"    > entering "raw"  mode and 't_BD'  when leaving  "raw" mode.  The  terminal is
+"    > then  expected to  put 't_PS'  before pasted  text and  't_PE' after  pasted
+"    > text.  This  way Vim can separate  text that is pasted  from characters that
+"    > are typed.  The pasted text is handled  like when the middle mouse button is
+"    > used, it is inserted literally and not interpreted as commands.
 "}}}
 "     Now you're talking about yet another mode!  What's this raw mode?{{{
 "
 " A mode in which the terminal driver doesn't interpret the characters it receives.
 "
-" >     The  terminal can  be placed  into  "raw" mode  where the  characters are  not
-" >     processed by the terminal driver, but are sent straight through (it can be set
-" >     that INTR and QUIT characters  are still processed). This allows programs like
-" >     emacs and vi to use the entire screen more easily.
+"    > The  terminal can  be placed  into  "raw" mode  where the  characters are  not
+"    > processed by the terminal driver, but are sent straight through (it can be set
+"    > that INTR and QUIT characters  are still processed). This allows programs like
+"    > emacs and vi to use the entire screen more easily.
 "
 " Source: https://unix.stackexchange.com/a/21760/289772
 "
@@ -2225,10 +2225,10 @@ endif
 " replaced with percent signs.
 " From `:h 'dir`:
 "
-" >     For Unix and Win32, if a directory ends in two path separators "//", the
-" >     swap file name will be built from the complete path to the file with all
-" >     path separators substituted to percent  '%' signs. This will ensure file
-" >     name uniqueness in the preserve directory.
+"    > For Unix and Win32, if a directory ends in two path separators "//", the
+"    > swap file name will be built from the complete path to the file with all
+"    > path separators substituted to percent  '%' signs. This will ensure file
+"    > name uniqueness in the preserve directory.
 "}}}
 set directory=$HOME/.vim/tmp/swap//
 
@@ -2341,8 +2341,8 @@ set ttimeoutlen=6
 " The best value seems to be `sgr`.
 " From `:h 'ttym`:
 "
-" >    The "sgr"  value will be set  if Vim detects Mac  Terminal.app, iTerm2 or
-" >    mintty, and when the xterm version is 277 **or higher**.
+"    > The "sgr"  value will be set  if Vim detects Mac  Terminal.app, iTerm2 or
+"    > mintty, and when the xterm version is 277 **or higher**.
 "
 " It's the value used by Vim when it detects a recent xterm.
 "}}}
@@ -3138,7 +3138,7 @@ endfu
 "
 "     ~/.vim/after/plugin/nop.vim
 "
-" Issue: It would break the `-` fugitive mapping (`:h fugitive_-`) which we use.
+" Problem: It would break the `-` fugitive mapping (`:h fugitive_-`) which we use.
 " We would need to  re-install this mapping but I don't know how  to get the rhs
 " programmatically; the latter contains sth like `<snr>123_`.
 " I seem to  remember trying to use the  rhs of a fugitive mapping in  one of my
@@ -3439,9 +3439,9 @@ nno <expr> z. 'zszH'
 " This is normal, do *not* try to change the code so that it opens a new menu.
 " From `:h z=`:
 "
-" >     When a word was replaced the redo command "." will
-" >     repeat the word replacement.  This works like "ciw",
-" >     the good word and <Esc>.
+"    > When a word was replaced the redo command "." will
+"    > repeat the word replacement.  This works like "ciw",
+"    > the good word and <Esc>.
 "}}}
 nno <expr> z= <sid>z_equal()
 
@@ -3459,9 +3459,9 @@ fu s:z_equal(...) abort
         " give it the number of the entry we want to select in advance.
         " From `:h norm`:
         "
-        " >     {commands} should be a complete command.  If
-        " >     {commands} does not finish a command, the last one
-        " >     will be aborted as if <Esc> or <C-C> was typed.
+        "    > {commands} should be a complete command.  If
+        "    > {commands} does not finish a command, the last one
+        "    > will be aborted as if <Esc> or <C-C> was typed.
         "}}}
         return feedkeys((v:count ? v:count : '') .. 'z=', 'in')
     catch
@@ -3469,21 +3469,31 @@ fu s:z_equal(...) abort
     endtry
 endfu
 
-" zd {{{4
+" zd  zD  zE {{{4
 
-" make `zd` repeatable
-nno <expr> zd <sid>my_zd()
+" make `zd` repeatable; also, make it handle Vim9's comment leader (`#`) correctly
+nno <expr> zd <sid>zd_setup('zd')
+nno <expr> zD <sid>zd_setup('zD')
+nno <expr> zE <sid>zd_setup('zE')
 
-fu s:my_zd(...) abort
-    if !a:0
-        let &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
-        return 'g@l'
-    endif
+fu s:zd_setup(cmd) abort
+    let s:zd_cmd = a:cmd
+    let &opfunc = expand('<SID>') .. 'zd'
+    return 'g@l'
+endfu
+
+fu s:zd(_) abort
+    let cms_save = &l:cms
     try
-        norm! zd
-    " `zd` only works when 'foldmethod' is "manual" or "marker".
+        if getline(1) is# 'vim9script'
+            let &l:cms = '#%s'
+        endif
+        exe 'norm! ' .. s:zd_cmd
+    " `zd` only works when 'foldmethod' is "manual" or "marker"
     catch /^Vim\%((\a\+)\)\=:\%(E351\|E490\):/
         return s:Catch()
+    finally
+        let &l:cms = cms_save
     endtry
 endfu
 
@@ -4137,12 +4147,12 @@ nno <expr><silent> <cr> !empty(&buftype)
 "
 " From `:h version7`:
 "
-" >     Not all modifiers were recognized for xterm function keys.  Added the
-" >     possibility in term codes to end in ";*X" or "O*X", where X is any
-" >     character and the * stands for the modifier code.
-" >     Added the <xUp>, <xDown>, <xLeft> and <xRight> keys, to be able to
-" >     recognize the two forms that xterm can send their codes in and still
-" >     handle all possible modifiers.
+"    > Not all modifiers were recognized for xterm function keys.  Added the
+"    > possibility in term codes to end in ";*X" or "O*X", where X is any
+"    > character and the * stands for the modifier code.
+"    > Added the <xUp>, <xDown>, <xLeft> and <xRight> keys, to be able to
+"    > recognize the two forms that xterm can send their codes in and still
+"    > handle all possible modifiers.
 "
 " The `*` in the next code stands for the modifier `C-`, `S-`, `M-`.
 " While the `x` is there because it seems that `xterm` can send codes in
@@ -4216,7 +4226,7 @@ fu s:c_a() abort
     "
     " From `:h :map-<expr>`:
     "
-    " >    - Moving the cursor is allowed, but it is restored afterwards.
+    "    > - Moving the cursor is allowed, but it is restored afterwards.
     "}}}
     let vcol = virtcol('.')
     return vcol .. '|r' .. new_char
@@ -4349,7 +4359,7 @@ endfu
 
 " _                   0_ {{{3
 
-" Issue:
+" Problem:
 "
 "     # start xterm with default geometry (80 columns)
 "     $ vim -Nu NONE +"pu='some short text'" +"pu=repeat(' ', 50) .. repeat('some long text ', 10)" +'setl nowrap'
@@ -4468,7 +4478,7 @@ fu s:fix_multiline_shellcmd() abort
     call setreg('+', reginfo)
 endfu
 
-" Issue: Fix `E353` in case `"+` has been written into from another Vim instance.{{{
+" Problem: Fix `E353` in case `"+` has been written into from another Vim instance.{{{
 "
 " Indeed, the previous mapping and autocmd write into `"+`; now watch this:
 "
@@ -5301,7 +5311,7 @@ fu s:def_complete(argLead, _l, _p) abort
     " To emulate the `+` quantifier.
     " From `:h file-pattern`:
     "
-    " >     \\\{n,m\}  like \{n,m} in a |pattern|
+    "    > \\\{n,m\}  like \{n,m} in a |pattern|
     "
     " Note that 3 backslashes are already neededd  in a file pattern, which is a
     " kind of globbing used by `getcompletion()`.
@@ -6247,8 +6257,8 @@ augroup END
 "
 " This is explained at `:h x11-selection`.
 "
-" >     ... selections  are "owned" by  an application, and disappear  when that
-" >     application (e.g., Vim) exits, thus losing the data ...
+"    > ... selections  are "owned" by  an application, and disappear  when that
+"    > application (e.g., Vim) exits, thus losing the data ...
 "}}}
 "     How do you fix it?{{{
 "
@@ -6563,8 +6573,8 @@ augroup END
 " Not sure what's the rationale behind this behavior but it's documented at
 " `:h abbreviations /rule`:
 "
-" >     full-id   In front of the match is a non-keyword character, **or this is where**
-" >               **the line or insertion starts.**
+"    > full-id   In front of the match is a non-keyword character, **or this is where**
+"    >           **the line or insertion starts.**
 "
 " In any case, I never want this,and when  that happens we have to roll back the
 " expansion which is distracting.  Let's try to disable it.
@@ -7640,7 +7650,7 @@ endfu
 " Document `:spellinfo`, and `:h spellfile-cleanup`.
 " Also, try to fix this item in the user manual:
 "
-" >     There should be something about spell checking in the user manual.
+"    > There should be something about spell checking in the user manual.
 "
 " 46 -
 "
@@ -7815,7 +7825,7 @@ endfu
 " https://github.com/ardagnir/athame
 " https://github.com/ardagnir/athame/issues/52
 "
-" >     full vim for your shell (bash, zsh, gdb, python, etc)
+"    > full vim for your shell (bash, zsh, gdb, python, etc)
 "
 " Could be used to expand ultisnips snippets in the shell.
 "
@@ -7982,7 +7992,7 @@ endfu
 " Read:
 "
 " https://gist.github.com/yegappan/3b50ec9ea86ad4511d3a213ee39f1ee0
-" >     Updating a quickfix/location list asynchronously without interfering with another plugin
+"    > Updating a quickfix/location list asynchronously without interfering with another plugin
 "
 " Also, study these plugins:
 "
@@ -8636,6 +8646,18 @@ endfu
 "
 " 114 -
 "
+" Create command to split method calls on multiple lines.
+"
+"     A()->B()->C()
+"
+"     →
+"
+"     A()
+"         ->B()
+"         ->C()
+"
+" 115 -
+"
 " Refactorings:
 "
 " Make sure we've never written sth like this:
@@ -8671,8 +8693,8 @@ endfu
 "
 " This is briefly mentioned at `:h method`:
 "
-" >   Example of using a lambda: >
-" >           GetPercentage()->{x -> x * 100}()->printf('%d%%')
+"    > Example of using a lambda: >
+"    >         GetPercentage()->{x -> x * 100}()->printf('%d%%')
 "
 " Note that when `Func()`  is a custom function or lambda, it  seems the base is
 " always passed as the first argument.

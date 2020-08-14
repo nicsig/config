@@ -65,8 +65,8 @@ import Derive from 'lg/syntax.vim'
 "
 "       They are removed after the expansion (`:h UltiSnips-triggers`):
 "
-"         > UltiSnips will only map the jump triggers while a snippet is
-"         > active to interfere as little as possible with other mappings.
+"     > UltiSnips will only map the jump triggers while a snippet is
+"     > active to interfere as little as possible with other mappings.
 "
 "       The first 2 mappings (Tab) call UltiSnips functions which expand a snippet
 "       or jump to the next tabstop, but they can't cycle forward inside a menu, nor
@@ -113,12 +113,12 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-F9>'
 
 " From `:h mapmode-s`:
 "
-" >     Some commands work both in Visual and Select mode, some in only one.
-" >     Note that quite often "Visual" is mentioned where both Visual and Select
-" >     mode apply.
-" >     NOTE: Mapping a printable character in Select mode may confuse the user.
-" >     It's better to explicitly use :xmap, and :smap for printable characters.
-" >     Or use :sunmap after defining the mapping.
+"    > Some commands work both in Visual and Select mode, some in only one.
+"    > Note that quite often "Visual" is mentioned where both Visual and Select
+"    > mode apply.
+"    > NOTE: Mapping a printable character in Select mode may confuse the user.
+"    > It's better to explicitly use :xmap, and :smap for printable characters.
+"    > Or use :sunmap after defining the mapping.
 "
 " It probably implies that mapping a printable character in select mode is a bad
 " idea.  For example, suppose that a plugin install this mapping:

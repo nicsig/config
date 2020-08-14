@@ -1,10 +1,10 @@
-" TODO(mine): Finish refactoring this script in Vim9 script.{{{
+" TODO(Vim9): Finish refactoring this script in Vim9 script.{{{
 "
 " If you succeed, suggest the result as a PR.
 " And post it as an answer here:
 " https://vi.stackexchange.com/questions/26406/how-does-ft-c-omni-work-and-how-can-i-make-it-faster
 "}}}
-" TODO(mine): try to replace as many `strpart()` as possible; use string slicing instead.{{{
+" TODO(Vim9): try to replace as many `strpart()` as possible; use string slicing instead.{{{
 "
 "     if strpart(line, start - 1, 1) =~ '\w'
 "     ⇔
@@ -184,14 +184,14 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
                     endif
                 endif
             endif
-            res = [{'match': match, 'tagline' : '', 'kind' : kind, 'info' : line}]
+            res = [{'match': match, 'tagline': '', 'kind': kind, 'info': line}]
         elseif len(items) == arrays + 1
             # Completing one word and it's a local array variable: build tagline
             # from declaration line
             let match = items[0]
             let kind = 'v'
             let tagline = "\t/^" .. line .. '$/'
-            res = [{'match': match, 'tagline' : tagline, 'kind' : kind, 'info' : line}]
+            res = [{'match': match, 'tagline': tagline, 'kind': kind, 'info': line}]
         else
             # Completing "var.", "var.something", etc.
             let _items = deepcopy(items)
@@ -294,7 +294,7 @@ def GetAddition(line: string, match: string, memarg: list<dict<any>>, bracket: b
     return ''
 enddef
 
-def Tag2item(val: dict<any>) #{{{1
+def Tag2item(val: dict<any>): dict<any> #{{{1
 # Turn the tag info "val" into an item for completion.
 # "val" is is an item in the list returned by taglist().
 # If it is a variable we may add "." or "->".  Don't do it for other types,
@@ -435,7 +435,7 @@ def Tagcmd2extra(cmd: string, name: string, fname: string): string #{{{1
     return x
 enddef
 
-def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<string> #{{{1
+def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<any> #{{{1
 # Find composing type in "lead" and match items[0] with it.
 # Repeat this recursively for items[1], if it's there.
 # When resolving typedefs "depth" is used to avoid infinite recursion.
@@ -571,7 +571,7 @@ fu s:StructMembers(typename, items, all) abort "{{{1
 
         if a:all == 0
             " Store the result to be able to use it again later.
-            " TODO(mine): When you'll refactor this function in a `:def` function:{{{
+            " TODO(Vim9): When you'll refactor this function in a `:def` function:{{{
             "
             " you'll  probably  need  to   have  created  a  secondary  variable
             " `_typename`  initialized by  `typename`.   Here is  what the  code
@@ -645,10 +645,10 @@ fu s:StructMembers(typename, items, all) abort "{{{1
 
         " More items following.  For each of the possible members find the
         " matching following members.
-        " TODO(mine): We can't refactor this function until Vim9 script supports list slicing.{{{
+        " TODO(Vim9): We can't refactor this function until Vim9 script supports list slicing.{{{
         "
-        "     return SearchMembers(matches, a:items[idx :], a:all)
-        "                                          ^-----^
+        "     return SearchMembers(matches, a:items[idx:], a:all)
+        "                                          ^----^
         "
         " I tried to emulate the latter construct with a `map()`, but it didn't work
         " as expected; there were a bunch of errors which were raised from seemingly
@@ -658,7 +658,7 @@ fu s:StructMembers(typename, items, all) abort "{{{1
         " Anyway, there's no rush.  Let's wait for Vim9 to get more reliable, and at
         " least support list slicing.
         "}}}
-        return SearchMembers(matches, a:items[idx :], a:all)
+        return SearchMembers(matches, a:items[idx:], a:all)
     endif
 
     " Failed to find anything.
@@ -666,7 +666,7 @@ fu s:StructMembers(typename, items, all) abort "{{{1
 endfu
 
 def SearchMembers(matches: list<dict<any>>, items: list<string>, all: number): list<any> #{{{1
-# TODO(mine): Should the function return type be `list<string>` instead?
+# TODO(Vim9): Should the function return type be `list<string>` instead?
 # Or maybe `list<dict<any>>`?
 
 # For matching members, find matches for following items.

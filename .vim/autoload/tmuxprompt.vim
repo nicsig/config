@@ -1,5 +1,5 @@
 fu tmuxprompt#undo_ftplugin() abort
-    setl bh< bl< cul< stl< swf< wrap<
+    set bh< bl< cul< stl< swf< wrap<
     nunmap <buffer> q
     nunmap <buffer> <cr>
     nunmap <buffer> ZZ

@@ -56,8 +56,8 @@ fu myfuncs#op_grep_core(...) abort
         "
         " From `:h system() /braces`:
         "
-        " >     For Unix, braces are put around {expr} to allow for
-        " >     concatenated commands.
+        "    > For Unix, braces are put around {expr} to allow for
+        "    > concatenated commands.
         "}}}
         let cmd = 'rg 2>/dev/null ' .. a:1
     else
@@ -77,7 +77,7 @@ fu myfuncs#op_grep_core(...) abort
 endfu
 
 fu myfuncs#op_replace_without_yank() abort "{{{2
-    let &opfunc = s:SID .. 'opfunc'
+    let &opfunc = s:SID .. 'Opfunc'
     let g:opfunc = {
         \ 'core': 'myfuncs#op_replace_without_yank_core',
         "\ we don't need to yank the text-object, and don't want `v:register` nor `""` to mutate
@@ -413,7 +413,8 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     let pos = getcurpos()
     let global = a:0 && a:1 =~# '\<reverse\>' ? 'v' : 'g'
     if &ft is# 'vim'
-        let cml = '["#]'
+        " don't delete a literal dictionary at the start of a line
+        let cml = '\%("\|#\%({\%([^{]\|$\)\)\@!\)'
     else
         let cml = '\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\') .. '\m'
     endif

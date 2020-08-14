@@ -8,7 +8,7 @@
 " I'm not sure  to understand its purpose,  but the comment says  that it should
 " highlight *words*:
 "
-" >     MT_ADDON - correctly highlights words after '...' as comments
+"    > MT_ADDON - correctly highlights words after '...' as comments
 "
 " So, let's fix  the issue by tweaking the pattern so that  it includes at least
 " one non-whitespace character.

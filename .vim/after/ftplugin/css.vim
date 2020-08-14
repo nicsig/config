@@ -20,5 +20,5 @@ END
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ .. '|setl sw< | set fp< | unlet! b:mc_chain'
+    \ .. '| set fp< sw< | unlet! b:mc_chain'
 

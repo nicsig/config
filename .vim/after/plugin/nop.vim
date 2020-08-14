@@ -44,8 +44,8 @@ fu s:cancel_prefix(prefixes) abort
         " In this case, the key should have no effect.
         " This is probably the reason why `:h sandwich-keymappings`, recommends this:{{{
         "
-        " >     NOTE: To prevent unintended operation, the following setting is strongly
-        " >           recommended to add to your vimrc.
+        "    > NOTE: To prevent unintended operation, the following setting is strongly
+        "    >       recommended to add to your vimrc.
         "
         "         nmap s <Nop>
         "         xmap s <Nop>

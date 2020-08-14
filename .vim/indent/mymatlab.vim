@@ -20,7 +20,7 @@ endif
 setl indk=0=elsei
 
 let b:did_indent = 1
-let b:undo_indent = get(b:, 'undo_indent', 'exe') .. '| setl inde< indk<'
+let b:undo_indent = get(b:, 'undo_indent', 'exe') .. '| set inde< indk<'
 
 if exists('*s:get_indent') | finish | endif
 

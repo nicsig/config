@@ -603,7 +603,14 @@ zstyle ':completion:*' group-name ''
 # If the `group-name` style is also set to an empty string, pages from different
 # sections will appear separately in different lists.
 #}}}
+# What about `insert-sections`?{{{
+#
+# It makes  zsh pass the  manual section to the  `man(1)` command even  when the
+# `separate-sections` style is set.
+# https://unix.stackexchange.com/a/604514/289772
+#}}}
 zstyle ':completion:*:manuals' separate-sections true
+zstyle ':completion:*' insert-sections true
 
 # Which style controls the printing of descriptions when completing command options?{{{
 #
