@@ -1,62 +1,41 @@
-" TODO(Vim9): Finish refactoring this script in Vim9 script.{{{
-"
-" If you succeed, suggest the result as a PR.
-" And post it as an answer here:
-" https://vi.stackexchange.com/questions/26406/how-does-ft-c-omni-work-and-how-can-i-make-it-faster
-"}}}
-" TODO(Vim9): try to replace as many `strpart()` as possible; use string slicing instead.{{{
-"
-"     if strpart(line, start - 1, 1) =~ '\w'
-"     ⇔
-"     if line[start - 1] =~ '\w'
-"
-" We can't right now, because of a bug:
-"
-"     vim9script
-"     def Func()
-"         let line = 'abc'
-"         echo line[1] =~ '\w'
-"     enddef
-"     Func()
-"
-"     E1072: Cannot compare number with string~
-"
-"     vim9script
-"     let line = 'abc'
-"     echo line[1] =~ '\w'
-"     v:true~
-"}}}
+vim9script
+
+s:prepended = ''
+s:grepCache = {}
+
 def ccomplete#Complete(findstart: number, base: string): any #{{{1
+# TODO(Vim9): `): any` → `): number|list<dict<any>>`
     if findstart
         # Locate the start of the item, including ".", "->" and "[...]".
         let line = getline('.')
         let start = col('.') - 1
         let lastword = -1
         while start > 0
-            if strpart(line, start - 1, 1) =~ '\w'
+            if line[start - 1] =~ '\w'
                 start -= 1
-            elseif strpart(line, start - 1, 1) =~ '\.'
+            elseif line[start - 1] =~ '\.'
                 if lastword == -1
                     lastword = start
                 endif
                 start -= 1
-            elseif start > 1 && strpart(line, start - 2, 1) == '-' && strpart(line, start - 1, 1) == '>'
+            elseif start > 1 && line[start - 2] == '-'
+                && line[start - 1] == '>'
                 if lastword == -1
                     lastword = start
                 endif
                 start -= 2
-            elseif strpart(line, start - 1, 1) == ']'
+            elseif line[start - 1] == ']'
                 # Skip over [...].
                 let n = 0
                 start -= 1
                 while start > 0
                     start -= 1
-                    if strpart(line, start, 1) == '['
+                    if line[start] == '['
                         if n == 0
                             break
                         endif
                         n -= 1
-                    elseif strpart(line, start, 1) == ']'  # nested []
+                    elseif line[start] == ']'  # nested []
                         n += 1
                     endif
                 endwhile
@@ -71,7 +50,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             s:prepended = ''
             return start
         endif
-        s:prepended = strpart(line, start, lastword - start)
+        s:prepended = line[start : lastword - 1]
         return lastword
     endif
 
@@ -92,24 +71,24 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
     # "aa" -> ['aa'], "aa." -> ['aa', ''], "aa.bb" -> ['aa', 'bb'], etc.
     # We can't use split, because we need to skip nested [...].
     # "aa[...]" -> ['aa', '[...]'], "aa.bb[...]" -> ['aa', 'bb', '[...]'], etc.
-    let items = []
+    let items: list<string> = []
     let s = 0
     let arrays = 0
     while 1
         let e = match(_base, '\.\|->\|\[', s)
         if e < 0
-            if s == 0 || strpart(_base, s - 1, 1) != ']'
-                add(items, strpart(_base, s))
+            if s == 0 || _base[s - 1] != ']'
+                add(items, _base[s : ])
             endif
             break
         endif
-        if s == 0 || strpart(_base, s - 1, 1) != ']'
+        if s == 0 || _base[s - 1] != ']'
             add(items, strpart(_base, s, e - s))
         endif
-        if strpart(_base, e, 1) == '.'
+        if _base[e] == '.'
             # skip over '.'
             s = e + 1
-        elseif strpart(_base, e, 1) == '-'
+        elseif _base[e] == '-'
             # skip over '->'
             s = e + 2
         else
@@ -118,12 +97,12 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             s = e
             e += 1
             while e < len(_base)
-                if strpart(_base, e, 1) == ']'
+                if _base[e] == ']'
                     if n == 0
                         break
                     endif
                     n -= 1
-                elseif strpart(_base, e, 1) == '['  # nested [...]
+                elseif _base[e] == '['  # nested [...]
                     n += 1
                 endif
                 e += 1
@@ -148,7 +127,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
         if strpart(line, 0, col)->stridx(';') != -1
             # Handle multiple declarations on the same line.
             let col2 = col - 1
-            while strpart(line, col2, 1) != ';'
+            while line[col2] != ';'
                 col2 -= 1
             endwhile
             line = strpart(line, col2 + 1)
@@ -158,7 +137,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             # Handle multiple declarations on the same line in a function
             # declaration.
             let col2 = col - 1
-            while strpart(line, col2, 1) != ','
+            while line[col2] != ','
                 col2 -= 1
             endwhile
             if strpart(line, col2 + 1, col - col2 - 1) =~ ' *[^ ][^ ]*  *[^ ]'
@@ -174,7 +153,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             if match(line, '\<' .. match .. '\s*\[') > 0
                 match ..= '['
             else
-                res = Nextitem(strpart(line, 0, col), [''], 0, 1)
+                res = strpart(line, 0 col)->Nextitem([''], 0, 1)
                 if len(res) > 0
                     # There are members, thus add "." or "->".
                     if match(line, '\*[ \t(]*' .. match .. '\>') > 0
@@ -196,7 +175,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             # Completing "var.", "var.something", etc.
             let _items = deepcopy(items)
             remove(_items, 0)
-            res = Nextitem(strpart(line, 0, col), _items, 0, 1)
+            res = strpart(line, 0, col)->Nextitem(_items, 0, 1)
         endif
     endif
 
@@ -213,7 +192,9 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
         filter(tags, {_, v -> has_key(v, 'kind') ? v.kind != 'm' : 1})
 
         # Remove static matches in other files.
-        filter(tags, {_, v -> !has_key(v, 'static') || !v['static'] || bufnr('%') == bufnr(v['filename'])})
+        filter(tags, {_, v -> !has_key(v, 'static')
+            || !v['static']
+            || bufnr('%') == bufnr(v['filename'])})
 
         extend(res, map(tags, {_, v -> Tag2item(v)}))
     endif
@@ -231,18 +212,18 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             if has_key(diclist[i], 'typename')
                 let _items = deepcopy(items)
                 remove(_items, 0)
-                extend(res, s:StructMembers(diclist[i]['typename'], _items, 1))
+                extend(res, StructMembers(diclist[i]['typename'], _items, 1))
             elseif has_key(diclist[i], 'typeref')
                 let _items = deepcopy(items)
                 remove(_items, 0)
-                extend(res, s:StructMembers(diclist[i]['typeref'], _items, 1))
+                extend(res, StructMembers(diclist[i]['typeref'], _items, 1))
             endif
 
             # For a variable use the command, which must be a search pattern that
             # shows the declaration of the variable.
             if diclist[i]['kind'] == 'v'
                 let line = diclist[i]['cmd']
-                if strpart(line, 0, 2) ==# '/^'
+                if strpart(line, 0, 2) == '/^'
                     let col = match(line, '\<' .. items[0] .. '\>')
                     let _items = deepcopy(items)
                     remove(_items, 0)
@@ -259,14 +240,14 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
         let col = col('.')
         let _items = deepcopy(items)
         remove(_items, 0)
-        res = Nextitem(strpart(line, 0, col), _items, 0, 1)
+        res = strpart(line, 0, col)->Nextitem(_items, 0, 1)
     endif
 
     # If the last item(s) are [...] they need to be added to the matches.
     let last = len(items) - 1
     let brackets = ''
     while last >= 0
-        if strpart(items[last], 0, 1) != '['
+        if items[last][0] != '['
             break
         endif
         brackets = items[last] .. brackets
@@ -276,7 +257,13 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
     return map(res, {_, v -> Tagline2item(v, brackets)})
 enddef
 
-def GetAddition(line: string, match: string, memarg: list<dict<any>>, bracket: bool): string #{{{1
+# GetAddition {{{1
+def GetAddition(
+        line: string,
+        match: string,
+        memarg: list<dict<any>>,
+        bracket: bool
+        ): string
     # Guess if the item is an array.
     if bracket && match(line, match .. '\s*\[') > 0
         return '['
@@ -329,7 +316,8 @@ def Dict2info(dict: dict<any>): string #{{{1
     for k in keys(dict)->sort()
         info  ..= k .. repeat(' ', 10 - len(k))
         if k == 'cmd'
-            info ..= matchstr(dict['cmd'], '/^\s*\zs.*\ze$/')->substitute('\\\(.\)', '\1', 'g')
+            info ..= matchstr(dict['cmd'], '/^\s*\zs.*\ze$/')
+                ->substitute('\\\(.\)', '\1', 'g')
         else
             let dictk = dict[k]
             if type(dictk) != v:t_string
@@ -343,35 +331,39 @@ def Dict2info(dict: dict<any>): string #{{{1
     return info
 enddef
 
-fu s:ParseTagline(line) abort "{{{1
-    " Parse a tag line and return a dictionary with items like taglist()
-    let l = split(a:line, "\t")
+def ParseTagline(line: string): dict<any> #{{{1
+    # Parse a tag line and return a dictionary with items like taglist()
+    let l = split(line, "\t")
     let d = {}
     if len(l) >= 3
-        let d['name'] = l[0]
-        let d['filename'] = l[1]
-        let d['cmd'] = l[2]
+        d['name'] = l[0]
+        d['filename'] = l[1]
+        d['cmd'] = l[2]
         let n = 2
         if l[2] =~ '^/'
-            " Find end of cmd, it may contain Tabs.
+            # Find end of cmd, it may contain Tabs.
             while n < len(l) && l[n] !~ '/;"$'
-                let n += 1
-                let d['cmd'] ..= '  ' .. l[n]
+                n += 1
+                # TODO(Vim9): Appending to dict item doesn't work.{{{
+                #
+                #     let d[i] ..= value
+                #}}}
+                d['cmd'] = d['cmd'] .. '  ' .. l[n]
             endwhile
         endif
         for i in range(n + 1, len(l) - 1)
             if l[i] == 'file:'
-                let d['static'] = 1
+                d['static'] = 1
             elseif l[i] !~ ':'
-                let d['kind'] = l[i]
+                d['kind'] = l[i]
             else
-                let d[matchstr(l[i], '[^:]*')] = matchstr(l[i], ':\zs.*')
+                d[matchstr(l[i], '[^:]*')] = matchstr(l[i], ':\zs.*')
             endif
         endfor
     endif
 
     return d
-endfu
+enddef
 
 def Tagline2item(val: dict<any>, brackets: string): dict<any> #{{{1
 # Turn a match item "val" into an item for completion.
@@ -379,14 +371,14 @@ def Tagline2item(val: dict<any>, brackets: string): dict<any> #{{{1
 # "val['tagline']" is the tagline in which the last part was found.
     let line = val['tagline']
     let add = GetAddition(line, val['match'], [val], brackets == '')
-    let res = {'word': val['match'] .. brackets .. add }
+    let res = {'word': val['match'] .. brackets .. add}
 
     if has_key(val, 'info')
         # Use info from Tag2item().
         res['info'] = val['info']
     else
         # Parse the tag line and add each part to the "info" entry.
-        let s = s:ParseTagline(line)->Dict2info()
+        let s = ParseTagline(line)->Dict2info()
         if s != ''
             res['info'] = s
         endif
@@ -411,12 +403,18 @@ def Tagline2item(val: dict<any>, brackets: string): dict<any> #{{{1
     # Isolate the command after the tag and filename.
     let s = matchstr(line, '[^\t]*\t[^\t]*\t\zs\(/^.*$/\|[^\t]*\)\ze\(;"\t\|\t\|$\)')
     if s != ''
-        res['menu'] = Tagcmd2extra(s, val['match'], matchstr(line, '[^\t]*\t\zs[^\t]*\ze\t'))
+        res['menu'] = Tagcmd2extra(s, val['match'],
+            matchstr(line, '[^\t]*\t\zs[^\t]*\ze\t'))
     endif
     return res
 enddef
 
-def Tagcmd2extra(cmd: string, name: string, fname: string): string #{{{1
+# Tagcmd2extra {{{1
+def Tagcmd2extra(
+        cmd: string,
+        name: string,
+        fname: string
+        ): string
 # Turn a command from a tag line to something that is useful in the menu
     let x: string
     if cmd =~ '^/^'
@@ -435,7 +433,13 @@ def Tagcmd2extra(cmd: string, name: string, fname: string): string #{{{1
     return x
 enddef
 
-def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<any> #{{{1
+# Nextitem {{{1
+def Nextitem(
+        lead: string,
+        items: list<string>,
+        depth: number,
+        all: number
+        ): list<dict<any>>
 # Find composing type in "lead" and match items[0] with it.
 # Repeat this recursively for items[1], if it's there.
 # When resolving typedefs "depth" is used to avoid infinite recursion.
@@ -445,7 +449,7 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<a
     let tokens = split(lead, '\s\+\|\<')
 
     # Try to recognize the type of the variable.  This is rough guessing...
-    let res = []
+    let res: list<dict<any>> = []
     for tidx in len(tokens)->range()
 
         # Skip tokens starting with a non-ID character.
@@ -456,13 +460,17 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<a
         # Recognize "struct foobar" and "union foobar".
         # Also do "class foobar" when it's C++ after all (doesn't work very well
         # though).
-        if (tokens[tidx] == 'struct' || tokens[tidx] == 'union' || tokens[tidx] == 'class') && tidx + 1 < len(tokens)
-            res = s:StructMembers(tokens[tidx] .. ':' .. tokens[tidx + 1], items, all)
+        if (tokens[tidx] == 'struct'
+            || tokens[tidx] == 'union'
+            || tokens[tidx] == 'class')
+            && tidx + 1 < len(tokens)
+            res = StructMembers(tokens[tidx] .. ':' .. tokens[tidx + 1], items, all)
             break
         endif
 
         # TODO: add more reserved words
-        if index(['int', 'short', 'char', 'float', 'double', 'static', 'unsigned', 'extern'], tokens[tidx]) >= 0
+        if index(['int', 'short', 'char', 'float',
+            'double', 'static', 'unsigned', 'extern'], tokens[tidx]) >= 0
             continue
         endif
 
@@ -473,11 +481,11 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<a
 
             # New ctags has the "typeref" field.  Patched version has "typename".
             if has_key(item, 'typeref')
-                extend(res, s:StructMembers(item['typeref'], items, all))
+                extend(res, StructMembers(item['typeref'], items, all))
                 continue
             endif
             if has_key(item, 'typename')
-                extend(res, s:StructMembers(item['typename'], items, all))
+                extend(res, StructMembers(item['typename'], items, all))
                 continue
             endif
 
@@ -487,7 +495,8 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<a
             endif
 
             # Skip matches local to another file.
-            if has_key(item, 'static') && item['static'] && bufnr('%') != bufnr(item['filename'])
+            if has_key(item, 'static') && item['static']
+                && bufnr('%') != bufnr(item['filename'])
                 continue
             endif
 
@@ -498,7 +507,9 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<a
             if ei > 1
                 let cmdtokens = strpart(cmd, ei)->split('\s\+\|\<')
                 if len(cmdtokens) > 1
-                    if cmdtokens[0] == 'struct' || cmdtokens[0] == 'union' || cmdtokens[0] == 'class'
+                    if cmdtokens[0] == 'struct'
+                        || cmdtokens[0] == 'union'
+                        || cmdtokens[0] == 'class'
                         let name = ''
                         # Use the first identifier after the "struct" or "union"
                         for ti in (len(cmdtokens) - 1)->range()
@@ -508,7 +519,8 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<a
                             endif
                         endfor
                         if name != ''
-                            extend(res, s:StructMembers(cmdtokens[0] .. ':' .. name, items, all))
+                            extend(res,
+                            StructMembers(cmdtokens[0] .. ':' .. name, items, all))
                         endif
                     elseif depth < 10
                         # Could be "typedef other_T some_T".
@@ -525,154 +537,128 @@ def Nextitem(lead: string, items: list<any>, depth: number, all: number): list<a
     return res
 enddef
 
-fu s:StructMembers(typename, items, all) abort "{{{1
-    " New header when you refactor in Vim9 script:{{{
-    "
-    "     def StructMembers(typename: string, items: list<any>, all: number): list<dict<any>>
-    "                                                     ^-^
-    "                                                     yes: any; not string
-    "}}}
+# StructMembers {{{1
+def StructMembers(
+        typename: string,
+        items: list<string>,
+        all: number
+        ): list<dict<any>>
 
-    " Search for members of structure "typename" in tags files.
-    " Return a list with resulting matches.
-    " Each match is a dictionary with "match" and "tagline" entries.
-    " When "all" is non-zero find all, otherwise just return 1 if there is any
-    " member.
+    # Search for members of structure "typename" in tags files.
+    # Return a list with resulting matches.
+    # Each match is a dictionary with "match" and "tagline" entries.
+    # When "all" is non-zero find all, otherwise just return 1 if there is any
+    # member.
 
-    " Todo: What about local structures?
-    let fnames = tagfiles()->map('escape(v:val, " \\#%")')->join()
+    # Todo: What about local structures?
+    let fnames = tagfiles()->map({_, v -> escape(v, ' \#%')})->join()
     if fnames == ''
         return []
     endif
 
-    let typename = a:typename
-    let qflist = []
+    let _typename = typename
+    let qflist: list<dict<any>> = []
     let cached = 0
-    if a:all == 0
-        let n = '1' " stop at first found match
-        if has_key(s:grepCache, a:typename)
-            let qflist = s:grepCache[a:typename]
-            let cached = 1
+    let n: string
+    if all == 0
+        n = '1'  # stop at first found match
+        if has_key(s:grepCache, _typename)
+            qflist = s:grepCache[_typename]
+            cached = 1
         endif
     else
-        let n = ''
+        n = ''
     endif
     if !cached
         while 1
-            exe 'silent! keepj noautocmd ' .. n .. 'vimgrep /\t' .. typename .. '\(\t\|$\)/j ' .. fnames
+            exe 'silent! keepj noautocmd ' .. n .. 'vimgrep '
+                .. '/\t' .. _typename .. '\(\t\|$\)/j ' .. fnames
 
-            let qflist = getqflist()
-            if len(qflist) > 0 || match(typename, "::") < 0
+            qflist = getqflist()
+            if len(qflist) > 0 || match(_typename, "::") < 0
                 break
             endif
-            " No match for "struct:context::name", remove "context::" and try again.
-            let typename = substitute(typename, ':[^:]*::', ':', '')
+            # No match for "struct:context::name", remove "context::" and try again.
+            _typename = substitute(_typename, ':[^:]*::', ':', '')
         endwhile
 
-        if a:all == 0
-            " Store the result to be able to use it again later.
-            " TODO(Vim9): When you'll refactor this function in a `:def` function:{{{
-            "
-            " you'll  probably  need  to   have  created  a  secondary  variable
-            " `_typename`  initialized by  `typename`.   Here is  what the  code
-            " should probably look like around:
-            "
-            "     let _typename: string
-            "     while 1
-            "       exe 'silent! keepj noautocmd ' .. n .. 'vimgrep /\t' .. typename .. '\(\t\|$\)/j ' .. fnames
-            "       qflist = getqflist()
-            "       if len(qflist) > 0 || match(typename, "::") < 0
-            "         break
-            "       endif
-            "       _typename = substitute(typename, ':[^:]*::', ':', '')
-            "     endwhile
-            "     if all == 0
-            "       s:grepCache[_typename] = qflist
-            "     endif
-            " }}}
-            let s:grepCache[a:typename] = qflist
+        if all == 0
+            # Store the result to be able to use it again later.
+            s:grepCache[_typename] = qflist
         endif
     endif
 
-    " Skip over [...] items
+    # Skip over [...] items
     let idx = 0
+    let target: string
     while 1
-        if idx >= len(a:items)
-            let target = ''           " No further items, matching all members
+        if idx >= len(items)
+            target = ''  # No further items, matching all members
             break
         endif
-        if a:items[idx][0] != '['
-            let target = a:items[idx]
+        if items[idx][0] != '['
+            target = items[idx]
             break
         endif
-        let idx += 1
+        idx += 1
     endwhile
-    " Put matching members in matches[].
-    let matches = []
+    # Put matching members in matches[].
+    let matches: list<dict<any>> = []
     for l in qflist
         let memb = matchstr(l['text'], '[^\t]*')
         if memb =~ '^' .. target
-            " Skip matches local to another file.
-            if match(l['text'], "\tfile:") < 0 || bufnr('%') == matchstr(l['text'], '\t\zs[^\t]*')->bufnr()
+            # Skip matches local to another file.
+            if match(l['text'], "\tfile:") < 0
+                || bufnr('%') == matchstr(l['text'], '\t\zs[^\t]*')->bufnr()
                 let item = {'match': memb, 'tagline': l['text']}
 
-                " Add the kind of item.
+                # Add the kind of item.
                 let s = matchstr(l['text'], '\t\(kind:\)\=\zs\S\ze\(\t\|$\)')
                 if s != ''
-                    let item['kind'] = s
+                    item['kind'] = s
                     if s == 'f'
-                        let item['match'] = memb .. '('
+                        item['match'] = memb .. '('
                     endif
                 endif
 
-                call add(matches, item)
+                add(matches, item)
             endif
         endif
     endfor
 
     if len(matches) > 0
-        " Skip over next [...] items
-        let idx += 1
+        # Skip over next [...] items
+        idx += 1
         while 1
-            if idx >= len(a:items)
-                return matches          " No further items, return the result.
+            if idx >= len(items)
+                return matches  # No further items, return the result.
             endif
-            if a:items[idx][0] != '['
+            if items[idx][0] != '['
                 break
             endif
-            let idx += 1
+            idx += 1
         endwhile
 
-        " More items following.  For each of the possible members find the
-        " matching following members.
-        " TODO(Vim9): We can't refactor this function until Vim9 script supports list slicing.{{{
-        "
-        "     return SearchMembers(matches, a:items[idx:], a:all)
-        "                                          ^----^
-        "
-        " I tried to emulate the latter construct with a `map()`, but it didn't work
-        " as expected; there were a bunch of errors which were raised from seemingly
-        " somewhere else.  Also, tried with `:for` + `add()`...
-        "
-        " It could be due to our `map()` or to yet another part of the script.
-        " Anyway, there's no rush.  Let's wait for Vim9 to get more reliable, and at
-        " least support list slicing.
-        "}}}
-        return SearchMembers(matches, a:items[idx:], a:all)
+        # More items following.  For each of the possible members find the
+        # matching following members.
+        return SearchMembers(matches, items[idx :], all)
     endif
 
-    " Failed to find anything.
+    # Failed to find anything.
     return []
-endfu
+enddef
 
-def SearchMembers(matches: list<dict<any>>, items: list<string>, all: number): list<any> #{{{1
-# TODO(Vim9): Should the function return type be `list<string>` instead?
-# Or maybe `list<dict<any>>`?
+# SearchMembers {{{1
+def SearchMembers(
+        matches: list<dict<any>>,
+        items: list<string>,
+        all: number
+        ): list<dict<any>>
 
 # For matching members, find matches for following items.
 # When "all"  is non-zero  find all,  otherwise just  return 1  if there  is any
 # member.
-    let res = []
+    let res: list<dict<any>> = []
     for i in len(matches)->range()
         let typename = ''
         let line: string
@@ -696,7 +682,7 @@ def SearchMembers(matches: list<dict<any>>, items: list<string>, all: number): l
         endif
 
         if typename != ''
-            extend(res, s:StructMembers(typename, items, all))
+            extend(res, StructMembers(typename, items, all))
         else
             # Use the search command (the declaration itself).
             let s = match(line, '\t\zs/^')

@@ -179,7 +179,6 @@ Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
 Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
 Plug 'lacygoill/vim-autoread', {'branch': 'assimil'}
 Plug 'lacygoill/vim-cheat', {'branch': 'assimil'}
-Plug 'lacygoill/vim-cookbook'
 Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-debug'
 Plug 'junegunn/vim-easy-align'
@@ -402,7 +401,7 @@ call plug#end()
 " Imports {{{1
 
 import MapMeta from 'lg/map.vim'
-import {Catch, Win_getid} from 'lg.vim'
+import {Catch, FuncComplete, Win_getid} from 'lg.vim'
 
 " Options 2 {{{1
 " Encoding {{{2
@@ -2824,7 +2823,7 @@ fu s:c_m() abort
         let menu = complete_info(['items'])->get('items', [])->get(0, {})->get('menu', '')
         if menu is# '[f]'
             let seq ..= "\<c-r>=completion#file#complete()\<cr>"
-        elseif menu[:5] is# '[snip]'
+        elseif strpart(menu, 0, 6) is# '[snip]'
             let seq ..= "\<c-r>=UltiSnips#ExpandSnippet()\<cr>"
         endif
         return seq
@@ -5130,7 +5129,7 @@ xno <expr> P '"_d"' .. v:register .. 'P'
 
 " Cfg {{{2
 
-com -bar -complete=custom,s:cfg_complete -nargs=1 Cfg call s:cfg(<q-args>)
+com -bar -nargs=1 -complete=custom,s:cfg_complete Cfg call s:cfg(<q-args>)
 
 fu s:cfg_complete(_a, _l, _p) abort
     return keys(s:PGM2CFGFILES)->sort()->join("\n")
@@ -5297,30 +5296,7 @@ endfu
 " Let's fix that.
 
 cnorea <expr> def getcmdtype() is# ':' && getcmdpos() == 4 ? 'Def' : 'def'
-" Here, we really need `customlist`, and not just `custom`.{{{
-"
-" Otherwise,  if  `argLead` starts  with  `s:`,  the completion  function  would
-" automatically filter out all matches, because none of them would match `s:` at
-" the start.  With `customlist`, we can disable the filtering.
-"}}}
-com -bar -complete=customlist,s:def_complete -nargs=? Def exe s:def(<q-args>)
-
-fu s:def_complete(argLead, _l, _p) abort
-    " Wait.  Why 6 backslashes in the replacement?{{{
-    "
-    " To emulate the `+` quantifier.
-    " From `:h file-pattern`:
-    "
-    "    > \\\{n,m\}  like \{n,m} in a |pattern|
-    "
-    " Note that 3 backslashes are already neededd  in a file pattern, which is a
-    " kind of globbing used by `getcompletion()`.
-    " And since we write this in the replacement part of `substitute()`, we need
-    " to double each backslash; hence 3 x 2 = 6 backslashes.
-    "}}}
-    let argLead = substitute(a:argLead, '^\Cs:', '<SNR>[0-9]\\\\\\{1,}_', '')
-    return getcompletion(argLead, 'function')->map('substitute(v:val, "($\\|()$", "", "")')
-endfu
+com -bar -nargs=? -complete=customlist,s:FuncComplete Def exe s:def(<q-args>)
 
 fu s:def(name) abort
     let name = trim(a:name, '()')
@@ -5874,7 +5850,7 @@ com -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | e
 
 " Tldr {{{2
 
-com -bar -complete=custom,s:tldr_completion -nargs=1 Tldr call s:tldr(<q-args>)
+com -bar -nargs=1 -complete=custom,s:tldr_completion Tldr call s:tldr(<q-args>)
 fu s:tldr_completion(_a, _l, _p) abort
     sil return system('tldr --list 2>/dev/null | tr -s "[ \t]" "\n"')
 endfu
@@ -8656,6 +8632,8 @@ endfu
 "         ->B()
 "         ->C()
 "
+" And to join them back.
+"
 " 115 -
 "
 " Refactorings:
@@ -8726,6 +8704,27 @@ endfu
 " `[,:]  ` → `, ` `: `    1285
 " `[-+*\/]\d` → add spaces around operator    4140
 " ` \.\. `            4258
+"
+" 116 -
+"
+" `ccomplete.vim` doesn't work anymore.
+"
+"     Error detected while processing function ccomplete#Complete:
+"     line    1:
+"     E1030: Using a String as a Number
+"
+" Reduce the code.
+" Current working undo sequence to return to once you're finished: 2916
+" Also, the error line number is wrong; find a MWE.
+
+
+
+
+
+"     augroup test_sth
+"         au!
+"         au CompleteChanged * call complete_info(['items']).items->map({_, v -> string(v)})->writefile('/tmp/.items')
+"     augroup END
 
 
 

@@ -598,7 +598,7 @@ fu myfuncs#dump_wiki(url) abort "{{{1
     " Give the recommendation to manually inspect the syntax highlighting at the
     " end of the buffer.
     "}}}
-    if a:url[:3] isnot# 'http'
+    if strpart(a:url, 0, 4) isnot# 'http'
         return
     endif
 
@@ -1308,7 +1308,7 @@ fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
             \ -
             \ strchars(k, 1) == 4
             \ ? 2
-            \   : k[-1:-1] is# "s" && keys(freq)->index(k[:strlen(k) - 1]) >= 0
+            \   : k[-1:-1] is# "s" && keys(freq)->index(k) >= 0
             \   ?     4
             \   :     3
             \ )})
