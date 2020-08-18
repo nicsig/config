@@ -1,5 +1,3 @@
-vim9script
-
 s:prepended = ''
 s:grepCache = {}
 
@@ -83,7 +81,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             break
         endif
         if s == 0 || _base[s - 1] != ']'
-            add(items, strpart(_base, s, e - s))
+            add(items, _base[s : e - 1])
         endif
         if _base[e] == '.'
             # skip over '.'
@@ -108,7 +106,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
                 e += 1
             endwhile
             e += 1
-            add(items, strpart(_base, s, e - s))
+            add(items, _base[s : e - 1])
             arrays += 1
             s = e
         endif
@@ -124,24 +122,24 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
         # TODO: join previous line if it makes sense
         let line = getline('.')
         let col = col('.')
-        if strpart(line, 0, col)->stridx(';') != -1
+        if line[: col - 1]->stridx(';') != -1
             # Handle multiple declarations on the same line.
             let col2 = col - 1
             while line[col2] != ';'
                 col2 -= 1
             endwhile
-            line = strpart(line, col2 + 1)
+            line = line[col2 + 1 :]
             col -= col2
         endif
-        if strpart(line, 0, col)->stridx(',') != -1
+        if line[: col - 1]->stridx(',') != -1
             # Handle multiple declarations on the same line in a function
             # declaration.
             let col2 = col - 1
             while line[col2] != ','
                 col2 -= 1
             endwhile
-            if strpart(line, col2 + 1, col - col2 - 1) =~ ' *[^ ][^ ]*  *[^ ]'
-                line = strpart(line, col2 + 1)
+            if line[col2 + 1 : col - 1] =~ ' *[^ ][^ ]*  *[^ ]'
+                line = line[col2 + 1 :]
                 col -= col2
             endif
         endif
@@ -153,7 +151,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             if match(line, '\<' .. match .. '\s*\[') > 0
                 match ..= '['
             else
-                res = strpart(line, 0 col)->Nextitem([''], 0, 1)
+                res = line[: col - 1]->Nextitem([''], 0, 1)
                 if len(res) > 0
                     # There are members, thus add "." or "->".
                     if match(line, '\*[ \t(]*' .. match .. '\>') > 0
@@ -173,9 +171,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
             res = [{'match': match, 'tagline': tagline, 'kind': kind, 'info': line}]
         else
             # Completing "var.", "var.something", etc.
-            let _items = deepcopy(items)
-            remove(_items, 0)
-            res = strpart(line, 0, col)->Nextitem(_items, 0, 1)
+            res = line[: col - 1]->Nextitem(items[1:], 0, 1)
         endif
     endif
 
@@ -210,24 +206,18 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
         for i in len(diclist)->range()
             # New ctags has the "typeref" field.  Patched version has "typename".
             if has_key(diclist[i], 'typename')
-                let _items = deepcopy(items)
-                remove(_items, 0)
-                extend(res, StructMembers(diclist[i]['typename'], _items, 1))
+                extend(res, StructMembers(diclist[i]['typename'], items[1:], 1))
             elseif has_key(diclist[i], 'typeref')
-                let _items = deepcopy(items)
-                remove(_items, 0)
-                extend(res, StructMembers(diclist[i]['typeref'], _items, 1))
+                extend(res, StructMembers(diclist[i]['typeref'], items[1:], 1))
             endif
 
             # For a variable use the command, which must be a search pattern that
             # shows the declaration of the variable.
             if diclist[i]['kind'] == 'v'
                 let line = diclist[i]['cmd']
-                if strpart(line, 0, 2) == '/^'
+                if line[:1] == '/^'
                     let col = match(line, '\<' .. items[0] .. '\>')
-                    let _items = deepcopy(items)
-                    remove(_items, 0)
-                    extend(res, Nextitem(strpart(line, 2, col - 2), _items, 0, 1))
+                    extend(res, line[2 : col - 1]->Nextitem(items[1:], 0, 1))
                 endif
             endif
         endfor
@@ -238,9 +228,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
         # TODO: join previous line if it makes sense
         let line = getline('.')
         let col = col('.')
-        let _items = deepcopy(items)
-        remove(_items, 0)
-        res = strpart(line, 0, col)->Nextitem(_items, 0, 1)
+        res = line[: col - 1]->Nextitem(items[1:], 0, 1)
     endif
 
     # If the last item(s) are [...] they need to be added to the matches.
@@ -296,7 +284,7 @@ def Tag2item(val: dict<any>): dict<any> #{{{1
     endif
 
     res['tagline'] = ''
-    if has_key(val, "kind")
+    if has_key(val, 'kind')
         let kind = val['kind']
         res['kind'] = kind
         if kind == 'v'
@@ -344,10 +332,7 @@ def ParseTagline(line: string): dict<any> #{{{1
             # Find end of cmd, it may contain Tabs.
             while n < len(l) && l[n] !~ '/;"$'
                 n += 1
-                # TODO(Vim9): Appending to dict item doesn't work.{{{
-                #
-                #     let d[i] ..= value
-                #}}}
+                # TODO(Vim9): Appending to dict item doesn't work yet.
                 d['cmd'] = d['cmd'] .. '  ' .. l[n]
             endwhile
         endif
@@ -420,9 +405,9 @@ def Tagcmd2extra(
     if cmd =~ '^/^'
         # The command is a search command, useful to see what it is.
         x = matchstr(cmd, '^/^\s*\zs.*\ze$/')
-        x = substitute(x, '\<' .. name .. '\>', '@@', '')
-        x = substitute(x, '\\\(.\)', '\1', 'g')
-        x = x .. ' - ' .. fname
+            ->substitute('\<' .. name .. '\>', '@@', '')
+            ->substitute('\\\(.\)', '\1', 'g')
+            .. ' - ' .. fname
     elseif cmd =~ '^\d*$'
         # The command is a line number, the file name is more useful.
         x = fname .. ' - ' .. cmd
@@ -505,7 +490,7 @@ def Nextitem(
             let cmd = item['cmd']
             let ei = matchend(cmd, 'typedef\s\+')
             if ei > 1
-                let cmdtokens = strpart(cmd, ei)->split('\s\+\|\<')
+                let cmdtokens = cmd[ei :]->split('\s\+\|\<')
                 if len(cmdtokens) > 1
                     if cmdtokens[0] == 'struct'
                         || cmdtokens[0] == 'union'
@@ -575,7 +560,7 @@ def StructMembers(
                 .. '/\t' .. _typename .. '\(\t\|$\)/j ' .. fnames
 
             qflist = getqflist()
-            if len(qflist) > 0 || match(_typename, "::") < 0
+            if len(qflist) > 0 || match(_typename, '::') < 0
                 break
             endif
             # No match for "struct:context::name", remove "context::" and try again.
@@ -689,7 +674,7 @@ def SearchMembers(
             if s > 0
                 let e = match(line, '\<' .. matches[i]['match'] .. '\>', s)
                 if e > 0
-                    extend(res, Nextitem(strpart(line, s, e - s), items, 0, all))
+                    extend(res, Nextitem(line[s : e - 1], items, 0, all))
                 endif
             endif
         endif

@@ -2823,7 +2823,7 @@ fu s:c_m() abort
         let menu = complete_info(['items'])->get('items', [])->get(0, {})->get('menu', '')
         if menu is# '[f]'
             let seq ..= "\<c-r>=completion#file#complete()\<cr>"
-        elseif strpart(menu, 0, 6) is# '[snip]'
+        elseif menu[:5] is# '[snip]'
             let seq ..= "\<c-r>=UltiSnips#ExpandSnippet()\<cr>"
         endif
         return seq
@@ -5988,7 +5988,7 @@ augroup END
 "         endif
 "
 "         " If the buffer is created inside /tmp and has no extension
-"         if fnamemodify(a:buffer, ':p:h')->strpart(0, 4) is# '/tmp' && fnamemodify(a:buffer, ':e')->empty()
+"         if fnamemodify(a:buffer, ':p:h')[:3] is# '/tmp' && fnamemodify(a:buffer, ':e')->empty()
 "
 "             " make sure it will be wiped when it's hidden
 "             " which will happen after the next command
@@ -8704,27 +8704,7 @@ endfu
 " `[,:]  ` → `, ` `: `    1285
 " `[-+*\/]\d` → add spaces around operator    4140
 " ` \.\. `            4258
-"
-" 116 -
-"
-" `ccomplete.vim` doesn't work anymore.
-"
-"     Error detected while processing function ccomplete#Complete:
-"     line    1:
-"     E1030: Using a String as a Number
-"
-" Reduce the code.
-" Current working undo sequence to return to once you're finished: 2916
-" Also, the error line number is wrong; find a MWE.
 
-
-
-
-
-"     augroup test_sth
-"         au!
-"         au CompleteChanged * call complete_info(['items']).items->map({_, v -> string(v)})->writefile('/tmp/.items')
-"     augroup END
 
 
 

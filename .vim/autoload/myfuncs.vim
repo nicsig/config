@@ -1,5 +1,5 @@
-import Catch from 'lg.vim'
-import Opfunc from 'lg.vim' | const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
+import {Catch, Opfunc} from 'lg.vim'
+const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 " Operators {{{1
 fu myfuncs#op_grep() abort "{{{2
@@ -598,7 +598,7 @@ fu myfuncs#dump_wiki(url) abort "{{{1
     " Give the recommendation to manually inspect the syntax highlighting at the
     " end of the buffer.
     "}}}
-    if strpart(a:url, 0, 4) isnot# 'http'
+    if a:url[:3] isnot# 'http'
         return
     endif
 
