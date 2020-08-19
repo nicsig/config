@@ -8622,46 +8622,7 @@ endfu
 "
 " 114 -
 "
-" Create command to split method calls on multiple lines.
-"
-"     A()->B()->C()
-"
-"     →
-"
-"     A()
-"         ->B()
-"         ->C()
-"
-" And to join them back.
-"
-" 115 -
-"
 " Refactorings:
-"
-" Make sure we've never written sth like this:
-"
-"     :call expr->func()
-"
-" Where `expr` is not a function (builtin or custom; doesn't matter).
-" It can't work, because `:call` expect a function name, and nothing else.
-"
-" Replace `:call` with `:eval` in that case.
-" Pattern to look for:
-"
-"     \C\%(\<call\>.*\)\@<=->
-"
-" If you provide a function name to `:call`, but prefix it with a bang: same issue.
-"
-"     ✔
-"     :call FuncA()->FuncB()
-"
-"     ✘
-"     :call !FuncA()->FuncB()
-"           ^
-"
-" Same reason: `!FuncA` cannot be the name of a function.
-"
-" ---
 "
 " There may be a lot more places where we could have used a method.
 " Indeed, you can write this:
@@ -8677,25 +8638,14 @@ endfu
 " Note that when `Func()`  is a custom function or lambda, it  seems the base is
 " always passed as the first argument.
 "
-" Revisit our `method` qfl;  for each match, check whether we could add one more `->`.
+" Check whether we could add one more `->` each time we've used a method.
+"
+"     \%(\S\|^\s*["#]\s*\\\s*\)\%\({\s*\%(\%\(\S\+\s*,\)\=\s*\S\+\)\=\s*\)\@<!->\a
 "
 " ---
 "
 " Btw, `term_setapi()` can be used as a method, but it's not documented (include
 " doc in our next patch?).
-"
-" ---
-"
-" Note that a leading `!` applies to the whole chain:
-"
-"     !Funca()->Funcb()
-"     ⇔
-"     !(Funca()->Funcb())
-"
-" If you want to inverse the value of the *first* function, use parentheses:
-"
-"     (!Funca())->Funcb()
-"     ^        ^
 "
 " ---
 "

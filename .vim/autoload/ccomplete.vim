@@ -1,5 +1,7 @@
-s:prepended = ''
-s:grepCache = {}
+vim9script
+
+let prepended = ''
+let grepCache = {}
 
 def ccomplete#Complete(findstart: number, base: string): any #{{{1
 # TODO(Vim9): `): any` → `): number|list<dict<any>>`
