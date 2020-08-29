@@ -87,7 +87,7 @@ let g:vimtex_compiler_latexmk = {
 "     \begin{displaymath}
 "     \end{displaymath}
 "
-" ... insert `~0`, it should be replaced with `\emptyset`.
+" ... insert `~0`, it should be replaced by `\emptyset`.
 "
 " For more info, see:
 "

@@ -63,13 +63,13 @@ stty quit undef
 
 # prompt
 # ------
-# our `prompt.zsh` script relies on the `add-zsh-hook` function
+# Our `prompt.zsh` script relies on the `add-zsh-hook` function.
 # See:
 # `man zshcontrib /Manipulating Hook Functions`
 # `man zshmisc /SPECIAL FUNCTIONS/;/Hook Functions`
 autoload -Uz add-zsh-hook
-# and on `PROMPT_SUBST` being set;
-# the latter enables parameter expansion, command substitution and arithmetic expansion inside the prompt
+# And  it relies  on `PROMPT_SUBST`  being  set.  The  latter enables  parameter
+# expansion, command substitution and arithmetic expansion inside the prompt.
 setopt PROMPT_SUBST
 # set the prompt
 source "$HOME/bin/prompt.zsh"
@@ -126,9 +126,8 @@ zmodload zsh/complist
 # What's the purpose of these commands?{{{
 #
 # They  install  programmable completion  functions  for  the most  common  Unix
-# commands.
-# They  also enable  some more  central  functionality, on  which `zstyle`,  for
-# example, rely.
+# commands.   They  also  enable  some  more  central  functionality,  on  which
+# `zstyle`, for example, rely.
 #}}}
 # What's the equivalent in bash?{{{
 #
@@ -464,7 +463,7 @@ setopt RM_STAR_SILENT
 # log up to 30 directories
 zstyle ':chpwd:*' recent-dirs-max 30
 
-# What does the style 'format' control?{{{
+# What does the 'format' style control?{{{
 #
 # The  appearance  of  a  description  for   each  list  of  matches,  when  you
 # tab-complete a word on the command line.   Its value gives the format to print
@@ -560,8 +559,7 @@ zstyle ':completion:*:warnings'     format $'No matches:\n%D'
 #}}}
 #   Why do you set it to an empty string?{{{
 #
-# When we  don't name our group  (empty string), the completion  system uses the
-# tag as the name of the group:
+# To let the completion system use the tag as the name of the group:
 #
 #    - external command
 #    - builtin command
@@ -713,15 +711,15 @@ zstyle ':completion:*:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd
 zstyle ':completion:*:processes' command 'ps -A'
 
 # enable case-insensitive search (useful for the `zaw` plugin)
-zstyle ':filter-select' case-insensitive 'yes'
+zstyle ':filter-select:*' case-insensitive yes
 # Suggest us only video files when we tab complete `mpv(1)`.
 #
 # TODO: To explain.
 # Source: https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
 #
-# `(#i)` is a globbing flag which makes the following pattern case-insensitive.
+# `(#i)` is a globbing flag  which makes the following pattern case-insensitive.
 # `(-.)`  is a  glob qualifier  restricting the  expansion to  regular files  or
-# symlinks pointing  to to  regular files.  `(-/)` does the  same thing  but for
+# symlinks  pointing to  regular  files.  `(-/)` does  the  same  thing but  for
 # directories.
 zstyle ':completion:*:*:mpv:*' file-patterns \
   '*.(#i)(flv|mp4|webm|mkv|wmv|mov|avi|mp3|ogg|wma|flac|wav|aiff|m4a|m4b|m4v|gif|ifo)(-.) *(-/):directories' \
@@ -957,7 +955,7 @@ cc() { #{{{2
   #     if ! cd "$dir"; then
   #             ^    ^
   #}}}
-  if ! cd "$dir"; then
+  if ! cd "${dir}"; then
     cdr -P "$dir"
     return 1
   fi
@@ -4261,7 +4259,6 @@ __reread_zshrc() {
 #
 # https://unix.stackexchange.com/a/370506/232487
 # https://github.com/zsh-users/zsh/commit/4d007e269d1892e45e44ff92b6b9a1a205ff64d5#diff-c47c7c7383225ab55ff591cb59c41e6b
-#}}}
 }
 zle -N __reread_zshrc
 bindkey '^X^R' __reread_zshrc
@@ -4792,14 +4789,6 @@ bindkey -r '\ew'
 bindkey -r '\eW'
 bindkey '\eY' copy-region-as-kill
 
-# M-Z           fuZzy-select-output {{{3
-
-# insert an entry from the output of the previous command,
-# selecting it with fuzzy search
-bindkey -s '\eZ' '$(!!|fzf)'
-#        │
-#        └ interpret the arguments as strings of characters
-#          without `-s`, `sudo` would be interpreted as the name of a zle widget
 # }}}2
 # Menuselect {{{2
 

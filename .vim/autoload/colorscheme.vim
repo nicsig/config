@@ -817,14 +817,14 @@ fu s:restore_cursor_color() abort "{{{2
 endfu
 " }}}1
 " Utilities {{{1
-fu s:get_attributes(hg, ...) abort "{{{2
-    let mode = a:0 ? [a:1] : []
+fu s:get_attributes(hg, mode = '') abort "{{{2
     let attributes = {
         \ 'fg': 0,
         \ 'bg': 0,
         \ 'bold': 0,
         \ 'reverse': 0,
         \ }
+    let mode = a:mode == '' ? [] : [a:mode]
     return map(attributes, {k -> call('synIDattr', [hlID(a:hg)->synIDtrans(), k] + mode)})
 endfu
 

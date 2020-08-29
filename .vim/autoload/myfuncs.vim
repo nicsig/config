@@ -4,9 +4,7 @@ const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 " Operators {{{1
 fu myfuncs#op_grep() abort "{{{2
     let &opfunc = s:SID .. 'Opfunc'
-    let g:opfunc = {
-        \ 'core': 'myfuncs#op_grep_core',
-        \ }
+    let g:opfunc = {'core': 'myfuncs#op_grep_core'}
     return 'g@'
 endfu
 
@@ -211,27 +209,6 @@ fu s:op_yank(type) abort
 endfu
 " }}}1
 
-" align line {{{1
-
-fu myfuncs#align_line_setup(key) abort
-    let s:align_line_key = a:key
-    let &opfunc = expand('<SID>') .. 'align_line'
-    return 'g@l'
-endfu
-
-fu s:align_line(_) abort
-    let offset = s:align_line_key[1] is# 'j' ? 1 : -1
-    if s:align_line_key[0] is# '['
-        exe 'left ' .. (line('.') + offset)->indent()
-    else
-        " length of text to align on the current line
-        let text_length = getline('.')->matchstr('\S.*$')->strchars(1)
-        " length of the previous/next line
-        let neighbour_length = (line('.') + offset)->getline()->strchars(1)
-        exe 'left ' .. (neighbour_length - text_length)
-    endif
-endfu
-
 " box_create / destroy {{{1
 
 " TODO:
@@ -256,145 +233,146 @@ endfu
 "
 " The peculiarity here, is the variable number of cells per line (2 on the first
 " one, 3 on the second one, 4 on the last ones).
-fu myfuncs#box_create(...) abort
-    if !a:0
-        let &opfunc = 'myfuncs#box_create'
+def myfuncs#box_create(type = ''): string
+    if type == ''
+        &opfunc = 'myfuncs#box_create'
         return 'g@'
     endif
     try
-        " draw `|` on the left of the paragraph
+        # draw `|` on the left of the paragraph
         exe "norm! _vip\<c-v>^I|"
-        " draw `|` on the right of the paragraph
+        # draw `|` on the right of the paragraph
         norm! gv$A|
 
-        " align all (*) the pipe characters (`|`) inside the current paragraph
-        sil '[,']EasyAlign *|
+        # align all (*) the pipe characters (`|`) inside the current paragraph
+        :sil '[,']EasyAlign *|
 
-        " If we wanted to center the text inside each cell, we would have to add
-        " hit `CR CR` after `gaip`:
-        "
-        "     sil exe "norm gaip\<cr>\<cr>*|"
+        # If we wanted to center the text inside each cell, we would have to add
+        # hit `CR CR` after `gaip`:
+        #
+        #     sil exe "norm gaip\<cr>\<cr>*|"
 
-        " Capture all the column positions in the current line matching a `|`
-        " character:
-        let col_pos = []
+        # Capture all the column positions in the current line matching a `|`
+        # character:
+        let col_pos: list<number> = []
         let i = 0
         for char in getline('.')->split('\zs')
-            let i += 1
-            if char is# '|'
-                let col_pos += [i]
+            i += 1
+            if char == '|'
+                col_pos += [i]
             endif
         endfor
 
         if empty(col_pos)
-            return
+            return ''
         endif
 
-        " Draw the upper border of the box '┌────┐':
-        call s:box_create_border('top', col_pos)
+        # Draw the upper border of the box '┌────┐':
+        Box_create_border('top', col_pos)
 
-        " Draw the lower border of the box '└────┘':
-        call s:box_create_border('bottom', col_pos)
+        # Draw the lower border of the box '└────┘':
+        Box_create_border('bottom', col_pos)
 
-        " Replace the remaining `|` with `│`:
+        # Replace the remaining `|` with `│`:
         let first_line = line("'{") + 2
         let last_line = line("'}") - 2
-        for i in range(first_line, last_line)
-            for j in col_pos
-                exe 'norm! ' .. i .. 'G' .. j .. '|r│'
+        for l in range(first_line, last_line)
+            for c in col_pos
+                exe 'norm! ' .. l .. 'G' .. c .. '|r│'
             endfor
         endfor
 
-        call s:box_create_separations()
+        Box_create_separations()
     catch
         return Catch()
     endtry
-endfu
+    return ''
+enddef
 
-fu s:box_create_border(where, col_pos) abort
-    let col_pos = a:col_pos
-
-    if a:where is# 'top'
-        " duplicate first line in the box
+def s:Box_create_border(where: string, col_pos: list<number>)
+    if where == 'top'
+        # duplicate first line in the box
         norm! '{+yyP
-        " replace all characters with `─`
+        # replace all characters with `─`
         norm! v$r─
-        " draw corners
+        # draw corners
         exe 'norm! ' .. col_pos[0] .. '|r┌' .. col_pos[-1] .. '|r┐'
     else
-        " duplicate the `┌────┐` border below the box
-        t'}-
-        " draw corners
+        # duplicate the `┌────┐` border below the box
+        copy '}-
+        # draw corners
         exe 'norm! ' .. col_pos[0] .. '|r└' .. col_pos[-1] .. '|r┘'
     endif
 
-    " draw the '┬' or '┴' characters:
+    # draw the '┬' or '┴' characters:
     for pos in col_pos[1:-2]
-        exe 'norm! ' .. pos .. '|r' .. (a:where is# 'top' ? '┬' : '┴')
+        exe 'norm! ' .. pos .. '|r' .. (where == 'top' ? '┬' : '┴')
     endfor
-endfu
+enddef
 
-fu s:box_create_separations() abort
-    " Create a separation line, such as:
-    "
-    "     |    |    |    |
-    "
-    " ... useful to make our table more readable.
+def s:Box_create_separations()
+    # Create a separation line, such as:
+    #
+    #     |    |    |    |
+    #
+    # ... useful to make our table more readable.
     norm! '{++yyp
-    call getline('.')->substitute('[^│┼]', ' ', 'g')->setline('.')
+    getline('.')->substitute('[^│┼]', ' ', 'g')->setline('.')
 
-    " Delete it in the `s` (s for space) register, so that it's stored inside
-    " default register and we can paste it wherever we want.
+    # Delete it in the `s` (s for space) register, so that it's stored inside
+    # default register and we can paste it wherever we want.
     d s
 
-    " Create a separation line, such as:
-    "
-    "     ├────┼────┼────┤
-    "
-    " ... and store it inside `x` register.
-    " So that we can paste it wherever we want.
+    # Create a separation line, such as:
+    #
+    #     ├────┼────┼────┤
+    #
+    # ... and store it inside `x` register.
+    # So that we can paste it wherever we want.
     let line = (line("'{") + 1)->getline()
-    let line = substitute(line, '\S', '├', '')
-    let line = substitute(line, '.*\zs\S', '┤', '')
-    let line = substitute(line, '┬', '┼', 'g')
+    line = substitute(line, '\S', '├', '')
+    line = substitute(line, '.*\zs\S', '┤', '')
+    line = substitute(line, '┬', '┼', 'g')
 
-    " Make the contents of the register linewise, so we don't need to hit
-    " `"x]p`, but simply `"xp`.
-    call setreg('x', [line], 'l')
-endfu
+    # Make the contents of the register linewise, so we don't need to hit
+    # `"x]p`, but simply `"xp`.
+    setreg('x', [line], 'l')
+enddef
 
-fu myfuncs#box_destroy(...) abort
-    if !a:0
-        let &opfunc = 'myfuncs#box_destroy'
+def myfuncs#box_destroy(type = ''): string
+    if type == ''
+        &opfunc = 'myfuncs#box_destroy'
         return 'g@'
     endif
 
-    let [lnum1, lnum2] = [line("'["), line("']")]
+    let lnum1 = line("'[")
+    let lnum2 = line("']")
     let range = lnum1 .. ',' .. lnum2
-    " remove box (except pretty bars: │)
-    sil exe range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
+    # remove box (except pretty bars: │)
+    exe ':sil ' .. range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
 
-    " replace pretty bars with regular bars
-    " necessary, because we will need them to align the contents of the
-    " paragraph later
-    sil exe range .. 's/│/|/ge'
+    # replace pretty bars with regular bars
+    # necessary, because we will need them to align the contents of the
+    # paragraph later
+    exe ':sil ' .. range .. 's/│/|/ge'
 
-    " remove the bars at the beginning and at the end of the lines
-    " we don't want them, because they would mess up the creation of a box
-    " later
-    sil exe range .. 's/|//e'
-    sil exe range .. 's/.*\zs|//e'
+    # remove the bars at the beginning and at the end of the lines
+    # we don't want them, because they would mess up the creation of a box
+    # later
+    exe ':sil ' .. range .. 's/|//e'
+    exe ':sil ' .. range .. 's/.*\zs|//e'
 
-    " trim whitespace
-    sil exe range .. 'TW'
-    " remove empty lines
-    sil exe range .. '-g/^\s*$/d_'
+    # trim whitespace
+    exe ':sil ' .. range .. 'TW'
+    # remove empty lines
+    exe ':sil ' .. range .. '-g/^\s*$/d_'
 
-    call append(lnum1 - 1, [''])
+    append(lnum1 - 1, [''])
 
-    " position the cursor on the upper left corner of the paragraph
+    # position the cursor on the upper left corner of the paragraph
     exe 'norm! ' .. lnum1 .. 'Gj_'
-endfu
+    return ''
+enddef
 
 fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     let view = winsaveview()
@@ -893,10 +871,10 @@ endfu
 fu myfuncs#plugin_global_variables(keyword) abort "{{{1
     if a:keyword == ''
         let usage =<< trim END
-        usage:
+            usage:
 
-            :PluginGlobalVariables ulti
-            display all global variables containing the keyword `ulti`
+                :PluginGlobalVariables ulti
+                display all global variables containing the keyword `ulti`
         END
         echo join(usage, "\n")
         return
@@ -1020,6 +998,89 @@ fu s:search_todo_text(dict) abort
     endif
     return dict
 endfu
+
+def myfuncs#send_to_tab_page(vcount: number) #{{{1
+    let curtab = tabpagenr()
+    let count: number
+    if vcount == curtab
+        redraw
+        echo 'current window is already in current tab page'
+        return
+    elseif vcount > tabpagenr('$')
+        redraw
+        echo 'no tab page with number ' .. vcount
+        return
+    # if we don't press a count before the lhs, we want the chance to provide it afterward
+    elseif vcount == 0
+        # TODO: It would be nice if we could select the tab page via fzf.{{{
+        #
+        #     " prototype
+        #     nno <silent> cd :<c-u>call fzf#run(#{
+        #         \ source: range(1, tabpagenr('$')),
+        #         \ sink: function(expand('<SID>') .. 'Func'),
+        #         \ options: '+m',
+        #         \ left: 30,
+        #         \ })<cr>
+        #
+        #     def Func(line: string)
+        #         exe line .. 'tabnext'
+        #     enddef
+        #
+        # We  still need  to figure out  how to  preview all the  windows opened  in the
+        # selected tab page.
+        #}}}
+        let input = input('send to tab page nr: ')
+        if input == '$'
+            count = tabpagenr('$')
+        elseif input =~ '$-\+$'
+            let offset = matchstr(input, '-\+')->len()
+            count = tabpagenr('$') - offset
+        elseif input =~ '$-\d\+$'
+            let offset = matchstr(input, '-\d\+')->str2nr()
+            count = tabpagenr('$') - offset
+        elseif input =~ '^[+-]\+$'
+            count = tabpagenr() + count(input, '+') - count(input, '-')
+        elseif input !~ '^[+-]\=\d*[1-9]\d*$'
+            redraw
+            if input != ''
+                echo 'not a valid number'
+            endif
+            return
+        # parse a `+2` or `-3` number as an index relative to the current tabpage
+        elseif input[0] =~ '+\|-'
+            count = eval(curtab .. ' ' .. input[0] .. ' ' .. matchstr(input, '\d\+'))
+        else
+            count = matchstr(input, '\d\+')->str2nr()
+        endif
+    endif
+    let bufnr = bufnr('%')
+    # let's save the winid of the window we want to move
+    let closedwinid = win_getid()
+    # Do *not* try to close it now.{{{
+    #
+    # Closing a tab page changes the positions of the next ones.
+    # So, you would need  to apply an offset when moving to  a later tabpage, if
+    # the current one only contains 1 window.
+    #
+    # Also, you don't know whether `:tabnext` will succeed.
+    # If it fails, there's no reason to close the current window.
+    #}}}
+    # focus target tab page
+    try
+        # clear output of `input()` from the command-line
+        redraw
+        exe 'tabnext ' .. count
+    catch /^Vim\%((\a\+)\)\=:E475:/
+        Catch()
+        return
+    endtry
+    # open new window displaying the buffer from the closed window in the target tab page
+    exe 'sb ' .. bufnr
+    let curwinid = win_getid()
+    win_gotoid(closedwinid)
+    close
+    win_gotoid(curwinid)
+enddef
 
 fu myfuncs#send_to_server() abort "{{{1
     sil undo | let contains_ansi = search("\e", 'n') | sil redo

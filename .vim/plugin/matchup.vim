@@ -37,7 +37,7 @@ let g:matchup_matchparen_offscreen = {'method': 'popup'}
 " is not visible on the screen.
 "
 " Because of the value `status`, the whole  contents of the status line is lost;
-" it's replaced with the close word, while the remaining part of the status line
+" it's replaced by the  close word, while the remaining part  of the status line
 " is syntax highlighted exactly as the matching line in the buffer.  All of this
 " is jarring.
 "

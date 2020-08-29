@@ -127,7 +127,7 @@ let g:UltiSnipsJumpBackwardTrigger = '<S-F9>'
 "
 " When the user will hit `z` in select mode, he will expect the selected text
 " to be replaced by the `z` character.
-" But in fact, the selected text will be replaced with `abc`.
+" But in fact, the selected text will be replaced by `abc`.
 " This unexpected behavior can happen because some plugins use the `:v(nore)map`
 " command instead of `:x(nore)map`.
 "

@@ -8,6 +8,7 @@ gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
 groff -man -Tascii {{program}}.man § check formatting of a manual page
 
+git bisect reset; git bisect start --term-old ok --term-new nope; git bisect nope {{new_commit}} && git bisect ok {{old_commit}}; git bisect run /tmp/bisect
 git bisect visualize --oneline
 git checkout $(git rev-list --max-parents=0 HEAD) § checkout initial commit
 git log --all --source -p -i -S § search for string across all commits
