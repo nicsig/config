@@ -1,4 +1,4 @@
-import {Catch, Opfunc} from 'lg.vim'
+import {Catch, IsVim9, Opfunc} from 'lg.vim'
 const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 " Operators {{{1
@@ -144,7 +144,7 @@ fu s:handle_char(reg) abort
     try
         exe 'keepj norm! `[v`]"' .. a:reg .. 'p'
     catch
-        return Catch()
+        return s:Catch()
     finally
         call setreg(a:reg, reg_save)
     endtry
@@ -186,7 +186,7 @@ fu s:op_yank(type) abort
         exe mods .. ' ' .. range .. cmd .. ':' .. escape(pat, ':') .. ':y Z'
         let yanked = getreginfo('z')->get('regcontents', [])
     catch
-        return Catch()
+        return s:Catch()
     finally
         call setreg('z', z_save)
         " emulate what Vim does with a  builtin operator; the cursor ends at the
@@ -545,7 +545,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
         "     (1 of 123): ...
         "}}}
         sil noa exe 'lvim /' .. pat .. '/g %'
-        let w:xl_match = matchadd('SpellBad', pat, -1)
+        let w:xl_match = matchadd('SpellBad', pat, 0)
     else
         echohl WarningMsg
         echom 'Lines are identical'
@@ -606,7 +606,7 @@ fu myfuncs#dump_wiki(url) abort "{{{1
         sil update
 
     catch
-        return Catch()
+        return s:Catch()
 
     finally
         call setpos("'x", x_save)
@@ -719,7 +719,7 @@ fu myfuncs#join_blocks(first_reverse) abort "{{{1
         sil *!column -s $'\x01' -t
 
     catch
-        return Catch()
+        return s:Catch()
     finally
         if winbufnr(winid) == bufnr
             let [tabnr, winnr] = win_id2tabwin(winid)
@@ -754,12 +754,13 @@ fu myfuncs#long_data_join(...) abort "{{{1
             sil exe 'keepj keepp' .. range .. '-s/$/,/'
             sil exe range .. 'j'
         else
-            sil exe 'keepj keepp ' .. range .. 's/\n\s*\\//ge'
+            let contline = !s:IsVim9() ? '\\' : ''
+            sil exe 'keepj keepp ' .. range .. 's/\n\s*' .. contline .. '/' .. (s:IsVim9() ? ' ' : '') .. '/ge'
             call cursor("'[", 1)
             sil keepj keepp s/\m\zs\s*,\ze\s\=[\]}]//e
         endif
     catch
-        return Catch()
+        return s:Catch()
     endtry
 endfu
 
@@ -778,11 +779,13 @@ fu myfuncs#long_data_split(...) abort "{{{1
         " symbol (`[` or `{`), add a space:
         sil keepj keepp s/\m[\[{]\s\@!\zs/ /e
         " Move the first item in the list on a dedicated line.
-        sil keepj keepp s/\m[\[{]\zs/\="\n" .. first_line_indent .. "    \\"/e
+        let contline = !s:IsVim9() ? ' \' : ''
+        sil keepj keepp s/\m[\[{]\zs/\="\n" .. first_line_indent .. '   ' .. contline/e
         " split the data
-        sil keepj keepp s/,\zs/\="\n" .. first_line_indent .. '    \'/ge
+        sil keepj keepp s/,\zs/\="\n" .. first_line_indent .. '   ' .. contline/ge
         " move the closing symbol on a dedicated line
-        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n" .. first_line_indent .. "    \\ "/e
+        let contline = !s:IsVim9() ? '    \ ' : ''
+        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n" .. first_line_indent .. contline/e
 
     elseif has_comma
         " We use `strdisplaywidth()` because the indentation could contain tabs.
@@ -956,7 +959,7 @@ fu myfuncs#search_todo(where) abort "{{{1
         echom 'no TO' .. 'DO or FIX' .. 'ME'
         return
     catch
-        return Catch()
+        return s:Catch()
     endtry
 
     " Because we've prefixed  `:lvim` with `:noa`, our autocmd which  opens a qf

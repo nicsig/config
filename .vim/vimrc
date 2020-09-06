@@ -3114,7 +3114,7 @@ let s:changenr_save = {}
 "}}}
 
 " Don't use `UU`; I think we used it in the past, but pressed it by accident too often.
-nno <silent> UM :call <sid>Undo_changes_during_current_session()<cr>
+nno <silent> UM :<c-u>call <sid>Undo_changes_during_current_session()<cr>
 def s:Undo_changes_during_current_session()
     let bufnr = bufnr('%')
     if !has_key(s:changenr_save, bufnr) || s:changenr_save[bufnr] == changenr()
@@ -3340,44 +3340,55 @@ nno <silent> goT :<c-u>eval getcwd()->myfuncs#gtfo_open_term()<cr>
 
 "}}}3
 " m {{{3
-" m/  m?         put current location in loclist {{{4
+" m;             mark current location {{{4
 
-" these mappings can be used to traverse an arbitrary set of locations in the
-" current buffer, using `m/` and `m?` to populate/empty the loclist, and `[l`,
-" `]l` to move from one location to the other
-
-" If we use our breakdown plugin, it will make us lose the current loclist.
-" But we could still recover it:
-"     :lol[der]
-"     :lhi[story]
-
-" add current position in loclist
-nno <silent> m/ :<c-u>call <sid>Add_to_loclist('populate')<cr>
-" empty loclist
-nno <silent> m? :<c-u>call <sid>Add_to_loclist('clear')<cr>
-
-def s:Add_to_loclist(action: string)
-    if action == 'populate'
-        s:my_marks += [{'bufnr': bufnr('%'), 'lnum': line('.'), 'col': col('.'), 'text': getline('.')}]
-    else
-        s:my_marks = []
-    endif
-    #                  ┌ don't create a new loclist every time we invoke the function
-    #                  │
-    setloclist(0, [], 'r', {'items': s:my_marks, 'title': 'My marks'})
-enddef
-" TODO(Vim9): `let my_marks: list<dict<any>>`{{{
+" These mappings can be used to traverse an arbitrary set of locations in the current buffer, using:{{{
+"
+"    - `m;` to save the current position into a list
+"    - `m,` to empty the latter
+"    - `[;` and `];` to jump from one location to the other
+"}}}
+" Why using text properties?  Why not a loclist?{{{
+"
+" A loclist would only save positions,  which could become invalid when the text
+" changes (e.g. a line before has been removed).
+" Text properties "follow" the text to which they're tied.
 "
 " ---
 "
-" When  you switch  your  vimrc to  a  Vim9 script  (write  `vim9script` at  the
-" top), review  all the  `:def` functions,  and check  whether you've  defined a
-" script-local variable  in any of them.   Whenever you find one,  declare it at
-" the  script-level (it's  disallowed to  define  a script-local  variable in  a
-" `:def` function in a  Vim9 script).  Try to give it a type,  and drop the `s:`
-" prefix.
+" Also, our breakdown plugin can frequently add a new loclist on the stack; when
+" that happens we would need to run `:lolder` or `:[count]lhi`.
 "}}}
-let s:my_marks = []
+
+" set mark on current position
+nno <silent> m; :<c-u>call <sid>MyLocations('save')<cr>
+" clear locations
+nno <silent> m, :<c-u>call <sid>MyLocations('clear')<cr>
+
+nno <silent> ]; :<c-u>call <sid>JumpMyLocations('f')<cr>
+nno <silent> [; :<c-u>call <sid>JumpMyLocations('b')<cr>
+
+def s:JumpMyLocations(direction: string)
+    let prop = prop_find(#{type: 'MyLocations', skipstart: true}, direction)
+    if empty(prop)
+        return
+    endif
+    call cursor(prop.lnum, prop.col)
+enddef
+
+def s:MyLocations(action: string)
+    if action == 'save'
+        call prop_add(line('.'), col('.'), #{
+            type: 'MyLocations',
+            combine: false,
+        })
+    else
+        call prop_type_delete('MyLocations')
+        redraw!
+        call prop_type_add('MyLocations', #{highlight: 'WildMenu', combine: 0})
+    endif
+enddef
+call prop_type_add('MyLocations', #{highlight: 'WildMenu', combine: v:false})
 
 " m!             matchadd / matchdelete search pattern {{{4
 
@@ -3386,7 +3397,7 @@ def s:Where_are_my_matches()
         sil! matchdelete(w:my_matches)
         unlet! w:my_matches
     else
-        w:my_matches = matchadd('WildMenu', '\c' .. @/, 10)
+        w:my_matches = matchadd('WildMenu', '\c' .. @/, 0)
     endif
 enddef
 
@@ -4204,7 +4215,7 @@ endif
 " brackets, and with  the closing one written  on a column whose  index is lower
 " than the one of the current cursor position.
 "}}}
-nno <silent> <c-]> :call <sid>Jump_to_definition()<cr>
+nno <silent> <c-]> :<c-u>call <sid>Jump_to_definition()<cr>
 
 def s:Jump_to_definition()
     try
@@ -4256,7 +4267,7 @@ enddef
 " Remember that `:norm` – like most Ex  commands – doesn't mark the lines in its
 " range, contrary to `:g`.
 "}}}
-nno <c-g>n :%norm!<space>
+nno <c-g>n :<c-u>%norm!<space>
 
 " C-np                move across tab pages {{{4
 
@@ -5466,7 +5477,7 @@ def s:Hl_weird_whitespace()
         let pat = '[\x0b\x0c\u00a0\u1680\u180e\u2000-\u200a\u2028\u202f\u205f\u3000\ufeff]'
         #                                     ├───────────┘
         #                                     └ yes, one can write an arbitrary range of unicode characters
-        w:strange_whitespace = matchadd('ErrorMsg', pat)
+        w:strange_whitespace = matchadd('ErrorMsg', pat, 0)
     else
         matchdelete(w:strange_whitespace)
         unlet! w:strange_whitespace
@@ -5779,7 +5790,7 @@ com -bar -nargs=? ShowLongLines echo s:ShowLongLines(<args>)
 
 def s:ShowLongLines(n = 80): string
     if !exists('w:_showlonglines')
-        w:_showlonglines = matchadd('Error', '\%' .. (n + 1) .. 'v', 20)
+        w:_showlonglines = matchadd('Error', '\%' .. (n + 1) .. 'v', 0)
     else
         matchdelete(w:_showlonglines)
         unlet w:_showlonglines
@@ -6053,7 +6064,7 @@ def s:Filetype_linter(action: string)
     endif
     if action == 'enable'
         let pat = '\m\C\%(^\%(\s*"\)\@!.*\)\@<=\mset\s\+\%(ft\|filetype\)\@!'
-        w:my_filetype_linter = matchadd('ErrorMsg', pat)
+        w:my_filetype_linter = matchadd('ErrorMsg', pat, 0)
     endif
 enddef
 
@@ -6876,7 +6887,7 @@ fu s:Trailing_whitespace(create_match)
         " It wouldn't  work; probably because  the match is installed  no matter
         " what, and needs to be removed.
         "}}}
-        let w:my_trailing_whitespace = matchadd('Error', '\s\+$', -1)
+        let w:my_trailing_whitespace = matchadd('Error', '\s\+$', 0)
     endif
 endfu
 " }}}1
@@ -7574,9 +7585,6 @@ endfu
 "     :h terminal.txt
 "     :h vim9-script
 "
-"     :h if_lua.txt (the interface may be phased out in the future)
-"     :h if_pyth.txt (" https://groups.google.com/forum/#!topic/vim_dev/__gARXMigYE)
-"
 " Note that LSP is not a replacement for tags:
 " https://www.reddit.com/r/vim/comments/fj9tsz/do_lsps_make_tag_generating_tools_obsolete/fkmna6k/
 " https://www.reddit.com/r/vim/comments/fj9tsz/do_lsps_make_tag_generating_tools_obsolete/fkmvji3/
@@ -7858,16 +7866,11 @@ endfu
 "
 " 60 -
 "
-" Be  consistent  in  how  you  chose  the  priority  of  matches  created  with
-" `matchadd()`.
-"
-" 61 -
-"
 " Every  time you open a  window, be aware that  an error may be  raised because
 " you're in the command-line window.
 " You may want to catch that error to avoid a stack trace.
 "
-" 62 -
+" 61 -
 "
 " - remove `&l:` when it's not necessary?  (or the opposite: add it everywhere?)
 " - use full name of commands and options?
@@ -7886,13 +7889,13 @@ endfu
 " Then, you  should be able to  use your refactoring command  wherever you want,
 " without breaking our diagrams.
 "
-" 63 -
+" 62 -
 "
 " We often have errors when we import the contents of a file with `:r`,
 " because the current buffer is not modifiable.
 " Maybe we should always bail out in those cases...
 "
-" 64 -
+" 63 -
 "
 "     % hash | vipe
 "
@@ -7934,13 +7937,13 @@ endfu
 " It seems to help a lot in our previous MWE.
 " Do we still have an issue? Or does the numeric prefix fix everything?
 "
-" 65 -
+" 64 -
 "
 " The  `C-n` and  `C-p`  buffer-local  mappings installed  by  fugitive in  some
 " buffers, conflict with our global mappings to cycle through tabpages.
 " We're often distracted, because we wonder why our mappings are not working.
 "
-" 66 -
+" 65 -
 "
 " Read:
 "
@@ -7955,12 +7958,12 @@ endfu
 " https://github.com/prabirshrestha/async.vim (243)
 " https://github.com/metakirby5/codi.vim (747)
 "
-" 67 -
+" 66 -
 "
 " Supercharge `]e` and `[e` to move a fold when the cursor is on a line inside a
 " closed fold.  Maybe do the same with `J` and `K` in visual mode.
 "
-" 68 -
+" 67 -
 "
 " We don't version control our pdfs in `~/wiki`.
 " Suppose one of our  notes has a link to a local pdf,  and we restore our notes
@@ -7970,12 +7973,12 @@ endfu
 " Also, make sure we do version control  the tex source code of all pdfs used in
 " links.
 "
-" 69 -
+" 68 -
 "
 " Review how we set folding ('fde', 'fdt') in all our plugins.
 " If it makes sense, try to move as much code as possible in `vim-fold`.
 "
-" 70 -
+" 69 -
 "
 " `[ SPC`  and `] SPC`  are not reliable  when we're on  a line inside  a closed
 " fold.
@@ -7983,18 +7986,18 @@ endfu
 " yourself if you want Vim to add an empty line or an empty fold.
 " Currently, I don't think we have an easy algo to teach Vim how to decide itself.
 "
-" 71 -
+" 70 -
 "
 " Watch these videos about using Vim as a diff tool, and as a merge tool:
 " https://www.youtube.com/watch?v=zEah_HDpHzc
 " https://www.youtube.com/watch?v=VxpCgQyUXlI
 "
-" 72 -
+" 71 -
 "
 " We have too many comments in this file about the bracketed paste mode.
 " Move all of that in a dedicated file (vim notes, terminal notes, ...).
 "
-" 73 -
+" 72 -
 "
 " In the  past, we have  had too many  issues by trying  to parse the  output of
 " `execute('syn list ...')`, `execute('hi ...')`.
@@ -8004,7 +8007,7 @@ endfu
 " Also, `:verbose syn list ...` doesn't print the script location from which the
 " syntax group was installed.  Maybe ask for an improvement of `:verb`.
 "
-" 74 -
+" 73 -
 "
 " *Maybe*, our notes about plugins should be in help files.
 " If so, *maybe* they should support folding.
@@ -8020,7 +8023,7 @@ endfu
 " And  once  the  interface  has  entered your  muscle  memory,  you  can  start
 " refactoring the code.
 "
-" 75 -
+" 74 -
 "
 " We really need a library function to get a comment leader.
 "
@@ -8069,7 +8072,7 @@ endfu
 "
 "     nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
 "
-" 76 -
+" 75 -
 "
 " We often make this error:
 "
@@ -8085,20 +8088,20 @@ endfu
 " Other Idea: Make `M-b` inspect the 2 previous characters.
 " If they are a pair of brackets, make it move the cursor as if `C-b` had been pressed.
 "
-" 77 -
+" 76 -
 "
 " In a markdown file, `gc` should behave slightly differently.
 " It  should  make sure  there  are  4 spaces  between  `>`  and the  first  non
 " whitespace on each line; and reformat the quote with `par(1)`.
 " Because that's what we do all the time; so better automate it.
 "
-" 78 -
+" 77 -
 "
 " In a fugitive buffer, when we need to  stage many files, I would like to press
 " `-` very fast.  We can't because – for some reason – it would trigger our `--`
 " mapping which opens a dirvish buffer.
 "
-" 79 -
+" 78 -
 "
 " We've just had an issue in `vim-search` because we used `==` instead of `==#`.
 " Maybe we should write `==#` and `!=#` instead of `==` and `!=`.
@@ -8106,7 +8109,7 @@ endfu
 "
 "     :vim /=\@1<![!=]=[#?=]\@!\%(\s*-\=\d\+\)\@!/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 "
-" 80 -
+" 79 -
 "
 " The  interface of  your plugins  and custom  config should  be simplified  and
 " exposed; review every custom mapping/command.
@@ -8126,7 +8129,7 @@ endfu
 "        If the help of a command gets too big, you could spread it across
 "        several pages, using a `-help {keyword}` argument.
 "
-" 81 -
+" 80 -
 "
 " Should we add the guard `if $MYVIMRC == '' | finish | endif` in all the files
 " under `~/.vim/{after/}plugin`?
@@ -8137,7 +8140,7 @@ endfu
 " `*/after/ftplugin/{&ft}.vim`?
 " https://github.com/andymass/vim-matchup/commit/0b780e9ae12ba913742356f4b7cedc52d3a15220
 "
-" 82 -
+" 81 -
 "
 " Document a few things about debugging with breakpoints.
 "
@@ -8208,7 +8211,7 @@ endfu
 " the sourcing of the autoloaded directory).
 " Now you can run `:breakadd func <snr>123_function_name`.
 "
-" 83 -
+" 82 -
 "
 " Vim saves anything typed on the  command-line, regardless of how we've left it
 " (including when we've pressed `C-c` or `Esc`).
@@ -8227,7 +8230,7 @@ endfu
 "     /the
 "     " press Escape: the cursor jumps to the next occurrence of `the`
 "
-" 84 -
+" 83 -
 "
 " Look for `:windo` and `:wincmd` everywhere.
 "
@@ -8235,7 +8238,7 @@ endfu
 "
 " Replace these commands with `win_execute()` whenever possible.
 "
-" 85 -
+" 84 -
 "
 " Review all the custom motions you've installed.
 " For each  of them, make  sure you can  jump back with  `C-o` (set mark  `'` on
@@ -8244,12 +8247,12 @@ endfu
 " Actually, maybe not for all of them.
 " Think about which motions should add an entry in the jumplist.
 "
-" 86 -
+" 85 -
 "
 " Install a `=rm`  mapping in Vim files to refactor  nested function calls using
 " the method call operator (`->`).
 "
-" 87 -
+" 86 -
 "
 "     $ cd ; vim
 "     :echo getcwd() → /home/user
@@ -8259,7 +8262,7 @@ endfu
 "     " press `--`
 "     " press `q`: why isn't the dirvish buffer unloaded?
 "
-" 88 -
+" 87 -
 "
 " Every time you've used sth like `norm! %` in the past, it was probably wrong.
 " You should have used sth like:
@@ -8290,7 +8293,7 @@ endfu
 " Enough is enough; we've removed `vim-matchit`, and installed `vim-matchup`.
 " Read the documentation of the latter.
 "
-" 89 -
+" 88 -
 "
 " Every time  we've "changed"  a buffer  in a way  that the  line count  did not
 " change (`y` operator, `:y`, `:w`, `:update`,  ...), make sure we have used the
@@ -8308,7 +8311,7 @@ endfu
 "
 " Also, whenever we've used `:!`, maybe we should have used the `:keepmarks` modifier...
 "
-" 90 -
+" 89 -
 "
 " Tweak our `= SPC` mapping so that it comments the added lines when we are on a
 " commented line.
@@ -8330,7 +8333,7 @@ endfu
 "
 "     " ~/.vim/plugged/vim-brackets/autoload/brackets.vim
 "
-" 91 -
+" 90 -
 "
 " I'm fed up with codespans being broken when formatting with `gq`.
 "
@@ -8343,22 +8346,22 @@ endfu
 " Also: Same issue with italics / bold style.
 " Tweak syntax regexes?
 "
-" 92 -
+" 91 -
 "
 " Integrate `~/Desktop/cwd.md` in our wiki notes.
 "
-" 93 -
+" 92 -
 "
 " Remove all custom mappings/Ex commands you never use.
 " They create "noise" which makes it harder to assimilate useful mappings/commands.
 "
-" 94 -
+" 93 -
 "
 " Read:
 " https://vimways.org/2019/indentation-without-dents/ (see `~/.vim/indent/[my]matlab.vim`, `~/Desktop/m.m`)
 " https://vimways.org/2019/a-test-to-attest-to/
 "
-" 95 -
+" 94 -
 "
 " Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 " Example:
@@ -8367,7 +8370,7 @@ endfu
 "
 " Also, check out `:h readdirex()`.
 "
-" 96 -
+" 95 -
 "
 " Try to use `matchlist()` more often.
 " In particular, whenever you've  used `matchstr()` several times consecutively,
@@ -8380,7 +8383,7 @@ endfu
 "     let text = 'hello world some text'
 "     let [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
 "
-" 97 -
+" 96 -
 "
 " Try to replace as many timers as possible:
 "
@@ -8404,13 +8407,13 @@ endfu
 " Naively, I would say yes.  The longer a command is delayed, the longer we stay
 " in an undesirable state...
 "
-" 98 -
+" 97 -
 "
 " We refer to dirvish in several locations in `vim-fex`.
 " I don't like that.
 " dirvish and fex are two different plugins.
 "
-" 99 -
+" 98 -
 "
 " Remove all invocations of `setenv()` and `getenv()`.
 " Use global variables  instead; don't write them in uppercase  though; we don't
@@ -8418,7 +8421,7 @@ endfu
 "
 " Document somewhere how `[gs]etenv()` can be used.
 "
-" 100 -
+" 99 -
 "
 " Replace 0 and 1 with v:false, v:true whenever possible.
 "
@@ -8426,7 +8429,7 @@ endfu
 "     :Cfilter! -other_plugins
 "     :Cfilter! -tmp
 "
-" 101 -
+" 100 -
 "
 " Assimilate the `s:Sendtoclipboard()` function, and the `~/bin/sendtoclipboard` script.
     def s:Sendtoclipboard(text: string)
@@ -8463,8 +8466,8 @@ endfu
             # If   you're   not   convinced,   comment  the   line,   and   in   the
             # `sendtoclipboard` script, comment the line invoking `xsel(1x)`.
             # Then, try to use this function: it will fail.
-            # It should work  thanks to the OSC 52 sequence,  but it doesn't without
-            # this `writefile()` line.
+            # It  should work  thanks to  the OSC  52 sequence,  but it  doesn't
+            # without this `echoraw()` line.
             # I think  that's because the script  is called via `system()`  and thus
             # has no controlling terminal; so the sequence is written nowhere.
             #}}}
@@ -8473,7 +8476,7 @@ endfu
     enddef
     nno <silent> <space>y y:<c-u>call <sid>Sendtoclipboard(@0)<cr>
 "
-" 102 -
+" 101 -
 "
 " Write a refactoring command to convert a dictionary into its literal form:
 "
@@ -8492,7 +8495,7 @@ endfu
 " That is,  if some key contains  characters which are invalid  in `#{}`, cancel
 " the whole refactoring.
 "
-" 103 -
+" 102 -
 "
 " Create a command to cycle between different buffer states.
 " E.g.:
@@ -8523,7 +8526,7 @@ endfu
 "     " pressing Enter on an entry runs `:undo 123` in the associated buffer
 "     :UndoSeq
 "
-" 104 -
+" 103 -
 "
 " Consider adding `sil!` to unmap all buffer-local mappings from `b:undo_ftplugin`.
 " We've lost some time  trying to understand why we sometimes  had an error when
@@ -8534,30 +8537,30 @@ endfu
 " But we didn't learn  much in the process; not sure  it's worth avoiding `sil!`
 " going forward.
 "
-" 105 - Find a fix for these console-related issues:
+" 104 - Find a fix for these console-related issues:
 "
 " https://vi.stackexchange.com/questions/25151/how-to-change-vim-cursor-shape-in-virtual-console
 " https://vi.stackexchange.com/questions/25093/how-to-use-16-color-colorscheme-in-tty
 "
-" 106 - Replace all `_save` with `save_`.
+" 105 - Replace all `_save` with `save_`.
 " That's what Bram seems to prefer (cf. `:h mapset()`).
 " But tpope seems to use `_save`...
 " What should we choose?
 "
-" 107 - In help files, we use `>` to jump to the next option tag.
+" 106 - In help files, we use `>` to jump to the next option tag.
 " In regular files, we use `>t` to move the current tab page.
 " There is a conflict here.  We can't use `>t` in a help file.
 " Change one of the mappings.
 "
-" 108 - In the past, did we use `len()` + `matchstr()` instead of `byteidx()`/`byteidxcomp()`?
+" 107 - In the past, did we use `len()` + `matchstr()` instead of `byteidx()`/`byteidxcomp()`?
 "
-" 109 -
+" 108 -
 "
 " Study and document the new `flatten()` function.
 " In particular, read the tests:
 " https://github.com/vim/vim/commit/077a1e670ad69ef4cefc22103ca6635bd269e764
 "
-" 110 -
+" 109 -
 "
 " Adapt this for `:map` (& friends like `:nno`), `:[ic]norea`, `:au`, and `:set`:
 " https://github.com/vim/vim/issues/6373#issuecomment-652664179
@@ -8570,7 +8573,7 @@ endfu
 " need to be adapted).  Instead, install a `CmdlineLeave` autocmd which inspects
 " the command-line.
 "
-" 111 -
+" 110 -
 "
 " Make sure  we've never  written `line('.')`,  `line('$')`, `line("'x")`  (x is
 " an  arbitrary  mark), `line('w0')`,  `line('w$')`,  `line('v')`,  when it  was
@@ -8581,12 +8584,12 @@ endfu
 " For any function which can only operate  on the current buffer, you don't need
 " `line()`.
 "
-" 112 -
+" 111 -
 "
 " Autoload as  many functions as possible  out of the vimrc,  to improve startup
 " time.  Refactor them in `:def` if possible.
 "
-" 113 -
+" 112 -
 "
 " Install `cop`  mapping in qf  filetype plugin  to toggle between  relative and
 " full file paths.
@@ -8599,7 +8602,7 @@ endfu
 " Depending on the value of this  argument, the function prints full or relative
 " file paths.
 "
-" 114 -
+" 113 -
 "
 " Refactorings:
 "
@@ -8620,12 +8623,6 @@ endfu
 " Check whether we could add one more `->` each time we've used a method.
 "
 "     \%(\S\|^\s*["#]\s*\\\s*\)\%\({\s*\%(\%\(\S\+\s*,\)\=\s*\S\+\)\=\s*\)\@<!->\a
-"
-" Update: Make sure the previous pattern covers this:
-"
-"     join(Combine(param_values), "\n")
-"     ^-----------^
-"     can be refactored into:  Combine(...)->join(...)
 "
 " ---
 "

@@ -322,6 +322,7 @@ call repmap#make#repeatable({
     \              {'bwd': '[q', 'fwd': ']q'},
     \              {'bwd': '[s', 'fwd': ']s'},
     \              {'bwd': '[t', 'fwd': ']t'},
+    \              {'bwd': '[;', 'fwd': '];'},
     \              {'bwd': 'g,', 'fwd': 'g;'},
     \            ]
     \ })
