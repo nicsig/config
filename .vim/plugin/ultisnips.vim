@@ -256,7 +256,7 @@ augroup my_ultisnips | au!
     " let us know when a snippet is being expanded
     sil! call s:Derive('Ulti', 'Visual', 'term=bold cterm=bold gui=bold')
     au User MyFlags call statusline#hoist('buffer', '%#Ulti#%{plugin#ultisnips#status()}',
-        \ 55, expand('<sfile>') .. ':' .. expand('<sflnum>'))
+        \ 55, expand('<sfile>:p') .. ':' .. expand('<sflnum>'))
 
     " Inserting the output of a shell command in a snippet can cause visual artifacts.{{{
     "

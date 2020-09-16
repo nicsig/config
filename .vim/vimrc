@@ -249,9 +249,10 @@ Plug 'foxik/vim-makejob'
 " ---
 "
 " When you  re-implement the man  plugin, make sure  to support motions  such as
-" `]r`, and commands such as `C-]`.
+" `]r`, and commands such as `C-]`/`CR`.
 "}}}
-Plug 'lacygoill/vim-man'
+set rtp^=~/.vim/plugged/vim-man-crash
+" Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'andymass/vim-matchup'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
@@ -2386,7 +2387,7 @@ augroup hoist_ve | au!
     "}}}
     au User MyFlags call statusline#hoist('global',
         \ '%{&ve isnot# "' .. &ve .. '" && mode(1) is# "n" ? "[ve=" .. &ve .. "]" : ""}', 8,
-        \ expand('<sfile>') .. ':' .. expand('<sflnum>'))
+        \ expand('<sfile>:p') .. ':' .. expand('<sflnum>'))
     au OptionSet virtualedit call timer_start(0, {-> execute('redrawt')})
 augroup END
 
@@ -2723,7 +2724,7 @@ enddef
 
 " C-r `         insert codespan {{{3
 
-cno <c-r>` <c-\>e <sid>Insert_codespan()<cr>
+cno <c-r>` <c-r><c-r>=<sid>Insert_codespan()<cr>
 def s:Insert_codespan(): string
     let line = getline('.')
     let col = col('.')
@@ -3247,7 +3248,7 @@ nno <expr> g<space> <sid>Break_line()
 
 def s:Break_line(type = ''): string
     if type == ''
-        &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
+        &opfunc = expand('<stack>')->matchstr('.*\zs<SNR>\w*')
         return 'g@l'
     endif
 
@@ -3381,7 +3382,7 @@ def s:MyLocations(action: string)
         call prop_add(line('.'), col('.'), #{
             type: 'MyLocations',
             combine: false,
-        })
+            })
     else
         call prop_type_delete('MyLocations')
         redraw!
@@ -3478,7 +3479,7 @@ nno <expr> z= <sid>Z_equal()
 
 def s:Z_equal(type = ''): any
     if type == ''
-        &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
+        &opfunc = expand('<stack>')->matchstr('.*\zs<SNR>\w*')
         return 'g@l'
     endif
     try
@@ -4104,7 +4105,7 @@ xno <expr> +< myfuncs#long_data_join()
 nno <expr> +e <sid>Emphasize()
 def s:Emphasize(type = ''): string
     if type == ''
-        &opfunc = expand('<sfile>')->matchstr('<SNR>\w*$')
+        &opfunc = expand('<stack>')->matchstr('.*\zs<SNR>\w*')
         return 'g@l'
     endif
     let word = expand('<cword>')
@@ -4245,7 +4246,7 @@ def s:C_a(): string
     let old2new = {
         '✘': '✔',
         '✔': '✘',
-    }
+        }
     if !has_key(old2new, char_under_cursor) | return '' | endif
     let new_char = old2new[char_under_cursor]
     # Why returning a `|` motion?{{{
@@ -5607,7 +5608,7 @@ def s:Plugins_to_commit()
 
     filter(output, {_, v -> v =~ '^\S'})
     map(output, {_, v -> glob($HOME .. '/.vim/plugged/' .. v .. '/*', 0, 1)[0]})
-    setqflist([], ' ', {'lines': output, 'efm': '%f', 'title': 'Plugins to commit'})
+    setqflist([], ' ', #{lines: output, efm: '%f', title: 'Plugins to commit'})
     cw
 enddef
 
@@ -5778,7 +5779,7 @@ fu s:reverse_every_n_lines(n, line1, line2) abort
     let mods = 'keepj keepp lockm'
     let range = a:line1 .. ',' .. a:line2
     let l:Address = {-> (line('.') - a:line1 + 1) % a:n ? (line('.') - a:line1 + 1) % a:n : a:n}
-    sil exe mods .. ' ' .. range .. 'g/^/exe "m .-" .. l:Address()'
+    sil exe mods .. ' ' .. range .. 'g/^/exe "m .-" .. Address()'
 endfu
 
 " ShowLongLines {{{2
@@ -6388,7 +6389,7 @@ def s:Filter_special_file()
         'odt': '%!odt2txt ' .. fname,
         'pdf': '%!pdftotext -nopgbrk -layout -q -eol unix ' .. fname .. ' -',
         'rtf': '%!unrtf --text',
-    }
+        }
 
     if has_key(ext2cmd, ext)
         let filter = matchstr(ext2cmd[ext], '%!\zs\S*')
@@ -6525,7 +6526,7 @@ augroup END
 " expansion which is distracting.  Let's try to disable it.
 "}}}
 augroup restrict_abbreviations | au!
-    au InsertEnter * let s:start_insertion = col('.')
+    au InsertEnter * let s:start_insertion = #{lnum: line('.'), col: col('.')}
     au InsertCharPre * call s:Restrict_abbreviations()
 augroup END
 
@@ -6553,15 +6554,20 @@ def s:Restrict_abbreviations()
     # Notice how `ab` has been expanded into `cd`.
     #}}}
 
-    # Why the `-1` in `s:start_insertion -1`?{{{
+    # Why the `-1` in `s:start_insertion.col -1`?{{{
     #
     # To handle  the case where  we enter insert mode  right after a  space, and
     # type an abbreviation immediately.
     #}}}
+    let curlnum = line('.')
+    # if  the  inserted  char  is  a  keyword  character,  there  can't  be  any
+    # abbreviation expansion; no need to do anything
     if v:char =~ '\k'
         # there must be a non-keyword between the cursor and the point where we entered insert mode
         # if not, bail out
-        || s:start_insertion - 1 <= searchpos('[^[:keyword:]]', 'bn')[1]
+        || s:start_insertion.col - 1 <= searchpos('[^[:keyword:]]', 'bn', curlnum)[1]
+        # we should be still on the same line where we entered insert mode
+        || curlnum != s:start_insertion.lnum
         # we probably don't need this to be run when keys are pressed from the rhs of a mapping;
         # the less frequently we run this code, the lower the risk we encounter some unexpected side-effect
         || state() =~ 'm'
@@ -8526,6 +8532,14 @@ endfu
 "     " pressing Enter on an entry runs `:undo 123` in the associated buffer
 "     :UndoSeq
 "
+" Update: 'undolevels' is set to 1000 by default.
+" It means that beyond 1000 changes, old undo states start being lost.
+" It's  easy to  reach the  limit when  refactoring a  script, especially  via a
+" script.  Increasing the limit could have a bad impact on performance.
+"
+" To avoid losing an old undo state, maybe our custom command should also make a
+" backup of the current version of the file...
+"
 " 103 -
 "
 " Consider adding `sil!` to unmap all buffer-local mappings from `b:undo_ftplugin`.
@@ -8643,6 +8657,20 @@ endfu
 " Name your optional arguments.
 " It makes the code more readable.
 " Look for this pattern `fu\%[nction]\>!\=\s\+.*\.\.\.)`.
+"
+" 114 -
+"
+" Finish `~/Desktop/links.vim`.
+"
+" 115 -
+"
+" Add a mapping to clear the undo history of a file.
+" Try this:
+"
+"     let ul_save = &l:ul
+"     setl ul=0
+"     exe "norm! \"=''\rp"
+"     exe 'wundo ' .. expand('%:p')->undofile()->fnameescape()
 
 
 

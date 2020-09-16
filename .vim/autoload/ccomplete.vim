@@ -436,7 +436,7 @@ def Nextitem(
     let tokens = split(lead, '\s\+\|\<')
 
     # Try to recognize the type of the variable.  This is rough guessing...
-    let res: list<dict<any>> = []
+    let res = []
     for tidx in len(tokens)->range()
 
         # Skip tokens starting with a non-ID character.
@@ -645,7 +645,7 @@ def SearchMembers(
 # For matching members, find matches for following items.
 # When "all"  is non-zero  find all,  otherwise just  return 1  if there  is any
 # member.
-    let res: list<dict<any>> = []
+    let res = []
     for i in len(matches)->range()
         let typename = ''
         let line: string

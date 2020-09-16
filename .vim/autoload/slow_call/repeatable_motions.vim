@@ -4,6 +4,8 @@ endif
 
 import Catch from 'lg.vim'
 
+const s:SFILE = expand('<sfile>:p')
+
 " Define some motions {{{1
 "       Why define them here? Why not in vimrc?{{{
 "
@@ -232,7 +234,7 @@ endfu
 call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': 'F', 'fwd': 'f' },
     \              {'bwd': 'SS', 'fwd': 'ss'},
@@ -266,7 +268,7 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '!e', 'fwd': '!e'},
     \            ]
@@ -276,7 +278,7 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '<t', 'fwd': '>t'},
     \              {'bwd': '<c-w>R', 'fwd': '<c-w>r'},
@@ -287,7 +289,7 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': "['", 'fwd': "]'"},
     \              {'bwd': '["', 'fwd': ']"'},
@@ -308,7 +310,7 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '<l', 'fwd': '>l'},
     \              {'bwd': '<q', 'fwd': '>q'},
@@ -330,7 +332,7 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': '',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[`', 'fwd': ']`'},
     \              {'bwd': '[h', 'fwd': ']h'},
@@ -374,7 +376,7 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'nxo',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[-', 'fwd': ']-'},
     \              {'bwd': 'g%', 'fwd': '%'},
@@ -385,7 +387,7 @@ call repmap#make#repeatable({
 call repmap#make#repeatable({
     \ 'mode': 'n',
     \ 'buffer': 0,
-    \ 'from': expand('<sfile>:p') .. ':' .. expand('<slnum>'),
+    \ 'from': s:SFILE .. ':' .. expand('<slnum>'),
     \ 'motions': [
     \              {'bwd': '[oC', 'fwd': ']oC'},
     \              {'bwd': '[oD', 'fwd': ']oD'},

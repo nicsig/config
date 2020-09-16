@@ -60,17 +60,17 @@
 " lightcyan     lightcyan_on_white                      white_on_lightcyan
 "                               lightcyan_on_black      black_on_lightcyan
 
-let s:fname = expand('<sfile>:p')
+let s:sfile = expand('<sfile>:p')
 fu s:main() abort
     " Open this file in a window if it isn't edited yet.
     " Use the current window if it's empty.
-    if expand('%:p') isnot# s:fname
-        let fname = fnameescape(s:fname)
-        unlet s:fname
+    if expand('%:p') isnot# s:sfile
+        let sfile = fnameescape(s:sfile)
+        unlet s:sfile
         if &mod || line('$') != 1 || getline(1) != ''
-            exe 'new ' .. fname
+            exe 'new ' .. sfile
         else
-            exe 'edit ' .. fname
+            exe 'edit ' .. sfile
         endif
     endif
 

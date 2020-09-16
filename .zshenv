@@ -376,21 +376,8 @@ fi
 
 # man {{{1
 
-# use Neovim as default man pager
-# I want to use Vim as my man pager!{{{
-#
-# Then write this instead:
-#
-#     export MANPAGER='vim -M +MANPAGER -'
-#
-# See: `:h manpager.vim`.
-#
-# ---
-#
-# Note that, currently, the Neovim man plugin is better than the Vim one.
-# The latter doesn't support some attributes such as bold/underlined.
-#}}}
-export MANPAGER='nvim +Man! -u ~/.vim/mini_init.vim'
+# See also: `:h manpager.vim`
+export MANPAGER='vim --not-a-term +Man! -'
 
 # Purpose:{{{
 #

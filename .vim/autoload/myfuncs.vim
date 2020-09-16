@@ -254,7 +254,7 @@ def myfuncs#box_create(type = ''): string
 
         # Capture all the column positions in the current line matching a `|`
         # character:
-        let col_pos: list<number> = []
+        let col_pos = []
         let i = 0
         for char in getline('.')->split('\zs')
             i += 1
@@ -794,7 +794,7 @@ fu myfuncs#long_data_split(...) abort "{{{1
         sil keepj keepp s/\m\ze\S/- /e
         let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
         let l:Rep = {-> "\n" .. indent_txt .. '- '}
-        sil exe 'keepj keepp s/' .. pat .. '/\=l:Rep()/ge'
+        sil exe 'keepj keepp s/' .. pat .. '/\=Rep()/ge'
     endif
 endfu
 
@@ -947,7 +947,7 @@ fu myfuncs#remove_tabs(line1, line2) abort "{{{1
     " The second iteration will replace the tabs 2, 4, 6 and 8.
     "}}}
     for i in [1, 2]
-        exe mods .. ' ' .. range .. 's/' .. pat .. '/\=l:Rep()/ge'
+        exe mods .. ' ' .. range .. 's/' .. pat .. '/\=Rep()/ge'
     endfor
     call winrestview(view)
 endfu
