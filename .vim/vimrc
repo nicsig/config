@@ -251,8 +251,7 @@ Plug 'foxik/vim-makejob'
 " When you  re-implement the man  plugin, make sure  to support motions  such as
 " `]r`, and commands such as `C-]`/`CR`.
 "}}}
-set rtp^=~/.vim/plugged/vim-man-crash
-" Plug 'lacygoill/vim-man'
+Plug 'lacygoill/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'andymass/vim-matchup'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
@@ -3879,13 +3878,6 @@ def s:Get_charbyte()
     echo @o
 enddef
 
-" -c               TOC {{{4
-
-" Source: https://github.com/neovim/neovim/pull/4449#issuecomment-237290098
-nno <silent> -c :<c-u>call myfuncs#tab_toc()<cr>
-"             ^
-"             Contents
-
 " -f               show filetype {{{4
 
 nno <silent> -f :<c-u>call <sid>Print_filetype()<cr>
@@ -5337,7 +5329,7 @@ fu s:diff_orig_restore_settings(conceallevel, _) abort
     diffoff!
     norm! zvzz
     aug! diff_orig_restore_settings
-    unlet s:tmp_partial
+    unlet! s:tmp_partial
 endfu
 
 " DumpWiki {{{2
@@ -5794,7 +5786,7 @@ def s:ShowLongLines(n = 80): string
         w:_showlonglines = matchadd('Error', '\%' .. (n + 1) .. 'v', 0)
     else
         matchdelete(w:_showlonglines)
-        unlet w:_showlonglines
+        unlet! w:_showlonglines
         if n != 80
         # we've executed 2 `:ShowLongLines` commands, probably with different arguments
         # we just got rid of the old match of the previous command,
@@ -6862,14 +6854,10 @@ augroup END
 fu s:Trailing_whitespace(create_match)
     if exists('g:expanding_snippet') | return |endif
     if !a:create_match && exists('w:my_trailing_whitespace')
-        " Why `sil!`?{{{
-        "
-        " Because the match may not exist anymore.
-        " For example, in `~/.vim/plugged/vim-qf/after/ftplugin/qf.vim:182`,
-        " we invoke `clearmatches()`.
-        "}}}
+        " `sil!` because the match might not exist anymore.
+        " For example, a plugin could have executed `clearmatches()`.
         sil! call matchdelete(w:my_trailing_whitespace)
-        unlet w:my_trailing_whitespace
+        unlet! w:my_trailing_whitespace
     elseif a:create_match
         \ && !exists('w:my_trailing_whitespace')
         \ && index(s:NO_TRAILING_WHITESPACE_FT, &filetype) == -1
@@ -7152,35 +7140,12 @@ endfu
 " Create a mapping to populate command-line with `:ltag /`, then open the
 " location window.  Ex:
 "
-      nno <expr> <c-g>t <sid>Ltag(1)
-      def s:Ltag(step: number): string
-          if step == 1
-              augroup my_ltag | au!
-                  # Why the timer?{{{
-                  #
-                  # If  we cancel,  or the  search fails  to find  anything, the
-                  # one-shot autocmd will still be, wrongly, active.
-                  # We should make sure to remove  it with a timer, after a very
-                  # short period of time.
-                  #}}}
-                  # Still, syntax highlighting would work better.
-                  # Less hack, no timer.
-                  au CmdlineLeave : timer_start(5, {-> execute(['au! my_ltag', 'aug! my_ltag'], 'silent!')})
-                  au FileType qf ++once Ltag(2)
-              augroup END
-              return ':ltag / | lw' .. repeat("\<left>", 5)
-          elseif step == 2
-              let pat = '|.\{-}|'
-              # FIXME: It works if we press `gt`, which invokes this function.
-              # But  if we  execute `:ltag`  manually, the  function won't  be
-              # invoked, and the conceal won't be applied.
-              # This brings an inconsistent user experience.
-              # Try to use a syntax highlighting file (inspiration: man plugin
-              # in neovim).
-              qf#set_matches('vimrc:ltag', 'conceal', pat)
-              qf#create_matches()
-          endif
-          return ''
+      nno <expr> <c-g>t <sid>Ltag()
+      def s:Ltag(): string
+          augroup my_ltag | au!
+              au CmdlineLeave : execute(['au! my_ltag', 'aug! my_ltag'], 'silent!')
+          augroup END
+          return ':ltag / | lw' .. repeat("\<left>", 5)
       enddef
 "
 " Update:
@@ -7470,8 +7435,6 @@ endfu
 " 36 -
 "
 " Use syntax hl in `vim-qf` instead of complex mechanism using matches.
-" Also, in `vim-qf`, fix the fixme in the autocmd `my_qf`.
-"
 " Once done, try to use this mechanism for the issue we have in `s:ltag()`.
 "
 " 37 -
@@ -8671,6 +8634,9 @@ endfu
 "     setl ul=0
 "     exe "norm! \"=''\rp"
 "     exe 'wundo ' .. expand('%:p')->undofile()->fnameescape()
+
+
+
 
 
 

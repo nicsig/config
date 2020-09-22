@@ -467,7 +467,7 @@ fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
 
     if exists('w:xl_match')
         call matchdelete(w:xl_match)
-        unlet w:xl_match
+        unlet! w:xl_match
     endif
 
     if a:bang | return | endif
@@ -1124,49 +1124,6 @@ fu myfuncs#send_to_server() abort "{{{1
     echohl ModeMsg
     echom msg
     echohl NONE
-endfu
-
-fu myfuncs#tab_toc() abort "{{{1
-    if index(['help', 'man', 'markdown'], &ft) == -1
-        return
-    endif
-
-    let patterns = {
-        \ 'man': '\S\zs',
-        \ 'markdown': '^\%(#\+\)\=\S.\zs',
-        \ 'help': '\S\ze\*$\|^\s*\*\zs\S',
-        \ }
-
-    let syntaxes = {
-        \ 'man': 'heading\|title',
-        \ 'markdown': 'markdownH\d\+',
-        \ 'help': 'helpHyperTextEntry\|helpStar',
-        \ }
-
-    let toc = []
-    for lnum in range(1, line('$'))
-        let col = getline(lnum)->match(patterns[&ft])
-        if col != -1 && synID(lnum, col, 1)->synIDattr('name') =~? syntaxes[&ft]
-            let text = getline(lnum)->substitute('\s\+', ' ', 'g')
-            call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
-        endif
-   endfor
-
-    call setloclist(0, [], ' ', {'items': toc, 'title': 'TOC'})
-
-    let is_help_file = &bt is# 'help'
-
-    " The width of the current window is going to be reduced by the TOC window.
-    " Long lines may be wrapped.  I don't like wrapped lines.
-    setl nowrap
-
-    do <nomodeline> QuickFixCmdPost lwindow
-    if &bt isnot# 'quickfix' | return | endif
-
-    if is_help_file
-        call qf#set_matches('myfuncs:tab_toc', 'Conceal', '\*')
-        call qf#create_matches()
-    endif
 endfu
 
 " trans {{{1

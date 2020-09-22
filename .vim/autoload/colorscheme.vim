@@ -717,6 +717,19 @@ fu s:misc() abort "{{{2
     " create `PopupSign` from `WarningMsg`
     " override the `guibg` or `ctermbg` attribute, using the colors of the `Normal` HG
     sil! call s:Derive('PopupSign', 'WarningMsg', {'bg': 'Normal'})
+    " It is not always easy to read the selected entry in a popup menu (created with `popup_menu()`).{{{
+    "
+    " Especially  when  the  text  is   already  highlighted  (either  via  text
+    " properties, or via `win_execute(id, 'set syntax=foo')`).
+    "
+    " Indeed,  the default  color is  set  by `PmenuSel`  which is  ok when  the
+    " surrounding  background  is  highlighted  by  `Pmenu`;  but  there  is  no
+    " guarantee that  `Pmenu` will be  used. It can  be overridden in  any given
+    " popup with the `highlight` key; often, it's overridden with `Normal`.
+    " And `PmenuSel` on `Normal` doesn't look great.  OTOH, `Visual` should look
+    " better.
+    "}}}
+    hi! link PopupSelected Visual
 endfu
 
 fu s:cursor() abort "{{{2

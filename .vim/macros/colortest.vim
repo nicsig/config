@@ -66,7 +66,7 @@ fu s:main() abort
     " Use the current window if it's empty.
     if expand('%:p') isnot# s:sfile
         let sfile = fnameescape(s:sfile)
-        unlet s:sfile
+        unlet! s:sfile
         if &mod || line('$') != 1 || getline(1) != ''
             exe 'new ' .. sfile
         else

@@ -377,7 +377,7 @@ fi
 # man {{{1
 
 # See also: `:h manpager.vim`
-export MANPAGER='vim --not-a-term +Man! -'
+export MANPAGER="vim --not-a-term +'Man!' -"
 
 # Purpose:{{{
 #
@@ -498,6 +498,7 @@ export INFOPATH=${HOME}/texlive/2018/texmf-dist/doc/info:${INFOPATH}
 export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/Vcs/dasht/man:${MANPATH}:
 
 # add the `texlive` and `dasht` binaries to our path
+# same thing for go and rust binaries
 # Aren't `~/bin` and `~/.local/bin` already in `$PATH` by default?{{{
 #
 # `~/bin` is there by default.
@@ -550,7 +551,7 @@ export MANPATH=${HOME}/texlive/2018/texmf-dist/doc/man:${HOME}/Vcs/dasht/man:${M
 #
 #     /etc/skel/.profile
 #}}}
-export PATH=${HOME}/bin:${HOME}/.local/bin:${PATH}:/usr/local/go/bin:${HOME}/Vcs/dasht/bin:${HOME}/texlive/2018/bin/x86_64-linux
+export PATH=${HOME}/bin:${HOME}/.local/bin:${PATH}:/usr/local/go/bin:${HOME}/.cargo/bin:${HOME}/Vcs/dasht/bin:${HOME}/texlive/2018/bin/x86_64-linux
 
 # What is the purpose of this block? {{{
 #
