@@ -86,7 +86,7 @@ nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>
 "           ✘
 "}}}
 nno <buffer><nowait><silent> <cr>
-    \ :<c-u>sil call job_start([
+    \ :<c-u>call job_start([
     \     'tmux',
     \     'command-prompt',
     \     '-I',

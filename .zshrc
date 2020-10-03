@@ -3258,6 +3258,9 @@ alias sh='$HOME/.local/bin/dash -E'
 #}}}
 alias sudo='\sudo -E env "PATH=$PATH" '
 #                                    ^
+# FIXME: This breaks `$ sudo -i`.
+#
+#     env: ‘-i’: No such file or directory
 
 # systemd {{{3
 
@@ -3602,7 +3605,7 @@ bindkey '^T' transpose-chars
 # The next times the code is run, it will simply source the generated file.
 # You may then use `${key[Delete]}` to reference the Delete key in a bindkey command.
 #
-# Issue: How to reliably detect the identity of the terminal?
+# Problem: How to reliably detect the identity of the terminal?
 # In tmux, `$TERM` always contains `tmux-256color`.
 # You could use `$COLORTERM`, but there's no guarantee it will work for any terminal.
 # For example, gnome-terminal, st, and xterm do not set this variable.
@@ -5105,9 +5108,8 @@ bindkey -M isearch ' ' self-insert
 #   Ok, but why do it in this file?{{{
 #
 # The configuration  of `$TERM` should  happen only in a  terminal configuration
-# file.
-# But for xfce4-terminal, I haven't found one.
-# So, we must try to detect the identity of the terminal from here.
+# file.  But for xfce4-terminal, I haven't found one.  So, we must try to detect
+# the identity of the terminal from here.
 #}}}
 # How to detect we're in an xfce terminal?{{{
 #
@@ -5128,14 +5130,12 @@ bindkey -M isearch ' ' self-insert
 #   6. $ echo $TERM  →  xterm-256color  ✘
 #
 # We must *not* reset `$TERM` when the  terminal is connecting to a running tmux
-# server.
-# Because the latter will already have set `$TERM` to 'tmux-256color' (thanks to
-# the option 'default-terminal'  in `tmux.conf`), which is one of  the few valid
-# value ({screen|tmux}[-256color]).
+# server.  Because the  latter will already have set  `$TERM` to 'tmux-256color'
+# (thanks to the option 'default-terminal' in  `tmux.conf`), which is one of the
+# few valid value ({screen|tmux}[-256color]).
 #
 # One way to be sure that we're not connected to tmux , is to check that `$TERM`
-# is set to 'xterm'.
-# That's the default value set by xfce4-terminal.
+# is set to 'xterm'.  That's the default value set by xfce4-terminal.
 #
 # ---
 #

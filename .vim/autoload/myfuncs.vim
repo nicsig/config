@@ -254,8 +254,8 @@ def myfuncs#box_create(type = ''): string
 
         # Capture all the column positions in the current line matching a `|`
         # character:
-        let col_pos = []
-        let i = 0
+        var col_pos: list<number>
+        var i = 0
         for char in getline('.')->split('\zs')
             i += 1
             if char == '|'
@@ -274,8 +274,8 @@ def myfuncs#box_create(type = ''): string
         Box_create_border('bottom', col_pos)
 
         # Replace the remaining `|` with `│`:
-        let first_line = line("'{") + 2
-        let last_line = line("'}") - 2
+        var first_line = line("'{") + 2
+        var last_line = line("'}") - 2
         for l in range(first_line, last_line)
             for c in col_pos
                 exe 'norm! ' .. l .. 'G' .. c .. '|r│'
@@ -329,7 +329,7 @@ def s:Box_create_separations()
     #
     # ... and store it inside `x` register.
     # So that we can paste it wherever we want.
-    let line = (line("'{") + 1)->getline()
+    var line = (line("'{") + 1)->getline()
     line = substitute(line, '\S', '├', '')
     line = substitute(line, '.*\zs\S', '┤', '')
     line = substitute(line, '┬', '┼', 'g')
@@ -345,9 +345,9 @@ def myfuncs#box_destroy(type = ''): string
         return 'g@'
     endif
 
-    let lnum1 = line("'[")
-    let lnum2 = line("']")
-    let range = lnum1 .. ',' .. lnum2
+    var lnum1 = line("'[")
+    var lnum2 = line("']")
+    var range = lnum1 .. ',' .. lnum2
     # remove box (except pretty bars: │)
     exe ':sil ' .. range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
 
@@ -972,7 +972,9 @@ fu myfuncs#search_todo(where) abort "{{{1
     "                                         │ replace it with the text of the next non empty line instead
     "                                         │
     let items = getloclist(0)->map({_, v -> s:search_todo_text(v)})
-    call setloclist(0, [], 'r', {'items': items, 'title': 'FIX' .. 'ME & TO' .. 'DO'})
+    " remove indentation (reading lines with various indentation levels is jarring)
+    call map(items, {_, v -> extend(v, #{text: substitute(v.text, '^\s*', '', '')})})
+    call setloclist(0, [], 'r', #{items: items, title: 'FIX' .. 'ME & TO' .. 'DO'})
 
     if &bt isnot# 'quickfix'
         return
@@ -1003,8 +1005,8 @@ fu s:search_todo_text(dict) abort
 endfu
 
 def myfuncs#send_to_tab_page(vcount: number) #{{{1
-    let curtab = tabpagenr()
-    let count: number
+    var curtab = tabpagenr()
+    var count: number
     if vcount == curtab
         redraw
         echo 'current window is already in current tab page'

@@ -126,6 +126,8 @@ augroup fzf_no_timeout | au!
     au FileType fzf tno <buffer><nowait> <c-s> <c-s>
     au FileType fzf tno <buffer><nowait> <c-v> <c-v>
     au FileType fzf tno <buffer><nowait> <c-t> <c-t>
+    " We can't use `C-w` to delete the previous word because of `'twk'`.  Let's fix this.
+    au FileType fzf setl twk=<c-@> | tno <buffer><nowait> <c-w> <c-w>
 augroup END
 
 " Mappings{{{1
