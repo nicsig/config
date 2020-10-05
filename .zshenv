@@ -98,80 +98,6 @@ export BROWSER='firefox'
 export VISUAL='vim'
 export EDITOR="$VISUAL"
 
-# TODO: Consider removing this `unset` once you don't use Nvim as a manpager anymore.
-# Necessary to avoid many issues when starting Nvim from Vim's terminal (or Vim from Nvim's terminal).{{{
-#
-# In the past, `E492` was raised when running `:!man cmd` from Vim.
-#
-# More generally, when Nvim was started from Vim's terminal:
-#
-#    - the clipboard didn't work:
-#
-#         :echo @+
-#         clipboard: No provider. Try ":checkhealth" or ":h clipboard".
-#
-#    - `:checkhealth` was broken (`E5009: Invalid 'runtimepath'`)
-#
-#    - the python interface was not enabled (`:echo has('python3')` output 0),
-#      which broke plugins relying on it (like UltiSnips)
-#
-# We had many other subtle issues which required a lot of fixes.
-# Like an  anonymous zsh function to  build a complex value  for `$MANPAGER`, to
-# reset `$VIMRUNTIME` & friends.
-#
-# I think  we sometimes  had an issue  when pressing  `K` on a  word in  a shell
-# script, when `'kp'` had its default value (`man`)...
-#
-# And running `$ ls | vipe` from Nvim's terminal raised:
-#
-#     E117: Unknown function: stdpath
-#
-# We tried to fix all these issues from our vimrc by checking whether we were in
-# a (N)Vim terminal  and clearing the variables.  But it  didn't work; you can't
-# clear these variables.
-#
-# We also tried to reset them from the vimrc:
-#
-#     if has('vim_starting')
-#         if $VIM_TERMINAL != '' && v:progpath =~# '\C/nvim$'
-#             let $VIMRUNTIME = '/usr/local/share/nvim/runtime'
-#             let $VIM = '/usr/local/share/nvim'
-#             let $MYVIMRC = $HOME..'/.config/nvim/init.vim'
-#         elseif $NVIM_LISTEN_ADDRESS != '' && v:progpath =~# '\C/vim$'
-#             let $VIMRUNTIME = '/usr/local/share/vim/vim82'
-#             let $VIM = '/usr/local/share/vim'
-#             let $MYVIMRC = $HOME..'/.vim/vimrc'
-#         endif
-#     endif
-#
-# But it seemed brittle (the path `.../vim82` is only valid while you use Vim 8.2).
-#
-# Anyway, the root cause of all these issues is in the shell's environment.
-# So that's where we need to intervene.
-# We just  make sure the environment  of a shell never  contains `$VIMRUNTIME` &
-# friends; it fixes everything.
-# See: https://github.com/neovim/neovim/issues/8696
-#
-# ---
-#
-# Btw, don't try to unset too many variables, like:
-#
-#    - `NVIM_LOG_FILE`
-#    - `NVIM_LISTEN_ADDRESS`
-#    - `VIM_TERMINAL`
-#    - `VIM_SERVERNAME`
-#
-# It  could break  a program  running in  (N)Vim's terminal  and which  needs to
-# communicate with the containing (N)Vim process:
-# https://github.com/neovim/neovim/issues/8696#issuecomment-403125772
-#
-# Leave them alone; they should be harmless; for example, Vim doesn't understand
-# `NVIM_LISTEN_ADDRESS`.
-# The only variables which can cause issues are the ones which are understood by
-# both Vim and Nvim.
-#}}}
-unset VIM VIMRUNTIME MYVIMRC
-
 # For some applications, it could be useful to use full paths (e.g. `/usr/local/bin/vim`):{{{
 # https://unix.stackexchange.com/questions/4859/visual-vs-editor-what-s-the-difference#comment5812_4861
 #
@@ -184,6 +110,21 @@ unset VIM VIMRUNTIME MYVIMRC
 #
 # Too cumbersome.
 #}}}
+
+# ESCDELAY {{{1
+
+# Specifies  the total  time,  in  milliseconds, for  which  ncurses will  await
+# a  character  sequence,  e.g.,  a  function  key.   The  default  value,  1000
+# milliseconds, is  a bit  too long;  notably when  we use  `tig(1)`.  Nowadays,
+# 100ms should be more than enough.
+#
+# For more  info, see  `man ncurses  /ESCDELAY`.  On Ubuntu,  you only  get this
+# manpage if you've installed the package `ncurses-doc`.
+#
+# See also:
+# https://github.com/jonas/tig/blob/d072cb7829ca187e4bb36f22e34b7bdd70dd5491/TROUBLESHOOTING.adoc#escdelay
+
+export ESCDELAY=100
 
 # fzf {{{1
 
@@ -662,6 +603,11 @@ export RIPGREP_CONFIG_PATH="$HOME/.config/ripgreprc"
 # `git-credential-cache(1)` agent.
 #}}}
 export SUDO_ASKPASS='/usr/lib/ssh/x11-ssh-askpass'
+
+# tig {{{1
+
+# path of the user configuration file for `tig(1)`
+export TIGRC_USER=$HOME/.config/tigrc
 
 # tldr {{{1
 

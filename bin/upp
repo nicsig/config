@@ -29,6 +29,7 @@ PGM="$1"
 #}}}
 COMMIT_HASH="$2"
 GIT_REPOS="${HOME}/Vcs/"
+WITH_DEBUGGING_SYMBOLS='yes'
 
 typeset -A URLS=( \
   [ansifilter]=https://gitlab.com/saalen/ansifilter.git \
@@ -323,14 +324,48 @@ configure() { #{{{2
     ./configure
 
   elif [[ "$PGM" == 'vim' ]]; then
+    if [[ -n "$WITH_DEBUGGING_SYMBOLS" ]]; then
+      sed -i 's/#CFLAGS = -g$/CFLAGS = -g -O0/ ; s@#STRIP = /bin/true@STRIP = /bin/true@' src/Makefile
+    fi
+    # We only enable the python interface.{{{
+    #
+    # Most Vim plugins which use an interface choose the python one.
+    # I only use 1 plugin which needs an interface: UltiSnips.
+    # And it uses the python interface.
+    #
+    # Besides, since  jobs, channels and  Vim9 script have been  implemented, it
+    # has been decided  to make the interfaces lower priority.   In practice, it
+    # means no  new feature, and  bugs are  fixed only for  "popular" interfaces
+    # like python and maybe lua.
+    #}}}
+    #   I want to enable the lua interface!{{{
+    #
+    # Then use these 2 options:
+    #
+    #     --enable-luainterp=dynamic
+    #     --with-luajit
+    #
+    # ---
+    #
+    # `--with-luajit` doesn't make `--enable-luainterp` useless.
+    #
+    # Without `--enable-luainterp`, the lua interface is not enabled.
+    # You can check it's working with:
+    #
+    #     :lua print(_VERSION)
+    #
+    # And that LuaJIT is available with:
+    #
+    #     :lua print(jit.version)
+    #
+    # See `:h :lua /luajit`.
+    #}}}
     ./configure  \
       --enable-fail-if-missing       \
       --enable-gui=gtk2              \
-      --enable-luainterp=dynamic     \
       --enable-python3interp=dynamic \
       --prefix=/usr/local            \
-      --with-compiledby=user         \
-      --with-luajit
+      --with-compiledby=user
     # Those options are not necessary, because they're set by default:{{{
     #
     #     --enable-cscope
@@ -349,19 +384,6 @@ configure() { #{{{2
     # Don't use `--with-python3-config-dir`;  it's deprecated.{{{
     #
     # Check out `./configure --help`.
-    #}}}
-    # `--with-luajit` doesn't make `--enable-luainterp` useless.{{{
-    #
-    # Without `--enable-luainterp`, the lua interface is not enabled.
-    # You can check it's working with:
-    #
-    #     :lua print(_VERSION)
-    #
-    # And that LuaJIT is available with:
-    #
-    #     :lua print(jit.version)
-    #
-    # See `:h :lua /luajit`.
     #}}}
 
   # If you want the online documentation, add this option:{{{

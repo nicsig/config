@@ -174,8 +174,6 @@ let g:plug_shallow = 0
 " They will be downloaded inside `~/.vim/plugged/`.
 call plug#begin('~/.vim/plugged')
 
-set rtp^=~/Vcs/fuzzyhelp
-
 " To Assimilate:
 Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
 Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
@@ -284,6 +282,7 @@ Plug 'lacygoill/vim-doc'
 Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-fold'
 Plug 'lacygoill/vim-freekeys'
+Plug 'lacygoill/vim-fuzzy'
 Plug 'lacygoill/vim-git'
 Plug 'lacygoill/vim-gx'
 Plug 'lacygoill/vim-help'
@@ -3655,7 +3654,7 @@ nno <silent> <bar>c :<c-u>call <sid>Run_compiler()<cr>
 def s:Run_compiler()
     if &l:mp =~ '^\m\Cdesktop-file-validate\>'
         sil update
-        sil let out = system('desktop-file-validate ' .. expand('%:p')->shellescape())
+        sil var out = system('desktop-file-validate ' .. expand('%:p')->shellescape())
         if out == ''
             echo '[desktop-file-validate] OK'
         else
@@ -3664,7 +3663,7 @@ def s:Run_compiler()
         return
     endif
 
-    let is_shellcheck = &l:mp =~ '\m\C^shellcheck\>'
+    var is_shellcheck = &l:mp =~ '\m\C^shellcheck\>'
     update
     # TODO: This causes the shell command output  to be printed in the terminal,
     # which we  can see once  we quit  Vim.  Try to  run `'mp'` via  `:cexpr system()`
@@ -4831,7 +4830,7 @@ xno <silent> af :<c-u>call <sid>Textobj_func(v:false)<cr>
 ono <silent> af :<c-u>norm Vaf<cr>
 
 def s:Textobj_func(inside: bool)
-    if search('^\C\s*\%(fu\%[nction]\|\%(export\s\+\)\=def\)\>', 'bcW')
+    if search('^\C\s*\%(fu\%[nction]\|\%(export\s\+\)\=def\)\>', 'bcW') > 0
         norm! m<
         search('^\C\s*\%(endf\%[unction]\|enddef\)\s*$', 'eW')
         norm! m>
@@ -6051,7 +6050,7 @@ augroup wipe_noname_buffers | au!
     " don't need to wipe a noname buffer *immediately*.
     "}}}
     au BufHidden * call s:Register_noname_for_wiping()
-    au CursorHold * call s:wipe_noname()
+    au CursorHold * call s:Wipe_noname()
 augroup END
 
 def s:Register_noname_for_wiping()
@@ -6061,15 +6060,18 @@ def s:Register_noname_for_wiping()
     endif
 enddef
 
-fu s:wipe_noname() abort
+def s:Wipe_noname()
     for buf in s:noname_buffers
         if buflisted(buf) && bufname(buf)->empty()
-            sil! exe 'bw! ' .. buf
+            # we might have redisplayed the buffer in a window; don't wipe it then
+            if !win_findbuf(buf)->empty()
+                sil! exe 'bw! ' .. buf
+            endif
         else
-            call filter(s:noname_buffers, 'v:val != ' .. buf)
+            filter(s:noname_buffers, {_, v -> v != buf})
         endif
     endfor
-endfu
+enddef
 
 " Filetype Linter {{{2
 
