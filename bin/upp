@@ -29,7 +29,7 @@ PGM="$1"
 #}}}
 COMMIT_HASH="$2"
 GIT_REPOS="${HOME}/Vcs/"
-WITH_DEBUGGING_SYMBOLS='yes'
+WITH_DEBUGGING_SYMBOLS=''
 
 typeset -A URLS=( \
   [ansifilter]=https://gitlab.com/saalen/ansifilter.git \

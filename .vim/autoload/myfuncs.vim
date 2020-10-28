@@ -194,6 +194,11 @@ fu s:op_yank(type) abort
         call cursor(matchstr(range, '\d\+'), 1)
     endtry
 
+    " if `:v` was used, and the pattern matched everywhere, nothing was yanked
+    if len(yanked) == 0
+        return
+    endif
+
     " the first  time we've  appended a  match to the  `z` register,  it has
     " appended a newline; we *never* want it; remove it
     if yanked[0] == ''
@@ -1034,14 +1039,14 @@ def myfuncs#send_to_tab_page(vcount: number) #{{{1
         # We  still need  to figure out  how to  preview all the  windows opened  in the
         # selected tab page.
         #}}}
-        let input = input('send to tab page nr: ')
+        var input = input('send to tab page nr: ')
         if input == '$'
             count = tabpagenr('$')
         elseif input =~ '$-\+$'
-            let offset = matchstr(input, '-\+')->len()
+            var offset = matchstr(input, '-\+')->len()
             count = tabpagenr('$') - offset
         elseif input =~ '$-\d\+$'
-            let offset = matchstr(input, '-\d\+')->str2nr()
+            var offset = matchstr(input, '-\d\+')->str2nr()
             count = tabpagenr('$') - offset
         elseif input =~ '^[+-]\+$'
             count = tabpagenr() + count(input, '+') - count(input, '-')
@@ -1058,9 +1063,9 @@ def myfuncs#send_to_tab_page(vcount: number) #{{{1
             count = matchstr(input, '\d\+')->str2nr()
         endif
     endif
-    let bufnr = bufnr('%')
+    var bufnr = bufnr('%')
     # let's save the winid of the window we want to move
-    let closedwinid = win_getid()
+    var closedwinid = win_getid()
     # Do *not* try to close it now.{{{
     #
     # Closing a tab page changes the positions of the next ones.
@@ -1081,7 +1086,7 @@ def myfuncs#send_to_tab_page(vcount: number) #{{{1
     endtry
     # open new window displaying the buffer from the closed window in the target tab page
     exe 'sb ' .. bufnr
-    let curwinid = win_getid()
+    var curwinid = win_getid()
     win_gotoid(closedwinid)
     close
     win_gotoid(curwinid)

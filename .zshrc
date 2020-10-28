@@ -1032,6 +1032,7 @@ cfg_newsboat() { "${=EDITOR}" -o "${HOME}/.config/newsboat/config" "${HOME}/.con
 cfg_ranger() { "${=EDITOR}" "${HOME}/.config/ranger/rc.conf" ;}
 cfg_readline() { "${=EDITOR}" "${HOME}/.inputrc" ;}
 cfg_surfraw() { "${=EDITOR}" -o "${HOME}/.config/surfraw/bookmarks" "${HOME}/.config/surfraw/conf" ;}
+cfg_tig() { "${=EDITOR}" "${HOME}/.config/tigrc" ;}
 cfg_tmux() { "${=EDITOR}" "${HOME}/.config/tmux/tmux.conf" ;}
 cfg_vim() { "${=EDITOR}" "${HOME}/.vim/vimrc" ;}
 cfg_w3m() { "${=EDITOR}" "${HOME}/.w3m/config" ;}
@@ -2810,6 +2811,51 @@ alias ..3='cd ../../..'
 alias ..4='cd ../../../..'
 alias ..5='cd ../../../../..'
 
+# config {{{3
+
+# FIXME: `config_push` is highlighted in red.{{{
+#
+# Here is what *I think* is a MWE:
+#
+#     alias e='echo'
+#     alias ee='e one; e two'
+#
+# ---
+#
+# Same issue with the `fm` and `sh` aliases.
+#
+# ---
+#
+# Also, it seems the zsh syntax highlighting plugin doesn't like you to override
+# any default command with an alias.
+#
+#     alias bash='foobar'
+#}}}
+
+# TODO: add file completion to `config`
+
+# Usage:{{{
+#
+#     $ config status
+#     $ config add /path/to/file
+#     $ config commit -m 'my message'
+#     $ config push
+#}}}
+alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
+alias config_push='config add -u && config commit -m "update" && config push'
+#                             ├┘{{{
+#                             └ All tracked files in the entire working tree are updated.
+#
+# This removes as well as modifies index  entries to match the working tree, but
+# adds no new files.
+# It's easier and more reliable to use `-u`, than to manually add every modified
+# file, and remove every deleted file:
+#
+#     $ git add -u
+#   ⇔
+#     $ git add file1 ... && git rm file2 ...
+#}}}
+
 # df {{{3
 
 # I want colors too!{{{
@@ -2864,99 +2910,7 @@ alias gdb='\gdb -q'
 
 # git {{{3
 
-# FIXME: `config_push` is highlighted in red.{{{
-#
-# Here is what *I think* is a MWE:
-#
-#     alias e='echo'
-#     alias ee='e one; e two'
-#
-# ---
-#
-# Same issue with the `fm` and `sh` aliases.
-#
-# ---
-#
-# Also, it seems the zsh syntax highlighting plugin doesn't like you to override
-# any default command with an alias.
-#
-#     alias bash='foobar'
-#}}}
-
-# TODO: add file completion to `config`
-
-# Usage:{{{
-#
-#     $ config status
-#     $ config add /path/to/file
-#     $ config commit -m 'my message'
-#     $ config push
-#}}}
-alias config='/usr/bin/git --git-dir="${HOME}/.cfg/" --work-tree="${HOME}"'
-alias config_push='config add -u && config commit -m "update" && config push'
-#                             ├┘{{{
-#                             └ All tracked files in the entire working tree are updated.
-#
-# This removes as well as modifies index  entries to match the working tree, but
-# adds no new files.
-# It's easier and more reliable to use `-u`, than to manually add every modified
-# file, and remove every deleted file:
-#
-#     $ git add -u
-#   ⇔
-#     $ git add file1 ... && git rm file2 ...
-#}}}
-
-alias ga='git add'
-
-alias gch='git checkout'
-alias gcl='git clone'
-alias gcm='git checkout master'
-# Do not add `rlwrap` before `git commit`.{{{
-# Why?
-#
-#    1. It's not needed here.
-#    2. It causes an issue.
-#
-# How to reproduce the issue?
-#
-#    1. write at the beginning of vimrc:
-#
-#         nno <silent> cd :sil w<cr>
-#         set rtp+=~/.vim/plugged/vim-gutentags/
-#         finish
-#
-#   2. tweak some repo
-#   3. try to commit with `rlwrap git commit`
-#   4. write something on the 1st line and stay on the 1st line
-#   5. while the buffer is still modified, hit `cd`
-#
-# The line disappears.
-#
-# It has nothing to do with the conceal feature.
-# It's reproducible without syntax highglighting.
-#
-# Solutions:
-#
-#    - nno          cd :sil w<cr>
-#    - nno <silent> cd :w<cr>
-#    - commit without `rlwrap`
-#
-# We have several mechanisms to save a buffer (including an autocmd).
-# It's easier (and more future-proof) to just *not* use `rlwrap`.
-#
-# TODO:
-# I can't reproduce this issue anymore.
-# Is this comment still relevant?
-#}}}
-alias gco='git commit'
-
-alias gp='rlwrap -H /dev/null git push'
-
-# this shadows the `/usr/bin/gs` (ghostscript) utility, but I don't care
-alias gs='git status -s'
-#                     │
-#                     └ `--short`, give the output in the short-format
+alias g='git'
 
 # grep {{{3
 
@@ -3016,17 +2970,6 @@ alias jobs='\jobs -l'
 #     $ lessh ~/Vcs/ranger/ranger.py
 #
 # Source: https://unix.stackexchange.com/a/139787/289772
-#}}}
-# FIXME: `lessh` is highlighted in red (as if it was executed a wrong command).{{{
-#
-# It should be highlighted as an alias.
-#
-# It's fixed by this commit:
-# https://github.com/zsh-users/zsh-syntax-highlighting/commit/cb8c736a564e0023a0ef4e7635c0eb4be5eb56a4
-#
-# I use a purposefully older version of the zsh-syntax-highlighting plugin,
-# because this commit introduces a regression:
-# https://github.com/zsh-users/zsh-syntax-highlighting/issues/565
 #}}}
 alias lessh='LESSOPEN="| ~/bin/src-hilite-lesspipe %s" less'
 
@@ -4581,7 +4524,10 @@ bindkey '\e,' copy-earlier-word
 #     calls to this widget: if it is -1, the default behaviour is used, while if
 #     it is 1, successive calls will move forwards through the history.
 #}}}
-# TODO: Where is this function syntax (no braces) documented?
+# Where is it documented that it is allowed to omit braces around a function's body?{{{
+#
+#     man zshmisc /COMPLEX COMMANDS/;/\Vword ... () [ term ] command
+#}}}
 insert-last-word-forward() zle insert-last-word 1
 zle -N insert-last-word-forward
 bindkey '\e;' insert-last-word-forward

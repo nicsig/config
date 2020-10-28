@@ -15,3 +15,16 @@ bind main Ba ?git branch %(prompt)
 # delete a branch
 bind main Bd ?git branch -D %(prompt)
 
+# push a commit
+# https://github.com/jonas/tig/issues/199#issuecomment-36841759
+bind status P !git push origin
+
+# TODO: These shadow default key bindings:{{{
+#
+#     g view-grep Show grep view
+#     G :toggle commit-title-graph
+#
+# Find replacements.
+#}}}
+bind generic g move-first-line
+bind generic G move-last-line

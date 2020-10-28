@@ -1,3 +1,29 @@
+[alias]
+    ; How do git aliases work?{{{
+    ;
+    ; https://git-scm.com/book/en/v2/Git-Basics-Git-Aliases
+    ;}}}
+    ; Why are they better than shell aliases?{{{
+    ;
+    ; https://www.reddit.com/r/git/comments/9drimq/aliases_git_or_bash/e5jmol0/
+    ;}}}
+    ; How to make a git alias run shell code?{{{
+    ;
+    ; https://github.com/alfunx/.dotfiles/blob/c55e6ee07132f367847fb544fd8e9b01aa03d34c/.gitconfig#L230-L444
+    ;
+    ; Example:
+    ;
+    ;     dr = "!f() { git diff -c ${1:-HEAD}~..${1:-HEAD}; }; f"
+    ;}}}
+    bir=bisect reset
+    br=branch
+    ch=checkout
+    chm=checkout master
+    ci=commit
+    cl=clone
+    st=status -s
+    ;          │
+    ;          └ `--short`, give the output in the short-format
 [color]
 	diff = auto
 	status = auto

@@ -133,11 +133,9 @@ let g:loaded_vimball = 1
 
 " We install vim-plug if it's not already.
 "
-" To know whether vim-plug is installed or not, we check whether the file:
+" To know whether vim-plug is installed or not, we check whether this file exists:
 "
 "     ~/.vim/autoload/plug.vim
-"
-" ... exists.
 
 if glob('~/.vim/autoload/plug.vim')->empty()
     sil call system('curl -fLo ~/.vim/autoload/plug.vim --create-dirs'
@@ -293,7 +291,6 @@ Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-lg-lib'
 Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
-Plug 'lacygoill/vim-my-fzf'
 Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-qf'
 Plug 'lacygoill/vim-readline'
@@ -2423,9 +2420,9 @@ set wildignore&vim
 "
 " ---
 "
-" There are other commands/functions which may honor the option (like `expand()`
-" when using a backtick expression), and which may unexpectedly fail to give the
-" right result when you include `*/.git/*`.
+" There  are  other  commands/functions  which  might  honor  the  option  (like
+" `expand()` when  using a  backtick expression),  and which  might unexpectedly
+" fail to give the right result when you include `*/.git/*`.
 "
 " ---
 "
@@ -2434,11 +2431,11 @@ set wildignore&vim
 " https://github.com/tpope/vim-fugitive/issues/121#issuecomment-38720847
 "}}}
 
-" lock files (example: ~/.gksu.lock)
+" lock files (example: `~/.gksu.lock`)
 set wildignore+=*.lock
 
 " vim temporary files
-set wildignore+=*.bak,*.swo,*.swp,*~
+set wildignore+=*.bak,*.sw[a-p],*~
 
 " latex temporary files
 set wildignore+=*.aux,*.fdb_latexmk,*.fls,*/auxiliary/*,*/build/*
@@ -2727,10 +2724,21 @@ call s:Remember_new_mappings([
 "     displays all mappings installed by third-party plugins
 "     in normal / visual / operator-pending mode
 
-let mapleader = "\<s-f5>"
+" Warning: Do *not* use `\<s-f5>`.{{{
+"
+" It would cause a weird issue:
+"
+"     $ vim --clean --cmd 'let mapleader = "\<s-f5>"' ~/Vcs/gdb-9.2/gdb/testsuite/gdb.ada/bp_c_mixed_case/foo_h731_021.adb
+"
+" I think it comes from the fact that the internal by representation of `<s-f5>`
+" ends with a newline or carriage return:
+"
+"     :echo "\<s-f5>"
+"}}}
+let mapleader = "\<s-f10>"
 
 " same thing for localleader
-let maplocalleader = "\<s-f6>"
+let maplocalleader = "\<s-f11>"
 
 " Command-Line {{{2
 " C-r C-h       fuzzy search history {{{3
@@ -4394,7 +4402,7 @@ def s:Indent_with_shiftround(type: string)
     var sr_save = &shiftround
     try
         set shiftround
-        exe 'norm! ' .. (v:count ? v:count : '') .. cmd
+        exe 'norm! ' .. (v:count != 0 ? v:count : '') .. cmd
     catch
         Catch()
     finally
@@ -4832,7 +4840,7 @@ ono <silent> af :<c-u>norm Vaf<cr>
 def s:Textobj_func(inside: bool)
     if search('^\C\s*\%(fu\%[nction]\|\%(export\s\+\)\=def\)\>', 'bcW') > 0
         norm! m<
-        search('^\C\s*\%(endf\%[unction]\|enddef\)\s*$', 'eW')
+        norm g%
         norm! m>
         exe 'norm! gv$' .. (inside ? 'koj' : '')
         # we want a linewise selection no matter the original visual mode
@@ -5186,6 +5194,7 @@ let s:PGM2CFGFILES = {
     \ 'ranger':        ['~/.config/ranger/rc.conf'],
     \ 'readline':      ['~/.inputrc'],
     \ 'surfraw':       ['~/.config/surfraw/bookmarks', '~/.config/surfraw/conf'],
+    \ 'tig':           ['~/.config/tigrc'],
     \ 'tmux':          ['~/.config/tmux/tmux.conf'],
     \ 'vim':           [$MYVIMRC],
     \ 'w3m':           ['~/.w3m/config'],
@@ -5641,7 +5650,7 @@ def s:Plugins_to_commit()
 
     filter(output, {_, v -> v =~ '^\S'})
     map(output, {_, v -> glob($HOME .. '/.vim/plugged/' .. v .. '/*', 0, 1)[0]})
-    setqflist([], ' ', #{lines: output, efm: '%f', title: 'Plugins to commit'})
+    noa setqflist([], ' ', #{lines: output, efm: '%f', title: 'Plugins to commit'})
     cw
 enddef
 
@@ -6064,7 +6073,7 @@ def s:Wipe_noname()
     for buf in s:noname_buffers
         if buflisted(buf) && bufname(buf)->empty()
             # we might have redisplayed the buffer in a window; don't wipe it then
-            if !win_findbuf(buf)->empty()
+            if win_findbuf(buf)->empty()
                 sil! exe 'bw! ' .. buf
             endif
         else
@@ -6669,7 +6678,7 @@ augroup my_mkspell | au!
     "
     " http://vi.stackexchange.com/a/5052/6960
     "}}}
-    au VimEnter * call glob('~/.vim/spell/*.add', 1, 1)
+    au VimEnter * call glob($HOME .. '/.vim/spell/*.add', 1, 1)
         \ ->map({_, v -> filereadable(v)
         \            && !filereadable(v .. '.spl') || (getftime(v) > getftime(v .. '.spl'))
         \            && execute('mkspell! ' .. fnameescape(v))})
