@@ -1,4 +1,4 @@
-fu plugin#plug#move_between_commits(is_fwd) abort "{{{1
+fu plugin#plug#move_between_commits(is_fwd = v:true) abort "{{{1
     " look for the next commit
     if !search('^  \X*\zs\x', a:is_fwd ? '' : 'b')
         " there's none

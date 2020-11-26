@@ -111,4 +111,3 @@ alias lss='ls++ --psf'
 #
 # Mnemonic:    t for Time
 alias lst='ls++ --ptsf'
-

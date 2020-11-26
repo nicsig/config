@@ -75,7 +75,7 @@ fu plugin#ultisnips#status() abort "{{{1
     return exists('g:expanding_snippet') ? '[Ulti]' : ''
 endfu
 
-fu plugin#ultisnips#prevent_memory_leak(on_enter) abort "{{{1
+fu plugin#ultisnips#prevent_memory_leak(on_enter = v:true) abort "{{{1
     if a:on_enter
         nno <buffer><expr><nowait> : plugin#ultisnips#cancel_expansion()
             \ .. ':' .. plugin#ultisnips#prevent_memory_leak(v:false)

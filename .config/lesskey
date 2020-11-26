@@ -46,7 +46,7 @@
 h noaction 3\e(
 l noaction 3\e)
 
-# Need less version 487 or more for these commands:
+# Need `less(1)` version 487 or more for these commands:
 # https://unix.stackexchange.com/a/455144/289772
 \^ no-scroll
 _ no-scroll

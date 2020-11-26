@@ -12,12 +12,12 @@ bindkey -e
 # This one is annoying, because we hit it by accident too often.  It's distracting.
 bindkey -r '\eh'
 
-# Why 65536?{{{
+# Why 131072?{{{
 #
 # I want a power of 2.
-# In the past, I used 32768, but last time I needed a core file for a crash with
-# Nvim, the core was truncated; the next power  of 2 is 65536, so that's what we
-# use now.
+# In the past, I used 65536, but last time I needed a core file for a crash with
+# Vim, the core needed more space; the next power of 2 is 131072, so that's what
+# we use now.
 #}}}
 #   How much space does that stand for?{{{
 #
@@ -26,9 +26,9 @@ bindkey -r '\eh'
 #
 # >    -c     512-byte blocks on the size of core dumps.
 #
-# So, 65536 should allow a core file up to 32 mebybytes (2^25 bytes).
+# So, 131072 should allow a core file up to 64 mebybytes (2^26 bytes).
 #}}}
-ulimit -c 65536
+ulimit -c 131072
 
 # disable XON/XOFF flow control
 # Why?{{{

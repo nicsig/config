@@ -85,15 +85,15 @@ nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>
 "           ^
 "           ✘
 "}}}
-nno <buffer><nowait><silent> <cr>
-    \ :<c-u>call job_start([
+nno <buffer><nowait> <cr>
+    \ <cmd>call job_start([
     \     'tmux',
     \     'command-prompt',
     \     '-I',
     \     getline('.')->substitute('#', '##', 'g')
     \ ])<cr>
 
-nmap <buffer><nowait><silent> ZZ <cr>
+nmap <buffer><nowait> ZZ <cr>
 
 " Teardown {{{1
 

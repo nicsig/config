@@ -118,7 +118,7 @@ def ccomplete#Complete(findstart: number, base: string): any #{{{1
     # 1. in current function (like with "gd")
     # 2. in tags file(s) (like with ":tag")
     # 3. in current file (like with "gD")
-    var res: list<dict<any>>
+    var res: list<dict<string>>
     if searchdecl(items[0], 0, 1) == 0
         # Found, now figure out the type.
         # TODO: join previous line if it makes sense
@@ -352,7 +352,7 @@ def ParseTagline(line: string): dict<any> #{{{1
     return d
 enddef
 
-def Tagline2item(val: dict<any>, brackets: string): dict<any> #{{{1
+def Tagline2item(val: dict<any>, brackets: string): dict<string> #{{{1
 # Turn a match item "val" into an item for completion.
 # "val['match']" is the matching item.
 # "val['tagline']" is the tagline in which the last part was found.
@@ -426,7 +426,7 @@ def Nextitem(
         items: list<string>,
         depth: number,
         all: number
-        ): list<dict<any>>
+        ): list<dict<string>>
 # Find composing type in "lead" and match items[0] with it.
 # Repeat this recursively for items[1], if it's there.
 # When resolving typedefs "depth" is used to avoid infinite recursion.
@@ -436,7 +436,7 @@ def Nextitem(
     var tokens = split(lead, '\s\+\|\<')
 
     # Try to recognize the type of the variable.  This is rough guessing...
-    var res: list<dict<any>>
+    var res: list<dict<string>>
     for tidx in len(tokens)->range()
 
         # Skip tokens starting with a non-ID character.
@@ -529,7 +529,7 @@ def StructMembers(
         typename: string,
         items: list<string>,
         all: number
-        ): list<dict<any>>
+        ): list<dict<string>>
 
     # Search for members of structure "typename" in tags files.
     # Return a list with resulting matches.
@@ -590,7 +590,7 @@ def StructMembers(
         idx += 1
     endwhile
     # Put matching members in matches[].
-    var matches: list<dict<any>> = []
+    var matches: list<dict<string>> = []
     for l in qflist
         var memb = matchstr(l['text'], '[^\t]*')
         if memb =~ '^' .. target
@@ -640,12 +640,12 @@ def SearchMembers(
         matches: list<dict<any>>,
         items: list<string>,
         all: number
-        ): list<dict<any>>
+        ): list<dict<string>>
 
 # For matching members, find matches for following items.
 # When "all"  is non-zero  find all,  otherwise just  return 1  if there  is any
 # member.
-    var res: list<dict<any>>
+    var res: list<dict<string>>
     for i in len(matches)->range()
         var typename = ''
         var line: string

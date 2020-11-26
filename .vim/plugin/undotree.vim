@@ -14,7 +14,7 @@ let g:undotree_ShortIndicators = 1
 " hide "Press ? for help"
 let g:undotree_HelpLine = 0
 
-nno <silent><unique> -u :<c-u>call plugin#undotree#show()<cr>
+nno <unique> -u <cmd>call plugin#undotree#show()<cr>
 
 fu g:Undotree_CustomMap() abort "{{{1
     nmap <buffer><nowait><silent> } <plug>UndotreePreviousSavedState
@@ -22,13 +22,13 @@ fu g:Undotree_CustomMap() abort "{{{1
     nmap <buffer><nowait><silent> ) <plug>UndotreePreviousState
     nmap <buffer><nowait><silent> ( <plug>UndotreeNextState
 
-    nno <buffer><nowait><silent> < <nop>
-    nno <buffer><nowait><silent> > <nop>
-    nno <buffer><nowait><silent> J <nop>
-    nno <buffer><nowait><silent> K <nop>
+    nno <buffer><nowait> < <nop>
+    nno <buffer><nowait> > <nop>
+    nno <buffer><nowait> J <nop>
+    nno <buffer><nowait> K <nop>
 
     " Purpose: Override the builtin help which doesn't take into account our custom mappings.
-    nno <buffer><nowait><silent> ? :<c-u>call plugin#undotree#show_help()<cr>
+    nno <buffer><nowait> ? <cmd>call plugin#undotree#show_help()<cr>
 
     " Purpose: set the preview flag in the diff panel, which lets us:{{{
     "
@@ -44,7 +44,7 @@ fu g:Undotree_CustomMap() abort "{{{1
     " its height would be maximized; you  could find this sudden height increase
     " jarring.
     "}}}
-    nno <buffer><nowait><silent> D :<c-u>call plugin#undotree#diff_toggle()<cr>
+    nno <buffer><nowait> D <cmd>call plugin#undotree#diff_toggle()<cr>
 
     " dummy item to get an empty status line
     setl stl=%h

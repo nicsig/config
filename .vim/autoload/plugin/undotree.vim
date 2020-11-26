@@ -134,6 +134,6 @@ fu s:customize_diff_panel() abort "{{{2
     " Let's use our own.
     let &l:stl = '%!plugin#undotree#stl()'
     let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe') .. '| set stl<'
-    nno <buffer><nowait><silent> q :<c-u>call plugin#undotree#close_diff_panel()<cr>
+    nno <buffer><nowait> q <cmd>call plugin#undotree#close_diff_panel()<cr>
 endfu
 

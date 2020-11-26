@@ -1,3 +1,7 @@
+# TODO: Find a good color scheme.
+# https://old.reddit.com/r/vim/comments/jrm2j5/cleaner_latex_in_vim/gbu9t59/
+# https://github.com/gennaro-tedesco/zathuraconf
+
 # Mappings {{{1
 
 # Adjust the width of the document to occupy the whole width of the window.

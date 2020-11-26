@@ -41,8 +41,8 @@ nno g, g;zv
 " These mappings  *could* be useful  when we start  coding in python  which uses
 " indentation to specify when a construct ends.
 "}}}
-noremap <expr><silent> gk <sid>vertical_jump_rhs(0)
-noremap <expr><silent> gj <sid>vertical_jump_rhs(1)
+noremap <expr> gk <sid>vertical_jump_rhs(0)
+noremap <expr> gj <sid>vertical_jump_rhs(1)
 
 fu s:vertical_jump_rhs(is_fwd) abort
     let mode = mode(1)
@@ -51,15 +51,13 @@ fu s:vertical_jump_rhs(is_fwd) abort
         let mode = "\<c-v>\<c-v>"
     endif
 
-    return printf(":\<c-u>call %s(%d, %s)\<cr>",
+    return printf("\<cmd>call %s(%d, %s)\<cr>",
         \ function('s:vertical_jump_go'), a:is_fwd, string(mode))
 endfu
 
 fu s:vertical_jump_go(is_fwd, mode) abort
     if a:mode is# 'n'
         norm! m'
-    elseif a:mode =~# "^[vV\<c-v>]$"
-        norm! gv
     endif
 
     let n = s:get_jump_height(a:is_fwd)
@@ -105,8 +103,8 @@ endfu
 
 "    <t  >t         move tab pages {{{2
 
-nno <silent> <t :<c-u>call <sid>move_tabpage('-1')<cr>
-nno <silent> >t :<c-u>call <sid>move_tabpage('+1')<cr>
+nno <t <cmd>call <sid>move_tabpage('-1')<cr>
+nno >t <cmd>call <sid>move_tabpage('+1')<cr>
 
 fu s:move_tabpage(where) abort
     try
@@ -171,6 +169,36 @@ endfu
 
 " These  mappings  must  be  installed  *before*  `repmap#make#repeatable()`  is
 " invoked to make the motions repeatable.
+
+" Do *not* try to replace `<expr>` with `<cmd>`.{{{
+"
+"     $ vim -S <(cat <<'EOF'
+"         vim9script
+"         ono <expr> <c-a> FuncA()
+"         def g:FuncA(): string
+"             feedkeys("\<plug>Sneak_f")
+"             return ''
+"         enddef
+"         ono <c-b> <cmd>call FuncB()<cr>
+"         def g:FuncB()
+"             feedkeys("\<plug>Sneak_f")
+"         enddef
+"         var lines =<< trim END
+"             some X text
+"             some X text
+"         END
+"         setline(1, lines)
+"     EOF
+"     )
+"
+"     " press:  d C-a X
+"     " expected:  "some X"  is deleted
+"     " actual:    "some X"  is deleted
+"
+"     " press:  j d C-b X
+"     " expected:  "some X"  is deleted
+"     " actual:    cursor jumps on "X"
+"}}}
 noremap <expr> t  <sid>fts('t')
 noremap <expr> T  <sid>fts('T')
 noremap <expr> f  <sid>fts('f')

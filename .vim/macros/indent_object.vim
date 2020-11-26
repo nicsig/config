@@ -11,6 +11,14 @@
 "    > copy up to / down to a line  which has a lower indentation level than the
 "    > current one.
 
+" indentation level sans any surrounding empty lines
+xno ii <c-\><c-n><cmd>call <sid>in_indentation()<cr>
+" indentation level and any surrounding empty lines
+xno ai <c-\><c-n><cmd>call <sid>around_indentation()<cr>
+
+ono ii <cmd>call <sid>in_indentation()<cr>
+ono ai <cmd>call <sid>around_indentation()<cr>
+
 fu s:in_indentation() abort "{{{1
     " select all text in current indentation level excluding any empty lines
     " that precede or follow the current indentationt level
@@ -53,10 +61,6 @@ fu s:in_indentation() abort "{{{1
     norm! $o
 endfu
 " }}}1
-
-" indentation level sans any surrounding empty lines
-xno <silent> ii :<c-u>call <sid>in_indentation()<cr>
-ono <silent> ii :<c-u>call <sid>in_indentation()<cr>
 
 fu s:around_indentation() abort "{{{1
     " select all text in the current indentation level including any emtpy
@@ -124,7 +128,3 @@ fu s:around_indentation() abort "{{{1
     exe 'norm! ' .. start .. 'G0V' .. end .. 'G$o'
 endfu
 " }}}1
-
-" indentation level and any surrounding empty lines
-xno <silent> ai :<c-u>call <sid>around_indentation()<cr>
-ono <silent> ai :<c-u>call <sid>around_indentation()<cr>

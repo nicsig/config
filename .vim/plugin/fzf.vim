@@ -133,7 +133,7 @@ augroup END
 " Mappings{{{1
 " `:map` {{{2
 
-exe 'nno <silent> <space>fmn :<c-u>' .. g:fzf_command_prefix .. 'Maps<cr>'
+exe 'nno <space>fmn <cmd>' .. g:fzf_command_prefix .. 'Maps<cr>'
 nmap <space>fmi i<plug>(fzf-maps-i)
 nmap <space>fmx v<plug>(fzf-maps-x)
 nmap <space>fmo y<plug>(fzf-maps-o)
@@ -159,13 +159,13 @@ cno <expr> <c-r><c-h>
 
 " commits {{{2
 
-nno <silent> <space>fgc :<c-u>call plugin#fzf#commits('')<cr>
-nno <silent> <space>fgbc :<c-u>call plugin#fzf#commits('B')<cr>
+nno <space>fgc <cmd>call plugin#fzf#commits()<cr>
+nno <space>fgbc <cmd>call plugin#fzf#commits('B')<cr>
 
 " miscellaneous (`:Marks`, `:Rg`, ...) {{{2
 
 fu s:miscellaneous() abort
-    nno <silent> <space>fF :<c-u>FZF $HOME<cr>
+    nno <space>fF <cmd>FZF $HOME<cr>
 
     let key2cmd = {
         \ 'M' : 'Marks',
@@ -187,7 +187,7 @@ fu s:miscellaneous() abort
         \ }
 
     for [char, cmd] in items(key2cmd)
-        exe 'nno <silent> <space>f' .. char .. ' :<c-u>' .. g:fzf_command_prefix .. cmd .. '<cr>'
+        exe 'nno <space>f' .. char .. ' <cmd>' .. g:fzf_command_prefix .. cmd .. '<cr>'
     endfor
 
     augroup remove_gvfs_from_oldfiles | au!
@@ -234,7 +234,7 @@ call s:miscellaneous()
 " It's  a  valid command  (e.g. `"Fyy`  appends  the  current  line in  the  `f`
 " register).
 "}}}
-nno <silent> "<c-f> :<c-u>call plugin#fzf#registers('"')<cr>
-nno <silent> @<c-f> :<c-u>call plugin#fzf#registers('@')<cr>
-ino <silent> <c-r><c-f> <c-\><c-o>:call plugin#fzf#registers('<lt>c-r>')<cr>
+nno "<c-f> <cmd>call plugin#fzf#registers('"')<cr>
+nno @<c-f> <cmd>call plugin#fzf#registers('@')<cr>
+ino <c-r><c-f> <cmd>call plugin#fzf#registers('<lt>c-r>')<cr>
 

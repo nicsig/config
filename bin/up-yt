@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# What should I do if the github repo is taken down by a DMCA notice?{{{
+#
+# Check out the main site:
+# https://youtube-dl.org/
+#
+# As well as the subreddit:
+# https://www.reddit.com/r/youtubedl
+#
+# If nothing helps, try to find a fork; e.g.:
+# https://github.com/blackjack4494/yt-dlc
+#}}}
+
 main() { #{{{1
   printf -- 'current version: %s\n\n' "$(youtube-dl --version)"
 
@@ -13,7 +25,8 @@ main() { #{{{1
   fi
 
   cd "${HOME}/Vcs/youtube-dl" || exit
-  git stash
+  git stash --all
+  git stash clear
   git checkout master
   git pull
 

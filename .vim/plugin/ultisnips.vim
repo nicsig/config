@@ -46,11 +46,11 @@ import Derive from 'lg/syntax.vim'
 "    2. Create the file `~/.vim/after/plugin/ultisnips.vim`,
 "       in which we would write:
 "
-"         ino  <silent> <tab>     <c-r>={g:snr_vimrc}expand_cycle_jump('N')<cr>
-"         snor <silent> <tab>     <Esc>:call {g:snr_vimrc}expand_cycle_jump('N')<cr>
+"         ino  <tab> <cmd>eval {g:snr_vimrc}expand_cycle_jump('N')<cr>
+"         snor <tab> <cmd>eval {g:snr_vimrc}expand_cycle_jump('N')<cr>
 "
-"         ino  <silent> <s-tab>   <c-r>={g:snr_vimrc}expand_cycle_jump('P')<cr>
-"         snor <silent> <s-tab>   <Esc>:call {g:snr_vimrc}expand_cycle_jump('P')<cr>
+"         ino  <s-tab> <cmd>eval {g:snr_vimrc}expand_cycle_jump('P')<cr>
+"         snor <s-tab> <cmd>eval {g:snr_vimrc}expand_cycle_jump('P')<cr>
 "
 "       Why? Because, by default Ultisnips would install these global mappings:
 "
@@ -98,7 +98,7 @@ import Derive from 'lg/syntax.vim'
 "
 "     This mapping overrides our own global mapping:
 "
-"           ino  <silent> <s-tab>   <c-r>={g:snr_vimrc}expand_cycle_jump('P')<cr>
+"           ino <s-tab> <cmd>eval {g:snr_vimrc}expand_cycle_jump('P')<cr>
 "
 "     Therefore, we would lose the capacity to cycle backward inside a menu.
 "     It would be probably a good idea to also unmap the buffer-local mapping
@@ -148,30 +148,31 @@ let g:UltiSnipsRemoveSelectModeMappings = 1
 " Note that  we can't  use `g:_uspy` anymore;  probably since  UltiSnips dropped
 " python2 support: https://github.com/SirVer/ultisnips/pull/1129
 "}}}
-ino <silent> <c-g><s-tab> <c-r>=execute('py3 UltiSnips_Manager._current_snippet_is_done()', 'silent!')[-1]<cr>
+ino <c-g><s-tab> <cmd>sil! py3 UltiSnips_Manager._current_snippet_is_done()<cr>
 
 " Purpose:{{{
-" We want  to be  able to press  Tab in  visual mode to  use the  {VISUAL} token
+"
+" We want  to be able to  press Tab in visual  mode to use the  `{VISUAL}` token
 " inside ultisnips snippets.
 "}}}
 " Where does the {rhs} come from?{{{
 "
 " Give a valid key to `g:UltiSnipsExpandTrigger`, ex:
 "
-"       let g:UltiSnipsExpandTrigger = '<c-g>e'
+"     let g:UltiSnipsExpandTrigger = '<c-g>e'
 "
 " Then, restart Vim, and type:
 "
-"       verb xmap <c-g>e
+"     verb xmap <c-g>e
 "}}}
 " Why do we need to install this mapping manually?{{{
 "
 " Because, we purposefully gave an invalid value to `g:UltiSnipsExpandTrigger`.
 "}}}
-xno <silent> <tab> :call UltiSnips#SaveLastVisualSelection()<cr>gvs
+xno <tab> <c-\><c-n><cmd>*call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
 " We need a way to enable UltiSnips's autotrigger on-demand.
-nno <silent> cou :<c-u>call plugin#ultisnips#toggle_autotrigger()<cr>
+nno cou <cmd>call plugin#ultisnips#toggle_autotrigger()<cr>
 
 " Autocmds {{{1
 
@@ -305,7 +306,7 @@ augroup my_ultisnips | au!
     " I  suspect that's  because,  initially,  there are  no  lines outside  the
     " snippet, since there are no lines at all in a new file.
     "}}}
-    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#prevent_memory_leak(v:true)
+    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#prevent_memory_leak()
     " `sil!` to suppress errors when the event is fired twice consecutively
     " (yeah, for some reason, it can happen)
     au User UltiSnipsExitLastSnippet sil! exe 'nunmap <buffer> :'

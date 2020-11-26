@@ -10,7 +10,7 @@ const s:COLORS = {
     \ 'regname': 30,
     \ }
 
-fu plugin#fzf#commits(char) abort "{{{1
+fu plugin#fzf#commits(char = '') abort "{{{1
     let cwd = getcwd()
     " To use `:FzBCommits` and `:FzCommits`, we first need to be in the working tree of the repo:{{{
     "

@@ -218,7 +218,7 @@ export LC_ALL=en_US.UTF-8
 #}}}
 #   `R`?{{{
 #
-# It's  an option  which prevents  Less from  displaying the  caret notation  of
+# It's an option which prevents `less(1)`  from displaying the caret notation of
 # control characters used in ANSI color escape sequences.
 # Instead, they're sent in raw form to the terminal which will interpret them to
 # set the colors of the text appropriately.

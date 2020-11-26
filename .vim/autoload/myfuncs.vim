@@ -164,54 +164,56 @@ endfu
 
 fu myfuncs#op_yank_setup(what) abort "{{{2
     let s:op_yank = {'what': a:what, 'register': v:register}
-    let &opfunc = expand('<SID>') .. 'op_yank'
+    let &opfunc = expand('<SID>') .. 'Op_yank'
     return 'g@'
 endfu
 
-fu s:op_yank(type) abort
-    let mods = 'keepj keepp'
-    let range = line("'[") .. ',' .. line("']")
+def s:Op_yank(type: string)
+    var mods = 'keepj keepp'
+    var range = line("'[") .. ',' .. line("']")
 
-    let cmd = s:op_yank.what is# 'g//' || s:op_yank.what is# 'comments' ? 'g' : 'v'
-    let cml = &ft is# 'vim'
-        \ ?     '["#]'
-        \ :     '\C\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\')
-    let pat = s:op_yank.what is# 'code' || s:op_yank.what is# 'comments'
-        \ ?     '^\s*' .. cml
-        \ :     @/
+    var cmd = s:op_yank.what == 'g//' || s:op_yank.what == 'comments' ? 'g' : 'v'
+    var cml = &ft == 'vim'
+        ?     '["#]'
+        :     '\C\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\')
+    var pat = s:op_yank.what == 'code' || s:op_yank.what == 'comments'
+        ?     '^\s*' .. cml
+        :     @/
 
-    let z_save = getreginfo('z')
+    var z_save = getreginfo('z')
+    var yanked: list<string>
     try
-        call setreg('z', {})
-        exe mods .. ' ' .. range .. cmd .. ':' .. escape(pat, ':') .. ':y Z'
-        let yanked = getreginfo('z')->get('regcontents', [])
+        setreg('z', {})
+        exe mods .. ' :' .. range .. cmd .. '/' .. escape(pat, '/') .. '/y Z'
+        yanked = getreginfo('z')->get('regcontents', [])
     catch
-        return s:Catch()
+        Catch()
+        return
     finally
-        call setreg('z', z_save)
-        " emulate what Vim does with a  builtin operator; the cursor ends at the
-        " *start* of the text object
-        call cursor(matchstr(range, '\d\+'), 1)
+        setreg('z', z_save)
+        # emulate what Vim does with a  builtin operator; the cursor ends at the
+        # *start* of the text object
+        cursor(matchstr(range, '\d\+')->str2nr(), 1)
     endtry
 
-    " if `:v` was used, and the pattern matched everywhere, nothing was yanked
+    # if `:v` was used, and the pattern matched everywhere, nothing was yanked
     if len(yanked) == 0
         return
     endif
 
-    " the first  time we've  appended a  match to the  `z` register,  it has
-    " appended a newline; we *never* want it; remove it
+    # the first  time we've  appended a  match to the  `z` register,  it has
+    # appended a newline; we *never* want it; remove it
     if yanked[0] == ''
-        call remove(yanked, 0)
+        remove(yanked, 0)
     endif
 
-    " remove *all* empty lines in some other cases
-    if s:op_yank.what is# 'v//' || s:op_yank.what is# 'code'
-        call filter(yanked, 'v:val !~# "^\\s*$"')
+    # remove *all* empty lines in some other cases
+    if s:op_yank.what == 'v//' || s:op_yank.what == 'code'
+        filter(yanked, {_, v -> v !~ '^\s*$'})
     endif
 
-    call setreg(s:op_yank.register, yanked, 'l')
-endfu
+    setreg(s:op_yank.register, yanked, 'l')
+enddef
 " }}}1
 
 " box_create / destroy {{{1
@@ -250,7 +252,7 @@ def myfuncs#box_create(type = ''): string
         norm! gv$A|
 
         # align all (*) the pipe characters (`|`) inside the current paragraph
-        :sil '[,']EasyAlign *|
+        sil :'[,']EasyAlign *|
 
         # If we wanted to center the text inside each cell, we would have to add
         # hit `CR CR` after `gaip`:
@@ -354,23 +356,23 @@ def myfuncs#box_destroy(type = ''): string
     var lnum2 = line("']")
     var range = lnum1 .. ',' .. lnum2
     # remove box (except pretty bars: │)
-    exe ':sil ' .. range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
+    exe 'sil :' .. range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
 
     # replace pretty bars with regular bars
     # necessary, because we will need them to align the contents of the
     # paragraph later
-    exe ':sil ' .. range .. 's/│/|/ge'
+    exe 'sil :' .. range .. 's/│/|/ge'
 
     # remove the bars at the beginning and at the end of the lines
     # we don't want them, because they would mess up the creation of a box
     # later
-    exe ':sil ' .. range .. 's/|//e'
-    exe ':sil ' .. range .. 's/.*\zs|//e'
+    exe 'sil :' .. range .. 's/|//e'
+    exe 'sil :' .. range .. 's/.*\zs|//e'
 
     # trim whitespace
-    exe ':sil ' .. range .. 'TW'
+    exe 'sil :' .. range .. 'TW'
     # remove empty lines
-    exe ':sil ' .. range .. '-g/^\s*$/d_'
+    exe 'sil :' .. range .. '-g/^\s*$/d_'
 
     append(lnum1 - 1, [''])
 
@@ -416,7 +418,7 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     norm! m'
     call setpos('.', pos)
 
-    let mods = 'keepj keepp '
+    let mods = 'sil keepj keepp '
     let range = a:0 && a:1 =~# '\<vis\>' ? '*' : '%'
     let pat = to_search[a:to_delete][0]
     " Don't use `/` as a delimiter.{{{
@@ -695,7 +697,7 @@ fu myfuncs#in_A_not_in_B(...) abort "{{{1
     call qf#create_matches()
 endfu
 
-fu myfuncs#join_blocks(first_reverse) abort "{{{1
+fu myfuncs#join_blocks(first_reverse = v:false) abort "{{{1
     let [line1, line2] = [line("'<"), line("'>")]
 
     if (line2 - line1 + 1) % 2 == 1
@@ -1025,7 +1027,7 @@ def myfuncs#send_to_tab_page(vcount: number) #{{{1
         # TODO: It would be nice if we could select the tab page via fzf.{{{
         #
         #     " prototype
-        #     nno <silent> cd :<c-u>call fzf#run(#{
+        #     nno cd <cmd>call fzf#run(#{
         #         \ source: range(1, tabpagenr('$')),
         #         \ sink: function(expand('<SID>') .. 'Func'),
         #         \ options: '+m',
@@ -1145,18 +1147,18 @@ endfu
 " Apply folding to be able to read only one section (`noun`, `verb`, `Synonyms`, `Examples`).
 
 "                ┌ the function is called for the 1st time;
-"                │ if the text is too long for `trans`, it will be
+"                │ if the text is too long for `trans(1)`, it will be
 "                │ split into chunks, and the function will be called
 "                │ several times
 "                │
-fu myfuncs#trans(first_time, ...) abort
+fu myfuncs#trans(first_time = v:true) abort
     let s:trans_tempfile = tempname()
 
     if a:first_time
-        let text = a:0 ? s:trans_grab_visual() : expand('<cword>')
-        "          │
-        "          └ visual mode
-
+        let text = mode() =~ "^[vV\<c-v>]$" ? s:trans_grab_visual() : expand('<cword>')
+        if text == ''
+            return
+        endif
         let s:trans_chunks = split(text, '.\{100}\zs[.?!]')
         "                                    │
         "                                    └ split the text into chunks of around 100 characters
@@ -1178,11 +1180,11 @@ fu myfuncs#trans(first_time, ...) abort
     " probably because the job writes in a buffer, and the buffer is written
     " to the file after the callback has been invoked
     " use `exit_cb` instead
-    let opts = {
-        \ 'out_io': 'file',
-        \ 'out_name': s:trans_tempfile,
-        \ 'err_io': 'null',
-        \ 'exit_cb': function('s:trans_output'),
+    let opts = #{
+        \ out_io: 'file',
+        \ out_name: s:trans_tempfile,
+        \ err_io: 'null',
+        \ exit_cb: function('s:trans_output'),
         \ }
 
     " send the first chunk in the list of chunks to `trans`
@@ -1230,7 +1232,6 @@ fu s:trans_grab_visual() abort
     endif
     return text
 endfu
-" pyrolysis
 
 fu s:trans_output(job, exit_status) abort
     if a:exit_status == -1
@@ -1255,7 +1256,7 @@ fu s:trans_output(job, exit_status) abort
 
     echo readfile(s:trans_tempfile)->join(' ')
     if len(s:trans_chunks)
-        call myfuncs#trans(0)
+        call myfuncs#trans(v:false)
     endif
 endfu
 
@@ -1283,91 +1284,92 @@ fu myfuncs#webpage_read(url) abort "{{{1
     setl bt=nofile nobl noswf nowrap
 endfu
 
-fu myfuncs#word_frequency(line1, line2, ...) abort "{{{1
-    let flags = {
-        \  'min_length': matchstr(a:1, '-min_length\s\+\zs\d\+'),
-        \  'weighted': stridx(a:1, '-weighted') != -1,
-        \ }
+def myfuncs#word_frequency(line1: number, line2: number, qargs: string) #{{{1
+    var flags = {
+        min_length: matchstr(qargs, '-min_length\s\+\zs\d\+'),
+        weighted: stridx(qargs, '-weighted') != -1,
+        }
 
-    let words = getline(a:line1, a:line2)
-        \ ->join("\n")
-        \ ->split('\%(\%(\k\@!\|\d\).\)\+')
-    let min_length = !empty(flags.min_length) ? flags.min_length : 4
+    var words = getline(line1, line2)
+        ->join("\n")
+        ->split('\%(\%(\k\@!\|\d\).\)\+')
 
-    " remove anything which is:
-    "
-    "    - shorter than `min_length` characters
-    "
-    "    - longer than 30 characters;
-    "      probably not words;
-    "      it  could be  for example  a long  sequence of  underscores used  to
-    "      divide 2 sections of text
-    "
-    "    - not containing any letter
+    var min_length = !empty(flags.min_length) ? flags.min_length : 4
 
-    call filter(words, {_, v -> strchars(v, 1) >= min_length && strchars(v, 1) <= 30 && v =~ '\a'})
-
-    " put all of them in lowercase
-    call map(words, {_, v -> tolower(v)})
-
-    let freq = {}
-    for word in words
-        let freq[word] = get(freq, word, 0) + 1
-    endfor
-
-    if flags.weighted
-        let weighted_freq = deepcopy(freq)
-        " What's the ternary expression after the minus sign?{{{
-        "
-        " The length of an abbreviation we could create for a given word.
-        " Its value depends on the word:
-        "
-        "   - if the word is 4 characters long, then the abbreviation should be
-        "     2 characters long,
-        "
-        "   - if the word ends with an 's', and the same word without the ending
-        "     's' is also present, then the abbreviation should be 4 characters
-        "     long (because it's probably a plural),
-        "
-        "   - otherwise, by default, an abbreviation should be 3 characters long
-        "}}}
-        call map(weighted_freq, {k, v ->
-            \ v * (strchars(k, 1)
-            \ -
-            \ strchars(k, 1) == 4
-            \ ? 2
-            \   : k[-1:-1] is# "s" && keys(freq)->index(k) >= 0
-            \   ?     4
-            \   :     3
-            \ )})
-        let weighted_freq = items(weighted_freq)->sort({a, b -> b[1] - a[1]})
-    endif
-
-    " put the result in a vertical viewport
-    let tempfile = tempname() .. '/WordFrequency'
-    exe 'lefta ' .. (&columns/3) .. 'vnew ' .. tempfile
+    # open vertical viewport to display future results
+    var tempfile = tempname() .. '/WordFrequency'
+    exe 'lefta :' .. (&columns / 3) .. 'vnew ' .. tempfile
     setl bh=delete bt=nofile nobl noswf wfw nowrap pvw
 
-    for item in flags.weighted ? weighted_freq : items(freq)
-        call join(item)->append('$')
+    # Remove anything which is:{{{
+    #
+    #    - shorter than `min_length` characters
+    #
+    #    - longer than 30 characters;
+    #      probably not words;
+    #      it  could be  for example  a long  sequence of  underscores used  to
+    #      divide 2 sections of text
+    #
+    #    - not containing any letter
+    #}}}
+    filter(words, {_, v -> strchars(v, 1) >= min_length && strchars(v, 1) <= 30 && v =~ '\a'})
+
+    # put all of them in lowercase
+    map(words, {_, v -> tolower(v)})
+
+    var freq: dict<number> = {}
+    for word in words
+        freq[word] = get(freq, word, 0) + 1
     endfor
 
-    " format output into aligned columns
-    if executable('column') && executable('sort')
-        sil %!column -t
-        sil %!sort -rn -k2
-        " We don't need to delete the first empty line, `column` doesn't return it.
-        " Probably because there's nothing to align in it.
+    # In addition to the frequency, take the length of words into consideration when sorting them.{{{
+    #
+    # This is especially useful  if we want to know for which  words it would be
+    # the most useful to create abbreviations.
+    #}}}
+    if flags.weighted
+        var weighted_freq: dict<number> = deepcopy(freq)
+        # `v` is the frequence of a word.
+        # We multiply  it by  a number which  should be equal  to the  amount of
+        # characters which we would save if  we created an abbreviation for that
+        # word.
+        map(weighted_freq, {k, v -> v * ( strchars(k, 1) -
+            # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
+            strchars(k, 1) == 4
+            ? 2
+              # if a word ends with an 's', and the same word without the ending
+              # 's'  is also  present,  then its  abbreviation  will probably  4
+              # characters long (because it's probably a plural)
+              : k[-1:-1] == 's' && keys(freq)->index(k) >= 0
+              ?     4
+              # otherwise, by default, an abbreviation will probably be 3 characters long
+              :     3
+            )})
+        for item in items(weighted_freq)->sort({a, b -> b[1] - a[1]})
+            join(item)->append('$')
+        endfor
+    else
+        for item in items(freq)
+            join(item)->append('$')
+        endfor
     endif
 
-    exe 'vert res ' .. (range(1, line('$'))->map("virtcol([v:val, '$'])")->max() + 4)
+    # format output into aligned columns
+    if executable('column') && executable('sort')
+        sil :%!column -t
+        sil :%!sort -rn -k2
+        # We don't need to delete the first empty line; `column(1)` doesn't return it.
+        # Probably because there's nothing to align in it.
+    endif
+
+    exe 'vert res ' .. (range(1, line('$'))->map({_, v -> virtcol([v, '$'])})->max() + 4)
     nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
     wincmd p
-endfu
+enddef
 
-fu myfuncs#wf_complete(_a, _l, _p) abort
-    return join(['-min_length', '-weighted'], "\n")
-endfu
+def myfuncs#wf_complete(_a: any, _l: any, _p: any): string
+    return ['-min_length', '-weighted']->join("\n")
+enddef
 
 fu myfuncs#zshoptions() abort "{{{1
     " this function is invoked from the zsh alias `options` (defined in our zshrc)

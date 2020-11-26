@@ -25,8 +25,8 @@ let &l:stl = '%!g:statusline_winid == win_getid() ? "%y%=%l " : "%y"'
 let b:url = 'https://www.startpage.com/do/search?cat=&language=english&cmd=process_search&query='
 
 nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
-nno <buffer><nowait><silent> <cr> :<c-u>call plugin#websearch#main()<cr>
-nmap <buffer><nowait><silent> ZZ <cr>
+nno <buffer><nowait> <cr> <cmd>call plugin#websearch#main()<cr>
+nmap <buffer><nowait> ZZ <cr>
 
 " Teardown {{{1
 
