@@ -12,7 +12,7 @@ setl cul
 
 let &l:stl = '%!g:statusline_winid == win_getid() ? "%y%=%l " : "%y"'
 
-nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
+nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q!<cr>'
 " Why `command-prompt`?  Why not running the command directly (`system('tmux ' .. getline('.'))`)?{{{
 "
 " First, it lets you review the command before it's run.
@@ -72,7 +72,7 @@ nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>
 "
 " To avoid starting a shell, which would require escaping some characters:
 "
-"     :<c-u>sil system('tmux command-prompt -I '
+"     <cmd>sil system('tmux command-prompt -I '
 "         \ .. getline('.')->substitute('#', '##', 'g')->shellescape())<cr>
 "         "                                              ^-----------^
 "}}}

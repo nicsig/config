@@ -41,10 +41,10 @@ nno g, g;zv
 " These mappings  *could* be useful  when we start  coding in python  which uses
 " indentation to specify when a construct ends.
 "}}}
-noremap <expr> gk <sid>vertical_jump_rhs(0)
-noremap <expr> gj <sid>vertical_jump_rhs(1)
+noremap <expr> gk <sid>vertical_jump_rhs(v:false)
+noremap <expr> gj <sid>vertical_jump_rhs()
 
-fu s:vertical_jump_rhs(is_fwd) abort
+fu s:vertical_jump_rhs(is_fwd = v:true) abort
     let mode = mode(1)
 
     if mode is# "\<c-v>"

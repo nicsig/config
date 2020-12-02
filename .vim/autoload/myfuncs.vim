@@ -1,4 +1,4 @@
-import {Catch, IsVim9, Opfunc} from 'lg.vim'
+import {Catch, GetSelectionText, GetSelectionCoords, IsVim9, Opfunc} from 'lg.vim'
 const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 " Operators {{{1
@@ -396,17 +396,17 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     " deleted, and set a mark on it.
     "}}}
     let pos = getcurpos()
-    let global = a:0 && a:1 =~# '\<reverse\>' ? 'v' : 'g'
+    let global = a:0 && a:1 is# 'reverse' ? 'v' : 'g'
     if &ft is# 'vim'
         " don't delete a literal dictionary at the start of a line
         let cml = '\%("\|#\%({\%([^{]\|$\)\)\@!\)'
     else
         let cml = '\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\') .. '\m'
     endif
-    let to_search = {
-        \ 'empty': ['^\s*$', '^'],
-        \ 'comments': ['^\s*' .. cml, '^\%(\s*' .. cml .. '\)\@!'],
-        \ '@/': [@/, '^\%(.*' .. @/ .. '\m\)\@!'],
+    let to_search = #{
+        \ empty: ['^\s*$', '^'],
+        \ comments: ['^\s*' .. cml, '^\%(\s*' .. cml .. '\)\@!'],
+        \ search: [@/, '^\%(.*' .. @/ .. '\m\)\@!'],
         \ }
     let wont_be_deleted = to_search[a:to_delete][global is# 'g']
     " necessary if the pattern matches on the current line, but the match starts
@@ -419,7 +419,13 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     call setpos('.', pos)
 
     let mods = 'sil keepj keepp '
-    let range = a:0 && a:1 =~# '\<vis\>' ? '*' : '%'
+    if mode() =~ "^[vV\<c-v>]$"
+        let coords = s:GetSelectionCoords()
+        let [lnum1, lnum2] = [coords.start[0], coords.end[0]]
+        let range = lnum1 .. ',' .. lnum2
+    else
+        let range = '%'
+    endif
     let pat = to_search[a:to_delete][0]
     " Don't use `/` as a delimiter.{{{
     "
@@ -446,6 +452,9 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     " `sil!` because if the pattern was so broad that all the lines were removed,
     " the original line doesn't exist anymore, and the `'` mark is invalid
     sil! norm! `'zv
+    if mode() =~ "^[vV\<c-v>]$"
+        call feedkeys("\<c-\>\<c-n>", 'n')
+    endif
 endfu
 
 fu myfuncs#diff_lines(bang, lnum1, lnum2, option) abort "{{{1
@@ -1155,7 +1164,7 @@ fu myfuncs#trans(first_time = v:true) abort
     let s:trans_tempfile = tempname()
 
     if a:first_time
-        let text = mode() =~ "^[vV\<c-v>]$" ? s:trans_grab_visual() : expand('<cword>')
+        let text = mode() =~ "^[vV\<c-v>]$" ? s:GetSelectionText()->join("\n") : expand('<cword>')
         if text == ''
             return
         endif
@@ -1213,24 +1222,6 @@ fu myfuncs#trans_cycle() abort
     let s:trans_target = {'fr': 'en', 'en': 'fr'}[get(s:, 'trans_target', 'fr')]
     let s:trans_source = {'fr': 'en', 'en': 'fr'}[get(s:, 'trans_source', 'en')]
     echo '[trans] ' .. s:trans_source .. ' → ' .. s:trans_target
-endfu
-
-fu s:trans_grab_visual() abort
-    let [lnum1, lnum2] = [line("'<"), line("'>")]
-    let [c1, c2] = [col("'<"), col("'>)")]
-
-    " single line visual selection
-    if lnum1 == lnum2
-        let text = getline(lnum1)->matchstr('\%' .. c1 .. 'c.*\%' .. c2 .. 'c.\=\ze.*$')
-    else
-        " multi lines
-        let first = getline(lnum1)->matchstr('\%' .. c1 .. 'c.*$')
-        let last = ' ' .. getline(lnum2)->matchstr('^.\{-}\%' .. c2 .. 'c.\=')
-        let middle = (lnum2 - lnum1) > 1 ? ' ' .. getline(lnum1 + 1, lnum2 - 1)->join(' ') : ''
-
-        let text = first .. middle .. last
-    endif
-    return text
 endfu
 
 fu s:trans_output(job, exit_status) abort
@@ -1328,12 +1319,11 @@ def myfuncs#word_frequency(line1: number, line2: number, qargs: string) #{{{1
     # the most useful to create abbreviations.
     #}}}
     if flags.weighted
-        var weighted_freq: dict<number> = deepcopy(freq)
         # `v` is the frequence of a word.
         # We multiply  it by  a number which  should be equal  to the  amount of
         # characters which we would save if  we created an abbreviation for that
         # word.
-        map(weighted_freq, {k, v -> v * ( strchars(k, 1) -
+        var weighted_freq = mapnew(freq, {k, v -> v * ( strchars(k, 1) -
             # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
             strchars(k, 1) == 4
             ? 2
@@ -1363,7 +1353,7 @@ def myfuncs#word_frequency(line1: number, line2: number, qargs: string) #{{{1
     endif
 
     exe 'vert res ' .. (range(1, line('$'))->map({_, v -> virtcol([v, '$'])})->max() + 4)
-    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
+    nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
     wincmd p
 enddef
 

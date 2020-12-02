@@ -173,6 +173,7 @@ let g:plug_shallow = 0
 call plug#begin('~/.vim/plugged')
 
 " To Assimilate:
+Plug 'lacygoill/vim-movesel'
 Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
 Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
 Plug 'lacygoill/vim-autoread', {'branch': 'assimil'}
@@ -254,8 +255,6 @@ Plug 'lacygoill/vim-markdown'
 Plug 'andymass/vim-matchup'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
 Plug 'tpope/vim-rhubarb'
-" Alternative: https://github.com/t9md/vim-textmanip
-Plug 'lacygoill/vim-schlepp'
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'lacygoill/vim-submode'
@@ -299,7 +298,6 @@ Plug 'lacygoill/vim-repeat', {'branch': 'lg'}
 Plug 'lacygoill/vim-repmap'
 Plug 'lacygoill/vim-save'
 Plug 'lacygoill/vim-search'
-Plug 'lacygoill/vim-selection-ring'
 Plug 'lacygoill/vim-session'
 Plug 'lacygoill/vim-sh'
 Plug 'lacygoill/vim-snippets'
@@ -2568,7 +2566,7 @@ set wildmode=full
 "
 " With:
 "
-"     cno <m-n> <down> <cmd>call feedkeys('<down>', 'in' .. (reg_recording()->empty() ? 't' : ''))
+"     cno <m-n> <cmd>call feedkeys("\<lt>down>", 'in' .. (reg_recording()->empty() ? 't' : ''))<cr>
 "}}}
 set wildchar=9
 set wildcharm=9
@@ -2944,12 +2942,12 @@ ino <c-s> <cmd>sil update<cr>
 
 " M-a  M-e {{{3
 
-sil! call s:MapMeta('a', '<cmd>norm! (<cr>', 'i', 's')
-sil! call s:MapMeta('e', '<cmd>norm! )<cr>', 'i', 's')
+sil! call s:MapMeta('a', '<cmd>norm! (<cr>', 'i', '')
+sil! call s:MapMeta('e', '<cmd>norm! )<cr>', 'i', '')
 
 " \ {{{3
 
-ino <silent> <bslash> <c-r><c-r>=<sid>Indent_before_backslash()<cr>
+ino <silent> <bslash> <c-r>=<sid>Indent_before_backslash()<cr>
 
 def s:Indent_before_backslash(): string
     if &filetype != 'vim'
@@ -3112,6 +3110,21 @@ nmap <space>S saiW
 nno <space>t <cmd>exe (v:count ? v:count .. 'tabnew' : 'tabnew')<cr>
 "}}}3
 " U {{{3
+" Uc                clear undo history {{{4
+
+nno Uc <cmd>call <sid>ClearUndoHistory()<cr>
+
+def s:ClearUndoHistory()
+    # `:h clear-undo`
+    var ul_save = &l:ul
+    setl ul=-1
+    getline('.')->setline('.')
+    &ul = ul_save
+    exe 'wundo ' .. expand('%:p')->undofile()->fnameescape()
+    sil update
+    echom 'cleared undo history'
+enddef
+
 " UM                undo changes during current session {{{4
 
 augroup changenr_save | au!
@@ -3320,10 +3333,10 @@ augroup END
 def s:Install_vimrc_mappings()
     nno <buffer><nowait> gf <cmd>call <sid>Try_to_edit_plugin_config('gf')<cr>
     nno <buffer><nowait> gF <cmd>call <sid>Try_to_edit_plugin_config('gF')<cr>
-    nno <buffer><nowait> <c-w>f <cmd>call <sid>Try_to_edit_plugin_config("\<lt>c-w>f")<cr>
-    nno <buffer><nowait> <c-w>F <cmd>call <sid>Try_to_edit_plugin_config("\<lt>c-w>F")<cr>
-    nno <buffer><nowait> <c-w>gf <cmd>call <sid>Try_to_edit_plugin_config("\<lt>c-w>gf")<cr>
-    nno <buffer><nowait> <c-w>gF <cmd>call <sid>Try_to_edit_plugin_config("\<lt>c-w>gF")<cr>
+    nno <buffer><nowait> <c-w>f <cmd>call <sid>Try_to_edit_plugin_config('<c-w>f')<cr>
+    nno <buffer><nowait> <c-w>F <cmd>call <sid>Try_to_edit_plugin_config('<c-w>F')<cr>
+    nno <buffer><nowait> <c-w>gf <cmd>call <sid>Try_to_edit_plugin_config('<c-w>gf')<cr>
+    nno <buffer><nowait> <c-w>gF <cmd>call <sid>Try_to_edit_plugin_config('<c-w>gF')<cr>
 
     nmap <buffer><nowait> Z <c-w>
     # easier to press `ZGF` than `ZgF`
@@ -3697,9 +3710,8 @@ xno <expr> <bar>g myfuncs#op_grep()
 
 nno <bar>t <cmd>call myfuncs#trans()<cr>
 nno <bar>T <cmd>call myfuncs#trans_stop()<cr>
-xno <bar>t <c-\><c-n><cmd>call myfuncs#trans()<cr>
-"   │
-"   └ do *not* use `!t`{{{
+xno <bar>t <cmd>call myfuncs#trans()<cr>
+"     └ do *not* use `!t`{{{
 "
 " It would prevent us from writing a visual selection on the standard input of a
 " shell command whose name begins with a `t`.
@@ -3841,8 +3853,12 @@ let s:fix_macro_c = ''
 def s:Fix_macro()
     # don't open several windows if we press `=m` several times consecutively
     if !empty(s:fix_macro_c) | return | endif
-    var c = getchar()->nr2char()
-    if c !~ '[[:lower:]]'
+    var c = getchar()
+    if type(c) != v:t_number
+        return
+    endif
+    var char = nr2char(c)
+    if char !~ '[[:lower:]]'
         return
     endif
     # Why don't you use the command-line window?{{{
@@ -3855,7 +3871,7 @@ def s:Fix_macro()
     setl bh=wipe bt=nofile nobl nomod noswf wfw wrap
     augroup fix_macro
         au! * <buffer>
-        s:fix_macro_c = c
+        s:fix_macro_c = char
         au QuitPre <buffer> setreg(s:fix_macro_c, [getline(1)], 'c') | s:fix_macro_c = ''
     augroup END
     if !has('gui_running')
@@ -3871,10 +3887,10 @@ def s:Fix_macro()
         #}}}
         ino <buffer> <c-v><esc> <c-v><c-\><c-v><c-n>
     endif
-    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
+    nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
     nmap <buffer><nowait> <cr> q
     nmap <buffer><nowait> ZZ q
-    getreg(c, 1, 1)->setline(1)
+    getreg(char, 1, 1)->setline(1)
     norm! 1|0f'
 enddef
 "}}}3
@@ -4020,18 +4036,17 @@ def s:Faq(): string
 
     for win in win_in_this_tab
         if get(win, 'bufnr', '')->bufname() == faq_file
-            exe win.winnr .. 'q'
+            exe ':' .. win.winnr .. 'q'
             sil! FoldAutoOpen 0
             return ''
         endif
     endfor
 
-    deepcopy(win_in_this_tab)->map({_, v -> getwinvar(v.winnr, '&pvw', 0)})
-    if index(win_in_this_tab, 1) != -1
+    if mapnew(win_in_this_tab, {_, v -> getwinvar(v.winnr, '&pvw', 0)})->index(1) != -1
         return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
-    if deepcopy(win_in_this_tab)->map({_, v -> bufname(v.bufnr)})->index(faq_file) != -1
+    if mapnew(win_in_this_tab, {_, v -> bufname(v.bufnr)})->index(faq_file) != -1
         echo 'a window displaying  ' .. faq_file .. '  already exists'
         return ''
     endif
@@ -4101,7 +4116,7 @@ nno -U <cmd>call <sid>Unicode_table()<cr>
 
 def s:Unicode_table()
     UnicodeTable
-    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
+    nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
 enddef
 
 " }}}3
@@ -4163,13 +4178,9 @@ nno <expr> +tt myfuncs#op_trim_ws() .. '_'
 " If we wrote the previous line in a python ftplugin, hitting CR would display
 " 'hello'.
 
-nno <expr><silent> <cr> !empty(&buftype)
+nno <expr> <cr> !empty(&buftype)
     \ ?     '<cr>'
-    \ :     ':<c-u>' .. getbufvar('%', 'cr_command', 'norm! 80<bar>') .. '<cr>'
-"              │
-"              └ important, otherwise, if we hit a nr
-"              (e.g. 42) by accident before `CR`, it would do:  :42norm! 100|
-"              which would move the cursor 42 lines below the current one
+    \ :     '<cmd>' .. getbufvar('%', 'cr_command', 'norm! 80<bar>') .. '<cr>'
 
 " S-→    C-↑ ...      modified arrow keys {{{4
 
@@ -4285,7 +4296,7 @@ enddef
 " Remember that `:norm` – like most Ex  commands – doesn't mark the lines in its
 " range, contrary to `:g`.
 "}}}
-nno <c-g>n :<c-u>%norm!<space>
+nno <c-g>n <cmd>%norm!<space>
 
 " C-np                move across tab pages {{{4
 
@@ -4336,7 +4347,21 @@ sil! call s:MapMeta('p', "['", 'n', '')
 nno <expr> @ <sid>Save_last_register_executed_interactively()
 def s:Save_last_register_executed_interactively(): string
     # ask which register we want to execute
-    var char = getchar()->nr2char(1)
+    var c = getchar()
+    # `c` is not necessarily a number.{{{
+    #
+    # It  could  be  a  string.   For   example,  this  is  the  case  when  Vim
+    # automatically presses the pseudo-key `<CursorHold>`.
+    #
+    # From `:h getchar()`:
+    #
+    #    > If it is a single character, the result is a number.  [...]
+    #    > **Otherwise a String is returned** with the encoded character.
+    #}}}
+    if type(c) != v:t_number
+        return '@'
+    endif
+    var char = nr2char(c, 1)
     if reg_executing()->empty()
         s:last_register_executed_interactively = char
     endif
@@ -4567,17 +4592,17 @@ nmap crgg <plug>(MakeDigraph)_
 " They also work in visual mode (except `zE`).
 
 nno dg<space> <cmd>call myfuncs#delete_matching_lines('empty')<cr>
-xno mg<space> <c-\><c-n><cmd>call myfuncs#delete_matching_lines('empty', 'vis')<cr>
+xno mg<space> <cmd>call myfuncs#delete_matching_lines('empty')<cr>
 
 nno dg" <cmd>call myfuncs#delete_matching_lines('comments')<cr>
+xno mg" <cmd>call myfuncs#delete_matching_lines('comments')<cr>
 nno dv" <cmd>call myfuncs#delete_matching_lines('comments', 'reverse')<cr>
-xno mg" <c-\><c-n><cmd>call myfuncs#delete_matching_lines('comments', 'vis')<cr>
-xno mv" <c-\><c-n><cmd>call myfuncs#delete_matching_lines('comments', 'vis+reverse')<cr>
+xno mv" <cmd>call myfuncs#delete_matching_lines('comments', 'reverse')<cr>
 
-nno dg/ <cmd>call myfuncs#delete_matching_lines('@/')<cr>
-nno dv/ <cmd>call myfuncs#delete_matching_lines('@/', 'reverse')<cr>
-xno mg/ <c-\><c-n><cmd>call myfuncs#delete_matching_lines('@/', 'vis')<cr>
-xno mv/ <c-\><c-n><cmd>call myfuncs#delete_matching_lines('@/', 'vis+reverse')<cr>
+nno dg/ <cmd>call myfuncs#delete_matching_lines('search')<cr>
+xno mg/ <cmd>call myfuncs#delete_matching_lines('search')<cr>
+nno dv/ <cmd>call myfuncs#delete_matching_lines('search', 'reverse')<cr>
+xno mv/ <cmd>call myfuncs#delete_matching_lines('search', 'reverse')<cr>
 
 " dr                  replace without yank {{{3
 
@@ -4808,23 +4833,86 @@ xno aS as
 
 " Vim function
 
-" FIXME: Not reliable text objects (check out kana plugin).
-xno if <c-\><c-n><cmd>call <sid>Textobj_func(v:true)<cr>
-" If  you  try to  get  rid  of `<c-\><c-n>`,  you'll  probably  need to  invoke
-" `searchpair()` in `s:Textobj_func()` (which is probably better anyway).
-xno af <c-\><c-n><cmd>call <sid>Textobj_func(v:false)<cr>
+xno if <cmd>call <sid>Textobj_func(v:true)<cr>
+xno af <cmd>call <sid>Textobj_func(v:false)<cr>
 
 ono if <cmd>norm Vif<cr>
 ono af <cmd>norm Vaf<cr>
 
 def s:Textobj_func(inside: bool)
-    if search('^\C\s*\%(fu\%[nction]\|\%(export\s\+\)\=def\)\>', 'bcW') > 0
-        norm! m<
-        norm g%
-        norm! m>
-        exe 'norm! gv$' .. (inside ? 'koj' : '')
-        # we want a linewise selection no matter the original visual mode
-        exe (mode() != 'V' ? 'norm! V' : '')
+    var start = '^\C\s*\%(fu\%[nction]\|\%(export\s\+\)\=def\)\>'
+    var end = '^\C\s*\%(endfu\|enddef\)\s*$'
+    var curline = getline('.')
+
+    # special cases: we're on the first or last line of a function
+    if inside && curline =~ start
+        if getline(line('.') + 1) =~ end
+            # there's no inside in an empty function
+            return
+        endif
+        norm! j
+    elseif inside && curline =~ end
+        if getline(line('.') - 1) =~ start
+            # there's no inside in an empty function
+            return
+        endif
+        norm! kok
+    elseif !inside && curline =~ start
+        # To be sure we are not on the first character.{{{
+        #
+        # `vaf` unexpectedly fails when we're on the first character.
+        # That's because  – for  some reason  – `searchpair()`  fails to  find a
+        # function when we're at its very beginning (and use the `c` flag).
+        #
+        #     vim9script
+        #     var lines =<< trim END
+        #         def Func()
+        #         enddef
+        #     END
+        #     setline(1, lines)
+        #     echo searchpair('^def', '', '^enddef$', 'cnW')
+        #     0~
+        #     ✘
+        #
+        #     vim9script
+        #     var lines =<< trim END
+        #         def Func()
+        #         enddef
+        #     END
+        #     setline(1, lines)
+        #     norm! $
+        #     echo searchpair('^def', '', '^enddef$', 'cnW')
+        #     2~
+        #     ✔
+        #}}}
+        norm! $
+    elseif !inside && curline =~ end
+        if getline(line('.') - 1) =~ start
+            norm! Vk
+            return
+        endif
+        norm! kok
+    endif
+
+    # look for the end of the function
+    if searchpair(start, '', end, 'cW') <= 0
+        return
+    endif
+    # we want a linewise selection no matter the original visual mode
+    if mode() != 'V'
+        norm! V
+    endif
+    if inside
+        norm! k
+    endif
+    # focus the other selection's corner
+    norm! o
+    # now look for the start of the function
+    if searchpair(start, '', end, 'bcW') <= 0
+        return
+    endif
+    if inside
+        norm! j
     endif
 enddef
 
@@ -5326,7 +5414,7 @@ fu s:diff_orig() abort
     setl nomodifiable readonly
 
     diffthis
-    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
+    nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
     let &filetype = getbufvar('#', '&ft')
 
     let s:tmp_partial = function('s:diff_orig_restore_settings', [cole_save])
@@ -5862,7 +5950,7 @@ def s:Tldr(shellcmd: string)
     keepj keepp g/^#/append('.', '')
     update
     norm! gg
-    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
+    nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
 enddef
 
 " TW {{{2
@@ -5909,7 +5997,7 @@ augroup my_cmdline_window | au!
     "}}}
     au CmdWinEnter : sil! iunmap <buffer> <tab>
 
-    au CmdWinEnter * nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q<cr>'
+    au CmdWinEnter * nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
     au CmdWinEnter * nno <buffer><nowait> ZZ <cr>
     " Purpose:{{{
     "
@@ -7108,9 +7196,9 @@ endfu
 " `man graph-easy`
 "
 " Update:
-" This is really useful with vim-schlepp, and vim-draw.
+" This is really useful with vim-movesel, and vim-draw.
 " You create  the skeleton of  the diagram with  graph-easy, then tweak  it with
-" vim-schlepp + vim-draw.
+" vim-movesel + vim-draw.
 "
 " Also, remember we've created the  `:BoxPrettify` command.  Useful to convert a
 " raw ascii diagram, in a more polished one.
@@ -8057,7 +8145,7 @@ endfu
 "
 " Also, we need a library function to install this kind of `q` mapping:
 "
-"     nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
+"     nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q!<cr>'
 "
 " 75 -
 "
@@ -8651,16 +8739,6 @@ endfu
 "
 " 113 -
 "
-" Add a mapping to clear the undo history of a file.
-" Try this:
-"
-"     let ul_save = &l:ul
-"     setl ul=0
-"     exe "norm! \"=''\rp"
-"     exe 'wundo ' .. expand('%:p')->undofile()->fnameescape()
-"
-" 114 -
-"
 " Consider doing this kind of refactorings:
 "
 "     let tempfile = tempname()
@@ -8674,7 +8752,7 @@ endfu
 " feature.  This is what junegunn does in `fzf#vim#helptags()`.
 " Although, I didn't find this kind of precautions anywhere else...
 "
-" 115 -
+" 114 -
 "
 " Install a mapping to toggle `'breakindent'` and `'linebreak'`?
 "
@@ -8684,6 +8762,7 @@ endfu
 " ---
 "
 " Also, add an indicator in the status line when the options are reset?
+
 
 
 
