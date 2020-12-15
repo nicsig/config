@@ -18,7 +18,7 @@
 #
 # So, it's useful for settings we need in any type of shell, and we don't want
 # to repeat them in both `zshrc` and `zprofile`.
-# Maybe sth like `EDITOR`, `PAGER`, `PATH`, `ZDOTDIR` …
+# Maybe sth like `EDITOR`, `PAGER`, `PATH`, `ZDOTDIR`...
 # }}}
 # Which commands should we include in this file?{{{
 #

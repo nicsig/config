@@ -103,6 +103,7 @@ endfu
 
 fu s:handle_char(reg) abort
     let reg_save = getreginfo(a:reg)
+    let zero = getreginfo('0')
 
     let contents = get(reg_save, 'regcontents', [])
     if get(reg_save, 'regtype', '') is# 'V' && !empty(contents)
@@ -146,7 +147,37 @@ fu s:handle_char(reg) abort
     catch
         return s:Catch()
     finally
+        " need to restore `a:reg` in case we've made it mutate with the previous `setreg()`
         call setreg(a:reg, reg_save)
+        " TODO: Why do we need a timer for `"0` to be properly restored?
+        "
+        " Make a test with this shell command:
+        "
+        "     $ cp ~/.shrc /tmp/file && vim -i NONE -S /tmp/t.vim
+        "
+        " Where `/tmp/t.vim` contains:
+        "
+        "     call setreg('a', #{regcontents: 'aaa'})
+        "     call setreg('0', #{regcontents: 'zero'})
+        "     call setreg('"', #{regcontents: 'unnamed', points_to: 'z'})
+        "     call setreg('*', {})
+        "     call setreg('+', {})
+        "     call repeat(['the quick brown fox jumps over the lazy dog'], 5)->setline(1)
+        "
+        " I think Vim automatically writes into `"0` because of `:h v_p`.
+        " Btw, when we use `v_p`, what happens exactly?
+        "
+        " ---
+        "
+        " In general, should we restore `"0` before or after `""`?
+        " Does  the answer  to  that  question depend  on  what  `""` points  to
+        " (especially `"0`)?
+        "
+        " ---
+        "
+        " Did we make some mistake when restoring `"0` in the past?
+        " Like maybe we should have restored it before or after `""`, or with a timer...
+        call timer_start(0, {-> setreg('0', zero)})
     endtry
 endfu
 
@@ -164,11 +195,11 @@ endfu
 
 fu myfuncs#op_yank_setup(what) abort "{{{2
     let s:op_yank = {'what': a:what, 'register': v:register}
-    let &opfunc = expand('<SID>') .. 'Op_yank'
+    let &opfunc = expand('<SID>') .. 'OpYank'
     return 'g@'
 endfu
 
-def s:Op_yank(type: string)
+def s:OpYank(type: string)
     var mods = 'keepj keepp'
     var range = line("'[") .. ',' .. line("']")
 
@@ -240,9 +271,9 @@ enddef
 "
 " The peculiarity here, is the variable number of cells per line (2 on the first
 " one, 3 on the second one, 4 on the last ones).
-def myfuncs#box_create(type = ''): string
+def myfuncs#boxCreate(type = ''): string
     if type == ''
-        &opfunc = 'myfuncs#box_create'
+        &opfunc = 'myfuncs#boxCreate'
         return 'g@'
     endif
     try
@@ -275,10 +306,10 @@ def myfuncs#box_create(type = ''): string
         endif
 
         # Draw the upper border of the box '┌────┐':
-        Box_create_border('top', col_pos)
+        BoxCreateBorder('top', col_pos)
 
         # Draw the lower border of the box '└────┘':
-        Box_create_border('bottom', col_pos)
+        BoxCreateBorder('bottom', col_pos)
 
         # Replace the remaining `|` with `│`:
         var first_line = line("'{") + 2
@@ -289,14 +320,14 @@ def myfuncs#box_create(type = ''): string
             endfor
         endfor
 
-        Box_create_separations()
+        BoxCreateSeparations()
     catch
         return Catch()
     endtry
     return ''
 enddef
 
-def s:Box_create_border(where: string, col_pos: list<number>)
+def s:BoxCreateBorder(where: string, col_pos: list<number>)
     if where == 'top'
         # duplicate first line in the box
         norm! '{+yyP
@@ -317,7 +348,7 @@ def s:Box_create_border(where: string, col_pos: list<number>)
     endfor
 enddef
 
-def s:Box_create_separations()
+def s:BoxCreateSeparations()
     # Create a separation line, such as:
     #
     #     |    |    |    |
@@ -346,9 +377,9 @@ def s:Box_create_separations()
     setreg('x', [line], 'l')
 enddef
 
-def myfuncs#box_destroy(type = ''): string
+def myfuncs#boxDestroy(type = ''): string
     if type == ''
-        &opfunc = 'myfuncs#box_destroy'
+        &opfunc = 'myfuncs#boxDestroy'
         return 'g@'
     endif
 
@@ -1020,7 +1051,7 @@ fu s:search_todo_text(dict) abort
     return dict
 endfu
 
-def myfuncs#send_to_tab_page(vcount: number) #{{{1
+def myfuncs#sendToTabPage(vcount: number) #{{{1
     var curtab = tabpagenr()
     var count: number
     if vcount == curtab
@@ -1275,7 +1306,7 @@ fu myfuncs#webpage_read(url) abort "{{{1
     setl bt=nofile nobl noswf nowrap
 endfu
 
-def myfuncs#word_frequency(line1: number, line2: number, qargs: string) #{{{1
+def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
     var flags = {
         min_length: matchstr(qargs, '-min_length\s\+\zs\d\+'),
         weighted: stridx(qargs, '-weighted') != -1,
@@ -1357,7 +1388,7 @@ def myfuncs#word_frequency(line1: number, line2: number, qargs: string) #{{{1
     wincmd p
 enddef
 
-def myfuncs#wf_complete(_a: any, _l: any, _p: any): string
+def myfuncs#wfComplete(_a: any, _l: any, _p: any): string
     return ['-min_length', '-weighted']->join("\n")
 enddef
 

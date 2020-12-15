@@ -257,7 +257,6 @@ Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
 Plug 'tpope/vim-rhubarb'
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
-Plug 'lacygoill/vim-submode'
 Plug 'wellle/targets.vim'
 Plug 'lacygoill/vim-tmux', {'branch': 'assimil'}
 Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
@@ -275,6 +274,7 @@ Plug 'lacygoill/vim-cmdline'
 Plug 'lacygoill/vim-column-object'
 Plug 'lacygoill/vim-comment'
 Plug 'lacygoill/vim-completion'
+Plug 'lacygoill/vim-cookbook'
 Plug 'lacygoill/vim-doc'
 Plug 'lacygoill/vim-draw'
 Plug 'lacygoill/vim-fold'
@@ -304,9 +304,8 @@ Plug 'lacygoill/vim-snippets'
 Plug 'lacygoill/vim-source'
 Plug 'lacygoill/vim-stacktrace'
 Plug 'lacygoill/vim-statusline'
-Plug 'lacygoill/vim-xterm'
+Plug 'lacygoill/vim-submode'
 Plug 'lacygoill/vim-terminal'
-Plug 'lacygoill/vim-cookbook'
 Plug 'lacygoill/vim-titlecase'
 Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-unichar'
@@ -314,6 +313,7 @@ Plug 'machakann/vim-Verdin'
 Plug 'lacygoill/vim-vim'
 Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
+Plug 'lacygoill/vim-xterm'
 
 " Read Doc:
 Plug 'justinmk/vim-dirvish'
@@ -328,7 +328,7 @@ Plug 'chrisbra/unicode.vim'
 
 " Some functions installing an interface are  too slow to be called during Vim's
 " startup.  We delay them.
-def s:delay_slow_call()
+def s:DelaySlowCall()
     au! delay_slow_call
     aug! delay_slow_call
 
@@ -386,10 +386,10 @@ augroup delay_slow_call | au!
         TextYankPost
         TextChanged
     END
-    exe 'au ' .. join(s:events, ',') .. ' * call s:delay_slow_call()' | unlet! s:events
+    exe 'au ' .. join(s:events, ',') .. ' * call s:DelaySlowCall()' | unlet! s:events
     " Do *not* call the function when we enter debug mode.
     " It could raise spurious errors when we debug Vim (`$ vim -D`).
-    au CmdlineEnter :,/,\?,@ call s:delay_slow_call()
+    au CmdlineEnter :,/,\?,@ call s:DelaySlowCall()
 augroup END
 
 call plug#end()
@@ -470,7 +470,7 @@ set termencoding=utf-8
 " That is, after `:syntax enable` or after `vim-plug` has done its job.
 " Otherwise, the syntax elements it installs would be cleared.
 "}}}
-def s:styled_comments()
+def s:StyledComments()
     # Why do you include `help`?{{{
     #
     # We sometimes  lose the  conceal in a  help window, when  the help  file is
@@ -523,11 +523,11 @@ def s:styled_comments()
         # Because of this new order, the default autocmd undoes our custom one.
         # We need to re-install our custom autocmd *after* the default one.
         #}}}
-        au SourcePost $VIMRUNTIME/syntax/syntax.vim styled_comments()
+        au SourcePost $VIMRUNTIME/syntax/syntax.vim StyledComments()
             \ | getwininfo()->map({_, v -> win_execute(v.winid, 'do styled_comments Syntax')})
     augroup END
 enddef
-call s:styled_comments()
+call s:StyledComments()
 
 " Gui {{{2
 
@@ -791,10 +791,10 @@ augroup my_color_scheme | au!
     "     :hi SomeGroup term=... ctermfg=...
     "     :hi clear
     "}}}
-    au ColorScheme * call s:reinstall_cleared_hg()
+    au ColorScheme * call s:ReinstallClearedHg()
 augroup END
 
-def s:reinstall_cleared_hg()
+def s:ReinstallClearedHg()
     # Why don't you simply run `:do Syntax`?{{{
     #
     # Suppose you have two windows, one with a python buffer, and the other with
@@ -2638,7 +2638,7 @@ set whichwrap=h,l
 " Mappings {{{1
 " New {{{2
 
-def s:Remember_new_mappings(some_lhs: list<list<string>>)
+def s:RememberNewMappings(some_lhs: list<list<string>>)
     for lhs in some_lhs
         exe 'nno ' .. lhs[0] .. ' <cmd>call <sid>Reminder_new_mapping(' .. string(lhs[1]) .. ')<cr>'
     endfor
@@ -2650,7 +2650,7 @@ def s:Reminder_new_mapping(new_lhs: string)
     echohl NONE
 enddef
 
-call s:Remember_new_mappings([
+call s:RememberNewMappings([
     \ ['-e', '!e'],
     \ ['zs', '!s'],
     \ ])
@@ -2753,8 +2753,8 @@ cno <c-r><c-h> <cmd>exe getcmdtype() =~ '[/?]' ? 'FzHistory/' : 'FzHistory:'<cr>
 
 " C-r C-l       insert current line {{{3
 
-cno <c-r><c-l> <c-r><c-r>=<sid>Insert_current_line()<cr>
-def s:Insert_current_line(): string
+cno <c-r><c-l> <c-r><c-r>=<sid>InsertCurrentLine()<cr>
+def s:InsertCurrentLine(): string
     var cml: string
     if s:IsVim9()
         cml = '#'
@@ -2767,8 +2767,8 @@ enddef
 
 " C-r `         insert codespan {{{3
 
-cno <c-r>` <c-r><c-r>=<sid>Insert_codespan()<cr>
-def s:Insert_codespan(): string
+cno <c-r>` <c-r><c-r>=<sid>InsertCodespan()<cr>
+def s:InsertCodespan(): string
     var line = getline('.')
     var col = col('.')
     var pat = '.*`\zs.*\%' .. col .. 'c.\{-}\ze`\|\%' .. col .. 'c`\zs.\{-}\ze`'
@@ -2808,9 +2808,9 @@ enddef
 
 " This  mapping  tries  to  perform  both edits,  depending  on  the  amount  of
 " whitespace between the comment leader and the rest of the text.
-ino <c-g><c-h> <cmd>call <sid>Compact_whitespace()<cr>
+ino <c-g><c-h> <cmd>call <sid>CompactWhitespace()<cr>
 
-def s:Compact_whitespace()
+def s:CompactWhitespace()
     if empty(&l:cms) | return | endif
     var cml: string
     if &ft == 'vim'
@@ -2846,7 +2846,7 @@ enddef
 " See: `:h i_ctrl-g_u`
 "}}}
 
-def s:C_m(): string
+def s:CM(): string
     if pumvisible()
         # If you change the code, make sure not to introduce a regression.{{{
         #
@@ -2896,7 +2896,7 @@ def s:C_m(): string
     return "\<c-g>u\<cr>"
 enddef
 
-ino <expr> <c-m> <sid>C_m()
+ino <expr> <c-m> <sid>CM()
 
 " C-r             ignore `'autoindent'` when inserting register {{{3
 
@@ -2947,9 +2947,9 @@ sil! call s:MapMeta('e', '<cmd>norm! )<cr>', 'i', '')
 
 " \ {{{3
 
-ino <silent> <bslash> <c-r>=<sid>Indent_before_backslash()<cr>
+ino <silent> <bslash> <c-r>=<sid>IndentBeforeBackslash()<cr>
 
-def s:Indent_before_backslash(): string
+def s:IndentBeforeBackslash(): string
     if &filetype != 'vim'
         return '\'
     endif
@@ -3017,9 +3017,9 @@ enddef
 "
 "     2 + n - 1  <  4 + 2 * n
 "}}}
-nno <expr> <space>. <sid>Repeat_last_edit_on_last_changed_text()
+nno <expr> <space>. <sid>RepeatLastEditOnLastChangedText()
 
-def s:Repeat_last_edit_on_last_changed_text(): string
+def s:RepeatLastEditOnLastChangedText(): string
     # put the last changed text inside the search register, so that we can refer
     # to it with the text-object `gn`
     var changed = getreg('"', 1, 1)
@@ -3074,13 +3074,13 @@ nno <space>an <cmd>arglocal %<cr>
 "
 " If you need to read it, it's there: `~/bin/bash/search-engine`.
 "}}}
-nno <space>i <cmd>call <sid>Run_current_line('websearch')<cr>
+nno <space>i <cmd>call <sid>RunCurrentLine('websearch')<cr>
 
 " tmux command-prompt has too limited editing capabilities.
 " Let's use a Vim buffer to leverage Vim's editing capabilities.
-nno <space>x <cmd>call <sid>Run_current_line('tmuxprompt')<cr>
+nno <space>x <cmd>call <sid>RunCurrentLine('tmuxprompt')<cr>
 
-def s:Run_current_line(type: string)
+def s:RunCurrentLine(type: string)
     if &ft == type
         return
     endif
@@ -3158,8 +3158,8 @@ let s:changenr_save = {}
 "}}}
 
 " Don't use `UU`; I think we used it in the past, but pressed it by accident too often.
-nno UM <cmd>call <sid>Undo_changes_during_current_session()<cr>
-def s:Undo_changes_during_current_session()
+nno UM <cmd>call <sid>UndoChangesDuringCurrentSession()<cr>
+def s:UndoChangesDuringCurrentSession()
     var bufnr = bufnr('%')
     if !has_key(s:changenr_save, bufnr) || s:changenr_save[bufnr] == changenr()
         return
@@ -3201,10 +3201,10 @@ augroup unmap_fugitive | au!
 augroup END
 
 nno Ud <cmd>Gdiff<cr>
-nno Up <cmd>call <sid>Try_fugitive_cmd('Gpush')<cr>
-nno Us <cmd>call <sid>Try_fugitive_cmd('Gstatus')<cr>
+nno Up <cmd>call <sid>TryFugitiveCmd('Gpush')<cr>
+nno Us <cmd>call <sid>TryFugitiveCmd('Gstatus')<cr>
 
-def s:Try_fugitive_cmd(cmd: string)
+def s:TryFugitiveCmd(cmd: string)
     try
         exe cmd
     catch
@@ -3227,13 +3227,13 @@ def s:Try_fugitive_cmd(cmd: string)
         # the one we were focusing before executing `:Gstatus`; IOW, we may lose
         # our focused window.
         #}}}
-        nno <buffer><nowait> q <cmd>call <sid>Close_fugitive_window()<cr>
+        nno <buffer><nowait> q <cmd>call <sid>CloseFugitiveWindow()<cr>
         cursor(1, 1)
         search('^# \%(Changes\|Untracked files\)', 'W')
     endif
 enddef
 
-def s:Close_fugitive_window()
+def s:CloseFugitiveWindow()
     # Do *not* try to be smart and focus the previous window immediately, then close the fugitive window.{{{
     #
     #     wincmd p
@@ -3287,9 +3287,9 @@ nno gV     '[V']
 
 " g SPC       break line {{{4
 
-nno <expr> g<space> <sid>Break_line()
+nno <expr> g<space> <sid>BreakLine()
 
-def s:Break_line(type = ''): string
+def s:BreakLine(type = ''): string
     if type == ''
         &opfunc = expand('<stack>')->matchstr('.*\zs<SNR>\w*')
         return 'g@l'
@@ -3327,23 +3327,23 @@ nmap ga <plug>(EasyAlign)
 " So, we try to make `gf` & friends smarter.
 
 augroup vimrc_mappings | au!
-    au BufReadPost $MYVIMRC call s:Install_vimrc_mappings()
+    au BufReadPost $MYVIMRC call s:InstallVimrcMappings()
 augroup END
 
-def s:Install_vimrc_mappings()
-    nno <buffer><nowait> gf <cmd>call <sid>Try_to_edit_plugin_config('gf')<cr>
-    nno <buffer><nowait> gF <cmd>call <sid>Try_to_edit_plugin_config('gF')<cr>
-    nno <buffer><nowait> <c-w>f <cmd>call <sid>Try_to_edit_plugin_config('<c-w>f')<cr>
-    nno <buffer><nowait> <c-w>F <cmd>call <sid>Try_to_edit_plugin_config('<c-w>F')<cr>
-    nno <buffer><nowait> <c-w>gf <cmd>call <sid>Try_to_edit_plugin_config('<c-w>gf')<cr>
-    nno <buffer><nowait> <c-w>gF <cmd>call <sid>Try_to_edit_plugin_config('<c-w>gF')<cr>
+def s:InstallVimrcMappings()
+    nno <buffer><nowait> gf <cmd>call <sid>TryToEditPluginConfig('gf')<cr>
+    nno <buffer><nowait> gF <cmd>call <sid>TryToEditPluginConfig('gF')<cr>
+    nno <buffer><nowait> <c-w>f <cmd>call <sid>TryToEditPluginConfig('<c-w>f')<cr>
+    nno <buffer><nowait> <c-w>F <cmd>call <sid>TryToEditPluginConfig('<c-w>F')<cr>
+    nno <buffer><nowait> <c-w>gf <cmd>call <sid>TryToEditPluginConfig('<c-w>gf')<cr>
+    nno <buffer><nowait> <c-w>gF <cmd>call <sid>TryToEditPluginConfig('<c-w>gF')<cr>
 
     nmap <buffer><nowait> Z <c-w>
     # easier to press `ZGF` than `ZgF`
     nmap <buffer><nowait> <c-w>GF <c-w>gF
 enddef
 
-def s:Try_to_edit_plugin_config(cmd: string)
+def s:TryToEditPluginConfig(cmd: string)
     var pat = '\C^\s*\<Plug\s\+''.\{-}/\%(vim-\)\=\zs.\{-}\ze\%([.-]vim\)\=/\='''
     var plugin = getline('.')->matchstr(pat)
 
@@ -3436,7 +3436,7 @@ call prop_type_add('MyLocations', #{highlight: 'WildMenu', combine: v:false})
 
 " m!             matchadd / matchdelete search pattern {{{4
 
-def s:Where_are_my_matches()
+def s:WhereAreMyMatches()
     if exists('w:my_matches')
         sil! matchdelete(w:my_matches)
         unlet! w:my_matches
@@ -3445,7 +3445,7 @@ def s:Where_are_my_matches()
     endif
 enddef
 
-nno m! <cmd>noh <bar> call <sid>Where_are_my_matches()<cr>
+nno m! <cmd>noh <bar> call <sid>WhereAreMyMatches()<cr>
 "}}}3
 " y {{{3
 " Y y$ {{{4
@@ -3518,9 +3518,9 @@ nno z. zszH
 "    > repeat the word replacement.  This works like "ciw",
 "    > the good word and <Esc>.
 "}}}
-nno <expr> z= <sid>Z_equal()
+nno <expr> z= <sid>ZEqual()
 
-def s:Z_equal(type = ''): any
+def s:ZEqual(type = ''): any
     if type == ''
         &opfunc = expand('<stack>')->matchstr('.*\zs<SNR>\w*')
         return 'g@l'
@@ -3549,11 +3549,11 @@ enddef
 " zd  zD  zE {{{4
 
 " make `zd` repeatable; also, make it handle Vim9's comment leader (`#`) correctly
-nno <expr> zd <sid>Zd_setup('zd')
-nno <expr> zD <sid>Zd_setup('zD')
-nno <expr> zE <sid>Zd_setup('zE')
+nno <expr> zd <sid>ZdSetup('zd')
+nno <expr> zD <sid>ZdSetup('zD')
+nno <expr> zE <sid>ZdSetup('zE')
 
-def s:Zd_setup(cmd: string): string
+def s:ZdSetup(cmd: string): string
     s:zd_cmd = cmd
     &opfunc = expand('<SID>') .. 'Zd'
     return 'g@l'
@@ -3596,28 +3596,28 @@ enddef
 " commands (easier to type lowercase characters).
 
 " mark word under cursor as good
-nno <expr> zg <sid>Spell_command_setup('zG')
-nno <expr> zG <sid>Spell_command_setup('zg')
+nno <expr> zg <sid>SpellCommandSetup('zG')
+nno <expr> zG <sid>SpellCommandSetup('zg')
 
 " mark word under cursor as wrong
-nno <expr> zw <sid>Spell_command_setup('zW')
-nno <expr> zW <sid>Spell_command_setup('zw')
+nno <expr> zw <sid>SpellCommandSetup('zW')
+nno <expr> zW <sid>SpellCommandSetup('zw')
 
 " undo the marking of word under cursor as good
-nno <expr> zug <sid>Spell_command_setup('zuG')
-nno <expr> zuG <sid>Spell_command_setup('zug')
+nno <expr> zug <sid>SpellCommandSetup('zuG')
+nno <expr> zuG <sid>SpellCommandSetup('zug')
 
 " undo the marking of word under cursor as wrong
-nno <expr> zuw <sid>Spell_command_setup('zuW')
-nno <expr> zuW <sid>Spell_command_setup('zuw')
+nno <expr> zuw <sid>SpellCommandSetup('zuW')
+nno <expr> zuW <sid>SpellCommandSetup('zuw')
 
-def s:Spell_command_setup(cmd: string): string
+def s:SpellCommandSetup(cmd: string): string
     s:spell_command = cmd
-    &opfunc = expand('<SID>') .. 'Spell_command'
+    &opfunc = expand('<SID>') .. 'SpellCommand'
     return 'g@l'
 enddef
 
-def s:Spell_command(_: string)
+def s:SpellCommand(_: string)
     try
         exe 'norm! ' .. s:spell_command
     catch /^Vim\%((\a\+)\)\=:E349:/
@@ -3655,9 +3655,9 @@ enddef
 " Instead, simply set the compiler in the filetype plugin with `:compiler foo`.
 " This global `<bar>c` mapping will then use the right compiler.
 "}}}
-nno <bar>c <cmd>call <sid>Run_compiler()<cr>
+nno <bar>c <cmd>call <sid>RunCompiler()<cr>
 
-def s:Run_compiler()
+def s:RunCompiler()
     if &l:mp =~ '^\m\Cdesktop-file-validate\>'
         sil update
         sil var out = system('desktop-file-validate ' .. expand('%:p')->shellescape())
@@ -3680,11 +3680,11 @@ def s:Run_compiler()
     if &ft == 'qf' && is_shellcheck
         # install  `gx` mapping, to  let us open the  wiki page where  the error
         # under the cursor is documented
-        nno <buffer><nowait> gx <cmd>call <sid>Gx_shellcheck()<cr>
+        nno <buffer><nowait> gx <cmd>call <sid>GxShellcheck()<cr>
     endif
 enddef
 
-def s:Gx_shellcheck()
+def s:GxShellcheck()
     var error_number = getline('.')->matchstr('.\{-}|.\{-}\zs\d\+\ze\s*|')
     # `:ShellCheckWiki` is defined only in a shell buffer (i.e. in the previous window).
     wincmd p
@@ -3742,9 +3742,9 @@ nno =<c-p> m''[=']``
 " So, we need to bind `:redraw!` to another key, `=d` could be a good
 " candidate.
 
-nno =d <cmd>call <sid>Fix_display()<cr>
+nno =d <cmd>call <sid>FixDisplay()<cr>
 
-def s:Fix_display()
+def s:FixDisplay()
     var view = winsaveview()
     redraw! | redraws! | redrawt
 
@@ -3847,10 +3847,10 @@ enddef
 
 " Usage:
 "     =ma  →  edit recording a
-nno =m <cmd>call <sid>Fix_macro()<cr>
+nno =m <cmd>call <sid>FixMacro()<cr>
 
 let s:fix_macro_c = ''
-def s:Fix_macro()
+def s:FixMacro()
     # don't open several windows if we press `=m` several times consecutively
     if !empty(s:fix_macro_c) | return | endif
     var c = getchar()
@@ -3904,16 +3904,16 @@ enddef
 "
 " We also capture the  output of the command in the `o` register,  to be able to
 " dump it in a buffer.
-nno -a <cmd>call <sid>Unicode_ga()<cr>
-def s:Unicode_ga()
+nno -a <cmd>call <sid>UnicodeGa()<cr>
+def s:UnicodeGa()
     var out = execute('UnicodeName', 'silent!')->substitute('\s*$', '', '')
     setreg('o', [out], 'c')
     UnicodeName
 enddef
 
 " We remap `-8` to `g8` for consistency.
-nno -8 <cmd>call <sid>Get_charbyte()<cr>
-def s:Get_charbyte()
+nno -8 <cmd>call <sid>GetCharbyte()<cr>
+def s:GetCharbyte()
     var out = execute('norm! g8', 'silent!')[1:]->substitute('\s*$', '', '')
     setreg('o', [out], 'c')
     echo @o
@@ -3921,8 +3921,8 @@ enddef
 
 " -f               show filetype {{{4
 
-nno -f <cmd>call <sid>Print_filetype()<cr>
-def s:Print_filetype()
+nno -f <cmd>call <sid>PrintFiletype()<cr>
+def s:PrintFiletype()
     setreg('o', [!empty(&ft) ? &ft : '∅'], 'c')
     echohl Title
     echo '[filetype] ' .. @o
@@ -3940,10 +3940,10 @@ enddef
 
 " -P  -p           show filePath / :pwd {{{4
 
-nno -P <cmd>call <sid>Print_cwd()<cr>
-nno -p <cmd>call <sid>Print_full_path()<cr>
+nno -P <cmd>call <sid>PrintCwd()<cr>
+nno -p <cmd>call <sid>PrintFullPath()<cr>
 
-def s:Print_cwd()
+def s:PrintCwd()
     var fmt =<< trim END
         window:  %s
         tabpage: %s
@@ -3955,7 +3955,7 @@ def s:Print_cwd()
     echo @o
 enddef
 
-def s:Print_full_path()
+def s:PrintFullPath()
     if &bt == 'quickfix'
         var out = get(w:, 'quickfix_title', 'no title')
         setreg('o', [out], 'c')
@@ -4066,9 +4066,9 @@ enddef
 " Use it as  a table of contents,  which briefly explains what each  page of the
 " wiki is about.
 
-nno -r <cmd>call <sid>Edit_readme()<cr>
+nno -r <cmd>call <sid>EditReadme()<cr>
 
-def s:Edit_readme()
+def s:EditReadme()
     if expand('%:p:h') == $HOME
         sp ~/.README.md | exe ':1'
         return
@@ -4112,9 +4112,9 @@ nno -s <cmd>UltiSnipsEdit<cr>
 " We define this mappping because  it's more convenient than the `:UnicodeTable`
 " command, and  to install a buffer-local  mapping to close the  “unicode table“
 " window with a single `q` (instead of `:q`).
-nno -U <cmd>call <sid>Unicode_table()<cr>
+nno -U <cmd>call <sid>UnicodeTable()<cr>
 
-def s:Unicode_table()
+def s:UnicodeTable()
     UnicodeTable
     nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
 enddef
@@ -4244,9 +4244,9 @@ endif
 " brackets, and with  the closing one written  on a column whose  index is lower
 " than the one of the current cursor position.
 "}}}
-nno <c-]> <cmd>call <sid>Jump_to_definition()<cr>
+nno <c-]> <cmd>call <sid>JumpToDefinition()<cr>
 
-def s:Jump_to_definition()
+def s:JumpToDefinition()
     try
         exe "norm! \<c-]>zvzz"
     catch /^Vim\%((\a\+)\)\=:E\%(426\|433\)/
@@ -4263,9 +4263,9 @@ enddef
 
 " C-a                 toggle some characters {{{4
 
-nno <expr> <c-a> <sid>C_a()
+nno <expr> <c-a> <sid>CA()
 
-def s:C_a(): string
+def s:CA(): string
     var pos = searchpos('[✘✔]', 'cW', line('.'))
     if pos == [0, 0]
         return "\<c-a>"
@@ -4312,7 +4312,7 @@ nno <c-q>T <cmd>call myfuncs#search_todo('project')<cr>
 
 " C-w s               send to tab page {{{4
 
-nno <c-w>s <cmd>call myfuncs#send_to_tab_page(v:count)<cr>
+nno <c-w>s <cmd>call myfuncs#sendToTabPage(v:count)<cr>
 
 " M-n    M-p          navigate between marks {{{4
 
@@ -4344,8 +4344,8 @@ sil! call s:MapMeta('p', "['", 'n', '')
 " Usually, I press `@@` to re-execute  a register which I've executed previously
 " *outside* a recording.
 "}}}
-nno <expr> @ <sid>Save_last_register_executed_interactively()
-def s:Save_last_register_executed_interactively(): string
+nno <expr> @ <sid>SaveLastRegisterExecutedInteractively()
+def s:SaveLastRegisterExecutedInteractively(): string
     # ask which register we want to execute
     var c = getchar()
     # `c` is not necessarily a number.{{{
@@ -4392,16 +4392,16 @@ nno _ 0_
 
 " << >>                  indent with 'shiftround' {{{3
 
-nno <expr> >> <sid>Indent_with_shiftround_setup('>>')
-nno <expr> << <sid>Indent_with_shiftround_setup('<<')
+nno <expr> >> <sid>IndentWithShiftroundSetup('>>')
+nno <expr> << <sid>IndentWithShiftroundSetup('<<')
 
-def s:Indent_with_shiftround_setup(cmd: string): string
+def s:IndentWithShiftroundSetup(cmd: string): string
     s:indent_with_shiftround = {'cmd': cmd}
-    &opfunc = expand('<SID>') .. 'Indent_with_shiftround'
+    &opfunc = expand('<SID>') .. 'IndentWithShiftround'
     return 'g@l'
 enddef
 
-def s:Indent_with_shiftround(type: string)
+def s:IndentWithShiftround(type: string)
     var cmd = s:indent_with_shiftround.cmd
     var sr_save = &shiftround
     try
@@ -4420,10 +4420,10 @@ enddef
 " The fields must be separated with `|`.
 " The function will populate the `s` and `x` registers with 2 kind of separation
 " lines.  We can paste them to fine tune the box.
-nno <expr> >b myfuncs#box_create() .. 'ip'
+nno <expr> >b myfuncs#boxCreate() .. 'ip'
 
 " undo the box, make it come back to just bars between cells
-nno <expr> <b myfuncs#box_destroy() .. 'ip'
+nno <expr> <b myfuncs#boxDestroy() .. 'ip'
 
 " ""                  easier access to clipboard register (and tweak paste/yank) {{{3
 
@@ -4690,13 +4690,13 @@ nno Q q
 " Objects {{{2
 " i- {{{3
 
-xno i- <cmd>call <sid>Horizontal_rules_textobject('inside')<cr>
-xno a- <cmd>call <sid>Horizontal_rules_textobject('around')<cr>
+xno i- <cmd>call <sid>HorizontalRulesTextobject('inside')<cr>
+xno a- <cmd>call <sid>HorizontalRulesTextobject('around')<cr>
 
 ono i- <cmd>norm Vi-<cr>
 ono a- <cmd>norm Va-<cr>
 
-def s:Horizontal_rules_textobject(adverb: string)
+def s:HorizontalRulesTextobject(adverb: string)
     # select "inside" by default (we'll update the selection to get "around" later if necessary)
     var start: string
     var end: string
@@ -4752,13 +4752,13 @@ ono iE <cmd>norm ViE<cr>
 
 " iF {{{3
 
-xno iF <cmd>call <sid>Fenced_codeblock('inside')<cr>
-xno aF <cmd>call <sid>Fenced_codeblock('around')<cr>
+xno iF <cmd>call <sid>FencedCodeblock('inside')<cr>
+xno aF <cmd>call <sid>FencedCodeblock('around')<cr>
 
 ono iF <cmd>norm ViF<cr>
 ono aF <cmd>norm VaF<cr>
 
-def s:Fenced_codeblock(what: string)
+def s:FencedCodeblock(what: string)
     if what == 'around'
         if !search('^```\l*$', 'bW') | return | endif
         norm! o
@@ -4776,16 +4776,16 @@ enddef
 " We don't use `in` but `iN`, because `in` is already used by `targets.vim`.
 
 " next number after cursor on current line
-xno iN <cmd>call <sid>Textobj_number(v:false)<cr>
+xno iN <cmd>call <sid>TextobjNumber(v:false)<cr>
 " same thing, but includes possible whitespace after the number
-xno aN <cmd>call <sid>Textobj_number(v:true)<cr>
+xno aN <cmd>call <sid>TextobjNumber(v:true)<cr>
 
 ono iN <cmd>norm viN<cr>
 ono aN <cmd>norm vaN<cr>
 
-def s:Textobj_number(around: bool)
+def s:TextobjNumber(around: bool)
     var stopline = line('.')
-    var pat = '\%(' .. Get_patnum() .. '\)' .. (around ? '\s*' : '')
+    var pat = '\%(' .. GetPatnum() .. '\)' .. (around ? '\s*' : '')
     # move cursor to end of number
     if !search(pat, 'ceW', stopline)
         return
@@ -4796,7 +4796,7 @@ def s:Textobj_number(around: bool)
     search(pat, 'cW', stopline)
 enddef
 
-def s:Get_patnum(): string
+def s:GetPatnum(): string
     var sign = '[-+]\='
     var decimal = '\d\+\.\=\d*'
     var fraction = '\.\d\+'
@@ -4833,15 +4833,15 @@ xno aS as
 
 " Vim function
 
-xno if <cmd>call <sid>Textobj_func(v:true)<cr>
-xno af <cmd>call <sid>Textobj_func(v:false)<cr>
+xno if <cmd>call <sid>TextobjFunc(v:true)<cr>
+xno af <cmd>call <sid>TextobjFunc(v:false)<cr>
 
 ono if <cmd>norm Vif<cr>
 ono af <cmd>norm Vaf<cr>
 
-def s:Textobj_func(inside: bool)
+def s:TextobjFunc(inside: bool)
     var start = '^\C\s*\%(fu\%[nction]\|\%(export\s\+\)\=def\)\>'
-    var end = '^\C\s*\%(endfu\|enddef\)\s*$'
+    var end = '^\C\s*\%(endfu\%[nction]\|enddef\)\s*$'
     var curline = getline('.')
 
     # special cases: we're on the first or last line of a function
@@ -4973,8 +4973,8 @@ xno <c-g>g <c-\><c-n>:keepj keepp *g/\%V/#<left><left>
 " quit visual mode so that they have been updated.
 " But you can't do that if the function is called while the text is locked.
 "}}}
-xno / <cmd>call <sid>Visual_slash()<cr>
-def s:Visual_slash()
+xno / <cmd>call <sid>VisualSlash()<cr>
+def s:VisualSlash()
     # if  we've selected  only 1  line, we  probably don't  want to  look for  a
     # pattern; instead, we just want to extend the selection
     if line('v') == line('.')
@@ -5126,7 +5126,7 @@ xno y y<cmd>call getreginfo('"')->setreg('v')<cr>
 " displayed; but we don't care about the latter.
 "}}}
 xno <expr> h mode() is# '<c-v>' && virtcol('.') == 1 ? '' : 'h'
-xno <expr> l <sid>V_l()
+xno <expr> l <sid>VL()
 
 " Purpose:{{{
 "
@@ -5139,7 +5139,7 @@ xno <expr> l <sid>V_l()
 " you can always use another motion like  `e` just to bypass the limit; then `l`
 " is not blocked anymore.
 "}}}
-def s:V_l(): string
+def s:VL(): string
     var siso = &l:siso != -1 ? &l:siso : &g:siso
     # this should evaluate to the total width of the fold/number/sign columns
     var left_columns = wincol() - virtcol('.')
@@ -5206,9 +5206,9 @@ xno <expr> P '"_d"' .. v:register .. 'P'
 
 " Cfg {{{2
 
-com -bar -nargs=1 -complete=custom,s:Cfg_complete Cfg call s:Cfg(<q-args>)
+com -bar -nargs=1 -complete=custom,s:CfgComplete Cfg call s:Cfg(<q-args>)
 
-def s:Cfg_complete(...l: list<any>): string
+def s:CfgComplete(...l: list<any>): string
     return keys(s:PGM2CFGFILES)->sort()->join("\n")
 enddef
 
@@ -5290,9 +5290,9 @@ com -nargs=1 LGrep call myfuncs#op_grep_core(<q-args>, v:true)
 
 " ClearRegisters {{{2
 
-com -bar ClearRegisters call s:Clear_registers()
+com -bar ClearRegisters call s:ClearRegisters()
 
-def s:Clear_registers()
+def s:ClearRegisters()
     var numeric = range(10)
     var alpha = range(char2nr('a'), char2nr('z'))->map({_, v -> nr2char(v)})
     var other = ['-', '*', '+', '/', '=']
@@ -5342,15 +5342,20 @@ enddef
 "     a c e
 "     a c f
 "}}}
-com -bar -range=% CombineParamValues call s:Combine_param_values(<line1>, <line2>)
+com -bar -range=% CombineParamValues call s:CombineParamValues(<line1>, <line2>)
 
-def s:Combine_param_values(lnum1: number, lnum2: number)
-    var param_values = getline(lnum1, lnum2)->filter({_, v -> v != ''})->map({_, v -> split(v)})
-    if len(param_values) < 2 | return | endif
-    var reg_save = getreginfo('"')
+def s:CombineParamValues(lnum1: number, lnum2: number)
+    var param_values = getline(lnum1, lnum2)
+        ->filter({_, v -> v != ''})
+        ->map({_, v -> split(v)})
+    if len(param_values) < 2
+        return
+    endif
+    var reg_save = [getreginfo('0'), getreginfo('"')]
     @" = Combine(param_values)->join("\n")
-    exe 'norm! ' .. lnum1 .. 'GV' .. lnum2 .. 'G""p'
-    setreg('"', reg_save)
+    exe 'norm! ' .. lnum1 .. 'GV' .. lnum2 .. 'Gp'
+    setreg('0', reg_save[0])
+    setreg('"', reg_save[1])
     sil exe ':*EasyAlign *\ '
 enddef
 
@@ -5502,9 +5507,9 @@ com -bar -nargs=1 GotoChar call search('\m\%^\_.\{<args>}', 'es')
 "
 "     :GrepCfg \<sed\>
 "}}}
-com -nargs=1 GrepCfg call s:Grep_cfg(<q-args>)
+com -nargs=1 GrepCfg call s:GrepCfg(<q-args>)
 
-def s:Grep_cfg(pat: string)
+def s:GrepCfg(pat: string)
     var cmd =<< trim END
         git
             --git-dir="${HOME}/.cfg/"
@@ -5566,9 +5571,9 @@ enddef
 "                      ^-------------------^
 "                      ✘ we would need `/tmp/file`, but the latter has not yet been loaded~
 "}}}
-com -bar -range=% HlWeirdWhitespace call s:Hl_weird_whitespace()
+com -bar -range=% HlWeirdWhitespace call s:HlWeirdWhitespace()
 
-def s:Hl_weird_whitespace()
+def s:HlWeirdWhitespace()
     if !exists('w:strange_whitespace')
         # https://vi.stackexchange.com/a/17697/17449
         var pat = '[\x0b\x0c\u00a0\u1680\u180e\u2000-\u200a\u2028\u202f\u205f\u3000\ufeff]'
@@ -5682,9 +5687,9 @@ com -bar -range=% OnlySelection call myfuncs#only_selection(<line1>, <line2>)
 
 " PluginsToCommit {{{2
 
-com -bar -nargs=0 PluginsToCommit call s:Plugins_to_commit()
+com -bar -nargs=0 PluginsToCommit call s:PluginsToCommit()
 
-def s:Plugins_to_commit()
+def s:PluginsToCommit()
     var script = 'commit-these-vim-plugins'
     if !executable(script)
         echom '[PluginsToCommit]: ' .. script .. ' is not available'
@@ -5723,9 +5728,9 @@ com -bar -nargs=1 PI call myfuncs#plugin_install(<q-args>)
 " PUP   update Vim plugins {{{2
 
 " Don't name the command `:PU`; it could shadow the default `:pu[t]`.
-com -bar PUP call s:Plugins_update()
+com -bar PUP call s:PluginsUpdate()
 
-def s:Plugins_update()
+def s:PluginsUpdate()
     # `:h spellfile-cleanup`
     # `sil!` to suppress `E108`.{{{
     #
@@ -5908,15 +5913,15 @@ enddef
 " We define the `:SortLines` command which moves lines containing `foo` or `bar` at
 " the bottom.  Lines containing `foo` are put before the ones containing `bar`.
 
-"     com -bar -range=% SortLines call s:Sort_lines(<line1>, <line2>)
+"     com -bar -range=% SortLines call s:SortLines(<line1>, <line2>)
 "
-"     def s:Sort_lines(lnum1: number, lnum2: number)
+"     def s:SortLines(lnum1: number, lnum2: number)
 "         getline(lnum1, lnum2)
 "             ->sort(Compare_lines)
 "             ->setline(lnum1)
 "     enddef
 "
-"     def s:Compare_lines(line1: string, line2: string): number
+"     def s:CompareLines(line1: string, line2: string): number
 "         # The greater the score, the further to the right in the sorted list
 "         var score1 = line1 =~ 'bar' ? 2 : line1 =~ 'foo' ? 1 : 0
 "         var score2 = line2 =~ 'bar' ? 2 : line2 =~ 'foo' ? 1 : 0
@@ -5929,9 +5934,9 @@ com -bar -range SumColumn sil! keepj keepp <line1>,<line2>g/=\s*$/ t. | s/// | e
 
 " Tldr {{{2
 
-com -bar -nargs=1 -complete=custom,s:Tldr_completion Tldr call s:Tldr(<q-args>)
+com -bar -nargs=1 -complete=custom,s:TldrCompletion Tldr call s:Tldr(<q-args>)
 
-def s:Tldr_completion(...l: list<any>): string
+def s:TldrCompletion(...l: list<any>): string
     sil return system('tldr --list 2>/dev/null | tr -s "[ \t]" "\n"')
 enddef
 
@@ -5973,9 +5978,9 @@ com -bar -nargs=1 WebPageRead call myfuncs#webpage_read(<q-args>)
 
 " Display words in the current buffer sorted by frequency
 
-com -bar -nargs=? -range=% -complete=custom,myfuncs#wf_complete
+com -bar -nargs=? -range=% -complete=custom,myfuncs#wfComplete
     \ WordFrequency
-    \ call myfuncs#word_frequency(<line1>, <line2>, <q-args>)
+    \ call myfuncs#wordFrequency(<line1>, <line2>, <q-args>)
 " }}}1
 " Autocmds {{{1
 " Command Window {{{2
@@ -6011,7 +6016,7 @@ augroup END
 
 " Create Missing Directory {{{2
 
-def s:Make_missing_dir(file: string, buf: number)
+def s:MakeMissingDir(file: string, buf: number)
     # Before creating a directory, make sure that the current buffer:{{{
     #
     #    - is not a special one    `:h special-buffers`
@@ -6045,7 +6050,7 @@ def s:Make_missing_dir(file: string, buf: number)
 enddef
 
 augroup make_missing_dir | au!
-    au BufWritePre * call expand('<afile>:p')->s:Make_missing_dir(expand('<abuf>')->str2nr())
+    au BufWritePre * call expand('<afile>:p')->s:MakeMissingDir(expand('<abuf>')->str2nr())
 augroup END
 
 " Default Extension {{{2
@@ -6054,10 +6059,10 @@ augroup END
 " Keep it, because it could still be useful for other extensions.
 
 "     augroup DefaultExtension | au!
-"         au BufNewFile * ++nested call expand('<afile>:p')->s:Default_extension()
+"         au BufNewFile * ++nested call expand('<afile>:p')->s:DefaultExtension()
 "     augroup END
 "
-"     def s:Default_extension(fname: string)
+"     def s:DefaultExtension(fname: string)
 "         # If the buffer name ends with a dot, it's probably a mistake.
 "         # We don't want to add a default extension.
 "         # We  would  end  up  with  a  buffer whose  name  contains  a  sequence  of
@@ -6112,18 +6117,18 @@ augroup wipe_noname_buffers | au!
     " all buffers in that list on  the next `CursorHold`.  It's good enough.  We
     " don't need to wipe a noname buffer *immediately*.
     "}}}
-    au BufHidden * call s:Register_noname_for_wiping()
-    au CursorHold * call s:Wipe_noname()
+    au BufHidden * call s:RegisterNonameForWiping()
+    au CursorHold * call s:WipeNoname()
 augroup END
 
-def s:Register_noname_for_wiping()
+def s:RegisterNonameForWiping()
     var buf = expand('<abuf>')->str2nr()
     if buflisted(buf) && bufname(buf)->empty()
         add(s:noname_buffers, buf)
     endif
 enddef
 
-def s:Wipe_noname()
+def s:WipeNoname()
     for buf in s:noname_buffers
         if buflisted(buf) && bufname(buf)->empty()
             # we might have redisplayed the buffer in a window; don't wipe it then
@@ -6153,11 +6158,11 @@ enddef
 "     set ft=sh
 "}}}
 augroup filetype_linter | au!
-    au VimEnter,WinEnter filetype.vim,*/ftdetect/*.vim call s:Filetype_linter('enable')
-    au BufWinLeave filetype.vim,*/ftdetect/*.vim call s:Filetype_linter('disable')
+    au VimEnter,WinEnter filetype.vim,*/ftdetect/*.vim call s:FiletypeLinter('enable')
+    au BufWinLeave filetype.vim,*/ftdetect/*.vim call s:FiletypeLinter('disable')
 augroup END
 
-def s:Filetype_linter(action: string)
+def s:FiletypeLinter(action: string)
     if exists('w:my_filetype_linter')
         sil! matchdelete(w:my_filetype_linter)
         unlet! w:my_filetype_linter
@@ -6190,10 +6195,10 @@ enddef
 "}}}
 " https://github.com/vim/vim/issues/5243
 augroup fire_leave_events_on_startup | au!
-    au VimEnter * call timer_start(0, {-> s:Fire_leave_events()})
+    au VimEnter * call timer_start(0, {-> s:FireLeaveEvents()})
 augroup END
 
-def s:Fire_leave_events()
+def s:FireLeaveEvents()
     if match(v:argv, '\C^-[doO]$') != -1
         var curwin = win_getid()
         windo #
@@ -6265,8 +6270,8 @@ augroup no_syntax_in_diff_mode | au!
     " Maybe because the option is set  before the autocmd is installed, or maybe
     " because `OptionSet` is not fired at startup.
     "}}}
-    au VimEnter * call s:If_diff_syn_clear()
-    def s:If_diff_syn_clear()
+    au VimEnter * call s:IfDiffSynClear()
+    def s:IfDiffSynClear()
         if !&l:diff | return | endif
         getwininfo()->map({_, v -> win_execute(v.winid, 'syn clear')})
     enddef
@@ -6370,10 +6375,10 @@ augroup END
 "     ~/.vim/plugged/vim-tmux/autoload/tmux/capture_pane.vim
 "}}}
 augroup make_clipboard_persist_after_quitting_vim | au!
-    au VimLeave * call s:Make_clipboard_persist_after_quitting_vim()
+    au VimLeave,VimSuspend * call s:MakeClipboardPersistAfterQuittingVim()
 augroup END
 
-def s:Make_clipboard_persist_after_quitting_vim()
+def s:MakeClipboardPersistAfterQuittingVim()
     # Why the `strlen()` guard?{{{
     #
     # If the clipboard selection is too big, I don't want Vim to be slow when we quit.
@@ -6430,9 +6435,6 @@ def s:Make_clipboard_persist_after_quitting_vim()
     sil system('xsel -ib', @+)
 enddef
 
-" we want to be able to paste the clipboard in the shell when we suspend Vim
-nno <c-z> <cmd>call <sid>Make_clipboard_persist_after_quitting_vim()<cr><c-z>
-
 " Read special files {{{2
 
 " The following autocmd lets us read special files like a pdf or an odt.
@@ -6464,10 +6466,10 @@ augroup filter_special_file | au!
     " Maybe it's because the event is fired too early, and the built-in tar plugin
     " processes the buffer after the event.
     "}}}
-    au BufWinEnter *.{doc,docx,epub,odp,odt,pdf,rtf} call s:Filter_special_file()
+    au BufWinEnter *.{doc,docx,epub,odp,odt,pdf,rtf} call s:FilterSpecialFile()
 augroup END
 
-def s:Filter_special_file()
+def s:FilterSpecialFile()
     # TODO: I once had a huge pdf undo file in `~/.vim/tmp/undo`.
     # Should we reset some options like `'undofile'` and `'swapfile'`?
     if get(b:, 'did_filter_special_file', 0)
@@ -6626,10 +6628,10 @@ augroup END
 "}}}
 augroup restrict_abbreviations | au!
     au InsertEnter * let s:start_insertion = #{lnum: line('.'), col: col('.')}
-    au InsertCharPre * call s:Restrict_abbreviations()
+    au InsertCharPre * call s:RestrictAbbreviations()
 augroup END
 
-def s:Restrict_abbreviations()
+def s:RestrictAbbreviations()
     # Purpose:{{{
     #
     # Suppress  a  possible abbreviation  expansion  by  preceding a  triggering
@@ -6815,10 +6817,10 @@ augroup END
 "}}}
 
 augroup swapfile_handling | au!
-    au SwapExists * call expand('<afile>:p')->s:Handle_swapfile()
+    au SwapExists * call expand('<afile>:p')->s:HandleSwapfile()
 augroup END
 
-def s:Handle_swapfile(fname: string)
+def s:HandleSwapfile(fname: string)
     # If the swap file is older than the file itself, just get rid of it.
     if getftime(v:swapname) < getftime(fname)
         Warn('Old swap file detected, and deleted:  ' .. fname)
@@ -7287,10 +7289,10 @@ endfu
 " Re-implement these mappings to open the file you're editing on github.
 " It could be handy when you want to see a commit you've just pushed.
 "
-"     nno <space>og V<cmd>call <sid>Open_current_file_in_github()<cr>
-"     xno <space>og <c-\><c-n><cmd>call <sid>Open_current_file_in_github()<cr>
+"     nno <space>og V<cmd>call <sid>OpenCurrentFileInGithub()<cr>
+"     xno <space>og <c-\><c-n><cmd>call <sid>OpenCurrentFileInGithub()<cr>
 "
-"     def s:Open_current_file_in_github()
+"     def s:OpenCurrentFileInGithub()
 "         let file_dir = expand('%:h')
 "         sil let git_root = system('cd ' .. file_dir .. '; git rev-parse --show-toplevel | tr -d "\n"')
 "         let file_path = expand('%:p')->substitute(git_root .. '/', '', '')
@@ -7604,9 +7606,9 @@ endfu
 " Maybe you should take inspiration from `vim-capslock`.
 " Create a mapping, which would toggle temporary mappings.
 "
-"     ino <c-g>n <cmd>call <sid>Easy_number()<cr>
+"     ino <c-g>n <cmd>call <sid>EasyNumber()<cr>
 "
-"     def s:Easy_number(): string
+"     def s:EasyNumber(): string
 "         if !maparg('!', 'i')->empty()
 "             for key in ['!', 'u', 'i', 'o', 'j', 'k', 'l', ',', ';', ':']
 "                 exe 'iunmap <buffer> ' .. key
@@ -7617,7 +7619,7 @@ endfu
 "                 exe 'ino <buffer> ' .. key .. ' ' .. i
 "                 i += 1
 "             endfor
-"             au InsertLeave <buffer> ++once Easy_number()
+"             au InsertLeave <buffer> ++once EasyNumber()
 "         endif
 "     enddef
 "
@@ -8762,6 +8764,72 @@ endfu
 " ---
 "
 " Also, add an indicator in the status line when the options are reset?
+"
+" 115 -
+"
+" Make Vim  respect the XDG spec.   As a benefit, I  think it would let  us move
+" `~/.vim` in `~/.config`, which would reduce clutter in our $HOME.
+"
+" See:
+" https://tlvince.com/vim-respect-xdg
+" https://blog.joren.ga/configuring/vim-xdg
+"
+" 116 -
+"
+" Leave a comment here  showing how problematic it is for  a popup filter to
+" consume the keys coming from the expansion of a mapping:
+" https://github.com/vim/vim/issues/7459
+"
+" Because of this issue, a plugin's author has no guarantee that their popup
+" filter won't break  a user mapping.  And  if it breaks a  user mapping, it
+" might cause  dangerous commands to  be executed.   Try to find  an example
+" (e.g. with a mapping whose rhs executes `rm(1)` via `:!`).
+"
+" Also, a plugin's  author has no guarantee that their  popup filter will be
+" executed intentionally.
+"
+" 117 -
+"
+" Check whether we should have sometimes  saved and restored `"0` in addition to
+" `""`. Look for `setreg(` everywhere.
+"
+" The issue is a  bit complex because we've forgotten a  lot about how registers
+" work.  Explain the issue to yourself in great detail.
+"
+" To help you, here is a start:
+"
+"     " write this in /tmp/t.vim
+"     set showcmd
+"
+"     nno <expr> <c-b> MyOp()
+"
+"     fu MyOp(...)
+"         if !a:0
+"             let &opfunc = 'MyOp'
+"             return 'g@'
+"         endif
+"         let unnamed = getreginfo('"')
+"         let zero = getreginfo('0')
+"         normal! `[v`]y
+"         echom strlen(@")
+"         call setreg('"', unnamed)
+"         call setreg('0', zero)
+"     endfu
+"
+"     call setreg('a', #{regcontents: 'aaa'})
+"     call setreg('0', #{regcontents: 'zero'})
+"     call setreg('"', #{regcontents: 'unnamed', points_to: 'z'})
+"     call repeat(['the quick brown fox jumps over the lazy dog'], 5)->setline(1)
+"
+"     # then, start Vim like this
+"     $ vim -Nu NONE -i NONE -S /tmp/t.vim
+"
+" Did we say something wrong here?
+" https://vi.stackexchange.com/questions/28354/reliably-saving-and-restoring-registers-across-a-function-call/28356#28356
+"
+" ---
+"
+" Use our saved qfl named `setreg`.
 
 
 
