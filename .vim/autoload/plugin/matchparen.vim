@@ -67,7 +67,7 @@ fu plugin#matchparen#install_dummy_autocmds() abort
         " Shortly after, the one-shot autocmd could be removed, and we would end
         " up with no autocmd listening to our event.
         "}}}
-        augroup my_dummy_autocmds
+        augroup MyDummyAutocmds
             exe 'au! ' .. event .. ' * "'
         augroup END
     endfor

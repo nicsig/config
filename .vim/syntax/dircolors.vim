@@ -226,15 +226,15 @@ endif
 if has('gui_running') || &t_Co != ''
     call s:reset_colors()
 
-    augroup my_dircolors_syntax
+    augroup MyDircolorsSyntax
         autocmd! * <buffer>
         autocmd CursorMoved,CursorMovedI <buffer> call s:preview_color('.')
         autocmd CursorHold,CursorHoldI   <buffer> call s:reset_colors()
         " if we change the filetype/syntax of the buffer, the autocmd should be removed
         autocmd CursorHold <buffer>
             \   if b:current_syntax isnot# 'dircolors'
-            \ |     exe 'au! my_dircolors_syntax'
-            \ |     aug! my_dircolors_syntax
+            \ |     exe 'au! MyDircolorsSyntax'
+            \ |     aug! MyDircolorsSyntax
             \ | endif
     augroup END
 endif

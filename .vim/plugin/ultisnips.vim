@@ -86,9 +86,8 @@ import Derive from 'lg/syntax.vim'
 "
 "    4. Install the following autocmd:
 "
-"           augroup ultisnips_custom | au!
-"               au! User UltiSnipsEnterFirstSnippet
-"               au User  UltiSnipsEnterFirstSnippet iunmap <buffer> <nowait> <s-tab>
+"           augroup UltisnipsCustom | au!
+"               au User UltiSnipsEnterFirstSnippet iunmap <buffer> <nowait> <s-tab>
 "           augroup END
 "
 "     Why? Because during the expansion of a snippet, UltiSnips temporarily
@@ -176,7 +175,7 @@ nno cou <cmd>call plugin#ultisnips#toggle_autotrigger()<cr>
 
 " Autocmds {{{1
 
-augroup my_ultisnips | au!
+augroup MyUltisnips | au!
 
     " useful during a snippet expansion to prevent the highlighting of trailing whitespace,
     " and to get a flag in the status line

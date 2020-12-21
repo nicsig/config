@@ -114,7 +114,7 @@ let g:matchup_transmute_enabled = 1
 "}}}2
 " Local {{{2
 
-augroup my_matchup | au!
+augroup MyMatchup | au!
     au FileType * call s:set_buffer_local_options()
 augroup END
 

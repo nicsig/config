@@ -36,7 +36,7 @@ let g:Verdin#fuzzymatch = 0
 " However, in practice, it doesn't work.
 " The plugin doesn't even seem to inspect this variable.
 "}}}
-augroup no_Verdin_in_vimrc | au!
+augroup NoVerdinInVimrc | au!
     au BufReadPost $MYVIMRC setl ofu=syntaxcomplete#Complete
 augroup END
 

@@ -45,12 +45,12 @@ fu plugin#ultisnips#cancel_expansion() abort "{{{1
 endfu
 
 fu plugin#ultisnips#toggle_autotrigger() abort "{{{1
-    if exists('#UltiSnips_AutoTrigger')
-        au! UltiSnips_AutoTrigger
-        aug! UltiSnips_AutoTrigger
+    if exists('#UltisnipsAutotrigger')
+        au! UltisnipsAutotrigger
+        aug! UltisnipsAutotrigger
         echom '[UltiSnips AutoTrigger] OFF'
     else
-        augroup UltiSnips_AutoTrigger | au!
+        augroup UltisnipsAutotrigger | au!
             au InsertCharPre,TextChangedI,TextChangedP * call UltiSnips#TrackChange()
         augroup END
         echom '[UltiSnips AutoTrigger] ON'

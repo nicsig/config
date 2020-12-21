@@ -46,7 +46,7 @@ let g:user_emmet_settings = {
 
 " Autocmds {{{1
 
-augroup my_emmet | au!
+augroup MyEmmet | au!
     au FileType css,html call plugin#emmet#install_mappings()
     " enable emmet mappings in our notes about web-related technologies (html, css, emmet, ...){{{
     "

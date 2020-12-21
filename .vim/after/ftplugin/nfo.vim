@@ -17,7 +17,7 @@
 " Why `:nos`?{{{
 "
 " If the nfo  file is already open  in another Vim instance,  you'll get `E325`;
-" that's because  our `swapfile_handling` autocmd  is not triggered  (because of
+" that's because  our `SwapfileHandling`  autocmd is  not triggered  (because of
 " `:noa`).
 " I don't want to  be bothered by Vim asking me whether I  want to edit the file
 " and how.

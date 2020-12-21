@@ -1,7 +1,7 @@
 fu plugin#dirvish#undo_ftplugin() abort
     unlet! b:fex_last_line
-    if exists('#fex_print_metadata')
-        au! fex_print_metadata * <buffer>
+    if exists('#FexPrintMetadata')
+        au! FexPrintMetadata * <buffer>
     endif
 
     nunmap <buffer> -M

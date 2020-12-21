@@ -241,7 +241,7 @@ fu colorscheme#cursorline(enable) abort "{{{2
         "}}}
         let s:culopt_save = &l:culopt
         let &l:culopt = 'screenline'
-        augroup my_cursorline | au!
+        augroup MyCursorline | au!
             " Why `BufWinEnter` and `BufWinLeave`?{{{
             "
             " If you load  another buffer in the current  window, `WinLeave` and
@@ -260,9 +260,9 @@ fu colorscheme#cursorline(enable) abort "{{{2
         "     :setl cul
         "     " press `]oL`
         "}}}
-        if exists('#my_cursorline')
-            au! my_cursorline
-            aug! my_cursorline
+        if exists('#MyCursorline')
+            au! MyCursorline
+            aug! MyCursorline
         endif
         setl nocul
         let &l:culopt = get(s:, 'culopt_save', &l:culopt)

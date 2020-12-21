@@ -1,185 +1,163 @@
+vim9script
+
 import {Catch, GetSelectionText, GetSelectionCoords, IsVim9, Opfunc} from 'lg.vim'
-const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
+const SID = execute('fu Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
-" Operators {{{1
-fu myfuncs#op_grep() abort "{{{2
-    let &opfunc = s:SID .. 'Opfunc'
-    let g:opfunc = {'core': 'myfuncs#op_grep_core'}
+# Operators {{{1
+def myfuncs#opGrep(): string #{{{2
+    &opfunc = SID .. 'Opfunc'
+    g:opfunc = {core: 'myfuncs#opGrepCore'}
     return 'g@'
-endfu
+enddef
 
-fu myfuncs#op_grep_core(...) abort
-    let type = a:0 == 1 ? a:1 : 'Ex'
-    if type is# 'char'
-        norm! `[v`]y
+def myfuncs#GrepEx(pat: string, use_loclist: bool)
+    # Why does `2>/dev/null` work here but not in `'grepprg'`?{{{
+    #
+    # They don't run the shell command in the same way:
+    #
+    #     " system()
+    #     (rg foobar /etc)>/tmp/... 2>&1
+    #
+    #     " 'grepprg'
+    #     :!rg foobar /etc 2>&1| tee /tmp/...
+    #
+    # In the first case, `2>/dev/null` is useful:
+    #
+    #     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
+    #         ^---------^
+    #
+    # It prevents errors from being written in the temp file.
+    #
+    # In the second case, `2>/dev/null` is useless:
+    #
+    #     :!rg 2>/dev/null foobar /etc 2>&1| tee /tmp/...
+    #          ^---------^
+    #
+    # Because, it's overridden by `2>&1` which comes from `'shellpipe'`.
+    # In contrast,  `system()` uses `'shellredir'`, which  also includes
+    # `2>&1`, but it  doesn't have the same effect,  because the command
+    # is run in a subshell via braces:
+    #
+    #     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
+    #     ^                          ^
+    #
+    # From `:h system() /braces`:
+    #
+    #    > For Unix, braces are put around {expr} to allow for
+    #    > concatenated commands.
+    #}}}
+    var cmd = 'rg 2>/dev/null ' .. pat
+    if use_loclist
+        sil var items = getloclist(0, {lines: systemlist(cmd), efm: '%f:%l:%c:%m'}).items
+        setloclist(0, [], ' ', {items: items, title: cmd})
+        do <nomodeline> QuickFixCmdPost lwindow
+    else
+        sil var items = getqflist({lines: systemlist(cmd), efm: '%f:%l:%c:%m'}).items
+        setqflist([], ' ', {items: items, title: cmd})
+        do <nomodeline> QuickFixCmdPost cwindow
     endif
-    if type is# 'line' || type is# 'block' || type is# 'char' && @" =~# "\n"
-        " `rg(1)` is is line-oriented, unless you use `-U`
-        " (which we don't because it's slower and consume more memory)
+enddef
+
+def myfuncs#opGrepCore(type: string)
+    if type == 'char'
+        norm! `[v`]y
+    elseif type == 'line' || type == 'block' || type == 'char' && @" =~# "\n"
+        # `rg(1)` is is line-oriented, unless you use `-U`
+        # (which we don't because it's slower and consume more memory)
         return
     endif
 
-    if type is# 'Ex'
-        let pat = a:1
-        let use_loclist = a:2
-        " Why does `2>/dev/null` work here but not in `'grepprg'`?{{{
-        "
-        " They don't run the shell command in the same way:
-        "
-        "     " system()
-        "     (rg foobar /etc)>/tmp/... 2>&1
-        "
-        "     " 'grepprg'
-        "     :!rg foobar /etc 2>&1| tee /tmp/...
-        "
-        " In the first case, `2>/dev/null` is useful:
-        "
-        "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
-        "         ^---------^
-        "
-        " It prevents errors from being written in the temp file.
-        "
-        " In the second case, `2>/dev/null` is useless:
-        "
-        "     :!rg 2>/dev/null foobar /etc 2>&1| tee /tmp/...
-        "          ^---------^
-        "
-        " Because, it's overridden by `2>&1` which comes from `'shellpipe'`.
-        " In contrast,  `system()` uses `'shellredir'`, which  also includes
-        " `2>&1`, but it  doesn't have the same effect,  because the command
-        " is run in a subshell via braces:
-        "
-        "     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
-        "     ^                          ^
-        "
-        " From `:h system() /braces`:
-        "
-        "    > For Unix, braces are put around {expr} to allow for
-        "    > concatenated commands.
-        "}}}
-        let cmd = 'rg 2>/dev/null ' .. a:1
-    else
-        let use_loclist = 0
-        let cmd = 'rg 2>/dev/null --fixed-strings ' .. shellescape(@")
-    endif
+    var cmd = 'rg 2>/dev/null --fixed-strings ' .. shellescape(@")
+    sil var items = getqflist({lines: systemlist(cmd), efm: '%f:%l:%c:%m'}).items
+    setqflist([], ' ', {items: items, title: cmd})
+    do <nomodeline> QuickFixCmdPost cwindow
+enddef
 
-    if type is# 'Ex' && use_loclist
-        sil let items = getloclist(0, {'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
-        call setloclist(0, [], ' ', {'items': items, 'title': cmd})
-        do <nomodeline> QuickFixCmdPost lwindow
-    else
-        sil let items = getqflist({'lines': systemlist(cmd), 'efm': '%f:%l:%c:%m'}).items
-        call setqflist([], ' ', {'items': items, 'title': cmd})
-        do <nomodeline> QuickFixCmdPost cwindow
-    endif
-endfu
-
-fu myfuncs#op_replace_without_yank() abort "{{{2
-    let &opfunc = s:SID .. 'Opfunc'
-    let g:opfunc = {
-        \ 'core': 'myfuncs#op_replace_without_yank_core',
-        "\ we don't need to yank the text-object, and don't want `v:register` nor `""` to mutate
-        \ 'yank': v:false,
-        "\ a third-party text-object might not know that it should pass `v:register` to the opfunc
-        "\ https://github.com/wellle/targets.vim/issues/253
-        \ 'register': v:register,
-        \ }
-        " TODO: You can  remove the `v:register`  key (here and in  our snippet)
-        " once https://github.com/vim/vim/issues/6374 is fixed.
+def myfuncs#opReplaceWithoutYank(): string #{{{2
+    &opfunc = SID .. 'Opfunc'
+    g:opfunc = {
+        core: 'myfuncs#opReplaceWithoutYankCore',
+        # we don't need to yank the text-object, and don't want `v:register` nor `""` to mutate
+        yank: false,
+        # a third-party text-object might not know that it should pass `v:register` to the opfunc
+        # https://github.com/wellle/targets.vim/issues/253
+        register: v:register,
+        }
+        # TODO: You can  remove the `v:register`  key (here and in  our snippet)
+        # once https://github.com/vim/vim/issues/6374 is fixed.
     return 'g@'
-endfu
+enddef
 
-fu myfuncs#op_replace_without_yank_core(type) abort
-    let reg = get(g:opfunc, 'register', '"')
-    if a:type is# 'line'
+def myfuncs#opReplaceWithoutYankCore(type: string)
+    var reg = get(g:opfunc, 'register', '"')
+
+    var reg_save: dict<any>
+    # Need to save/restore:{{{
+    #
+    #    - `reg` in case we make it mutate with the next `setreg()`
+    #    - `"-` and the numbered registers, because they will mutate when the selection is replaced
+    #}}}
+    for regname in [reg] + ['-'] + range(10)->map({_, v -> string(v)})
+        extend(reg_save, {[regname]: getreginfo(regname)})
+    endfor
+
+    if type == 'line'
         exe 'keepj norm! ''[V'']"' .. reg .. 'p'
         norm! gv=
-    elseif a:type is# 'block'
+    elseif type == 'block'
         exe "keepj norm! `[\<c-v>`]" .. '"' .. reg .. 'p'
-    elseif a:type is# 'char'
-        call s:handle_char(reg)
+    elseif type == 'char'
+        HandleChar(reg)
     endif
-endfu
 
-fu s:handle_char(reg) abort
-    let reg_save = getreginfo(a:reg)
-    let zero = getreginfo('0')
+    keys(reg_save)->map({_, v -> setreg(v, reg_save[v])})
+enddef
 
-    let contents = get(reg_save, 'regcontents', [])
-    if get(reg_save, 'regtype', '') is# 'V' && !empty(contents)
-        " Tweak linewise register so that it better fits inside a characterwise text.{{{
-        "
-        " That is:
-        "
-        "    - reset its type to characterwise
-        "    - trim the leading whitespace in front of the first line
-        "    - trim the trailing whitespace at the end of the last line
-        "
-        " Consider this text:
-        "
-        "     a
-        "     b c d
-        "
-        " If you press `dd` to delete the  `a` line, then press `drl` on the
-        " `c` character, you get:
-        "
-        "     b a d
-        "
-        " If you didn't tweak the register, you would get:
-        "
-        "        b
-        "        a
-        "     d
-        "
-        " Which is probably not what you want.
-        "}}}
-        " trim whitespace surrounding the text
-        let contents[0] = substitute(contents[0], '^\s*', '', '')
-        let contents[-1] = substitute(contents[-1], '\s*$', '', '')
-        call deepcopy(reg_save)
-            "\ and reset the type to characterwise
-            \ ->extend({'regcontents': contents, 'regtype': 'c'})
-            \ ->setreg(a:reg)
+def HandleChar(reg: string)
+    var reginfo = getreginfo(reg)
+    var contents = get(reginfo, 'regcontents', [])
+    if get(reginfo, 'regtype', '') == 'V' && !empty(contents)
+        # Tweak linewise register so that it better fits inside a characterwise text.{{{
+        #
+        # That is:
+        #
+        #    - reset its type to characterwise
+        #    - trim the leading whitespace in front of the first line
+        #    - trim the trailing whitespace at the end of the last line
+        #
+        # Consider this text:
+        #
+        #     a
+        #     b c d
+        #
+        # If you press `dd` to delete the  `a` line, then press `drl` on the
+        # `c` character, you get:
+        #
+        #     b a d
+        #
+        # If you didn't tweak the register, you would get:
+        #
+        #        b
+        #        a
+        #     d
+        #
+        # Which is probably not what you want.
+        #}}}
+        # trim whitespace surrounding the text
+        contents[0] = substitute(contents[0], '^\s*', '', '')
+        contents[-1] = substitute(contents[-1], '\s*$', '', '')
+        # and reset the type to characterwise
+        eval reginfo
+            ->extend({regcontents: contents, regtype: 'c'})
+            ->setreg(reg)
     endif
 
     try
-        exe 'keepj norm! `[v`]"' .. a:reg .. 'p'
+        exe 'keepj norm! `[v`]"' .. reg .. 'p'
     catch
-        return s:Catch()
-    finally
-        " need to restore `a:reg` in case we've made it mutate with the previous `setreg()`
-        call setreg(a:reg, reg_save)
-        " TODO: Why do we need a timer for `"0` to be properly restored?
-        "
-        " Make a test with this shell command:
-        "
-        "     $ cp ~/.shrc /tmp/file && vim -i NONE -S /tmp/t.vim
-        "
-        " Where `/tmp/t.vim` contains:
-        "
-        "     call setreg('a', #{regcontents: 'aaa'})
-        "     call setreg('0', #{regcontents: 'zero'})
-        "     call setreg('"', #{regcontents: 'unnamed', points_to: 'z'})
-        "     call setreg('*', {})
-        "     call setreg('+', {})
-        "     call repeat(['the quick brown fox jumps over the lazy dog'], 5)->setline(1)
-        "
-        " I think Vim automatically writes into `"0` because of `:h v_p`.
-        " Btw, when we use `v_p`, what happens exactly?
-        "
-        " ---
-        "
-        " In general, should we restore `"0` before or after `""`?
-        " Does  the answer  to  that  question depend  on  what  `""` points  to
-        " (especially `"0`)?
-        "
-        " ---
-        "
-        " Did we make some mistake when restoring `"0` in the past?
-        " Like maybe we should have restored it before or after `""`, or with a timer...
-        call timer_start(0, {-> setreg('0', zero)})
+        Catch()
     endtry
-endfu
+enddef
 
 fu myfuncs#op_trim_ws(...) abort "{{{2
     if !a:0
@@ -193,21 +171,22 @@ fu myfuncs#op_trim_ws(...) abort "{{{2
     exe range .. 'TW'
 endfu
 
-fu myfuncs#op_yank_setup(what) abort "{{{2
-    let s:op_yank = {'what': a:what, 'register': v:register}
-    let &opfunc = expand('<SID>') .. 'OpYank'
+def myfuncs#opYankSetup(what: string): string #{{{2
+    op_yank = {what: what, register: v:register}
+    &opfunc = expand('<SID>') .. 'OpYank'
     return 'g@'
-endfu
+enddef
+var op_yank: dict<string>
 
-def s:OpYank(type: string)
+def OpYank(type: string)
     var mods = 'keepj keepp'
-    var range = line("'[") .. ',' .. line("']")
+    var range = ':' .. line("'[") .. ',' .. line("']")
 
-    var cmd = s:op_yank.what == 'g//' || s:op_yank.what == 'comments' ? 'g' : 'v'
+    var cmd = op_yank.what == 'g//' || op_yank.what == 'comments' ? 'g' : 'v'
     var cml = &ft == 'vim'
         ?     '["#]'
         :     '\C\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\')
-    var pat = s:op_yank.what == 'code' || s:op_yank.what == 'comments'
+    var pat = op_yank.what == 'code' || op_yank.what == 'comments'
         ?     '^\s*' .. cml
         :     @/
 
@@ -215,7 +194,7 @@ def s:OpYank(type: string)
     var yanked: list<string>
     try
         setreg('z', {})
-        exe mods .. ' :' .. range .. cmd .. '/' .. escape(pat, '/') .. '/y Z'
+        exe mods .. range .. cmd .. '/' .. escape(pat, '/') .. '/y Z'
         yanked = getreginfo('z')->get('regcontents', [])
     catch
         Catch()
@@ -239,38 +218,38 @@ def s:OpYank(type: string)
     endif
 
     # remove *all* empty lines in some other cases
-    if s:op_yank.what == 'v//' || s:op_yank.what == 'code'
+    if op_yank.what == 'v//' || op_yank.what == 'code'
         filter(yanked, {_, v -> v !~ '^\s*$'})
     endif
 
-    setreg(s:op_yank.register, yanked, 'l')
+    setreg(op_yank.register, yanked, 'l')
 enddef
-" }}}1
+# }}}1
 
-" box_create / destroy {{{1
+# boxCreate / boxDestroy {{{1
 
-" TODO:
-" We could improve these functions by reading:
-" https://github.com/vimwiki/vimwiki/blob/dev/autoload/vimwiki/tbl.vim
-"
-" In particular, it could update an existing table.
-"
-" ---
-"
-" Also, we should improve it to generate this kind of table:
-"
-"    ┌───────────────────┬─────────────────────────────────────────────────┐
-"    │                   │                    login                        │
-"    │                   ├─────────────────────────────────┬───────────────┤
-"    │                   │ yes                             │ no            │
-"    ├─────────────┬─────┼─────────────────────────────────┼───────────────┤
-"    │ interactive │ yes │ zshenv  zprofile  zshrc  zlogin │ zshenv  zshrc │
-"    │             ├─────┼─────────────────────────────────┼───────────────┤
-"    │             │ no  │ zshenv  zprofile         zlogin │ zshenv        │
-"    └─────────────┴─────┴─────────────────────────────────┴───────────────┘
-"
-" The peculiarity here, is the variable number of cells per line (2 on the first
-" one, 3 on the second one, 4 on the last ones).
+# TODO:
+# We could improve these functions by reading:
+# https://github.com/vimwiki/vimwiki/blob/dev/autoload/vimwiki/tbl.vim
+#
+# In particular, it could update an existing table.
+#
+# ---
+#
+# Also, we should improve it to generate this kind of table:
+#
+#    ┌───────────────────┬─────────────────────────────────────────────────┐
+#    │                   │                    login                        │
+#    │                   ├─────────────────────────────────┬───────────────┤
+#    │                   │ yes                             │ no            │
+#    ├─────────────┬─────┼─────────────────────────────────┼───────────────┤
+#    │ interactive │ yes │ zshenv  zprofile  zshrc  zlogin │ zshenv  zshrc │
+#    │             ├─────┼─────────────────────────────────┼───────────────┤
+#    │             │ no  │ zshenv  zprofile         zlogin │ zshenv        │
+#    └─────────────┴─────┴─────────────────────────────────┴───────────────┘
+#
+# The peculiarity here, is the variable number of cells per line (2 on the first
+# one, 3 on the second one, 4 on the last ones).
 def myfuncs#boxCreate(type = ''): string
     if type == ''
         &opfunc = 'myfuncs#boxCreate'
@@ -327,7 +306,7 @@ def myfuncs#boxCreate(type = ''): string
     return ''
 enddef
 
-def s:BoxCreateBorder(where: string, col_pos: list<number>)
+def BoxCreateBorder(where: string, col_pos: list<number>)
     if where == 'top'
         # duplicate first line in the box
         norm! '{+yyP
@@ -348,7 +327,7 @@ def s:BoxCreateBorder(where: string, col_pos: list<number>)
     endfor
 enddef
 
-def s:BoxCreateSeparations()
+def BoxCreateSeparations()
     # Create a separation line, such as:
     #
     #     |    |    |    |
@@ -385,25 +364,25 @@ def myfuncs#boxDestroy(type = ''): string
 
     var lnum1 = line("'[")
     var lnum2 = line("']")
-    var range = lnum1 .. ',' .. lnum2
+    var range = ':' .. lnum1 .. ',' .. lnum2
     # remove box (except pretty bars: │)
-    exe 'sil :' .. range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
+    exe 'sil ' .. range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
 
     # replace pretty bars with regular bars
     # necessary, because we will need them to align the contents of the
     # paragraph later
-    exe 'sil :' .. range .. 's/│/|/ge'
+    exe 'sil ' .. range .. 's/│/|/ge'
 
     # remove the bars at the beginning and at the end of the lines
     # we don't want them, because they would mess up the creation of a box
     # later
-    exe 'sil :' .. range .. 's/|//e'
-    exe 'sil :' .. range .. 's/.*\zs|//e'
+    exe 'sil ' .. range .. 's/|//e'
+    exe 'sil ' .. range .. 's/.*\zs|//e'
 
     # trim whitespace
-    exe 'sil :' .. range .. 'TW'
+    exe 'sil ' .. range .. 'TW'
     # remove empty lines
-    exe 'sil :' .. range .. '-g/^\s*$/d_'
+    exe 'sil ' .. range .. '-g/^\s*$/d_'
 
     append(lnum1 - 1, [''])
 
@@ -434,10 +413,10 @@ fu myfuncs#delete_matching_lines(to_delete, ...) abort "{{{1
     else
         let cml = '\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\') .. '\m'
     endif
-    let to_search = #{
-        \ empty: ['^\s*$', '^'],
-        \ comments: ['^\s*' .. cml, '^\%(\s*' .. cml .. '\)\@!'],
-        \ search: [@/, '^\%(.*' .. @/ .. '\m\)\@!'],
+    let to_search = {
+        \ 'empty': ['^\s*$', '^'],
+        \ 'comments': ['^\s*' .. cml, '^\%(\s*' .. cml .. '\)\@!'],
+        \ 'search': [@/, '^\%(.*' .. @/ .. '\m\)\@!'],
         \ }
     let wont_be_deleted = to_search[a:to_delete][global is# 'g']
     " necessary if the pattern matches on the current line, but the match starts
@@ -661,50 +640,99 @@ fu myfuncs#dump_wiki(url) abort "{{{1
     endtry
 endfu
 
-" gtfo {{{1
+# gtfo {{{1
 
-fu s:gtfo_init() abort
-    let s:IS_TMUX = !empty($TMUX)
-    " terminal Vim running within a GUI environment
-    let s:IS_X_RUNNING = !empty($DISPLAY) && $TERM isnot# 'linux'
-    let s:LAUNCH_TERM = 'urxvt -cd'
-endfu
+def GtfoError(msg: string)
+    echohl ErrorMsg
+    echom '[GTFO] ' .. msg
+    echohl None
+enddef
 
-fu s:gtfo_error(s) abort
-    echohl ErrorMsg | echom '[GTFO] ' .. a:s | echohl None
-endfu
-
-fu myfuncs#gtfo_open_gui(dir) abort
-    if s:gtfo_is_not_valid(a:dir)
+def myfuncs#gtfoOpenGui(dir: string)
+    if GtfoIsNotValid(dir)
         return
     endif
-    sil call system('xdg-open ' .. shellescape(a:dir) .. ' &')
-endfu
+    sil system('xdg-open ' .. shellescape(dir) .. ' &')
+enddef
 
-fu s:gtfo_is_not_valid(dir) abort
-    if !isdirectory(a:dir) "this happens if a directory was deleted outside of vim.
-        call s:gtfo_error('invalid/missing directory: ' .. a:dir)
-        return 1
+def GtfoIsNotValid(dir: string): bool
+    if !isdirectory(dir) # this happens if a directory was deleted outside of vim.
+        GtfoError('invalid/missing directory: ' .. dir)
+        return true
     endif
-endfu
+    return false
+enddef
 
-fu myfuncs#gtfo_open_term(dir) abort
-    if s:gtfo_is_not_valid(a:dir)
+def myfuncs#gtfoOpenTerm(dir: string)
+    if GtfoIsNotValid(dir)
         return
     endif
-    if s:IS_TMUX
-        sil call system('tmux splitw -h -c ' .. shellescape(a:dir))
-    elseif s:IS_X_RUNNING
-        sil call system(s:LAUNCH_TERM .. ' ' .. shellescape(a:dir) .. ' &')
+    if IS_TMUX
+        sil system('tmux splitw -h -c ' .. shellescape(dir))
+    elseif IS_X_RUNNING
+        sil system(LAUNCH_TERM .. ' ' .. shellescape(dir) .. ' &')
     else
-        call s:gtfo_error('failed to open terminal')
+        GtfoError('failed to open terminal')
     endif
-endfu
+enddef
 
-if !exists('s:gtfo_has_been_init')
-    let s:gtfo_has_been_init = 1
-    call s:gtfo_init()
-endif
+const IS_TMUX = !empty($TMUX)
+# terminal Vim running within a GUI environment
+const IS_X_RUNNING = !empty($DISPLAY) && $TERM != 'linux'
+const LAUNCH_TERM = 'urxvt -cd'
+
+def myfuncs#HorizontalRulesTextobject(adverb: string) #{{{1
+# TODO: Consider moving all or most of your custom text-objects into a dedicated (libary?) plugin.
+    var start: string
+    var end: string
+    var comment: string
+    if &ft == 'markdown'
+        start = '^\%(---\|#.*\)\n\zs\|\%^'
+        end = '\n\@1<=---$\|\n#\|\%$'
+    else
+        if &ft == 'vim'
+            comment = '["#]'
+        else
+            var cml = matchstr(&l:cms, '\S*\ze\s*%s')
+            comment = '\V' .. escape(cml, '\') .. '\m'
+        endif
+        var foldmarker = '\%(' .. split(&l:fmr, ',')->join('\|') .. '\)\d*'
+        start =
+            # just below a `---` line, or just below the start of a fold
+            '^\s*' .. comment .. '\s*\%(---\|.*' .. foldmarker .. '\)\n\zs'
+            # or the start of a multiline comment
+            .. '\|^\%(\s*' .. comment .. '\)\@!.*\n\zs\s*' .. comment
+            .. '\|\%^'
+        end =
+            # a `---` line, or the end of a fold
+            '\s*' .. comment .. '\s*\%(---\|.*' .. foldmarker .. '\)$'
+            # or the end of a multiline comment
+            .. '\|^\s*' .. comment .. '.*\n\%(\s*' .. comment .. '\)\@!'
+    endif
+    search(start, 'bcW')
+    exe 'norm! o' .. (mode() != 'V' ? 'V' : '')
+    search('\n\@1<=' .. end, 'cW')
+
+    if adverb == 'around'
+        # special case: if we're in the last `---` section of a fold,
+        # grab the `---` above
+        if &ft == 'markdown' && (getline(line('.') + 1) =~ '^#' || line('.') == line('$'))
+        || &ft != 'markdown' && (getline('.') !~ end)
+            norm! oko
+        endif
+        return
+    endif
+
+    if &ft == 'markdown'
+        if getline('.') =~ '^---$\|^#'
+            norm! k
+        endif
+    else
+        if getline('.') =~ '^\s*' .. comment .. '\s*---$'
+            norm! k
+        endif
+    endif
+enddef
 
 fu myfuncs#in_A_not_in_B(...) abort "{{{1
     let [fileA, fileB] = a:000
@@ -811,41 +839,45 @@ fu myfuncs#long_data_join(...) abort "{{{1
     endtry
 endfu
 
-fu myfuncs#long_data_split(...) abort "{{{1
-    if !a:0
-        let &opfunc = 'myfuncs#long_data_split'
+def myfuncs#longDataSplit(type = ''): string #{{{1
+    if type == ''
+        &opfunc = 'myfuncs#longDataSplit'
         return 'g@l'
     endif
-    let line = getline('.')
+    var line = getline('.')
 
-    let is_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
-    let has_comma = stridx(line, ',') > -1
+    var is_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
+    var has_comma = stridx(line, ',') > -1
     if is_list_or_dict
-        let first_line_indent = repeat(' ', match(line, '\S'))
-        " If the  first item in the  list/dictionary begins right after  the opening
-        " symbol (`[` or `{`), add a space:
+        first_line_indent = repeat(' ', match(line, '\S'))
+        # If the  first item in the  list/dictionary begins right after  the opening
+        # symbol (`[` or `{`), add a space:
         sil keepj keepp s/\m[\[{]\s\@!\zs/ /e
-        " Move the first item in the list on a dedicated line.
-        let contline = !s:IsVim9() ? ' \' : ''
+        # Move the first item in the list on a dedicated line.
+        contline = !IsVim9() ? ' \' : ''
         sil keepj keepp s/\m[\[{]\zs/\="\n" .. first_line_indent .. '   ' .. contline/e
-        " split the data
+        # split the data
         sil keepj keepp s/,\zs/\="\n" .. first_line_indent .. '   ' .. contline/ge
-        " move the closing symbol on a dedicated line
-        let contline = !s:IsVim9() ? '    \ ' : ''
+        # move the closing symbol on a dedicated line
+        contline = !IsVim9() ? '    \ ' : ''
         sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n" .. first_line_indent .. contline/e
 
     elseif has_comma
-        " We use `strdisplaywidth()` because the indentation could contain tabs.
-        let indent_lvl = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
-        let indent_txt = repeat(' ', indent_lvl)
+        # We use `strdisplaywidth()` because the indentation could contain tabs.
+        var indent_lvl = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
+        var indent_txt = repeat(' ', indent_lvl)
         sil keepj keepp s/\m\ze\S/- /e
-        let pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
-        let l:Rep = {-> "\n" .. indent_txt .. '- '}
-        sil exe 'keepj keepp s/' .. pat .. '/\=Rep()/ge'
+        var pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
+        g:LongDataSplitRep = { -> "\n" .. indent_txt .. '- '}
+        sil exe 'keepj keepp s/' .. pat .. '/\=g:LongDataSplitRep()/ge'
     endif
-endfu
 
-fu myfuncs#only_selection(lnum1,lnum2) abort "{{{1
+    return ''
+enddef
+var first_line_indent: string
+var contline: string
+
+fu myfuncs#only_selection(lnum1, lnum2) abort "{{{1
     let lines = getline(a:lnum1,a:lnum2)
     sil keepj %d_
     call setline(1, lines)
@@ -1018,10 +1050,10 @@ fu myfuncs#search_todo(where) abort "{{{1
     "                                         │ with just `todo` or `fixme`;
     "                                         │ replace it with the text of the next non empty line instead
     "                                         │
-    let items = getloclist(0)->map({_, v -> s:search_todo_text(v)})
+    let items = getloclist(0)->map({_, v -> s:SearchTodoText(v)})
     " remove indentation (reading lines with various indentation levels is jarring)
-    call map(items, {_, v -> extend(v, #{text: substitute(v.text, '^\s*', '', '')})})
-    call setloclist(0, [], 'r', #{items: items, title: 'FIX' .. 'ME & TO' .. 'DO'})
+    call map(items, {_, v -> extend(v, {'text': substitute(v.text, '^\s*', '', '')})})
+    call setloclist(0, [], 'r', {'items': items, 'title': 'FIX' .. 'ME & TO' .. 'DO'})
 
     if &bt isnot# 'quickfix'
         return
@@ -1032,7 +1064,7 @@ fu myfuncs#search_todo(where) abort "{{{1
     call qf#create_matches()
 endfu
 
-fu s:search_todo_text(dict) abort
+fu SearchTodoText(dict) abort
     let dict = a:dict
     " if the text only contains `fixme` or `todo`
     if dict.text =~# '\c\%(fixme\|todo\):\=\s*\%(' .. split(&l:fmr, ',')[0] .. '\)\=\s*$'
@@ -1175,118 +1207,119 @@ fu myfuncs#send_to_server() abort "{{{1
     echohl NONE
 endfu
 
-" trans {{{1
+# trans {{{1
 
-" Update:
-" Have a look at this plugin:
-" https://github.com/echuraev/translate-shell.vim
+# Update: Have a look at this plugin:
+# https://github.com/echuraev/translate-shell.vim
 
-" TODO: add `| C-t` mapping, to replay last text
-" TODO: Implement a mapping which would translate the word under the cursor in a split.
-" Apply text properties to get bold/italics attributes.
-" Apply folding to be able to read only one section (`noun`, `verb`, `Synonyms`, `Examples`).
+# TODO: add `| C-t` mapping, to replay last text
+# TODO: Implement a mapping which would translate the word under the cursor in a split.
+# Apply text properties to get bold/italics attributes.
+# Apply folding to be able to read only one section (`noun`, `verb`, `Synonyms`, `Examples`).
 
-"                ┌ the function is called for the 1st time;
-"                │ if the text is too long for `trans(1)`, it will be
-"                │ split into chunks, and the function will be called
-"                │ several times
-"                │
-fu myfuncs#trans(first_time = v:true) abort
-    let s:trans_tempfile = tempname()
+#                ┌ the function is called for the 1st time;
+#                │ if the text is too long for `trans(1)`, it will be
+#                │ split into chunks, and the function will be called
+#                │ several times
+#                │
+def myfuncs#trans(first_time = true)
+    trans_tempfile = tempname()
 
-    if a:first_time
-        let text = mode() =~ "^[vV\<c-v>]$" ? s:GetSelectionText()->join("\n") : expand('<cword>')
+    if first_time
+        var text = mode() =~ "^[vV\<c-v>]$" ? GetSelectionText()->join("\n") : expand('<cword>')
         if text == ''
             return
         endif
-        let s:trans_chunks = split(text, '.\{100}\zs[.?!]')
-        "                                    │
-        "                                    └ split the text into chunks of around 100 characters
+        trans_chunks = split(text, '.\{100}\zs[.?!]')
+        #                              │
+        #                              └ split the text into chunks of around 100 characters
     endif
 
-    " remove characters which cause issue during the translation
-    let garbage = '["`*]' .. (!empty(&l:cms) ? '\|' .. matchstr(&l:cms, '\S*\ze\s*%s') : '')
-    let chunk = substitute(s:trans_chunks[0], garbage, '', 'g')
+    # remove characters which cause issue during the translation
+    var garbage = '["`*]' .. (!empty(&l:cms) ? '\|' .. matchstr(&l:cms, '\S*\ze\s*%s') : '')
+    var chunk = substitute(trans_chunks[0], garbage, '', 'g')
 
-    " reduce excessive whitespace
-    let chunk = substitute(chunk, '\s\+', ' ', 'g')
+    # reduce excessive whitespace
+    chunk = substitute(chunk, '\s\+', ' ', 'g')
 
-    " `exit_io` invokes a callback when the jobs finishes
-    " if you want to invoke a callback every time the job sends a message, use
-    " `out_cb` instead
-    "
-    " don't use `close_cb` to read the file where the job writes its output,
-    " because when the callback will read the file, the latter will be empty,
-    " probably because the job writes in a buffer, and the buffer is written
-    " to the file after the callback has been invoked
-    " use `exit_cb` instead
-    let opts = #{
-        \ out_io: 'file',
-        \ out_name: s:trans_tempfile,
-        \ err_io: 'null',
-        \ exit_cb: function('s:trans_output'),
-        \ }
+    # `exit_io` invokes a callback when the jobs finishes
+    # if you want to invoke a callback every time the job sends a message, use
+    # `out_cb` instead
+    #
+    # don't use `close_cb` to read the file where the job writes its output,
+    # because when the callback will read the file, the latter will be empty,
+    # probably because the job writes in a buffer, and the buffer is written
+    # to the file after the callback has been invoked
+    # use `exit_cb` instead
+    var opts = {
+        out_io: 'file',
+        out_name: trans_tempfile,
+        err_io: 'null',
+        exit_cb: TransOutput,
+        }
 
-    " send the first chunk in the list of chunks to `trans`
-    "
-    " We execute the command in a shell, otherwise the text seems to be split
-    " at each whitespace before being sent to `trans`.
-    " This makes the translation wrong (because no global context), and the
-    " voice pauses after each word.
-    " Besides,  it's a  good habit  to invoke  a shell  so that  our command  is
-    " properly parsed by the latter.  Otherwise, I don't know how Vim parses it.
-    let s:trans_job = job_start([
-        \ '/bin/bash',
-        \ '-c',
-        \
-        \ 'trans -brief -speak'
-        \ .. ' -t ' .. get(s:, 'trans_target', 'fr')
-        \ .. ' -s ' .. get(s:, 'trans_source', 'en')
-        \ .. ' ' .. shellescape(chunk)]
-        \ , opts)
+    # send the first chunk in the list of chunks to `trans`
+    #
+    # We execute the command in a shell, otherwise the text seems to be split
+    # at each whitespace before being sent to `trans`.
+    # This makes the translation wrong (because no global context), and the
+    # voice pauses after each word.
+    # Besides,  it's a  good habit  to invoke  a shell  so that  our command  is
+    # properly parsed by the latter.  Otherwise, I don't know how Vim parses it.
+    trans_job = job_start(['/bin/sh', '-c',
+        'trans -brief -speak'
+        .. ' -t ' .. (trans_target ?? 'fr')
+        .. ' -s ' .. (trans_source ?? 'en')
+        .. ' ' .. shellescape(chunk)
+        ], opts)
 
-    " remove it from the list of chunks
-    call remove(s:trans_chunks, 0)
-endfu
+    # remove it from the list of chunks
+    remove(trans_chunks, 0)
+enddef
+var trans_tempfile: string
+var trans_chunks: list<string>
+var trans_target: string
+var trans_source: string
 
-fu myfuncs#trans_cycle() abort
-    let s:trans_target = {'fr': 'en', 'en': 'fr'}[get(s:, 'trans_target', 'fr')]
-    let s:trans_source = {'fr': 'en', 'en': 'fr'}[get(s:, 'trans_source', 'en')]
-    echo '[trans] ' .. s:trans_source .. ' → ' .. s:trans_target
-endfu
+def myfuncs#transCycle()
+    trans_target = {fr: 'en', en: 'fr'}[trans_target ?? 'fr']
+    trans_source = {fr: 'en', en: 'fr'}[trans_source ?? 'en']
+    echo '[trans] ' .. trans_source .. ' → ' .. trans_target
+enddef
 
-fu s:trans_output(job, exit_status) abort
-    if a:exit_status == -1
+def TransOutput(job: job, exit_status: number)
+    if exit_status == -1
         return
     endif
-    " FIXME:
-    " if the text is composed of several chunks, only the last one is echoed
-    "
-    " instead of `echo`, maybe we should open a scratch buffer to display a long
-    " translation
-    "
-    " we would need to introduce some newlines to format the output
-    "
-    " also, increase the length of the chunks (150?), so that the voice pauses
-    " less often?
-    " why not, but then the message won't be echoed properly
-    " so we need to distinguish between 3 types of lengths:
-    "
-    "     short :  < 100 characters  →  one invocation, echo
-    "     medium:  < 150 "           →  one invocation, scratch buffer
-    "     long  :  > 200 "           →  several invocations, scratch buffer
+    # FIXME:
+    # if the text is composed of several chunks, only the last one is echoed
+    #
+    # instead of `echo`, maybe we should open a scratch buffer to display a long
+    # translation
+    #
+    # we would need to introduce some newlines to format the output
+    #
+    # also, increase the length of the chunks (150?), so that the voice pauses
+    # less often?
+    # why not, but then the message won't be echoed properly
+    # so we need to distinguish between 3 types of lengths:
+    #
+    #     short :  < 100 characters  →  one invocation, echo
+    #     medium:  < 150 "           →  one invocation, scratch buffer
+    #     long  :  > 200 "           →  several invocations, scratch buffer
 
-    echo readfile(s:trans_tempfile)->join(' ')
-    if len(s:trans_chunks)
-        call myfuncs#trans(v:false)
+    echo readfile(trans_tempfile)->join(' ')
+    if len(trans_chunks) > 0
+        myfuncs#trans(false)
     endif
-endfu
+enddef
 
-fu myfuncs#trans_stop() abort
-    if exists('s:trans_job')
-        call job_stop(s:trans_job)
+def myfuncs#transStop()
+    if job_status('trans_job') == 'run'
+        job_stop(trans_job)
     endif
-endfu
+enddef
+var trans_job: job
 
 fu myfuncs#webpage_read(url) abort "{{{1
     if !executable('w3m')
@@ -1339,7 +1372,7 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
     # put all of them in lowercase
     map(words, {_, v -> tolower(v)})
 
-    var freq: dict<number> = {}
+    var freq: dict<number>
     for word in words
         freq[word] = get(freq, word, 0) + 1
     endfor

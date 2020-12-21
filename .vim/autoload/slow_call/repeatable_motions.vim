@@ -194,10 +194,12 @@ endfu
 "     " press:  d C-a X
 "     " expected:  "some X"  is deleted
 "     " actual:    "some X"  is deleted
+"     ✔
 "
 "     " press:  j d C-b X
 "     " expected:  "some X"  is deleted
 "     " actual:    cursor jumps on "X"
+"     ✘
 "}}}
 noremap <expr> t  <sid>fts('t')
 noremap <expr> T  <sid>fts('T')
