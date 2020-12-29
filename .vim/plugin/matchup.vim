@@ -10,7 +10,7 @@ endif
 let g:matchup_matchparen_enabled = 0
 " make sure there are always autocmds listening to some events
 if !g:matchup_matchparen_enabled
-    call plugin#matchparen#install_dummy_autocmds()
+    call plugin#matchparen#installDummyAutocmds()
 endif
 
 " Improves performance when moving with `hjkl`.{{{

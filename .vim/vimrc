@@ -1,4 +1,7 @@
-vim9script
+vim9script noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
 
 # Options 1 {{{1
 
@@ -286,9 +289,9 @@ enddef
 augroup DelaySlowCall | au!
     # Do *not* use a simple timer:{{{
     #
-    #     au VimEnter * timer_start(1000, {->
+    #     au VimEnter * timer_start(1000, () =>
     #         \     execute('runtime autoload/toggle_settings.vim | runtime! autoload/slow_call/*.vim')
-    #         \ })
+    #         \ )
     #
     # It could cause issues, for example, if you enter insert mode quickly (i.e.
     # before  the  callback),  and  some  custom  code  of  yours  rely  on  the
@@ -452,12 +455,12 @@ def StyledComments()
     END
     augroup StyledComments | au!
         au FileType * if index(styled_comments_filetypes, expand('<amatch>')) >= 0
-            \ |     sil! Fold()
-            \ |     sil! UndoFtplugin()
-            \ | endif
+            |     sil! Fold()
+            |     sil! UndoFtplugin()
+            | endif
         au Syntax * if index(styled_comments_filetypes, expand('<amatch>')) >= 0
-            \ |     sil! Syntax()
-            \ | endif
+            |     sil! Syntax()
+            | endif
         # Purpose:{{{
         #
         # We (or a plugin) may  temporarily disable the syntax highlighting globally
@@ -470,7 +473,7 @@ def StyledComments()
         # We need to re-install our custom autocmd *after* the default one.
         #}}}
         au SourcePost $VIMRUNTIME/syntax/syntax.vim StyledComments()
-            \ | getwininfo()->map({_, v -> win_execute(v.winid, 'do StyledComments Syntax')})
+            | getwininfo()->map((_, v) => win_execute(v.winid, 'do StyledComments Syntax'))
     augroup END
 enddef
 var styled_comments_filetypes: list<string>
@@ -691,7 +694,8 @@ set backspace=indent,eol,nostop
 # time to time, I won't be running tmux inside.
 #}}}
 if map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'tmux', 'xterm'],
-    {_, v -> v .. '-256color'})->index($TERM) >= 0
+    (_, v) => v .. '-256color')
+        ->index($TERM) >= 0
     # xfce4-terminal lies about its identity
     # and doesn't support true color on Ubuntu 16.04
     && $COLORTERM != 'xfce4-terminal'
@@ -832,7 +836,7 @@ else
     # will have been installed to apply the italic style on the text between two
     # asterisks.  We need to avoid clearing it right after Vim has been started.
     #}}}
-    au MyColorScheme VimLeavePre * colorscheme#save_last_version()
+    au MyColorScheme VimLeavePre * colorscheme#saveLastVersion()
 
     # try to restore the exact version of the last color scheme used
     var last_color_file = $HOME .. '/.vim/colors/my/last_version.vim'
@@ -2322,8 +2326,16 @@ set viminfo+=!
 #
 # Useful to select a rectangle out of irregular (different lengths) lines.
 set ve=block
-g:orig_virtualedit = &ve
-lockvar g:orig_virtualedit
+# Do *not* make the constant name start with an uppercase character.{{{
+#
+# It would cause all sorts of issues because of the `!` flag which we include in `'viminfo'`.
+#
+# Don't  try to  be  smart and  install  a `VimLeavePre`  autocmd  to unlet  the
+# variable (it wouldn't always work; e.g. when debuggin a crash).
+# Don't try a  `VimEnter` autocmd to delay `:lockvar` either;  I'm sure we would
+# end up finding some other edge case where it fails.
+#}}}
+const g:_ORIG_VIRTUALEDIT = &ve
 augroup HoistVe | au!
     # TODO: The `[ve=onemore]` flag is visible when selecting some text and pressing `sa`.{{{
     #
@@ -2335,7 +2347,7 @@ augroup HoistVe | au!
     au User MyFlags statusline#hoist('global',
         \ '%{&ve isnot# "' .. &ve .. '" && mode(1) is# "n" ? "[ve=" .. &ve .. "]" : ""}', 8,
         \ expand('<sfile>:p') .. ':' .. expand('<sflnum>'))
-    au OptionSet virtualedit timer_start(0, {-> execute('redrawt')})
+    au OptionSet virtualedit timer_start(0, () => execute('redrawt'))
 augroup END
 
 # wildignore(case) {{{2
@@ -2495,22 +2507,6 @@ set wildmode=full
 #
 # ---
 #
-# Besides, if `'wcm'` is different than `'wc'`, it can trigger a weird bug which
-# breaks some command-line mode mappings.
-#
-# MWE:
-#
-#     $ vim -Nu NONE +'set wildmenu wcm=<c-z>' +'cno <c-j> <down>' +cd
-#     :e SPC Tab C-j
-#     " C-j should enter the directory; instead it inserts ^I
-#
-# See:
-# https://github.com/vim/vim/issues/4954
-# https://groups.google.com/d/msg/vim_dev/xf5TRb4uR4Y/djk2dq2poaQJ
-# http://stackoverflow.com/a/14849216
-#
-# ---
-#
 # If you  change `'wcm'`, among other  things, in `vim-readline` you'll  need to
 # replace this mapping:
 #
@@ -2572,7 +2568,7 @@ augroup FastLongWrappedLines | au!
     :def FastLongWrappedLines()
         # We only inspect the first 10  lines, otherwise the expression could be
         # too costly on a huge file.
-        if getline(1, 10)->map({_, v -> strchars(v, 1)})->max() > 1000
+        if getline(1, 10)->map((_, v) => strchars(v, 1))->max() > 1000
             setl nobreakindent nolinebreak
         else
             setl breakindent linebreak
@@ -2838,7 +2834,7 @@ def Cm(): string
 
     if getline('.') =~ '^\s*\V' .. escape(cml, '\') .. '\m\s*$'
         # We can't invoke `setline()` immediately, because of `<expr>`.
-        timer_start(0, {-> setline('.', '')})
+        timer_start(0, () => setline('.', ''))
         # Why don't you simply press `BS`?{{{
         #
         #     return "0\<c-d>" .. repeat("\<BS>", strchars(cml) + 1)
@@ -2983,7 +2979,7 @@ def RepeatLastEditOnLastChangedText(): string
         return ''
     endif
 
-    map(changed, {_, v -> escape(v, '\')})
+    map(changed, (_, v) => escape(v, '\'))
     var pat: string
     if len(changed) == 1
         pat = changed[0]
@@ -3320,7 +3316,7 @@ def TryToEditPluginConfig(cmd: string)
         var files = [$HOME .. '/.vim/plugin/' .. plugin .. '.vim']
         files += [$HOME .. '/.vim/after/plugin/' .. plugin .. '.vim']
         files += [$HOME .. '/.vim/autoload/slow_call/' .. plugin .. '.vim']
-        filter(files, {_, v -> filereadable(v)})
+        filter(files, (_, v) => filereadable(v))
         if empty(files)
             echo 'There''s no config file for ' .. string(plugin)
             return
@@ -3802,7 +3798,7 @@ def FixDisplay()
     syn sync minlines=200
     syn sync maxlines=400
 
-    sil! window#popup#close_all()
+    sil! window#popup#closeAll()
     winrestview(view)
 enddef
 
@@ -3912,7 +3908,7 @@ def PrintCwd()
         tabpage: %s
         global:  %s
     END
-    map(fmt, {i, v -> [getcwd(), getcwd(-1, 0), getcwd(-1)][i]->printf(v)})
+    map(fmt, (i, v) => [getcwd(), getcwd(-1, 0), getcwd(-1)][i]->printf(v))
         # 'c' instead of 'l' to prevent the insertion of a trailing newline
         ->setreg('o', 'c')
     echo @o
@@ -3994,7 +3990,7 @@ def Faq(): string
     endif
 
     var this_tab = tabpagenr()
-    var win_in_this_tab = getwininfo()->filter({_, v -> v.tabnr == this_tab})
+    var win_in_this_tab = getwininfo()->filter((_, v) => v.tabnr == this_tab)
     var faq_file = $XDG_RUNTIME_VIM .. '/faq'
 
     for win in win_in_this_tab
@@ -4005,11 +4001,11 @@ def Faq(): string
         endif
     endfor
 
-    if mapnew(win_in_this_tab, {_, v -> getwinvar(v.winnr, '&pvw', 0)})->index(1) != -1
+    if mapnew(win_in_this_tab, (_, v) => getwinvar(v.winnr, '&pvw', 0))->index(1) != -1
         return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
-    if mapnew(win_in_this_tab, {_, v -> bufname(v.bufnr)})->index(faq_file) != -1
+    if mapnew(win_in_this_tab, (_, v) => bufname(v.bufnr))->index(faq_file) != -1
         echo 'a window displaying  ' .. faq_file .. '  already exists'
         return ''
     endif
@@ -4039,7 +4035,7 @@ def EditReadme()
     var files = (expand('%:p:h') .. '/*')->glob(0, 1)
     var kwd = '\%(readme\|contents\)'
     var pat = '\c/' .. kwd .. '\%(\..\{-}\)\=$'
-    var readmes = filter(files, {_, v -> v =~ pat})
+    var readmes = filter(files, (_, v) => v =~ pat)
     var readme = get(readmes, 0, '')
     if filereadable(readme) || isdirectory(readme)
         exe 'sp ' .. readme
@@ -4090,8 +4086,8 @@ enddef
 
 nno <expr> +> myfuncs#longDataSplit()
 
-nno <expr> +< myfuncs#long_data_join()
-xno <expr> +< myfuncs#long_data_join()
+nno <expr> +< myfuncs#longDataJoin()
+xno <expr> +< myfuncs#longDataJoin()
 
 # +e            emphasize {{{4
 
@@ -4119,9 +4115,9 @@ enddef
 
 # +t            trim whitespace {{{4
 
-nno <expr> +t  myfuncs#op_trim_ws()
-xno <expr> +t  myfuncs#op_trim_ws()
-nno <expr> +tt myfuncs#op_trim_ws() .. '_'
+nno <expr> +t  myfuncs#opTrimWs()
+xno <expr> +t  myfuncs#opTrimWs()
+nno <expr> +tt myfuncs#opTrimWs() .. '_'
 # }}}3
 # Control / Meta / CR / Tab / Shift {{{3
 # CR                  move cursor on 80th column {{{4
@@ -4269,8 +4265,8 @@ nno <c-n> <cmd>exe (v:count > 1 ? v:count : '') .. 'tabnext'<cr>
 
 # C-q t  C-q T        search Todo, fixme, ... {{{4
 
-nno <c-q>t <cmd>call myfuncs#search_todo('buffer')<cr>
-nno <c-q>T <cmd>call myfuncs#search_todo('project')<cr>
+nno <c-q>t <cmd>call myfuncs#searchTodo('buffer')<cr>
+nno <c-q>T <cmd>call myfuncs#searchTodo('project')<cr>
 #      │
 #      └ quickfix
 
@@ -4410,13 +4406,13 @@ def EasyAndCustomPaste()
     # register.
     #}}}
     if &ft == 'markdown'
-        map(contents, {_, v -> substitute(v, '’', "'", 'g')})
-        map(contents, {_, v -> substitute(v, '\w\zs \ze, \w', '', 'g')})
+        map(contents, (_, v) => substitute(v, '’', "'", 'g'))
+        map(contents, (_, v) => substitute(v, '\w\zs \ze, \w', '', 'g'))
         if getline('.') =~ '^\S\|^$'
-            map(contents, {_, v -> substitute(v, '^\s*\zshttp.*', '<&>', '')})
+            map(contents, (_, v) => substitute(v, '^\s*\zshttp.*', '<&>', ''))
         endif
     endif
-    map(contents, {_, v -> substitute(v, '٪', '$', 'g')})
+    map(contents, (_, v) => substitute(v, '٪', '$', 'g'))
     setreg('+', reginfo)
 enddef
 
@@ -4454,7 +4450,7 @@ def FixMultilineShellcmd()
         if contents[0] =~ '<<-\=\([''"]\=\)EOF\1'
             var eof_line = contents[match(contents, '^\s*' .. cml .. '\s*EOF$')]
             var indent = matchstr(eof_line, '^\s*' .. cml .. '\s*')
-            map(contents, {_, v -> substitute(v, indent, '', '')})
+            map(contents, (_, v) => substitute(v, indent, '', ''))
         endif
     endif
 
@@ -4557,18 +4553,18 @@ nmap crgg <plug>(MakeDigraph)_
 # If you need to delete folds, use `zd`, `zD`, or `zE`.
 # They also work in visual mode (except `zE`).
 
-nno dg<space> <cmd>call myfuncs#delete_matching_lines('empty')<cr>
-xno mg<space> <cmd>call myfuncs#delete_matching_lines('empty')<cr>
+nno dg<space> <cmd>call myfuncs#deleteMatchingLines('empty')<cr>
+xno mg<space> <cmd>call myfuncs#deleteMatchingLines('empty')<cr>
 
-nno dg" <cmd>call myfuncs#delete_matching_lines('comments')<cr>
-xno mg" <cmd>call myfuncs#delete_matching_lines('comments')<cr>
-nno dv" <cmd>call myfuncs#delete_matching_lines('comments', 'reverse')<cr>
-xno mv" <cmd>call myfuncs#delete_matching_lines('comments', 'reverse')<cr>
+nno dg" <cmd>call myfuncs#deleteMatchingLines('comments')<cr>
+xno mg" <cmd>call myfuncs#deleteMatchingLines('comments')<cr>
+nno dv" <cmd>call myfuncs#deleteMatchingLines('comments', v:true)<cr>
+xno mv" <cmd>call myfuncs#deleteMatchingLines('comments', v:true)<cr>
 
-nno dg/ <cmd>call myfuncs#delete_matching_lines('search')<cr>
-xno mg/ <cmd>call myfuncs#delete_matching_lines('search')<cr>
-nno dv/ <cmd>call myfuncs#delete_matching_lines('search', 'reverse')<cr>
-xno mv/ <cmd>call myfuncs#delete_matching_lines('search', 'reverse')<cr>
+nno dg/ <cmd>call myfuncs#deleteMatchingLines('search')<cr>
+xno mg/ <cmd>call myfuncs#deleteMatchingLines('search')<cr>
+nno dv/ <cmd>call myfuncs#deleteMatchingLines('search', v:true)<cr>
+xno mv/ <cmd>call myfuncs#deleteMatchingLines('search', v:true)<cr>
 
 # dr                  replace without yank {{{3
 
@@ -4680,6 +4676,9 @@ ono iF <cmd>norm ViF<cr>
 ono aF <cmd>norm VaF<cr>
 
 def FencedCodeblock(what: string)
+    if mode() != 'V'
+        norm! V
+    endif
     if what == 'around'
         if !search('^```\l*$', 'bW') | return | endif
         norm! o
@@ -5097,11 +5096,11 @@ nno <expr> vip getline('.') =~# '^\s*$' ? '' : 'vip'
 #   - join the 2 blocks
 #   - align the blocks using ^A as a delimiter
 
-xno mJ <c-\><c-n><cmd>call myfuncs#join_blocks()<cr>
-xno m<c-j> <c-\><c-n><cmd>call myfuncs#join_blocks(v:true)<cr>
-#                                                  │
-#                                                  └ first, reverse the order of the blocks
-#                                                    then, join them
+xno mJ <c-\><c-n><cmd>call myfuncs#joinBlocks()<cr>
+xno m<c-j> <c-\><c-n><cmd>call myfuncs#joinBlocks(v:true)<cr>
+#                                                 │
+#                                                 └ first, reverse the order of the blocks
+#                                                   then, join them
 
 # mq          populate qfl with lines in the selection {{{3
 
@@ -5143,7 +5142,7 @@ def Cfg(pgm: string)
         echohl NONE
         return
     endif
-    filter(files, {_, v -> expand(v)->filereadable()})
+    filter(files, (_, v) => expand(v)->filereadable())
     if empty(files) | echo 'no readable file' | endif
     for file in files
         exe 'sp ' .. file
@@ -5215,9 +5214,9 @@ com -bar ClearRegisters ClearRegisters()
 
 def ClearRegisters()
     var numeric = range(10)
-    var alpha = range(char2nr('a'), char2nr('z'))->map({_, v -> nr2char(v)})
+    var alpha = range(char2nr('a'), char2nr('z'))->map((_, v) => nr2char(v))
     var other = ['-', '*', '+', '/', '=']
-    map(numeric + alpha + other, {_, v -> setreg(v, {})})
+    map(numeric + alpha + other, (_, v) => setreg(v, {}))
 enddef
 
 # CombineParamValues {{{2
@@ -5267,8 +5266,8 @@ com -bar -range=% CombineParamValues CombineParamValues(<line1>, <line2>)
 
 def CombineParamValues(lnum1: number, lnum2: number)
     var param_values = getline(lnum1, lnum2)
-        ->filter({_, v -> v != ''})
-        ->map({_, v -> split(v)})
+        ->filter((_, v) => v != '')
+        ->map((_, v) => split(v))
     if len(param_values) < 2
         return
     endif
@@ -5316,7 +5315,7 @@ enddef
 
 # DiffLines {{{2
 
-com -bar -bang -range -nargs=? DiffLines myfuncs#diff_lines(<bang>0, <line1>, <line2>, <q-args>)
+com -bar -bang -range -nargs=? DiffLines myfuncs#diffLines(<bang>0, <line1>, <line2>, <q-args>)
 
 # DiffOrig {{{2
 
@@ -5367,7 +5366,7 @@ enddef
 # Usage:
 #     :DumpWiki https://github.com/oniony/TMSU/
 
-com -bar -nargs=1 DumpWiki myfuncs#dump_wiki(<q-args>)
+com -bar -nargs=1 DumpWiki myfuncs#dumpWiki(<q-args>)
 
 # FormatManpage {{{2
 
@@ -5444,11 +5443,11 @@ def GrepCfg(pat: string)
         | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
     END
     var files = join(cmd)->systemlist()
-    filter(files, {_, v -> filereadable(v)})
+    filter(files, (_, v) => filereadable(v))
     # we may  have a  versioned controlled symlink  pointing to  another version
     # controlled file (e.g. vimrc → init.vim); we don't want to vimgrep into the
     # same file twice (it would give duplicate entries)
-    map(files, {_, v -> resolve(v)})
+    map(files, (_, v) => resolve(v))
     sort(files)->uniq()
     try
         exe 'vim /' .. escape(pat, '/') .. '/gj ' .. join(files)
@@ -5517,7 +5516,7 @@ enddef
 #
 # A filename can contain whitespace.
 #}}}
-com -bar -nargs=+ -complete=buffer InAButNotInB myfuncs#in_A_not_in_B(<f-args>)
+com -bar -nargs=+ -complete=buffer InAButNotInB myfuncs#inANotInB(<f-args>)
 
 # JoinBlocks {{{2
 
@@ -5591,10 +5590,9 @@ com -bar -nargs=+ -complete=buffer InAButNotInB myfuncs#in_A_not_in_B(<f-args>)
 # This command isn't really needed (we have `v_mj`), but I keep it for educational
 # purpose.
 
-com -bar -bang -nargs=1 JoinBlocks
-    \   &l:fen = 0
-    \ | exe "sil keepp :.,.+<args>-1g/^/:''+<args>m . | :-j<bang>"
-    \ | &l:fen = 1
+com -bar -bang -nargs=1 JoinBlocks &l:fen = 0
+    | exe "sil keepp :.,.+<args>-1g/^/:''+<args>m . | :-j<bang>"
+    | &l:fen = 1
 
 # OnlySelection {{{2
 
@@ -5606,7 +5604,7 @@ com -bar -bang -nargs=1 JoinBlocks
 #     :'<,'>OnlySelection
 #     :12,34OnlySelection
 
-com -bar -range=% OnlySelection myfuncs#only_selection(<line1>, <line2>)
+com -bar -range=% OnlySelection myfuncs#onlySelection(<line1>, <line2>)
 
 # PluginsToCommit {{{2
 
@@ -5620,25 +5618,25 @@ def PluginsToCommit()
     endif
 
     var my_plugins = readfile($MYVIMRC)
-    filter(my_plugins, {_, v -> v =~ '^\s*Plug\s\+''lacygoill/'})
-    map(my_plugins, {_, v -> matchstr(v, 'lacygoill/\zs.\{-}\ze''')})
+    filter(my_plugins, (_, v) => v =~ '^\s*Plug\s\+''lacygoill/')
+    map(my_plugins, (_, v) => matchstr(v, 'lacygoill/\zs.\{-}\ze'''))
     sil var output = systemlist('commit-these-vim-plugins ' .. join(my_plugins))
     # we may have removed a plugin, but not executed `:Plugclean` yet
-    filter(output, {_, v -> v !~ 'No such file or directory'})
+    filter(output, (_, v) => v !~ 'No such file or directory')
     if output == []
         echom '[PluginsToCommit]: nothing to commit'
         return
     endif
 
-    filter(output, {_, v -> v =~ '^\S'})
-    map(output, {_, v -> glob($HOME .. '/.vim/plugged/' .. v .. '/*', 0, 1)[0]})
+    filter(output, (_, v) => v =~ '^\S')
+    map(output, (_, v) => glob($HOME .. '/.vim/plugged/' .. v .. '/*', 0, 1)[0])
     setqflist([], ' ', {lines: output, efm: '%f', title: 'Plugins to commit'})
     cw
 enddef
 
 # PluginGlobalVariables {{{2
 
-com -bar -nargs=? PluginGlobalVariables myfuncs#plugin_global_variables(<q-args>)
+com -bar -nargs=? PluginGlobalVariables myfuncs#pluginGlobalVariables(<q-args>)
 
 # PC    Plugin Clean {{{2
 
@@ -5646,7 +5644,7 @@ com -bar PC sil! PlugClean
 
 # PI    Plugin Install {{{2
 
-com -bar -nargs=1 PI myfuncs#plugin_install(<q-args>)
+com -bar -nargs=1 PI myfuncs#pluginInstall(<q-args>)
 
 # PUP   update Vim plugins {{{2
 
@@ -5757,7 +5755,7 @@ com -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
 
 # RemoveSwapFiles {{{2
 
-com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', 1, 1)->map({_, v -> delete(v)})
+com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', 1, 1)->map((_, v) => delete(v))
 
 # RemoveTabs {{{2
 
@@ -5765,7 +5763,7 @@ com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', 1, 1)->map({_, v -> d
 # with a nr of spaces which will occupy the same nr of cells.
 #
 # Before using it, set 'ts' (2, 4, 8) so that the text is aligned.
-com -bar -range=% RemoveTabs myfuncs#remove_tabs(<line1>, <line2>)
+com -bar -range=% RemoveTabs myfuncs#removeTabs(<line1>, <line2>)
 
 # Retab {{{2
 
@@ -5880,9 +5878,9 @@ def Tldr(shellcmd: string)
         echo out[0]
         return
     endif
-    map(out, {_, v -> substitute(v, '\e.\{-}m\|\%x0f', '', 'g')})
-    map(out, {_, v -> substitute(v, '^-', '#', '')})
-    map(out, {_, v -> substitute(v, '^  ', '    ', '')})
+    map(out, (_, v) => substitute(v, '\e.\{-}m\|\%x0f', '', 'g'))
+    map(out, (_, v) => substitute(v, '^-', '#', ''))
+    map(out, (_, v) => substitute(v, '^  ', '    ', ''))
     sp /tmp/.tldr.md
     keepj :%d_
     setline(1, out)
@@ -5906,7 +5904,7 @@ enddef
 
 # this command opens a new tab page, loads a temporary buffer, and dumps
 # the contents of a webpage inside the latter
-com -bar -nargs=1 WebPageRead myfuncs#webpage_read(<q-args>)
+com -bar -nargs=1 WebPageRead myfuncs#webpageRead(<q-args>)
 
 # WordFrequency {{{2
 
@@ -6070,7 +6068,7 @@ def WipeNoname()
                 sil! exe 'bw! ' .. buf
             endif
         else
-            filter(noname_buffers, {_, v -> v != buf})
+            filter(noname_buffers, (_, v) => v != buf)
         endif
     endfor
 enddef
@@ -6129,7 +6127,7 @@ enddef
 #}}}
 # https://github.com/vim/vim/issues/5243
 augroup FireLeaveEventsOnStartup | au!
-    au VimEnter * timer_start(0, {-> FireLeaveEvents()})
+    au VimEnter * timer_start(0, () => FireLeaveEvents())
 augroup END
 
 def FireLeaveEvents()
@@ -6183,6 +6181,13 @@ augroup IncludeShellCwdInPath | au!
     au StdinReadPost * set path+=$PWD
 augroup END
 
+# Indent settings {{{2
+
+augroup IndentSettings | au!
+    # Vim test files are indented with 2 spaces (see their modelines)
+    au BufReadPost */vim/src/testdir/*.vim setl sw=2
+augroup END
+
 # No syntax in diff mode {{{2
 
 augroup NoSyntaxInDiffMode | au!
@@ -6207,7 +6212,7 @@ augroup NoSyntaxInDiffMode | au!
     au VimEnter * IfDiffSynClear()
     :def IfDiffSynClear()
         if !&l:diff | return | endif
-        getwininfo()->map({_, v -> win_execute(v.winid, 'syn clear')})
+        getwininfo()->map((_, v) => win_execute(v.winid, 'syn clear'))
     enddef
 augroup END
 
@@ -6637,7 +6642,7 @@ enddef
 # Install a  mapping to  send the  current Vim buffer/file  to a  remote running
 # server.   This is  useful –  in particular  – to  send the  output of  a shell
 # command to our main Vim instance.
-nno ]<c-s> <cmd>call myfuncs#send_to_server()<cr>
+nno ]<c-s> <cmd>call myfuncs#sendToServer()<cr>
 
 # Standard Input {{{2
 
@@ -6670,9 +6675,9 @@ augroup MyMkspell | au!
     # http://vi.stackexchange.com/a/5052/6960
     #}}}
     au VimEnter * glob($HOME .. '/.vim/spell/*.add', 1, 1)
-        \ ->map({_, v -> filereadable(v)
+        \ ->map((_, v) => filereadable(v)
         \ && !filereadable(v .. '.spl') || (getftime(v) > getftime(v .. '.spl'))
-        \ && execute('mkspell! ' .. fnameescape(v))})
+        \ && execute('mkspell! ' .. fnameescape(v)))
 augroup END
 
 # Swap file handling "{{{2
@@ -6889,7 +6894,7 @@ augroup TrailingWhitespace | au!
     # because it's not code; so we don't care about its presence.
     #}}}
     exe 'au FileType '
-        \ .. copy(NO_TRAILING_WHITESPACE_FT)->filter({_, v -> v != ''})->join(',')
+        \ .. copy(NO_TRAILING_WHITESPACE_FT)->filter((_, v) => v != '')->join(',')
         \ .. ' TrailingWhitespace(false)'
     # we still have an undesired match when we run `:VimPatches 8.1` *twice*
     au BufWinEnter * if &ft == 'text' | TrailingWhitespace(false) | endif
@@ -8380,7 +8385,7 @@ enddef
 # Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 # Example:
 #
-#     if !expand('%:p:h')->readdir({n -> n =~ 'some_name'})->empty() | do sth | endif
+#     if !expand('%:p:h')->readdir((n) => n =~ 'some_name')->empty() | do sth | endif
 #
 # Also, check out `:h readdirex()`.
 #
@@ -8403,7 +8408,7 @@ enddef
 #
 # Try to replace as many timers as possible:
 #
-#     timer_start(0, {-> ...})
+#     timer_start(0, () => ...)
 #     →
 #     au SafeState * ++once ...
 #
@@ -8645,6 +8650,7 @@ enddef
 #
 #     expr->Func()
 #     expr->{x -> x + 1}()
+#     expr->((x) => x + 1)()
 #
 # This is briefly mentioned at `:h method`:
 #
@@ -8657,11 +8663,6 @@ enddef
 # Check whether we could add one more `->` each time we've used a method.
 #
 #     \%(\S\|^\s*["#]\s*\\\s*\)\%\({\s*\%(\%\(\S\+\s*,\)\=\s*\S\+\)\=\s*\)\@<!->\a
-#
-# ---
-#
-# Btw, `term_setapi()` can be used as a method, but it's not documented (include
-# doc in our next patch?).
 #
 # ---
 #
@@ -8732,6 +8733,13 @@ enddef
 #
 # 117 -
 #
+# Because of  `Catch()`, we often  have incomplete error messages,  which `:WTF`
+# can't  parse.  Sure,  we can  press `coV`  and repeat  whatever triggered  the
+# issue; still, it's annoying.  Remove `Catch()` everywhere, and let Vim display
+# its stack trace?
+#
+# 118 -
+#
 # Check whether we should have sometimes  saved and restored `"0` in addition to
 # `""`. Look for `setreg(` everywhere.
 #
@@ -8801,6 +8809,7 @@ enddef
 # ---
 #
 # Use our saved qfl named `setreg`.
+
 
 
 

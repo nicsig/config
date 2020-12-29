@@ -1,1 +1,2 @@
-let g:last_color_scheme = 253
+vim9script
+g:last_color_scheme = 253

@@ -98,5 +98,5 @@ nmap <buffer><nowait> ZZ <cr>
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ .. '| call tmuxprompt#undo_ftplugin()'
+    \ .. '| call tmuxprompt#undoFtplugin()'
 

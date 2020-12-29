@@ -28,7 +28,7 @@ fu g:Undotree_CustomMap() abort "{{{1
     nno <buffer><nowait> K <nop>
 
     " Purpose: Override the builtin help which doesn't take into account our custom mappings.
-    nno <buffer><nowait> ? <cmd>call plugin#undotree#show_help()<cr>
+    nno <buffer><nowait> ? <cmd>call plugin#undotree#showHelp()<cr>
 
     " Purpose: set the preview flag in the diff panel, which lets us:{{{
     "
@@ -44,7 +44,7 @@ fu g:Undotree_CustomMap() abort "{{{1
     " its height would be maximized; you  could find this sudden height increase
     " jarring.
     "}}}
-    nno <buffer><nowait> D <cmd>call plugin#undotree#diff_toggle()<cr>
+    nno <buffer><nowait> D <cmd>call plugin#undotree#diffToggle()<cr>
 
     " dummy item to get an empty status line
     setl stl=%h

@@ -6,7 +6,7 @@ endif
 
 augroup MyFugitive | au!
     au CmdlineLeave : if getcmdline() is# 'Glog'
-        \ | call plugin#fugitive#glog_conceal('on_quickfixcmdpost')
+        \ | call plugin#fugitive#glogConceal('on_quickfixcmdpost')
         \ | endif
 augroup END
 

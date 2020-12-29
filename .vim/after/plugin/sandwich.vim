@@ -1,8 +1,9 @@
-vim9script
+vim9script noclear
 
-if !exists('g:loaded_sandwich')
+if exists('loaded') || !exists('g:loaded_sandwich')
     finish
 endif
+var loaded = true
 
 def SetRecipes()
     # Don't we need `deepcopy()`?{{{

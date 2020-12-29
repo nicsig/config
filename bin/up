@@ -182,6 +182,7 @@ update_system() { #{{{1
   update_terminfo
   update_texlive
   update_tldr
+  update_trash_cli
   update_youtube_dl
   update_zsh_plugins
 }
@@ -368,6 +369,13 @@ update_tldr() { #{{{1
   # https://github.com/raylee/tldr#installation
   curl -Lso "${HOME}/bin/tldr" 'https://raw.githubusercontent.com/raylee/tldr/master/tldr'
   chmod +x "${HOME}/bin/tldr"
+}
+
+update_trash_cli() { #{{{1
+  print_title 'trash-command-line'
+  cd "${HOME}/Vcs/trash-cli" || return
+  update_git_programs 'https://github.com/andreafrancia/trash-cli' "${HOME}/Vcs/"
+  python3 -m pip install --user --upgrade .
 }
 
 update_youtube_dl() { #{{{1

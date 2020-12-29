@@ -1,8 +1,9 @@
-vim9script
+vim9script noclear
 
-if stridx(&rtp, 'vim-submode') == -1
+if exists('loaded') || stridx(&rtp, 'vim-submode') == -1
     finish
 endif
+var loaded = true
 
 # Normal mode {{{1
 # C-w g[hjkl]    tradewinds {{{2

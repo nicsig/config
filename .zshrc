@@ -3240,7 +3240,7 @@ alias tl='trash-list'
 alias tp='trash-put'
 
 # TRash Restore
-alias trr='rlwrap restore-trash'
+alias trr='rlwrap trash-restore'
 
 # ubuntu-code-name {{{3
 

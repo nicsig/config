@@ -47,5 +47,5 @@ nno <buffer><nowait> tp <cmd>call fex#trash_put()<cr>
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ .. '| call plugin#dirvish#undo_ftplugin()'
+    \ .. '| call plugin#dirvish#undoFtplugin()'
 

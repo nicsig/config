@@ -193,14 +193,14 @@ def ccomplete#Complete(findstart: number, abase: string): any #{{{1
     endif
 
     # Remove members, these can't appear without something in front.
-    filter(tags, {_, v -> has_key(v, 'kind') ? v.kind != 'm' : 1})
+    filter(tags, (_, v: dict<any>) => has_key(v, 'kind') ? v.kind != 'm' : true)
 
     # Remove static matches in other files.
-    filter(tags, {_, v -> !has_key(v, 'static')
+    filter(tags, (_, v: dict<any>) => !has_key(v, 'static')
       || !v['static']
-      || bufnr('%') == bufnr(v['filename'])})
+      || bufnr('%') == bufnr(v['filename']))
 
-    extend(res, map(tags, {_, v -> Tag2item(v)}))
+    extend(res, map(tags, (_, v: dict<any>) => Tag2item(v)))
   endif
 
   if len(res) == 0
@@ -208,7 +208,7 @@ def ccomplete#Complete(findstart: number, abase: string): any #{{{1
     var diclist = taglist('^' .. items[0] .. '$')
 
     # Remove members, these can't appear without something in front.
-    filter(diclist, {_, v -> has_key(v, 'kind') ? v.kind != 'm' : 1})
+    filter(diclist, (_, v: dict<string>) => has_key(v, 'kind') ? v.kind != 'm' : true)
 
     res = []
     for i in len(diclist)->range()
@@ -250,7 +250,7 @@ def ccomplete#Complete(findstart: number, abase: string): any #{{{1
     last -= 1
   endwhile
 
-  return map(res, {_, v -> Tagline2item(v, brackets)})
+  return map(res, (_, v: dict<any>) => Tagline2item(v, brackets))
 enddef
 
 # GetAddition {{{1
@@ -543,7 +543,7 @@ def StructMembers(
 # member.
 
   # Todo: What about local structures?
-  var fnames = tagfiles()->map({_, v -> escape(v, ' \#%')})->join()
+  var fnames = tagfiles()->map((_, v: string) => escape(v, ' \#%'))->join()
   if fnames == ''
     return []
   endif

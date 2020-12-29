@@ -1,9 +1,11 @@
-fu plugin#fugitive#glog_conceal(when) abort
-    if a:when is# 'on_quickfixcmdpost'
-        au QuickFixCmdPost * ++once call plugin#fugitive#glog_conceal('now')
+vim9script noclear
+
+def plugin#fugitive#glogConceal(when: string)
+    if when == 'on_quickfixcmdpost'
+        au QuickFixCmdPost * ++once plugin#fugitive#glogConceal('now')
     else
-        call qf#set_matches('my_fugitive:glog_conceal', 'Conceal', 'location')
-        call qf#create_matches()
+        qf#set_matches('my_fugitive:glog_conceal', 'Conceal', 'location')
+        qf#create_matches()
     endif
-endfu
+enddef
 

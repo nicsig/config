@@ -1,4 +1,6 @@
-fu plugin#dirvish#undo_ftplugin() abort
+vim9script noclear
+
+def plugin#dirvish#undoFtplugin()
     unlet! b:fex_last_line
     if exists('#FexPrintMetadata')
         au! FexPrintMetadata * <buffer>
@@ -16,5 +18,5 @@ fu plugin#dirvish#undo_ftplugin() abort
     nunmap <buffer> q
     nunmap <buffer> (
     nunmap <buffer> )
-endfu
+enddef
 

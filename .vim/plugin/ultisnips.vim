@@ -171,7 +171,7 @@ ino <c-g><s-tab> <cmd>sil! py3 UltiSnips_Manager._current_snippet_is_done()<cr>
 xno <tab> <c-\><c-n><cmd>*call UltiSnips#SaveLastVisualSelection()<cr>gvs
 
 " We need a way to enable UltiSnips's autotrigger on-demand.
-nno cou <cmd>call plugin#ultisnips#toggle_autotrigger()<cr>
+nno cou <cmd>call plugin#ultisnips#toggleAutotrigger()<cr>
 
 " Autocmds {{{1
 
@@ -281,7 +281,7 @@ augroup MyUltisnips | au!
     " I think that's because the event is not always fired...
     " I'm tired of this issue; let's call the function from `InsertEnter`.
     "}}}
-    au InsertEnter * call plugin#ultisnips#save_info()
+    au InsertEnter * call plugin#ultisnips#saveInfo()
 
     " Importing a long file with `:r` while a snippet is being expanded may cause a memory leak.{{{
     "
@@ -305,7 +305,7 @@ augroup MyUltisnips | au!
     " I  suspect that's  because,  initially,  there are  no  lines outside  the
     " snippet, since there are no lines at all in a new file.
     "}}}
-    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#prevent_memory_leak()
+    au User UltiSnipsEnterFirstSnippet call plugin#ultisnips#preventMemoryLeak()
     " `sil!` to suppress errors when the event is fired twice consecutively
     " (yeah, for some reason, it can happen)
     au User UltiSnipsExitLastSnippet sil! exe 'nunmap <buffer> :'
@@ -314,7 +314,7 @@ augroup MyUltisnips | au!
         "\ To suppress  `E31` when we open  a dirvish buffer while  a snippet is
         "\ being expanded:
         "\ .
-        "\     Error detected while processing function <SNR>16_LoadFTPlugin[2]..plugin#dirvish#undo_ftplugin:
+        "\     Error detected while processing function <SNR>16_LoadFTPlugin[2]..plugin#dirvish#undoFtplugin:
         "\     line   14:
         "\     E31: No such mapping
         "\
@@ -330,7 +330,7 @@ augroup MyUltisnips | au!
     " Pitfall: If you try to replace the `:` mapping with a `CmdlineEnter` autocmd, use `state()`:{{{
     "
     "     au User UltiSnipsEnterFirstSnippet au CmdlineEnter : ++once
-    "         \ if state('m') == '' | call plugin#ultisnips#cancel_expansion() | endif
+    "         \ if state('m') == '' | call plugin#ultisnips#cancelExpansion() | endif
     "
     " Without the `state()` guard, you may exit a snippet prematurely.
     " That's what  happens atm  with the  `if` snippet, when  you jump  from the
