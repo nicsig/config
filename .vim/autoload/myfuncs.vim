@@ -326,7 +326,7 @@ def BoxCreateBorder(where: string, col_pos: list<number>)
     endif
 
     # draw the '┬' or '┴' characters:
-    for pos in col_pos[1:-2]
+    for pos in col_pos[1 : -2]
         exe 'norm! ' .. pos .. '|r' .. (where == 'top' ? '┬' : '┴')
     endfor
 enddef
@@ -618,7 +618,7 @@ def myfuncs#dumpWiki(argurl: string) #{{{1
     # Give the recommendation to manually inspect the syntax highlighting at the
     # end of the buffer.
     #}}}
-    if argurl[:3] != 'http'
+    if argurl[: 3] != 'http'
         return
     endif
 
@@ -638,7 +638,7 @@ def myfuncs#dumpWiki(argurl: string) #{{{1
         norm! my
 
         sil keepj keepp :'x+,'y-s/^/# /
-        sil keepj keepp :'x+,'y-g/^./exe 'keepalt r `=tempdir`/' .. getline('.')[2:]
+        sil keepj keepp :'x+,'y-g/^./exe 'keepalt r `=tempdir`/' .. getline('.')[2 :]
         sil keepj keepp :'x+,'y-g/^=\+\s*$/d _
             | eval (line('.') - 1)->getline()->substitute('^', '## ', '')->setline(line('.') - 1)
         sil keepj keepp :'x+,'y-g/^-\+\s*$/d _
@@ -1143,7 +1143,7 @@ def SearchTodoText(dict: dict<any>): dict<any>
         # There's no guarantee that all buffers in which a fixme/todo is present
         # is currently listed.
         #}}}
-        var lines = bufname(bufnr)->readfile(0, dict.lnum + 4)[-4:]
+        var lines = bufname(bufnr)->readfile(0, dict.lnum + 4)[-4 :]
         dict.text = filter(lines, (_, v) => v =~ '\k')->get(0, '')
     endif
     return dict
@@ -1463,7 +1463,7 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
               # if a word ends with an 's', and the same word without the ending
               # 's'  is also  present,  then its  abbreviation  will probably  4
               # characters long (because it's probably a plural)
-              : k[-1:-1] == 's' && keys(freq)->index(k) >= 0
+              : k[-1 : -1] == 's' && keys(freq)->index(k) >= 0
               ?     4
               # otherwise, by default, an abbreviation will probably be 3 characters long
               :     3

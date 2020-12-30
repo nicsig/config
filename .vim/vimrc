@@ -1204,7 +1204,7 @@ def Inex(): string
 
     # for lines such as `set option=path`, Vim tries to open `option=path` instead of `path`
     elseif line =~ pat2
-        return matchstr(line, pat2)[1:]
+        return matchstr(line, pat2)[1 :]
     # for lines such as `./relative/path/to/file`{{{
     #
     # especially useful when the buffer has been populated by sth like:
@@ -2819,7 +2819,7 @@ def Cm(): string
         var menu = complete_info(['items'])->get('items', [])->get(0, {})->get('menu', '')
         if menu == '[f]'
             seq ..= "\<cmd>call completion#file#complete()\<cr>"
-        elseif menu[:5] == '[snip]'
+        elseif menu[: 5] == '[snip]'
             seq ..= "\<cmd>call UltiSnips#ExpandSnippet()\<cr>"
         endif
         return seq
@@ -3873,7 +3873,7 @@ enddef
 # We remap `-8` to `g8` for consistency.
 nno -8 <cmd>call <sid>GetCharbyte()<cr>
 def GetCharbyte()
-    var out = execute('norm! g8', 'silent!')[1:]->substitute('\s*$', '', '')
+    var out = execute('norm! g8', 'silent!')[1 :]->substitute('\s*$', '', '')
     setreg('o', [out], 'c')
     echo @o
 enddef
@@ -5289,7 +5289,7 @@ def Combine(param_values: list<list<string>>): list<string>
             endfor
         endfor
     else
-        res = Combine([Combine(param_values[:-2]), param_values[-1]])
+        res = Combine([Combine(param_values[: -2]), param_values[-1]])
     endif
     return res
 enddef
@@ -5999,12 +5999,12 @@ augroup END
 #         # We don't want to add a default extension.
 #         # We  would  end  up  with  a  buffer whose  name  contains  a  sequence  of
 #         # consecutive dots.
-#         if fname[-1:-1] == '.'
+#         if fname[-1 : -1] == '.'
 #             return
 #         endif
 #
 #         # If the buffer is created inside `/tmp` and has no extension
-#         if fnamemodify(fname, ':p:h')[:3] == '/tmp' && fnamemodify(fname, ':e')->empty()
+#         if fnamemodify(fname, ':p:h')[: 3] == '/tmp' && fnamemodify(fname, ':e')->empty()
 #             # ... make  sure it  will be  wiped when it's  hidden which  will happen
 #             # after the next command
 #             setlocal bufhidden=wipe
@@ -6676,8 +6676,8 @@ augroup MyMkspell | au!
     #}}}
     au VimEnter * glob($HOME .. '/.vim/spell/*.add', 1, 1)
         \ ->map((_, v) => filereadable(v)
-        \ && !filereadable(v .. '.spl') || (getftime(v) > getftime(v .. '.spl'))
-        \ && execute('mkspell! ' .. fnameescape(v)))
+        \     && !filereadable(v .. '.spl') || (getftime(v) > getftime(v .. '.spl'))
+        \     && execute('mkspell! ' .. fnameescape(v)))
 augroup END
 
 # Swap file handling "{{{2
@@ -6894,8 +6894,8 @@ augroup TrailingWhitespace | au!
     # because it's not code; so we don't care about its presence.
     #}}}
     exe 'au FileType '
-        \ .. copy(NO_TRAILING_WHITESPACE_FT)->filter((_, v) => v != '')->join(',')
-        \ .. ' TrailingWhitespace(false)'
+        .. copy(NO_TRAILING_WHITESPACE_FT)->filter((_, v) => v != '')->join(',')
+        .. ' TrailingWhitespace(false)'
     # we still have an undesired match when we run `:VimPatches 8.1` *twice*
     au BufWinEnter * if &ft == 'text' | TrailingWhitespace(false) | endif
 augroup END
@@ -8402,7 +8402,7 @@ enddef
 #     var text = 'hello world some text'
 #     var foo: string
 #     var bar: string
-#     [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1:2]
+#     [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1 : 2]
 #
 # 96 -
 #

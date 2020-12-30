@@ -22,7 +22,7 @@ def plugin#fzf#commits(char = '') #{{{1
 enddef
 
 def plugin#fzf#registers(pfx: string) #{{{1
-    var source = execute('reg')->split('\n')[1:]
+    var source = execute('reg')->split('\n')[1 :]
     # trim leading whitespace (useful to filter based on type; e.g. typing `^b` will leave only blockwise registers)
     map(source, {_, v -> substitute(v, '^\s\+', '', '')})
     # highlight register type
