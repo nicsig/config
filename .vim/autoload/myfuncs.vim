@@ -795,8 +795,8 @@ def myfuncs#inANotInB(argfileA: string, argfileB: string) #{{{1
         })
 
     do <nomodeline> QuickFixCmdPost lopen
-    qf#set_matches('myfuncs#inANotInB', 'Conceal', 'double_bar')
-    qf#create_matches()
+    qf#setMatches('myfuncs#inANotInB', 'Conceal', 'double_bar')
+    qf#createMatches()
 enddef
 
 def myfuncs#joinBlocks(first_reverse = false) #{{{1
@@ -1126,9 +1126,9 @@ def myfuncs#searchTodo(where: string) #{{{1
         return
     endif
 
-    qf#set_matches('myfuncs:search_todo', 'Conceal', 'location')
-    qf#set_matches('myfuncs:search_todo', 'Todo', '\cfixme\|todo')
-    qf#create_matches()
+    qf#setMatches('myfuncs:search_todo', 'Conceal', 'location')
+    qf#setMatches('myfuncs:search_todo', 'Todo', '\cfixme\|todo')
+    qf#createMatches()
 enddef
 
 def SearchTodoText(dict: dict<any>): dict<any>
@@ -1434,8 +1434,8 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
     #
     #    - not containing any letter
     #}}}
-    filter(words, (_, v) => strchars(v, 1) >= min_length
-        && strchars(v, 1) <= 30
+    filter(words, (_, v) => strchars(v, true) >= min_length
+        && strchars(v, true) <= 30
         && v =~ '\a')
 
     # put all of them in lowercase
@@ -1456,9 +1456,9 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
         # We multiply  it by  a number which  should be equal  to the  amount of
         # characters which we would save if  we created an abbreviation for that
         # word.
-        var weighted_freq = mapnew(freq, (k, v) => v * ( strchars(k, 1) -
+        var weighted_freq = mapnew(freq, (k, v) => v * ( strchars(k, true) -
             # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
-            strchars(k, 1) == 4
+            strchars(k, true) == 4
             ? 2
               # if a word ends with an 's', and the same word without the ending
               # 's'  is also  present,  then its  abbreviation  will probably  4

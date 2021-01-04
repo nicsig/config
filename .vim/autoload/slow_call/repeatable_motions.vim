@@ -54,8 +54,8 @@ def VerticalJumpRhs(is_fwd = true): string
         mode = "\<c-v>\<c-v>"
     endif
 
-    return printf("\<cmd>call %s(%d, %s)\<cr>", VerticalJumpGo,
-        is_fwd ? 1 : 0, string(mode))
+    return printf("\<cmd>call %s(%d, %s)\<cr>",
+        VerticalJumpGo, is_fwd ? 1 : 0, string(mode))
 enddef
 
 def VerticalJumpGo(is_fwd: bool, mode: string)

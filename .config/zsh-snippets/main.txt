@@ -8,7 +8,7 @@ gpg --keyserver x-hkp://pool.sks-keyservers.net --recv-keys {{ID}}
 
 groff -man -Tascii {{program}}.man § check formatting of a manual page
 
-git bisect reset; git bisect start --term-old ok --term-new nope; git bisect nope {{new_commit}} && git bisect ok {{old_commit}}; git bisect run /tmp/bisect
+git bisect reset; git bisect start --term-old {{old_term}} --term-new {{new_term}}; git bisect {{new_term}} {{new_rev}} && git bisect {{old_term}} {{old_rev}} && chmod +x {{/tmp/bisecting_script}} && git bisect run {{/tmp/bisecting_script}}
 git bisect visualize --oneline
 git checkout $(git rev-list --max-parents=0 HEAD) § checkout initial commit
 git log --all --source -p -i -S § search for string across all commits
@@ -18,7 +18,7 @@ git reset --hard "$(git rev-parse HEAD)" § restore latest checked out commit
 git remote add upstream git://github.com/{{original-dev-username}}/{{repo-you-forked-from}}.git; git fetch upstream pull/{{PR-id}}/head:{{PR-branch}}; git checkout {{PR-branch}} § test PR
 
 cd ~/Vcs/tmux/ && { git stash -a; git stash clear; make clean; make distclean; \sh autogen.sh && ./configure && make; tput bel ;} § compile tmux (useful when git-bisecting)
-cd ~/Vcs/vim/ && { git stash -a; git stash clear; make clean; make distclean; sed -i 's/#ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ ; s/#CFLAGS = -g$/CFLAGS = -g -O0/ ; s@#STRIP = /bin/true@STRIP = /bin/true@' src/Makefile ; ./configure --enable-fail-if-missing; make; tput bel ;} § compile vim
+cd ~/Vcs/vim/ && { git stash -a; git stash clear; make clean; make distclean; sed -i 's/#ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ABORT_CFLAGS = -DABORT_ON_INTERNAL_ERROR/ ; s/#CFLAGS = -g$/CFLAGS = -g -O0/ ; s@#STRIP = /bin/true@STRIP = /bin/true@' src/Makefile ; ./configure --enable-fail-if-missing && make; tput bel ;} § compile vim
 
 strace -o {{/tmp/log}} {{cmd}} § run a command, and trace the new process
 strace -o {{/tmp/log}} -p $(pidof {{cmd}}) § trace an existing process; run `less +F /tmp/log` to read it
@@ -45,6 +45,8 @@ vboxmanage snapshot {{ubuntu}} take {{snapname}} --description "{{my snapshot}}"
 
 vimdiff =({{cmd1}}) =({{cmd2}}) § compare output of 2 commands
 vim -q =(!!) +cw § use last output to populate Vim qf list
+rm test.log; vim -u NONE -S runtest.vim test_{{filename}}.vim {{funcname}}; vim test.log § run a Vim test
+cd ~/Vcs/vim/ && { git stash -a; git stash clear; make clean; make distclean; sed -i '/fsanitize=address/s/^#//' src/Makefile; ./configure && make; tput bel ;} # ./src/vim -Nu NONE 2>asan.log § compile Vim to get ASAN log
 
 xdg-mime query filetype {{file}} § get the mimetype of a file
 xdg-mime query default {{mimetype}} § get the default application which handles a particular type of data

@@ -2568,7 +2568,7 @@ augroup FastLongWrappedLines | au!
     :def FastLongWrappedLines()
         # We only inspect the first 10  lines, otherwise the expression could be
         # too costly on a huge file.
-        if getline(1, 10)->map((_, v) => strchars(v, 1))->max() > 1000
+        if getline(1, 10)->map((_, v) => strchars(v, true))->max() > 1000
             setl nobreakindent nolinebreak
         else
             setl breakindent linebreak
@@ -2578,6 +2578,12 @@ augroup END
 
 # allow to soft-wrap after ) ] }
 set breakat+=)]}
+
+# Alternatives:
+#
+#     &showbreak = '↳ '
+#     &showbreak = '››› '
+&showbreak = '↪ '
 
 # allow `h` and `l` motion to move across lines
 set whichwrap=h,l
@@ -2814,14 +2820,32 @@ def Cm(): string
         # Press `C-g Tab` to complete the path.
         # Press `Enter`:  `/h` should be  completed with `/home`,  *and* another
         # completion should have been performed.
+        #
+        # In a file with only 2 lines "unexpected", and "une", pressing
+        # `C-x C-n Enter` should complete "une" into "unexpected".
         #}}}
         var seq = "\<c-y>"
-        var menu = complete_info(['items'])->get('items', [])->get(0, {})->get('menu', '')
+        var items = complete_info(['items'])->get('items', [])
+
+        # If the pum contains only 1 entry, and it's not selected, select it.{{{
+        #
+        # Otherwise,  the text  which was  inserted  in the  last completion  is
+        # removed, which is very jarring.
+        #}}}
+        var nothing_selected = complete_info(['selected'])->get('selected', -1) == -1
+        if len(items) == 1 && nothing_selected
+            seq = "\<c-n>" .. seq
+        endif
+
+        var menu = get(items, 0, {})->get('menu', '')
+        # for a file path, re-trigger completion for a next possible path component
         if menu == '[f]'
             seq ..= "\<cmd>call completion#file#complete()\<cr>"
+        # for an unexpanded snippet, trigger the expansion
         elseif menu[: 5] == '[snip]'
             seq ..= "\<cmd>call UltiSnips#ExpandSnippet()\<cr>"
         endif
+
         return seq
     endif
 
@@ -3476,7 +3500,7 @@ nno z. zszH
 #}}}
 nno <expr> z= <sid>ZEqual()
 
-def ZEqual(type = ''): any
+def ZEqual(type = ''): string
     if type == ''
         &opfunc = expand('<stack>')->matchstr('.*\zs<SNR>\w*')
         return 'g@l'
@@ -7497,7 +7521,7 @@ enddef
 # Move every function called from several scripts inside `vim-lg-lib`:
 #
 #     comment#object(
-#     qf#create_matches(
+#     qf#createMatches(
 #     qf#set_matches(
 #
 # Also, make  sure they  are self-contained.
@@ -8732,13 +8756,6 @@ enddef
 # executed intentionally.
 #
 # 117 -
-#
-# Because of  `Catch()`, we often  have incomplete error messages,  which `:WTF`
-# can't  parse.  Sure,  we can  press `coV`  and repeat  whatever triggered  the
-# issue; still, it's annoying.  Remove `Catch()` everywhere, and let Vim display
-# its stack trace?
-#
-# 118 -
 #
 # Check whether we should have sometimes  saved and restored `"0` in addition to
 # `""`. Look for `setreg(` everywhere.
