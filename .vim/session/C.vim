@@ -1,6 +1,6 @@
 let SessionLoad = 1
 if &cp | set nocp | endif
-let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
+let s:so_save = &g:so | let s:siso_save = &g:siso | setg so=0 siso=0 | setl so=-1 siso=-1
 let v:this_session=expand("<sfile>:p")
 silent only
 silent tabonly
@@ -23,24 +23,24 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
-arglocal
-%argdel
+argglobal
+balt ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim
 let s:l = 2 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-2
+keepjumps 2
 normal! 0
 lcd ~/wiki/c
 wincmd w
-arglocal
-%argdel
+argglobal
 if bufexists("~/wiki/c/c.md") | buffer ~/wiki/c/c.md | else | edit ~/wiki/c/c.md | endif
+balt ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
 let s:l = 12 - ((11 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
-exe s:l
+keepjumps exe s:l
 normal! zt
-12
+keepjumps 12
 normal! 0
 lcd ~/wiki/c
 wincmd w
@@ -48,7 +48,7 @@ wincmd w
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
-badd +1 ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
+badd +2 ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
 badd +0 ~/wiki/c/c.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
@@ -60,7 +60,7 @@ let s:sx = expand("<sfile>:p:r")."x.vim"
 if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
-let &so = s:so_save | let &siso = s:siso_save
+let &g:so = s:so_save | let &g:siso = s:siso_save
 nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad

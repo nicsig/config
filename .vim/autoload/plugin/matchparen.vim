@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 def plugin#matchparen#installDummyAutocmds()
     # We need to always have at least one autocmd listening to `CursorMoved`.{{{

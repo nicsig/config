@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') || stridx(&rtp, 'vim-submode') == -1
     finish

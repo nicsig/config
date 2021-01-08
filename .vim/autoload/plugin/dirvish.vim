@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 def plugin#dirvish#undoFtplugin()
     unlet! b:fex_last_line

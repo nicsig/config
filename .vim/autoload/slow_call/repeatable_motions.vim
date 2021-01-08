@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') || stridx(&rtp, 'vim-lg-lib') == -1
     finish
@@ -67,11 +67,11 @@ def VerticalJumpGo(is_fwd: bool, mode: string)
     if n <= 0 | return | endif
 
     # temporarily disable folds before we move
-    var fen_save: number
+    var fen_save: bool
     var winid: number
     var bufnr: number
     [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
-    &l:fen = 0
+    &l:fen = false
     try
         exe 'norm! ' .. (is_fwd ? n .. 'j' : n .. 'k')
     finally
@@ -182,7 +182,7 @@ enddef
 # Do *not* try to replace `<expr>` with `<cmd>`.{{{
 #
 #     $ vim -S <(cat <<'EOF'
-#         vim9script
+#         vim9
 #         ono <expr> <c-a> FuncA()
 #         def g:FuncA(): string
 #             feedkeys("\<plug>Sneak_f")

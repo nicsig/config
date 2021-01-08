@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 def plugin#plug#moveBetweenCommits(is_fwd = true) #{{{1
     # look for the next commit

@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') | finish | endif
 var loaded = true
@@ -586,7 +586,7 @@ def myfuncs#diffLines(bang: bool, alnum1: number, alnum2: number, option: string
         #
         #     (1 of 123): ...
         #}}}
-        sil noa exe 'lvim /' .. pat .. '/g %'
+        sil exe 'lvim /' .. pat .. '/g %'
         w:xl_match = matchadd('SpellBad', pat, 0)
     else
         echohl WarningMsg
@@ -628,7 +628,13 @@ def myfuncs#dumpWiki(argurl: string) #{{{1
         var url = trim(argurl, '/') .. '.wiki'
         var tempdir = tempname()->substitute('.*/\zs.\{-}', '', '')
         sil system('git clone ' .. shellescape(url) .. ' ' .. tempdir)
-        var files = glob(tempdir .. '/*', 0, 1)
+        var files = glob(tempdir .. '/*', false, true)
+        if empty(files)
+            echohl ErrorMsg
+            echom 'Could not find any wiki at:  ' .. url
+            echohl NONE
+            return
+        endif
         map(files, (_, v) => substitute(v, '^\C\V' .. tempdir .. '/', '', ''))
         filter(files, (_, v) => v !~ '\c_\=footer\%(\.md\)\=$')
 
@@ -818,7 +824,7 @@ def myfuncs#joinBlocks(first_reverse = false) #{{{1
     var fen_save = &l:fen
     var winid = win_getid()
     var bufnr = bufnr('%')
-    &l:fen = 0
+    &l:fen = false
     try
         if first_reverse
             sil exe ':' .. range_first_block .. 'd'
@@ -1098,7 +1104,7 @@ var RemoveTabsRep: func: string
 
 def myfuncs#searchTodo(where: string) #{{{1
     try
-        sil noa exe 'lvim /\CFIX' .. 'ME\|TO' .. 'DO/j '
+        sil exe 'lvim /\CFIX' .. 'ME\|TO' .. 'DO/j '
             .. (where == 'buffer' ? '%' : './**/*')
     catch /^Vim\%((\a\+)\)\=:E480:/
         echom 'no TO' .. 'DO or FIX' .. 'ME'

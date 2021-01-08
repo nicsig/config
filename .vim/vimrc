@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') | finish | endif
 var loaded = true
@@ -549,7 +549,9 @@ setenv('MANSECT', $MYMANSECT)
 setenv('MY_WIKI', $HOME .. '/wiki')
 
 if !isdirectory($XDG_RUNTIME_DIR .. '/vim')
-    mkdir($XDG_RUNTIME_DIR .. '/vim', 'p', 0700)
+    # `0o` is necessary  for the octal to decimal conversion  which is no longer
+    # automatic in Vim9.
+    mkdir($XDG_RUNTIME_DIR .. '/vim', 'p', 0o700)
 endif
 setenv('XDG_RUNTIME_VIM', $XDG_RUNTIME_DIR .. '/vim')
 # For more info about `$XDG_RUNTIME_DIR` and `/run`:
@@ -4784,7 +4786,7 @@ ono if <cmd>norm Vif<cr>
 ono af <cmd>norm Vaf<cr>
 
 def TextobjFunc(inside: bool)
-    var start = '^\C\s*\%(fu\%[nction]\|\%(export\s\+\)\=def\)\>'
+    var start = '^\C\s*\%(fu\%[nction](\@!\|\%(export\s\+\)\=def\)\>'
     var end = '^\C\s*\%(endfu\%[nction]\|enddef\)\s*$'
     var curline = getline('.')
 
@@ -4808,7 +4810,7 @@ def TextobjFunc(inside: bool)
         # That's because  – for  some reason  – `searchpair()`  fails to  find a
         # function when we're at its very beginning (and use the `c` flag).
         #
-        #     vim9script
+        #     vim9
         #     var lines =<< trim END
         #         def Func()
         #         enddef
@@ -4818,7 +4820,7 @@ def TextobjFunc(inside: bool)
         #     0~
         #     ✘
         #
-        #     vim9script
+        #     vim9
         #     var lines =<< trim END
         #         def Func()
         #         enddef
@@ -5388,6 +5390,7 @@ enddef
 
 # DumpWiki {{{2
 # Usage:
+#
 #     :DumpWiki https://github.com/oniony/TMSU/
 
 com -bar -nargs=1 DumpWiki myfuncs#dumpWiki(<q-args>)
@@ -5614,9 +5617,9 @@ com -bar -nargs=+ -complete=buffer InAButNotInB myfuncs#inANotInB(<f-args>)
 # This command isn't really needed (we have `v_mj`), but I keep it for educational
 # purpose.
 
-com -bar -bang -nargs=1 JoinBlocks &l:fen = 0
+com -bar -bang -nargs=1 JoinBlocks &l:fen = false
     | exe "sil keepp :.,.+<args>-1g/^/:''+<args>m . | :-j<bang>"
-    | &l:fen = 1
+    | &l:fen = true
 
 # OnlySelection {{{2
 
@@ -7522,7 +7525,7 @@ enddef
 #
 #     comment#object(
 #     qf#createMatches(
-#     qf#set_matches(
+#     qf#setMatches(
 #
 # Also, make  sure they  are self-contained.
 # They must not call  functions from one of our other  plugins.
@@ -8766,7 +8769,7 @@ enddef
 # To help you, here is a start:
 #
 #     " write this in /tmp/t.vim
-#     vim9script
+#     vim9
 #     set showcmd
 #
 #     nno <expr> <c-b> <sid>MyOp()
@@ -8826,6 +8829,7 @@ enddef
 # ---
 #
 # Use our saved qfl named `setreg`.
+
 
 
 

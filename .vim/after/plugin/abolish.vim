@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists(':Abolish') != 2
     finish

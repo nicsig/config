@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 # Init {{{1
 
@@ -24,11 +24,11 @@ enddef
 def plugin#fzf#registers(pfx: string) #{{{1
     var source = execute('reg')->split('\n')[1 :]
     # trim leading whitespace (useful to filter based on type; e.g. typing `^b` will leave only blockwise registers)
-    map(source, {_, v -> substitute(v, '^\s\+', '', '')})
+    map(source, (_, v) => substitute(v, '^\s\+', '', ''))
     # highlight register type
-    map(source, {_, v -> substitute(v, '^\s*\zs[bcl]', "\x1b[38;5;" .. s:COLORS.regtype .. "m&\x1b[0m", '')})
+    map(source, (_, v) => substitute(v, '^\s*\zs[bcl]', "\x1b[38;5;" .. COLORS.regtype .. "m&\x1b[0m", ''))
     # highlight register name
-    map(source, {_, v -> substitute(v, '"\S', "\x1b[38;5;" .. s:COLORS.regname .. "m&\x1b[0m", '')})
+    map(source, (_, v) => substitute(v, '"\S', "\x1b[38;5;" .. COLORS.regname .. "m&\x1b[0m", ''))
     fzf#wrap({
         source: source,
         options: '--ansi --nth=3.. --tiebreak=index +m',
