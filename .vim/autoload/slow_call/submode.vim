@@ -80,8 +80,8 @@ def DuplicateCharAround(above: bool): string
 # `c-y` ignores it.
 #}}}
 
-    var col = col('.')
-    var vcol = virtcol('.')
+    var col: number = col('.')
+    var vcol: number = virtcol('.')
 
     # Don't do anything fancy, unless it's really necessary.{{{
     #
@@ -96,8 +96,8 @@ def DuplicateCharAround(above: bool): string
         return "\<c-e>"
     endif
 
-    var line = search('\%' .. col .. 'c.*\S', (above ? 'b' : '') .. 'nW')
-    var char = getline(line)->matchstr('\%' .. col .. 'c.')
+    var line: number = search('\%' .. col .. 'c.*\S', (above ? 'b' : '') .. 'nW')
+    var char: string = getline(line)->matchstr('\%' .. col .. 'c.')
     return char
 enddef
 

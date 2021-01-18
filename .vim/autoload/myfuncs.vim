@@ -4,7 +4,7 @@ if exists('loaded') | finish | endif
 var loaded = true
 
 import {Catch, GetSelectionText, GetSelectionCoords, IsVim9, Opfunc} from 'lg.vim'
-const SID = execute('fu Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
+const SID: string = execute('fu Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 # Operators {{{1
 def myfuncs#opGrep(): string #{{{2
@@ -49,13 +49,19 @@ def myfuncs#GrepEx(pat: string, use_loclist: bool)
     #    > For Unix, braces are put around {expr} to allow for
     #    > concatenated commands.
     #}}}
-    var cmd = 'rg 2>/dev/null ' .. pat
+    var cmd: string = 'rg 2>/dev/null ' .. pat
     if use_loclist
-        sil var items = getloclist(0, {lines: systemlist(cmd), efm: '%f:%l:%c:%m'}).items
+        sil var items: list<dict<any>> = getloclist(0, {
+            lines: systemlist(cmd),
+            efm: '%f:%l:%c:%m'
+            }).items
         setloclist(0, [], ' ', {items: items, title: cmd})
         do <nomodeline> QuickFixCmdPost lwindow
     else
-        sil var items = getqflist({lines: systemlist(cmd), efm: '%f:%l:%c:%m'}).items
+        sil var items: list<dict<any>> = getqflist({
+            lines: systemlist(cmd),
+            efm: '%f:%l:%c:%m'
+            }).items
         setqflist([], ' ', {items: items, title: cmd})
         do <nomodeline> QuickFixCmdPost cwindow
     endif
@@ -70,8 +76,11 @@ def myfuncs#opGrepCore(type: string)
         return
     endif
 
-    var cmd = 'rg 2>/dev/null --fixed-strings ' .. shellescape(@")
-    sil var items = getqflist({lines: systemlist(cmd), efm: '%f:%l:%c:%m'}).items
+    var cmd: string = 'rg 2>/dev/null --fixed-strings ' .. shellescape(@")
+    sil var items: list<dict<any>> = getqflist({
+        lines: systemlist(cmd),
+        efm: '%f:%l:%c:%m'
+        }).items
     setqflist([], ' ', {items: items, title: cmd})
     do <nomodeline> QuickFixCmdPost cwindow
 enddef
@@ -92,7 +101,7 @@ def myfuncs#opReplaceWithoutYank(): string #{{{2
 enddef
 
 def myfuncs#opReplaceWithoutYankCore(type: string)
-    var reg = get(g:opfunc, 'register', '"')
+    var reg: string = get(g:opfunc, 'register', '"')
 
     var reg_save: dict<any>
     # Need to save/restore:{{{
@@ -100,7 +109,7 @@ def myfuncs#opReplaceWithoutYankCore(type: string)
     #    - `reg` in case we make it mutate with the next `setreg()`
     #    - `"-` and the numbered registers, because they will mutate when the selection is replaced
     #}}}
-    for regname in [reg] + ['-'] + range(10)->map((_, v) => string(v))
+    for regname in [reg] + ['-'] + range(10)->mapnew((_, v) => string(v))
         extend(reg_save, {[regname]: getreginfo(regname)})
     endfor
 
@@ -113,12 +122,12 @@ def myfuncs#opReplaceWithoutYankCore(type: string)
         HandleChar(reg)
     endif
 
-    keys(reg_save)->map((_, v) => setreg(v, reg_save[v]))
+    keys(reg_save)->mapnew((_, v) => setreg(v, reg_save[v]))
 enddef
 
 def HandleChar(reg: string)
-    var reginfo = getreginfo(reg)
-    var contents = get(reginfo, 'regcontents', [])
+    var reginfo: dict<any> = getreginfo(reg)
+    var contents: list<string> = get(reginfo, 'regcontents', [])
     if get(reginfo, 'regtype', '') == 'V' && !empty(contents)
         # Tweak linewise register so that it better fits inside a characterwise text.{{{
         #
@@ -159,6 +168,7 @@ def HandleChar(reg: string)
         exe 'keepj norm! `[v`]"' .. reg .. 'p'
     catch
         Catch()
+        return
     endtry
 enddef
 
@@ -170,7 +180,7 @@ def myfuncs#opTrimWs(type = ''): string #{{{2
     if &l:binary || &ft == 'diff'
         return ''
     endif
-    var range = ':' .. line("'[") .. ',' .. line("']")
+    var range: string = ':' .. line("'[") .. ',' .. line("']")
     exe range .. 'TW'
     return ''
 enddef
@@ -183,18 +193,18 @@ enddef
 var op_yank: dict<string>
 
 def OpYank(type: string)
-    var mods = 'keepj keepp'
-    var range = ':' .. line("'[") .. ',' .. line("']")
+    var mods: string = 'keepj keepp'
+    var range: string = ':' .. line("'[") .. ',' .. line("']")
 
-    var cmd = op_yank.what == 'g//' || op_yank.what == 'comments' ? 'g' : 'v'
-    var cml = &ft == 'vim'
+    var cmd: string = op_yank.what == 'g//' || op_yank.what == 'comments' ? 'g' : 'v'
+    var cml: string = &ft == 'vim'
         ?     '["#]'
         :     '\C\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\')
-    var pat = op_yank.what == 'code' || op_yank.what == 'comments'
+    var pat: string = op_yank.what == 'code' || op_yank.what == 'comments'
         ?     '^\s*' .. cml
         :     @/
 
-    var z_save = getreginfo('z')
+    var z_save: dict<any> = getreginfo('z')
     var yanked: list<string>
     try
         setreg('z', {})
@@ -276,7 +286,7 @@ def myfuncs#boxCreate(type = ''): string
         # Capture all the column positions in the current line matching a `|`
         # character:
         var col_pos: list<number>
-        var i = 0
+        var i: number = 0
         for char in getline('.')->split('\zs')
             i += 1
             if char == '|'
@@ -295,8 +305,8 @@ def myfuncs#boxCreate(type = ''): string
         BoxCreateBorder('bottom', col_pos)
 
         # Replace the remaining `|` with `│`:
-        var first_line = line("'{") + 2
-        var last_line = line("'}") - 2
+        var first_line: number = line("'{") + 2
+        var last_line: number = line("'}") - 2
         for l in range(first_line, last_line)
             for c in col_pos
                 exe 'norm! ' .. l .. 'G' .. c .. '|r│'
@@ -350,7 +360,7 @@ def BoxCreateSeparations()
     #
     # ... and store it inside `x` register.
     # So that we can paste it wherever we want.
-    var line = (line("'{") + 1)->getline()
+    var line: string = (line("'{") + 1)->getline()
     line = substitute(line, '\S', '├', '')
     line = substitute(line, '.*\zs\S', '┤', '')
     line = substitute(line, '┬', '┼', 'g')
@@ -366,9 +376,9 @@ def myfuncs#boxDestroy(type = ''): string
         return 'g@'
     endif
 
-    var lnum1 = line("'[")
-    var lnum2 = line("']")
-    var range = ':' .. lnum1 .. ',' .. lnum2
+    var lnum1: number = line("'[")
+    var lnum2: number = line("']")
+    var range: string = ':' .. lnum1 .. ',' .. lnum2
     # remove box (except pretty bars: │)
     exe 'sil ' .. range .. 's/[─┴┬├┤┼└┘┐┌]//ge'
 
@@ -386,7 +396,7 @@ def myfuncs#boxDestroy(type = ''): string
     # trim whitespace
     exe 'sil ' .. range .. 'TW'
     # remove empty lines
-    exe 'sil ' .. range .. '-g/^\s*$/d_'
+    exe 'sil ' .. range .. '-g/^\s*$/d _'
 
     append(lnum1 - 1, [''])
 
@@ -396,8 +406,8 @@ def myfuncs#boxDestroy(type = ''): string
 enddef
 
 def myfuncs#deleteMatchingLines(to_delete: string, reverse = false) #{{{1
-    var view = winsaveview()
-    var fen_save = &l:fen
+    var view: dict<number> = winsaveview()
+    var fen_save: bool = &l:fen
     setl nofen
 
     # Purpose:{{{
@@ -410,8 +420,8 @@ def myfuncs#deleteMatchingLines(to_delete: string, reverse = false) #{{{1
     # To achieve this goal, we need to find the nearest character which won't be
     # deleted, and set a mark on it.
     #}}}
-    var pos = getcurpos()
-    var global = reverse ? 'v' : 'g'
+    var pos: list<number> = getcurpos()
+    var global: string = reverse ? 'v' : 'g'
     var cml: string
     if &ft == 'vim'
         # don't delete a literal dictionary at the start of a line
@@ -419,32 +429,34 @@ def myfuncs#deleteMatchingLines(to_delete: string, reverse = false) #{{{1
     else
         cml = '\V' .. matchstr(&l:cms, '\S*\ze\s*%s')->escape('\') .. '\m'
     endif
-    var to_search = {
+    var to_search: dict<list<string>> = {
         empty: ['^\s*$', '^'],
         comments: ['^\s*' .. cml, '^\%(\s*' .. cml .. '\)\@!'],
         search: [@/, '^\%(.*' .. @/ .. '\m\)\@!'],
         }
-    var wont_be_deleted = to_search[to_delete][global == 'g' ? 1 : 0]
+    var wont_be_deleted: string = to_search[to_delete][global == 'g' ? 1 : 0]
     # necessary if the pattern matches on the current line, but the match starts
     # before our current position
     exe 'norm! ' .. (pos[1] == 1 ? '1|' : 'k$')
     search(wont_be_deleted, pos[1] == 1 ? 'c' : '')
     # if the match is on our original line, restore the column position
-    if line('.') == pos[1] | call setpos('.', pos) | endif
+    if line('.') == pos[1]
+        call setpos('.', pos)
+    endif
     norm! m'
     setpos('.', pos)
 
-    var mods = 'sil keepj keepp '
+    var mods: string = 'sil keepj keepp '
     var range: string
     if mode() =~ "^[vV\<c-v>]$"
-        var coords = GetSelectionCoords()
-        var lnum1 = coords.start[0]
-        var lnum2 = coords.end[0]
+        var coords: dict<list<number>> = GetSelectionCoords()
+        var lnum1: number = coords.start[0]
+        var lnum2: number = coords.end[0]
         range = ':' .. lnum1 .. ',' .. lnum2
     else
         range = ':%'
     endif
-    var pat = to_search[to_delete][0]
+    var pat: string = to_search[to_delete][0]
     # Don't use `/` as a delimiter.{{{
     #
     # It's tricky.
@@ -477,7 +489,7 @@ enddef
 
 def myfuncs#diffLines(bang: bool, alnum1: number, alnum2: number, option: string) #{{{1
     if option == '-h' || option == '--help'
-        var usage =<< trim END
+        var usage: list<string> =<< trim END
             :DiffLines lets you see and cycle through the differences between 2 lines
 
             usage:
@@ -504,7 +516,9 @@ def myfuncs#diffLines(bang: bool, alnum1: number, alnum2: number, option: string
         unlet! w:xl_match
     endif
 
-    if bang | return | endif
+    if bang
+        return
+    endif
 
     # if `alnum1 == alnum2`, it means `:DiffLines` was called without a range
     var lnum1: number
@@ -516,11 +530,11 @@ def myfuncs#diffLines(bang: bool, alnum1: number, alnum2: number, option: string
         lnum1 = alnum1
         lnum2 = alnum2
     endif
-    var line1 = getline(lnum1)
-    var line2 = getline(lnum2)
-    var chars1 = split(line1, '\zs')
-    var chars2 = split(line2, '\zs')
-    var min_chars = min([len(chars1), len(chars2)])
+    var line1: string = getline(lnum1)
+    var line2: string = getline(lnum2)
+    var chars1: list<string> = split(line1, '\zs')
+    var chars2: list<string> = split(line2, '\zs')
+    var min_chars: number = min([len(chars1), len(chars2)])
 
     # build a pattern matching the characters which are different
     var pat: string
@@ -622,21 +636,22 @@ def myfuncs#dumpWiki(argurl: string) #{{{1
         return
     endif
 
-    var x_save = getpos("'x")
-    var y_save = getpos("'y")
+    var x_save: list<number> = getpos("'x")
+    var y_save: list<number> = getpos("'y")
     try
-        var url = trim(argurl, '/') .. '.wiki'
-        var tempdir = tempname()->substitute('.*/\zs.\{-}', '', '')
+        var url: string = trim(argurl, '/') .. '.wiki'
+        var tempdir: string = tempname()->substitute('.*/\zs.\{-}', '', '')
         sil system('git clone ' .. shellescape(url) .. ' ' .. tempdir)
-        var files = glob(tempdir .. '/*', false, true)
+        var files: list<string> = glob(tempdir .. '/*', false, true)
         if empty(files)
             echohl ErrorMsg
             echom 'Could not find any wiki at:  ' .. url
             echohl NONE
             return
         endif
-        map(files, (_, v) => substitute(v, '^\C\V' .. tempdir .. '/', '', ''))
-        filter(files, (_, v) => v !~ '\c_\=footer\%(\.md\)\=$')
+        eval files
+            ->map((_, v) => substitute(v, '^\C\V' .. tempdir .. '/', '', ''))
+            ->filter((_, v) => v !~ '\c_\=footer\%(\.md\)\=$')
 
         norm! mx
         append('.', files + [''])
@@ -695,16 +710,15 @@ def myfuncs#gtfoOpenTerm(dir: string)
     if IS_TMUX
         sil system('tmux splitw -h -c ' .. shellescape(dir))
     elseif IS_X_RUNNING
-        sil system(LAUNCH_TERM .. ' ' .. shellescape(dir) .. ' &')
+        sil printf('xterm -e "cd %s; %s"', shellescape(dir), &shell)->system()
     else
         GtfoError('failed to open terminal')
     endif
 enddef
 
-const IS_TMUX = !empty($TMUX)
+const IS_TMUX: bool = !empty($TMUX)
 # terminal Vim running within a GUI environment
-const IS_X_RUNNING = !empty($DISPLAY) && $TERM != 'linux'
-const LAUNCH_TERM = 'urxvt -cd'
+const IS_X_RUNNING: bool = !empty($DISPLAY) && $TERM != 'linux'
 
 def myfuncs#HorizontalRulesTextobject(adverb: string) #{{{1
 # TODO: Consider moving all or most of your custom text-objects into a dedicated (libary?) plugin.
@@ -718,10 +732,10 @@ def myfuncs#HorizontalRulesTextobject(adverb: string) #{{{1
         if &ft == 'vim'
             comment = '["#]'
         else
-            var cml = matchstr(&l:cms, '\S*\ze\s*%s')
+            var cml: string = matchstr(&l:cms, '\S*\ze\s*%s')
             comment = '\V' .. escape(cml, '\') .. '\m'
         endif
-        var foldmarker = '\%(' .. split(&l:fmr, ',')->join('\|') .. '\)\d*'
+        var foldmarker: string = '\%(' .. split(&l:fmr, ',')->join('\|') .. '\)\d*'
         start =
             # just below a `---` line, or just below the start of a fold
             '^\s*' .. comment .. '\s*\%(---\|.*' .. foldmarker .. '\)\n\zs'
@@ -787,14 +801,14 @@ def myfuncs#inANotInB(argfileA: string, argfileB: string) #{{{1
     # see a  file anymore, only  its contents, which  removes some noise  in the
     # output.
     #}}}
-    var cmd = printf('diff -U $(wc -l < %s) %s %s | grep ''^-'' | sed ''s/^-//g''',
+    var cmd: string = printf('diff -U $(wc -l < %s) %s %s | grep ''^-'' | sed ''s/^-//g''',
         fileA,
         fileA,
         fileB
         )
-    sil var output = systemlist(cmd)
+    sil var output: list<string> = systemlist(cmd)
 
-    map(output, (_, v) => ({text: v}))
+    mapnew(output, (_, v) => ({text: v}))
     setloclist(0, [], ' ', {
         items: output,
         title: 'in  ' .. fileA .. '  but not in  ' .. fileB
@@ -806,8 +820,8 @@ def myfuncs#inANotInB(argfileA: string, argfileB: string) #{{{1
 enddef
 
 def myfuncs#joinBlocks(first_reverse = false) #{{{1
-    var line1 = line("'<")
-    var line2 = line("'>")
+    var line1: number = line("'<")
+    var line2: number = line("'>")
 
     if (line2 - line1 + 1) % 2 == 1
         echohl ErrorMsg
@@ -816,14 +830,14 @@ def myfuncs#joinBlocks(first_reverse = false) #{{{1
         return
     endif
 
-    var end_first_block = line1 + (line2 - line1 + 1) / 2 - 1
-    var range_first_block = ':' .. line1 .. ',' .. end_first_block
-    var range_second_block = ':' .. (end_first_block + 1) .. ',' .. line2
-    var mods = 'sil keepj keepp '
+    var end_first_block: number = line1 + (line2 - line1 + 1) / 2 - 1
+    var range_first_block: string = ':' .. line1 .. ',' .. end_first_block
+    var range_second_block: string = ':' .. (end_first_block + 1) .. ',' .. line2
+    var mods: string = 'sil keepj keepp '
 
-    var fen_save = &l:fen
-    var winid = win_getid()
-    var bufnr = bufnr('%')
+    var fen_save: bool = &l:fen
+    var winid: number = win_getid()
+    var bufnr: number = bufnr('%')
     &l:fen = false
     try
         if first_reverse
@@ -839,6 +853,7 @@ def myfuncs#joinBlocks(first_reverse = false) #{{{1
 
     catch
         Catch()
+        return
     finally
         if winbufnr(winid) == bufnr
             var tabnr: number
@@ -864,13 +879,13 @@ def myfuncs#longDataJoin(type = ''): string #{{{1
         return 'g@'
     endif
 
-    var range = ':' .. line("'[") .. ',' .. line("']")
+    var range: string = ':' .. line("'[") .. ',' .. line("']")
 
-    var bullets = '[-*+]'
-    var join_bulleted_list = getline('.') =~ '^\s*' .. bullets
+    var bullets: string = '[-*+]'
+    var join_bulleted_list: bool = getline('.') =~ '^\s*' .. bullets
 
     try
-        var mods = 'keepj keepp '
+        var mods: string = 'keepj keepp '
         if join_bulleted_list
             sil exe mods .. range .. 's/^\s*\zs' .. bullets .. '\s*//'
             sil exe mods .. range .. '-s/$/,/'
@@ -884,6 +899,7 @@ def myfuncs#longDataJoin(type = ''): string #{{{1
         endif
     catch
         Catch()
+        return ''
     endtry
     return ''
 enddef
@@ -893,18 +909,18 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
         &opfunc = 'myfuncs#longDataSplit'
         return 'g@l'
     endif
-    var line = getline('.')
+    var line: string = getline('.')
 
     # This pattern is useful to split long stacktrace such as:{{{
     #
     #     Error detected while processing function doc#mapping#main[52]..<SNR>205_handle_special_filetype[11]..<SNR>205_use_manpage[21]..function doc#mapping#main[52]..<SNR>205_handle_special_filetype[11]..<SNR>205_use_manpage:
     #}}}
-    var stack_pat = '\%(^\s*Error detected while .*\)\@<=[.]\@1<!\.\.[.]\@!'
-    var is_stacktrace = match(line, stack_pat) > -1
+    var stack_pat: string = '\%(^\s*Error detected while .*\)\@<=[.]\@1<!\.\.[.]\@!'
+    var is_stacktrace: bool = match(line, stack_pat) > -1
     if is_stacktrace
-        var reg_save = getreginfo('"')
-        var indent = matchstr(line, '^\s*')
-        var splitted = line
+        var reg_save: dict<any> = getreginfo('"')
+        var indent: string = matchstr(line, '^\s*')
+        var splitted: list<string> = line
             ->substitute(stack_pat, '\n' .. indent .. '..', 'g')
             ->split('\n')
         setreg('"', splitted)
@@ -913,8 +929,8 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
         return ''
     endif
 
-    var is_list_or_dict = match(line, '\m\[.*\]\|{.*}') > -1
-    var has_comma = stridx(line, ',') > -1
+    var is_list_or_dict: bool = match(line, '\m\[.*\]\|{.*}') > -1
+    var has_comma: bool = stridx(line, ',') > -1
     if is_list_or_dict
         first_line_indent = repeat(' ', match(line, '\S'))
         # If the  first item in the  list/dictionary begins right after  the opening
@@ -931,10 +947,10 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
 
     elseif has_comma
         # We use `strdisplaywidth()` because the indentation could contain tabs.
-        var indent_lvl = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
-        var indent_txt = repeat(' ', indent_lvl)
+        var indent_lvl: string = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
+        var indent_txt: string = repeat(' ', indent_lvl)
         sil keepj keepp s/\m\ze\S/- /e
-        var pat = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
+        var pat: string = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
         LongDataSplitRep = () => "\n" .. indent_txt .. '- '
         sil exe 'keepj keepp s/' .. pat .. '/\=LongDataSplitRep()/ge'
     endif
@@ -946,29 +962,29 @@ var contline: string
 var LongDataSplitRep: func: string
 
 def myfuncs#onlySelection(lnum1: number, lnum2: number) #{{{1
-    var lines = getline(lnum1, lnum2)
+    var lines: list<string> = getline(lnum1, lnum2)
     sil keepj :%d _
     setline(1, lines)
 enddef
 
 def myfuncs#pluginInstall(url: string) #{{{1
-    var pat = 'https\=://github.com/\(.\{-}\)/\(.*\)/\='
+    var pat: string = 'https\=://github.com/\(.\{-}\)/\(.*\)/\='
     if url !~ pat
         echo 'invalid url'
         return
     endif
-    var rep = 'Plug ''\1/\2'''
-    var plug_line = substitute(url, pat, rep, '')
-    var to_install = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
+    var rep: string = 'Plug ''\1/\2'''
+    var plug_line: string = substitute(url, pat, rep, '')
+    var to_install: string = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
 
-    var win_orig = win_getid()
+    var win_orig: number = win_getid()
     vnew | e $MYVIMRC
     if &l:ro
         echom 'cannot install plugin (vimrc is readonly)'
         return
     endif
 
-    var win_vimrc = win_getid()
+    var win_vimrc: number = win_getid()
 
     cursor(1, 1)
     search('^\s*Plug', 'cW')
@@ -982,7 +998,7 @@ def myfuncs#pluginInstall(url: string) #{{{1
     # I don't know how to detect an open fold, and then how to move to the first
     # line.
     norm! zv
-    var plugin_on_current_line = ''
+    var plugin_on_current_line: string = ''
 
     while to_install >? plugin_on_current_line && search('plug#end()', 'nW') > 0
         # test if there's still another 'Plug ...' line afterwards, AND move the
@@ -1007,7 +1023,7 @@ def myfuncs#pluginInstall(url: string) #{{{1
     exe plug_line
     # now vim-plug can install our new plugin
     PlugInstall
-    var win_plug = win_getid()
+    var win_plug: number = win_getid()
 
     win_gotoid(win_vimrc) | q
 
@@ -1021,7 +1037,7 @@ enddef
 
 def myfuncs#pluginGlobalVariables(keyword: string) #{{{1
     if keyword == ''
-        var usage =<< trim END
+        var usage: list<string> =<< trim END
             usage:
 
                 :PluginGlobalVariables ulti
@@ -1030,7 +1046,7 @@ def myfuncs#pluginGlobalVariables(keyword: string) #{{{1
         echo join(usage, "\n")
         return
     endif
-    var variables = deepcopy(g:)
+    var variables: list<string> = deepcopy(g:)
         ->filter((k) => k =~ '\C\V' .. escape(keyword, '\')
                      && k !~ '\%(loaded\|did_plugin_\)')
         ->items()
@@ -1041,9 +1057,9 @@ def myfuncs#pluginGlobalVariables(keyword: string) #{{{1
 enddef
 
 def myfuncs#removeTabs(line1: number, line2: number) #{{{1
-    var view = winsaveview()
-    var mods = 'sil keepj keepp'
-    var range = ':' .. line1 .. ',' .. line2
+    var view: dict<number> = winsaveview()
+    var mods: string = 'sil keepj keepp'
+    var range: string = ':' .. line1 .. ',' .. line2
     # Why not simply `\t`?{{{
     #
     # We need  the cursor to be  positioned on the screen  position *before* the
@@ -1060,9 +1076,9 @@ def myfuncs#removeTabs(line1: number, line2: number) #{{{1
     #
     # Use this pattern instead:
     #
-    #     var pat = '\%(^\s*\)\@!\&\(.\)\t'
+    #     var pat: string = '\%(^\s*\)\@!\&\(.\)\t'
     #}}}
-    var pat = '^\t\|\(.\)\t'
+    var pat: string = '^\t\|\(.\)\t'
     # Don't remove a leading tab in a heredoc.{{{
     #
     # They have a special meaning in bash and zsh.
@@ -1081,7 +1097,7 @@ def myfuncs#removeTabs(line1: number, line2: number) #{{{1
     # markdown file, where the leading `> ` is concealed because `'cole'` is 3.
     #}}}
     RemoveTabsRep = () => synstack('.', col('.'))
-        ->map((_, v) => synIDattr(v, 'name'))
+        ->mapnew((_, v) => synIDattr(v, 'name'))
         ->match('heredoc') != -1
             ? submatch(0)
             : submatch(1) .. repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))
@@ -1117,13 +1133,14 @@ def myfuncs#searchTodo(where: string) #{{{1
     # Because we've prefixed  `:lvim` with `:noa`, our autocmd which  opens a qf
     # window hasn't kicked in.  We must manually open it.
     do <nomodeline> QuickFixCmdPost lwindow
-    if &bt != 'quickfix' | return | endif
+    if &bt != 'quickfix'
+        return
+    endif
 
-    #                                        ┌ Tweak the text of each entry when there's a line
-    #                                        │ with just `todo` or `fixme`;
-    #                                        │ replace it with the text of the next non empty line instead
-    #                                        │
-    var items = getloclist(0)->map((_, v) => SearchTodoText(v))
+    var items: list<dict<any>> = getloclist(0)
+        # Tweak the text of  each entry when there's a line  with just `todo` or
+        # `fixme`.  Replace it with the text of the next non empty line instead.
+        ->map((_, v) => SearchTodoText(v))
     # remove indentation (reading lines with various indentation levels is jarring)
     map(items, (_, v) => extend(v, {text: substitute(v.text, '^\s*', '', '')}))
     setloclist(0, [], 'r', {items: items, title: 'FIX' .. 'ME & TO' .. 'DO'})
@@ -1140,7 +1157,7 @@ enddef
 def SearchTodoText(dict: dict<any>): dict<any>
     # if the text only contains `fixme` or `todo`
     if dict.text =~ '\c\%(fixme\|todo\):\=\s*\%(' .. split(&l:fmr, ',')[0] .. '\)\=\s*$'
-        var bufnr = dict.bufnr
+        var bufnr: number = dict.bufnr
         # get the text of the next line, which is not empty (contains at least one keyword character)
         # Why using `readfile()` instead of `getbufline()`?{{{
         #
@@ -1149,14 +1166,14 @@ def SearchTodoText(dict: dict<any>): dict<any>
         # There's no guarantee that all buffers in which a fixme/todo is present
         # is currently listed.
         #}}}
-        var lines = bufname(bufnr)->readfile(0, dict.lnum + 4)[-4 :]
+        var lines: list<string> = bufname(bufnr)->readfile(0, dict.lnum + 4)[-4 :]
         dict.text = filter(lines, (_, v) => v =~ '\k')->get(0, '')
     endif
     return dict
 enddef
 
 def myfuncs#sendToTabPage(vcount: number) #{{{1
-    var curtab = tabpagenr()
+    var curtab: number = tabpagenr()
     var count: number
     if vcount == curtab
         redraw
@@ -1185,14 +1202,14 @@ def myfuncs#sendToTabPage(vcount: number) #{{{1
         # We  still need  to figure out  how to  preview all the  windows opened  in the
         # selected tab page.
         #}}}
-        var input = input('send to tab page nr: ')
+        var input: string = input('send to tab page nr: ')
         if input == '$'
             count = tabpagenr('$')
         elseif input =~ '$-\+$'
-            var offset = matchstr(input, '-\+')->len()
+            var offset: number = matchstr(input, '-\+')->len()
             count = tabpagenr('$') - offset
         elseif input =~ '$-\d\+$'
-            var offset = matchstr(input, '-\d\+')->str2nr()
+            var offset: number = matchstr(input, '-\d\+')->str2nr()
             count = tabpagenr('$') - offset
         elseif input =~ '^[+-]\+$'
             count = tabpagenr() + count(input, '+') - count(input, '-')
@@ -1209,9 +1226,9 @@ def myfuncs#sendToTabPage(vcount: number) #{{{1
             count = matchstr(input, '\d\+')->str2nr()
         endif
     endif
-    var bufnr = bufnr('%')
+    var bufnr: number = bufnr('%')
     # let's save the winid of the window we want to move
-    var closedwinid = win_getid()
+    var closedwinid: number = win_getid()
     # Do *not* try to close it now.{{{
     #
     # Closing a tab page changes the positions of the next ones.
@@ -1232,15 +1249,15 @@ def myfuncs#sendToTabPage(vcount: number) #{{{1
     endtry
     # open new window displaying the buffer from the closed window in the target tab page
     exe 'sb ' .. bufnr
-    var curwinid = win_getid()
+    var curwinid: number = win_getid()
     win_gotoid(closedwinid)
     close
     win_gotoid(curwinid)
 enddef
 
 def myfuncs#sendToServer() #{{{1
-    sil undo | var contains_ansi = search("\e", 'n') | sil redo
-    var bufname = expand('%:p')
+    sil undo | var contains_ansi: bool = search("\e", 'n') != 0 | sil redo
+    var bufname: string = expand('%:p')
     var file: string
     if bufname == '' || bufname =~ '^\C/proc/'
         file = tempname()
@@ -1257,7 +1274,7 @@ def myfuncs#sendToServer() #{{{1
         file = bufname
     endif
 
-    var cmd = 'vim --remote-tab ' .. shellescape(file)
+    var cmd: string = 'vim --remote-tab ' .. shellescape(file)
     sil system(cmd)
 
     if v:shell_error
@@ -1273,7 +1290,7 @@ def myfuncs#sendToServer() #{{{1
         sil system(cmd)
     endif
 
-    var msg = printf('the %s was sent to the Vim server',
+    var msg: string = printf('the %s was sent to the Vim server',
         bufname == '' ? 'buffer' : 'file')
     echohl ModeMsg
     echom msg
@@ -1299,7 +1316,9 @@ def myfuncs#trans(first_time = true)
     trans_tempfile = tempname()
 
     if first_time
-        var text = mode() =~ "^[vV\<c-v>]$" ? GetSelectionText()->join("\n") : expand('<cword>')
+        var text: string = mode() =~ "^[vV\<c-v>]$"
+            ? GetSelectionText()->join("\n")
+            : expand('<cword>')
         if text == ''
             return
         endif
@@ -1309,8 +1328,12 @@ def myfuncs#trans(first_time = true)
     endif
 
     # remove characters which cause issue during the translation
-    var garbage = '["`*]' .. (!empty(&l:cms) ? '\|' .. matchstr(&l:cms, '\S*\ze\s*%s') : '')
-    var chunk = substitute(trans_chunks[0], garbage, '', 'g')
+    var garbage: string = '["`*]' .. (
+        !empty(&l:cms)
+            ? '\|' .. matchstr(&l:cms, '\S*\ze\s*%s')
+            : ''
+        )
+    var chunk: string = substitute(trans_chunks[0], garbage, '', 'g')
 
     # reduce excessive whitespace
     chunk = substitute(chunk, '\s\+', ' ', 'g')
@@ -1324,7 +1347,7 @@ def myfuncs#trans(first_time = true)
     # probably because the job writes in a buffer, and the buffer is written
     # to the file after the callback has been invoked
     # use `exit_cb` instead
-    var opts = {
+    var opts: dict<any> = {
         out_io: 'file',
         out_name: trans_tempfile,
         err_io: 'null',
@@ -1399,7 +1422,7 @@ def myfuncs#webpageRead(url: string) #{{{1
         echo 'w3m is not installed'
         return
     endif
-    var tempfile = tempname() .. '/webpage'
+    var tempfile: string = tempname() .. '/webpage'
     exe 'tabe ' .. tempfile
     # Alternative shell command:{{{
     #
@@ -1413,19 +1436,21 @@ def myfuncs#webpageRead(url: string) #{{{1
 enddef
 
 def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
-    var flags = {
+    var flags: dict<any> = {
         min_length: matchstr(qargs, '-min_length\s\+\zs\d\+'),
         weighted: stridx(qargs, '-weighted') != -1,
         }
 
-    var words = getline(line1, line2)
+    var words: list<string> = getline(line1, line2)
         ->join("\n")
         ->split('\%(\%(\k\@!\|\d\).\)\+')
 
-    var min_length = !empty(flags.min_length) ? flags.min_length : 4
+    var min_length: number = !empty(flags.min_length)
+        ? flags.min_length
+        : 4
 
     # open vertical viewport to display future results
-    var tempfile = tempname() .. '/WordFrequency'
+    var tempfile: string = tempname() .. '/WordFrequency'
     exe 'lefta :' .. (&columns / 3) .. 'vnew ' .. tempfile
     setl bh=delete bt=nofile nobl noswf wfw nowrap pvw
 
@@ -1462,18 +1487,19 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
         # We multiply  it by  a number which  should be equal  to the  amount of
         # characters which we would save if  we created an abbreviation for that
         # word.
-        var weighted_freq = mapnew(freq, (k, v) => v * ( strchars(k, true) -
-            # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
-            strchars(k, true) == 4
-            ? 2
-              # if a word ends with an 's', and the same word without the ending
-              # 's'  is also  present,  then its  abbreviation  will probably  4
-              # characters long (because it's probably a plural)
-              : k[-1 : -1] == 's' && keys(freq)->index(k) >= 0
-              ?     4
-              # otherwise, by default, an abbreviation will probably be 3 characters long
-              :     3
-            ))
+        var weighted_freq: dict<number> = mapnew(freq, (k, v) =>
+            v * ( strchars(k, true) -
+                # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
+                strchars(k, true) == 4
+                ? 2
+                  # if a word ends with an 's', and the same word without the ending
+                  # 's'  is also  present,  then its  abbreviation  will probably  4
+                  # characters long (because it's probably a plural)
+                  : k[-1] == 's' && keys(freq)->index(k) >= 0
+                  ?     4
+                  # otherwise, by default, an abbreviation will probably be 3 characters long
+                  :     3
+                ))
         for item in items(weighted_freq)->sort((a, b) => b[1] - a[1])
             join(item)->append('$')
         endfor

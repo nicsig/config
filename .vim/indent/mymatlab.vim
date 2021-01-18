@@ -22,7 +22,9 @@ setl indk=0=elsei
 let b:did_indent = 1
 let b:undo_indent = get(b:, 'undo_indent', 'exe') .. '| set inde< indk<'
 
-if exists('*s:get_indent') | finish | endif
+if exists('*s:get_indent')
+    finish
+endif
 
 " Init {{{1
 
@@ -56,7 +58,9 @@ unlet! s:OPEN_KEYWORDS
 
 fu s:get_indent() abort "{{{1
     let prevlnum = prevnonblank(v:lnum - 1)
-    if !prevlnum | return 0 | endif
+    if !prevlnum
+        return 0
+    endif
     let unclosedkwd_lvl = s:get_unclosed_lvl(prevlnum, s:KWD_PAT)
     let final_indent = indent(prevlnum) + unclosedkwd_lvl * shiftwidth()
 
@@ -67,9 +71,13 @@ fu s:get_indent() abort "{{{1
     let g = 0 | while g < 999 | let g += 1
         let lnum = prevnonblank(lnum - 1)
         let indent = indent(lnum)
-        if lnum <= 0 || indent > previndent | break | endif
+        if lnum <= 0 || indent > previndent
+            break
+        endif
         let past_unclosedbracket_lvl += s:get_unclosed_lvl(lnum, s:BRACKET_PAT)
-        if indent < previndent | break | endif
+        if indent < previndent
+            break
+        endif
     endwhile
     let cur_unclosedbracket_lvl += past_unclosedbracket_lvl
 
@@ -104,7 +112,9 @@ fu s:submatches_counts(lnum, pat) abort "{{{1
         let flags = 'pz' .. (g == 1 ? 'c' : '')
         let [lnum, col, submatch] = searchpos(a:pat, flags, a:lnum)
         " if there is no match now, there won't be any match in the future; stop counting
-        if !submatch | break | endif
+        if !submatch
+            break
+        endif
         if !s:is_comment_or_string(lnum, col)
             " `submatch` will always be 2 or 3{{{
             "

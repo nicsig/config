@@ -7,7 +7,7 @@ var loaded = true
 
 import Catch from 'lg.vim'
 
-const SFILE = expand('<sfile>:p')
+const SFILE: string = expand('<sfile>:p')
 
 # Define some motions {{{1
 #       Why define them here? Why not in vimrc?{{{
@@ -48,7 +48,7 @@ noremap <expr> gk <sid>VerticalJumpRhs(v:false)
 noremap <expr> gj <sid>VerticalJumpRhs()
 
 def VerticalJumpRhs(is_fwd = true): string
-    var mode = mode(1)
+    var mode: string = mode(1)
 
     if mode == "\<c-v>"
         mode = "\<c-v>\<c-v>"
@@ -63,8 +63,10 @@ def VerticalJumpGo(is_fwd: bool, mode: string)
         norm! m'
     endif
 
-    var n = GetJumpHeight(is_fwd)
-    if n <= 0 | return | endif
+    var n: number = GetJumpHeight(is_fwd)
+    if n <= 0
+        return
+    endif
 
     # temporarily disable folds before we move
     var fen_save: bool
@@ -91,18 +93,18 @@ def VerticalJumpGo(is_fwd: bool, mode: string)
 enddef
 
 def GetJumpHeight(is_fwd: bool): number
-    var vcol = '\%' .. virtcol('.') .. 'v'
-    var flags = is_fwd ? 'nW' : 'bnW'
+    var vcol: string = '\%' .. virtcol('.') .. 'v'
+    var flags: string = is_fwd ? 'nW' : 'bnW'
 
     # a line where there IS a character in the same column,
     # then one where there is NOT
-    var lnum1 = search(vcol .. '.*\n\%(.*' .. vcol .. '.\)\@!', flags)
+    var lnum1: number = search(vcol .. '.*\n\%(.*' .. vcol .. '.\)\@!', flags)
 
     # a line where there is NOT a character in the same column,
     # then one where there IS
-    var lnum2 = search('^\%(.*' .. vcol .. '.\)\@!.*\n.*\zs' .. vcol, flags)
+    var lnum2: number = search('^\%(.*' .. vcol .. '.\)\@!.*\n.*\zs' .. vcol, flags)
 
-    var lnums = filter([lnum1, lnum2], (_, v) => v > 0)
+    var lnums: list<number> = filter([lnum1, lnum2], (_, v) => v > 0)
 
     return is_fwd
         ?     min(lnums) - line('.')
@@ -173,7 +175,7 @@ enddef
 #
 # We'll give this information to the function via:
 #
-#     repmap#make#is_repeating()
+#     repmap#make#isRepeating()
 #}}}
 
 # These  mappings  must  be  installed  *before*  `repmap#make#repeatable()`  is
@@ -192,7 +194,7 @@ enddef
 #         def g:FuncB()
 #             feedkeys("\<plug>Sneak_f")
 #         enddef
-#         var lines =<< trim END
+#         var lines: list<string> =<< trim END
 #             some X text
 #             some X text
 #         END
@@ -238,9 +240,9 @@ def Fts(cmd: string): string
     # before returning the keys to press.  In  the other, it doesn't need to ask
     # anything.
     #}}}
-    if repmap#make#is_repeating()
-        var move_fwd = cmd =~# '\C[fts]'
-        #              └ When we press `;` after `fx`, how is `cmd` obtained?{{{
+    if repmap#make#isRepeating()
+        var move_fwd: bool = cmd =~ '\C[fts]'
+        #                    └ When we press `;` after `fx`, how is `cmd` obtained?{{{
         #
         # Here's what happens approximately:
         #
@@ -272,14 +274,13 @@ enddef
 
 repmap#make#repeatable({
     mode: '',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-                 {bwd: 'F',  fwd: 'f' },
-                 {bwd: 'SS', fwd: 'ss'},
-                 {bwd: 'T',  fwd: 't' },
-               ],
-    })
+        {bwd: 'F',  fwd: 'f' },
+        {bwd: 'SS', fwd: 'ss'},
+        {bwd: 'T',  fwd: 't' },
+        ]})
 
 # Make other motions repeatable {{{1
 
@@ -306,7 +307,7 @@ repmap#make#repeatable({
 # so I just repeat the same keys for 'bwd' and 'fwd'
 repmap#make#repeatable({
     mode: 'n',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [{bwd: '!e', fwd: '!e'}]
     })
@@ -314,72 +315,68 @@ repmap#make#repeatable({
 # move tabpage / rotate window
 repmap#make#repeatable({
     mode: 'n',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-                 {bwd: '<t', fwd: '>t'},
-                 {bwd: '<c-w>R', fwd: '<c-w>r'},
-             ]
-    })
+        {bwd: '<t', fwd: '>t'},
+        {bwd: '<c-w>R', fwd: '<c-w>r'},
+        ]})
 
 # built-in motions
 repmap#make#repeatable({
     mode: '',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-                 {bwd: "['", fwd: "]'"},
-                 {bwd: '["', fwd: ']"'},
-                 {bwd: '[#', fwd: ']#'},
-                 {bwd: '[(', fwd: '])'},
-                 {bwd: '[*', fwd: ']*'},
-                 {bwd: '[/', fwd: ']/'},
-                 {bwd: '[M', fwd: ']M'},
-                 {bwd: '[S', fwd: ']S'},
-                 {bwd: '[]', fwd: ']['},
-                 {bwd: '[c', fwd: ']c'},
-                 {bwd: '[m', fwd: ']m'},
-                 {bwd: '[{', fwd: ']}'},
-             ]
-    })
+        {bwd: "['", fwd: "]'"},
+        {bwd: '["', fwd: ']"'},
+        {bwd: '[#', fwd: ']#'},
+        {bwd: '[(', fwd: '])'},
+        {bwd: '[*', fwd: ']*'},
+        {bwd: '[/', fwd: ']/'},
+        {bwd: '[M', fwd: ']M'},
+        {bwd: '[S', fwd: ']S'},
+        {bwd: '[]', fwd: ']['},
+        {bwd: '[c', fwd: ']c'},
+        {bwd: '[m', fwd: ']m'},
+        {bwd: '[{', fwd: ']}'},
+        ]})
 
 # custom motions
 repmap#make#repeatable({
     mode: 'n',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-                 {bwd: '<l', fwd: '>l'},
-                 {bwd: '<q', fwd: '>q'},
-                 {bwd: '[<c-l>', fwd: ']<c-l>'},
-                 {bwd: '[<c-q>', fwd: ']<c-q>'},
-                 {bwd: '[a', fwd: ']a'},
-                 {bwd: '[b', fwd: ']b'},
-                 {bwd: '[e', fwd: ']e'},
-                 {bwd: '[f', fwd: ']f'},
-                 {bwd: '[l', fwd: ']l'},
-                 {bwd: '[q', fwd: ']q'},
-                 {bwd: '[s', fwd: ']s'},
-                 {bwd: '[t', fwd: ']t'},
-                 {bwd: '[;', fwd: '];'},
-                 {bwd: 'g,', fwd: 'g;'},
-             ]
-    })
+        {bwd: '<l', fwd: '>l'},
+        {bwd: '<q', fwd: '>q'},
+        {bwd: '[<c-l>', fwd: ']<c-l>'},
+        {bwd: '[<c-q>', fwd: ']<c-q>'},
+        {bwd: '[a', fwd: ']a'},
+        {bwd: '[b', fwd: ']b'},
+        {bwd: '[e', fwd: ']e'},
+        {bwd: '[f', fwd: ']f'},
+        {bwd: '[l', fwd: ']l'},
+        {bwd: '[q', fwd: ']q'},
+        {bwd: '[s', fwd: ']s'},
+        {bwd: '[t', fwd: ']t'},
+        {bwd: '[;', fwd: '];'},
+        {bwd: 'g,', fwd: 'g;'},
+        ]})
 
 repmap#make#repeatable({
     mode: '',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-                 {bwd: '[`', fwd: ']`'},
-                 {bwd: '[h', fwd: ']h'},
-                 {bwd: '[r', fwd: ']r'},
-                 {bwd: '[u', fwd: ']u'},
-                 {bwd: '[U', fwd: ']U'},
-                 {bwd: '[z', fwd: ']z'},
-                 {bwd: 'gk', fwd: 'gj'},
-             ]
-    })
+        {bwd: '[`', fwd: ']`'},
+        {bwd: '[h', fwd: ']h'},
+        {bwd: '[r', fwd: ']r'},
+        {bwd: '[u', fwd: ']u'},
+        {bwd: '[U', fwd: ']U'},
+        {bwd: '[z', fwd: ']z'},
+        {bwd: 'gk', fwd: 'gj'},
+        ]})
 
 # Why `nxo` for the mode?  Why not simply an empty string?{{{
 #
@@ -412,38 +409,36 @@ repmap#make#repeatable({
 #}}}
 repmap#make#repeatable({
     mode: 'nxo',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-                 {bwd: '[-', fwd: ']-'},
-                 {bwd: 'g%', fwd: '%'},
-             ]
-    })
+        {bwd: '[-', fwd: ']-'},
+        {bwd: 'g%', fwd: '%'},
+        ]})
 
 # toggle settings
 repmap#make#repeatable({
     mode: 'n',
-    buffer: 0,
+    buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-                 {bwd: '[oC', fwd: ']oC'},
-                 {bwd: '[oD', fwd: ']oD'},
-                 {bwd: '[oL', fwd: ']oL'},
-                 {bwd: '[oS', fwd: ']oS'},
-                 {bwd: '[oc', fwd: ']oc'},
-                 {bwd: '[od', fwd: ']od'},
-                 {bwd: '[oh', fwd: ']oh'},
-                 {bwd: '[oi', fwd: ']oi'},
-                 {bwd: '[ol', fwd: ']ol'},
-                 {bwd: '[on', fwd: ']on'},
-                 {bwd: '[op', fwd: ']op'},
-                 {bwd: '[oq', fwd: ']oq'},
-                 {bwd: '[os', fwd: ']os'},
-                 {bwd: '[ot', fwd: ']ot'},
-                 {bwd: '[ov', fwd: ']ov'},
-                 {bwd: '[ow', fwd: ']ow'},
-                 {bwd: '[oy', fwd: ']oy'},
-                 {bwd: '[oz', fwd: ']oz'},
-             ]
-    })
+        {bwd: '[oC', fwd: ']oC'},
+        {bwd: '[oD', fwd: ']oD'},
+        {bwd: '[oL', fwd: ']oL'},
+        {bwd: '[oS', fwd: ']oS'},
+        {bwd: '[oc', fwd: ']oc'},
+        {bwd: '[od', fwd: ']od'},
+        {bwd: '[oh', fwd: ']oh'},
+        {bwd: '[oi', fwd: ']oi'},
+        {bwd: '[ol', fwd: ']ol'},
+        {bwd: '[on', fwd: ']on'},
+        {bwd: '[op', fwd: ']op'},
+        {bwd: '[oq', fwd: ']oq'},
+        {bwd: '[os', fwd: ']os'},
+        {bwd: '[ot', fwd: ']ot'},
+        {bwd: '[ov', fwd: ']ov'},
+        {bwd: '[ow', fwd: ']ow'},
+        {bwd: '[oy', fwd: ']oy'},
+        {bwd: '[oz', fwd: ']oz'},
+        ]})
 

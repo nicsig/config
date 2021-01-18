@@ -112,7 +112,7 @@ def SetRecipes()
     # Instead of removing some problematic  recipes, we should add recipes which
     # we know not to cause any issue.
     # IOW, a whitelist is more reliable than a blacklist.
-    var problematic_recipes = [{
+    var problematic_recipes: list<dict<any>> = [{
         noremap: 0,
         expr_filter: ['operator#sandwich#kind() is# "replace"'],
         kind: ['replace', 'textobj'],
@@ -122,7 +122,7 @@ def SetRecipes()
         }]
 
     for recipe in problematic_recipes
-        var idx = index(g:sandwich#recipes, recipe)
+        var idx: number = index(g:sandwich#recipes, recipe)
         if idx != -1
             remove(g:sandwich#recipes, idx)
         endif

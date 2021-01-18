@@ -372,7 +372,7 @@ let g:UltiSnipsEnableSnipMate = 0
 "
 " Tab is NOT a printable character, but UltiSnips seems to unmap it as if it was one.
 "}}}
-let g:UltiSnipsMappingsToIgnore = ['mycompletion#snippet_or_complete']
+let g:UltiSnipsMappingsToIgnore = ['mycompletion#snippetOrComplete']
 " For more info: `:h UltiSnips-warning-smapping`
 " Edit: It doesn't seem necessary anymore, but I'll keep it anyway, just in case...
 

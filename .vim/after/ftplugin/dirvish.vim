@@ -6,9 +6,9 @@ let &l:stl = '%!g:statusline_winid == win_getid() ? "%y %F%<%=%l/%L " : "%y %F"'
 " Mappings {{{1
 " -m {{{2
 
-nno <buffer><nowait> -m <cmd>call fex#print_metadata('manual')<cr>
-xno <buffer><nowait> -m <c-\><c-n><cmd>call fex#print_metadata('manual', 'vis')<cr>
-nno <buffer><nowait> -M <cmd>call fex#print_metadata('auto')<cr>
+nno <buffer><nowait> -m <cmd>call fex#printMetadata()<cr>
+xno <buffer><nowait> -m <c-\><c-n><cmd>call fex#printMetadata()<cr>
+nno <buffer><nowait> -M <cmd>call fex#printMetadata(v:true)<cr>
 
 " C-n  C-p {{{2
 
@@ -23,7 +23,7 @@ nunmap <buffer> <c-p>
 " gh {{{2
 
 " Map `gh` to toggle dot-prefixed entries.
-nno <buffer><nowait> gh <cmd>call fex#toggle_dot_entries()<cr>
+nno <buffer><nowait> gh <cmd>call fex#toggleDotEntries()<cr>
 
 " h    l {{{2
 
@@ -42,7 +42,7 @@ nmap <buffer><nowait><silent> q gq
 
 " tp {{{2
 
-nno <buffer><nowait> tp <cmd>call fex#trash_put()<cr>
+nno <buffer><nowait> tp <cmd>call fex#trashPut()<cr>
 "}}}1
 " Teardown {{{1
 

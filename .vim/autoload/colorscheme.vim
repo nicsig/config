@@ -6,7 +6,7 @@ import Termname from 'lg/term.vim'
 import Derive from 'lg/syntax.vim'
 
 # map greyscale colors from decimal to hexadecimal
-const DEC2HEX = {
+const DEC2HEX: dict<string> = {
     232: '#080808',
     233: '#121212',
     234: '#1c1c1c',
@@ -57,7 +57,7 @@ def colorscheme#set() #{{{2
     #}}}
     g:seoul256_default_lightness = 253
 
-    var seoul_bg = get(g:, 'last_color_scheme', g:seoul256_default_lightness)
+    var seoul_bg: number = get(g:, 'last_color_scheme', g:seoul256_default_lightness)
     if seoul_bg >= 233 && seoul_bg <= 239
         # What's this `g:seoul256_background`?{{{
         #
@@ -180,13 +180,17 @@ def colorscheme#customize() #{{{2
     #                 ^-------------------^
     #                 must exist, otherwise an error is raised
     #}}}
-    if &bg == 'light' | g:seoul256_background = 237 | endif
+    if &bg == 'light'
+        g:seoul256_background = 237
+    endif
 
     colorscheme#cursorline(&bg == 'dark') # (re)set `'cul'`
 
     # the cursor does not seem to need any customization in the GUI;
     # seoul256 correctly sets its color depending on which version we're using (light vs dark)
-    if has('gui_running') | return | endif
+    if has('gui_running')
+        return
+    endif
 
     # If we start Vim with a dark color scheme, the cursor must be visible.{{{
     #
@@ -273,7 +277,10 @@ enddef
 var culopt_save: string
 
 def colorscheme#saveLastVersion() #{{{2
-    var lines = ['vim9script', 'g:last_color_scheme = ' .. get(g:, 'seoul256_current_bg', 253)]
+    var lines: list<string> = [
+        'vim9script',
+        'g:last_color_scheme = ' .. get(g:, 'seoul256_current_bg', 253)
+        ]
     writefile(lines, $HOME .. '/.vim/colors/my/last_version.vim')
 enddef
 # }}}1
@@ -378,7 +385,8 @@ def StatuslineNC() #{{{3
     # optional `{mode}` argument, to ask for  the value the attribute would have
     # if we were in an arbitrary mode (here `cterm`).
     #}}}
-    var bg = GetAttributes('TabLine', 'cterm').bg->str2nr() + (&bg == 'light' ? -6 : 6)
+    var bg: number = GetAttributes('TabLine', 'cterm').bg->str2nr()
+        + (&bg == 'light' ? -6 : 6)
     if has('gui_running') || &tgc
         # The value of `bg` may not be a key in the dictionary `s:DEC2HEX`.{{{
         #
@@ -412,14 +420,14 @@ enddef
 def TabLine() #{{{3
     # the purpose of this function is to remove the underline value from the HG `TabLine`
 
-    var attributes = {
+    var attributes: dict<number> = {
         fg: 0,
         bg: 0,
         bold: 0,
         reverse: 0,
         }
 
-    map(attributes, (k) => hlID('Tabline')->synIDtrans()->synIDattr(k))
+    mapnew(attributes, (k) => hlID('Tabline')->synIDtrans()->synIDattr(k))
 
     var cmd: string
     if has('gui_running')
@@ -433,13 +441,15 @@ def TabLine() #{{{3
     # For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
     # Tabline  doesn't have  any  value in  gui.  In  this  case, executing  the
     # command will fail.
-    if attributes.fg == 0 | return | endif
+    if attributes.fg == 0
+        return
+    endif
     exe printf(cmd, attributes.fg)
 enddef
 
 def Title() #{{{3
     # Purpose: We need some HGs to get the bold, italic, bold+italic styles in a markdown header.
-    var title_fg = GetAttributes('Title').fg
+    var title_fg: string = GetAttributes('Title').fg
     if has('gui_running')
         # In gVim, `seoul256` makes a markdown Title bold by default.
         # It prevents us from using the bold style.
@@ -535,12 +545,16 @@ fu User() abort "{{{3
     endif
 
     let style1 = (attributes.bold ? 'bold,' : '') .. (attributes.reverse ? '' : 'reverse')
-    if style1 == '' | return | endif
+    if style1 == ''
+        return
+    endif
 
     exe printf(cmd1, style1, attributes.fg, attributes.bg)
 
     let style2 = (attributes.bold ? 'bold,' : '') .. (attributes.reverse ? 'reverse' : '')
-    if style2 == '' | return | endif
+    if style2 == ''
+        return
+    endif
 
     let todo_fg = hlID('Todo')->synIDtrans()->synIDattr('fg')
     exe printf(cmd2, style2, todo_fg, attributes.bg)
@@ -632,9 +646,9 @@ def StyledComments() #{{{2
     else
         bg = string(nbg)
     endif
-    var comment_fg = GetAttributes('Comment').fg
-    var statement_fg = GetAttributes('Statement').fg
-    var repeat_fg = GetAttributes('Repeat').fg
+    var comment_fg: string = GetAttributes('Comment').fg
+    var statement_fg: string = GetAttributes('Statement').fg
+    var repeat_fg: string = GetAttributes('Repeat').fg
 
     # the only relevant attributes in GUI are `gui`, `guifg` and `guibg`
     if has('gui_running')
@@ -831,21 +845,25 @@ fu Cursor() abort "{{{2
 endfu
 
 def RestoreCursorColor() #{{{2
-    var seq = get(g:cursor_color.light, get(g:, 'termname', '') == 'st-256color' ? 'st' : 'other')
+    var seq: string = get(
+        g:cursor_color.light, get(g:, 'termname', '') == 'st-256color'
+            ? 'st'
+            : 'other'
+        )
     seq = "\e]12;" .. seq .. "\x07"
     &t_te ..= seq
 enddef
 # }}}1
 # Utilities {{{1
 def GetAttributes(hg: string, amode = ''): dict<string> #{{{2
-    var attributes = {
+    var attributes: dict<number> = {
         fg: 0,
         bg: 0,
         bold: 0,
         reverse: 0,
         }
-    var mode = amode == '' ? [] : [amode]
-    return map(attributes, (k) =>
+    var mode: list<string> = amode == '' ? [] : [amode]
+    return mapnew(attributes, (k) =>
         call('synIDattr', [hlID(hg)->synIDtrans(), k] + mode))
 enddef
 

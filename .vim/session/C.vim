@@ -23,9 +23,9 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
-argglobal
-balt ~/.vim/plugged/vim-debug/ftplugin/timer_info.vim
-let s:l = 2 - ((0 * winheight(0) + 0) / 0)
+arglocal
+%argdel
+let s:l = 2 - ((1 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -33,9 +33,9 @@ keepjumps 2
 normal! 0
 lcd ~/wiki/c
 wincmd w
-argglobal
+arglocal
+%argdel
 if bufexists("~/wiki/c/c.md") | buffer ~/wiki/c/c.md | else | edit ~/wiki/c/c.md | endif
-balt ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
 let s:l = 12 - ((11 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
@@ -49,7 +49,7 @@ exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
 badd +2 ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
-badd +0 ~/wiki/c/c.md
+badd +12 ~/wiki/c/c.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

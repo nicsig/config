@@ -1,7 +1,9 @@
 vim9 noclear
 
 def plugin#ultisnips#cancelExpansion(): string #{{{1
-    if !get(g:, 'expanding_snippet', 0) | return '' | endif
+    if !get(g:, 'expanding_snippet', false)
+        return ''
+    endif
     try
         py3 UltiSnips_Manager._current_snippet_is_done()
     # Vim(py3):IndexError: pop from empty list
@@ -47,7 +49,7 @@ def plugin#ultisnips#cancelExpansion(): string #{{{1
 enddef
 
 def plugin#ultisnips#toggleAutotrigger() #{{{1
-    var augroup_name = 'UltiSnips_AutoTrigger'
+    var augroup_name: string = 'UltiSnips_AutoTrigger'
     if exists('#' .. augroup_name)
         exe 'au! ' .. augroup_name
         exe 'aug! ' .. augroup_name

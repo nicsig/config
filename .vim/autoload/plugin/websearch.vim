@@ -13,7 +13,7 @@ def plugin#websearch#main()
     # I care about the search being  more predictable, even when it contains special
     # characters.
     #}}}
-    var query = getline('.')->substitute('"', '', 'g')
+    var query: string = getline('.')->substitute('"', '', 'g')
     # An ampersand can truncate the query.{{{
     #
     #     $ xdg-open 'https://www.startpage.com/do/search?query=foo & bar'

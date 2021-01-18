@@ -138,7 +138,6 @@ plug#begin('~/.vim/plugged')
 Plug 'lacygoill/vim-movesel'
 Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
 Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
-Plug 'lacygoill/vim-autoread', {'branch': 'assimil'}
 Plug 'lacygoill/vim-cheat', {'branch': 'assimil'}
 Plug 'lacygoill/vim-cwd'
 Plug 'lacygoill/vim-debug'
@@ -324,12 +323,11 @@ augroup DelaySlowCall | au!
     #     :q
     #     $ vim /tmp/log
     #}}}
-    var events =<< trim END
+    var events: list<string> =<< trim END
         CursorHold
         InsertEnter
         WinEnter
         CmdWinEnter
-        BufReadPost
         BufWritePost
         QuickFixCmdPost
         TextYankPost
@@ -427,7 +425,7 @@ def StyledComments()
     # Including `help` in this list fixes the issue, because `'cole'` is applied
     # from an autocmd listening to `BufWinEnter`.
     #}}}
-    styled_comments_filetypes =<< trim END
+    STYLED_COMMENTS_FILETYPES =<< trim END
         awk
         c
         cheat
@@ -454,11 +452,11 @@ def StyledComments()
         zsh
     END
     augroup StyledComments | au!
-        au FileType * if index(styled_comments_filetypes, expand('<amatch>')) >= 0
+        au FileType * if index(STYLED_COMMENTS_FILETYPES, expand('<amatch>')) >= 0
             |     sil! Fold()
             |     sil! UndoFtplugin()
             | endif
-        au Syntax * if index(styled_comments_filetypes, expand('<amatch>')) >= 0
+        au Syntax * if index(STYLED_COMMENTS_FILETYPES, expand('<amatch>')) >= 0
             |     sil! Syntax()
             | endif
         # Purpose:{{{
@@ -473,10 +471,10 @@ def StyledComments()
         # We need to re-install our custom autocmd *after* the default one.
         #}}}
         au SourcePost $VIMRUNTIME/syntax/syntax.vim StyledComments()
-            | getwininfo()->map((_, v) => win_execute(v.winid, 'do StyledComments Syntax'))
+            | getwininfo()->mapnew((_, v) => win_execute(v.winid, 'do StyledComments Syntax'))
     augroup END
 enddef
-var styled_comments_filetypes: list<string>
+var STYLED_COMMENTS_FILETYPES: list<string>
 StyledComments()
 
 # Gui {{{2
@@ -657,7 +655,9 @@ set backspace=indent,eol,nostop
 # As  a result,  `vim-session`  won't  load the  last  session automatically  on
 # startup, because of this guard:
 #
-#     if v:servername isnot# 'VIM' | return | endif
+#     if v:servername != 'VIM'
+#         return
+#     endif
 #
 # And we can't send files remotely with `--remote` and friends.
 # And we can't access the `+` clipboard.
@@ -788,7 +788,7 @@ def ReinstallClearedHg()
     #}}}
     var seen: dict<number>
     for info in getwininfo()
-        var ft = getbufvar(info.bufnr, '&ft')
+        var ft: string = getbufvar(info.bufnr, '&ft')
         if !has_key(seen, ft)
             seen[ft] = 1
             if ft != ''
@@ -841,7 +841,7 @@ else
     au MyColorScheme VimLeavePre * colorscheme#saveLastVersion()
 
     # try to restore the exact version of the last color scheme used
-    var last_color_file = $HOME .. '/.vim/colors/my/last_version.vim'
+    var last_color_file: string = $HOME .. '/.vim/colors/my/last_version.vim'
     if filereadable(last_color_file)
         exe 'so ' .. last_color_file
     endif
@@ -1175,7 +1175,7 @@ set history=1000
 &includeexpr = expand('<SID>') .. 'Inex()'
 
 def Inex(): string
-    var line = getline('.')
+    var line: string = getline('.')
 
     # the path could contain an environment variable surrounded by curly brackets
     # What's the purpose of the second branch?{{{
@@ -1192,16 +1192,16 @@ def Inex(): string
     #     ${HOME}/bin/README.md
     #     ^
     #}}}
-    var pat = '\m\C${\f\+}' .. '\V' .. v:fname .. '\m\|${\V' .. v:fname .. '}\f\+\|\%' .. col('.') .. 'c${\f\+}\f\+'
-    #                            │
-    #                            └ `v:fname` could contain a tilde
-    var cursor_after = '\m\%(.*\%' .. col('.') .. 'c\)\@='
-    var cursor_before = '\m\%(\%' .. col('.') .. 'c.*\)\@<='
-    var pat1 = cursor_after .. pat .. cursor_before
-    var pat2 = cursor_after .. '=\f\+' .. cursor_before
+    var pat: string = '\m\C${\f\+}' .. '\V' .. v:fname .. '\m'
+        .. '\|${\V' .. v:fname .. '}\f\+'
+        .. '\|\%' .. col('.') .. 'c${\f\+}\f\+'
+    var cursor_after: string = '\m\%(.*\%' .. col('.') .. 'c\)\@='
+    var cursor_before: string = '\m\%(\%' .. col('.') .. 'c.*\)\@<='
+    var pat1: string = cursor_after .. pat .. cursor_before
+    var pat2: string = cursor_after .. '=\f\+' .. cursor_before
     if line =~ pat
         pat1 = matchstr(line, pat1)
-        var env = matchstr(pat1, '\w\+')
+        var env: string = matchstr(pat1, '\w\+')
         return substitute(pat1, '${' .. env .. '}', eval('$' .. env), '')
 
     # for lines such as `set option=path`, Vim tries to open `option=path` instead of `path`
@@ -1666,7 +1666,7 @@ set nostartofline
 #    - the qf window is opened; in a qf filetype plugin:
 #
 #         if !exists('swb_save')
-#             var swb_save = &swb
+#             var swb_save: string = &swb
 #             set swb=
 #         endif
 #
@@ -1931,6 +1931,15 @@ endif
 &t_Ts = "\e[9m"
 &t_Te = "\e[29m"
 
+# fd, fe {{{3
+
+# Let's make sure that `FocusGained` and `FocusLost` work in xterm+tmux.
+# See: `:h xterm-focus-event`.
+if &term =~ 'tmux' && !!getenv('XTERM_VERSION') && &t_fd == ''
+    exe "set t_fd=\e[?1004l"
+    exe "set t_fe=\e[?1004h"
+endif
+
 # kB {{{3
 
 if $TERM =~ '^st\%(-256color\)$'
@@ -2149,7 +2158,7 @@ augroup END
 #}}}
 
 if !isdirectory($HOME .. '/.vim')
-    mkdir($HOME .. '/.vim', '', 0700)
+    mkdir($HOME .. '/.vim', '', 0o700)
 endif
 
 # Put all swap files in `~/.vim/tmp/swap/`.{{{
@@ -2187,7 +2196,7 @@ set directory=$HOME/.vim/tmp/swap//
 
 # make sure the swap directory exists
 if !isdirectory(&directory)
-    mkdir(&directory, 'p', 0700)
+    mkdir(&directory, 'p', 0o700)
 endif
 
 # enable persistent undo
@@ -2198,7 +2207,7 @@ set undodir=$HOME/.vim/tmp/undo
 
 # make sure the undo directory exists
 if !isdirectory(&undodir)
-    mkdir(&undodir, 'p', 0700)
+    mkdir(&undodir, 'p', 0o700)
 endif
 
 set backup
@@ -2209,7 +2218,7 @@ set backupskip+=/run/*
 
 # make sure the backup directory exists
 if !isdirectory(&backupdir)
-    mkdir(&backupdir, 'p', 0700)
+    mkdir(&backupdir, 'p', 0o700)
 endif
 
 # timeout {{{2
@@ -2570,7 +2579,7 @@ augroup FastLongWrappedLines | au!
     :def FastLongWrappedLines()
         # We only inspect the first 10  lines, otherwise the expression could be
         # too costly on a huge file.
-        if getline(1, 10)->map((_, v) => strchars(v, true))->max() > 1000
+        if getline(1, 10)->mapnew((_, v) => strchars(v, true))->max() > 1000
             setl nobreakindent nolinebreak
         else
             setl breakindent linebreak
@@ -2724,10 +2733,10 @@ enddef
 
 cno <c-r>` <c-r><c-r>=<sid>InsertCodespan()<cr>
 def InsertCodespan(): string
-    var line = getline('.')
-    var col = col('.')
-    var pat = '.*`\zs.*\%' .. col .. 'c.\{-}\ze`\|\%' .. col .. 'c`\zs.\{-}\ze`'
-    var codespan = matchstr(line, pat)
+    var line: string = getline('.')
+    var col: number = col('.')
+    var pat: string = '.*`\zs.*\%' .. col .. 'c.\{-}\ze`\|\%' .. col .. 'c`\zs.\{-}\ze`'
+    var codespan: string = matchstr(line, pat)
     return substitute(codespan, '^:', '', '')
 enddef
 # }}}2
@@ -2826,20 +2835,20 @@ def Cm(): string
         # In a file with only 2 lines "unexpected", and "une", pressing
         # `C-x C-n Enter` should complete "une" into "unexpected".
         #}}}
-        var seq = "\<c-y>"
-        var items = complete_info(['items'])->get('items', [])
+        var seq: string = "\<c-y>"
+        var items: list<dict<string>> = complete_info(['items'])->get('items', [])
 
         # If the pum contains only 1 entry, and it's not selected, select it.{{{
         #
         # Otherwise,  the text  which was  inserted  in the  last completion  is
         # removed, which is very jarring.
         #}}}
-        var nothing_selected = complete_info(['selected'])->get('selected', -1) == -1
+        var nothing_selected: bool = complete_info(['selected'])->get('selected', -1) == -1
         if len(items) == 1 && nothing_selected
             seq = "\<c-n>" .. seq
         endif
 
-        var menu = get(items, 0, {})->get('menu', '')
+        var menu: string = get(items, 0, {})->get('menu', '')
         # for a file path, re-trigger completion for a next possible path component
         if menu == '[f]'
             seq ..= "\<cmd>call completion#file#complete()\<cr>"
@@ -2852,7 +2861,7 @@ def Cm(): string
     endif
 
     # If we press Enter on a commented line with nothing in it, we want to delete everything.
-    var cml = matchstr(&l:cms, '\S*\ze\s*%s')
+    var cml: string = matchstr(&l:cms, '\S*\ze\s*%s')
 
     if empty(cml)
         return "\<c-g>u\<cr>"
@@ -2932,16 +2941,18 @@ def IndentBeforeBackslash(): string
         return '\'
     endif
 
-    var has_text_before_cursor = getline('.')->matchstr('.*\%' .. col('.') .. 'c') =~ '\S'
-    var prev_indent = (line('.') - 1)->getline()->matchstr('^\s*\\')
-    var next_indent = (line('.') + 1)->getline()->matchstr('^\s*\\')
+    var has_text_before_cursor: bool = getline('.')
+        ->matchstr('.*\%' .. col('.') .. 'c')
+        =~ '\S'
+    var prev_indent: string = (line('.') - 1)->getline()->matchstr('^\s*\\')
+    var next_indent: string = (line('.') + 1)->getline()->matchstr('^\s*\\')
 
     if has_text_before_cursor
     || empty(prev_indent) && empty(next_indent)
         return '\'
     endif
 
-    var current_indent = empty(next_indent)
+    var current_indent: string = empty(next_indent)
         ?     prev_indent
         :     next_indent
 
@@ -3000,8 +3011,8 @@ nno <expr> <space>. <sid>RepeatLastEditOnLastChangedText()
 def RepeatLastEditOnLastChangedText(): string
     # put the last changed text inside the search register, so that we can refer
     # to it with the text-object `gn`
-    var changed = getreg('"', 1, 1)
-    if empty(changed)
+    var changed: list<string> = getreg('"', true, true)
+    if changed == []
         return ''
     endif
 
@@ -3065,15 +3076,15 @@ def RunCurrentLine(type: string)
     if &ft == type
         return
     endif
-    var dir = $HOME .. '/.vim/tmp'
-    var file = dir .. '/' .. type
-    var max_history = 100
+    var dir: string = $HOME .. '/.vim/tmp'
+    var file: string = dir .. '/' .. type
+    var max_history: number = 100
     if !isdirectory(dir)
-        mkdir(dir, 'p', 0700)
+        mkdir(dir, 'p', 0o700)
     endif
     # make sure the history doesn't exceed `max_history` entries
     if filereadable(file)
-        var lines = readfile(file)
+        var lines: list<string> = readfile(file)
         if len(lines) > max_history
             writefile(lines[: max_history - 1], file)
         endif
@@ -3097,7 +3108,7 @@ nno Uc <cmd>call <sid>ClearUndoHistory()<cr>
 
 def ClearUndoHistory()
     # `:h clear-undo`
-    var ul_save = &l:ul
+    var ul_save: number = &l:ul
     setl ul=-1
     getline('.')->setline('.')
     &ul = ul_save
@@ -3113,7 +3124,7 @@ augroup ChangenrSave | au!
 augroup END
 
 def ChangenrSave()
-    var bufnr = bufnr('%')
+    var bufnr: number = bufnr('%')
     if has_key(changenr_save, bufnr)
         return
     endif
@@ -3141,7 +3152,7 @@ var changenr_save: dict<number>
 # Don't use `UU`; I think we used it in the past, but pressed it by accident too often.
 nno UM <cmd>call <sid>UndoChangesDuringCurrentSession()<cr>
 def UndoChangesDuringCurrentSession()
-    var bufnr = bufnr('%')
+    var bufnr: number = bufnr('%')
     if !has_key(changenr_save, bufnr) || changenr_save[bufnr] == changenr()
         return
     endif
@@ -3250,7 +3261,7 @@ def CloseFugitiveWindow()
     #
     # As you can see, there are a few pitfalls; so don't try to be smart, be simple.
     #}}}
-    var winid = Win_getid('#')
+    var winid: number = Win_getid('#')
     close
     win_gotoid(winid)
 enddef
@@ -3327,10 +3338,10 @@ def InstallVimrcMappings()
 enddef
 
 def TryToEditPluginConfig(cmd: string)
-    var pat = '\C^\s*\<Plug\s\+''.\{-}/\%(vim-\)\=\zs.\{-}\ze\%([.-]vim\)\=/\='''
-    var plugin = getline('.')->matchstr(pat)
+    var pat: string = '\C^\s*\<Plug\s\+''.\{-}/\%(vim-\)\=\zs.\{-}\ze\%([.-]vim\)\=/\='''
+    var plugin: string = getline('.')->matchstr(pat)
 
-    if empty(plugin)
+    if plugin == ''
         try
             exe 'norm! ' .. cmd .. 'zv'
         catch
@@ -3338,8 +3349,8 @@ def TryToEditPluginConfig(cmd: string)
             return
         endtry
     else
-        var split = cmd[0] == 'g' ? 'edit' : cmd[1] == 'g' ? 'tabedit' : 'split'
-        var files = [$HOME .. '/.vim/plugin/' .. plugin .. '.vim']
+        var split: string = cmd[0] == 'g' ? 'edit' : cmd[1] == 'g' ? 'tabedit' : 'split'
+        var files: list<string> = [$HOME .. '/.vim/plugin/' .. plugin .. '.vim']
         files += [$HOME .. '/.vim/after/plugin/' .. plugin .. '.vim']
         files += [$HOME .. '/.vim/autoload/slow_call/' .. plugin .. '.vim']
         filter(files, (_, v) => filereadable(v))
@@ -3348,7 +3359,7 @@ def TryToEditPluginConfig(cmd: string)
             return
         endif
 
-        var a_file_is_opened = false
+        var a_file_is_opened: bool = false
         for f in files
             exe (a_file_is_opened ? 'sp ' : split) .. f
             norm! zv
@@ -3395,8 +3406,11 @@ nno ]; <cmd>call <sid>JumpMyLocations('f')<cr>
 nno [; <cmd>call <sid>JumpMyLocations('b')<cr>
 
 def JumpMyLocations(direction: string)
-    var prop = prop_find({type: 'MyLocations', skipstart: true}, direction)
-    if empty(prop)
+    var prop: dict<any> = prop_find({
+        type: 'MyLocations',
+        skipstart: true
+        }, direction)
+    if prop == {}
         return
     endif
     cursor(prop.lnum, prop.col)
@@ -3543,7 +3557,7 @@ enddef
 var zd_cmd: string
 
 def Zd(_: string)
-    var cms_save = &l:cms
+    var cms_save: string = &l:cms
     try
         if IsVim9()
             setl cms=#%s
@@ -3645,7 +3659,7 @@ nno <bar>c <cmd>call <sid>RunCompiler()<cr>
 def RunCompiler()
     if &l:mp =~ '^\m\Cdesktop-file-validate\>'
         sil update
-        sil var out = system('desktop-file-validate ' .. expand('%:p')->shellescape())
+        sil var out: string = system('desktop-file-validate ' .. expand('%:p')->shellescape())
         if out == ''
             echo '[desktop-file-validate] OK'
         else
@@ -3654,7 +3668,7 @@ def RunCompiler()
         return
     endif
 
-    var is_shellcheck = &l:mp =~ '\m\C^shellcheck\>'
+    var is_shellcheck: bool = &l:mp =~ '\m\C^shellcheck\>'
     update
     # TODO: This causes the shell command output  to be printed in the terminal,
     # which we  can see once  we quit  Vim.  Try to  run `'mp'` via  `:cexpr system()`
@@ -3670,7 +3684,7 @@ def RunCompiler()
 enddef
 
 def GxShellcheck()
-    var error_number = getline('.')->matchstr('.\{-}|.\{-}\zs\d\+\ze\s*|')
+    var error_number: string = getline('.')->matchstr('.\{-}|.\{-}\zs\d\+\ze\s*|')
     # `:ShellCheckWiki` is defined only in a shell buffer (i.e. in the previous window).
     wincmd p
     exe 'ShellCheckWiki ' .. error_number
@@ -3730,7 +3744,7 @@ nno =<c-p> m''[=']``
 nno =d <cmd>call <sid>FixDisplay()<cr>
 
 def FixDisplay()
-    var view = winsaveview()
+    var view: dict<number> = winsaveview()
     redraw! | redraws! | redrawt
 
     if &l:diff
@@ -3764,7 +3778,7 @@ def FixDisplay()
     exe 'do filetype ' .. &ft
 
     # recompute folds
-    var _ = foldlevel(1)
+    foldlevel(1)
     # and their titles
     do <nomodeline> BufWinEnter
 
@@ -3837,12 +3851,14 @@ nno =m <cmd>call <sid>FixMacro()<cr>
 var fix_macro_c: string
 def FixMacro()
     # don't open several windows if we press `=m` several times consecutively
-    if !empty(fix_macro_c) | return | endif
-    var c = getchar()
+    if !empty(fix_macro_c)
+        return
+    endif
+    var c: any = getchar()
     if type(c) != v:t_number
         return
     endif
-    var char = nr2char(c)
+    var char: string = nr2char(c)
     if char !~ '[[:lower:]]'
         return
     endif
@@ -3891,7 +3907,7 @@ enddef
 # dump it in a buffer.
 nno -a <cmd>call <sid>UnicodeGa()<cr>
 def UnicodeGa()
-    var out = execute('UnicodeName', 'silent!')->substitute('\s*$', '', '')
+    var out: string = execute('UnicodeName', 'silent!')->substitute('\s*$', '', '')
     setreg('o', [out], 'c')
     UnicodeName
 enddef
@@ -3899,7 +3915,7 @@ enddef
 # We remap `-8` to `g8` for consistency.
 nno -8 <cmd>call <sid>GetCharbyte()<cr>
 def GetCharbyte()
-    var out = execute('norm! g8', 'silent!')[1 :]->substitute('\s*$', '', '')
+    var out: string = execute('norm! g8', 'silent!')[1 :]->substitute('\s*$', '', '')
     setreg('o', [out], 'c')
     echo @o
 enddef
@@ -3929,7 +3945,7 @@ nno -P <cmd>call <sid>PrintCwd()<cr>
 nno -p <cmd>call <sid>PrintFullPath()<cr>
 
 def PrintCwd()
-    var fmt =<< trim END
+    var fmt: list<string> =<< trim END
         window:  %s
         tabpage: %s
         global:  %s
@@ -3942,13 +3958,13 @@ enddef
 
 def PrintFullPath()
     if &bt == 'quickfix'
-        var out = get(w:, 'quickfix_title', 'no title')
+        var out: string = get(w:, 'quickfix_title', 'no title')
         setreg('o', [out], 'c')
         echo @o
         return
     endif
 
-    var fname = expand('%:p')
+    var fname: string = expand('%:p')
     # later, we'll compare `fname` with its resolved form,
     # and the comparison may be wrongly different because of an extra ending slash
     fname = substitute(fname, '/$', '', '')
@@ -3959,8 +3975,8 @@ def PrintFullPath()
         setreg('o', [w:quickfix_title], 'c')
     else
         if fname[0] == '/' || fname =~ '^\l\+://'
-            var resolved = resolve(fname)
-            var out = resolved == fname ? fname : fname .. ' -> ' .. resolved
+            var resolved: string = resolve(fname)
+            var out: string = resolved == fname ? fname : fname .. ' -> ' .. resolved
             setreg('o', [out], 'c')
         else
             # Why is adding the current working directory sometimes necessary?{{{
@@ -3972,7 +3988,7 @@ def PrintFullPath()
             #     :e foo/bar
             #     :echo expand('%:p')
             #}}}
-            var out = getcwd() .. '/' .. fname
+            var out: string = getcwd() .. '/' .. fname
             setreg('o', [out], 'c')
         endif
     endif
@@ -4004,7 +4020,7 @@ def Faq(): string
     # In that case, rewrite the code like so:
     #
     #     # outside the function
-    #     const DIR = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
+    #     const DIR: string = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
     #
     #     ...
     #
@@ -4015,9 +4031,10 @@ def Faq(): string
         return 'echo "you''re not in a wiki"'
     endif
 
-    var this_tab = tabpagenr()
-    var win_in_this_tab = getwininfo()->filter((_, v) => v.tabnr == this_tab)
-    var faq_file = $XDG_RUNTIME_VIM .. '/faq'
+    var this_tab: number = tabpagenr()
+    var win_in_this_tab: list<dict<any>> = getwininfo()
+        ->filter((_, v) => v.tabnr == this_tab)
+    var faq_file: string = $XDG_RUNTIME_VIM .. '/faq'
 
     for win in win_in_this_tab
         if get(win, 'bufnr', '')->bufname() == faq_file
@@ -4058,11 +4075,11 @@ def EditReadme()
         sp ~/.README.md | exe ':1'
         return
     endif
-    var files = (expand('%:p:h') .. '/*')->glob(0, 1)
-    var kwd = '\%(readme\|contents\)'
-    var pat = '\c/' .. kwd .. '\%(\..\{-}\)\=$'
-    var readmes = filter(files, (_, v) => v =~ pat)
-    var readme = get(readmes, 0, '')
+    var files: list<string> = (expand('%:p:h') .. '/*')->glob(false, true)
+    var kwd: string = '\%(readme\|contents\)'
+    var pat: string = '\c/' .. kwd .. '\%(\..\{-}\)\=$'
+    var readmes: list<string> = filter(files, (_, v) => v =~ pat)
+    var readme: string = get(readmes, 0, '')
     if filereadable(readme) || isdirectory(readme)
         exe 'sp ' .. readme
         # Why `:exe`?{{{
@@ -4125,16 +4142,21 @@ def Emphasize(type = ''): string
         &opfunc = expand('<stack>')->matchstr('.*\zs<SNR>\w*')
         return 'g@l'
     endif
-    var word = expand('<cword>')
-    if word !~ '^\k*$' | return '' | endif
-    var line = getline('.')
-    var col = col('.')
+    var word: string = expand('<cword>')
+    if word !~ '^\k*$'
+        return ''
+    endif
+    var line: string = getline('.')
+    var col: number = col('.')
     # the negative lookbehind is  necessary to prevent a match when  we are on a
     # sequence of whitespace before a word
-    var pat = '\%(\%' .. col .. 'c.\+\)\@<!' .. word .. '\%(.*\%' .. col .. 'c\)\@!'
-    if line !~ pat | return '' | endif
-    var rep = '*' .. tolower(word) .. '*'
-    var new_line = substitute(line, pat, rep, '')
+    var pat: string = '\%(\%' .. col .. 'c.\+\)\@<!'
+        .. word .. '\%(.*\%' .. col .. 'c\)\@!'
+    if line !~ pat
+        return ''
+    endif
+    var rep: string = '*' .. tolower(word) .. '*'
+    var new_line: string = substitute(line, pat, rep, '')
     setline('.', new_line)
     return ''
 enddef
@@ -4252,24 +4274,26 @@ enddef
 nno <expr> <c-a> <sid>CA()
 
 def CA(): string
-    var pos = searchpos('[✘✔]', 'cW', line('.'))
+    var pos: list<number> = searchpos('[✘✔]', 'cW', line('.'))
     if pos == [0, 0]
         return "\<c-a>"
     endif
-    var char_under_cursor = getline('.')->matchstr('\%' .. pos[1] .. 'c.')
-    var old2new = {
+    var char_under_cursor: string = getline('.')->matchstr('\%' .. pos[1] .. 'c.')
+    var old2new: dict<string> = {
         '✘': '✔',
         '✔': '✘',
         }
-    if !has_key(old2new, char_under_cursor) | return '' | endif
-    var new_char = old2new[char_under_cursor]
+    if !has_key(old2new, char_under_cursor)
+        return ''
+    endif
+    var new_char: string = old2new[char_under_cursor]
     # Why returning a `|` motion?{{{
     #
     # From `:h :map-<expr>`:
     #
     #    > - Moving the cursor is allowed, but it is restored afterwards.
     #}}}
-    var vcol = virtcol('.')
+    var vcol: number = virtcol('.')
     return vcol .. '|r' .. new_char
 enddef
 
@@ -4333,7 +4357,7 @@ sil! MapMeta('p', "['", 'n', '')
 nno <expr> @ <sid>SaveLastRegisterExecutedInteractively()
 def SaveLastRegisterExecutedInteractively(): string
     # ask which register we want to execute
-    var c = getchar()
+    var c: any = getchar()
     # `c` is not necessarily a number.{{{
     #
     # It  could  be  a  string.   For   example,  this  is  the  case  when  Vim
@@ -4347,7 +4371,7 @@ def SaveLastRegisterExecutedInteractively(): string
     if type(c) != v:t_number
         return '@'
     endif
-    var char = nr2char(c, 1)
+    var char: string = nr2char(c, 1)
     if reg_executing()->empty()
         last_register_executed_interactively = char
     endif
@@ -4358,7 +4382,7 @@ nno <expr> @@ <sid>Atat()
 def Atat(): string
     return '@' .. last_register_executed_interactively
 enddef
-var last_register_executed_interactively = '@'
+var last_register_executed_interactively: string = '@'
 
 # _                   0_ {{{3
 
@@ -4388,13 +4412,14 @@ enddef
 var indent_with_shiftround: dict<string>
 
 def IndentWithShiftround(type: string)
-    var cmd = indent_with_shiftround.cmd
-    var sr_save = &shiftround
+    var cmd: string = indent_with_shiftround.cmd
+    var sr_save: bool = &shiftround
     try
         set shiftround
         exe 'norm! ' .. (v:count != 0 ? v:count : '') .. cmd
     catch
         Catch()
+        return
     finally
         &shiftround = sr_save
     endtry
@@ -4422,8 +4447,8 @@ nno "" <cmd>call <sid>EasyAndCustomPaste()<cr>"+
 xno "" "+
 
 def EasyAndCustomPaste()
-    var reginfo = getreginfo('+')
-    var contents = get(reginfo, 'regcontents', [])
+    var reginfo: dict<any> = getreginfo('+')
+    var contents: list<string> = get(reginfo, 'regcontents', [])
     # We manipulate the `+` register in case we're going to paste it.
     # But what if we're going to yank some text into it?{{{
     #
@@ -4453,14 +4478,14 @@ def FixMultilineShellcmd()
         return
     endif
 
-    var reginfo = getreginfo('+')
-    var contents = get(reginfo, 'regcontents', [])
+    var reginfo: dict<any> = getreginfo('+')
+    var contents: list<string> = get(reginfo, 'regcontents', [])
 
-    var cml = matchstr(&l:cms, '\S*\ze\s*%s')
+    var cml: string = matchstr(&l:cms, '\S*\ze\s*%s')
     cml = '\%(\V' .. escape(cml, '\') .. '\m\)\='
 
     # remove possible dollar sign in front of a shell command
-    var pat = '^\s*' .. cml .. '\s*\$\s'
+    var pat: string = '^\s*' .. cml .. '\s*\$\s'
     if contents[0] =~ pat
         contents[0] = substitute(contents[0], pat, '', '')
     endif
@@ -4474,8 +4499,8 @@ def FixMultilineShellcmd()
         # formatted as a codeblock on whatever forum we paste it.
         #}}}
         if contents[0] =~ '<<-\=\([''"]\=\)EOF\1'
-            var eof_line = contents[match(contents, '^\s*' .. cml .. '\s*EOF$')]
-            var indent = matchstr(eof_line, '^\s*' .. cml .. '\s*')
+            var eof_line: string = contents[match(contents, '^\s*' .. cml .. '\s*EOF$')]
+            var indent: string = matchstr(eof_line, '^\s*' .. cml .. '\s*')
             map(contents, (_, v) => substitute(v, indent, '', ''))
         endif
     endif
@@ -4706,13 +4731,19 @@ def FencedCodeblock(what: string)
         norm! V
     endif
     if what == 'around'
-        if !search('^```\l*$', 'bW') | return | endif
+        if !search('^```\l*$', 'bW')
+            return
+        endif
         norm! o
         search('^```$', 'W')
     else
-        if !search('^```\l*$', 'bW') | return | endif
+        if !search('^```\l*$', 'bW')
+            return
+        endif
         norm! jo
-        if !search('^```$', 'W') | return | endif
+        if !search('^```$', 'W')
+            return
+        endif
         norm! k
     endif
 enddef
@@ -4730,8 +4761,8 @@ ono iN <cmd>norm viN<cr>
 ono aN <cmd>norm vaN<cr>
 
 def TextobjNumber(around: bool)
-    var stopline = line('.')
-    var pat = '\%(' .. GetPatnum() .. '\)' .. (around ? '\s*' : '')
+    var stopline: number = line('.')
+    var pat: string = '\%(' .. GetPatnum() .. '\)' .. (around ? '\s*' : '')
     # move cursor to end of number
     if !search(pat, 'ceW', stopline)
         return
@@ -4743,17 +4774,18 @@ def TextobjNumber(around: bool)
 enddef
 
 def GetPatnum(): string
-    var sign = '[-+]\='
-    var decimal = '\d\+\.\=\d*'
-    var fraction = '\.\d\+'
-    var exponent = '[eE]' .. sign .. '\d\+'
-    var number = printf('%s\%%(%s\|%s\)\%%(%s\)\=', sign, decimal, fraction, exponent)
+    var sign: string = '[-+]\='
+    var decimal: string = '\d\+\.\=\d*'
+    var fraction: string = '\.\d\+'
+    var exponent: string = '[eE]' .. sign .. '\d\+'
+    var number: string = printf('%s\%%(%s\|%s\)\%%(%s\)\=',
+        sign, decimal, fraction, exponent)
 
-    var binary = '0b[01]\+'
-    var hex = '0x\x\+'
+    var binary: string = '0b[01]\+'
+    var hex: string = '0x\x\+'
 
     # the order matters; keep `number` at the end
-    var pat = binary .. '\|' .. hex .. '\|' .. number
+    var pat: string = binary .. '\|' .. hex .. '\|' .. number
     return pat
 enddef
 
@@ -4786,9 +4818,9 @@ ono if <cmd>norm Vif<cr>
 ono af <cmd>norm Vaf<cr>
 
 def TextobjFunc(inside: bool)
-    var start = '^\C\s*\%(fu\%[nction](\@!\|\%(export\s\+\)\=def\)\>'
-    var end = '^\C\s*\%(endfu\%[nction]\|enddef\)\s*$'
-    var curline = getline('.')
+    var start: string = '^\C\s*\%(fu\%[nction](\@!\|\%(export\s\+\)\=def\)\>'
+    var end: string = '^\C\s*\%(endfu\%[nction]\|enddef\)\s*$'
+    var curline: string = getline('.')
 
     # special cases: we're on the first or last line of a function
     if inside && curline =~ start
@@ -4811,7 +4843,7 @@ def TextobjFunc(inside: bool)
         # function when we're at its very beginning (and use the `c` flag).
         #
         #     vim9
-        #     var lines =<< trim END
+        #     var lines: list<string> =<< trim END
         #         def Func()
         #         enddef
         #     END
@@ -4821,7 +4853,7 @@ def TextobjFunc(inside: bool)
         #     ✘
         #
         #     vim9
-        #     var lines =<< trim END
+        #     var lines: list<string> =<< trim END
         #         def Func()
         #         enddef
         #     END
@@ -4993,7 +5025,7 @@ xno @ <c-\><c-n><cmd>exe '*norm @' .. getchar()->nr2char()<cr>
 # instructions found on forums.
 # Besides, a trailing space is useless.
 #}}}
-var niceblock_keys = {
+var niceblock_keys: dict<dict<string>> = {
     '$':  {v: 'g$h',      V: '$',          "\<c-v>": '$h'},
     'I':  {v: "\<c-v>I",  V: "\<c-v>^o^I", "\<c-v>": 'I'},
     'A':  {v: "\<c-v>A",  V: "\<c-v>0o$A", "\<c-v>": 'A'},
@@ -5086,10 +5118,10 @@ xno <expr> l <sid>VL()
 # is not blocked anymore.
 #}}}
 def VL(): string
-    var siso = &l:siso != -1 ? &l:siso : &g:siso
+    var siso: number = &l:siso != -1 ? &l:siso : &g:siso
     # this should evaluate to the total width of the fold/number/sign columns
-    var left_columns = wincol() - virtcol('.')
-    var offset = siso + left_columns
+    var left_columns: number = wincol() - virtcol('.')
+    var offset: number = siso + left_columns
     return mode() == "\<c-v>" && virtcol('.') == winwidth(0) - offset ? '' : 'l'
 enddef
 
@@ -5169,23 +5201,25 @@ def Cfg(pgm: string)
         return
     endif
     filter(files, (_, v) => expand(v)->filereadable())
-    if empty(files) | echo 'no readable file' | endif
+    if empty(files)
+        echo 'no readable file'
+    endif
     for file in files
         exe 'sp ' .. file
     endfor
 enddef
 
-var PGM2CFGFILES = {
+var PGM2CFGFILES: dict<list<string>> = {
     autostart:     ['~/bin/autostartrc'],
     bash:          ['~/.bashrc', '~/.bashenv', '~/.bash_profile'],
     conky:         ['~/.config/conky/system.lua', '~/.config/conky/system_rings.lua', '~/.config/conky/time.lua'],
     fasd:          ['~/.fasdrc'],
     fd:            ['~/.fdignore'],
-    firefox:       glob('~/.mozilla/firefox/*.default/chrome/userContent.css', 0, 1),
+    firefox:       glob('~/.mozilla/firefox/*.default/chrome/userContent.css', false, true),
     git:           ['~/.config/git/config', '~/.cvsignore'],
     htop:          ['~/.config/htop/htoprc'],
     intersubs:     ['~/.config/mpv/scripts/interSubs.lua', '~/.config/mpv/scripts/interSubs.py', '~/.config/mpv/scripts/interSubs_config.py'],
-    keyboard:      glob('~/.config/keyboard/*', 0, 1),
+    keyboard:      glob('~/.config/keyboard/*', false, true),
     kitty:         ['~/.config/kitty/kitty.conf'],
     latexmk:       ['~/.config/latexmk/latexmkrc'],
     less:          ['~/.config/lesskey'],
@@ -5202,7 +5236,7 @@ var PGM2CFGFILES = {
     xbindkeys:     ['~/.config/keyboard/xbindkeys.conf'],
     zathura:       ['~/.config/zathura/zathurarc'],
     zsh:           ['~/.zshrc', '~/.zshenv'],
-    zsh_snippets:  glob('~/.config/zsh-snippets/*.txt', 0, 1),
+    zsh_snippets:  glob('~/.config/zsh-snippets/*.txt', false, true),
     }
 
 # CGrep / LGrep {{{2
@@ -5239,9 +5273,10 @@ com -nargs=1 LGrep myfuncs#GrepEx(<q-args>, true)
 com -bar ClearRegisters ClearRegisters()
 
 def ClearRegisters()
-    var numeric = range(10)
-    var alpha = range(char2nr('a'), char2nr('z'))->map((_, v) => nr2char(v))
-    var other = ['-', '*', '+', '/', '=']
+    var numeric: list<number> = range(10)
+    var alpha: list<string> = range(char2nr('a'), char2nr('z'))
+        ->mapnew((_, v) => nr2char(v))
+    var other: list<string> = ['-', '*', '+', '/', '=']
     map(numeric + alpha + other, (_, v) => setreg(v, {}))
 enddef
 
@@ -5291,13 +5326,13 @@ enddef
 com -bar -range=% CombineParamValues CombineParamValues(<line1>, <line2>)
 
 def CombineParamValues(lnum1: number, lnum2: number)
-    var param_values = getline(lnum1, lnum2)
+    var param_values: list<string> = getline(lnum1, lnum2)
         ->filter((_, v) => v != '')
-        ->map((_, v) => split(v))
+        ->mapnew((_, v) => split(v))
     if len(param_values) < 2
         return
     endif
-    var reg_save = [getreginfo('0'), getreginfo('"')]
+    var reg_save: list<dict<any>> = [getreginfo('0'), getreginfo('"')]
     @" = Combine(param_values)->join("\n")
     exe 'norm! ' .. lnum1 .. 'GV' .. lnum2 .. 'Gp'
     setreg('0', reg_save[0])
@@ -5330,7 +5365,7 @@ cnorea <expr> def getcmdtype() is# ':' && getcmdpos() == 4 ? 'Def' : 'def'
 com -bar -nargs=? -complete=customlist,FuncComplete Def exe Def(<q-args>)
 
 def Def(name: string): string
-    var _name = trim(name, '()')
+    var _name: string = trim(name, '()')
     try
         exe 'def ' .. _name
     catch
@@ -5350,7 +5385,7 @@ com -bar DiffOrig echo DiffOrig()
 
 def DiffOrig(): string
     save#toggle_auto(0)
-    var cole_save = &l:conceallevel
+    var cole_save: number = &l:conceallevel
     setl conceallevel=0
 
     if difforig_tempfile != ''
@@ -5378,7 +5413,7 @@ def DiffOrig(): string
     exe ':' .. winnr('#') .. 'windo diffthis'
     return ''
 enddef
-var difforig_tempfile = ''
+var difforig_tempfile: string = ''
 var TmpPartial: func
 
 def DiffOrigRestoreSettings(cole: number, _: any)
@@ -5400,8 +5435,8 @@ com -bar -nargs=1 DumpWiki myfuncs#dumpWiki(<q-args>)
 com -bar -range=% FormatManpage FormatManpage(<line1>, <line2>)
 
 def FormatManpage(line1: number, line2: number)
-    var range = ':' .. line1 .. ',' .. line2
-    var mods = 'sil keepj keepp '
+    var range: string = ':' .. line1 .. ',' .. line2
+    var mods: string = 'sil keepj keepp '
     # create folds
     exe mods .. range .. 's/^\u\+/# &/e'
     # titlecase headers
@@ -5459,7 +5494,7 @@ com -bar -nargs=1 GotoChar search('\m\%^\_.\{<args>}', 'es')
 com -nargs=1 GrepCfg GrepCfg(<q-args>)
 
 def GrepCfg(pat: string)
-    var cmd =<< trim END
+    var cmd: list<string> =<< trim END
         git
             --git-dir="${HOME}/.cfg/"
             --work-tree="${HOME}"
@@ -5469,7 +5504,7 @@ def GrepCfg(pat: string)
         -r
         | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
     END
-    var files = join(cmd)->systemlist()
+    var files: list<string> = join(cmd)->systemlist()
     filter(files, (_, v) => filereadable(v))
     # we may  have a  versioned controlled symlink  pointing to  another version
     # controlled file (e.g. vimrc → init.vim); we don't want to vimgrep into the
@@ -5507,7 +5542,7 @@ enddef
 # which is going to be loaded.
 # So this guard wouldn't work:
 #
-#     var bufnr = winnr()->winbufnr()
+#     var bufnr: number = winnr()->winbufnr()
 #     if getbufvar(bufnr, '&ft', '') == 'fex'
 #         return
 #     endif
@@ -5525,9 +5560,10 @@ com -bar -range=% HlWeirdWhitespace HlWeirdWhitespace()
 def HlWeirdWhitespace()
     if !exists('w:strange_whitespace')
         # https://vi.stackexchange.com/a/17697/17449
-        var pat = '[\x0b\x0c\u00a0\u1680\u180e\u2000-\u200a\u2028\u202f\u205f\u3000\ufeff]'
-        #                                     ├───────────┘
-        #                                     └ yes, one can write an arbitrary range of unicode characters
+        var pat: string = '[\x0b\x0c\u00a0\u1680\u180e'
+            .. '\u2000-\u200a\u2028\u202f\u205f\u3000\ufeff]'
+        #       ├───────────┘
+        #       └ yes, one can write an arbitrary range of unicode characters
         w:strange_whitespace = matchadd('ErrorMsg', pat, 0)
     else
         matchdelete(w:strange_whitespace)
@@ -5638,16 +5674,16 @@ com -bar -range=% OnlySelection myfuncs#onlySelection(<line1>, <line2>)
 com -bar -nargs=0 PluginsToCommit PluginsToCommit()
 
 def PluginsToCommit()
-    var script = 'commit-these-vim-plugins'
+    var script: string = 'commit-these-vim-plugins'
     if !executable(script)
         echom '[PluginsToCommit]: ' .. script .. ' is not available'
         return
     endif
 
-    var my_plugins = readfile($MYVIMRC)
+    var my_plugins: list<string> = readfile($MYVIMRC)
     filter(my_plugins, (_, v) => v =~ '^\s*Plug\s\+''lacygoill/')
     map(my_plugins, (_, v) => matchstr(v, 'lacygoill/\zs.\{-}\ze'''))
-    sil var output = systemlist('commit-these-vim-plugins ' .. join(my_plugins))
+    sil var output: list<string> = systemlist('commit-these-vim-plugins ' .. join(my_plugins))
     # we may have removed a plugin, but not executed `:Plugclean` yet
     filter(output, (_, v) => v !~ 'No such file or directory')
     if output == []
@@ -5655,8 +5691,9 @@ def PluginsToCommit()
         return
     endif
 
-    filter(output, (_, v) => v =~ '^\S')
-    map(output, (_, v) => glob($HOME .. '/.vim/plugged/' .. v .. '/*', 0, 1)[0])
+    eval output
+        ->filter((_, v) => v =~ '^\S')
+        ->map((_, v) => glob($HOME .. '/.vim/plugged/' .. v .. '/*', false, true)[0])
     setqflist([], ' ', {lines: output, efm: '%f', title: 'Plugins to commit'})
     cw
 enddef
@@ -5690,20 +5727,20 @@ def PluginsUpdate()
     # The `s:fname`  variable may not exist  if the `for` loop  iterates over an
     # empty list; i.e. if this expression is empty:
     #
-    #     globpath(&rtp, "spell/*.add")->split("\n")
+    #     globpath(&rtp, "spell/*.add")->split('\n')
     #}}}
     sil! runtime spell/cleanadd.vim
 
     # Install `wfrench` package.  Useful for dictionary completion.
     if system('aptitude show wfrench | grep "^State"')->trim("\n", 2) =~? 'state:\s*not\s\+installed'
         echom 'Need to install the wfrench package for the french dictionary.'
-        var password = inputsecret('Enter sudo password:') .. "\n"
-        sil var out = system('sudo -S aptitude install wfrench', password)
+        var password: string = inputsecret('Enter sudo password:') .. "\n"
+        sil var out: string = system('sudo -S aptitude install wfrench', password)
         echo out
     endif
 
     if !isdirectory($HOME .. '/.vim/tmp/snapshot')
-        mkdir($HOME .. '/.vim/tmp/snapshot', 'p', 0700)
+        mkdir($HOME .. '/.vim/tmp/snapshot', 'p', 0o700)
     endif
     #                                                                                ┌ put the month before the day
     #                                                                                │ so that, in the output of `ls(1)`,
@@ -5782,7 +5819,7 @@ com -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
 
 # RemoveSwapFiles {{{2
 
-com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', 1, 1)->map((_, v) => delete(v))
+com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', true, true)->map((_, v) => delete(v))
 
 # RemoveTabs {{{2
 
@@ -5816,9 +5853,9 @@ com -bar -range=% RemoveTabs myfuncs#removeTabs(<line1>, <line2>)
 com -bar -bang -range=% Retab Retab(<line1>, <line2>, <bang>0)
 
 def Retab(line1: number, line2: number, bang: bool)
-    var view = winsaveview()
-    var range = ':' .. line1 .. ',' .. line2
-    var mods = 'sil keepj keepp '
+    var view: dict<number> = winsaveview()
+    var range: string = ':' .. line1 .. ',' .. line2
+    var mods: string = 'sil keepj keepp '
     if !bang
         exe mods .. range .. 's:^\t\+:\=repeat(" ", &ts * submatch(0)->strlen()):e'
     else
@@ -5832,13 +5869,13 @@ enddef
 com -bar -range=% -nargs=1 ReverseEveryNLines ReverseEveryNLines(<args>, <line1>, <line2>)
 
 def ReverseEveryNLines(n: number, line1: number, line2: number)
-    var mods = 'sil keepj keepp lockm '
-    var range = ':' .. line1 .. ',' .. line2
+    var mods: string = 'sil keepj keepp lockm '
+    var range: string = ':' .. line1 .. ',' .. line2
     exe mods .. range .. printf('g/^/exe "m .-" .. Offset(%d, %d)', line1, n)
 enddef
 
 def Offset(line1: number, n: number): number
-    var offset = (line('.') - line1 + 1) % n
+    var offset: number = (line('.') - line1 + 1) % n
     return offset != 0 ? offset : n
 enddef
 
@@ -5882,8 +5919,8 @@ enddef
 #
 #     def CompareLines(line1: string, line2: string): number
 #         # The greater the score, the further to the right in the sorted list
-#         var score1 = line1 =~ 'bar' ? 2 : line1 =~ 'foo' ? 1 : 0
-#         var score2 = line2 =~ 'bar' ? 2 : line2 =~ 'foo' ? 1 : 0
+#         var score1: number = line1 =~ 'bar' ? 2 : line1 =~ 'foo' ? 1 : 0
+#         var score2: number = line2 =~ 'bar' ? 2 : line2 =~ 'foo' ? 1 : 0
 #         return score1 - score2
 #     enddef
 
@@ -5900,16 +5937,17 @@ def TldrCompletion(...l: list<any>): string
 enddef
 
 def Tldr(shellcmd: string)
-    sil var out = systemlist('tldr ' .. shellcmd)
+    sil var out: string = systemlist('tldr ' .. shellcmd)
     if get(out, 0, '') =~ '^tldr page.*not found$'
         echo out[0]
         return
     endif
-    map(out, (_, v) => substitute(v, '\e.\{-}m\|\%x0f', '', 'g'))
-    map(out, (_, v) => substitute(v, '^-', '#', ''))
-    map(out, (_, v) => substitute(v, '^  ', '    ', ''))
+    eval out
+        ->map((_, v) => substitute(v, '\e.\{-}m\|\%x0f', '', 'g'))
+        ->map((_, v) => substitute(v, '^-', '#', ''))
+        ->map((_, v) => substitute(v, '^  ', '    ', ''))
     sp /tmp/.tldr.md
-    keepj :%d_
+    keepj :%d _
     setline(1, out)
     keepj keepp g/^#/append('.', '')
     update
@@ -5922,7 +5960,7 @@ enddef
 com -bar -range=% TW TrimWhitespace(<line1>, <line2>)
 
 def TrimWhitespace(line1: number, line2: number)
-    var view = winsaveview()
+    var view: dict<number> = winsaveview()
     sil exe 'keepj keepp :' .. line1 .. ',' .. line2 .. 's/\s\+$//e'
     winrestview(view)
 enddef
@@ -5986,15 +6024,17 @@ def MakeMissingDir(file: string, buf: number)
     if !getbufvar(buf, '&buftype')->empty() || file =~ '^\w\+:/'
         return
     endif
-    var dir = fnamemodify(file, ':h')
+    var dir: string = fnamemodify(file, ':h')
     # if the directory already exists, nothing needs to be done
-    if isdirectory(dir) | return | endif
+    if isdirectory(dir)
+        return
+    endif
     try
         mkdir(dir, 'p')
     catch /^Vim\%((\a\+)\)\=:E739:/
         # If the directory is in a root directory, `mkdir()` will fail.
         # We need to run `$ sudo mkdir`.
-        var pass = inputsecret('[sudo] password for ' .. $USER .. ': ')
+        var pass: string = inputsecret('[sudo] password for ' .. $USER .. ': ')
         sil system('sudo -S mkdir ' .. dir, pass .. "\n")
         #                 │{{{
         #                 └ read the password from the standard input
@@ -6026,7 +6066,7 @@ augroup END
 #         # We don't want to add a default extension.
 #         # We  would  end  up  with  a  buffer whose  name  contains  a  sequence  of
 #         # consecutive dots.
-#         if fname[-1 : -1] == '.'
+#         if fname[-1] == '.'
 #             return
 #         endif
 #
@@ -6081,7 +6121,7 @@ augroup WipeNonameBuffers | au!
 augroup END
 
 def RegisterNonameForWiping()
-    var buf = expand('<abuf>')->str2nr()
+    var buf: number = expand('<abuf>')->str2nr()
     if buflisted(buf) && bufname(buf)->empty()
         add(noname_buffers, buf)
     endif
@@ -6127,7 +6167,7 @@ def FiletypeLinter(action: string)
         unlet! w:my_filetype_linter
     endif
     if action == 'enable'
-        var pat = '\m\C\%(^\%(\s*"\)\@!.*\)\@<=\mset\s\+\%(ft\|filetype\)\@!'
+        var pat: string = '\m\C\%(^\%(\s*"\)\@!.*\)\@<=\mset\s\+\%(ft\|filetype\)\@!'
         w:my_filetype_linter = matchadd('ErrorMsg', pat, 0)
     endif
 enddef
@@ -6159,7 +6199,7 @@ augroup END
 
 def FireLeaveEvents()
     if match(v:argv, '\C^-[doO]$') != -1
-        var curwin = win_getid()
+        var curwin: number = win_getid()
         windo #
         win_gotoid(curwin)
     endif
@@ -6238,7 +6278,9 @@ augroup NoSyntaxInDiffMode | au!
     #}}}
     au VimEnter * IfDiffSynClear()
     :def IfDiffSynClear()
-        if !&l:diff | return | endif
+        if !&l:diff
+            return
+        endif
         getwininfo()->map((_, v) => win_execute(v.winid, 'syn clear'))
     enddef
 augroup END
@@ -6362,7 +6404,7 @@ def MakeClipboardPersistAfterQuittingVim()
     #
     # You could write the clipboard in a temporary file:
     #
-    #     var tempfile = tempname()
+    #     var tempfile: string = tempname()
     #     split(@+, '\n')->writefile(tempfile, 'b')
     #     system('xsel -ib ' .. tempfile)
     #
@@ -6398,6 +6440,7 @@ def MakeClipboardPersistAfterQuittingVim()
     #              ^
     #              ✘ where is `%n`?
     #}}}
+    # TODO: Doesn't work in the GUI.
     sil system('xsel -ib', @+)
 enddef
 
@@ -6442,9 +6485,9 @@ def FilterSpecialFile()
         return
     endif
 
-    var fname = expand('<afile>:p:S')
-    var ext = expand('<afile>:e')
-    var ext2cmd = {
+    var fname: string = expand('<afile>:p:S')
+    var ext: string = expand('<afile>:e')
+    var ext2cmd: dict<string> = {
         doc: '%!antiword ' .. fname,
         docx: '%!pandoc -f docx -t markdown ' .. fname,
         epub: '%!pandoc -f epub -t markdown ' .. fname,
@@ -6455,7 +6498,7 @@ def FilterSpecialFile()
         }
 
     if has_key(ext2cmd, ext)
-        var filter = matchstr(ext2cmd[ext], '%!\zs\S*')
+        var filter: string = matchstr(ext2cmd[ext], '%!\zs\S*')
         if !executable(filter)
             echom 'cannot filter ' .. expand('<afile>:p') .. '; please install ' .. filter
             return
@@ -6627,7 +6670,7 @@ def RestrictAbbreviations()
     # To handle  the case where  we enter insert mode  right after a  space, and
     # type an abbreviation immediately.
     #}}}
-    var curlnum = line('.')
+    var curlnum: number = line('.')
     # if  the  inserted  char  is  a  keyword  character,  there  can't  be  any
     # abbreviation expansion; no need to do anything
     if v:char =~ '\k'
@@ -6694,15 +6737,15 @@ augroup END
 # (.add.spl) is older than the original addition file (.add).
 
 augroup MyMkspell | au!
-    # Why `map()`?{{{
+    # Why `mapnew()`?{{{
     #
     # Because there can  be several spell files (one per  language), in which we
     # made additions.
     #
     # http://vi.stackexchange.com/a/5052/6960
     #}}}
-    au VimEnter * glob($HOME .. '/.vim/spell/*.add', 1, 1)
-        \ ->map((_, v) => filereadable(v)
+    au VimEnter * glob($HOME .. '/.vim/spell/*.add', true, true)
+        \ ->mapnew((_, v) => filereadable(v)
         \     && !filereadable(v .. '.spl') || (getftime(v) > getftime(v .. '.spl'))
         \     && execute('mkspell! ' .. fnameescape(v)))
 augroup END
@@ -6809,7 +6852,7 @@ enddef
 # Trailing Whitespace {{{2
 
 # Trailing whitespace in red but not if the filetype is blacklisted:
-var NO_TRAILING_WHITESPACE_FT =<< trim END
+var NO_TRAILING_WHITESPACE_FT: list<string> =<< trim END
 
     fzf
     git
@@ -6954,7 +6997,9 @@ def TrailingWhitespace(create_match: bool)
         #
         # Don't try to move the guard earlier:
         #
-        #     if &bt != '' | return | endif
+        #     if &bt != ''
+        #         return
+        #     endif
         #
         # It wouldn't  work; probably because  the match is installed  no matter
         # what, and needs to be removed.
@@ -7262,16 +7307,20 @@ enddef
 #     xno <space>og <c-\><c-n><cmd>call <sid>OpenCurrentFileInGithub()<cr>
 #
 #     def OpenCurrentFileInGithub()
-#         var file_dir = expand('%:h')
-#         sil var git_root = system('cd ' .. file_dir .. '; git rev-parse --show-toplevel | tr -d "\n"')
-#         var file_path = expand('%:p')->substitute(git_root .. '/', '', '')
-#         sil var branch = system('git symbolic-ref --short -q HEAD | tr -d "\n"')
-#         sil var git_remote = system('cd ' .. file_dir .. '; git remote get-url origin')
-#         var repo_path = matchlist(git_remote, ':\(.*\)\.')[1]->matchstr('github\.com/\zs.*')
-#         var url = 'https://github.com/' .. repo_path .. '/blob/' .. branch .. '/' .. file_path
-#         var first_line = getpos("'<")[1]
+#         var file_dir: string = expand('%:h')
+#         sil var git_root: string = system(
+#             'cd ' .. file_dir .. '; git rev-parse --show-toplevel | tr -d "\n"'
+#             )
+#         var file_path: string = expand('%:p')->substitute(git_root .. '/', '', '')
+#         sil var branch: string = system('git symbolic-ref --short -q HEAD | tr -d "\n"')
+#         sil var git_remote: string = system(
+#             'cd ' .. file_dir .. '; git remote get-url origin'
+#             )
+#         var repo_path: string = matchlist(git_remote, ':\(.*\)\.')[1]->matchstr('github\.com/\zs.*')
+#         var url: string = 'https://github.com/' .. repo_path .. '/blob/' .. branch .. '/' .. file_path
+#         var first_line: number = getpos("'<")[1]
 #         url ..= '#L' .. first_line
-#         var last_line = getpos("'>")[1]
+#         var last_line: number = getpos("'>")[1]
 #         if last_line != first_line
 #             url ..= '-L' .. last_line
 #         endif
@@ -7484,7 +7533,7 @@ enddef
 # Check that whenever we use `wincmd p` we get to the right window.
 # Maybe we should use this instead:
 #
-#     var id = win_getid()
+#     var id: number = win_getid()
 #     ...
 #     win_gotoid(id)
 #
@@ -7583,7 +7632,7 @@ enddef
 #                 exe 'iunmap <buffer> ' .. key
 #             endfor
 #         else
-#             var i = 0
+#             var i: number = 0
 #             for key in ['!', 'u', 'i', 'o', 'j', 'k', 'l', ',', ';', ':']
 #                 exe 'ino <buffer> ' .. key .. ' ' .. i
 #                 i += 1
@@ -7999,7 +8048,6 @@ enddef
 # Also, study these plugins:
 #
 # https://github.com/yegappan/asyncmake (125 sloc)
-# https://github.com/chrisbra/vim-autoread (145)
 # https://github.com/foxik/vim-makejob (197)
 # https://github.com/prabirshrestha/async.vim (243)
 # https://github.com/metakirby5/codi.vim (747)
@@ -8076,7 +8124,7 @@ enddef
 #     if &ft == 'markdown'
 #         return ''
 #     else
-#         var cml = matchstr(&l:cms, '\S*\ze\s*%s')
+#         var cml: string = matchstr(&l:cms, '\S*\ze\s*%s')
 #         return '\V' .. escape(cml, '\') .. '\m'
 #     endif
 #
@@ -8412,7 +8460,9 @@ enddef
 # Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 # Example:
 #
-#     if !expand('%:p:h')->readdir((n) => n =~ 'some_name')->empty() | do sth | endif
+#     if !expand('%:p:h')->readdir((n) => n =~ 'some_name')->empty()
+#         do sth
+#     endif
 #
 # Also, check out `:h readdirex()`.
 #
@@ -8422,11 +8472,11 @@ enddef
 # In particular, whenever you've  used `matchstr()` several times consecutively,
 # it may be an indication that `matchlist()` was better:
 #
-#     var text = 'hello world some text'
-#     var foo = matchstr(text, '^\S\+')
-#     var bar = matchstr(text, '^\S\+\s\+\zs\S\+')
+#     var text: string = 'hello world some text'
+#     var foo: string = matchstr(text, '^\S\+')
+#     var bar: string = matchstr(text, '^\S\+\s\+\zs\S\+')
 #     ⇔
-#     var text = 'hello world some text'
+#     var text: string = 'hello world some text'
 #     var foo: string
 #     var bar: string
 #     [foo, bar] = matchlist(text, '^\(\S\+\)\s\+\(\S\+\)')[1 : 2]
@@ -8482,7 +8532,7 @@ enddef
         #    - the clipboard via `xsel(1x)` or `xclip(1)`
         #    - the clipboard via OSC 52
         #}}}
-        sil var seq = system('sendtoclipboard', text)
+        sil var seq: string = system('sendtoclipboard', text)
         # Why this guard?{{{
         #
         # gVim doesn't seem to support OSC 52.
@@ -8498,6 +8548,7 @@ enddef
         endif
         if v:shell_error
             Catch()
+            return
         else
             # TODO: Document why this line is needed.{{{
             #
@@ -8710,7 +8761,7 @@ enddef
 #
 # Consider doing this kind of refactorings:
 #
-#     var tempfile = tempname()
+#     var tempfile: string = tempname()
 #
 #     →
 #
@@ -8718,7 +8769,7 @@ enddef
 #         sil! delete(tempfile)
 #         tempfile = ''
 #     endif
-#     var tempfile = tempname()
+#     var tempfile: string = tempname()
 #
 # The purpose  would be  to prevent Vim  from piling up  tempfiles for  the same
 # feature.  This is what junegunn does in `fzf#vim#helptags()`.
@@ -8779,8 +8830,8 @@ enddef
 #             &opfunc = expand('<SID>') .. 'MyOp'
 #             return 'g@'
 #         endif
-#         var unnamed = getreginfo('"')
-#         var zero = getreginfo('0')
+#         var unnamed: dict<any> = getreginfo('"')
+#         var zero: dict<any> = getreginfo('0')
 #         normal! `[v`]y
 #         echom strlen(@")
 #         setreg('"', unnamed)
@@ -8829,9 +8880,6 @@ enddef
 # ---
 #
 # Use our saved qfl named `setreg`.
-
-
-
 
 
 

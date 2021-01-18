@@ -47,7 +47,7 @@ def plugin#matchparen#installDummyAutocmds()
     # Otherwise, we could encounter bugs which  are hard to understand, and that
     # other people can't reproduce.
     #}}}
-    var events =<< trim END
+    var events: list<string> =<< trim END
         CursorMoved
         CursorMovedI
         WinEnter

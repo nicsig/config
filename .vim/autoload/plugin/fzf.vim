@@ -2,13 +2,13 @@ vim9 noclear
 
 # Init {{{1
 
-const COLORS = {
+const COLORS: dict<number> = {
     regtype: 3,
     regname: 30,
     }
 
 def plugin#fzf#commits(char = '') #{{{1
-    var cwd = getcwd()
+    var cwd: string = getcwd()
     # To use `:FzBCommits` and `:FzCommits`, we first need to be in the working tree of the repo:{{{
     #
     #    - in which the current file belongs
@@ -22,13 +22,14 @@ def plugin#fzf#commits(char = '') #{{{1
 enddef
 
 def plugin#fzf#registers(pfx: string) #{{{1
-    var source = execute('reg')->split('\n')[1 :]
-    # trim leading whitespace (useful to filter based on type; e.g. typing `^b` will leave only blockwise registers)
-    map(source, (_, v) => substitute(v, '^\s\+', '', ''))
-    # highlight register type
-    map(source, (_, v) => substitute(v, '^\s*\zs[bcl]', "\x1b[38;5;" .. COLORS.regtype .. "m&\x1b[0m", ''))
-    # highlight register name
-    map(source, (_, v) => substitute(v, '"\S', "\x1b[38;5;" .. COLORS.regname .. "m&\x1b[0m", ''))
+    var source: list<string> = execute('reg')->split('\n')[1 :]
+        # trim leading whitespace  (useful to filter based on  type; e.g. typing
+        # `^b` will leave only blockwise registers)
+        ->map((_, v) => substitute(v, '^\s\+', '', ''))
+        # highlight register type
+        ->map((_, v) => substitute(v, '^\s*\zs[bcl]', "\x1b[38;5;" .. COLORS.regtype .. "m&\x1b[0m", ''))
+        # highlight register name
+        ->map((_, v) => substitute(v, '"\S', "\x1b[38;5;" .. COLORS.regname .. "m&\x1b[0m", ''))
     fzf#wrap({
         source: source,
         options: '--ansi --nth=3.. --tiebreak=index +m',
@@ -37,7 +38,7 @@ def plugin#fzf#registers(pfx: string) #{{{1
 enddef
 
 def RegistersSink(pfx: string, line: string)
-    var regname = matchstr(line, '"\zs\S')
+    var regname: string = matchstr(line, '"\zs\S')
     if pfx =~ '["@]'
         feedkeys(pfx .. regname, 'in')
     else

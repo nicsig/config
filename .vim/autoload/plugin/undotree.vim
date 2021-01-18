@@ -64,7 +64,7 @@ def plugin#undotree#show() #{{{2
 enddef
 
 def plugin#undotree#showHelp() #{{{2
-    var help =<< END
+    var help: list<string> =<< END
    ===== Marks =====
 >num<: The current state
 {num}: The next redo state

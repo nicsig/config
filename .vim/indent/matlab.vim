@@ -72,7 +72,9 @@ let b:MATLAB_bracketlevel = 0
 let b:did_indent = 1
 let b:undo_indent = get(b:, 'undo_indent', 'exe') .. '| set inde< indk<'
 
-if exists('*s:get_indent') | finish | endif
+if exists('*s:get_indent')
+    finish
+endif
 
 let s:end = '\<end\>\%([^({]*[)}]\)\@!' " array indexing heuristic
 let s:open_pat = 'for\|if\|parfor\|spmd\|switch\|try\|while\|classdef\|properties\|methods\|events\|enumeration'
@@ -131,9 +133,13 @@ fu s:get_indent() abort "{{{1
         let previndent = indent(prevlnum) | let lnum = prevlnum
         let g = 0 | while g < 999 | let g += 1
             let lnum = prevnonblank(lnum - 1) | let indent = indent(lnum)
-            if lnum <= 0 || previndent < indent | break | endif
+            if lnum <= 0 || previndent < indent
+                break
+            endif
             let b:MATLAB_bracketlevel += s:get_unclosed_lvl(lnum, s:BRACKET_PAT)
-            if previndent > indent | break | endif
+            if previndent > indent
+                break
+            endif
         endwhile
 
         let b:MATLAB_was_lc = s:continues_on_next_line(prevlnum - 1)
@@ -195,8 +201,12 @@ fu s:submatches_counts(lnum, pattern, ...) abort "{{{1
     call cursor(a:lnum, 1)
     let g = 0 | while g < 999 | let g += 1
         let [lnum, col, submatch] = searchpos(a:pattern, g == 1 ? 'cpz' : 'pz', a:lnum)
-        if !submatch || col >= endcol | break | endif
-        if !s:is_comment_or_string(lnum, col) | let counts[submatch - 2] += 1 | endif
+        if !submatch || col >= endcol
+            break
+        endif
+        if !s:is_comment_or_string(lnum, col)
+            let counts[submatch - 2] += 1
+        endif
     endwhile
     return counts
 endfu

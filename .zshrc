@@ -4129,7 +4129,7 @@ zle -N edit-command-line
 #            │ finishes or is suspended.
 #            │
 #            ├───────┐}}}
-__sane_vim() STTY=sane command vim +'au TextChanged,InsertLeave <buffer> sil! call source#fix_shell_cmd()' "$@"
+__sane_vim() STTY=sane command vim +'au TextChanged,InsertLeave <buffer> sil! call source#fixShellCmd()' "$@"
 
 sane-edit-command-line() {
   emulate -L zsh
@@ -4165,7 +4165,7 @@ sane-edit-command-line() {
 zle -N sane-edit-command-line
 
 bindkey '^X^E' sane-edit-command-line
-#              ^^^^^
+#              ^---^
 #              wrapper function around the `edit-command-line()` function
 
 # C-x C-h         complete-help {{{4
