@@ -175,10 +175,10 @@ def colorscheme#customize() #{{{2
     # The error comes from:
     #
     #     " ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
-    #     " /fu s:lightness(
-    #     let level = g:seoul256_background - 233 + 1
-    #                 ^-------------------^
-    #                 must exist, otherwise an error is raised
+    #     " /def Lightness(
+    #     level = g:seoul256_background - 233 + 1
+    #             ^-------------------^
+    #             must exist, otherwise an error is raised
     #}}}
     if &bg == 'light'
         g:seoul256_background = 237
@@ -202,8 +202,8 @@ def colorscheme#customize() #{{{2
     if has('vim_starting') && &bg == 'dark'
         # Why the timer?{{{
         #
-        # `s:Cursor()` needs to know the name of the terminal.
-        # It does so by calling  `s:Termname()` which in turn calls `system()`.
+        # `Cursor()` needs to know the name of the terminal.
+        # It does so by calling  `Termname()` which in turn calls `system()`.
         # `system()` is slow: we don't want to increase the startup time.
         #
         # ---
@@ -379,7 +379,7 @@ def StatuslineNC() #{{{3
     # If we  are in  gui or in  a true color  terminal, then  `synIDattr()` will
     # return an hexadecimal number.  We can't easily make it less/more light.
     # We need  a decimal  number to which  we can apply  a simple  offset; later
-    # we'll convert the result back in hexadecimal via `s:DEC2HEX`.
+    # we'll convert the result back in hexadecimal via `DEC2HEX`.
     #
     # To force `synIDattr()` to return a decimal  number, we nedd to pass it the
     # optional `{mode}` argument, to ask for  the value the attribute would have
@@ -388,7 +388,7 @@ def StatuslineNC() #{{{3
     var bg: number = GetAttributes('TabLine', 'cterm').bg->str2nr()
         + (&bg == 'light' ? -6 : 6)
     if has('gui_running') || &tgc
-        # The value of `bg` may not be a key in the dictionary `s:DEC2HEX`.{{{
+        # The value of `bg` may not be a key in the dictionary `DEC2HEX`.{{{
         #
         # That's  because there  is  no  guarantee that  the  `bg` attribute  of
         # `TabLine` is between 232 and 255.
@@ -773,7 +773,7 @@ fu Cursor() abort "{{{2
     "    - append it to `&t_ti` (or `&t_SI`, but the effect would be delayed until you quit insert mode)
     "}}}
 
-    " `s:Termname()` is a bit slow (it invokes `system()`); let's save its output
+    " `Termname()` is a bit slow (it invokes `system()`); let's save its output
     if !exists('g:termname')
         " in case `vim-lg` is not enabled
         try

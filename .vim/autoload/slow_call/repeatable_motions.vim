@@ -111,15 +111,22 @@ def GetJumpHeight(is_fwd: bool): number
         :     line('.') - max(lnums)
 enddef
 
-#    <t  >t         move tab pages {{{2
+#    gt  gT         move tab pages {{{2
 
-nno <t <cmd>call <sid>MoveTabpage('-1')<cr>
-nno >t <cmd>call <sid>MoveTabpage('+1')<cr>
+nno gT <cmd>call <sid>MoveTabpage()<cr>
+nno gt <cmd>call <sid>MoveTabpage(v:false)<cr>
 
-def MoveTabpage(where: string)
+def MoveTabpage(fwd = true)
     try
-        exe 'tabmove ' .. where
-    catch /^Vim\%((\a\+)\)\=:E474:/
+        if fwd && tabpagenr() == tabpagenr('$')
+            tabmove 0
+        elseif !fwd && tabpagenr() == 1
+            tabmove $
+        elseif fwd
+            tabmove +1
+        else
+            tabmove -1
+        endif
     catch
         Catch()
         return
@@ -156,13 +163,13 @@ enddef
 # So we must use the 2nd solution, and press `;`.
 # But this introduces a special case:
 #
-#     we press `)` → `s:move()`        must press `)`
-#     we press `;` → `s:move_again()`  must press `)`
+#     we press `)` → `Move()`       must press `)`
+#     we press `;` → `moveAgain()`  must press `)`
 #
-#     we press `f`  → `s:move()`       must press `f`
-#     we press `;`  → `s:move_again()` must press `;`
-#                                                  │
-#                                                  └ special case (because != f)
+#     we press `f`  → `Move()`      must press `f`
+#     we press `;`  → `MoveAgain()` must press `;`
+#                                               │
+#                                               └ special case (because != f)
 #
 # We  need to  redefine the  `f`  motion with  the  output of  a function  which
 # returns:
@@ -253,8 +260,8 @@ def Fts(cmd: string): string
         #     +-  all info about the 'f' motion is saved in `motion`
         #     |
         #     |   Why 'f'?
-        #     |   'f' was saved in `s:last_motion` when we pressed `fx` earlier
-        #     |   and is now retrieved with `s:get_motion_info(s:last_motion)`
+        #     |   'f' was saved in `last_motion` when we pressed `fx` earlier
+        #     |   and is now retrieved with `GetMotionInfo(last_motion)`
         #     |
         #     +-  a temporary ad-hoc mapping is installed
         #     |
@@ -318,7 +325,7 @@ repmap#make#repeatable({
     buffer: false,
     from: SFILE .. ':' .. expand('<slnum>'),
     motions: [
-        {bwd: '<t', fwd: '>t'},
+        {bwd: 'gT', fwd: 'gt'},
         {bwd: '<c-w>R', fwd: '<c-w>r'},
         ]})
 
@@ -381,7 +388,7 @@ repmap#make#repeatable({
 # Why `nxo` for the mode?  Why not simply an empty string?{{{
 #
 # You can use `''` when the original motion is built-in or defined via `:[nore]map`.
-# In the first case, repmap use `s:DEFAULT_MAPARG` whose `mode` key is a space.
+# In the first case, repmap use `DEFAULT_MAPARG` whose `mode` key is a space.
 # In the latter case, `maparg(motion, '', 0, 1).mode` is a space.
 # In both cases, a space describes `nvo`.
 #

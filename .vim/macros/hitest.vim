@@ -142,9 +142,9 @@ def OptionsSet() #{{{1
 enddef
 
 def OptionsRestore() #{{{1
-    &report = s:options_save.report
-    &wrapscan = s:options_save.wrapscan
-    &ww = s:options_save.ww
+    &report = options_save.report
+    &wrapscan = options_save.wrapscan
+    &ww = options_save.ww
     options_save = {}
 enddef
 # }}}1

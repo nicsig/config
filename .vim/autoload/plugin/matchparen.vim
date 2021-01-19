@@ -1,5 +1,8 @@
 vim9 noclear
 
+if exists('loaded') | finish | endif
+var loaded = true
+
 def plugin#matchparen#installDummyAutocmds()
     # We need to always have at least one autocmd listening to `CursorMoved`.{{{
     #

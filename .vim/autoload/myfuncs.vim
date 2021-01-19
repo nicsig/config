@@ -431,7 +431,12 @@ def myfuncs#deleteMatchingLines(to_delete: string, reverse = false) #{{{1
     endif
     var to_search: dict<list<string>> = {
         empty: ['^\s*$', '^'],
-        comments: ['^\s*' .. cml, '^\%(\s*' .. cml .. '\)\@!'],
+        comments: [
+            '^\s*' .. cml
+                # preserve start of folds when deleting comments
+                .. '\%(.*' .. split(&l:fmr, ',')->get(0, '') .. '\d\+$\)\@!',
+            '^\%(\s*' .. cml .. '\)\@!'
+            ],
         search: [@/, '^\%(.*' .. @/ .. '\m\)\@!'],
         }
     var wont_be_deleted: string = to_search[to_delete][global == 'g' ? 1 : 0]
