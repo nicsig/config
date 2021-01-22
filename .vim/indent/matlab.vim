@@ -222,10 +222,7 @@ def GetUnclosedLvl(lnum: number, pat: string, col = 0): number #{{{2
 enddef
 
 def SubmatchesCounts(arg_lnum: number, pattern: string, arg_col = 0): list<number> #{{{2
-    # TODO: In the original code, `9999...` was actually `1 / 0` which – I think
-    # – generated the biggest number the running Vim binary can handle.
-    # However, we can't use that: https://github.com/vim/vim/issues/7704
-    var endcol = arg_col != 0 ? arg_col : 9999999999
+    var endcol = arg_col != 0 ? arg_col : v:numbermax
     var counts: list<number> = [0, 0, 0, 0]
     cursor(arg_lnum, 1)
     var g: number = 0 | while g < 999 | g += 1

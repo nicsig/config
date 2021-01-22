@@ -2916,7 +2916,7 @@ enddef
 # See: `:h i_ctrl-g_u`
 #}}}
 
-def Cm(): string
+def CtrlM(): string
     if pumvisible()
         # If you change the code, make sure not to introduce a regression.{{{
         #
@@ -2966,6 +2966,15 @@ def Cm(): string
     # If we press Enter on a commented line with nothing in it, we want to delete everything.
     var cml: string = matchstr(&l:cms, '\S*\ze\s*%s')
 
+    # make sure not to break possible text properties:
+    # https://github.com/vim/vim/issues/7719
+    var autoindent_is_on: bool = &l:ai
+    var next_char: string = getline('.')->strpart(col('.') - 1)[1]
+    if autoindent_is_on && next_char =~ '\s'
+        setl noai
+        au TextChangedI * ++once setl ai | FixIndent()
+    endif
+
     if empty(cml)
         return "\<c-g>u\<cr>"
     endif
@@ -2986,7 +2995,20 @@ def Cm(): string
     return "\<c-g>u\<cr>"
 enddef
 
-ino <expr> <c-m> <sid>Cm()
+def FixIndent()
+    var cindent_was_off: bool = !&l:cindent
+    setl cindent
+    # this assumes that `!^F` is in `'cinkeys'`
+    feedkeys("\<c-f>", 'int')
+    if cindent_was_off
+        var buf = bufnr('%')
+        TurnOffCindent = () => bufnr('%') == buf && !!execute('setl nocindent')
+        au SafeState * ++once TurnOffCindent()
+    endif
+enddef
+var TurnOffCindent: func
+
+ino <expr> <c-m> <sid>CtrlM()
 
 # C-r             ignore `'autoindent'` when inserting register {{{3
 
@@ -3508,6 +3530,34 @@ nno m, <cmd>call <sid>MyLocations('clear')<cr>
 nno ]; <cmd>call <sid>JumpMyLocations('f')<cr>
 nno [; <cmd>call <sid>JumpMyLocations('b')<cr>
 
+def MyLocations(action: string)
+    var buf: number = bufnr('%')
+    if action == 'save'
+        if prop_type_list({bufnr: buf})->index('MyLocations') == -1
+            prop_type_add('MyLocations', {
+                bufnr: buf,
+                highlight: 'WildMenu',
+                combine: false
+                })
+        endif
+        prop_add(line('.'), col('.'), {
+            bufnr: buf,
+            type: 'MyLocations',
+            combine: false,
+            })
+    else
+        if prop_type_list({bufnr: buf})->index('MyLocations') != -1
+            prop_type_delete('MyLocations', {bufnr: buf})
+            redraw!
+        endif
+        prop_type_add('MyLocations', {
+            bufnr: buf,
+            highlight: 'WildMenu',
+            combine: false
+            })
+    endif
+enddef
+
 def JumpMyLocations(direction: string)
     var prop: dict<any> = prop_find({
         type: 'MyLocations',
@@ -3518,20 +3568,6 @@ def JumpMyLocations(direction: string)
     endif
     cursor(prop.lnum, prop.col)
 enddef
-
-def MyLocations(action: string)
-    if action == 'save'
-        prop_add(line('.'), col('.'), {
-            type: 'MyLocations',
-            combine: false,
-            })
-    else
-        prop_type_delete('MyLocations')
-        redraw!
-        prop_type_add('MyLocations', {highlight: 'WildMenu', combine: 0})
-    endif
-enddef
-prop_type_add('MyLocations', {highlight: 'WildMenu', combine: false})
 
 # m/             matchadd / matchdelete search pattern {{{4
 
@@ -4727,16 +4763,34 @@ nno <expr> drr myfuncs#opReplaceWithoutYank() .. '_'
 
 # j  k  ^  0  $       gj  gk  ... {{{3
 
-# By default, we can't move across several lines of a long wrapped line with
-# `j` and `k`.
-#
-#            ┌ if we used a count, we probably don't care about wrapped lines
-#            │
-nno <expr> j v:count ? (v:count >= 5 ? "m'" .. v:count : '') .. 'j' : 'gj'
-nno <expr> k v:count ? (v:count >= 5 ? "m'" .. v:count : '') .. 'k' : 'gk'
-#                      ├───────────────────────────────────┘
-#                      └ if the count was bigger than 5,
-#                        we consider the motion as a jump useful to come back with `c-o`
+# let us move across several lines of a long wrapped line with `j` and `k`
+nno <expr> j <sid>JK('j')
+nno <expr> k <sid>JK('k')
+
+def JK(key: string): string
+    # if we used a count, we probably don't care about wrapped lines
+    if v:count != 0
+    # Don't use `gj` or `gk` when we're in a closed fold.{{{
+    #
+    # Otherwise, when we  open a fold with `za`, the  first visible line depends
+    # on the direction in which we landed on the fold:
+    #
+    #  - if we've moved from *below*, the first visible line is the *last* line in the fold
+    #  - if we've moved from *above*, the first visible line is the *first* line in the fold
+    #
+    # This is a new behavior introduced in 8.2.2385.
+    # It might  make sense,  but I  find this  confusing; I  prefer the  fold to
+    # always open in the same way, regardless of how we reached it.
+    #}}}
+    || foldclosed('.') != -1
+        return (v:count >= 5 ? "m'" .. v:count : '') .. key
+        #       ├─────────────────────────────────┘
+        #       └ if the count was bigger than 5,
+        #         we consider the motion as a jump useful to come back with `c-o`
+    else
+        return 'g' .. key
+    endif
+enddef
 
 nmap <down> j
 nmap <up> k
@@ -5922,7 +5976,7 @@ com -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
 
 # RemoveSwapFiles {{{2
 
-com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', true, true)->map((_, v) => delete(v))
+com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', true, true)->mapnew((_, v) => delete(v))
 
 # RemoveTabs {{{2
 

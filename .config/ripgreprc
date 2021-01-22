@@ -1,3 +1,8 @@
+# `rg(1)` reads this file because we've set this variable in `~/.zshenv`:
+#
+#     export RIPGREP_CONFIG_PATH="$HOME/.config/ripgreprc"
+#
+# For more info, see:
 # https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md#configuration-file
 
 --color=auto

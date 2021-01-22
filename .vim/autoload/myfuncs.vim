@@ -952,7 +952,7 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
 
     elseif has_comma
         # We use `strdisplaywidth()` because the indentation could contain tabs.
-        var indent_lvl: string = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
+        var indent_lvl: number = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
         var indent_txt: string = repeat(' ', indent_lvl)
         sil keepj keepp s/\m\ze\S/- /e
         var pat: string = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
