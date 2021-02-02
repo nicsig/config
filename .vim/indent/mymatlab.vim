@@ -24,7 +24,7 @@ setl indk=0=elsei
 b:did_indent = true
 b:undo_indent = get(b:, 'undo_indent', 'exe') .. '| set inde< indk<'
 
-if exists('*s:GetIndent')
+if exists('*GetIndent')
     finish
 endif
 

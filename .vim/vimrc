@@ -234,6 +234,7 @@ Plug 'lacygoill/vim-help'
 Plug 'lacygoill/vim-hydra'
 Plug 'lacygoill/vim-iabbrev'
 Plug 'lacygoill/vim-interactive-lists'
+Plug 'lacygoill/vim-jagged-block'
 Plug 'lacygoill/vim-latex'
 Plug 'lacygoill/vim-lg-lib'
 Plug 'lacygoill/vim-logevents'
@@ -342,7 +343,7 @@ plug#end()
 # }}}1
 # Imports {{{1
 
-import {Catch, FuncComplete, IsVim9, Win_getid} from 'lg.vim'
+import {Catch, FixIndent, FuncComplete, IsVim9, Win_getid} from 'lg.vim'
 import MapMeta from 'lg/map.vim'
 import {Fold, UndoFtplugin, Syntax} from 'lg/styled_comment.vim'
 
@@ -958,8 +959,8 @@ def SetCursor() #{{{
     #
     # We may start gVim from tmux (e.g. `gf` in copy-mode).
     # When that happens, `$TERM` has the value `tmux-256color` inside gVim.
-    # With this  value, if  you write the  `$TERM =~# ...`  case before  the gui
-    # case, 'gcr' would be wrongly handled by the former instead of the latter.
+    # With this value, if you write the `$TERM =~ ...` case before the gui case,
+    # 'gcr' would be wrongly handled by the former instead of the latter.
     #}}}
     if has('gui_running')
         # No blinking cursor in gVim.
@@ -2445,7 +2446,7 @@ set ve=block
 # It would cause all sorts of issues because of the `!` flag which we include in `'viminfo'`.
 #
 # Don't  try to  be  smart and  install  a `VimLeavePre`  autocmd  to unlet  the
-# variable (it wouldn't always work; e.g. when debuggin a crash).
+# variable (it wouldn't always work; e.g. when debugging a crash).
 # Don't try a  `VimEnter` autocmd to delay `:lockvar` either;  I'm sure we would
 # end up finding some other edge case where it fails.
 #}}}
@@ -2832,7 +2833,7 @@ def InsertCurrentLine(): string
     return getline('.')->substitute('^\s*' .. cml .. '\s*:\=', '', '')
 enddef
 
-# C-r `         insert codespan {{{3
+# C-r `          insert codespan {{{3
 
 cno <c-r>` <c-r><c-r>=<sid>InsertCodespan()<cr>
 def InsertCodespan(): string
@@ -2995,19 +2996,7 @@ def CtrlM(): string
     return "\<c-g>u\<cr>"
 enddef
 
-def FixIndent()
-    var cindent_was_off: bool = !&l:cindent
-    setl cindent
-    # this assumes that `!^F` is in `'cinkeys'`
-    feedkeys("\<c-f>", 'int')
-    if cindent_was_off
-        var buf = bufnr('%')
-        TurnOffCindent = () => bufnr('%') == buf && !!execute('setl nocindent')
-        au SafeState * ++once TurnOffCindent()
-    endif
-enddef
-var TurnOffCindent: func
-
+# https://github.com/vim/vim/issues/7719
 ino <expr> <c-m> <sid>CtrlM()
 
 # C-r             ignore `'autoindent'` when inserting register {{{3
@@ -3486,7 +3475,7 @@ def TryToEditPluginConfig(cmd: string)
 
         var a_file_is_opened: bool = false
         for f in files
-            exe (a_file_is_opened ? 'sp ' : split) .. f
+            exe (a_file_is_opened ? 'sp' : split) .. ' ' .. f
             norm! zv
             a_file_is_opened = true
         endfor
@@ -4183,7 +4172,7 @@ def Faq(): string
         endif
     endfor
 
-    if mapnew(win_in_this_tab, (_, v) => getwinvar(v.winnr, '&pvw', 0))->index(1) != -1
+    if mapnew(win_in_this_tab, (_, v) => getwinvar(v.winnr, '&pvw', 0))->index(true) != -1
         return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
@@ -4729,6 +4718,19 @@ nno c# #``/<up><cr>``cgN
 nno cg* g*``/<up><cr>``cgn
 nno cg# g#``/<up><cr>``cgN
 
+# cc {{{3
+
+# https://github.com/vim/vim/issues/7737
+nno cc <cmd>call <sid>CC()<cr>
+
+def CC()
+    exe 'norm! 0' .. v:count .. 'C'
+    startinsert
+    if &l:ai && &l:inde != ''
+        FixIndent()
+    endif
+enddef
+
 # crg                 coerce to glyph {{{3
 
 # The behavior of this operator can be customized via
@@ -4853,7 +4855,7 @@ nno <expr> gJ "m'" .. v:count1 .. 'gJ``'
 
 # Q        q {{{3
 
-# no more entering Ex command by accident
+# no more entering Ex mode by accident
 nno Q q
 
 # }}}2
@@ -8806,6 +8808,10 @@ enddef
 # In particular, read the tests:
 # https://github.com/vim/vim/commit/077a1e670ad69ef4cefc22103ca6635bd269e764
 #
+# Note that `flatten()` is disallowed in Vim9.
+# Instead, you must use `flattennew()`:
+# https://github.com/vim/vim/commit/3b690069730805a147d45d92eaca4dc838272d1d
+#
 # 105 -
 #
 # Adapt this for `:map` (& friends like `:nno`), `:[ic]norea`, `:au`, and `:set`:
@@ -8981,8 +8987,6 @@ enddef
 # ---
 #
 # Use our saved qfl named `setreg`.
-
-
 
 
 

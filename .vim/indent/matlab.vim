@@ -248,7 +248,7 @@ def IsCommentOrString(lnum: number, col: number): bool #{{{2
     # without `synIDtrans()`, you'll have to update this function to include it;
     # with `synIDtrans()`, you don't need to.
     #
-    # Besides, it simplifies the pattern to the right of `=~#`.
+    # Besides, it simplifies the pattern to the right of `=~`.
     #}}}
     return synID(lnum, col, true)
         ->synIDtrans()
@@ -277,7 +277,7 @@ def ContinuesOnNextLine(lnum: number): bool #{{{2
     # Besides, it  doesn't even  check that the  ellipsis is at  the end  of the
     # line, which seems wrong.
     #}}}
-    # Note: The `s:IsLineContinuation()` test wrongly fails on an ellipsis used as a line continuation symbol.{{{
+    # Note: The `IsLineContinuation()` test wrongly fails on an ellipsis used as a line continuation symbol.{{{
     #
     # See our comment at the top of `~/.vim/after/syntax/matlab.vim`.
     #}}}
@@ -302,14 +302,14 @@ def ContinuesOnNextLine(lnum: number): bool #{{{2
     #
     # Rationale: A positive assertion is more restrictive.
     #
-    # As a result, we need to create the helper function `s:IsLineContinuation()`.
+    # As a result, we need to create the helper function `IsLineContinuation()`.
     # But the name is already taken in the original plugin.
     #
     #                 v----------------v
     #     function! s:IsLineContinuation(lnum)
     #     " $VIMRUNTIME/indent/matlab.vim:45
     #
-    # So, we need to rename the current function into `s:ContinuesOnNextLine()`.
+    # So, we need to rename the current function into `ContinuesOnNextLine()`.
     # Incidentally, I think this is a better name.
     # Indeed, the current function does not  check whether the current line is a
     # line continuation symbol; it checks  whether the current line continues on

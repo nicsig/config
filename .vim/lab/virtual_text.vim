@@ -3,7 +3,9 @@ vim9
 # Improve this gist to preserve the virtual texts across a buffer reload:
 # https://gist.github.com/lacygoill/09da3dddea83e83bc15e6d9a9044bc95
 #
-# Also, I don't think the structure of `virtualtext_db` makes sense.
+# ---
+#
+# I don't think the structure of `virtualtext_db` makes sense.
 # The keys are buffer numbers: that's OK.
 # The values are dictionaries of line numbers: that's not OK.
 # Instead, the values should be simple lists of names of property types.
@@ -12,6 +14,16 @@ vim9
 # buffer being read); for each name  of property type, run `prop_find()` to find
 # where is the virtual text, and other useful info about it.
 # On `BufReadPost`, use that info to restore virtual texts.
+
+# FIXME: Doesn't work well when joining lines with virtual texts.
+#
+# Example: Delete the first  3 lines (the ones which don't  have virtual texts),
+# then join the  new first 2 lines  (the one which do have  virtual texts), then
+# undo, and finally append  text on the first line: the  inserted text is hidden
+# behind the popup.
+#
+# Update: Actually, can  repro just by  deleting the third line,  then appending
+# text on the new 3rd line.
 
 var virtualtext_db: dict<dict<number>> = {}
 
@@ -73,9 +85,11 @@ def AddVirtualText(props: dict<any>): number
         au BufReadPre <buffer> UpdateDb()
         au BufReadPost <buffer> RefreshHighlighting()
     augroup END
+
+    return popup_id
 enddef
 
-def Refresh()
+def RefreshHighlighting()
     # TODO
 enddef
 

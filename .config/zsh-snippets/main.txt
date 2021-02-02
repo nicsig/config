@@ -14,6 +14,7 @@ git checkout $(git rev-list --max-parents=0 HEAD) § checkout initial commit
 git log --all --source -p -i -S § search for string across all commits
 git log --pretty=format:'%h - %an, %ar : %s' --after='{{date1}}' --before='{{date2}}' § search commits in date range
 git log -L {{line1}},{{line2}}:{{file}} § trace evolution of range of lines
+git ls-files --others --directory --exclude-standard § list untracked files
 git reset --hard "$(git rev-parse HEAD)" § restore latest checked out commit
 git remote add upstream git://github.com/{{original-dev-username}}/{{repo-you-forked-from}}.git; git fetch upstream pull/{{PR-id}}/head:{{PR-branch}}; git checkout {{PR-branch}} § test PR
 

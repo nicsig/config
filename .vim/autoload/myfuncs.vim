@@ -1193,11 +1193,11 @@ def myfuncs#sendToTabPage(vcount: number) #{{{1
         # TODO: It would be nice if we could select the tab page via fzf.{{{
         #
         #     " prototype
-        #     nno cd <cmd>call fzf#run(#{
-        #         \ source: range(1, tabpagenr('$')),
-        #         \ sink: function(expand('<SID>') .. 'Func'),
-        #         \ options: '+m',
-        #         \ left: 30,
+        #     nno cd <cmd>call fzf#run({
+        #         \ 'source': range(1, tabpagenr('$')),
+        #         \ 'sink': function(expand('<SID>') .. 'Func'),
+        #         \ 'options': '+m',
+        #         \ 'left': 30,
         #         \ })<cr>
         #
         #     def Func(line: string)

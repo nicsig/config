@@ -1,2 +1,2 @@
 vim9script
-g:last_color_scheme = 252
+g:last_color_scheme = 253

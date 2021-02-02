@@ -53,7 +53,7 @@ augroup MyEmmet | au!
     " TODO:
     " However, maybe we could enable them to all markdown files...
     "
-    "     au FileType css,html,markdown  call s:install_mappings()
+    "     au FileType css,html,markdown  call plugin#emmet#install_mappings()
     "                          ^------^
     "}}}
     au BufReadPost,BufNewFile */wiki/web/*.md call plugin#emmet#install_mappings()

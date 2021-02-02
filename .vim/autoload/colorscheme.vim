@@ -489,76 +489,79 @@ def CommentUnderlined() #{{{3
     sil! Derive('CommentUnderlined', 'Comment', 'term=underline cterm=underline gui=underline')
 enddef
 
-fu User() abort "{{{3
-    " We're going to define 2 HGs: User1 and User2.{{{
-    "
-    " We use them in the status line to customize the appearance of:
-    "
-    "    - the filename
-    "    - the modified flag
-    "
-    " We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
-    " except for one: `reverse` (boolean flag).
-    "
-    " `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
-    " Also, we set the color of the background of `User2` as the same as the
-    " foreground color of `Todo`, so that the modified flag clearly stands out.
-    "}}}
+def User() #{{{3
+    # We're going to define 2 HGs: User1 and User2.{{{
+    #
+    # We use them in the status line to customize the appearance of:
+    #
+    #    - the filename
+    #    - the modified flag
+    #
+    # We want their  attributes to be the  same as the ones of  the HG `StatusLine`,
+    # except for one: `reverse` (boolean flag).
+    #
+    # `User1` and `StatusLine` should have opposite values for the `reverse` attribute.
+    # Also, we set the color of the background of `User2` as the same as the
+    # foreground color of `Todo`, so that the modified flag clearly stands out.
+    #}}}
 
-    let attributes = {
-        \ 'fg': 0,
-        \ 'bg': 0,
-        \ 'bold': 0,
-        \ 'reverse': 0,
-        \ }
+    var attributes: dict<any> = {
+        fg: 0,
+        bg: 0,
+        bold: 0,
+        reverse: 0,
+        }->mapnew((k) => hlID('StatusLine')->synIDtrans()->synIDattr(k))
+         ->mapnew((k, v) => k == 'bold' || k == 'reverse' ? str2nr(v) : v)
 
-    call map(attributes, {k -> hlID('StatusLine')->synIDtrans()->synIDattr(k)})
-
+    var cmd1: string
+    var cmd2: string
     if has('gui_running')
-        let cmd1 = 'hi User1 gui=%s guifg=%s guibg=%s'
-        let cmd2 = 'hi User2 gui=%s guifg=%s guibg=%s'
+        cmd1 = 'hi User1 gui=%s guifg=%s guibg=%s'
+        cmd2 = 'hi User2 gui=%s guifg=%s guibg=%s'
 
     elseif &tgc
-        let cmd1 = 'hi User1 cterm=%s guifg=%s guibg=%s'
-        let cmd2 = 'hi User2 cterm=%s guifg=%s guibg=%s'
+        cmd1 = 'hi User1 cterm=%s guifg=%s guibg=%s'
+        cmd2 = 'hi User2 cterm=%s guifg=%s guibg=%s'
 
     else
-        let cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
-        let cmd2 = 'hi User2 cterm=%s ctermfg=%s ctermbg=%s'
-        "                                      │
-        "                                      └ yes, you could use `%d`
-        "                                        but you couldn't use `%d` for `guifg`
-        "                                        nor `%x`
-        "                                        nor `%X`
-        "                                        only `%s`
-        "                                        so, we use `%s` everywhere
+        cmd1 = 'hi User1 cterm=%s ctermfg=%s ctermbg=%s'
+        cmd2 = 'hi User2 cterm=%s ctermfg=%s ctermbg=%s'
+        #                                  │
+        #                                  └ yes, you could use `%d`
+        #                                    but you couldn't use `%d` for `guifg`
+        #                                    nor `%x`
+        #                                    nor `%X`
+        #                                    only `%s`
+        #                                    so, we use `%s` everywhere
     endif
 
-    " For some color  schemes (default, darkblue, ...), some values  used in the
-    " command which is going to be executed may be empty.
-    " If that happens, the command will fail:
-    "
-    "     Error detected while processing function <SNR>18_set_user_hg:~
-    "     E421: Color name or number not recognized: ctermfg= ctermbg=~
+    # For some color  schemes (default, darkblue, ...), some values  used in the
+    # command which is going to be executed may be empty.
+    # If that happens, the command will fail:
+    #
+    #     Error detected while processing function <SNR>18_set_user_hg:~
+    #     E421: Color name or number not recognized: ctermfg= ctermbg=~
     if attributes.fg == '' || attributes.bg == ''
         return
     endif
 
-    let style1 = (attributes.bold ? 'bold,' : '') .. (attributes.reverse ? '' : 'reverse')
+    var style1: string = (attributes.bold ? 'bold,' : '')
+                      .. (attributes.reverse ? '' : 'reverse')
     if style1 == ''
         return
     endif
 
     exe printf(cmd1, style1, attributes.fg, attributes.bg)
 
-    let style2 = (attributes.bold ? 'bold,' : '') .. (attributes.reverse ? 'reverse' : '')
+    var style2: string = (attributes.bold ? 'bold,' : '')
+                      .. (attributes.reverse ? 'reverse' : '')
     if style2 == ''
         return
     endif
 
-    let todo_fg = hlID('Todo')->synIDtrans()->synIDattr('fg')
+    var todo_fg: string = hlID('Todo')->synIDtrans()->synIDattr('fg')
     exe printf(cmd2, style2, todo_fg, attributes.bg)
-endfu
+enddef
 
 def VertSplit() #{{{3
     # When  you split  a  window  vertically, Vim  uses  `VertSplit`  to draw  2
