@@ -2,7 +2,7 @@ vim9 noclear
 
 def plugin#plug#moveBetweenCommits(is_fwd = true) #{{{1
     # look for the next commit
-    if !search('^  \X*\zs\x', is_fwd ? '' : 'b')
+    if search('^  \X*\zs\x', is_fwd ? '' : 'b') == 0
         # there's none
         return
     endif

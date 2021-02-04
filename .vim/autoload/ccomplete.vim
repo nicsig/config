@@ -130,7 +130,7 @@ def ccomplete#Complete(findstart: number, abase: string): any #{{{1
     # TODO: join previous line if it makes sense
     var line: string = getline('.')
     var col: number = col('.')
-    if line[: col - 1]->stridx(';') != -1
+    if line[: col - 1]->stridx(';') >= 0
       # Handle multiple declarations on the same line.
       var col2: number = col - 1
       while line[col2] != ';'
@@ -139,7 +139,7 @@ def ccomplete#Complete(findstart: number, abase: string): any #{{{1
       line = line[col2 + 1 :]
       col -= col2
     endif
-    if line[: col - 1]->stridx(',') != -1
+    if line[: col - 1]->stridx(',') >= 0
       # Handle multiple declarations on the same line in a function
       # declaration.
       var col2: number = col - 1

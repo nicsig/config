@@ -122,7 +122,7 @@ def colorscheme#set() #{{{2
 enddef
 
 def colorscheme#customize() #{{{2
-    # We delay until `VimEnter` to avoid errors when starting gVim.{{{
+    # We delay until `VimEnter` to avoid errors when starting the GUI.{{{
     #
     #     E417: missing argument: guifg=~
     #     E254: Cannot allocate color 95~
@@ -451,7 +451,7 @@ def Title() #{{{3
     # Purpose: We need some HGs to get the bold, italic, bold+italic styles in a markdown header.
     var title_fg: string = GetAttributes('Title').fg
     if has('gui_running')
-        # In gVim, `seoul256` makes a markdown Title bold by default.
+        # In the GUI, `seoul256` makes a markdown Title bold by default.
         # It prevents us from using the bold style.
         # So, we remove this attribute.
         hi clear Title

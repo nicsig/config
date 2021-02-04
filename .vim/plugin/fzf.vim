@@ -105,7 +105,7 @@ augroup FzfOpenFolds | au!
     # press `zv` the next time Vim has nothing to do, *after* a buffer has been displayed in a window
     # Why the `mode()` condition?{{{
     #
-    # For some reason, in gVim, `norm! zv` makes the cursor move back one character when:
+    # For some reason, in the GUI, `norm! zv` makes the cursor move back one character when:
     #
     #    - the cursor is at the end of the line
     #    - we're in insert mode
@@ -204,7 +204,7 @@ def Miscellaneous()
         #
         # If you've opened ftp files with Vim:
         #
-        #     $ gvim ftp://ftp.vim.org/pub/vim/patches/8.0/README
+        #     $ vim -g ftp://ftp.vim.org/pub/vim/patches/8.0/README
         #
         # `v:oldfiles` will contain filepaths such as:
         #

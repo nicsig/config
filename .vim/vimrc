@@ -40,7 +40,7 @@ set guioptions+=!
 # Plugins {{{1
 # Disable plugins {{{2
 
-# I never use these plugins:{{{
+# We never use these plugins:{{{
 #
 #    - getscript
 #    - logipat
@@ -112,19 +112,6 @@ g:plug_shallow = 0
 
 # vim-plug:  usage  {{{2
 
-# Why this check?{{{
-#
-# We shouldn't reload  the interface of all our plugins  every time we re-source
-# the vimrc.  If a plugin is missing a guard, this could have unexpected effects.
-#}}}
-# Is there a drawback?{{{
-#
-# Yes.
-#
-# If you remove  the `Plug` line of  a plugin, `:PlugClean` will  not remove its
-# files, because `vim-plug` won't be informed.
-# You need to restart Vim.
-#}}}
 # Plugins must be declared after this line.
 # They will be downloaded inside `~/.vim/plugged/`.
 plug#begin('~/.vim/plugged')
@@ -375,7 +362,7 @@ import {Fold, UndoFtplugin, Syntax} from 'lg/styled_comment.vim'
 #
 # This would tell Vim to convert the following lines in our vimrc to utf-8.
 # But setting `'encoding'`  seems to have a broader scope,  and hence be better,
-# as I  want every file  sourced after  the vimrc to  be read using  the `utf-8`
+# as we  want every file sourced  after the vimrc  to be read using  the `utf-8`
 # encoding (ex: filetype plugins).
 #}}}
 set encoding=utf-8
@@ -389,8 +376,8 @@ set termencoding=utf-8
 # Commented because we don't need this anymore.{{{
 #
 # `vim-plug` already does it for us.
-# I keep this section in case it might be necessary if one day we change our plugin
-# manager.
+# We keep this  section in case it might  be necessary if one day  we change our
+# plugin manager.
 #
 # From: https://github.com/junegunn/vim-plug/wiki/faq
 #
@@ -692,18 +679,18 @@ set backspace=indent,eol,nostop
 # Unfortunately, `system()` would add too much time during startup.
 #
 # Anyway, in practice, I doubt this will be an issue.
-# Most terminals support true colors; and even  if I test one which doesn't from
-# time to time, I won't be running tmux inside.
+# Most terminals support true colors; and even if we test one which doesn't from
+# time to time, we won't be running tmux inside.
 #}}}
 if map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'tmux', 'xterm'],
-    (_, v) => v .. '-256color')
-        ->index($TERM) >= 0
+        (_, v) => v .. '-256color'
+      )->index(&term) >= 0
     # xfce4-terminal lies about its identity
     # and doesn't support true color on Ubuntu 16.04
     && $COLORTERM != 'xfce4-terminal'
     set termguicolors
     if !has('gui_running')
-        # In Vim,  if `$TERM`  is not  'xterm', `'t_8f'`  and `'t_8b'`  won't be
+        # If  `&term`   is  not   'xterm',  `'t_8f'`   and  `'t_8b'`   won't  be
         # automatically set; we need to do it manually.
         # See: `:h xterm-true-color`.
         &t_8f = "\e[38;2;%lu;%lu;%lum"
@@ -831,7 +818,7 @@ else
     #
     # So, if we delay the color scheme, we must redefine all our custom HGs.
     #
-    # But, I can't know in advance all the custom HGs currently defined.
+    # But, we can't know in advance all the custom HGs currently defined.
     # It depends on the files which have been read during Vim startup.
     #
     # For example, if  we start Vim to  read a markdown file,  the htmlItalic HG
@@ -878,7 +865,7 @@ set commentstring=
 
 # cpoptions {{{2
 
-# When I type `:r some_file` or `:'<,'>w some_file`, I don't want `some_file`
+# When we type  `:r some_file` or `:'<,'>w some_file`, I  don't want `some_file`
 # to become the alternate file of the current window.
 # Update: It's commented.  Did we change our mind?
 # set cpo-=aA
@@ -957,13 +944,13 @@ def SetCursor() #{{{
     #}}}
     # Write the gui case first.{{{
     #
-    # We may start gVim from tmux (e.g. `gf` in copy-mode).
-    # When that happens, `$TERM` has the value `tmux-256color` inside gVim.
-    # With this value, if you write the `$TERM =~ ...` case before the gui case,
+    # We may start the GUI from tmux (e.g. `gf` in copy-mode).
+    # When that happens, `&term` has the value `tmux-256color` inside the GUI.
+    # With this value, if you write the `&term =~ ...` case before the gui case,
     # 'gcr' would be wrongly handled by the former instead of the latter.
     #}}}
     if has('gui_running')
-        # No blinking cursor in gVim.
+        # No blinking cursor in the GUI.
         # Where did you get this value?{{{
         #
         # It's  the  default  value;  we've just  included  `blinkon0`  in  each
@@ -975,7 +962,7 @@ def SetCursor() #{{{
             .. ',i-ci:ver25-Cursor/lCursor-blinkon0'
             .. ',r-cr:hor20-Cursor/lCursor-blinkon0'
             .. ',sm:block-Cursor-blinkon0'
-    elseif $TERM =~ '^\%(rxvt-unicode\|st\|tmux\|xterm\)-256color$'
+    elseif &term =~ '^\%(rxvt-unicode\|st\|tmux\|xterm\)-256color$'
         # For more info, see `:h termcap-cursor-shape`
 
         #  ┌ End Insert or replace mode
@@ -1172,7 +1159,7 @@ augroup END
 #     ^[abc]:
 #
 # https://github.com/tpope/vim-markdown/commit/14977fb9df2984067780cd452e51909cf567ee9d
-# I don't know how it's useful, so I didn't copy it.
+# We don't know how it's useful, so we didn't copy it.
 # The title of the commit is:
 #
 #     Indent the footnotes also.
@@ -1419,7 +1406,7 @@ g:is_bash = 1
 
 # invisible characters {{{2
 
-# We define which symbol Vim must use to display certain symbols:
+# We define which glyph Vim must use to display certain special characters:
 #
 #    ┌────────────────────────┬───────────────────────────────┐
 #    │ tab                    │ > or <> or <-> or <--> or ... │
@@ -1429,20 +1416,11 @@ g:is_bash = 1
 #    │ scroll unwrapped lines │ » «                           │
 #    ├────────────────────────┼───────────────────────────────┤
 #    │ no-break space         │ ∅                             │
+#    ├────────────────────────┼───────────────────────────────┤
+#    │ leading space          │ │                             │
 #    └────────────────────────┴───────────────────────────────┘
 
-set listchars=tab:<->,eol:¬,precedes:«,extends:»,nbsp:∅
-
-# join {{{2
-
-# Don't insert two spaces after a '.', '?' and '!' with a join command.
-
-# Update: Actually, I like how  in the user manual 2 spaces  are added between a
-# final dot and the next non-whitespace.  It  makes it easier to find when a new
-# sentence starts.
-# In fact, I think it's a widely adopted convention.  See `man man` and `man par`.
-
-#     set nojoinspaces
+set listchars=tab:<->,eol:¬,precedes:«,extends:»,nbsp:∅,lead:│
 
 # lazyredraw {{{2
 # What does it do?{{{
@@ -1506,7 +1484,7 @@ set noshowmatch
 # `:set` commands it finds.
 
 # This allows easy file-specific configuration.
-# But I don't like that, for security reason.
+# But we don't like that, for security reasons.
 
 set nomodeline
 set modelines=0
@@ -1648,7 +1626,7 @@ set scrollopt+=hor
 #}}}
 # Why don't you enable the flag anymore?{{{
 #
-# I deal with the "ATTENTION" message with an autocmd listening to `SwapExists`.
+# We deal with the "ATTENTION" message with an autocmd listening to `SwapExists`.
 #}}}
 # set shm+=A
 
@@ -1733,7 +1711,7 @@ set spelloptions=camel
 #         dd, <<, >>                                      (operators)
 #         c-^, :bnext, :bprevious
 #
-# I prefer the cursor to stay on the same column as before.
+# We prefer the cursor to stay on the same column as before.
 set nostartofline
 
 # switchbuf {{{2
@@ -1789,7 +1767,7 @@ set nostartofline
 #         Why don't you set it?{{{
 #
 #    - Too many issues.
-#    - I don't need it atm.
+#    - We don't need it atm.
 #    - To give the focus to an already displayed buffer, there are alternatives:
 #
 #         :FzWindows  (<space>fw)
@@ -2005,7 +1983,7 @@ if !has('gui_running')
 # Because Vim  already sets these options  for some terminals (e.g.  xterm), but
 # not all.
 # In particular, it fails to set them for st, and for any terminal in tmux.
-# Presumably because  it only recognizes a few terminals  (via `$TERM`) which it
+# Presumably because it  only recognizes a few terminals (via  `&term`) which it
 # knows how to configure.
 #}}}
 if &t_BE == ''
@@ -2021,13 +1999,13 @@ endif
 # https://github.com/vim/vim/issues/4836
 # https://github.com/vim/vim/issues/6206
 # https://github.com/vim/vim/issues/2581
-if $TERM =~ 'xterm'
+if &term =~ 'xterm'
     set t_RV=
 endif
 
 # Ts, Te {{{3
 
-# necessary when `$TERM` is not `xterm` to be able to apply the strikethrough attribute to text:{{{
+# necessary when `&term` is not `xterm` to be able to apply the strikethrough attribute to text:{{{
 #
 #     $ vim -Nu NONE +'hi MyStrikeThrough cterm=strikethrough'
 #     :hi MyStrikeThrough
@@ -2046,7 +2024,7 @@ endif
 
 # kB {{{3
 
-if $TERM =~ '^st\%(-256color\)$'
+if &term =~ '^st\%(-256color\)$'
     # `<S-Tab>` may not work in st, because Vim may not set `t_kB`.{{{
     #
     # Right now, for st, we use the terminfo description from the ncurses developer.
@@ -2067,7 +2045,7 @@ if $TERM =~ '^st\%(-256color\)$'
     #             kcbt@, kent@, oc=\E]104\007,
     #             ^---^
     #
-    # As a result, Vim does not set `t_kB` when `$TERM` is `st`.
+    # As a result, Vim does not set `t_kB` when `&term` is `st`.
     #}}}
     exe "set t_kB=\e[Z"
 endif
@@ -2076,7 +2054,7 @@ endif
 
 # We don't really need this atm.
 # It's only useful if you start Vim inside `xterm-kitty` (and outside tmux).
-if $TERM =~ '-256color$\|^xterm-kitty$'
+if &term =~ '-256color$\|^xterm-kitty$'
     # Disable Background Color  Erase (BCE) so that color  schemes render properly
     # when inside 256-color tmux and GNU screen.
     # See: http://snk.tuxfamily.org/log/vim-256color-bce.html
@@ -2460,7 +2438,7 @@ augroup HoistVe | au!
     # dev, which prefixes `:set` with `:noa`.
     #}}}
     au User MyFlags statusline#hoist('global',
-        \ '%{&ve isnot# "' .. &ve .. '" && mode(1) is# "n" ? "[ve=" .. &ve .. "]" : ""}', 8,
+        \ '%{&ve isnot# "' .. &ve .. '" && mode(1) ==# "n" ? "[ve=" .. &ve .. "]" : ""}', 8,
         \ expand('<sfile>:p') .. ':' .. expand('<sflnum>'))
     au OptionSet virtualedit timer_start(0, () => execute('redrawt'))
 augroup END
@@ -2545,8 +2523,8 @@ set wildignore+=*.pyc,*/__pycache__/*
 #                      └ don't ignore man pages in `/usr/share/man/man1/`
 #
 # Some system files are stored in archives, logs for example.
-# When we inspect the contents of a directory in dirvish, I want to see them
-# (whether I can open them or not).
+# When we inspect  the contents of a  directory in dirvish, we want  to see them
+# (whether we can open them or not).
 # Besides, usually, they can be read in Vim.
 # Example:
 #
@@ -2908,7 +2886,8 @@ enddef
 # Make `C-m` break the undo sequence.{{{
 #
 # When  we write  a paragraph  then press  `u` to  undo, Vim  removes the  whole
-# paragraph.  I want it to remove only the last line.  Then the one before, etc.
+# paragraph.  We  want it to  remove only the last  line.  Then the  one before,
+# etc.
 # To get a more granular undo, we need to press `c-g u` every time we press `C-m`.
 # This will break the undo sequence into smaller undo sequences.
 # Every time  we press `c-g  u`, the current state  of the buffer  is accessible
@@ -3250,7 +3229,7 @@ def ChangenrSave()
     # `undotree().seq_cur` was not either.
     # But that has changed since 8.0.1290; now, they should both be reliable.
     #}}}
-    changenr_save[string(bufnr)] = changenr()
+    changenr_save[bufnr] = changenr()
 enddef
 var changenr_save: dict<number>
 
@@ -3270,7 +3249,21 @@ def UndoChangesDuringCurrentSession()
     if !has_key(changenr_save, bufnr) || changenr_save[bufnr] == changenr()
         return
     endif
-    exe 'undo ' .. changenr_save[bufnr]
+    try
+        exe 'undo ' .. changenr_save[bufnr]
+    # E830: Undo number 1234 not found
+    catch /^Vim\%((\a\+)\)\=:E830:/
+        var msg: list<string> =<< trim END
+            Cannot access original state of the file
+            you probably performed too many changes during the same session
+            if this is an issue, try to increase 'undolevels'
+        END
+        echohl ErrorMsg
+        mapnew(msg, (_, v) => execute('echom ' .. string(v), ''))
+        redraw
+        echo msg[0]
+        echohl NONE
+    endtry
 enddef
 
 # Ud  Up  Us       (fugitive) {{{4
@@ -3401,7 +3394,7 @@ def BreakLine(type = ''): string
         return 'g@l'
     endif
 
-    # I sometimes press `g SPC` by  accident after getting back to the beginning
+    # We sometimes press `g SPC` by accident after getting back to the beginning
     # of a markdown file.  It creates a superfluous empty line.
     if col('.') == 1
         return ''
@@ -3535,7 +3528,7 @@ def MyLocations(action: string)
             combine: false,
             })
     else
-        if prop_type_list({bufnr: buf})->index('MyLocations') != -1
+        if prop_type_list({bufnr: buf})->index('MyLocations') >= 0
             prop_type_delete('MyLocations', {bufnr: buf})
             redraw!
         endif
@@ -3717,8 +3710,8 @@ enddef
 #    │ temporary  │ zG   │ zW    │ zuG  │ zuW   │
 #    └────────────┴──────┴───────┴──────┴───────┘
 #
-# For the moment, I  prefer to always add good / bad words  to a temporary list,
-# so that my  choices don't persist across sessions.  Therefore,  I swap all the
+# For the moment, we prefer to always add  good / bad words to a temporary list,
+# so that my choices don't persist  across sessions.  Therefore, we swap all the
 # commands (easier to type lowercase characters).
 
 # mark word under cursor as good
@@ -4172,11 +4165,11 @@ def Faq(): string
         endif
     endfor
 
-    if mapnew(win_in_this_tab, (_, v) => getwinvar(v.winnr, '&pvw', 0))->index(true) != -1
+    if mapnew(win_in_this_tab, (_, v) => getwinvar(v.winnr, '&pvw', 0))->index(true) >= 0
         return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
-    if mapnew(win_in_this_tab, (_, v) => bufname(v.bufnr))->index(faq_file) != -1
+    if mapnew(win_in_this_tab, (_, v) => bufname(v.bufnr))->index(faq_file) >= 0
         echo 'a window displaying  ' .. faq_file .. '  already exists'
         return ''
     endif
@@ -4351,7 +4344,7 @@ nno <expr> <cr> !empty(&buftype)
 #
 # See also: `:h xterm-modifier-keys`.
 
-if $TERM =~ '^\%(screen\|tmux\)'
+if &term =~ '^\%(screen\|tmux\)'
     sil! exe "set <xUp>=\e[1;*A"
     sil! exe "set <xDown>=\e[1;*B"
     sil! exe "set <xRight>=\e[1;*C"
@@ -4477,10 +4470,10 @@ sil! MapMeta('p', "['", 'n', '')
 # register  executed *interactively*.   We assume  that a  register is  executed
 # interactively iff no recording is active.
 # Note  that this  assumption  may  be wrong;  you  *could*  execute a  register
-# interactively while a recording is active.  But in practice, I doubt I'll ever
-# want to re-execute such a register with `@@`.
-# Usually, I press `@@` to re-execute  a register which I've executed previously
-# *outside* a recording.
+# interactively while  a recording is  active.  But  in practice, I  doubt we'll
+# ever want to re-execute such a register with `@@`.
+# Usually,  we  press  `@@`  to  re-execute  a  register  which  we've  executed
+# previously *outside* a recording.
 #}}}
 nno <expr> @ <sid>SaveLastRegisterExecutedInteractively()
 def SaveLastRegisterExecutedInteractively(): string
@@ -4784,7 +4777,7 @@ def JK(key: string): string
     # It might  make sense,  but I  find this  confusing; I  prefer the  fold to
     # always open in the same way, regardless of how we reached it.
     #}}}
-    || foldclosed('.') != -1
+    || foldclosed('.') >= 0
         return (v:count >= 5 ? "m'" .. v:count : '') .. key
         #       ├─────────────────────────────────┘
         #       └ if the count was bigger than 5,
@@ -4805,7 +4798,7 @@ nno 0 g0
 # To draw freely, sometimes we need to enable 'virtualedit'.
 # And then, when we press `$`, the cursor moves to the very end of the screen.
 # We never want that.  We want the cursor on the last non whitespace.
-nno <expr> $ &virtualedit is# 'block' ? '$' : 'g_'
+nno <expr> $ &virtualedit ==# 'block' ? '$' : 'g_'
 # Do *not* use `g$` by default (i. e. don't write `g$` in the lhs when 've' is 'block')!  Keep using `$`.{{{
 #
 # It would break the dot command when you've pressed `$` right before.
@@ -4890,17 +4883,17 @@ def FencedCodeblock(what: string)
         norm! V
     endif
     if what == 'around'
-        if !search('^```\l*$', 'bW')
+        if search('^```\l*$', 'bW') == 0
             return
         endif
         norm! o
         search('^```$', 'W')
     else
-        if !search('^```\l*$', 'bW')
+        if search('^```\l*$', 'bW') == 0
             return
         endif
         norm! jo
-        if !search('^```$', 'W')
+        if search('^```$', 'W') == 0
             return
         endif
         norm! k
@@ -4923,7 +4916,7 @@ def TextobjNumber(around: bool)
     var stopline: number = line('.')
     var pat: string = '\%(' .. GetPatnum() .. '\)' .. (around ? '\s*' : '')
     # move cursor to end of number
-    if !search(pat, 'ceW', stopline)
+    if search(pat, 'ceW', stopline) == 0
         return
     endif
 
@@ -4957,8 +4950,8 @@ enddef
 #     o  is  <plug>(textobj-sandwich-query-i)
 #     o  as  <plug>(textobj-sandwich-query-a)
 #
-# They  shadow the  built-in  sentences  objects.  But  I  use  the latter  less
-# frequently than the sandwich objects.  So,  I won't remove the mappings.  But,
+# They  shadow the  built-in  sentences objects.   But we  use  the latter  less
+# frequently than the sandwich objects.  So, we won't remove the mappings.  But,
 # instead, to restore the sentences objects, we install these mappings:
 
 ono iS is
@@ -5084,7 +5077,7 @@ ono al _
 snor <c-b> <c-\><c-n>i<left>
 snor <c-f> <c-\><c-n>i<right>
 
-# After expanding a snippet, I want to be able to delete the character after
+# After expanding a  snippet, we want to  be able to delete  the character after
 # the cursor with C-d like in insert mode.
 snor <c-d> <c-\><c-n>i<del>
 
@@ -5262,7 +5255,7 @@ xno y y<cmd>call getreginfo('"')->setreg('v')<cr>
 # position could be much bigger depending on the kind of text which is currently
 # displayed; but we don't care about the latter.
 #}}}
-xno <expr> h mode() is# '<c-v>' && virtcol('.') == 1 ? '' : 'h'
+xno <expr> h mode() ==# '<c-v>' && virtcol('.') == 1 ? '' : 'h'
 xno <expr> l <sid>VL()
 
 # Purpose:{{{
@@ -5286,7 +5279,7 @@ enddef
 
 # ip          disable on empty line {{{3
 
-# sometimes I hit `vip` by accident on an empty line
+# sometimes we hit `vip` by accident on an empty line
 # annoying, because it can make me lose previous visual selection
 # (you can cycle through the last 2 visual selections with `gv`)
 
@@ -5406,7 +5399,7 @@ var PGM2CFGFILES: dict<list<string>> = {
 
 # I have an improvement idea!  I just need to tweak the definitions of the commands...{{{
 #
-# Ok, but remember:
+# OK, but remember:
 #
 #    1. The new synopsis should be identical to the one of `grep(1)`.
 #
@@ -5520,7 +5513,7 @@ enddef
 # https://github.com/vim/vim/issues/6525
 # Let's fix that.
 
-cnorea <expr> def getcmdtype() is# ':' && getcmdpos() == 4 ? 'Def' : 'def'
+cnorea <expr> def getcmdtype() == ':' && getcmdpos() == 4 ? 'Def' : 'def'
 com -bar -nargs=? -complete=customlist,FuncComplete Def Def(<q-args>)
 
 def Def(name: string)
@@ -5691,10 +5684,10 @@ enddef
 #         au WinEnter * HlWeirdWhitespace()
 #     augroup END
 #
-# Ok, but I wouldn't be able to disable the highlight in a 'fex' buffer.
+# OK, but we wouldn't be able to disable the highlight in a 'fex' buffer.
 #
 # The  same issue  would probably  apply to  other types  of buffers  (like help
-# buffers), where I don't want this highlighting.
+# buffers), where we don't want this highlighting.
 #
 # The issue comes from the fact that when `WinEnter` is fired after a split, the
 # current buffer is still the one displayed  in the original window, not the one
@@ -5809,8 +5802,8 @@ com -bar -nargs=+ -complete=buffer InAButNotInB myfuncs#inANotInB(<f-args>)
 # (`-` = `.-1`).
 #}}}
 
-# This command isn't really needed (we have `v_mj`), but I keep it for educational
-# purpose.
+# This  command  isn't really  needed  (we  have `v_mj`),  but  we  keep it  for
+# educational purpose.
 
 com -bar -bang -nargs=1 JoinBlocks &l:fen = false
     | exe "sil keepp :.,.+<args>-1g/^/:''+<args>m . | :-j<bang>"
@@ -5969,9 +5962,9 @@ enddef
 #
 # See also: https://www.gnu.org/software/gawk/manual/html_node/History-Sorting.html#History-Sorting
 #}}}
-com -bar -range=% RemoveDuplicateLines sil <line1>,<line2>!awk '\!x[$0]++'
-#                                                               │{{{
-#                                                               └ `:h :!`:
+com -bar -range=% RemoveDuplicateLines sil :<line1>,<line2>!awk '\!x[$0]++'
+#                                                                │{{{
+#                                                                └ `:h :!`:
 # `!` is replaced by the previous external command
 # But not when there is a backslash before the '!', then that backslash is removed.
 #}}}
@@ -6096,12 +6089,12 @@ def TldrCompletion(...l: list<any>): string
 enddef
 
 def Tldr(shellcmd: string)
-    sil var out: string = systemlist('tldr ' .. shellcmd)
+    sil var out: list<string> = systemlist('tldr ' .. shellcmd)
     if get(out, 0, '') =~ '^tldr page.*not found$'
         echo out[0]
         return
     endif
-    eval out
+    out
         ->map((_, v) => substitute(v, '\e.\{-}m\|\%x0f', '', 'g'))
         ->map((_, v) => substitute(v, '^-', '#', ''))
         ->map((_, v) => substitute(v, '^  ', '    ', ''))
@@ -6357,7 +6350,7 @@ augroup FireLeaveEventsOnStartup | au!
 augroup END
 
 def FireLeaveEvents()
-    if match(v:argv, '\C^-[doO]$') != -1
+    if match(v:argv, '\C^-[doO]$') >= 0
         var curwin: number = win_getid()
         windo #
         win_gotoid(curwin)
@@ -6524,8 +6517,8 @@ augroup END
 # the Vim instance from which you copied it, but you still can't paste it anywhere
 # else.
 #
-# Btw, I can't find the perl script at  the address given in the file, but you can
-# still find it here:
+# BTW, I can't  find the perl script at  the address given in the  file, but you
+# can still find it here:
 # https://wiki.gentoo.org/wiki/Rxvt-unicode#Copy.2FPaste_and_URL_handling
 #}}}
 #     Does it affect all applications?{{{
@@ -6548,7 +6541,7 @@ augroup END
 def MakeClipboardPersistAfterQuittingVim()
     # Why the `strlen()` guard?{{{
     #
-    # If the clipboard selection is too big, I don't want Vim to be slow when we quit.
+    # If the clipboard selection is too big, we don't want Vim to be slow when we quit.
     # If you find the current limit too low, you may increase it, after doing some tests:
     #
     #     :let @+ = repeat('a', 999999)
@@ -6638,7 +6631,7 @@ augroup FilterSpecialFile | au!
 augroup END
 
 def FilterSpecialFile()
-    # TODO: I once had a huge pdf undo file in `~/.vim/tmp/undo`.
+    # TODO: We once had a huge pdf undo file in `~/.vim/tmp/undo`.
     # Should we reset some options like `'undofile'` and `'swapfile'`?
     if get(b:, 'did_filter_special_file', 0)
         return
@@ -6682,7 +6675,7 @@ def FilterSpecialFile()
         # Look at the bottom of a `pdf` file filtered by `par(1)`, to find error
         # messages.  It's  often due to a  too long “word” (more  precisely what
         # `par(1)`  considers  a  word).   Because  of  this,  a  pdf  is  often
-        # truncated.  So, I don't use it atm.
+        # truncated.  So, we don't use it atm.
         #
         # Try to fix these errors by  learning how to better configure `par(1)`,
         # through  command-line options,  and/or through  `$PARINIT`.  Then  use
@@ -6791,7 +6784,7 @@ augroup END
 #    > full-id   In front of the match is a non-keyword character, **or this is where**
 #    >           **the line or insertion starts.**
 #
-# In any case, I never want this,and when  that happens we have to roll back the
+# In any case, we never want this,and when that happens we have to roll back the
 # expansion which is distracting.  Let's try to disable it.
 #}}}
 augroup RestrictAbbreviations | au!
@@ -7060,7 +7053,7 @@ augroup TrailingWhitespace | au!
     #
     # ---
     #
-    # Btw, `BufWinEnter`  can't replace `TerminalWinOpen`;  probably because
+    # BTW, `BufWinEnter`  can't replace `TerminalWinOpen`;  probably because
     # `'buftype'` has not been set when  the first `BufWinEnter` is fired in
     # a terminal buffer.
     #}}}
@@ -7541,10 +7534,10 @@ enddef
 #
 # 22 -
 #
-# No need to check `if &bt is# 'quickfix'` before applying conceal, abort and/or
-# try conditional are enough.  Sure?
+# No  need  to  check  `if  &bt ==  'quickfix'`  before  applying  conceal,  try
+# conditional is enough.  Sure?
 #
-#     :vim /if\s\+&bt\s\+is#\s\+'quickfix'/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
+#     :vim /if\s\+&bt\s\+==\s\+'quickfix'/gj $MYVIMRC ~/.vim/**/*.vim ~/.vim/**/*.snippets ~/.vim/template/**
 #
 # 23 -
 #
@@ -7680,7 +7673,7 @@ enddef
 #
 # Update:
 # Whenever you  need to *temporarily*  change the  focus to another  window, you
-# should try to use `win_execute()` (Vim only for the moment).
+# should try to use `win_execute()`.
 #
 # Changing the focused window can  lead to hard-to-debug issues, especially from
 # an autocmd; `win_execute()` does not trigger autocmds when changing the focus.
@@ -8010,7 +8003,7 @@ enddef
 #     ch_info()                 get channel information
 #     job_info()                get information about a job
 #
-# Btw:
+# BTW:
 # The 'lnum'  and 'windows' key in  the output of getbufinfo(...)[...]  are very
 # interesting.
 #
@@ -8678,13 +8671,13 @@ enddef
         sil var seq: string = system('sendtoclipboard', text)
         # Why this guard?{{{
         #
-        # gVim doesn't seem to support OSC 52.
+        # In the GUI, OSC 52 doesn't seem to be supported.
         #}}}
         #   Why don't you move it at the top?{{{
         #
         # In addition to producing an  OSC 52 sequence, `sendtoclipboard` copies the
         # text  in the  clipboard via  `xsel(1x)`; this  last feature  may still  be
-        # useful in gVim.
+        # useful in the GUI.
         #}}}
         if has('gui_running')
             return
@@ -8918,6 +8911,16 @@ enddef
 #
 # 113 -
 #
+# Should we have used the autocmd pattern `?*` instead of `*` in some autocmds?
+# It could simplify some of them  (or maybe slightly improve their performance);
+# because, then, there's no need to write sth like this:
+#
+#     if bufname('%') == ''
+#         return
+#     endif
+#
+# 114 -
+#
 # Check whether we should have sometimes  saved and restored `"0` in addition to
 # `""`. Look for `setreg(` everywhere.
 #
@@ -8961,12 +8964,12 @@ enddef
 #
 # ---
 #
-# Btw, when we use `v_p`, what happens exactly regarding the registers?
+# BTW, when we use `v_p`, what happens exactly regarding the registers?
 # I think that:
 #
-#    - the selected text is written in `"-` or a number register (depending on whether it's big or not)
-#    - if it's written into a number register, Vim perform a rotation on the latter
-#    - the unnamed register is reconnected to `"-` or a number register
+#    - the selected text is written in `"-` or a numbered register (depending on whether it's big or not)
+#    - if it's written into a numbered register, Vim perform a rotation on the stack of numbered registers
+#    - the unnamed register is reconnected to `"-` or a numbered register
 #
 # ---
 #

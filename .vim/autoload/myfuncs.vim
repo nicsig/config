@@ -159,7 +159,7 @@ def HandleChar(reg: string)
         contents[0] = substitute(contents[0], '^\s*', '', '')
         contents[-1] = substitute(contents[-1], '\s*$', '', '')
         # and reset the type to characterwise
-        eval reginfo
+        reginfo
             ->extend({regcontents: contents, regtype: 'c'})
             ->setreg(reg)
     endif
@@ -654,7 +654,7 @@ def myfuncs#dumpWiki(argurl: string) #{{{1
             echohl NONE
             return
         endif
-        eval files
+        files
             ->map((_, v) => substitute(v, '^\C\V' .. tempdir .. '/', '', ''))
             ->filter((_, v) => v !~ '\c_\=footer\%(\.md\)\=$')
 
@@ -723,7 +723,7 @@ enddef
 
 const IS_TMUX: bool = !empty($TMUX)
 # terminal Vim running within a GUI environment
-const IS_X_RUNNING: bool = !empty($DISPLAY) && $TERM != 'linux'
+const IS_X_RUNNING: bool = !empty($DISPLAY) && &term != 'linux'
 
 def myfuncs#HorizontalRulesTextobject(adverb: string) #{{{1
 # TODO: Consider moving all or most of your custom text-objects into a dedicated (libary?) plugin.
@@ -1008,7 +1008,7 @@ def myfuncs#pluginInstall(url: string) #{{{1
     while to_install >? plugin_on_current_line && search('plug#end()', 'nW') > 0
         # test if there's still another 'Plug ...' line afterwards, AND move the
         # cursor there, if there's one
-        if !search('^\s*"\=\s*Plug ''.\{-}/.\{-}/\=''', 'W')
+        if search('^\s*"\=\s*Plug ''.\{-}/.\{-}/\=''', 'W') == 0
             break
         endif
         plugin_on_current_line = getline('.')
@@ -1103,7 +1103,7 @@ def myfuncs#removeTabs(line1: number, line2: number) #{{{1
     #}}}
     RemoveTabsRep = () => synstack('.', col('.'))
         ->mapnew((_, v) => synIDattr(v, 'name'))
-        ->match('heredoc') != -1
+        ->match('heredoc') >= 0
             ? submatch(0)
             : submatch(1) .. repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))
     # We need the loop because there may be several tabs consecutively.{{{
@@ -1261,7 +1261,7 @@ def myfuncs#sendToTabPage(vcount: number) #{{{1
 enddef
 
 def myfuncs#sendToServer() #{{{1
-    sil undo | var contains_ansi: bool = search("\e", 'n') != 0 | sil redo
+    sil undo | var contains_ansi: bool = search("\e", 'n') > 0 | sil redo
     var bufname: string = expand('%:p')
     var file: string
     if bufname == '' || bufname =~ '^\C/proc/'
@@ -1443,7 +1443,7 @@ enddef
 def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
     var flags: dict<any> = {
         min_length: matchstr(qargs, '-min_length\s\+\zs\d\+'),
-        weighted: stridx(qargs, '-weighted') != -1,
+        weighted: stridx(qargs, '-weighted') >= 0,
         }
 
     var words: list<string> = getline(line1, line2)

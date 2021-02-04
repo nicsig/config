@@ -123,7 +123,7 @@ def SetRecipes()
 
     for recipe in problematic_recipes
         var idx: number = index(g:sandwich#recipes, recipe)
-        if idx != -1
+        if idx >= 0
             remove(g:sandwich#recipes, idx)
         endif
     endfor
