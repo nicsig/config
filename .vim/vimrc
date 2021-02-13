@@ -247,6 +247,7 @@ Plug 'lacygoill/vim-toggle-settings'
 Plug 'lacygoill/vim-unichar'
 Plug 'machakann/vim-Verdin'
 Plug 'lacygoill/vim-vim'
+Plug 'lacygoill/vim-virtual-text'
 Plug 'lacygoill/vim-window'
 Plug 'lacygoill/vim-xkb'
 
@@ -388,12 +389,7 @@ set termencoding=utf-8
 #
 # See also: https://github.com/junegunn/vim-plug/issues/83
 #}}}
-# filetype plugin indent on
-
-# Why do you comment this?{{{
-#
-# `vim-plug` already does it.
-#}}}
+#     filetype plugin indent on
 #     syntax enable
 
 # Styled Comments {{{2
@@ -1028,18 +1024,6 @@ SetCursor()
 # If you need to temporarily ignore whitespace differences, use our `co SPC` mapping.
 #}}}
 
-# only 3 lines of context above/below a changed line (instead of 6)
-set diffopt+=context:3
-
-# use only 1 column for the foldcolumn, instead of 2 (vertical space is precious)
-set diffopt+=foldcolumn:1
-
-# turn off diff mode automatically for a buffer which becomes hidden
-set diffopt+=hiddenoff
-
-# start diff mode with vertical splits (unless explicitly specified otherwise)
-set diffopt+=vertical
-
 # the “patience” algorithm gives more readable diffs
 # Why isn't patience the default?{{{
 #
@@ -1059,11 +1043,26 @@ set diffopt+=vertical
 #}}}
 set diffopt+=algorithm:patience
 
-# Use the indent heuristic for the internal diff library.
-# Again, this gives more readable diffs.
+# only 3 lines of context above/below a changed line (instead of 6)
+set diffopt+=context:3
+
+# use only 1 column for the foldcolumn, instead of 2 (vertical space is precious)
+set diffopt+=foldcolumn:1
+
+# follow the 'wrap' option and leave as it is
+set diffopt+=followwrap
+
+# turn off diff mode automatically for a buffer which becomes hidden
+set diffopt+=hiddenoff
+
+# Use the indent heuristic for the  internal diff library, because it gives more
+# readable diffs.
 set diffopt+=indent-heuristic
 # For more info, see:
 # https://vimways.org/2018/the-power-of-diff/
+
+# start diff mode with vertical splits (unless explicitly specified otherwise)
+set diffopt+=vertical
 
 # display {{{2
 
@@ -1088,14 +1087,15 @@ set noemoji
 
 # fillchars {{{2
 
-set fillchars&vim
-
 # Replace ugly  separators (`|`)  used for vertical  splits, with  prettier utf8
 # characters, to get a continuous line.
 set fillchars=vert:┃
 
-# Pad end of title lines with spaces instead of hyphens.
+# pad end of title lines with spaces instead of hyphens
 &fillchars ..= ',fold: '
+
+# don't print a tilde at the start of the lines after the last buffer line
+&fillchars ..= ',eob: '
 
 # flp "{{{2
 
@@ -2287,6 +2287,12 @@ set undofile
 # choose location of undo files
 set undodir=$HOME/.vim/tmp/undo
 
+# If you lose the undo history after  a buffer reload (or write), you might want
+# to increase  the value of  this option.  But beware  that it causes  the whole
+# buffer to  be stored  in memory,  which in turn  causes Vim  to have  a larger
+# memory footprint.
+set undoreload=10000
+
 # make sure the undo directory exists
 if !isdirectory(&undodir)
     mkdir(&undodir, 'p', 0o700)
@@ -3289,7 +3295,7 @@ enddef
 # Problem: It would break the `-` fugitive mapping (`:h fugitive_-`) which we use.
 # We would need to  re-install this mapping but I don't know how  to get the rhs
 # programmatically; the latter contains sth like `<snr>123_`.
-# I seem to  remember trying to use the  rhs of a fugitive mapping in  one of my
+# I seem to remember  trying to use the rhs of a fugitive  mapping in one of our
 # own mapping, and it didn't work well; it's much trickier than what it seems.
 #
 # Anyway, this issue  highlights the importance of getting  `<plug>` mappings to
@@ -3976,7 +3982,7 @@ def FixMacro()
         return
     endif
     var c: any = getchar()
-    if type(c) != v:t_number
+    if typename(c) != 'number'
         return
     endif
     var char: string = nr2char(c)
@@ -4489,7 +4495,7 @@ def SaveLastRegisterExecutedInteractively(): string
     #    > If it is a single character, the result is a number.  [...]
     #    > **Otherwise a String is returned** with the encoded character.
     #}}}
-    if type(c) != v:t_number
+    if typename(c) != 'number'
         return '@'
     endif
     var char: string = nr2char(c, 1)
@@ -4717,10 +4723,16 @@ nno cg# g#``/<up><cr>``cgN
 nno cc <cmd>call <sid>CC()<cr>
 
 def CC()
+    var indent: string = getline('.')->matchstr('^\s*')
     exe 'norm! 0' .. v:count .. 'C'
     startinsert
-    if &l:ai && &l:inde != ''
-        FixIndent()
+    if &l:ai
+        if &l:indentexpr == '' && !&l:cindent
+            setline('.', indent)
+            startinsert!
+        else
+            FixIndent()
+        endif
     endif
 enddef
 
@@ -5357,7 +5369,11 @@ def Cfg(pgm: string)
         echo 'no readable file'
     endif
     for file in files
-        exe 'sp ' .. file
+        if expand('%:p') == '' && (line('$') + 1)->line2byte() <= 2
+            exe 'e ' .. file
+        else
+            exe 'sp ' .. file
+        endif
     endfor
 enddef
 
@@ -5370,7 +5386,11 @@ var PGM2CFGFILES: dict<list<string>> = {
     firefox:       glob('~/.mozilla/firefox/*.default/chrome/userContent.css', false, true),
     git:           ['~/.config/git/config', '~/.cvsignore'],
     htop:          ['~/.config/htop/htoprc'],
-    intersubs:     ['~/.config/mpv/scripts/interSubs.lua', '~/.config/mpv/scripts/interSubs.py', '~/.config/mpv/scripts/interSubs_config.py'],
+    intersubs:     [
+        '~/.config/mpv/scripts/interSubs.lua',
+        '~/.config/mpv/scripts/python.disable/interSubs.py',
+        '~/.config/mpv/scripts/python.disable/interSubs_config.py'
+        ],
     keyboard:      glob('~/.config/keyboard/*', false, true),
     kitty:         ['~/.config/kitty/kitty.conf'],
     latexmk:       ['~/.config/latexmk/latexmkrc'],
@@ -6195,7 +6215,7 @@ def MakeMissingDir(file: string, buf: number)
         #}}}
         # Write the file  as root, so that the next  `:update` (executed when we
         # press `C-s`) does not fail.
-        exe 'w !sudo tee >/dev/null ' .. shellescape(file, 1)
+        exe 'w !sudo tee >/dev/null ' .. shellescape(file, true)
         setl nomod
     endtry
 enddef
@@ -7416,12 +7436,15 @@ enddef
 # location window.  Ex:
 #
       nno <expr> <c-g>t <sid>Ltag()
-      :def Ltag(): string
+      def Ltag(): string
           augroup MyLtag | au!
               au CmdlineLeave : execute(['au! MyLtag', 'aug! MyLtag'], 'silent!')
           augroup END
           return ':ltag / | lw' .. repeat("\<left>", 5)
       enddef
+#
+# We need to execute `:lw` manually, because `QuickFixCmdPost` is not fired.
+# Vim bug: https://github.com/vim/vim/pull/3001
 #
 # Update:
 # It should probably be implemented as a cycle in `vim-cmdline`.
@@ -7949,6 +7972,11 @@ enddef
 # on what the position of a character is on a long wrapped line.
 # However, it's much simpler to just save the cursor position with `getpos()` or
 # `getcurpos()` and restore it via `setpos()`.
+#
+# ---
+#
+# What about `charcol()`?  How does it fit in all of this?
+# When should we use `col()`, `virtcol()`, `charcol()`?
 #
 # 50 -
 #
@@ -8990,6 +9018,7 @@ enddef
 # ---
 #
 # Use our saved qfl named `setreg`.
+
 
 
 

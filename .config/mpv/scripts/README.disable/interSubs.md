@@ -81,6 +81,18 @@ Edit `interSubs_config.py`, and assign one these values to `'forvo'`:
    - forvo
 
 ##
+# Todo
+
+We are  stuck on  an old  version of  the plugin;  probably, the  one of  the 15
+september of 2020.
+
+We can't  go beyond, because  later versions need  to import the  `httpx` module
+which is  only available for python  >= 3.6; but  on ubuntu 16.04, we  only have
+python 3.5.
+
+Once you finally upgrade the OS, remember to also update the interSubs plugin.
+
+##
 # Issues
 ## Which pitfall should I avoid after redownloading the plugin from github?
 
@@ -111,9 +123,7 @@ which should come with it – as well as these Python libraries:
 ---
 
 If you have issues to install one of those libraries, try to find them on github.
-Example:
-
-    https://github.com/facelessuser/soupsieve
+Example: <https://github.com/facelessuser/soupsieve>
 
 Then, cd into the project, and run:
 
@@ -127,9 +137,7 @@ For beautifulsoup4, don't dl from github; dl from here:
 
 ---
 
-Also, see this issue:
-
-    https://github.com/oltodosel/interSubs/issues/9
+Also, see this issue: <https://github.com/oltodosel/interSubs/issues/9>
 
 ### When I try to manually install/update the `lxml` library, an error is raised because of `Cython`!
 

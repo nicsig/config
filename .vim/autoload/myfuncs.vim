@@ -16,33 +16,33 @@ enddef
 def myfuncs#GrepEx(pat: string, use_loclist: bool)
     # Why does `2>/dev/null` work here but not in `'grepprg'`?{{{
     #
-    # They don't run the shell command in the same way:
+    # `systemlist()` doesn't run the shell command in the same way:
     #
-    #     " system()
-    #     (rg foobar /etc)>/tmp/... 2>&1
+    #     " systemlist()
+    #     (rg pat /etc) >/tmp/... 2>&1
     #
     #     " 'grepprg'
-    #     :!rg foobar /etc 2>&1| tee /tmp/...
+    #     :!rg pat /etc 2>&1| tee /tmp/...
     #
     # In the first case, `2>/dev/null` is useful:
     #
-    #     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
+    #     (rg 2>/dev/null pat /etc) >/tmp/... 2>&1
     #         ^---------^
     #
     # It prevents errors from being written in the temp file.
     #
     # In the second case, `2>/dev/null` is useless:
     #
-    #     :!rg 2>/dev/null foobar /etc 2>&1| tee /tmp/...
+    #     :!rg 2>/dev/null pat /etc 2>&1| tee /tmp/...
     #          ^---------^
     #
     # Because, it's overridden by `2>&1` which comes from `'shellpipe'`.
-    # In contrast,  `system()` uses `'shellredir'`, which  also includes
-    # `2>&1`, but it  doesn't have the same effect,  because the command
-    # is run in a subshell via braces:
+    # In  contrast,  `systemlist()`  uses `'shellredir'`,  which  also  includes
+    # `2>&1`, but it doesn't have the same effect, because the command is run in
+    # a subshell via braces:
     #
-    #     (rg 2>/dev/null foobar /etc)>/tmp/... 2>&1
-    #     ^                          ^
+    #     (rg 2>/dev/null pat /etc)>/tmp/... 2>&1
+    #     ^                       ^
     #
     # From `:h system() /braces`:
     #
@@ -916,6 +916,19 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
     endif
     var line: string = getline('.')
 
+    # special case: popup options or position (probably)
+    if line =~ '^\s*{''highlight''' || line =~ '^\s*{''core_col'''
+        :%j!
+        first_line = getline(1)
+        if first_line[0] == '{' && first_line[-1] == '}'
+            sil keepj keepp s/.*/\=first_line->substitute('^{\|}$', '', 'g')/e
+            sil keepj keepp s/\%(^\%(\[[^[\]]*\]\|[^[\]]\)*\)\@<=,/\="\r"/ge
+            sil keepj keepp :%s/^\s*'\([^']*\)'/\1/
+            :%sort
+        endif
+        return ''
+    endif
+
     # This pattern is useful to split long stacktrace such as:{{{
     #
     #     Error detected while processing function doc#mapping#main[52]..<SNR>205_handle_special_filetype[11]..<SNR>205_use_manpage[21]..function doc#mapping#main[52]..<SNR>205_handle_special_filetype[11]..<SNR>205_use_manpage:
@@ -962,6 +975,7 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
 
     return ''
 enddef
+var first_line: string
 var first_line_indent: string
 var contline: string
 var LongDataSplitRep: func: string
@@ -1261,6 +1275,10 @@ def myfuncs#sendToTabPage(vcount: number) #{{{1
 enddef
 
 def myfuncs#sendToServer() #{{{1
+    if v:servername != ''
+        return
+    endif
+
     sil undo | var contains_ansi: bool = search("\e", 'n') > 0 | sil redo
     var bufname: string = expand('%:p')
     var file: string
@@ -1436,7 +1454,7 @@ def myfuncs#webpageRead(url: string) #{{{1
     #                         └ high nr to be sure that
     #                           `lynx` won't break long lines of code
     #}}}
-    sil exe 'r !w3m -cols 100 ' .. shellescape(url, 1)
+    sil exe 'r !w3m -cols 100 ' .. shellescape(url, true)
     setl bt=nofile nobl noswf nowrap
 enddef
 

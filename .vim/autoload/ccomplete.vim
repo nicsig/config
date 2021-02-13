@@ -317,7 +317,7 @@ def Dict2info(dict: dict<any>): string #{{{1
 	->substitute('\\\(.\)', '\1', 'g')
     else
       var dictk: any = dict[k]
-      if type(dictk) != v:t_string
+      if typename(dictk) != 'string'
 	info ..= string(dictk)
       else
 	info ..= dictk

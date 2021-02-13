@@ -288,7 +288,6 @@ enddef
 def Override() #{{{2
     CursorLine()
     DiffChange()
-    EndOfBuffer()
     LineNrAboveBelow()
     SpecialKey()
     StatuslineNC()
@@ -332,26 +331,6 @@ def DiffChange() #{{{3
     #}}}
     hi! link DiffChange NONE
     hi! clear DiffChange
-enddef
-
-def EndOfBuffer() #{{{3
-    # hide the `EndOfBuffer` char (`~`) by changing its ctermfg attribute (`ctermfg=bg`)
-    # Why this `:if` guard?{{{
-    #
-    # Some color schemes don't set up the `Normal` HG.
-    # So, the value `bg` may not exist for all color schemes.
-    #
-    #     :colo elflord
-    #     :hi EndOfBuffer ctermfg=bg
-    #     E420: BG color unknown ~
-    #}}}
-    if execute('hi Normal') =~ 'ctermbg'
-        if $DISPLAY == ''
-            hi EndOfBuffer ctermfg=bg
-        else
-            hi EndOfBuffer ctermfg=bg guifg=bg
-        endif
-    endif
 enddef
 
 def LineNrAboveBelow() #{{{3
