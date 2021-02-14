@@ -1,4 +1,4 @@
-vim9
+vim9script
 
 # Where does the code in this script come from?{{{
 #

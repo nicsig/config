@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 # Why not moving the code from here to `~/.vim/after/plugin/sandwich.vim`?{{{
 #

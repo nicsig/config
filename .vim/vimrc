@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 if exists('loaded') | finish | endif
 var loaded = true
@@ -5006,7 +5006,7 @@ def TextobjFunc(inside: bool)
         # That's because  – for  some reason  – `searchpair()`  fails to  find a
         # function when we're at its very beginning (and use the `c` flag).
         #
-        #     vim9
+        #     vim9script
         #     var lines: list<string> =<< trim END
         #         def Func()
         #         enddef
@@ -5016,7 +5016,7 @@ def TextobjFunc(inside: bool)
         #     0~
         #     ✘
         #
-        #     vim9
+        #     vim9script
         #     var lines: list<string> =<< trim END
         #         def Func()
         #         enddef
@@ -8958,7 +8958,7 @@ enddef
 # To help you, here is a start:
 #
 #     " write this in /tmp/t.vim
-#     vim9
+#     vim9script
 #     set showcmd
 #
 #     nno <expr> <c-b> <sid>MyOp()

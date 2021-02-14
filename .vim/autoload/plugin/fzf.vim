@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 # Init {{{1
 

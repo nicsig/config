@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 def plugin#websearch#main()
     # Double quotes can break `xdg-open(1)`.{{{

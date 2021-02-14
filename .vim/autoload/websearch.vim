@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 def websearch#undoFtplugin()
     set bh< bl< cul< stl< swf< wrap<

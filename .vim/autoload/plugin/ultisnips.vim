@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 def plugin#ultisnips#cancelExpansion(): string #{{{1
     if !get(g:, 'expanding_snippet', false)

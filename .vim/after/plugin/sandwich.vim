@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 if exists('loaded') || !exists('g:loaded_sandwich')
     finish

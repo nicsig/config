@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 def plugin#fugitive#glogConceal(when: string)
     if when == 'on_quickfixcmdpost'

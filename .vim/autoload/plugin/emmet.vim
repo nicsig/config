@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 # Interface {{{1
 def plugin#emmet#install_mappings() #{{{2

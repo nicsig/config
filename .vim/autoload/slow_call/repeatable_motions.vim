@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 if exists('loaded') || stridx(&rtp, 'vim-lg-lib') == -1
     finish
@@ -191,7 +191,7 @@ enddef
 # Do *not* try to replace `<expr>` with `<cmd>`.{{{
 #
 #     $ vim -S <(cat <<'EOF'
-#         vim9
+#         vim9script
 #         ono <expr> <c-a> FuncA()
 #         def g:FuncA(): string
 #             feedkeys("\<plug>Sneak_f")
