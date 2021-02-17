@@ -15,7 +15,7 @@
 //   the keysyms (such as `eacute`)?{{{
 //
 //     $ locate keysymdef.h
-//     /usr/include/X11/keysymdef.h~
+//     /usr/include/X11/keysymdef.h
 //}}}
 
 // Where can I find the default layout?{{{

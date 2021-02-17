@@ -1374,7 +1374,7 @@ def myfuncs#trans(first_time = true)
         out_io: 'file',
         out_name: trans_tempfile,
         err_io: 'null',
-        exit_cb: TransOutput,
+        close_cb: TransOutput,
         }
 
     # send the first chunk in the list of chunks to `trans`
@@ -1406,10 +1406,7 @@ def myfuncs#transCycle()
     echo '[trans] ' .. trans_source .. ' → ' .. trans_target
 enddef
 
-def TransOutput(job: job, exit_status: number)
-    if exit_status == -1
-        return
-    endif
+def TransOutput(channel: channel)
     # FIXME:
     # if the text is composed of several chunks, only the last one is echoed
     #
