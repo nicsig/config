@@ -77,10 +77,10 @@ if exists('*GetIndent')
     finish
 endif
 
-var end = '\<end\>\%([^({]*[)}]\)\@!' # array indexing heuristic
-var open_pat = 'for\|if\|parfor\|spmd\|switch\|try\|while\|classdef\|properties\|methods\|events\|enumeration'
-var start_pat = '\C\<\%(function\|' .. open_pat .. '\)\>'
-const BRACKET_PAT = '\([[{]\)\|\([]}]\)'
+var end: string = '\<end\>\%([^({]*[)}]\)\@!' # array indexing heuristic
+var open_pat: string = 'for\|if\|parfor\|spmd\|switch\|try\|while\|classdef\|properties\|methods\|events\|enumeration'
+var start_pat: string = '\C\<\%(function\|' .. open_pat .. '\)\>'
+const BRACKET_PAT: string = '\([[{]\)\|\([]}]\)'
 
 &l:inde = expand('<SID>') .. 'GetIndent()'
 
@@ -222,7 +222,7 @@ def GetUnclosedLvl(lnum: number, pat: string, col = 0): number #{{{2
 enddef
 
 def SubmatchesCounts(arg_lnum: number, pattern: string, arg_col = 0): list<number> #{{{2
-    var endcol = arg_col != 0 ? arg_col : v:numbermax
+    var endcol: number = arg_col != 0 ? arg_col : v:numbermax
     var counts: list<number> = [0, 0, 0, 0]
     cursor(arg_lnum, 1)
     var g: number = 0 | while g < 999 | g += 1

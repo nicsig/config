@@ -104,7 +104,7 @@ def GetJumpHeight(is_fwd: bool): number
     # then one where there IS
     var lnum2: number = search('^\%(.*' .. vcol .. '.\)\@!.*\n.*\zs' .. vcol, flags)
 
-    var lnums: list<number> = filter([lnum1, lnum2], (_, v) => v > 0)
+    var lnums: list<number> = filter([lnum1, lnum2], (_, v: number): bool => v > 0)
 
     return is_fwd
         ?     min(lnums) - line('.')

@@ -48,13 +48,13 @@ const OPEN_KEYWORDS: list<string> =<< trim END
     enumeration
 END
 
-const KWD_PAT =
-    \ '\C\<\('
-    \     .. join(OPEN_KEYWORDS, '\|')
-    \     .. '\|'
-    \     .. '^\s*\zs\%(else\|elseif\|case\|otherwise\|catch\)'
-    \ .. '\)\>'
-    \ .. '\|\S\s*\zs\(\<end\>\)'
+const KWD_PAT: string =
+    '\C\<\('
+        .. join(OPEN_KEYWORDS, '\|')
+        .. '\|'
+        .. '^\s*\zs\%(else\|elseif\|case\|otherwise\|catch\)'
+    .. '\)\>'
+    .. '\|\S\s*\zs\(\<end\>\)'
 #}}}1
 
 &l:inde = expand('<SID>') .. 'GetIndent()'

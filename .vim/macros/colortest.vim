@@ -65,12 +65,12 @@ var loaded = true
 # lightcyan     lightcyan_on_white                      white_on_lightcyan
 #                               lightcyan_on_black      black_on_lightcyan
 
-const SFILE = expand('<sfile>:p')
+const SFILE: string = expand('<sfile>:p')
 def Main()
     # Open this file in a window if it isn't edited yet.
     # Use the current window if it's empty.
     if expand('%:p') != SFILE
-        var sfile = fnameescape(SFILE)
+        var sfile: string = fnameescape(SFILE)
         if &mod || line('$') != 1 || getline(1) != ''
             exe 'new ' .. sfile
         else
@@ -95,7 +95,7 @@ def Main()
     var isk_save: string = &l:isk
     try
         setl isk-=#
-        var range = ':' .. lnum1 .. ',' .. lnum2
+        var range: string = ':' .. lnum1 .. ',' .. lnum2
         exe range .. 'g/^# \a/Highlight()'
     finally
         &l:isk = isk_save

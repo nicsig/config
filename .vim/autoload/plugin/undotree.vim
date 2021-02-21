@@ -88,7 +88,7 @@ enddef
 
 fu plugin#undotree#diffToggle() abort "{{{2
     let pv_bufnr = tabpagebuflist()
-        \ ->filter({_, v -> bufwinnr(v)->getwinvar('&pvw', 0)})
+        \ ->filter({_, v -> bufwinnr(v)->getwinvar('&pvw')})
         \ ->get(0, 0)
     " if there is already a preview window, ask the user to close it (to avoid `E590`)
     if pv_bufnr && bufname(pv_bufnr) !~# '^diffpanel_\d\+$'

@@ -21,11 +21,12 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 12 + 8) / 16)
 arglocal
 %argdel
-let s:l = 2 - ((1 * winheight(0) + 0) / 0)
+balt ~/.shrc
+let s:l = 2 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -36,7 +37,8 @@ wincmd w
 arglocal
 %argdel
 if bufexists("~/wiki/c/c.md") | buffer ~/wiki/c/c.md | else | edit ~/wiki/c/c.md | endif
-let s:l = 12 - ((11 * winheight(0) + 14) / 29)
+balt ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
+let s:l = 12 - ((8 * winheight(0) + 6) / 12)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -45,11 +47,11 @@ normal! 0
 lcd ~/wiki/c
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 0 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 0 + 8) / 16)
+exe '2resize ' . ((&lines * 12 + 8) / 16)
 tabnext 1
 badd +2 ~/wiki/c/examples/C_Programming_A_Modern_Approach/ch02/01_pun.c
-badd +12 ~/wiki/c/c.md
+badd +0 ~/wiki/c/c.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

@@ -7,7 +7,7 @@ G:$HOME/wiki/git/git.md
 I:$HOME/wiki/bug/vim.md
 J:$HOME/Dropbox/others_vimrc/justinmk.vim
 L:$HOME/.shrc
-M:$HOME/Desktop/answer.md
+M:$HOME/.vim/plugged/vim-window/plugin/window.vim
 N:$HOME/.vim/doc/misc/notes
 O:$HOME/bin/prompt.zsh
 P:$HOME/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py

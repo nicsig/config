@@ -399,14 +399,16 @@ enddef
 def TabLine() #{{{3
     # the purpose of this function is to remove the underline value from the HG `TabLine`
 
-    var attributes: dict<number> = {
+    var attributes: dict<any> = {
         fg: 0,
         bg: 0,
         bold: 0,
         reverse: 0,
         }
 
-    mapnew(attributes, (k) => hlID('Tabline')->synIDtrans()->synIDattr(k))
+    attributes = mapnew(attributes, (k: string): string =>
+        hlID('Tabline')->synIDtrans()->synIDattr(k)
+        )
 
     var cmd: string
     if has('gui_running')
@@ -420,7 +422,7 @@ def TabLine() #{{{3
     # For  some  values of  `g:seoul{_light}_background`,  the  fg attribute  of
     # Tabline  doesn't have  any  value in  gui.  In  this  case, executing  the
     # command will fail.
-    if attributes.fg == 0
+    if attributes.fg->typename() == 'number'
         return
     endif
     exe printf(cmd, attributes.fg)
@@ -489,8 +491,8 @@ def User() #{{{3
         bg: 0,
         bold: 0,
         reverse: 0,
-        }->mapnew((k) => hlID('StatusLine')->synIDtrans()->synIDattr(k))
-         ->mapnew((k, v) => k == 'bold' || k == 'reverse' ? str2nr(v) : v)
+        }->mapnew((k: string): string => hlID('StatusLine')->synIDtrans()->synIDattr(k))
+         ->mapnew((k: string, v: string): any => k == 'bold' || k == 'reverse' ? str2nr(v) : v)
 
     var cmd1: string
     var cmd2: string
@@ -845,7 +847,7 @@ def GetAttributes(hg: string, amode = ''): dict<string> #{{{2
         reverse: 0,
         }
     var mode: list<string> = amode == '' ? [] : [amode]
-    return mapnew(attributes, (k) =>
-        call('synIDattr', [hlID(hg)->synIDtrans(), k] + mode))
+    return attributes
+        ->mapnew((k: string) => call('synIDattr', [hlID(hg)->synIDtrans(), k] + mode))
 enddef
 

@@ -3,7 +3,13 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-import {Catch, GetSelectionText, GetSelectionCoords, IsVim9, Opfunc} from 'lg.vim'
+import {
+    Catch,
+    GetSelectionText,
+    GetSelectionCoords,
+    IsVim9,
+    Opfunc,
+    } from 'lg.vim'
 const SID: string = execute('fu Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 # Operators {{{1
@@ -109,7 +115,7 @@ def myfuncs#opReplaceWithoutYankCore(type: string)
     #    - `reg` in case we make it mutate with the next `setreg()`
     #    - `"-` and the numbered registers, because they will mutate when the selection is replaced
     #}}}
-    for regname in [reg] + ['-'] + range(10)->mapnew((_, v) => string(v))
+    for regname in [reg] + ['-'] + range(10)->mapnew((_, v: any): string => string(v))
         extend(reg_save, {[regname]: getreginfo(regname)})
     endfor
 
@@ -122,7 +128,7 @@ def myfuncs#opReplaceWithoutYankCore(type: string)
         HandleChar(reg)
     endif
 
-    keys(reg_save)->mapnew((_, v) => setreg(v, reg_save[v]))
+    keys(reg_save)->mapnew((_, v: string) => setreg(v, reg_save[v]))
 enddef
 
 def HandleChar(reg: string)
@@ -233,7 +239,7 @@ def OpYank(type: string)
 
     # remove *all* empty lines in some other cases
     if op_yank.what == 'v//' || op_yank.what == 'code'
-        filter(yanked, (_, v) => v !~ '^\s*$')
+        filter(yanked, (_, v: string): bool => v !~ '^\s*$')
     endif
 
     setreg(op_yank.register, yanked, 'l')
@@ -655,8 +661,8 @@ def myfuncs#dumpWiki(argurl: string) #{{{1
             return
         endif
         files
-            ->map((_, v) => substitute(v, '^\C\V' .. tempdir .. '/', '', ''))
-            ->filter((_, v) => v !~ '\c_\=footer\%(\.md\)\=$')
+            ->map((_, v: string): string => substitute(v, '^\C\V' .. tempdir .. '/', '', ''))
+            ->filter((_, v: string): bool => v !~ '\c_\=footer\%(\.md\)\=$')
 
         norm! mx
         append('.', files + [''])
@@ -811,11 +817,11 @@ def myfuncs#inANotInB(argfileA: string, argfileB: string) #{{{1
         fileA,
         fileB
         )
-    sil var output: list<string> = systemlist(cmd)
+    sil var items: list<dict<string>> = systemlist(cmd)
+        ->mapnew((_, v: string): dict<string> => ({text: v}))
 
-    mapnew(output, (_, v) => ({text: v}))
     setloclist(0, [], ' ', {
-        items: output,
+        items: items,
         title: 'in  ' .. fileA .. '  but not in  ' .. fileB
         })
 
@@ -969,7 +975,7 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
         var indent_txt: string = repeat(' ', indent_lvl)
         sil keepj keepp s/\m\ze\S/- /e
         var pat: string = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
-        LongDataSplitRep = () => "\n" .. indent_txt .. '- '
+        LongDataSplitRep = (): string => "\n" .. indent_txt .. '- '
         sil exe 'keepj keepp s/' .. pat .. '/\=LongDataSplitRep()/ge'
     endif
 
@@ -1066,10 +1072,12 @@ def myfuncs#pluginGlobalVariables(keyword: string) #{{{1
         return
     endif
     var variables: list<string> = deepcopy(g:)
-        ->filter((k) => k =~ '\C\V' .. escape(keyword, '\')
-                     && k !~ '\%(loaded\|did_plugin_\)')
+        ->filter((k: string): bool =>
+                k =~ '\C\V' .. escape(keyword, '\')
+             && k !~ '\%(loaded\|did_plugin_\)'
+             )
         ->items()
-    map(variables, (_, v) => v[0] .. ' = ' .. string(v[1]))
+        ->mapnew((_, v: list<any>): string => v[0] .. ' = ' .. string(v[1]))
     new
     setl bt=nofile nobl noswf nowrap
     setline(1, variables)
@@ -1115,8 +1123,8 @@ def myfuncs#removeTabs(line1: number, line2: number) #{{{1
     # This  matters, e.g.,  for a  blockquote containing  a tab  character in  a
     # markdown file, where the leading `> ` is concealed because `'cole'` is 3.
     #}}}
-    RemoveTabsRep = () => synstack('.', col('.'))
-        ->mapnew((_, v) => synIDattr(v, 'name'))
+    RemoveTabsRep = (): string => synstack('.', col('.'))
+        ->mapnew((_, v: number): string => synIDattr(v, 'name'))
         ->match('heredoc') >= 0
             ? submatch(0)
             : submatch(1) .. repeat(' ', strdisplaywidth("\t", col('.') == 1 ? 0 : virtcol('.')))
@@ -1159,9 +1167,10 @@ def myfuncs#searchTodo(where: string) #{{{1
     var items: list<dict<any>> = getloclist(0)
         # Tweak the text of  each entry when there's a line  with just `todo` or
         # `fixme`.  Replace it with the text of the next non empty line instead.
-        ->map((_, v) => SearchTodoText(v))
-    # remove indentation (reading lines with various indentation levels is jarring)
-    map(items, (_, v) => extend(v, {text: substitute(v.text, '^\s*', '', '')}))
+        ->map((_, v: dict<any>): dict<any> => SearchTodoText(v)
+            # remove indentation (reading lines with various indentation levels is jarring)
+            ->extend({text: substitute(v.text, '^\s*', '', '')})
+            )
     setloclist(0, [], 'r', {items: items, title: 'FIX' .. 'ME & TO' .. 'DO'})
 
     if &bt != 'quickfix'
@@ -1186,7 +1195,7 @@ def SearchTodoText(dict: dict<any>): dict<any>
         # is currently listed.
         #}}}
         var lines: list<string> = bufname(bufnr)->readfile(0, dict.lnum + 4)[-4 :]
-        dict.text = filter(lines, (_, v) => v =~ '\k')->get(0, '')
+        dict.text = filter(lines, (_, v: string): bool => v =~ '\k')->get(0, '')
     endif
     return dict
 enddef
@@ -1485,12 +1494,12 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
     #
     #    - not containing any letter
     #}}}
-    filter(words, (_, v) => strchars(v, true) >= min_length
+    filter(words, (_, v: string): bool => strchars(v, true) >= min_length
         && strchars(v, true) <= 30
         && v =~ '\a')
 
     # put all of them in lowercase
-    map(words, (_, v) => tolower(v))
+    map(words, (_, v: string): string => tolower(v))
 
     var freq: dict<number>
     for word in words
@@ -1507,20 +1516,22 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
         # We multiply  it by  a number which  should be equal  to the  amount of
         # characters which we would save if  we created an abbreviation for that
         # word.
-        var weighted_freq: dict<number> = mapnew(freq, (k, v) =>
-            v * ( strchars(k, true) -
-                # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
-                strchars(k, true) == 4
-                ? 2
-                  # if a word ends with an 's', and the same word without the ending
-                  # 's'  is also  present,  then its  abbreviation  will probably  4
-                  # characters long (because it's probably a plural)
-                  : k[-1] == 's' && keys(freq)->index(k) >= 0
-                  ?     4
-                  # otherwise, by default, an abbreviation will probably be 3 characters long
-                  :     3
-                ))
-        for item in items(weighted_freq)->sort((a, b) => b[1] - a[1])
+        var weighted_freq: dict<number> = freq
+            ->mapnew((k: string, v: number): number =>
+                v * ( strchars(k, true) -
+                    # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
+                    strchars(k, true) == 4
+                    ? 2
+                      # if a word ends with an 's', and the same word without the ending
+                      # 's'  is also  present,  then its  abbreviation  will probably  4
+                      # characters long (because it's probably a plural)
+                      : k[-1] == 's' && keys(freq)->index(k) >= 0
+                      ?     4
+                      # otherwise, by default, an abbreviation will probably be 3 characters long
+                      :     3
+                    ))
+        for item in items(weighted_freq)
+                ->sort((a: list<any>, b: list<any>): number => b[1] - a[1])
             join(item)->append('$')
         endfor
     else
@@ -1537,7 +1548,11 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
         # Probably because there's nothing to align in it.
     endif
 
-    exe 'vert res ' .. (range(1, line('$'))->map((_, v) => virtcol([v, '$']))->max() + 4)
+    exe 'vert res ' .. (
+        range(1, line('$'))
+            ->map((_, v: number): number => virtcol([v, '$']))->max()
+        + 4
+        )
     nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
     wincmd p
 enddef

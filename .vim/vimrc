@@ -331,9 +331,21 @@ plug#end()
 # }}}1
 # Imports {{{1
 
-import {Catch, FixIndent, FuncComplete, IsVim9, Win_getid} from 'lg.vim'
+import {
+    Catch,
+    FixIndent,
+    FuncComplete,
+    IsVim9,
+    Win_getid,
+    } from 'lg.vim'
+
 import MapMeta from 'lg/map.vim'
-import {Fold, UndoFtplugin, Syntax} from 'lg/styled_comment.vim'
+
+import {
+    Fold,
+    UndoFtplugin,
+    Syntax,
+    } from 'lg/styled_comment.vim'
 
 # Options 2 {{{1
 # Encoding {{{2
@@ -454,7 +466,7 @@ def StyledComments()
         # We need to re-install our custom autocmd *after* the default one.
         #}}}
         au SourcePost $VIMRUNTIME/syntax/syntax.vim StyledComments()
-            | getwininfo()->mapnew((_, v) => win_execute(v.winid, 'do StyledComments Syntax'))
+            | getwininfo()->mapnew((_, v: dict<any>) => win_execute(v.winid, 'do StyledComments Syntax'))
     augroup END
 enddef
 var STYLED_COMMENTS_FILETYPES: list<string>
@@ -679,7 +691,7 @@ set backspace=indent,eol,nostop
 # time to time, we won't be running tmux inside.
 #}}}
 if map(['gnome', 'konsole', 'rxvt-unicode', 'st', 'tmux', 'xterm'],
-        (_, v) => v .. '-256color'
+        (_, v: string): string => v .. '-256color'
       )->index(&term) >= 0
     # xfce4-terminal lies about its identity
     # and doesn't support true color on Ubuntu 16.04
@@ -900,17 +912,17 @@ set cpoptions+=>
 
 #     ┌ Control Sequence
 #     │
-const CS_BLOCK = "\e[2 q"
-const CS_UNDERLINE = "\e[4 q"
-const CS_LINE = "\e[6 q"
+const CS_BLOCK: string = "\e[2 q"
+const CS_UNDERLINE: string = "\e[4 q"
+const CS_LINE: string = "\e[6 q"
 
-const CS_BLINKING_BLOCK = "\e[0 q"
-const CS_BLINKING_UNDERLINE = "\e[3 q"
-const CS_BLINKING_LINE = "\e[5 q"
+const CS_BLINKING_BLOCK: string = "\e[0 q"
+const CS_BLINKING_UNDERLINE: string = "\e[3 q"
+const CS_BLINKING_LINE: string = "\e[5 q"
 
-const SHAPE_NORMAL = 'BLOCK' # █
-const SHAPE_REPLACE = 'UNDERLINE' # _
-const SHAPE_INSERT = 'LINE' # |
+const SHAPE_NORMAL: string = 'BLOCK' # █
+const SHAPE_REPLACE: string = 'UNDERLINE' # _
+const SHAPE_INSERT: string = 'LINE' # |
 #}}}
 def SetCursor() #{{{
     # In console, no escape sequence we're going to use is supported (probably).{{{
@@ -2667,7 +2679,9 @@ augroup FastLongWrappedLines | au!
     :def FastLongWrappedLines()
         # We only inspect the first 10  lines, otherwise the expression could be
         # too costly on a huge file.
-        if getline(1, 10)->mapnew((_, v) => strchars(v, true))->max() > 1000
+        if getline(1, 10)
+            ->mapnew((_, v: string): number => strchars(v, true))
+            ->max() > 1000
             setl nobreakindent nolinebreak
         else
             setl breakindent linebreak
@@ -3115,7 +3129,7 @@ def RepeatLastEditOnLastChangedText(): string
         return ''
     endif
 
-    map(changed, (_, v) => escape(v, '\'))
+    map(changed, (_, v: string): string => escape(v, '\'))
     var pat: string
     if len(changed) == 1
         pat = changed[0]
@@ -3265,7 +3279,7 @@ def UndoChangesDuringCurrentSession()
             if this is an issue, try to increase 'undolevels'
         END
         echohl ErrorMsg
-        mapnew(msg, (_, v) => execute('echom ' .. string(v), ''))
+        mapnew(msg, (_, v: string) => execute('echom ' .. string(v), ''))
         redraw
         echo msg[0]
         echohl NONE
@@ -3406,7 +3420,10 @@ def BreakLine(type = ''): string
         return ''
     endif
 
+    var sol_save: bool = &sol
     try
+        # https://github.com/andymass/vim-matchup/issues/132
+        set sol
         # break the line
         exe "norm! i\r"
 
@@ -3414,6 +3431,8 @@ def BreakLine(type = ''): string
         keepj keepp :.-,.s/\s\+$//e
     catch
         return Catch()
+    finally
+        &sol = sol_save
     endtry
     return ''
 enddef
@@ -3466,7 +3485,7 @@ def TryToEditPluginConfig(cmd: string)
         var files: list<string> = [$HOME .. '/.vim/plugin/' .. plugin .. '.vim']
         files += [$HOME .. '/.vim/after/plugin/' .. plugin .. '.vim']
         files += [$HOME .. '/.vim/autoload/slow_call/' .. plugin .. '.vim']
-        filter(files, (_, v) => filereadable(v))
+        filter(files, (_, v: string): bool => filereadable(v))
         if empty(files)
             echo 'There''s no config file for ' .. string(plugin)
             return
@@ -4077,7 +4096,11 @@ def PrintCwd()
         tabpage: %s
         global:  %s
     END
-    map(fmt, (i, v) => [getcwd(), getcwd(-1, 0), getcwd(-1)][i]->printf(v))
+    map(fmt, (i: number, v: string): string => [
+            getcwd(), getcwd(-1, 0), getcwd(-1)
+        ][i]
+        ->printf(v)
+        )
         # 'c' instead of 'l' to prevent the insertion of a trailing newline
         ->setreg('o', 'c')
     echo @o
@@ -4160,7 +4183,7 @@ def Faq(): string
 
     var this_tab: number = tabpagenr()
     var win_in_this_tab: list<dict<any>> = getwininfo()
-        ->filter((_, v) => v.tabnr == this_tab)
+        ->filter((_, v: dict<any>): bool => v.tabnr == this_tab)
     var faq_file: string = $XDG_RUNTIME_VIM .. '/faq'
 
     for win in win_in_this_tab
@@ -4171,11 +4194,15 @@ def Faq(): string
         endif
     endfor
 
-    if mapnew(win_in_this_tab, (_, v) => getwinvar(v.winnr, '&pvw', 0))->index(true) >= 0
+    if win_in_this_tab
+        ->mapnew((_, v: dict<any>): bool => getwinvar(v.winnr, '&pvw'))
+        ->index(true) >= 0
         return 'echoerr "E590: A preview window already exists: previewwindow"'
     endif
 
-    if mapnew(win_in_this_tab, (_, v) => bufname(v.bufnr))->index(faq_file) >= 0
+    if win_in_this_tab
+        ->mapnew((_, v: dict<any>): string => bufname(v.bufnr))
+        ->index(faq_file) >= 0
         echo 'a window displaying  ' .. faq_file .. '  already exists'
         return ''
     endif
@@ -4205,7 +4232,7 @@ def EditReadme()
     var files: list<string> = (expand('%:p:h') .. '/*')->glob(false, true)
     var kwd: string = '\%(readme\|contents\)'
     var pat: string = '\c/' .. kwd .. '\%(\..\{-}\)\=$'
-    var readmes: list<string> = filter(files, (_, v) => v =~ pat)
+    var readmes: list<string> = filter(files, (_, v: string): bool => v =~ pat)
     var readme: string = get(readmes, 0, '')
     if filereadable(readme) || isdirectory(readme)
         exe 'sp ' .. readme
@@ -4571,13 +4598,13 @@ def EasyAndCustomPaste()
     # register.
     #}}}
     if &ft == 'markdown'
-        map(contents, (_, v) => substitute(v, '’', "'", 'g'))
-        map(contents, (_, v) => substitute(v, '\w\zs \ze, \w', '', 'g'))
+        map(contents, (_, v: string): string => substitute(v, '’', "'", 'g'))
+        map(contents, (_, v: string): string => substitute(v, '\w\zs \ze, \w', '', 'g'))
         if getline('.') =~ '^\S\|^$'
-            map(contents, (_, v) => substitute(v, '^\s*\zshttp.*', '<&>', ''))
+            map(contents, (_, v: string): string => substitute(v, '^\s*\zshttp.*', '<&>', ''))
         endif
     endif
-    map(contents, (_, v) => substitute(v, '٪', '$', 'g'))
+    map(contents, (_, v: string): string => substitute(v, '٪', '$', 'g'))
     setreg('+', reginfo)
 enddef
 
@@ -4615,7 +4642,7 @@ def FixMultilineShellcmd()
         if contents[0] =~ '<<-\=\([''"]\=\)EOF\1'
             var eof_line: string = contents[match(contents, '^\s*' .. cml .. '\s*EOF$')]
             var indent: string = matchstr(eof_line, '^\s*' .. cml .. '\s*')
-            map(contents, (_, v) => substitute(v, indent, '', ''))
+            map(contents, (_, v: string): string => substitute(v, indent, '', ''))
         endif
     endif
 
@@ -5351,7 +5378,7 @@ def Cfg(pgm: string)
         echohl NONE
         return
     endif
-    filter(files, (_, v) => expand(v)->filereadable())
+    filter(files, (_, v: string): bool => expand(v)->filereadable())
     if empty(files)
         echo 'no readable file'
     endif
@@ -5434,9 +5461,9 @@ com -bar ClearRegisters ClearRegisters()
 def ClearRegisters()
     var numeric: list<number> = range(10)
     var alpha: list<string> = range(char2nr('a'), char2nr('z'))
-        ->mapnew((_, v) => nr2char(v))
+        ->mapnew((_, v: number): string => nr2char(v))
     var other: list<string> = ['-', '*', '+', '/', '=']
-    map(numeric + alpha + other, (_, v) => setreg(v, {}))
+    map(numeric + alpha + other, (_, v: any) => setreg(v, {}))
 enddef
 
 # CombineParamValues {{{2
@@ -5485,9 +5512,9 @@ enddef
 com -bar -range=% CombineParamValues CombineParamValues(<line1>, <line2>)
 
 def CombineParamValues(lnum1: number, lnum2: number)
-    var param_values: list<string> = getline(lnum1, lnum2)
-        ->filter((_, v) => v != '')
-        ->mapnew((_, v) => split(v))
+    var param_values: list<list<string>> = getline(lnum1, lnum2)
+        ->filter((_, v: string): bool => v != '')
+        ->mapnew((_, v: string): list<string> => split(v))
     if len(param_values) < 2
         return
     endif
@@ -5664,11 +5691,11 @@ def GrepCfg(pat: string)
         | sed "s:^:${HOME}/:; \%.vim/tools/mthesaur.txt%d"
     END
     var files: list<string> = join(cmd)->systemlist()
-    filter(files, (_, v) => filereadable(v))
+    filter(files, (_, v: string): bool => filereadable(v))
     # we may  have a  versioned controlled symlink  pointing to  another version
     # controlled file (e.g. vimrc → init.vim); we don't want to vimgrep into the
     # same file twice (it would give duplicate entries)
-    map(files, (_, v) => resolve(v))
+    map(files, (_, v: string): string => resolve(v))
     sort(files)->uniq()
     try
         exe 'vim /' .. escape(pat, '/') .. '/gj ' .. join(files)
@@ -5840,19 +5867,21 @@ def PluginsToCommit()
     endif
 
     var my_plugins: list<string> = readfile($MYVIMRC)
-    filter(my_plugins, (_, v) => v =~ '^\s*Plug\s\+''lacygoill/')
-    map(my_plugins, (_, v) => matchstr(v, 'lacygoill/\zs.\{-}\ze'''))
+    filter(my_plugins, (_, v: string): bool => v =~ '^\s*Plug\s\+''lacygoill/')
+    map(my_plugins, (_, v: string): string => matchstr(v, 'lacygoill/\zs.\{-}\ze'''))
     sil var output: list<string> = systemlist('commit-these-vim-plugins ' .. join(my_plugins))
     # we may have removed a plugin, but not executed `:Plugclean` yet
-    filter(output, (_, v) => v !~ 'No such file or directory')
+    filter(output, (_, v: string): bool => v !~ 'No such file or directory')
     if output == []
         echom '[PluginsToCommit]: nothing to commit'
         return
     endif
 
     eval output
-        ->filter((_, v) => v =~ '^\S')
-        ->map((_, v) => glob($HOME .. '/.vim/plugged/' .. v .. '/*', false, true)[0])
+        ->filter((_, v: string): bool => v =~ '^\S')
+        ->map((_, v: string): string =>
+            glob($HOME .. '/.vim/plugged/' .. v .. '/*', false, true)[0]
+            )
     setqflist([], ' ', {lines: output, efm: '%f', title: 'Plugins to commit'})
     cw
 enddef
@@ -5978,7 +6007,8 @@ com -bar -range=% RemoveDuplicateLines sil :<line1>,<line2>!awk '\!x[$0]++'
 
 # RemoveSwapFiles {{{2
 
-com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', true, true)->mapnew((_, v) => delete(v))
+com -bar RemoveSwapFiles glob($HOME .. '/.vim/tmp/swap/*', true, true)
+    \ ->mapnew((_, v: string) => delete(v))
 
 # RemoveTabs {{{2
 
@@ -6102,9 +6132,9 @@ def Tldr(shellcmd: string)
         return
     endif
     out
-        ->map((_, v) => substitute(v, '\e.\{-}m\|\%x0f', '', 'g'))
-        ->map((_, v) => substitute(v, '^-', '#', ''))
-        ->map((_, v) => substitute(v, '^  ', '    ', ''))
+        ->map((_, v: string): string => substitute(v, '\e.\{-}m\|\%x0f', '', 'g'))
+        ->map((_, v: string): string => substitute(v, '^-', '#', ''))
+        ->map((_, v: string): string => substitute(v, '^  ', '    ', ''))
     sp /tmp/.tldr.md
     keepj :%d _
     setline(1, out)
@@ -6294,7 +6324,7 @@ def WipeNoname()
                 sil! exe 'bw! ' .. buf
             endif
         else
-            filter(noname_buffers, (_, v) => v != buf)
+            filter(noname_buffers, (_, v: number): bool => v != buf)
         endif
     endfor
 enddef
@@ -6440,7 +6470,8 @@ augroup NoSyntaxInDiffMode | au!
         if !&l:diff
             return
         endif
-        getwininfo()->mapnew((_, v) => win_execute(v.winid, 'syn clear'))
+        getwininfo()
+            ->mapnew((_, v: dict<any>) => win_execute(v.winid, 'syn clear'))
     enddef
 augroup END
 
@@ -6904,9 +6935,9 @@ augroup MyMkspell | au!
     # http://vi.stackexchange.com/a/5052/6960
     #}}}
     au VimEnter * glob($HOME .. '/.vim/spell/*.add', true, true)
-        \ ->mapnew((_, v) => filereadable(v)
+        \ ->mapnew((_, v: string) => filereadable(v)
         \     && !filereadable(v .. '.spl') || (getftime(v) > getftime(v .. '.spl'))
-        \     && execute('mkspell! ' .. fnameescape(v)))
+        \     && !!execute('mkspell! ' .. fnameescape(v)))
 augroup END
 
 # Swap file handling "{{{2
@@ -7123,7 +7154,9 @@ augroup TrailingWhitespace | au!
     # because it's not code; so we don't care about its presence.
     #}}}
     exe 'au FileType '
-        .. copy(NO_TRAILING_WHITESPACE_FT)->filter((_, v) => v != '')->join(',')
+        .. copy(NO_TRAILING_WHITESPACE_FT)
+            ->filter((_, v: string): bool => v != '')
+            ->join(',')
         .. ' TrailingWhitespace(false)'
     # we still have an undesired match when we run `:VimPatches 8.1` *twice*
     au BufWinEnter * if &ft == 'text' | TrailingWhitespace(false) | endif
@@ -8611,7 +8644,9 @@ enddef
 # Try to use `readdir()` whenever you've used `glob*()` + `filter()/match()` in the past.
 # Example:
 #
-#     if !expand('%:p:h')->readdir((n) => n =~ 'some_name')->empty()
+#     if !expand('%:p:h')
+#         ->readdir((n: string): bool => n =~ 'some_name')
+#         ->empty()
 #         do sth
 #     endif
 #
