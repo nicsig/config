@@ -1318,7 +1318,7 @@ def myfuncs#sendToServer() #{{{1
 
     # highlight ansi codes; useful for when you run sth like `$ trans word | vipe`
     if contains_ansi && ($_ =~ '\C/vipe$' || bufname == '')
-        cmd = 'vim --remote-expr "execute(''runtime macros/ansi.vim'')"'
+        cmd = 'vim --remote-expr "execute(''runtime tools/ansi.vim'')"'
         sil system(cmd)
     endif
 

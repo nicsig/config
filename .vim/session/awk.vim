@@ -27,8 +27,6 @@ tabnew
 tabnew
 tabnew
 tabnew
-tabnew
-tabnew
 tabrewind
 edit ~/wiki/awk/sed.md
 set splitbelow splitright
@@ -649,7 +647,10 @@ wincmd _ | wincmd |
 split
 wincmd _ | wincmd |
 split
-2wincmd k
+wincmd _ | wincmd |
+split
+3wincmd k
+wincmd w
 wincmd w
 wincmd w
 wincmd t
@@ -659,9 +660,10 @@ set winminwidth=0
 set winwidth=1
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 27 + 16) / 33)
 argglobal
-let s:l = 8 - ((3 * winheight(0) + 0) / 0)
+let s:l = 8 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -671,116 +673,64 @@ lcd ~/.vim/plugged/vim-stacktrace
 wincmd w
 argglobal
 if bufexists("~/wiki/vim/vim9.md") | buffer ~/wiki/vim/vim9.md | else | edit ~/wiki/vim/vim9.md | endif
-balt /tmp/md.md
-let s:l = 2737 - ((0 * winheight(0) + 0) / 0)
+balt ~/.vim
+let s:l = 2716 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 2737
-normal! 05|
+keepjumps 2716
+normal! 013|
 lcd ~/wiki/vim
 wincmd w
 argglobal
-if bufexists("/tmp/t.vim") | buffer /tmp/t.vim | else | edit /tmp/t.vim | endif
-balt ftp://ftp.vim.org/pub/vim/patches/8.2/README
-let s:l = 11 - ((10 * winheight(0) + 14) / 28)
+if bufexists("~/.vim/after/plugin/README/README.md") | buffer ~/.vim/after/plugin/README/README.md | else | edit ~/.vim/after/plugin/README/README.md | endif
+balt ~/.vim/plugin/README/README.md
+let s:l = 38 - ((0 * winheight(0) + 0) / 0)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 11
-normal! 018|
+keepjumps 38
+normal! 0
 lcd ~/.vim
 wincmd w
+argglobal
+if bufexists("~/.vim/plugin/undotree.vim") | buffer ~/.vim/plugin/undotree.vim | else | edit ~/.vim/plugin/undotree.vim | endif
+balt ~/.vim/plugin
+let s:l = 1 - ((0 * winheight(0) + 13) / 27)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 1
+normal! 0
+lcd ~/.vim
+wincmd w
+4wincmd w
 exe '1resize ' . ((&lines * 0 + 16) / 33)
 exe '2resize ' . ((&lines * 0 + 16) / 33)
-exe '3resize ' . ((&lines * 28 + 16) / 33)
-tabnext
-edit ~/.vim/vimrc
-set splitbelow splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-argglobal
-balt /tmp/t.vim
-let s:l = 1108 - ((721 * winheight(0) + 15) / 30)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 1108
-normal! 02|
-lcd ~/.vim
-tabnext
-edit ~/.vim/plugged/asyncmake/.git/index
-set splitbelow splitright
-wincmd _ | wincmd |
-split
-wincmd _ | wincmd |
-split
-2wincmd k
-wincmd w
-wincmd w
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-wincmd =
-argglobal
-let s:l = 1 - ((0 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 1
-normal! 0
-lcd ~/.vim/plugged/asyncmake
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-debug/.git/index") | buffer ~/.vim/plugged/vim-debug/.git/index | else | edit ~/.vim/plugged/vim-debug/.git/index | endif
-let s:l = 5 - ((1 * winheight(0) + 0) / 0)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 5
-normal! 0
-lcd ~/.vim/plugged/asyncmake
-wincmd w
-argglobal
-if bufexists("~/.vim/plugged/vim-debug/.git/COMMIT_EDITMSG") | buffer ~/.vim/plugged/vim-debug/.git/COMMIT_EDITMSG | else | edit ~/.vim/plugged/vim-debug/.git/COMMIT_EDITMSG | endif
-balt ~/.vim/tmp/gitcommit_messages/2020-11-01__21-25-21.txt
-let s:l = 1 - ((0 * winheight(0) + 5) / 10)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 1
-normal! 0
-lcd ~/.vim/plugged/asyncmake
-wincmd w
-3wincmd w
-wincmd =
-tabnext 20
+exe '3resize ' . ((&lines * 0 + 16) / 33)
+exe '4resize ' . ((&lines * 27 + 16) / 33)
+tabnext 18
 badd +1 ~/wiki/awk/sed.md
-badd +1 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
+badd +69 ~/.vim/plugged/vim-cheat/ftplugin/cheat.vim
 badd +1 ~/Desktop/ask.md
 badd +1 ~/.vim/plugged/vim-vim/after/ftplugin/vim.vim
 badd +1 ~/.vim/plugin/README/matchup.md
 badd +1 ~/Desktop/cwd.md
 badd +1 ~/.vim/plugged/vim-unix/autoload/unix.vim
 badd +1 ~/Desktop/refactor.md
-badd +1 ~/.vim/plugged/vim-quickhl/autoload/quickhl.vim
+badd +4 ~/.vim/plugged/vim-quickhl/autoload/quickhl.vim
 badd +1 ~/wiki/vim/sign.md
 badd +1 ~/Vcs/zsh/Misc/vcs_info-examples
 badd +1 ~/wiki/vim/mapping.md
 badd +1 ~/wiki/vim/todo/todo.md
 badd +1 ~/.vim/plugged/vim-lg-lib/import/lg.vim
-badd +1 ~/.vim/plugged/vim-fuzzy/autoload/fuzzy.vim
+badd +335 ~/.vim/plugged/vim-fuzzy/autoload/fuzzy.vim
 badd +1 ~/.vim/plugged/vim-virtual-text/import/virtualText.vim
 badd +8 ~/.vim/plugged/vim-stacktrace/test/compile_time.vim
 badd +1694 ~/wiki/vim/config.md
 badd +11 ~/wiki/vim/complete.md
 badd +69 ~/Desktop/vim.vim
-badd +97 ~/.vim/plugin/matchup.vim
+badd +3 ~/.vim/plugin/matchup.vim
 badd +38 ~/.vim/plugged/vim-fex/ftplugin/fex.vim
 badd +119 ~/wiki/vim/shell.md
 badd +6 ~/.vim/plugged/vim-completion/autoload/completion/util.vim
@@ -789,16 +739,13 @@ badd +9 ~/.vim/plugged/vim-vim/test/refactor/substitute.vim
 badd +51 ~/wiki/vim/popup.md
 badd +128 ~/Desktop/git-prompt.md
 badd +88 ~/bin/prompt.zsh
-badd +2073 ~/wiki/vim/vimscript.md
+badd +1700 ~/wiki/vim/vimscript.md
 badd +1 ~/Desktop/filez
-badd +6 ~/.vim/autoload/myfuncs.vim
+badd +1321 ~/.vim/autoload/myfuncs.vim
 badd +22 ~/.vim/plugged/vim-fuzzy/plugin/fuzzy.vim
-badd +2708 ~/wiki/vim/vim9.md
-badd +126 ~/.vim/vimrc
-badd +1 /tmp/t.vim
-badd +0 ~/.vim/plugged/asyncmake/.git/index
-badd +0 ~/.vim/plugged/vim-debug/.git/index
-badd +0 ~/.vim/plugged/vim-debug/.git/COMMIT_EDITMSG
+badd +2716 ~/wiki/vim/vim9.md
+badd +3 ~/.vim/plugin/undotree.vim
+badd +38 ~/.vim/after/plugin/README/README.md
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif

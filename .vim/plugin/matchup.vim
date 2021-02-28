@@ -1,6 +1,6 @@
 vim9script noclear
 
-if exists('loaded') || exists('g:loaded_matchup') || stridx(&rtp, 'vim-matchup') == -1
+if exists('loaded') || stridx(&rtp, 'vim-matchup') == -1
     finish
 endif
 var loaded = true

@@ -1,6 +1,6 @@
 vim9script noclear
 
-if exists('loaded') || !exists('g:loaded_sandwich')
+if exists('loaded') || stridx('vim-sandwich') == -1
     finish
 endif
 var loaded = true

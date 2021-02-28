@@ -50,20 +50,20 @@ set guioptions+=!
 # Besides, they install some custom commands which pollute tab completion on the
 # command-line.
 #}}}
-g:loaded_getscriptPlugin = 1
-g:loaded_logiPat = 1
+g:loaded_getscriptPlugin = true
+g:loaded_logiPat = true
 
 # interface + autoload
-g:loaded_vimballPlugin = 1
-g:loaded_vimball = 1
+g:loaded_vimballPlugin = true
+g:loaded_vimball = true
 
 # How to disable netrw?{{{
 #
 #     # no interface
-#     g:loaded_netrwPlugin = 1
+#     g:loaded_netrwPlugin = true
 #
 #     # no autoload/
-#     g:loaded_netrw = 1
+#     g:loaded_netrw = true
 #
 # See `:h netrw-noload`.
 #}}}
@@ -268,16 +268,15 @@ def DelaySlowCall()
     au! DelaySlowCall
     aug! DelaySlowCall
 
-    # source `autoload/toggle_settings.vim`
-    runtime autoload/toggle_settings.vim
-    runtime! autoload/slow_call/*.vim
+    packadd toggleSettings
+    packadd slowCall
 enddef
 
 augroup DelaySlowCall | au!
     # Do *not* use a simple timer:{{{
     #
     #     au VimEnter * timer_start(1000, () =>
-    #         \     execute('runtime autoload/toggle_settings.vim | runtime! autoload/slow_call/*.vim')
+    #         \     execute('runtime autoload/toggleSettings.vim | runtime! autoload/slowCall/*.vim')
     #         \ )
     #
     # It could cause issues, for example, if you enter insert mode quickly (i.e.
@@ -345,7 +344,7 @@ import {
     Fold,
     UndoFtplugin,
     Syntax,
-    } from 'lg/styled_comment.vim'
+    } from 'lg/styledComment.vim'
 
 # Options 2 {{{1
 # Encoding {{{2
@@ -836,7 +835,7 @@ else
     au MyColorScheme VimLeavePre * colorscheme#saveLastVersion()
 
     # try to restore the exact version of the last color scheme used
-    var last_color_file: string = $HOME .. '/.vim/colors/my/last_version.vim'
+    var last_color_file: string = $HOME .. '/.vim/colors/my/lastVersion.vim'
     if filereadable(last_color_file)
         exe 'so ' .. last_color_file
     endif
@@ -3482,7 +3481,7 @@ def TryToEditPluginConfig(cmd: string)
         var split: string = cmd[0] == 'g' ? 'edit' : cmd[1] == 'g' ? 'tabedit' : 'split'
         var files: list<string> = [$HOME .. '/.vim/plugin/' .. plugin .. '.vim']
         files += [$HOME .. '/.vim/after/plugin/' .. plugin .. '.vim']
-        files += [$HOME .. '/.vim/autoload/slow_call/' .. plugin .. '.vim']
+        files += [$HOME .. '/.vim/autoload/slowCall/' .. plugin .. '.vim']
         filter(files, (_, v: string): bool => filereadable(v))
         if empty(files)
             echo 'There''s no config file for ' .. string(plugin)
@@ -6408,8 +6407,8 @@ augroup HighlightAnsi | au!
     # properly in the outer Vim instance.
     #}}}
     if empty($VIM_TERMINAL)
-        au StdinReadPost * runtime macros/ansi.vim
-        au VimEnter * if $_ =~ '\C/vipe$' | runtime macros/ansi.vim | endif
+        au StdinReadPost * runtime tools/ansi.vim
+        au VimEnter * if $_ =~ '\C/vipe$' | runtime tools/ansi.vim | endif
     endif
 augroup END
 
@@ -6566,7 +6565,7 @@ augroup END
 # OTOH, the issue does affect libreoffice.
 #}}}
 
-# Warning: If you change the name of the augroup, do the same in `tmux#capture_pane#main()`:{{{
+# Warning: If you change the name of the augroup, do the same in `tmux#capturePane#main()`:{{{
 #
 #     ~/.vim/plugged/vim-tmux/autoload/tmux/capture_pane.vim
 #}}}
@@ -8098,7 +8097,7 @@ enddef
 # But they aren't properly concealed in a fold title, nor in the unfolded buffer.
 #
 # Also, should we use them more often?
-# Review the comments in `~/.vim/plugged/vim-snippets/pythonx/snippet_helpers.py:442`.
+# Review the comments in `~/.vim/plugged/vim-snippets/pythonx/snippetHelpers.py:442`.
 #
 # Also, finish restructuring our notes in `vim-snippets`.  Too many scattered files.
 #

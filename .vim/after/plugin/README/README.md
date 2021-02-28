@@ -23,7 +23,7 @@ You can use it to:
 
    - directly execute some interface of the plugin
 
-       For this, you HAVE TO use `after/plugin/`, to be sure
+       For this, you *have to* use `after/plugin/`, to be sure
        the interface has been installed.
 
        Btw, that's what the documentation of `Abolish.vim` recommends.
@@ -35,55 +35,20 @@ You can use it to:
 A script  shouldn't be  sourced if  the plugin it  configures has  been disabled
 while we debug some issue.
 
-Note that there is  no possible guard for scripts which  are not associated with
-any third-party plugin, like:
-
-   - nop.vim
-   - tidy_tab_completion.vim
-
 ## Which template should I follow?
 
-       ┌ load the script only if it makes sense
-       │ (i.e. the plugin it configures has been loaded)
-       │
-       ├───────────────────┐
-    if !exists(g:loaded_...)
+    if exists('loaded')
+        # load the script only if it makes sense
+        # (i.e. the plugin it configures has been loaded)
+        || stridx(&rtp, 'vim-...') == -1
         finish
     endif
-
-Or:
-
-    if stridx(&rtp, 'vim-...') == -1
-        finish
-    endif
+    var loaded = true
 
 Note that the  name of the plugin  does not necessarily begin  with `vim-`, it's
-just a widely adopted convention.
-Adapt the first template to the plugin you're working on.
+just a widely adopted convention.  Adapt the first template to the plugin you're
+working on.
 
-Use the second one if the author of the plugin forgot to set a guard.
-
-## How to prevent a script to be sourced twice?
-
-I don't think you can.
-
-The first time a script is sourced here, the plugin it configures will *already*
-have been sourced.
-So `g:loaded_...` will exist, and you won't be able to write this:
-
-    if exists('g:loaded_...')
-        finish
-    endif
-
-It would *always* prevent your script from being sourced.
-
-OTOH, you can write this:
-
-    if !exists('g:loaded_...')
-        finish
-    endif
-
-But it serves another purpose.
-It prevents the script from being sourced,  if the plugin it configures has been
-disabled.
+You could also try to  replace `stridx(...)` with `!exists('g:loaded_...')`, but
+sometimes, the author of a plugin forgets to set this variable.
 

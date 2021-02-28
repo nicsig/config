@@ -1,5 +1,10 @@
 vim9script noclear
 
+if exists('loaded')
+    finish
+endif
+var loaded = true
+
 # Purpose:{{{
 #
 # Use this file to disable some keys.

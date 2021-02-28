@@ -11,7 +11,7 @@ set shortmess=aoO
 " badd +1 ~/Desktop/md.md
 " badd +1 /tmp/sh.sh
 " badd +1 ~/.vim/UltiSnips/markdown.snippets
-" badd +20 ~/.vim/pythonx/snippet_helpers.py
+" badd +20 ~/.vim/pythonx/snippetHelpers.py
 " badd +44 ~/.vim/UltiSnips/sh.snippets
 " badd +142 ~/.vim/UltiSnips/README.md
 " badd +40 ~/.vim/UltiSnips/help.snippets
@@ -125,7 +125,7 @@ normal! 0
 wincmd w
 arglocal
 silent! argdel *
-if bufexists('~/.vim/pythonx/snippet_helpers.py') | buffer ~/.vim/pythonx/snippet_helpers.py | else | edit ~/.vim/pythonx/snippet_helpers.py | endif
+if bufexists('~/.vim/pythonx/snippetHelpers.py') | buffer ~/.vim/pythonx/snippetHelpers.py | else | edit ~/.vim/pythonx/snippetHelpers.py | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}

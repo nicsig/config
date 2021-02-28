@@ -174,7 +174,7 @@ def colorscheme#customize() #{{{2
     #
     # The error comes from:
     #
-    #     " ~/.vim/plugged/vim-toggle-settings/autoload/toggle_settings.vim
+    #     " ~/.vim/plugged/vim-toggle-settings/autoload/toggleSettings.vim
     #     " /def Lightness(
     #     level = g:seoul256_background - 233 + 1
     #             ^-------------------^
@@ -229,7 +229,7 @@ enddef
 def colorscheme#cursorline(enable: bool) #{{{2
     # Why is this function public?{{{
     #
-    # We  need to  be able  to  call it  from `autoload/toggle_settings.vim`  to
+    # We  need to  be able  to  call it  from `autoload/toggleSettings.vim`  to
     # implement the `]oL` and `[oL` mappings which toggle `'cul'`.
     #}}}
 
@@ -281,7 +281,7 @@ def colorscheme#saveLastVersion() #{{{2
         'vim9script',
         'g:last_color_scheme = ' .. get(g:, 'seoul256_current_bg', 253)
         ]
-    writefile(lines, $HOME .. '/.vim/colors/my/last_version.vim')
+    writefile(lines, $HOME .. '/.vim/colors/my/lastVersion.vim')
 enddef
 # }}}1
 # Core {{{1
@@ -568,8 +568,8 @@ def StyledComments() #{{{2
     # We can't blindly ignore any text highlighted by `PreProc`.
     # We need a way to distinguish between comment and code.
     # To achieve this, we install this `CommentPreProc` HG.
-    # In `~/plugged/vim-lg-lib/autoload/lg/styled_comment.vim`, we use it
-    # to highlight comment titles and outputs of commands.
+    # In  `~/plugged/vim-lg-lib/autoload/lg/styledComment.vim`,  we  use  it  to
+    # highlight comment titles and outputs of commands.
     #
     # This way,  we retain  the same  highlighting (because  `CommentPreProc` is
     # linked to `PreProc`), but we can  ignore it in goyo mode without affecting

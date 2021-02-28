@@ -67,7 +67,7 @@ normal! 0
 lcd ~/.vim
 wincmd w
 argglobal
-if bufexists("~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim") | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim | endif
+if bufexists("~/.vim/plugged/vim-lg-lib/autoload/lg/styledComment.vim") | buffer ~/.vim/plugged/vim-lg-lib/autoload/lg/styledComment.vim | else | edit ~/.vim/plugged/vim-lg-lib/autoload/lg/styledComment.vim | endif
 setlocal fdm=marker
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -230,7 +230,7 @@ set stal=1
 " badd +24 ~/wiki/vim/syntax_hl.md
 " badd +47 /usr/local/share/vim/vim81/colors/README.txt
 " badd +1 ~/Desktop/test.vim
-" badd +167 ~/.vim/plugged/vim-lg-lib/autoload/lg/styled_comment.vim
+" badd +167 ~/.vim/plugged/vim-lg-lib/autoload/lg/styledComment.vim
 " badd +726 ~/.vim/plugged/vim-markdown/syntax/markdown.vim
 " badd +379 ~/.vim/autoload/colorscheme.vim
 " badd +785 ~/wiki/vim/highlighting.md

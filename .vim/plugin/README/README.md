@@ -59,18 +59,19 @@ See the comment at the top of `nop.vim` for an explanation.
 
        ┌ don't source the script twice
        │
-       │                         ┌ source it only if the plugin is enabled
-       │                         │
-       │                         │
-       │                         │
-       ├────────────────────┐    ├───────────────────────────┐
-    if exists('g:loaded_...') || stridx(&rtp, 'vim-...') == -1
+       │                   ┌ source it only if the plugin is enabled
+       │                   │
+       │                   │
+       │                   │
+       ├──────────────┐    ├───────────────────────────┐
+    if exists('loaded') || stridx(&rtp, 'vim-...') == -1
         finish
     endif
+    var loaded = true
 
 Note that the  name of the plugin  does not necessarily begin  with 'vim-', it's
-just a widely adopted convention.
-Adapt the template to the plugin you're working on.
+just  a widely  adopted convention.   Adapt the  template to  the plugin  you're
+working on.
 
 ##
 # Misc

@@ -1,6 +1,6 @@
 vim9script noclear
 
-if exists('loaded') || exists('g:loaded_ultisnips') || stridx(&rtp, 'ultisnips') == -1
+if exists('loaded') || stridx(&rtp, 'ultisnips') == -1
     finish
 endif
 var loaded = true

@@ -23,7 +23,7 @@ def plugin#ultisnips#cancelExpansion(): string #{{{1
         # relevant block:
         #
         #     global !p
-        #     from snippet_helpers import *
+        #     from snippetHelpers import *
         #     endglobal
         #
         # Now,  try to  expand the  tab  trigger `cc`);  it fails,  and a  stack

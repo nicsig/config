@@ -1,7 +1,7 @@
 vim9script noclear
 
 # Interface {{{1
-def plugin#emmet#install_mappings() #{{{2
+def plugin#emmet#installMappings() #{{{2
     # The default mappings are not silent (and they probably don't use `<nowait>` either).
     # We prefer to make them silent.
 
