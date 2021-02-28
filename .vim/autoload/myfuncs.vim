@@ -116,7 +116,7 @@ def myfuncs#opReplaceWithoutYankCore(type: string)
     #    - `"-` and the numbered registers, because they will mutate when the selection is replaced
     #}}}
     for regname in [reg] + ['-'] + range(10)->mapnew((_, v: any): string => string(v))
-        extend(reg_save, {[regname]: getreginfo(regname)})
+        reg_save[regname] = getreginfo(regname)
     endfor
 
     if type == 'line'
@@ -498,7 +498,7 @@ def myfuncs#deleteMatchingLines(to_delete: string, reverse = false) #{{{1
     endif
 enddef
 
-def myfuncs#diffLines(bang: bool, alnum1: number, alnum2: number, option: string) #{{{1
+def myfuncs#diffLines(bang: bool, arg_lnum1: number, arg_lnum2: number, option: string) #{{{1
     if option == '-h' || option == '--help'
         var usage: list<string> =<< trim END
             :DiffLines lets you see and cycle through the differences between 2 lines
@@ -531,15 +531,15 @@ def myfuncs#diffLines(bang: bool, alnum1: number, alnum2: number, option: string
         return
     endif
 
-    # if `alnum1 == alnum2`, it means `:DiffLines` was called without a range
+    # if `arg_lnum1 == arg_lnum2`, it means `:DiffLines` was called without a range
     var lnum1: number
     var lnum2: number
-    if alnum1 == alnum2
+    if arg_lnum1 == arg_lnum2
         lnum1 = line('.')
         lnum2 = lnum1 + 1
     else
-        lnum1 = alnum1
-        lnum2 = alnum2
+        lnum1 = arg_lnum1
+        lnum2 = arg_lnum2
     endif
     var line1: string = getline(lnum1)
     var line2: string = getline(lnum2)
@@ -620,7 +620,7 @@ def myfuncs#diffLines(bang: bool, alnum1: number, alnum2: number, option: string
     endif
 enddef
 
-def myfuncs#dumpWiki(argurl: string) #{{{1
+def myfuncs#dumpWiki(arg_url: string) #{{{1
     # TODO: Regarding triple backticks.{{{
     #
     # Look at this page: https://github.com/ranger/ranger/wiki/Keybindings
@@ -643,14 +643,14 @@ def myfuncs#dumpWiki(argurl: string) #{{{1
     # Give the recommendation to manually inspect the syntax highlighting at the
     # end of the buffer.
     #}}}
-    if argurl[: 3] != 'http'
+    if arg_url[: 3] != 'http'
         return
     endif
 
     var x_save: list<number> = getpos("'x")
     var y_save: list<number> = getpos("'y")
     try
-        var url: string = trim(argurl, '/') .. '.wiki'
+        var url: string = trim(arg_url, '/') .. '.wiki'
         var tempdir: string = tempname()->substitute('.*/\zs.\{-}', '', '')
         sil system('git clone ' .. shellescape(url) .. ' ' .. tempdir)
         var files: list<string> = glob(tempdir .. '/*', false, true)
@@ -784,16 +784,16 @@ def myfuncs#HorizontalRulesTextobject(adverb: string) #{{{1
     endif
 enddef
 
-def myfuncs#inANotInB(argfileA: string, argfileB: string) #{{{1
+def myfuncs#inANotInB(arg_fileA: string, arg_fileB: string) #{{{1
     var fileA: string
     var fileB: string
-    if getbufline(argfileA, 1, '$')->len()
-     < getbufline(argfileB, 1, '$')->len()
-        fileA = argfileB
-        fileB = argfileA
+    if getbufline(arg_fileA, 1, '$')->len()
+     < getbufline(arg_fileB, 1, '$')->len()
+        fileA = arg_fileB
+        fileB = arg_fileA
     else
-        fileA = argfileA
-        fileB = argfileB
+        fileA = arg_fileA
+        fileB = arg_fileB
     endif
 
     fileA = shellescape(fileA)
@@ -1557,7 +1557,7 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
     wincmd p
 enddef
 
-def myfuncs#wfComplete(_a: any, _l: any, _p: any): string
+def myfuncs#wfComplete(...l: any): string
     return ['-min_length', '-weighted']->join("\n")
 enddef
 

@@ -13,7 +13,7 @@ enddef
 def plugin#plug#showDocumentation() #{{{1
     var name: string = getline('.')->matchstr('^- \zs\S\+\ze:')
     if has_key(g:plugs, name)
-        for doc in globpath(g:plugs[name].dir, 'doc/*.txt')->split('\n')
+        for doc in globpath(g:plugs[name]['dir'], 'doc/*.txt')->split('\n')
             exe 'tabe +setf\ help ' .. doc
         endfor
     endif

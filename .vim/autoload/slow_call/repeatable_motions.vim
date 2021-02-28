@@ -48,7 +48,7 @@ noremap <expr> gk <sid>VerticalJumpRhs(v:false)
 noremap <expr> gj <sid>VerticalJumpRhs()
 
 def VerticalJumpRhs(is_fwd = true): string
-    var mode: string = mode(1)
+    var mode: string = mode(true)
 
     if mode == "\<c-v>"
         mode = "\<c-v>\<c-v>"
@@ -113,8 +113,8 @@ enddef
 
 #    gt  gT         move tab pages {{{2
 
-nno gT <cmd>call <sid>MoveTabpage()<cr>
-nno gt <cmd>call <sid>MoveTabpage(v:false)<cr>
+nno gt <cmd>call <sid>MoveTabpage()<cr>
+nno gT <cmd>call <sid>MoveTabpage(v:false)<cr>
 
 def MoveTabpage(fwd = true)
     try

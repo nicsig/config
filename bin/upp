@@ -29,7 +29,9 @@ PGM="$1"
 #}}}
 COMMIT_HASH="$2"
 GIT_REPOS="${HOME}/Vcs/"
-WITH_DEBUGGING_SYMBOLS=''
+# TODO: empty the variable once we've found a MWE for this:
+# https://github.com/vim/vim/issues/7891
+WITH_DEBUGGING_SYMBOLS='yes'
 
 typeset -A URLS=( \
   [ansifilter]=https://gitlab.com/saalen/ansifilter.git \

@@ -258,7 +258,7 @@ augroup MyUltisnips | au!
         | endif
 
     # let us know when a snippet is being expanded
-    sil! Derive('Ulti', 'Visual', 'term=bold cterm=bold gui=bold')
+    Derive('Ulti', 'Visual', 'term=bold cterm=bold gui=bold')
     au User MyFlags statusline#hoist('buffer', '%#Ulti#%{plugin#ultisnips#status()}',
         \ 55, expand('<sfile>:p') .. ':' .. expand('<sflnum>'))
 

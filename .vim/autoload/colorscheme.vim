@@ -462,12 +462,12 @@ def Underlined() #{{{3
     # So, we reset the  HG with the `underline` style, and the  colors of the HG
     # `Conditional` (because this one is blue).
     #}}}
-    sil! Derive('Underlined', 'Conditional', 'term=underline cterm=underline gui=underline')
+    Derive('Underlined', 'Conditional', 'term=underline cterm=underline gui=underline')
 enddef
 
 def CommentUnderlined() #{{{3
     # define the `CommentUnderlined` HG (useful for urls in comments)
-    sil! Derive('CommentUnderlined', 'Comment', 'term=underline cterm=underline gui=underline')
+    Derive('CommentUnderlined', 'Comment', 'term=underline cterm=underline gui=underline')
 enddef
 
 def User() #{{{3
@@ -721,7 +721,7 @@ def Misc() #{{{2
     #}}}
     # create `PopupSign` from `WarningMsg`
     # override the `guibg` or `ctermbg` attribute, using the colors of the `Normal` HG
-    sil! Derive('PopupSign', 'WarningMsg', {bg: 'Normal'})
+    Derive('PopupSign', 'WarningMsg', {bg: 'Normal'})
     # It is not always easy to read the selected entry in a popup menu (created with `popup_menu()`).{{{
     #
     # Especially  when  the  text  is   already  highlighted  (either  via  text
@@ -839,14 +839,14 @@ def RestoreCursorColor() #{{{2
 enddef
 # }}}1
 # Utilities {{{1
-def GetAttributes(hg: string, amode = ''): dict<string> #{{{2
+def GetAttributes(hg: string, arg_mode = ''): dict<string> #{{{2
     var attributes: dict<number> = {
         fg: 0,
         bg: 0,
         bold: 0,
         reverse: 0,
         }
-    var mode: list<string> = amode == '' ? [] : [amode]
+    var mode: list<string> = arg_mode == '' ? [] : [arg_mode]
     return attributes
         ->mapnew((k: string) => call('synIDattr', [hlID(hg)->synIDtrans(), k] + mode))
 enddef

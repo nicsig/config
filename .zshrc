@@ -1529,6 +1529,8 @@ fix() { #{{{2
   tput rs2
   tput rs3
   tput cnorm
+  # make sure the cursor's shape is a steady block
+  tput Se
   clear
   printf -- '\ec'
 }

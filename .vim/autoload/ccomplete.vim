@@ -5,12 +5,11 @@
 
 vim9script
 
-var prepended: string = ''
+var prepended: string
 var grepCache: dict<list<dict<any>>>
 
 # This function is used for the 'omnifunc' option.
 def ccomplete#Complete(findstart: number, abase: string): any #{{{1
-# TODO(Vim9): `): any` → `): number|list<dict<any>>`
   if findstart
     # Locate the start of the item, including ".", "->" and "[...]".
     var line: string = getline('.')
@@ -341,7 +340,6 @@ def ParseTagline(line: string): dict<any> #{{{1
       # Find end of cmd, it may contain Tabs.
       while n < len(l) && l[n] !~ '/;"$'
 	n += 1
-	# TODO(Vim9): Appending to dict item doesn't work yet.
 	d['cmd'] = d['cmd'] .. '  ' .. l[n]
       endwhile
     endif
@@ -653,12 +651,12 @@ def SearchMembers( #{{{1
     var typename: string = ''
     var line: string
     if has_key(matches[i], 'dict')
-      if has_key(matches[i].dict, 'typename')
-	typename = matches[i].dict['typename']
-      elseif has_key(matches[i].dict, 'typeref')
-	typename = matches[i].dict['typeref']
+      if has_key(matches[i]['dict'], 'typename')
+	typename = matches[i]['dict']['typename']
+      elseif has_key(matches[i]['dict'], 'typeref')
+	typename = matches[i]['dict']['typeref']
       endif
-      line = "\t" .. matches[i].dict['cmd']
+      line = "\t" .. matches[i]['dict']['cmd']
     else
       line = matches[i]['tagline']
       var e: number = matchend(line, '\ttypename:')

@@ -448,11 +448,11 @@ def StyledComments()
     END
     augroup StyledComments | au!
         au FileType * if index(STYLED_COMMENTS_FILETYPES, expand('<amatch>')) >= 0
-            |     sil! Fold()
-            |     sil! UndoFtplugin()
+            |     Fold()
+            |     UndoFtplugin()
             | endif
         au Syntax * if index(STYLED_COMMENTS_FILETYPES, expand('<amatch>')) >= 0
-            |     sil! Syntax()
+            |     Syntax()
             | endif
         # Purpose:{{{
         #
@@ -867,8 +867,6 @@ set noruler
 
 # cms {{{2
 
-# Without the  guard, when  you reload  the vimrc, the  fold titles  display the
-# comment leader.
 set commentstring=
 
 # cpoptions {{{2
@@ -1823,7 +1821,7 @@ if !has('gui_running')
 # "enter normal mode", "enter command-line mode", and "run command".
 #
 # As you can see,  this can be dangerous, because if you  don't pay attention to
-# what you've copied, Vim may run an unexpected command.
+# what you've copied, Vim might run an unexpected command.
 #
 # Other MWE:
 #
@@ -1981,8 +1979,8 @@ if !has('gui_running')
 #
 # Theory:
 # Remember that you can start an external process from Vim (e.g. via `system()`).
-# While Vim is running, the foreground process may not be Vim, and it may or may
-# not want the terminal to be in bracketed paste mode.
+# While Vim is running, the foreground process might not be Vim, and it might or
+# might not want the terminal to be in bracketed paste mode.
 # I think  that's why  Vim disables  the bracketed paste  mode when  leaving raw
 # mode;  so that  the foreground  process does  not receive  sequences which  it
 # doesn't understand.
@@ -2029,9 +2027,9 @@ endif
 
 # Let's make sure that `FocusGained` and `FocusLost` work in xterm+tmux.
 # See: `:h xterm-focus-event`.
-if &term =~ 'tmux' && !!getenv('XTERM_VERSION') && &t_fd == ''
-    exe "set t_fd=\e[?1004l"
+if &term =~ 'tmux' && !!getenv('XTERM_VERSION') && &t_fe == ''
     exe "set t_fe=\e[?1004h"
+    exe "set t_fd=\e[?1004l"
 endif
 
 # kB {{{3
@@ -2456,7 +2454,7 @@ augroup HoistVe | au!
     # dev, which prefixes `:set` with `:noa`.
     #}}}
     au User MyFlags statusline#hoist('global',
-        \ '%{&ve isnot# "' .. &ve .. '" && mode(1) ==# "n" ? "[ve=" .. &ve .. "]" : ""}', 8,
+        \ '%{&ve isnot# "' .. &ve .. '" && mode(v:true) ==# "n" ? "[ve=" .. &ve .. "]" : ""}', 8,
         \ expand('<sfile>:p') .. ':' .. expand('<sflnum>'))
     au OptionSet virtualedit timer_start(0, () => execute('redrawt'))
 augroup END
@@ -3042,8 +3040,8 @@ ino <c-s> <cmd>sil update<cr>
 
 # M-a  M-e {{{3
 
-sil! MapMeta('a', '<cmd>norm! (<cr>', 'i', '')
-sil! MapMeta('e', '<cmd>norm! )<cr>', 'i', '')
+MapMeta('a', '<cmd>norm! (<cr>', 'i', '')
+MapMeta('e', '<cmd>norm! )<cr>', 'i', '')
 
 # \ {{{3
 
@@ -4467,8 +4465,8 @@ nno <c-w>s <cmd>call myfuncs#sendToTabPage(v:count)<cr>
 
 # M-n    M-p          navigate between marks {{{4
 
-sil! MapMeta('n', "]'", 'n', '')
-sil! MapMeta('p', "['", 'n', '')
+MapMeta('n', "]'", 'n', '')
+MapMeta('p', "['", 'n', '')
 # }}}3
 # @@ {{{3
 
@@ -5550,10 +5548,10 @@ enddef
 cnorea <expr> def getcmdtype() == ':' && getcmdpos() == 4 ? 'Def' : 'def'
 com -bar -nargs=? -complete=customlist,FuncComplete Def Def(<q-args>)
 
-def Def(name: string)
-    var _name: string = trim(name, '()')
+def Def(arg_name: string)
+    var name: string = trim(arg_name, '()')
     try
-        exe 'def ' .. _name
+        exe 'def ' .. name
     catch
         Catch()
         return
@@ -9040,6 +9038,22 @@ enddef
 # ---
 #
 # Use our saved qfl named `setreg`.
+
+
+
+
+#     &ei = 'FocusGained,FocusLost'
+
+nno <expr> <F4> ':unsilent echom "F4 is working"<cr>'
+ino <expr> <F5> 'F5 is working'
+cno <expr> <F6> 'F6 is working'
+
+nno <F7> <cmd>unsilent echom 'F7 is working'<cr>
+
+inorea <expr> aaaaa 'expr insert mode abbreviations are working'
+cnorea <expr> bbbbb 'expr command-line mode abbreviations are working'
+inorea ccccc 'insert mode abbreviations are working'
+cnorea ddddd 'command-line mode abbreviations are working'
 
 
 
