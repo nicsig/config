@@ -115,7 +115,9 @@ def myfuncs#opReplaceWithoutYankCore(type: string)
     #    - `reg` in case we make it mutate with the next `setreg()`
     #    - `"-` and the numbered registers, because they will mutate when the selection is replaced
     #}}}
-    for regname in [reg] + ['-'] + range(10)->mapnew((_, v: any): string => string(v))
+    for regname in [reg]
+                 + ['-']
+                 + range(10)->mapnew((_, v: any): string => string(v))
         reg_save[regname] = getreginfo(regname)
     endfor
 
@@ -162,8 +164,8 @@ def HandleChar(reg: string)
         # Which is probably not what you want.
         #}}}
         # trim whitespace surrounding the text
-        contents[0] = substitute(contents[0], '^\s*', '', '')
-        contents[-1] = substitute(contents[-1], '\s*$', '', '')
+        contents[0] = contents[0]->substitute('^\s*', '', '')
+        contents[-1] = contents[-1]->substitute('\s*$', '', '')
         # and reset the type to characterwise
         reginfo
             ->extend({regcontents: contents, regtype: 'c'})
@@ -239,7 +241,7 @@ def OpYank(type: string)
 
     # remove *all* empty lines in some other cases
     if op_yank.what == 'v//' || op_yank.what == 'code'
-        filter(yanked, (_, v: string): bool => v !~ '^\s*$')
+        yanked->filter((_, v: string): bool => v !~ '^\s*$')
     endif
 
     setreg(op_yank.register, yanked, 'l')
@@ -366,10 +368,11 @@ def BoxCreateSeparations()
     #
     # ... and store it inside `x` register.
     # So that we can paste it wherever we want.
-    var line: string = (line("'{") + 1)->getline()
-    line = substitute(line, '\S', '├', '')
-    line = substitute(line, '.*\zs\S', '┤', '')
-    line = substitute(line, '┬', '┼', 'g')
+    var line: string = (line("'{") + 1)
+        ->getline()
+        ->substitute('\S', '├', '')
+        ->substitute('.*\zs\S', '┤', '')
+        ->substitute('┬', '┼', 'g')
 
     # Make the contents of the register linewise, so we don't need to hit
     # `"x]p`, but simply `"xp`.
@@ -541,6 +544,12 @@ def myfuncs#diffLines(bang: bool, arg_lnum1: number, arg_lnum2: number, option: 
         lnum1 = arg_lnum1
         lnum2 = arg_lnum2
     endif
+    if lnum1 > line('$') || lnum2 > line('$')
+        echohl ErrorMsg
+        echom 'line ' .. max([lnum1, lnum2]) .. ' does not exist'
+        echohl None
+        return
+    endif
     var line1: string = getline(lnum1)
     var line2: string = getline(lnum2)
     var chars1: list<string> = split(line1, '\zs')
@@ -577,11 +586,11 @@ def myfuncs#diffLines(bang: bool, arg_lnum1: number, arg_lnum2: number, option: 
             # Don't use `virtcol()` and `\%v`.{{{
             #
             # It wouldn't work as expected  if the lines contain literal control
-            # characters, and more generally any multi-cell characters.
+            # characters, and more generally any multicell characters.
             #}}}
-            col1 = matchstr(line1, '^.\{' .. (i + 1) .. '}')->strlen()
+            col1 = byteidx(line1, i + 1)
             pat ..= (empty(pat) ? '' : '\|') .. '\%' .. lnum1 .. 'l\%' .. col1 .. 'c.'
-            col2 = matchstr(line2, '^.\{' .. (i + 1) .. '}')->strlen()
+            col2 = byteidx(line2, i + 1)
             pat ..= (empty(pat) ? '' : '\|') .. '\%' .. lnum2 .. 'l\%' .. col2 .. 'c.'
         endif
     endfor
@@ -599,7 +608,7 @@ def myfuncs#diffLines(bang: bool, arg_lnum1: number, arg_lnum2: number, option: 
         pat ..= (!empty(pat) ? '\|' : '') .. '\%' .. lnum1 .. 'l' .. '\%>' .. strlen(line2) .. 'c.'
 
     elseif strlen(line1) < strlen(line2)
-        pat ..= (!empty(pat) ? '\|' : '') .. '\%' .. lnum2 .. 'l' .. '\%>' .. len(line1) .. 'c.'
+        pat ..= (!empty(pat) ? '\|' : '') .. '\%' .. lnum2 .. 'l' .. '\%>' .. strlen(line1) .. 'c.'
     endif
 
     # give the result
@@ -653,7 +662,9 @@ def myfuncs#dumpWiki(arg_url: string) #{{{1
         var url: string = trim(arg_url, '/') .. '.wiki'
         var tempdir: string = tempname()->substitute('.*/\zs.\{-}', '', '')
         sil system('git clone ' .. shellescape(url) .. ' ' .. tempdir)
-        var files: list<string> = glob(tempdir .. '/*', false, true)
+        var files: list<string> = tempdir
+            ->readdir((n: string): bool => n !~ '^\.', {sort: 'none'})
+            ->map((_, v: string): string => tempdir .. '/' .. v)
         if empty(files)
             echohl ErrorMsg
             echom 'Could not find any wiki at:  ' .. url
@@ -661,7 +672,7 @@ def myfuncs#dumpWiki(arg_url: string) #{{{1
             return
         endif
         files
-            ->map((_, v: string): string => substitute(v, '^\C\V' .. tempdir .. '/', '', ''))
+            ->map((_, v: string): string => v->substitute('^\C\V' .. tempdir .. '/', '', ''))
             ->filter((_, v: string): bool => v !~ '\c_\=footer\%(\.md\)\=$')
 
         norm! mx
@@ -906,7 +917,7 @@ def myfuncs#longDataJoin(type = ''): string #{{{1
             sil exe mods .. range .. 's/\n\s*' .. contline .. '/'
                 .. (IsVim9() ? ' ' : '') .. '/ge'
             cursor("'[", 1)
-            sil keepj keepp s/\m\zs\s*,\ze\s\=[\]}]//e
+            sil keepj keepp s/\zs\s*,\ze\s\=[\]}]//e
         endif
     catch
         Catch()
@@ -925,9 +936,9 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
     # special case: popup options or position (probably)
     if line =~ '^\s*{''highlight''' || line =~ '^\s*{''core_col'''
         :%j!
-        first_line = getline(1)
-        if first_line[0] == '{' && first_line[-1] == '}'
-            sil keepj keepp s/.*/\=first_line->substitute('^{\|}$', '', 'g')/e
+        lds_first_line = getline(1)
+        if lds_first_line[0] == '{' && lds_first_line[-1] == '}'
+            sil keepj keepp s/.*/\=lds_first_line->substitute('^{\|}$', '', 'g')/e
             sil keepj keepp s/\%(^\%(\[[^[\]]*\]\|[^[\]]\)*\)\@<=,/\="\r"/ge
             sil keepj keepp :%s/^\s*'\([^']*\)'/\1/
             :%sort
@@ -953,38 +964,38 @@ def myfuncs#longDataSplit(type = ''): string #{{{1
         return ''
     endif
 
-    var is_list_or_dict: bool = match(line, '\m\[.*\]\|{.*}') > -1
+    var is_list_or_dict: bool = match(line, '\[.*\]\|{.*}') > -1
     var has_comma: bool = stridx(line, ',') > -1
     if is_list_or_dict
-        first_line_indent = repeat(' ', match(line, '\S'))
+        lds_first_line_indent = repeat(' ', match(line, '\S'))
         # If the  first item in the  list/dictionary begins right after  the opening
         # symbol (`[` or `{`), add a space:
-        sil keepj keepp s/\m[\[{]\s\@!\zs/ /e
+        sil keepj keepp s/[\[{]\s\@!\zs/ /e
         # Move the first item in the list on a dedicated line.
         contline = !IsVim9() ? ' \' : ''
-        sil keepj keepp s/\m[\[{]\zs/\="\n" .. first_line_indent .. '   ' .. contline/e
+        sil keepj keepp s/[\[{]\zs/\="\n" .. lds_first_line_indent .. '   ' .. contline/e
         # split the data
-        sil keepj keepp s/,\zs/\="\n" .. first_line_indent .. '   ' .. contline/ge
+        sil keepj keepp s/,\zs/\="\n" .. lds_first_line_indent .. '   ' .. contline/ge
         # move the closing symbol on a dedicated line
         contline = !IsVim9() ? '    \ ' : ''
-        sil keepj keepp s/\m\zs\s\=\ze[\]}]/\=",\n" .. first_line_indent .. contline/e
+        sil keepj keepp s/\zs\s\=\ze[\]}]/\=",\n" .. lds_first_line_indent .. contline/e
 
     elseif has_comma
         # We use `strdisplaywidth()` because the indentation could contain tabs.
         var indent_lvl: number = matchstr(line, '.\{-}\ze\S')->strdisplaywidth()
         var indent_txt: string = repeat(' ', indent_lvl)
-        sil keepj keepp s/\m\ze\S/- /e
-        var pat: string = '\m\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
+        sil keepj keepp s/\ze\S/- /e
+        var pat: string = '\s*,\s*\%(et\|and\s\+\)\=\|\s*\<\%(et\|and\)\>\s*'
         LongDataSplitRep = (): string => "\n" .. indent_txt .. '- '
         sil exe 'keepj keepp s/' .. pat .. '/\=LongDataSplitRep()/ge'
     endif
 
     return ''
 enddef
-var first_line: string
-var first_line_indent: string
+var lds_first_line: string
+var lds_first_line_indent: string
 var contline: string
-var LongDataSplitRep: func: string
+var LongDataSplitRep: func
 
 def myfuncs#onlySelection(lnum1: number, lnum2: number) #{{{1
     var lines: list<string> = getline(lnum1, lnum2)
@@ -999,7 +1010,7 @@ def myfuncs#pluginInstall(url: string) #{{{1
         return
     endif
     var rep: string = 'Plug ''\1/\2'''
-    var plug_line: string = substitute(url, pat, rep, '')
+    var plug_line: string = url->substitute(pat, rep, '')
     var to_install: string = matchstr(plug_line, 'Plug ''.\{-}/\%(vim-\)\=\zs.\{-}\ze''')
 
     var win_orig: number = win_getid()
@@ -1074,8 +1085,7 @@ def myfuncs#pluginGlobalVariables(keyword: string) #{{{1
     var variables: list<string> = deepcopy(g:)
         ->filter((k: string): bool =>
                 k =~ '\C\V' .. escape(keyword, '\')
-             && k !~ '\%(loaded\|did_plugin_\)'
-             )
+             && k !~ '\%(loaded\|did_plugin_\)')
         ->items()
         ->mapnew((_, v: list<any>): string => v[0] .. ' = ' .. string(v[1]))
     new
@@ -1123,7 +1133,8 @@ def myfuncs#removeTabs(line1: number, line2: number) #{{{1
     # This  matters, e.g.,  for a  blockquote containing  a tab  character in  a
     # markdown file, where the leading `> ` is concealed because `'cole'` is 3.
     #}}}
-    RemoveTabsRep = (): string => synstack('.', col('.'))
+    RemoveTabsRep = (): string =>
+          synstack('.', col('.'))
         ->mapnew((_, v: number): string => synIDattr(v, 'name'))
         ->match('heredoc') >= 0
             ? submatch(0)
@@ -1143,7 +1154,7 @@ def myfuncs#removeTabs(line1: number, line2: number) #{{{1
     endfor
     winrestview(view)
 enddef
-var RemoveTabsRep: func: string
+var RemoveTabsRep: func
 
 def myfuncs#searchTodo(where: string) #{{{1
     try
@@ -1167,10 +1178,10 @@ def myfuncs#searchTodo(where: string) #{{{1
     var items: list<dict<any>> = getloclist(0)
         # Tweak the text of  each entry when there's a line  with just `todo` or
         # `fixme`.  Replace it with the text of the next non empty line instead.
-        ->map((_, v: dict<any>): dict<any> => SearchTodoText(v)
-            # remove indentation (reading lines with various indentation levels is jarring)
-            ->extend({text: substitute(v.text, '^\s*', '', '')})
-            )
+        ->map((_, v: dict<any>): dict<any> =>
+                SearchTodoText(v)
+                # remove indentation (reading lines with various indentation levels is jarring)
+                ->extend({text: v.text->substitute('^\s*', '', '')}))
     setloclist(0, [], 'r', {items: items, title: 'FIX' .. 'ME & TO' .. 'DO'})
 
     if &bt != 'quickfix'
@@ -1195,7 +1206,9 @@ def SearchTodoText(dict: dict<any>): dict<any>
         # is currently listed.
         #}}}
         var lines: list<string> = bufname(bufnr)->readfile(0, dict.lnum + 4)[-4 :]
-        dict.text = filter(lines, (_, v: string): bool => v =~ '\k')->get(0, '')
+        dict.text = lines
+            ->filter((_, v: string): bool => v =~ '\k')
+            ->get(0, '')
     endif
     return dict
 enddef
@@ -1234,7 +1247,7 @@ def myfuncs#sendToTabPage(vcount: number) #{{{1
         if input == '$'
             count = tabpagenr('$')
         elseif input =~ '$-\+$'
-            var offset: number = matchstr(input, '-\+')->len()
+            var offset: number = matchstr(input, '-\+')->strlen()
             count = tabpagenr('$') - offset
         elseif input =~ '$-\d\+$'
             var offset: number = matchstr(input, '-\d\+')->str2nr()
@@ -1365,10 +1378,10 @@ def myfuncs#trans(first_time = true)
             ? '\|' .. matchstr(&l:cms, '\S*\ze\s*%s')
             : ''
         )
-    var chunk: string = substitute(trans_chunks[0], garbage, '', 'g')
+    var chunk: string = trans_chunks[0]->substitute(garbage, '', 'g')
 
     # reduce excessive whitespace
-    chunk = substitute(chunk, '\s\+', ' ', 'g')
+    chunk = chunk->substitute('\s\+', ' ', 'g')
 
     # `exit_io` invokes a callback when the jobs finishes
     # if you want to invoke a callback every time the job sends a message, use
@@ -1483,23 +1496,20 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
     exe 'lefta :' .. (&columns / 3) .. 'vnew ' .. tempfile
     setl bh=delete bt=nofile nobl noswf wfw nowrap pvw
 
-    # Remove anything which is:{{{
-    #
-    #    - shorter than `min_length` characters
-    #
-    #    - longer than 30 characters;
-    #      probably not words;
-    #      it  could be  for example  a long  sequence of  underscores used  to
-    #      divide 2 sections of text
-    #
-    #    - not containing any letter
-    #}}}
-    filter(words, (_, v: string): bool => strchars(v, true) >= min_length
-        && strchars(v, true) <= 30
-        && v =~ '\a')
-
-    # put all of them in lowercase
-    map(words, (_, v: string): string => tolower(v))
+    words->filter((_, v: string): bool =>
+                   # remove words shorter than `min_length` characters
+                   strchars(v, true) >= min_length
+                # Remove words longer than 30 characters.{{{
+                #
+                # Those are probably not words.
+                # It could  be for example  a long  sequence of underscores  used to
+                # divide 2 sections of text.
+                #}}}
+                && strchars(v, true) <= 30
+                # remove words not containing any alphabetical character
+                && v =~ '\a'
+    # lowercase all remaining words
+    )->map((_, v: string): string => tolower(v))
 
     var freq: dict<number>
     for word in words
@@ -1518,18 +1528,22 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
         # word.
         var weighted_freq: dict<number> = freq
             ->mapnew((k: string, v: number): number =>
-                v * ( strchars(k, true) -
-                    # if a word is 4 characters long, then its abbreviation will probably be 2 characters long
-                    strchars(k, true) == 4
-                    ? 2
-                      # if a word ends with an 's', and the same word without the ending
-                      # 's'  is also  present,  then its  abbreviation  will probably  4
-                      # characters long (because it's probably a plural)
-                      : k[-1] == 's' && keys(freq)->index(k) >= 0
-                      ?     4
-                      # otherwise, by default, an abbreviation will probably be 3 characters long
-                      :     3
-                    ))
+                v * (
+                        strchars(k, true) -
+                        # if a word is 4  characters long, then its abbreviation
+                        # will probably be 2 characters long
+                        strchars(k, true) == 4
+                        ? 2
+                          # if  a word  ends  with  an 's',  and  the same  word
+                          # without  the  ending  's'   is  also  present,  then
+                          # its  abbreviation will  probably  4 characters  long
+                          # (because it's probably a plural)
+                          : k[-1] == 's' && keys(freq)->index(k) >= 0
+                          ?     4
+                          # otherwise, by default, an abbreviation will probably
+                          # be 3 characters long
+                          :     3
+            ))
         for item in items(weighted_freq)
                 ->sort((a: list<any>, b: list<any>): number => b[1] - a[1])
             join(item)->append('$')
@@ -1548,11 +1562,10 @@ def myfuncs#wordFrequency(line1: number, line2: number, qargs: string) #{{{1
         # Probably because there's nothing to align in it.
     endif
 
-    exe 'vert res ' .. (
-        range(1, line('$'))
-            ->map((_, v: number): number => virtcol([v, '$']))->max()
-        + 4
-        )
+    var width: number = 4 + range(1, line('$'))
+        ->map((_, v: number): number => virtcol([v, '$']))
+        ->max()
+    exe 'vert res ' .. width
     nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
     wincmd p
 enddef

@@ -220,7 +220,7 @@ def colorscheme#customize() #{{{2
         # Indeed, as long  as all your terminals support  hexcodes/rgb spec, you
         # don't need the terminal name anymore.
         #}}}
-        timer_start(1000, () => Cursor())
+        timer_start(1'000, () => Cursor())
     elseif !has('vim_starting')
         Cursor()
     endif
@@ -406,9 +406,9 @@ def TabLine() #{{{3
         reverse: 0,
         }
 
-    attributes = mapnew(attributes, (k: string): string =>
-        hlID('Tabline')->synIDtrans()->synIDattr(k)
-        )
+    attributes = attributes
+        ->mapnew((k: string): string =>
+            hlID('Tabline')->synIDtrans()->synIDattr(k))
 
     var cmd: string
     if has('gui_running')
@@ -491,8 +491,10 @@ def User() #{{{3
         bg: 0,
         bold: 0,
         reverse: 0,
-        }->mapnew((k: string): string => hlID('StatusLine')->synIDtrans()->synIDattr(k))
-         ->mapnew((k: string, v: string): any => k == 'bold' || k == 'reverse' ? str2nr(v) : v)
+        }->mapnew((k: string): string =>
+                hlID('StatusLine')->synIDtrans()->synIDattr(k))
+         ->mapnew((k: string, v: string): any =>
+                k == 'bold' || k == 'reverse' ? str2nr(v) : v)
 
     var cmd1: string
     var cmd2: string
@@ -848,6 +850,7 @@ def GetAttributes(hg: string, arg_mode = ''): dict<string> #{{{2
         }
     var mode: list<string> = arg_mode == '' ? [] : [arg_mode]
     return attributes
-        ->mapnew((k: string) => call('synIDattr', [hlID(hg)->synIDtrans(), k] + mode))
+        ->mapnew((k: string) =>
+            call('synIDattr', [hlID(hg)->synIDtrans(), k] + mode))
 enddef
 

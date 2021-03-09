@@ -97,7 +97,7 @@ def DuplicateCharAround(above: bool): string
     endif
 
     var line: number = search('\%' .. col .. 'c.*\S', (above ? 'b' : '') .. 'nW')
-    var char: string = getline(line)->matchstr('\%' .. col .. 'c.')
+    var char: string = getline(line)->strpart(col - 1)[0]
     return char
 enddef
 

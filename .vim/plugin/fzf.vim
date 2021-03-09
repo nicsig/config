@@ -227,7 +227,7 @@ def Miscellaneous()
         # The latter is read after our vimrc, so we can't clean `v:oldfiles` right now.
         # We need to wait for Vim to have fully started up.
         #}}}
-        au VimEnter * filter(v:oldfiles, (_, v: string): bool => v !~ '/gvfs/')
+        au VimEnter * v:oldfiles->filter((_, v: string): bool => v !~ '/gvfs/')
     augroup END
 enddef
 Miscellaneous()

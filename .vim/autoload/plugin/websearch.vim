@@ -13,20 +13,22 @@ def plugin#websearch#main()
     # I care about the search being  more predictable, even when it contains special
     # characters.
     #}}}
-    var query: string = getline('.')->substitute('"', '', 'g')
-    # An ampersand can truncate the query.{{{
-    #
-    #     $ xdg-open 'https://www.startpage.com/do/search?query=foo & bar'
-    #
-    # The browser correctly opens this url:
-    #
-    #     https://www.startpage.com/do/search?query=foo & bar
-    #
-    # But the search engine (startpage atm) only searches `foo`.
-    #}}}
-    query = substitute(query, '&', '%26', 'g')
-    # same issue with an equal sign
-    query = substitute(query, '=', '%3d', 'g')
+    var query: string = getline('.')
+        ->substitute('"', '', 'g')
+        # An ampersand can truncate the query.{{{
+        #
+        #     $ xdg-open 'https://www.startpage.com/do/search?query=foo & bar'
+        #
+        # The browser correctly opens this url:
+        #
+        #     https://www.startpage.com/do/search?query=foo & bar
+        #
+        # But the search engine (startpage atm) only searches `foo`.
+        #}}}
+        ->substitute('&', '%26', 'g')
+        # same issue with an equal sign
+        ->substitute('=', '%3d', 'g')
+
     sil system('xdg-open ' .. shellescape(b:url .. query))
     q!
 enddef
