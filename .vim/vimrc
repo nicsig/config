@@ -123,22 +123,22 @@ plug#begin('~/.vim/plugged')
 
 set rtp^=~/vim-scriptease/
 # To Assimilate:
-Plug 'lacygoill/vim-movesel'
-Plug 'lacygoill/vim-abolish', {'branch': 'assimil'}
-Plug 'lacygoill/asyncmake', {'branch': 'assimil'}
-Plug 'lacygoill/vim-cheat', {'branch': 'assimil'}
-Plug 'lacygoill/vim-cwd'
-Plug 'lacygoill/vim-debug'
+Plug 'nicsig/vim-movesel'
+Plug 'nicsig/vim-abolish'
+Plug 'nicsig/vim-asyncmake'
+Plug 'nicsig/vim-cheat'
+Plug 'nicsig/vim-cwd'
+Plug 'nicsig/vim-debug'
 Plug 'junegunn/vim-easy-align'
-Plug 'lacygoill/vim-exchange'
-Plug 'lacygoill/vim-fex'
+Plug 'nicsig/vim-exchange'
+Plug 'nicsig/vim-fex'
 Plug 'tpope/vim-fugitive'
 # You can pass more arguments to the fzf installer:
 #     $ ~/.fzf/install --help
 Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash'}
 Plug 'junegunn/fzf.vim'
-Plug 'lacygoill/goyo.vim', {'branch': 'assimil'}
-Plug 'lacygoill/vim-graph'
+Plug 'nicsig/vim-goyo'
+Plug 'nicsig/vim-graph'
 # TODO: remove `vim-gutentags`{{{
 #
 # Use git hooks instead.
@@ -184,9 +184,9 @@ Plug 'lacygoill/vim-graph'
 #}}}
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'tweekmonster/helpful.vim'
-Plug 'lacygoill/limelight.vim', {'branch': 'assimil'}
+Plug 'nicsig/vim-limelight'
 Plug 'foxik/vim-makejob'
-Plug 'lacygoill/vim-man'
+Plug 'nicsig/vim-man'
 Plug 'lacygoill/vim-markdown'
 Plug 'andymass/vim-matchup'
 Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
@@ -229,7 +229,7 @@ Plug 'lacygoill/vim-logevents'
 Plug 'lacygoill/vim-math'
 Plug 'lacygoill/vim-par'
 Plug 'lacygoill/vim-qf'
-Plug 'lacygoill/vim-readline'
+Plug 'nicsig/vim-readline'
 Plug 'lacygoill/vim-reorder'
 Plug 'lacygoill/vim-repeat', {'branch': 'lg'}
 Plug 'lacygoill/vim-repmap'
