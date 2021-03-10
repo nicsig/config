@@ -96,7 +96,7 @@ g:loaded_vimball = true
 #
 #     ~/.vim/autoload/plug.vim
 
-if glob('~/.vim/autoload/plug.vim')->empty()
+if !filereadable($HOME .. '/.vim/autoload/plug.vim')
     sil system('curl -fLo ~/.vim/autoload/plug.vim --create-dirs'
         .. 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim')
     au VimEnter * PlugInstall | so $MYVIMRC
@@ -124,9 +124,9 @@ plug#begin('~/.vim/plugged')
 set rtp^=~/vim-scriptease/
 # To Assimilate:
 Plug 'nicsig/vim-movesel'
-Plug 'nicsig/vim-abolish'
-Plug 'nicsig/vim-asyncmake'
-Plug 'nicsig/vim-cheat'
+Plug 'nicsig/vim-abolish', {'branch': 'assimil'}
+Plug 'nicsig/asyncmake', {'branch': 'assimil'}
+Plug 'nicsig/vim-cheat', {'branch': 'assimil'}
 Plug 'nicsig/vim-cwd'
 Plug 'nicsig/vim-debug'
 Plug 'junegunn/vim-easy-align'
@@ -137,7 +137,7 @@ Plug 'tpope/vim-fugitive'
 #     $ ~/.fzf/install --help
 Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': './install --all --no-bash'}
 Plug 'junegunn/fzf.vim'
-Plug 'nicsig/vim-goyo'
+Plug 'nicsig/goyo.vim', {'branch': 'assimil'}
 Plug 'nicsig/vim-graph'
 # TODO: remove `vim-gutentags`{{{
 #
@@ -184,73 +184,73 @@ Plug 'nicsig/vim-graph'
 #}}}
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'tweekmonster/helpful.vim'
-Plug 'nicsig/vim-limelight'
+Plug 'nicsig/limelight.vim', {'branch': 'assimil'}
 Plug 'foxik/vim-makejob'
 Plug 'nicsig/vim-man'
-Plug 'lacygoill/vim-markdown'
+Plug 'nicsig/vim-markdown'
 Plug 'andymass/vim-matchup'
-Plug 'lacygoill/vim-quickhl', {'branch': 'assimil'}
+Plug 'nicsig/vim-quickhl', {'branch': 'assimil'}
 Plug 'tpope/vim-rhubarb'
 Plug 'junegunn/seoul256.vim'
 Plug 'justinmk/vim-sneak'
 Plug 'wellle/targets.vim'
-Plug 'lacygoill/vim-tmux', {'branch': 'assimil'}
-Plug 'lacygoill/vim-tmuxify', {'branch': 'assimil'}
+Plug 'nicsig/vim-tmux', {'branch': 'assimil'}
+Plug 'nicsig/vim-tmuxify', {'branch': 'assimil'}
 # Alternative: https://github.com/vim/vim/pull/3220#issuecomment-538651011
-Plug 'lacygoill/vim-tradewinds', {'branch': 'assimil'}
-Plug 'lacygoill/vim-unix'
+Plug 'nicsig/vim-tradewinds', {'branch': 'assimil'}
+Plug 'nicsig/vim-unix'
 
 # Done:
-Plug 'lacygoill/vim-awk'
-Plug 'lacygoill/vim-brackets'
-Plug 'lacygoill/vim-breakdown'
-Plug 'lacygoill/vim-bullet-list'
-Plug 'lacygoill/vim-capslock'
-Plug 'lacygoill/vim-cmdline'
-Plug 'lacygoill/vim-column-object'
-Plug 'lacygoill/vim-comment'
-Plug 'lacygoill/vim-completion'
-Plug 'lacygoill/vim-cookbook'
-Plug 'lacygoill/vim-doc'
-Plug 'lacygoill/vim-draw'
-Plug 'lacygoill/vim-fold'
-Plug 'lacygoill/vim-freekeys'
-Plug 'lacygoill/vim-fuzzy'
-Plug 'lacygoill/vim-git'
-Plug 'lacygoill/vim-gx'
-Plug 'lacygoill/vim-help'
-Plug 'lacygoill/vim-hydra'
-Plug 'lacygoill/vim-iabbrev'
-Plug 'lacygoill/vim-interactive-lists'
-Plug 'lacygoill/vim-jagged-block'
-Plug 'lacygoill/vim-latex'
-Plug 'lacygoill/vim-lg-lib'
-Plug 'lacygoill/vim-logevents'
-Plug 'lacygoill/vim-math'
-Plug 'lacygoill/vim-par'
-Plug 'lacygoill/vim-qf'
+Plug 'nicsig/vim-awk'
+Plug 'nicsig/vim-brackets'
+Plug 'nicsig/vim-breakdown'
+Plug 'nicsig/vim-bullet-list'
+Plug 'nicsig/vim-capslock'
+Plug 'nicsig/vim-cmdline'
+Plug 'nicsig/vim-column-object'
+Plug 'nicsig/vim-comment'
+Plug 'nicsig/vim-completion'
+Plug 'nicsig/vim-cookbook'
+Plug 'nicsig/vim-doc'
+Plug 'nicsig/vim-draw'
+Plug 'nicsig/vim-fold'
+Plug 'nicsig/vim-freekeys'
+Plug 'nicsig/vim-fuzzy'
+Plug 'nicsig/vim-git'
+Plug 'nicsig/vim-gx'
+Plug 'nicsig/vim-help'
+Plug 'nicsig/vim-hydra'
+Plug 'nicsig/vim-iabbrev'
+Plug 'nicsig/vim-interactive-lists'
+Plug 'nicsig/vim-jagged-block'
+Plug 'nicsig/vim-latex'
+Plug 'nicsig/vim-lg-lib'
+Plug 'nicsig/vim-logevents'
+Plug 'nicsig/vim-math'
+Plug 'nicsig/vim-par'
+Plug 'nicsig/vim-qf'
 Plug 'nicsig/vim-readline'
-Plug 'lacygoill/vim-reorder'
-Plug 'lacygoill/vim-repeat', {'branch': 'lg'}
-Plug 'lacygoill/vim-repmap'
-Plug 'lacygoill/vim-save'
-Plug 'lacygoill/vim-search'
-Plug 'lacygoill/vim-session'
-Plug 'lacygoill/vim-sh'
-Plug 'lacygoill/vim-snippets'
-Plug 'lacygoill/vim-source'
-Plug 'lacygoill/vim-stacktrace'
-Plug 'lacygoill/vim-statusline'
-Plug 'lacygoill/vim-submode'
-Plug 'lacygoill/vim-terminal'
-Plug 'lacygoill/vim-titlecase'
-Plug 'lacygoill/vim-toggle-settings'
-Plug 'lacygoill/vim-unichar'
+Plug 'nicsig/vim-reorder'
+Plug 'nicsig/vim-repeat', {'branch': 'lg'}
+Plug 'nicsig/vim-repmap'
+Plug 'nicsig/vim-save'
+Plug 'nicsig/vim-search'
+Plug 'nicsig/vim-session'
+Plug 'nicsig/vim-sh'
+Plug 'nicsig/vim-snippets'
+Plug 'nicsig/vim-source'
+Plug 'nicsig/vim-stacktrace'
+Plug 'nicsig/vim-statusline'
+Plug 'nicsig/vim-submode'
+Plug 'nicsig/vim-terminal'
+Plug 'nicsig/vim-titlecase'
+Plug 'nicsig/vim-toggle-settings'
+Plug 'nicsig/vim-unichar'
 Plug 'machakann/vim-Verdin'
-Plug 'lacygoill/vim-vim'
-Plug 'lacygoill/vim-virtual-text'
-Plug 'lacygoill/vim-window'
-Plug 'lacygoill/vim-xkb'
+Plug 'nicsig/vim-vim'
+Plug 'nicsig/vim-virtual-text'
+Plug 'nicsig/vim-window'
+Plug 'nicsig/vim-xkb'
 
 # Read Doc:
 Plug 'justinmk/vim-dirvish'
@@ -5381,7 +5381,7 @@ var PGM2CFGFILES: dict<list<string>> = {
     conky:         ['~/.config/conky/system.lua', '~/.config/conky/system_rings.lua', '~/.config/conky/time.lua'],
     fasd:          ['~/.fasdrc'],
     fd:            ['~/.fdignore'],
-    firefox:       glob('~/.mozilla/firefox/*.default/chrome/userContent.css', false, true),
+    firefox:       glob('~/.mozilla/firefox/*.default/chrome/userContent.css', true, true),
     git:           ['~/.config/git/config', '~/.cvsignore'],
     htop:          ['~/.config/htop/htoprc'],
     intersubs:     [
@@ -5389,7 +5389,7 @@ var PGM2CFGFILES: dict<list<string>> = {
         '~/.config/mpv/scripts/python.disable/interSubs.py',
         '~/.config/mpv/scripts/python.disable/interSubs_config.py'
         ],
-    keyboard:      glob('~/.config/keyboard/*', false, true),
+    keyboard:      glob('~/.config/keyboard/*', true, true),
     kitty:         ['~/.config/kitty/kitty.conf'],
     latexmk:       ['~/.config/latexmk/latexmkrc'],
     less:          ['~/.config/lesskey'],
@@ -5406,7 +5406,7 @@ var PGM2CFGFILES: dict<list<string>> = {
     xbindkeys:     ['~/.config/keyboard/xbindkeys.conf'],
     zathura:       ['~/.config/zathura/zathurarc'],
     zsh:           ['~/.zshrc', '~/.zshenv'],
-    zsh_snippets:  glob('~/.config/zsh-snippets/*.txt', false, true),
+    zsh_snippets:  glob('~/.config/zsh-snippets/*.txt', true, true),
     }
 
 # CGrep / LGrep {{{2
@@ -5853,8 +5853,8 @@ def PluginsToCommit()
     endif
 
     var my_plugins: list<string> = readfile($MYVIMRC)
-        ->filter((_, v: string): bool => v =~ '^\s*Plug\s\+''lacygoill/')
-        ->map((_, v: string): string => matchstr(v, 'lacygoill/\zs.\{-}\ze'''))
+        ->filter((_, v: string): bool => v =~ '^\s*Plug\s\+''nicsig/')
+        ->map((_, v: string): string => matchstr(v, 'nicsig/\zs.\{-}\ze'''))
     sil var output: list<string> = systemlist('commit-these-vim-plugins ' .. join(my_plugins))
         # we may have removed a plugin, but not executed `:Plugclean` yet
         ->filter((_, v: string): bool => v !~ 'No such file or directory')
@@ -5865,8 +5865,7 @@ def PluginsToCommit()
 
     output
         ->filter((_, v: string): bool => v =~ '^\S' && v !~ '^fatal:')
-        ->map((_, v: string): string =>
-                glob($HOME .. '/.vim/plugged/' .. v .. '/*', false, true)[0])
+        ->map((_, v: string): string => $HOME .. '/.vim/plugged/' .. v)
     setqflist([], ' ', {lines: output, efm: '%f', title: 'Plugins to commit'})
     cw
 enddef

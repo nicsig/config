@@ -663,7 +663,7 @@ def myfuncs#dumpWiki(arg_url: string) #{{{1
         var tempdir: string = tempname()->substitute('.*/\zs.\{-}', '', '')
         sil system('git clone ' .. shellescape(url) .. ' ' .. tempdir)
         var files: list<string> = tempdir
-            ->readdir((n: string): bool => n !~ '^\.', {sort: 'none'})
+            ->readdir((n: string): bool => n !~ '^\.')
             ->map((_, v: string): string => tempdir .. '/' .. v)
         if empty(files)
             echohl ErrorMsg
